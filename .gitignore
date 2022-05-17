@@ -1,0 +1,10 @@
+.idea/
+bin/
+vendor/
+terraform-provider-vestack
+.terraform/
+*.tfstate
+*.tfstate.*
+.*hcl
+output_result
+*.log
