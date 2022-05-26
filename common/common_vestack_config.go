@@ -1,7 +1,10 @@
 package common
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"strings"
 
 	"github.com/volcengine/volcstack-go-sdk/service/autoscaling"
 	"github.com/volcengine/volcstack-go-sdk/service/clb"
@@ -10,6 +13,7 @@ import (
 	"github.com/volcengine/volcstack-go-sdk/service/rdsmysql"
 	"github.com/volcengine/volcstack-go-sdk/service/rdsmysqlv2"
 	"github.com/volcengine/volcstack-go-sdk/service/storageebs"
+	"github.com/volcengine/volcstack-go-sdk/service/vke"
 	"github.com/volcengine/volcstack-go-sdk/service/vpc"
 	"github.com/volcengine/volcstack-go-sdk/service/vpn"
 	"github.com/volcengine/volcstack-go-sdk/volcstack"
@@ -36,6 +40,11 @@ func (c *Config) Client() (*SdkClient, error) {
 		WithExtraUserAgent(volcstack.String(version)).
 		WithCredentials(credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.SessionToken)).
 		WithDisableSSL(c.DisableSSL).
+		WithExtendHttpRequest(func(ctx context.Context, request *http.Request) {
+			if c.Region == "cn-guilin-boe" {
+
+			}
+		}).
 		WithEndpoint(volcstackutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
 
 	sess, err := session.NewSession(config)
@@ -53,6 +62,24 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.AutoScalingClient = autoscaling.New(sess)
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
+	if !strings.Contains(c.Region, "boe") {
+		client.VkeClient = vke.New(sess)
+	} else {
+		vkeConfig := volcstack.NewConfig().
+			WithRegion(c.Region).
+			WithExtraUserAgent(volcstack.String(version)).
+			WithCredentials(credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.SessionToken)).
+			WithDisableSSL(c.DisableSSL).
+			WithExtendHttpRequest(func(ctx context.Context, request *http.Request) {
+				request.Header.Set("X-Forward-Env", "CTRL-GL")
+			}).
+			WithEndpoint(volcstackutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
+		sessVke, errVke := session.NewSession(vkeConfig)
+		if errVke != nil {
+			return nil, fmt.Errorf("session init error %w", errVke)
+		}
+		client.VkeClient = vke.New(sessVke)
+	}
 
 	InitLocks()
 	InitSyncLimit()
