@@ -8,3 +8,4 @@ terraform-provider-vestack
 .*hcl
 output_result
 *.log
+go.sum

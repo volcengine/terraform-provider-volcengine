@@ -10,7 +10,7 @@ fi
 
 CGO_ENABLED=0 GOOS=$OS GOARCH=amd64 go build  -o $NAME
 rm -f $GOPATH/bin/$NAME
-cp $GOPATH/src/code.byted.org/iaasng/terraform-provider-vestack/$NAME $GOPATH/bin/
+cp $NAME $GOPATH/bin/
 # 如果terraform版本高于或者等于0.13
 # 需要执行如下三条指令 来映射CLI到本地路径
 # 如果小于此版本可以不做这三个操作
