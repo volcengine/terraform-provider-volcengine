@@ -22,7 +22,7 @@ resource "vestack_listener" "foo" {
     timeout              = 3
     healthy_threshold    = 5
     un_healthy_threshold = 2
-    domain               = "bytedance.net"
+    domain               = "github.com"
     http_code            = "http_2xx"
     method               = "GET"
     uri                  = "/"
