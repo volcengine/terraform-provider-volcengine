@@ -71,7 +71,7 @@ func (c *Config) Client() (*SdkClient, error) {
 			WithCredentials(credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.SessionToken)).
 			WithDisableSSL(c.DisableSSL).
 			WithExtendHttpRequest(func(ctx context.Context, request *http.Request) {
-				request.Header.Set("X-Forward-Env", "CTRL-GL")
+				request.Header.Set("X-Forward-Env", "SIT-CTRL-GL")
 			}).
 			WithEndpoint(volcstackutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
 		sessVke, errVke := session.NewSession(vkeConfig)
