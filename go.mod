@@ -14,4 +14,4 @@ require (
 
 //以后正式开源后，直接在required的位置依赖github上的sdk 不在用这种gitlib的替换方式
 //后续开发过程中可以用这种replace方式 但是replace在提交过程不要提交到版本库
-replace github.com/volcengine/volcstack-go-sdk => code.byted.org/iaasng/volcstack-go-sdk v1.0.1-0.20220526125608-e1c94c5cfb9e
+replace github.com/volcengine/volcstack-go-sdk => code.byted.org/iaasng/volcstack-go-sdk v1.0.1-0.20220526125608-ba93ad6e0dd8
