@@ -22,6 +22,7 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/vestack/eip/eip_associate"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/snat_entry"
+	"github.com/volcengine/terraform-provider-vestack/vestack/vke/node"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/route_entry"
@@ -104,6 +105,9 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"vestack_snat_entries": snat_entry.DataSourceVestackSnatEntries(),
 			"vestack_nat_gateways": nat_gateway.DataSourceVestackNatGateways(),
+
+			// ================ VKE ================
+			"vestack_vke_nodes": node.DataSourceVestackVkeNodes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"vestack_vpc":                      vpc.ResourceVestackVpc(),
