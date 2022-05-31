@@ -1,6 +1,8 @@
 package vestack
 
 import (
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
@@ -69,8 +71,14 @@ func Provider() terraform.ResourceProvider {
 			"disable_ssl": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("vestack_DISABLE_SSL", nil),
+				DefaultFunc: schema.EnvDefaultFunc("VESTACK_DISABLE_SSL", nil),
 				Description: "Disable SSL for Vestack Provider",
+			},
+			"customer_headers": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("VESTACK_CUSTOMER_HEADERS", nil),
+				Description: "CUSTOMER HEADERS for Vestack Provider",
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
@@ -148,13 +156,26 @@ func Provider() terraform.ResourceProvider {
 
 func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := ve.Config{
-		AccessKey:    d.Get("access_key").(string),
-		SecretKey:    d.Get("secret_key").(string),
-		SessionToken: d.Get("session_token").(string),
-		Region:       d.Get("region").(string),
-		Endpoint:     d.Get("endpoint").(string),
-		DisableSSL:   d.Get("disable_ssl").(bool),
+		AccessKey:       d.Get("access_key").(string),
+		SecretKey:       d.Get("secret_key").(string),
+		SessionToken:    d.Get("session_token").(string),
+		Region:          d.Get("region").(string),
+		Endpoint:        d.Get("endpoint").(string),
+		DisableSSL:      d.Get("disable_ssl").(bool),
+		CustomerHeaders: map[string]string{},
 	}
+
+	headers := d.Get("customer_headers").(string)
+	if headers != "" {
+		hs1 := strings.Split(headers, ",")
+		for _, hh := range hs1 {
+			hs2 := strings.Split(hh, ":")
+			if len(hs2) == 2 {
+				config.CustomerHeaders[hs2[0]] = hs2[1]
+			}
+		}
+	}
+
 	client, err := config.Client()
 	return client, err
 }

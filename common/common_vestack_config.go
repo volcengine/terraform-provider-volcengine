@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/volcengine/volcstack-go-sdk/service/autoscaling"
 	"github.com/volcengine/volcstack-go-sdk/service/clb"
@@ -23,12 +22,13 @@ import (
 )
 
 type Config struct {
-	AccessKey    string
-	SecretKey    string
-	SessionToken string
-	Region       string
-	Endpoint     string
-	DisableSSL   bool
+	AccessKey       string
+	SecretKey       string
+	SessionToken    string
+	Region          string
+	Endpoint        string
+	DisableSSL      bool
+	CustomerHeaders map[string]string
 }
 
 func (c *Config) Client() (*SdkClient, error) {
@@ -41,8 +41,10 @@ func (c *Config) Client() (*SdkClient, error) {
 		WithCredentials(credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.SessionToken)).
 		WithDisableSSL(c.DisableSSL).
 		WithExtendHttpRequest(func(ctx context.Context, request *http.Request) {
-			if c.Region == "cn-guilin-boe" {
-
+			if len(c.CustomerHeaders) > 0 {
+				for k, v := range c.CustomerHeaders {
+					request.Header.Add(k, v)
+				}
 			}
 		}).
 		WithEndpoint(volcstackutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
@@ -62,24 +64,8 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.AutoScalingClient = autoscaling.New(sess)
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
-	if !strings.Contains(c.Region, "boe") {
-		client.VkeClient = vke.New(sess)
-	} else {
-		vkeConfig := volcstack.NewConfig().
-			WithRegion(c.Region).
-			WithExtraUserAgent(volcstack.String(version)).
-			WithCredentials(credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.SessionToken)).
-			WithDisableSSL(c.DisableSSL).
-			WithExtendHttpRequest(func(ctx context.Context, request *http.Request) {
-				request.Header.Set("X-Forward-Env", "SIT-CTRL-GL")
-			}).
-			WithEndpoint(volcstackutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
-		sessVke, errVke := session.NewSession(vkeConfig)
-		if errVke != nil {
-			return nil, fmt.Errorf("session init error %w", errVke)
-		}
-		client.VkeClient = vke.New(sessVke)
-	}
+	client.VkeClient = vke.New(sess)
+	client.UniversalClient = NewUniversalClient(sess)
 
 	InitLocks()
 	InitSyncLimit()

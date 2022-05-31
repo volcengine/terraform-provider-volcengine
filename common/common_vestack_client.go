@@ -25,4 +25,5 @@ type SdkClient struct {
 	RdsClient         *rdsmysql.RDSMYSQL
 	RdsClientV2       *rdsmysqlv2.RDSMYSQLV2
 	VkeClient         *vke.VKE
+	UniversalClient   *Universal
 }
