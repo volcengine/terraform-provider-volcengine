@@ -1,5 +1,5 @@
 resource "vestack_vke_cluster" "foo" {
-  name = "terraform-test-5"
+  name = "terraform-test-15"
   description = "created by terraform"
   delete_protection_enabled = false
   cluster_config {
@@ -16,7 +16,7 @@ resource "vestack_vke_cluster" "foo" {
   pods_config {
     pod_network_mode = "Flannel"
     flannel_config {
-      pod_cidrs = ["172.18.0.0/18"]
+      pod_cidrs = ["172.27.224.0/19"]
       max_pods_per_node = 64
     }
     vpc_cni_config {
@@ -24,6 +24,6 @@ resource "vestack_vke_cluster" "foo" {
     }
   }
   services_config {
-    service_cidrsv4 = ["172.29.192.0/20"]
+    service_cidrsv4 = ["172.30.0.0/17"]
   }
 }

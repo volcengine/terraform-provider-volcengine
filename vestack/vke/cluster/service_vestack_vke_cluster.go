@@ -73,6 +73,8 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 			}
 		}
 
+		log.Println("DEBUGLISTCLUSTER", *resp)
+
 		results, err = ve.ObtainSdkValue("Result.Items", *resp)
 		if err != nil {
 			return data, err
@@ -96,7 +98,9 @@ func (s *VestackVkeClusterService) ReadResource(resourceData *schema.ResourceDat
 		clusterId = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
-		"Filter.Ids": []string{clusterId},
+		"Filter": map[string]interface{}{
+			"Ids": []string{clusterId},
+		},
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -252,6 +256,13 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 					},
 				},
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
+					realBillingType := billingTypeRequestConvert(d, billingType)
+					(*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"] = realBillingType
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				b, _ := json.Marshal(*call.SdkParam)
@@ -328,6 +339,11 @@ func (s *VestackVkeClusterService) ModifyResource(resourceData *schema.ResourceD
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
+					realBillingType := billingTypeRequestConvert(d, billingType)
+					(*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"] = realBillingType
+				}
+
 				(*call.SdkParam)["Id"] = d.Id()
 				return true, nil
 			},
