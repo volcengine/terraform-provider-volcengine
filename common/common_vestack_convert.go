@@ -391,9 +391,9 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 					if flag {
 						var k3 string
 						if single {
-							k3 = GetFinalKey(t, k, true) + "."
+							k3 = chain + GetFinalKey(t, k, true) + "."
 						} else {
-							k3 = GetFinalKey(t, k, true) + "." + strconv.Itoa(index+t.StartIndex+1) + "."
+							k3 = chain + GetFinalKey(t, k, true) + "." + strconv.Itoa(index+t.StartIndex+1) + "."
 						}
 						switch reflect.TypeOf(v2).Kind() {
 						case reflect.Slice:
@@ -422,7 +422,7 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 							break
 						default:
 							k3 = k3 + GetFinalKey(t, k2, false)
-							(*req)[chain+k3] = v2
+							(*req)[k3] = v2
 							break
 						}
 					}

@@ -148,25 +148,41 @@ func (s *VestackVkeClusterService) RefreshResourceState(resourceData *schema.Res
 }
 
 func (VestackVkeClusterService) WithResourceResponseHandlers(cluster map[string]interface{}) []ve.ResourceResponseHandler {
+	if clusterConfig, ok := cluster["ClusterConfig"]; ok {
+		if apiServerPublicAccessConfig, ok := clusterConfig.(map[string]interface{})["ApiServerPublicAccessConfig"]; ok {
+			if publicAccessNetworkConfig, ok := apiServerPublicAccessConfig.(map[string]interface{})["PublicAccessNetworkConfig"]; ok {
+				apiServerPublicAccessConfig.(map[string]interface{})["PublicAccessNetworkConfig"] = []interface{}{publicAccessNetworkConfig}
+			}
+			clusterConfig.(map[string]interface{})["ApiServerPublicAccessConfig"] = []interface{}{apiServerPublicAccessConfig}
+		}
+	}
+
+	if podsConfig, ok := cluster["PodsConfig"]; ok {
+		if flannelConfig, ok := podsConfig.(map[string]interface{})["FlannelConfig"]; ok {
+			podsConfig.(map[string]interface{})["FlannelConfig"] = []interface{}{flannelConfig}
+		}
+		if vpcCniConfig, ok := podsConfig.(map[string]interface{})["VpcCniConfig"]; ok {
+			podsConfig.(map[string]interface{})["VpcCniConfig"] = []interface{}{vpcCniConfig}
+		}
+	}
+
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return cluster, map[string]ve.ResponseConvert{
 			"ClusterConfig": {
 				TargetField: "cluster_config",
 				Convert: func(i interface{}) interface{} {
-					realBillingType, err := ve.ObtainSdkValue("ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType", i)
-					if err != nil {
-						return i
-					}
-					billingType := billingTypeResponseConvert(realBillingType)
+					clusterConfig := i.(map[string]interface{})
 
-					if clusterConfig, ok := i.(map[string]interface{}); !ok {
+					if apiServerPublicAccessConfig, ok := clusterConfig["ApiServerPublicAccessConfig"].([]interface{}); !ok {
 						return i
-					} else if apiServerPublicAccessConfig, ok := clusterConfig["ApiServerPublicAccessConfig"].(map[string]interface{}); !ok {
-						return i
-					} else if publicAccessNetworkConfig, ok := apiServerPublicAccessConfig["PublicAccessNetworkConfig"].(map[string]interface{}); !ok {
+					} else if publicAccessNetworkConfig, ok := apiServerPublicAccessConfig[0].(map[string]interface{})["PublicAccessNetworkConfig"].([]interface{}); !ok {
 						return i
 					} else {
-						publicAccessNetworkConfig["BillingType"] = billingType
+						billingType := publicAccessNetworkConfig[0].(map[string]interface{})["BillingType"]
+						if billingType == nil {
+							return i
+						}
+						publicAccessNetworkConfig[0].(map[string]interface{})["BillingType"] = billingTypeResponseConvert(billingType)
 					}
 
 					return i
@@ -185,15 +201,18 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 			Convert: map[string]ve.RequestConvert{
 				"cluster_config": {
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"subnet_ids": {
 							ConvertType: ve.ConvertJsonArray,
 						},
 						"api_server_public_access_config": {
 							ConvertType: ve.ConvertJsonObject,
+							ForceGet:    true,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"public_access_network_config": {
 									ConvertType: ve.ConvertJsonObject,
+									ForceGet:    true,
 								},
 							},
 						},
@@ -201,9 +220,11 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 				},
 				"pods_config": {
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"flannel_config": {
 							ConvertType: ve.ConvertJsonObject,
+							ForceGet:    true,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"pod_cidrs": {
 									ConvertType: ve.ConvertJsonArray,
@@ -212,6 +233,7 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 						},
 						"vpc_cni_config": {
 							ConvertType: ve.ConvertJsonObject,
+							ForceGet:    true,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"subnet_ids": {
 									ConvertType: ve.ConvertJsonArray,
@@ -222,6 +244,7 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 				},
 				"services_config": {
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"service_cidrsv4": {
 							ConvertType: ve.ConvertJsonArray,
