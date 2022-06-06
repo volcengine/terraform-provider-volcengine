@@ -1,3 +1,4 @@
+
 package common
 
 import (
@@ -231,7 +232,7 @@ func ResourceDateToRequest(d *schema.ResourceData, resource *schema.Resource, is
 	return req, err
 }
 
-func Convert(d *schema.ResourceData, k string, v interface{}, t RequestConvert, index int, req *map[string]interface{}, chain string, forceGet bool, contentType RequestContentType) (err error) {
+func Convert(d *schema.ResourceData, k string, v interface{}, t RequestConvert, index int, req *map[string]interface{}, chain string, forceGet bool, contentType RequestContentType, schemaChain string) (err error) {
 	if !checkRequestConvertTypeSupport(contentType, t.ConvertType) {
 		return fmt.Errorf("Can not support the RequestContentType [%v] when RequestContentType is [%v] ", t.ConvertType, contentType)
 	}
@@ -247,19 +248,19 @@ func Convert(d *schema.ResourceData, k string, v interface{}, t RequestConvert, 
 		err = RequestConvertWithN(v, k, t, req, chain)
 		break
 	case ConvertListN:
-		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, false, contentType)
+		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, false, contentType, schemaChain)
 		break
 	case ConvertListUnique:
-		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, true, contentType)
+		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, true, contentType, schemaChain)
 		break
 	case ConvertJsonObject: //equal ConvertListUnique
-		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, true, contentType)
+		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, true, contentType, schemaChain)
 		break
 	case ConvertJsonArray: //equal ConvertWithN
 		err = RequestConvertWithN(v, k, t, req, chain)
 		break
 	case ConvertJsonObjectArray: //equal ConvertListN
-		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, false, contentType)
+		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, false, contentType, schemaChain)
 		break
 		//case ConvertWithFilter:
 		//	index, err = RequestConvertWithFilter(v, k, t, index, req)
@@ -296,7 +297,7 @@ func RequestCreateConvert(d *schema.ResourceData, k string, t RequestConvert, in
 		}
 	}
 	if ok {
-		err = Convert(d, k, v, t, index, req, "", forceGet, contentType)
+		err = Convert(d, k, v, t, index, req, "", forceGet, contentType, "")
 	}
 	return index, err
 }
@@ -359,7 +360,7 @@ func RequestConvertWithN(v interface{}, k string, t RequestConvert, req *map[str
 	return nil
 }
 
-func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[string]interface{}, chain string, d *schema.ResourceData, forceGet bool, single bool, contentType RequestContentType) error {
+func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[string]interface{}, chain string, d *schema.ResourceData, forceGet bool, single bool, contentType RequestContentType, schemaChain string) error {
 	var (
 		err   error
 		isSet bool
@@ -377,7 +378,7 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 					if isSet {
 						flag = true
 					} else {
-						schemaKey := fmt.Sprintf("%s.%d.%s", k, index, k2)
+						schemaKey := fmt.Sprintf("%s.%d.%s", schemaChain+k, index, k2)
 						if forceGet {
 							if t.ForceGet || (d.HasChange(schemaKey) && !d.IsNewResource()) {
 								flag = true
@@ -395,12 +396,13 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 						} else {
 							k3 = chain + GetFinalKey(t, k, true) + "." + strconv.Itoa(index+t.StartIndex+1) + "."
 						}
+						k4 := schemaChain + k + "." + strconv.Itoa(index) + "."
 						switch reflect.TypeOf(v2).Kind() {
 						case reflect.Slice:
 							if t.NextLevelConvert[k2].Convert != nil {
-								err = Convert(d, k2, t.NextLevelConvert[k2].Convert(d, v2), t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType)
+								err = Convert(d, k2, t.NextLevelConvert[k2].Convert(d, v2), t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType, k4)
 							} else {
-								err = Convert(d, k2, v2, t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType)
+								err = Convert(d, k2, v2, t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType, k4)
 							}
 
 							if err != nil {
@@ -410,9 +412,9 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 						case reflect.Ptr:
 							if _v2, ok := v2.(*schema.Set); ok {
 								if t.NextLevelConvert[k2].Convert != nil {
-									err = Convert(d, k2, t.NextLevelConvert[k2].Convert(d, _v2.List()), t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType)
+									err = Convert(d, k2, t.NextLevelConvert[k2].Convert(d, _v2.List()), t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType, k4)
 								} else {
-									err = Convert(d, k2, _v2.List(), t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType)
+									err = Convert(d, k2, _v2.List(), t.NextLevelConvert[k2], 0, req, k3, forceGet, contentType, k4)
 								}
 								if err != nil {
 									return err

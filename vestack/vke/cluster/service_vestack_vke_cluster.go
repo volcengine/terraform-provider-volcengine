@@ -201,18 +201,15 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 			Convert: map[string]ve.RequestConvert{
 				"cluster_config": {
 					ConvertType: ve.ConvertJsonObject,
-					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"subnet_ids": {
 							ConvertType: ve.ConvertJsonArray,
 						},
 						"api_server_public_access_config": {
 							ConvertType: ve.ConvertJsonObject,
-							ForceGet:    true,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"public_access_network_config": {
 									ConvertType: ve.ConvertJsonObject,
-									ForceGet:    true,
 								},
 							},
 						},
@@ -220,11 +217,9 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 				},
 				"pods_config": {
 					ConvertType: ve.ConvertJsonObject,
-					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"flannel_config": {
 							ConvertType: ve.ConvertJsonObject,
-							ForceGet:    true,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"pod_cidrs": {
 									ConvertType: ve.ConvertJsonArray,
@@ -233,7 +228,6 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 						},
 						"vpc_cni_config": {
 							ConvertType: ve.ConvertJsonObject,
-							ForceGet:    true,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"subnet_ids": {
 									ConvertType: ve.ConvertJsonArray,
@@ -244,7 +238,6 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 				},
 				"services_config": {
 					ConvertType: ve.ConvertJsonObject,
-					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"service_cidrsv4": {
 							ConvertType: ve.ConvertJsonArray,
