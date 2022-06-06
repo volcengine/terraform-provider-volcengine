@@ -1,10 +1,8 @@
 package cluster
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -72,8 +70,6 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 				return data, err
 			}
 		}
-
-		log.Println("DEBUGLISTCLUSTER", *resp)
 
 		results, err = ve.ObtainSdkValue("Result.Items", *resp)
 		if err != nil {
@@ -265,8 +261,6 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				b, _ := json.Marshal(*call.SdkParam)
-				log.Println(string(b))
 				//创建cluster
 				return s.Client.VkeClient.CreateClusterCommon(call.SdkParam)
 			},
