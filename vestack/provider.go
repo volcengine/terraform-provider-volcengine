@@ -24,6 +24,7 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/vestack/eip/eip_associate"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/snat_entry"
+	"github.com/volcengine/terraform-provider-vestack/vestack/vke/cluster"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vke/node"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface_attach"
@@ -115,7 +116,8 @@ func Provider() terraform.ResourceProvider {
 			"vestack_nat_gateways": nat_gateway.DataSourceVestackNatGateways(),
 
 			// ================ VKE ================
-			"vestack_vke_nodes": node.DataSourceVestackVkeNodes(),
+			"vestack_vke_nodes":    node.DataSourceVestackVkeNodes(),
+			"vestack_vke_clusters": cluster.DataSourceVestackVkeVkeClusters(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"vestack_vpc":                      vpc.ResourceVestackVpc(),
@@ -155,7 +157,8 @@ func Provider() terraform.ResourceProvider {
 			"vestack_nat_gateway": nat_gateway.ResourceVestackNatGateway(),
 
 			// ================ VKE ================
-			"vestack_vke_node": node.ResourceVestackVkeNode(),
+			"vestack_vke_node":    node.ResourceVestackVkeNode(),
+			"vestack_vke_cluster": cluster.ResourceVestackVkeCluster(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
