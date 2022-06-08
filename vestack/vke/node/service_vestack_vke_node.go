@@ -424,7 +424,6 @@ func (s *VestackVkeNodeService) removeNodes(instanceIds []interface{}, resourceD
 					if len(ids) < 1 {
 						return false, nil
 					}
-					logger.Debug(logger.RespFormat, "DeleteNodesBeforeCall 1111", resourceData.Get("cascading_delete_resources"))
 
 					if resourceData.Get("cascading_delete_resources") != nil {
 						for i, v := range resourceData.Get("cascading_delete_resources").(*schema.Set).List() {
@@ -434,7 +433,6 @@ func (s *VestackVkeNodeService) removeNodes(instanceIds []interface{}, resourceD
 					for i, id := range ids {
 						(*call.SdkParam)[fmt.Sprintf("Ids.%d", i+1)] = id
 					}
-					logger.Debug(logger.RespFormat, "DeleteNodesBeforeCall", call.SdkParam)
 					resourceData.SetId(strings.Join(ids, ":"))
 					return true, nil
 				},
