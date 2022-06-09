@@ -1,6 +1,7 @@
 package vestack
 
 import (
+	"github.com/volcengine/terraform-provider-vestack/vestack/vke/node_pool"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -159,6 +160,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ VKE ================
 			"vestack_vke_node":    node.ResourceVestackVkeNode(),
 			"vestack_vke_cluster": cluster.ResourceVestackVkeCluster(),
+			"vestack_vke_node_pools": node_pool.ResourceVestackNodePool(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
