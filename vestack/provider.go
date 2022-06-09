@@ -4,6 +4,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
+	"github.com/volcengine/terraform-provider-vestack/vestack/autoscaling/scaling_activity"
+	"github.com/volcengine/terraform-provider-vestack/vestack/autoscaling/scaling_configuration"
+	"github.com/volcengine/terraform-provider-vestack/vestack/autoscaling/scaling_group"
+	"github.com/volcengine/terraform-provider-vestack/vestack/autoscaling/scaling_instance_attach"
+	"github.com/volcengine/terraform-provider-vestack/vestack/autoscaling/scaling_lifecycle_hook"
+	"github.com/volcengine/terraform-provider-vestack/vestack/autoscaling/scaling_policy"
+	"github.com/volcengine/terraform-provider-vestack/vestack/autoscaling/scalinggroup_server_group"
 	"github.com/volcengine/terraform-provider-vestack/vestack/clb/acl"
 	"github.com/volcengine/terraform-provider-vestack/vestack/clb/acl_entry"
 	"github.com/volcengine/terraform-provider-vestack/vestack/clb/certificate"
@@ -104,6 +111,13 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"vestack_snat_entries": snat_entry.DataSourceVestackSnatEntries(),
 			"vestack_nat_gateways": nat_gateway.DataSourceVestackNatGateways(),
+
+			// ================ AutoScaling ================
+			"vestack_scaling_groups":          scaling_group.DataSourceVestackScalingGroups(),
+			"vestack_scaling_configurations":  scaling_configuration.DataSourceVestackScalingConfigurations(),
+			"vestack_scaling_policies":        scaling_policy.DataSourceVestackScalingPolicies(),
+			"vestack_scaling_activities":      scaling_activity.DataSourceVestackScalingActivities(),
+			"vestack_scaling_lifecycle_hooks": scaling_lifecycle_hook.DataSourceVestackScalingLifecycleHooks(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"vestack_vpc":                      vpc.ResourceVestackVpc(),
@@ -141,6 +155,14 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"vestack_snat_entry":  snat_entry.ResourceVestackSnatEntry(),
 			"vestack_nat_gateway": nat_gateway.ResourceVestackNatGateway(),
+
+			// ================ AutoScaling ================
+			"vestack_scaling_group":             scaling_group.ResourceVestackScalingGroup(),
+			"vestack_scaling_configuration":     scaling_configuration.ResourceVestackScalingConfiguration(),
+			"vestack_scaling_policy":            scaling_policy.ResourceVestackScalingPolicy(),
+			"vestack_scaling_instance_attach":   scaling_instance_attach.ResourceVestackScalingInstanceAttach(),
+			"vestack_scalinggroup_server_group": scalinggroup_server_group.ResourceVestackScalinggroupServerGroup(),
+			"vestack_scaling_lifecycle_hook":    scaling_lifecycle_hook.ResourceVestackScalingLifecycleHook(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
