@@ -303,8 +303,8 @@ func DataSourceVestackVkeVkeClusters() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"pod_network_mode": {
-										Type: schema.TypeString,
-										Computed: true,
+										Type:        schema.TypeString,
+										Computed:    true,
 										Description: "Container Pod Network Type (CNI).",
 									},
 									"flannel_config": {
@@ -324,8 +324,8 @@ func DataSourceVestackVkeVkeClusters() *schema.Resource {
 													Description: "Container Pod Network CIDR.",
 												},
 												"max_pods_per_node": {
-													Type: schema.TypeInt,
-													Computed: true,
+													Type:        schema.TypeInt,
+													Computed:    true,
 													Description: "Maximum number of Pod instances on a single node.",
 												},
 											},
@@ -339,8 +339,8 @@ func DataSourceVestackVkeVkeClusters() *schema.Resource {
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"vpc_id": {
-													Type: schema.TypeString,
-													Computed: true,
+													Type:        schema.TypeString,
+													Computed:    true,
 													Description: "Maximum number of Pod instances on a single node.",
 												},
 												"subnet_ids": {
@@ -385,38 +385,38 @@ func DataSourceVestackVkeVkeClusters() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"total_count": {
-										Type: schema.TypeInt,
-										Computed: true,
+										Type:        schema.TypeInt,
+										Computed:    true,
 										Description: "Total number of nodes.",
 									},
 									"creating_count": {
-										Type: schema.TypeInt,
-										Computed: true,
+										Type:        schema.TypeInt,
+										Computed:    true,
 										Description: "Phase=Creating total number of nodes.",
 									},
 									"running_count": {
-										Type: schema.TypeInt,
-										Computed: true,
+										Type:        schema.TypeInt,
+										Computed:    true,
 										Description: "Phase=Running total number of nodes.",
 									},
 									"stopped_count": {
-										Type: schema.TypeInt,
-										Computed: true,
+										Type:        schema.TypeInt,
+										Computed:    true,
 										Description: "Phase=Stopped total number of nodes.",
 									},
 									"updating_count": {
-										Type: schema.TypeInt,
-										Computed: true,
+										Type:        schema.TypeInt,
+										Computed:    true,
 										Description: "Phase=Updating total number of nodes.",
 									},
 									"deleting_count": {
-										Type: schema.TypeInt,
-										Computed: true,
+										Type:        schema.TypeInt,
+										Computed:    true,
 										Description: "Phase=Deleting total number of nodes.",
 									},
 									"failed_count": {
-										Type: schema.TypeInt,
-										Computed: true,
+										Type:        schema.TypeInt,
+										Computed:    true,
 										Description: "Phase=Failed total number of nodes.",
 									},
 								},
