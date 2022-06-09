@@ -410,64 +410,66 @@ func (s *VestackVkeNodeService) removeNodes(instanceIds []interface{}, resourceD
 
 	// 根据不同的节点池进行删除
 	tmpId := resourceData.Id()
-	for poolId, ids := range nodeIds {
-		callbacks = append(callbacks, ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "DeleteNodes",
-				ConvertMode: ve.RequestConvertIgnore,
-				ContentType: ve.ContentTypeJson,
-				SdkParam: &map[string]interface{}{
-					"ClusterId":  resourceData.Get("cluster_id"),
-					"NodePoolId": poolId,
-				},
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					if len(ids) < 1 {
-						return false, nil
-					}
-
-					if resourceData.Get("cascading_delete_resources") != nil {
-						for i, v := range resourceData.Get("cascading_delete_resources").(*schema.Set).List() {
-							(*call.SdkParam)[fmt.Sprintf("CascadingDeleteResources.%d", i+1)] = v.(string)
+	for tmpPoolId, tmpIds := range nodeIds {
+		func(poolId string, nodeIds []string) {
+			callbacks = append(callbacks, ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "DeleteNodes",
+					ConvertMode: ve.RequestConvertIgnore,
+					ContentType: ve.ContentTypeJson,
+					SdkParam: &map[string]interface{}{
+						"ClusterId":  resourceData.Get("cluster_id"),
+						"NodePoolId": poolId,
+					},
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						if len(nodes) < 1 {
+							return false, nil
 						}
-					}
-					for i, id := range ids {
-						(*call.SdkParam)[fmt.Sprintf("Ids.%d", i+1)] = id
-					}
-					resourceData.SetId(strings.Join(ids, ":"))
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-				CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
-					//出现错误后重试
-					return resource.Retry(15*time.Minute, func() *resource.RetryError {
-						_, callErr := s.ReadResource(d, "")
-						if callErr != nil {
-							if ve.ResourceNotFoundError(callErr) && strings.Contains(callErr.Error(), strings.Join(strings.Split(resourceData.Id(), ":"), ",")) {
-								return nil
-							} else {
-								return resource.NonRetryableError(fmt.Errorf("error on reading vke node on delete %q, %w", d.Id(), callErr))
+
+						if resourceData.Get("cascading_delete_resources") != nil {
+							for i, v := range resourceData.Get("cascading_delete_resources").(*schema.Set).List() {
+								(*call.SdkParam)[fmt.Sprintf("CascadingDeleteResources.%d", i+1)] = v.(string)
 							}
 						}
-						_, callErr = call.ExecuteCall(d, client, call)
-						logger.Debug(logger.RespFormat, call.Action, callErr)
-						if callErr == nil {
-							return nil
+						for i, id := range nodeIds {
+							(*call.SdkParam)[fmt.Sprintf("Ids.%d", i+1)] = id
 						}
-						return resource.RetryableError(callErr)
-					})
+						resourceData.SetId(strings.Join(nodeIds, ":"))
+						return true, nil
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					},
+					CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+						//出现错误后重试
+						return resource.Retry(15*time.Minute, func() *resource.RetryError {
+							_, callErr := s.ReadResource(d, "")
+							if callErr != nil {
+								if ve.ResourceNotFoundError(callErr) && strings.Contains(callErr.Error(), strings.Join(strings.Split(resourceData.Id(), ":"), ",")) {
+									return nil
+								} else {
+									return resource.NonRetryableError(fmt.Errorf("error on reading vke node on delete %q, %w", d.Id(), callErr))
+								}
+							}
+							_, callErr = call.ExecuteCall(d, client, call)
+							logger.Debug(logger.RespFormat, call.Action, callErr)
+							if callErr == nil {
+								return nil
+							}
+							return resource.RetryableError(callErr)
+						})
+					},
+					Refresh: &ve.StateRefresh{
+						Target:  []string{nodeRemove},
+						Timeout: 2 * time.Hour,
+					},
+					LockId: func(d *schema.ResourceData) string {
+						return d.Get("cluster_id").(string)
+					},
 				},
-				Refresh: &ve.StateRefresh{
-					Target:  []string{nodeRemove},
-					Timeout: 2 * time.Hour,
-				},
-				LockId: func(d *schema.ResourceData) string {
-					return d.Get("cluster_id").(string)
-				},
-			},
-		})
+			})
+		}(tmpPoolId, tmpIds)
 	}
 
 	if len(callbacks) > 0 {
@@ -495,7 +497,7 @@ func (s *VestackVkeNodeService) removeNodes(instanceIds []interface{}, resourceD
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
-		ServiceName: "vke",
+		ServiceName: "vke_pre",
 		Version:     "2022-05-12",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
