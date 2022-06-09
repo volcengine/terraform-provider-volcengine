@@ -497,7 +497,7 @@ func (s *VestackVkeNodeService) removeNodes(instanceIds []interface{}, resourceD
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
-		ServiceName: "vke_pre",
+		ServiceName: "vke",
 		Version:     "2022-05-12",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
