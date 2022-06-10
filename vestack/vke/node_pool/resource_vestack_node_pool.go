@@ -101,14 +101,39 @@ func ResourceVestackNodePool() *schema.Resource {
 				Optional:    true,
 				Description: "The ClientToken of NodePool.",
 			},
-			"kubernetes_config": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The KubernetesConfig of NodePool.",
-			},
 			"auto_scaling": {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "The Enabled of AutoScaling.",
+						},
+						"max_replicas": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The MaxReplicas of AutoScaling.",
+						},
+						"min_replicas": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The MinReplicas of AutoScaling.",
+						},
+						"desired_replicas": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The DesiredReplicas of AutoScaling.",
+						},
+						"priority": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "The Priority of AutoScaling.",
+						},
+					},
+				},
 				Description: "The AutoScaling of NodePool.",
 			},
 			"node_config": {
@@ -230,6 +255,66 @@ func ResourceVestackNodePool() *schema.Resource {
 						},
 					},
 				},
+			},
+			"kubernetes_config": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"labels": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Key of Labels.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Value of Labels.",
+									},
+								},
+							},
+							Description: "The Labels of KubernetesConfig.",
+						},
+						"taints": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Key of Taints.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Value of Taints.",
+									},
+									"effect": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Effect of Taints.",
+									},
+								},
+							},
+							Description: "The Taints of KubernetesConfig.",
+						},
+						"cordon": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "The Cordon of KubernetesConfig.",
+						},
+					},
+				},
+				Description: "The KubernetesConfig of NodeConfig.",
 			},
 		},
 	}
