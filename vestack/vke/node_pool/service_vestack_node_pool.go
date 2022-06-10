@@ -155,6 +155,15 @@ func (s *VestackNodePoolService) CreateResource(resourceData *schema.ResourceDat
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
+				"cluster_id": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"client_token": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"name": {
+					ConvertType: ve.ConvertJsonObject,
+				},
 				"node_config": {
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
@@ -178,7 +187,94 @@ func (s *VestackNodePoolService) CreateResource(resourceData *schema.ResourceDat
 										},
 									},
 								},
+								"security_group_ids": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"security_strategies": {
+									ConvertType: ve.ConvertJsonArray,
+								},
 							},
+						},
+						"system_volume": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"type": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"size": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+						"data_volumes": {
+							ConvertType: ve.ConvertJsonArray,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"type": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"size": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+						"initialize_script": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"additional_container_storage_enabled": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+				"kubernetes_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"labels": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"value": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+						"taints": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"value": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"effect": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+						"cordon": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+				"auto_scaling": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"enabled": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"max_replicas": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"min_replicas": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"desired_replicas": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"priority": {
+							ConvertType: ve.ConvertJsonObject,
 						},
 					},
 				},
