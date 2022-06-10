@@ -136,10 +136,11 @@ func DataSourceVestackVkeNodes() *schema.Resource {
 							Computed:    true,
 							Description: "The node pool id.",
 						},
-						"role": {
-							Type:        schema.TypeString,
+						"roles": {
+							Type:        schema.TypeList,
 							Computed:    true,
-							Description: "The role of node.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Description: "The roles of node.",
 						},
 						"create_client_token": {
 							Type:        schema.TypeString,
