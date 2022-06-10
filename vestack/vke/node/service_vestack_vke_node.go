@@ -357,6 +357,9 @@ func (s *VestackVkeNodeService) addNodes(instanceIds []interface{}, resourceData
 				"container_storage_path": {
 					ForceGet:    true,
 					TargetField: "ContainerStoragePath",
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						return i
+					},
 				},
 			},
 			LockId: func(d *schema.ResourceData) string {
