@@ -422,6 +422,16 @@ func DataSourceVestackVkeVkeClusters() *schema.Resource {
 								},
 							},
 						},
+						"kubeconfig": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Kubeconfig data, returned in BASE64 encoding.",
+						},
+						"kubeconfig_access_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Kubeconfig access type.",
+						},
 					},
 				},
 			},
