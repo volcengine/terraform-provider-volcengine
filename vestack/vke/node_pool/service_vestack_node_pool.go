@@ -306,6 +306,100 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 			Action:      "UpdateNodePoolConfig",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"cluster_id": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"client_token": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"name": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"node_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"security": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"login": {
+									ConvertType: ve.ConvertJsonObject,
+									NextLevelConvert: map[string]ve.RequestConvert{
+										"password": {
+											ConvertType: ve.ConvertJsonObject,
+										},
+										"ssh_key_pair_name": {
+											ConvertType: ve.ConvertJsonObject,
+										},
+									},
+								},
+								"security_group_ids": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"security_strategies": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+							},
+						},
+						"initialize_script": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+				"kubernetes_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"labels": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"value": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+						"taints": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"value": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"effect": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+						"cordon": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+				"auto_scaling": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"enabled": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"max_replicas": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"min_replicas": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"desired_replicas": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"priority": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
