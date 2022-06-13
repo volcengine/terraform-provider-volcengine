@@ -55,7 +55,7 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 		}
 	}
 
-	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
+	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
 		vke := s.Client.VkeClient
 		action := "ListClusters"
 		logger.Debug(logger.ReqFormat, action, condition)
@@ -83,6 +83,41 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 		}
 		return data, err
 	})
+	if err != nil {
+		return data, err
+	}
+
+	// get kubeconfig
+	for _, d := range data {
+		if cluster, ok := d.(map[string]interface{}); ok {
+			clusterId := cluster["Id"]
+			publicAccess, err := ve.ObtainSdkValue("ClusterConfig.ApiServerPublicAccessEnabled", cluster)
+			if err != nil {
+				continue
+			}
+
+			accessType := "Private"
+			if publicAccess, ok := publicAccess.(bool); ok && publicAccess {
+				accessType = "Public"
+			}
+
+			kubeconfigReq := &map[string]interface{}{
+				"ClusterId": clusterId,
+				"Type":      accessType,
+			}
+			kubeconfigResp, err := s.Client.VkeClient.GetKubeconfigCommon(kubeconfigReq)
+			if err != nil {
+				return nil, err
+			}
+
+			if kubeconfig, ok := (*kubeconfigResp)["Result"].(map[string]interface{}); ok {
+				cluster["Kubeconfig"] = kubeconfig["Kubeconfig"]
+				cluster["KubeconfigAccessType"] = kubeconfig["Type"]
+			}
+		}
+	}
+
+	return data, err
 }
 
 func (s *VestackVkeClusterService) ReadResource(resourceData *schema.ResourceData, clusterId string) (data map[string]interface{}, err error) {
