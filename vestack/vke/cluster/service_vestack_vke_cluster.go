@@ -56,16 +56,15 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 	}
 
 	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		vke := s.Client.VkeClient
 		action := "ListClusters"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vke.ListClustersCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vke.ListClustersCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -90,34 +89,62 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 	// get kubeconfig
 	for _, d := range data {
 		if cluster, ok := d.(map[string]interface{}); ok {
-			clusterId := cluster["Id"]
-			publicAccess, err := ve.ObtainSdkValue("ClusterConfig.ApiServerPublicAccessEnabled", cluster)
+			// 1. cluster status
+			status, err := ve.ObtainSdkValue("Status.Phase", cluster)
 			if err != nil {
+				logger.Info("Get cluster status failed, cluster: %+v, err: %s", cluster, err.Error())
+				return data, err
+			}
+			if !validKubeconfigClusterStatus[status.(string)] {
+				logger.Info("Cluster status cannot get kubeconfig, cluster: %+v", cluster)
 				continue
 			}
 
-			accessType := "Private"
-			if publicAccess, ok := publicAccess.(bool); ok && publicAccess {
-				accessType = "Public"
-			}
-
-			kubeconfigReq := &map[string]interface{}{
-				"ClusterId": clusterId,
-				"Type":      accessType,
-			}
-			kubeconfigResp, err := s.Client.VkeClient.GetKubeconfigCommon(kubeconfigReq)
+			// 2. get kubeconfig
+			clusterId := cluster["Id"].(string)
+			publicAccess, err := ve.ObtainSdkValue("ClusterConfig.ApiServerPublicAccessEnabled", cluster)
 			if err != nil {
-				return nil, err
+				logger.Info("Get cluster public access failed, cluster: %+v, err: %s", cluster, err.Error())
+				return data, err
+			}
+			publicIp, err := ve.ObtainSdkValue("ClusterConfig.ApiServerEndpoints.PublicIp.Ipv4", cluster)
+			if err != nil || publicIp == "" {
+				logger.Info("Get cluster public ip error or public ip is empty, cluster: %+v, err: %v", cluster, err)
+			} else {
+				if publicAccess, ok := publicAccess.(bool); ok && publicAccess {
+					publicKubeconfigResp, err := s.getKubeconfig(clusterId, "Public")
+					if err != nil {
+						logger.Info("Get public kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
+						return data, err
+					}
+
+					if kubeconfig, ok := (*publicKubeconfigResp)["Result"].(map[string]interface{}); ok {
+						cluster["KubeconfigPublic"] = kubeconfig["Kubeconfig"]
+					}
+				}
 			}
 
-			if kubeconfig, ok := (*kubeconfigResp)["Result"].(map[string]interface{}); ok {
-				cluster["Kubeconfig"] = kubeconfig["Kubeconfig"]
-				cluster["KubeconfigAccessType"] = kubeconfig["Type"]
+			privateKubeconfigResp, err := s.getKubeconfig(clusterId, "Private")
+			if err != nil {
+				logger.Info("Get private kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
+				return data, err
+			}
+
+			if kubeconfig, ok := (*privateKubeconfigResp)["Result"].(map[string]interface{}); ok {
+				cluster["KubeconfigPrivate"] = kubeconfig["Kubeconfig"]
 			}
 		}
 	}
 
 	return data, err
+}
+
+func (s *VestackVkeClusterService) getKubeconfig(clusterId, accessType string) (*map[string]interface{}, error) {
+	kubeconfigReq := &map[string]interface{}{
+		"ClusterId": clusterId,
+		"Type":      accessType,
+	}
+	return s.Client.UniversalClient.DoCall(getUniversalInfo("GetKubeconfig"), kubeconfigReq)
 }
 
 func (s *VestackVkeClusterService) ReadResource(resourceData *schema.ResourceData, clusterId string) (data map[string]interface{}, err error) {
@@ -290,7 +317,7 @@ func (s *VestackVkeClusterService) CreateResource(resourceData *schema.ResourceD
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建cluster
-				return s.Client.VkeClient.CreateClusterCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -312,7 +339,7 @@ func (s *VestackVkeClusterService) ModifyResource(resourceData *schema.ResourceD
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateClusterConfig",
-			ConvertMode: ve.RequestConvertAll,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"cluster_config": {
 					ConvertType: ve.ConvertJsonObject,
@@ -372,7 +399,7 @@ func (s *VestackVkeClusterService) ModifyResource(resourceData *schema.ResourceD
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改cluster属性
-				return s.Client.VkeClient.UpdateClusterConfigCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Running"},
@@ -394,7 +421,7 @@ func (s *VestackVkeClusterService) RemoveResource(resourceData *schema.ResourceD
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除Cluster
-				return s.Client.VkeClient.DeleteClusterCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -484,4 +511,14 @@ func (s *VestackVkeClusterService) DatasourceResources(*schema.ResourceData, *sc
 
 func (s *VestackVkeClusterService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vke",
+		Version:     "2022-05-12",
+		HttpMethod:  ve.POST,
+		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
 }
