@@ -3,12 +3,14 @@ package cluster
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 	"github.com/volcengine/terraform-provider-vestack/logger"
+	"github.com/volcengine/terraform-provider-vestack/vestack/eip/eip_address"
 )
 
 type VestackVkeClusterService struct {
@@ -86,7 +88,7 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 		return data, err
 	}
 
-	// get kubeconfig
+	// get extra data
 	for _, d := range data {
 		if cluster, ok := d.(map[string]interface{}); ok {
 			// 1. cluster status
@@ -95,12 +97,12 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 				logger.Info("Get cluster status failed, cluster: %+v, err: %s", cluster, err.Error())
 				return data, err
 			}
-			if !validKubeconfigClusterStatus[status.(string)] {
-				logger.Info("Cluster status cannot get kubeconfig, cluster: %+v", cluster)
+			if !clusterReadyStatuses[status.(string)] {
+				logger.Info("Cluster not ready, cluster: %+v", cluster)
 				continue
 			}
 
-			// 2. get kubeconfig
+			// 2. get kubeconfig and eip allocation id
 			clusterId := cluster["Id"].(string)
 			publicAccess, err := ve.ObtainSdkValue("ClusterConfig.ApiServerPublicAccessEnabled", cluster)
 			if err != nil {
@@ -112,6 +114,7 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 				logger.Info("Get cluster public ip error or public ip is empty, cluster: %+v, err: %v", cluster, err)
 			} else {
 				if publicAccess, ok := publicAccess.(bool); ok && publicAccess {
+					// a. get public kubeconfig
 					publicKubeconfigResp, err := s.getKubeconfig(clusterId, "Public")
 					if err != nil {
 						logger.Info("Get public kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
@@ -120,6 +123,40 @@ func (s *VestackVkeClusterService) ReadResources(condition map[string]interface{
 
 					if kubeconfig, ok := (*publicKubeconfigResp)["Result"].(map[string]interface{}); ok {
 						cluster["KubeconfigPublic"] = kubeconfig["Kubeconfig"]
+					}
+
+					// b. get eip data
+					eipAddressResp, err := s.Client.VpcClient.DescribeEipAddressesCommon(&map[string]interface{}{
+						"EipAddresses.1": publicIp,
+					})
+					if err != nil {
+						return data, err
+					}
+					eipAddresses, err := ve.ObtainSdkValue("Result.EipAddresses", *eipAddressResp)
+					if err != nil {
+						return data, err
+					}
+
+					if eipAddresses, ok := eipAddresses.([]interface{}); !ok {
+						return data, errors.New("Result.EipAddresses is not Slice")
+					} else if len(eipAddresses) == 0 {
+						return data, errors.New(fmt.Sprintf("Eip %s not found", publicIp))
+					} else {
+						// get eip allocation id
+						cluster["EipAllocationId"] = eipAddresses[0].(map[string]interface{})["AllocationId"].(string)
+
+						// get eip bandwidth, billing_type, isp
+						if clusterConfig, exist := cluster["ClusterConfig"]; exist {
+							if apiServerPublicAccessConfig, exist := clusterConfig.(map[string]interface{})["ApiServerPublicAccessConfig"]; exist {
+								if publicAccessNetworkConfig, exist := apiServerPublicAccessConfig.(map[string]interface{})["PublicAccessNetworkConfig"]; exist {
+									if eipConfig, ok := publicAccessNetworkConfig.(map[string]interface{}); ok {
+										eipConfig["BillingType"] = eipAddresses[0].(map[string]interface{})["BillingType"]
+										eipConfig["Bandwidth"] = eipAddresses[0].(map[string]interface{})["Bandwidth"]
+										eipConfig["Isp"] = eipAddresses[0].(map[string]interface{})["ISP"]
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -407,6 +444,35 @@ func (s *VestackVkeClusterService) ModifyResource(resourceData *schema.ResourceD
 			},
 		},
 	}
+
+	if resourceData.HasChange("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth") {
+		eipAllocationId := resourceData.Get("eip_allocation_id").(string)
+		modifyEipCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyEipAddresses",
+				ContentType: ve.ContentTypeDefault,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["AllocationId"] = eipAllocationId
+					(*call.SdkParam)["Bandwidth"] = d.Get("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					//修改eip属性
+					return s.Client.VpcClient.ModifyEipAddressAttributesCommon(call.SdkParam)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					eip_address.NewEipAddressService(s.Client): {
+						Target:     []string{"Available", "Attached", "Attaching", "Detaching"},
+						Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
+						ResourceId: eipAllocationId,
+					},
+				},
+			},
+		}
+		return []ve.Callback{modifyEipCallback, callback}
+	}
+
 	return []ve.Callback{callback}
 }
 
@@ -414,9 +480,12 @@ func (s *VestackVkeClusterService) RemoveResource(resourceData *schema.ResourceD
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteCluster",
+			ContentType: ve.ContentTypeJson,
 			ConvertMode: ve.RequestConvertIgnore,
-			SdkParam: &map[string]interface{}{
-				"Id": resourceData.Id(),
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["Id"] = resourceData.Id()
+				(*call.SdkParam)["CascadingDeleteResources"] = []string{"DefaultNodePoolResource", "NodePoolResource", "Clb", "Nat"}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
