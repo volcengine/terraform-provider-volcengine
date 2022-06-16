@@ -47,3 +47,13 @@ func VpcCniConfigFieldDiffSuppress(k, old, new string, d *schema.ResourceData) b
 	podNetworkMode := d.Get("pods_config").([]interface{})[0].(map[string]interface{})["pod_network_mode"].(string)
 	return podNetworkMode != "VpcCniShared"
 }
+
+var (
+	// cluster status can get kubeconfig
+	validKubeconfigClusterStatus = map[string]bool{
+		"Running":  true,
+		"Updating": true,
+		"Stopped":  true,
+		"Starting": true,
+	}
+)

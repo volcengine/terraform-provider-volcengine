@@ -74,6 +74,7 @@ func ResourceVestackVkeCluster() *schema.Resource {
 							Type:             schema.TypeList,
 							MaxItems:         1,
 							Optional:         true,
+							ForceNew:         true,
 							DiffSuppressFunc: ApiServerPublicAccessConfigFieldDiffSuppress,
 							Description:      "Cluster API Server public network access configuration.",
 							Elem: &schema.Resource{
@@ -82,18 +83,21 @@ func ResourceVestackVkeCluster() *schema.Resource {
 										Type:        schema.TypeList,
 										MaxItems:    1,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "Public network access network configuration.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"billing_type": {
 													Type:         schema.TypeString,
 													Optional:     true,
+													ForceNew:     true,
 													Description:  "Billing type of public IP.",
 													ValidateFunc: validation.StringInSlice([]string{"PostPaidByBandwidth", "PostPaidByTraffic"}, false),
 												},
 												"bandwidth": {
 													Type:        schema.TypeInt,
 													Optional:    true,
+													ForceNew:    true,
 													Description: "Peak bandwidth of public IP.",
 												},
 											},
@@ -122,6 +126,7 @@ func ResourceVestackVkeCluster() *schema.Resource {
 						"pod_network_mode": {
 							Type:         schema.TypeString,
 							Required:     true,
+							ForceNew:     true,
 							Description:  "Container Pod Network Type (CNI).",
 							ValidateFunc: validation.StringInSlice([]string{"Flannel", "VpcCniShared"}, false),
 						},
@@ -129,6 +134,7 @@ func ResourceVestackVkeCluster() *schema.Resource {
 							Type:             schema.TypeList,
 							MaxItems:         1,
 							Optional:         true,
+							ForceNew:         true,
 							Description:      "Flannel network configuration.",
 							DiffSuppressFunc: FlannelFieldDiffSuppress,
 							Elem: &schema.Resource{
@@ -136,6 +142,7 @@ func ResourceVestackVkeCluster() *schema.Resource {
 									"pod_cidrs": {
 										Type:     schema.TypeSet,
 										Optional: true,
+										ForceNew: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
@@ -145,6 +152,7 @@ func ResourceVestackVkeCluster() *schema.Resource {
 									"max_pods_per_node": {
 										Type:        schema.TypeInt,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "Maximum number of Pod instances on a single node.",
 									},
 								},
@@ -154,6 +162,7 @@ func ResourceVestackVkeCluster() *schema.Resource {
 							Type:             schema.TypeList,
 							MaxItems:         1,
 							Optional:         true,
+							ForceNew:         true,
 							Description:      "VPC-CNI network configuration.",
 							DiffSuppressFunc: VpcCniConfigFieldDiffSuppress,
 							Elem: &schema.Resource{
@@ -161,11 +170,13 @@ func ResourceVestackVkeCluster() *schema.Resource {
 									"vpc_id": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "Maximum number of Pod instances on a single node.",
 									},
 									"subnet_ids": {
 										Type:     schema.TypeSet,
 										Optional: true,
+										ForceNew: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
@@ -189,6 +200,7 @@ func ResourceVestackVkeCluster() *schema.Resource {
 						"service_cidrsv4": {
 							Type:     schema.TypeSet,
 							Required: true,
+							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -197,6 +209,16 @@ func ResourceVestackVkeCluster() *schema.Resource {
 						},
 					},
 				},
+			},
+			"kubeconfig_public": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Kubeconfig data with public network access, returned in BASE64 encoding.",
+			},
+			"kubeconfig_private": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Kubeconfig data with private network access, returned in BASE64 encoding.",
 			},
 		},
 	}
