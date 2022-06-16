@@ -119,6 +119,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ VKE ================
 			"vestack_vke_nodes":    node.DataSourceVestackVkeNodes(),
 			"vestack_vke_clusters": cluster.DataSourceVestackVkeVkeClusters(),
+			"vestack_vke_node_pools": node_pool.DataSourceVestackNodePools(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"vestack_vpc":                      vpc.ResourceVestackVpc(),
@@ -160,7 +161,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ VKE ================
 			"vestack_vke_node":    node.ResourceVestackVkeNode(),
 			"vestack_vke_cluster": cluster.ResourceVestackVkeCluster(),
-			"vestack_vke_node_pools": node_pool.ResourceVestackNodePool(),
+			"vestack_vke_node_pool": node_pool.ResourceVestackNodePool(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

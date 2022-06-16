@@ -1,9 +1,9 @@
-resource "vestack_vke_node_pools" "vke_test" {
-    cluster_id = "ccabe57fqtofgrbln3dog"
-    name = "zk33"
+resource "vestack_vke_node_pool" "vke_test" {
+    cluster_id = "ccah01nnqtofnluts98j0"
+    name = "demo"
     node_config {
         instance_type_ids = ["ecs.r1.large"]
-        subnet_ids = ["subnet-2d5zs7e0b3l6o58ozfcufvgoq"]
+        subnet_ids = ["subnet-3recgzi7hfim85zsk2i8l9ve7"]
         security {
             login {
                 password = "UHdkMTIzNDU2"
