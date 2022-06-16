@@ -432,6 +432,11 @@ func DataSourceVestackVkeVkeClusters() *schema.Resource {
 							Computed:    true,
 							Description: "Kubeconfig data with private network access, returned in BASE64 encoding.",
 						},
+						"eip_allocation_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Eip allocation Id.",
+						},
 					},
 				},
 			},

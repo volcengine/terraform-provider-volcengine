@@ -74,7 +74,6 @@ func ResourceVestackVkeCluster() *schema.Resource {
 							Type:             schema.TypeList,
 							MaxItems:         1,
 							Optional:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: ApiServerPublicAccessConfigFieldDiffSuppress,
 							Description:      "Cluster API Server public network access configuration.",
 							Elem: &schema.Resource{
@@ -90,14 +89,15 @@ func ResourceVestackVkeCluster() *schema.Resource {
 												"billing_type": {
 													Type:         schema.TypeString,
 													Optional:     true,
-													ForceNew:     true,
 													Description:  "Billing type of public IP.",
 													ValidateFunc: validation.StringInSlice([]string{"PostPaidByBandwidth", "PostPaidByTraffic"}, false),
+													DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+														return d.Id() != ""
+													},
 												},
 												"bandwidth": {
 													Type:        schema.TypeInt,
 													Optional:    true,
-													ForceNew:    true,
 													Description: "Peak bandwidth of public IP.",
 												},
 											},
@@ -219,6 +219,11 @@ func ResourceVestackVkeCluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "Kubeconfig data with private network access, returned in BASE64 encoding.",
+			},
+			"eip_allocation_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Eip allocation Id.",
 			},
 		},
 	}

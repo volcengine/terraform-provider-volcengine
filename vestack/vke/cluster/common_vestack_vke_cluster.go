@@ -49,8 +49,8 @@ func VpcCniConfigFieldDiffSuppress(k, old, new string, d *schema.ResourceData) b
 }
 
 var (
-	// cluster status can get kubeconfig
-	validKubeconfigClusterStatus = map[string]bool{
+	// cluster ready status
+	clusterReadyStatuses = map[string]bool{
 		"Running":  true,
 		"Updating": true,
 		"Stopped":  true,
