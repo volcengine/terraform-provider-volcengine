@@ -3,7 +3,6 @@ package cluster
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
