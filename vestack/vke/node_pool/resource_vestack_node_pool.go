@@ -36,22 +36,6 @@ func ResourceVestackNodePool() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of NodePool IDs.",
 			},
-			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
-				Description:  "A Name Regex of NodePool.",
-			},
-			"output_file": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "File name where to save data source results.",
-			},
-			"total_count": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "The total count of NodePools query.",
-			},
 			"statuses": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -93,7 +77,8 @@ func ResourceVestackNodePool() *schema.Resource {
 			},
 			"cluster_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				ForceNew:    true,
 				Description: "The clusterId  of NodePool.",
 			},
 			"client_token": {
@@ -113,9 +98,10 @@ func ResourceVestackNodePool() *schema.Resource {
 							Description: "The Enabled of AutoScaling.",
 						},
 						"max_replicas": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Description: "The MaxReplicas of AutoScaling.",
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(0, 1000),
+							Description:  "The MaxReplicas of AutoScaling.",
 						},
 						"min_replicas": {
 							Type:        schema.TypeInt,
@@ -128,9 +114,10 @@ func ResourceVestackNodePool() *schema.Resource {
 							Description: "The DesiredReplicas of AutoScaling.",
 						},
 						"priority": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Description: "The Priority of AutoScaling.",
+							Type:         schema.TypeInt,
+							Optional:     true,
+							ValidateFunc: validation.IntBetween(0, 100),
+							Description:  "The Priority of AutoScaling.",
 						},
 					},
 				},
@@ -139,12 +126,12 @@ func ResourceVestackNodePool() *schema.Resource {
 			"node_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_type_ids": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -152,7 +139,7 @@ func ResourceVestackNodePool() *schema.Resource {
 						},
 						"subnet_ids": {
 							Type:     schema.TypeList,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -161,7 +148,7 @@ func ResourceVestackNodePool() *schema.Resource {
 						"security": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"security_group_ids": {
@@ -183,7 +170,7 @@ func ResourceVestackNodePool() *schema.Resource {
 									"login": {
 										Type:     schema.TypeList,
 										MaxItems: 1,
-										Required: true,
+										Optional: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"password": {
@@ -211,14 +198,16 @@ func ResourceVestackNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The type of SystemVolume.",
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
+										Description:  "The type of SystemVolume.",
 									},
 									"size": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "The Size of SystemVolume.",
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(20, 2048),
+										Description:  "The Size of SystemVolume.",
 									},
 								},
 							},
@@ -230,14 +219,16 @@ func ResourceVestackNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The type of DataVolumes.",
+										Type:         schema.TypeString,
+										Optional:     true,
+										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
+										Description:  "The type of DataVolumes.",
 									},
 									"size": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Description: "The Size of DataVolumes.",
+										Type:         schema.TypeInt,
+										Optional:     true,
+										ValidateFunc: validation.IntBetween(20, 32768),
+										Description:  "The Size of DataVolumes.",
 									},
 								},
 							},

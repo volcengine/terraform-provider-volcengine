@@ -59,14 +59,19 @@ func DataSourceVestackNodePools() *schema.Resource {
 				Optional:    true,
 				Description: "The Name of NodePool.",
 			},
+			"cluster_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ClusterId of NodePool.",
+			},
 			"create_client_token": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "The create client token of NodePool.",
 			},
 			"update_client_token": {
 				Type:        schema.TypeString,
-				Computed:    true,
+				Optional:    true,
 				Description: "The update client token of NodePool.",
 			},
 			"auto_scaling_enabled": {
@@ -180,12 +185,12 @@ func DataSourceVestackNodePools() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The type of SystemVolume.",
 									},
 									"size": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The size of SystemVolume.",
 									},
 								},
@@ -201,32 +206,32 @@ func DataSourceVestackNodePools() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"total_count": {
 										Type:        schema.TypeInt,
-										Optional:    true,
+										Computed:    true,
 										Description: "The totalCount of Node.",
 									},
 									"creating_count": {
 										Type:        schema.TypeInt,
-										Optional:    true,
+										Computed:    true,
 										Description: "The creatingCount of Node.",
 									},
 									"running_count": {
 										Type:        schema.TypeInt,
-										Optional:    true,
+										Computed:    true,
 										Description: "The runningCount of Node.",
 									},
 									"updating_count": {
 										Type:        schema.TypeInt,
-										Optional:    true,
+										Computed:    true,
 										Description: "The updatingCount of Node.",
 									},
 									"deleting_count": {
 										Type:        schema.TypeInt,
-										Optional:    true,
+										Computed:    true,
 										Description: "The deletingCount of Node.",
 									},
 									"failed_count": {
 										Type:        schema.TypeInt,
-										Optional:    true,
+										Computed:    true,
 										Description: "The failedCount of Node.",
 									},
 								},
@@ -246,12 +251,12 @@ func DataSourceVestackNodePools() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The Key of KubernetesConfig.",
 									},
 									"value": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The Value of KubernetesConfig.",
 									},
 								},
@@ -264,12 +269,12 @@ func DataSourceVestackNodePools() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The type of DataVolume.",
 									},
 									"size": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The size of DataVolume.",
 									},
 								},
@@ -283,17 +288,17 @@ func DataSourceVestackNodePools() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The key of Taint.",
 									},
 									"value": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The value of Taint.",
 									},
 									"effect": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The effect of Taint.",
 									},
 								},
@@ -302,7 +307,7 @@ func DataSourceVestackNodePools() *schema.Resource {
 						},
 						"additional_container_storage_enabled": {
 							Type:        schema.TypeBool,
-							Optional:    true,
+							Computed:    true,
 							Description: "The additionalContainerStorageEnabled of NodeConfig.",
 						},
 						"instance_type_ids": {

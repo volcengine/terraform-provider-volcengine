@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 	"github.com/volcengine/terraform-provider-vestack/logger"
-	"strconv"
-	"time"
 )
 
 type VestackNodePoolService struct {
@@ -45,16 +46,15 @@ func (s *VestackNodePoolService) ReadResources(m map[string]interface{}) (data [
 			delete(condition, "AutoScalingEnabled")
 		}
 
-		vkeClient := s.Client.VkeClient
 		action := "ListNodePools"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vkeClient.ListNodePoolsCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vkeClient.ListNodePoolsCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -85,7 +85,7 @@ func (s *VestackNodePoolService) ReadResource(resourceData *schema.ResourceData,
 		nodePoolId = s.ReadResourceId(resourceData.Id())
 	}
 
-	vkeClient := s.Client.VkeClient
+	action := "ListNodePools"
 	nodeId := []string{nodePoolId}
 	condition := make(map[string]interface{}, 0)
 	condition["Filter"] = map[string]interface{}{
@@ -93,7 +93,7 @@ func (s *VestackNodePoolService) ReadResource(resourceData *schema.ResourceData,
 	}
 
 	logger.Debug(logger.RespFormat, "ReadResource ", condition)
-	result, err = vkeClient.ListNodePoolsCommon(&condition)
+	result, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 	logger.Debug(logger.RespFormat, "ReadResource ", result)
 
 	if err != nil {
@@ -156,13 +156,13 @@ func (s *VestackNodePoolService) CreateResource(resourceData *schema.ResourceDat
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"cluster_id": {
-					ConvertType: ve.ConvertJsonObject,
+					TargetField: "ClusterId",
 				},
 				"client_token": {
-					ConvertType: ve.ConvertJsonObject,
+					TargetField: "ClientToken",
 				},
 				"name": {
-					ConvertType: ve.ConvertJsonObject,
+					TargetField: "Name",
 				},
 				"node_config": {
 					ConvertType: ve.ConvertJsonObject,
@@ -279,10 +279,9 @@ func (s *VestackNodePoolService) CreateResource(resourceData *schema.ResourceDat
 					},
 				},
 			},
-
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.VkeClient.CreateNodePoolCommon(call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
@@ -407,7 +406,7 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VkeClient.UpdateNodePoolConfigCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Running"},
@@ -430,7 +429,7 @@ func (s *VestackNodePoolService) RemoveResource(resourceData *schema.ResourceDat
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VkeClient.DeleteNodePoolCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
@@ -455,10 +454,6 @@ func (s *VestackNodePoolService) DatasourceResources(*schema.ResourceData, *sche
 						TargetField: "ConditionsType",
 					},
 				},
-			},
-			"name": {
-				TargetField: "Filter.Name",
-				ConvertType: ve.ConvertJsonArray,
 			},
 		},
 		NameField:    "Name",
@@ -560,6 +555,9 @@ func (s *VestackNodePoolService) DatasourceResources(*schema.ResourceData, *sche
 				TargetField: "system_volume",
 				Convert: func(i interface{}) interface{} {
 					var results []interface{}
+					if i.(map[string]interface{})["Type"] == nil || i.(map[string]interface{})["size"] == nil {
+						return results
+					}
 					volume := make(map[string]interface{}, 0)
 					volume["type"] = i.(map[string]interface{})["Type"].(string)
 					volume["size"] = strconv.FormatFloat(i.(map[string]interface{})["Size"].(float64), 'g', 5, 32)
@@ -601,4 +599,14 @@ func (s *VestackNodePoolService) DatasourceResources(*schema.ResourceData, *sche
 
 func (s *VestackNodePoolService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vke",
+		Version:     "2022-05-12",
+		HttpMethod:  ve.POST,
+		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
 }
