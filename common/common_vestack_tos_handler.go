@@ -109,6 +109,13 @@ type Credentials struct {
 	SessionToken    string
 }
 
+type tosError struct {
+	Code      string
+	RequestId string
+	HostId    string
+	Message   string
+}
+
 func sign(request *http.Request, c Credentials) *http.Request {
 	query := request.URL.Query()
 
@@ -361,14 +368,18 @@ func tosUnmarshalError(r *request.Request) {
 			r.Error = err
 			return
 		}
-		if reflect.TypeOf(r.Data) != reflect.TypeOf(&map[string]interface{}{}) {
-			mm := map[string]interface{}{}
-			if err = json.Unmarshal(body, &mm); err != nil {
-				fmt.Printf("Unmarshal err, %v\n", err)
-				r.Error = err
-				return
-			}
+		tos := tosError{}
+		if err = json.Unmarshal(body, &tos); err != nil {
+			fmt.Printf("Unmarshal err, %v\n", err)
+			r.Error = err
+			return
 		}
+		r.Error = volcstackerr.NewRequestFailure(
+			volcstackerr.New(tos.Code, tos.Message, nil),
+			r.HTTPResponse.StatusCode,
+			tos.RequestId,
+		)
+
 		return
 	} else {
 		r.Error = volcstackerr.NewRequestFailure(

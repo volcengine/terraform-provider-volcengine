@@ -17,7 +17,6 @@ type Tos struct {
 
 type TosInfo struct {
 	HttpMethod  HttpMethod
-	Query       map[string]interface{}
 	Path        []string
 	Header      map[string]string
 	Domain      string
@@ -40,6 +39,8 @@ func (u *Tos) getMethod(m HttpMethod) string {
 		return "PUT"
 	case DELETE:
 		return "DELETE"
+	case HEAD:
+		return "HEAD"
 	default:
 		return "GET"
 	}

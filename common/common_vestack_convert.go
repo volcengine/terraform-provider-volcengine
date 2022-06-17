@@ -28,6 +28,11 @@ type RequestConvert struct {
 	TargetField      string
 	NextLevelConvert map[string]RequestConvert
 	StartIndex       int
+	SpecialParam     *SpecialParam
+}
+type SpecialParam struct {
+	Type  SpecialParamType
+	Index int
 }
 
 var supportRequestConvertType = map[RequestContentType]map[RequestConvertType]bool{

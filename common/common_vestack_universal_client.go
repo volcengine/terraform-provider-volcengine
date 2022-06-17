@@ -14,6 +14,7 @@ type HttpMethod int
 
 const (
 	GET HttpMethod = iota
+	HEAD
 	POST
 	PUT
 	DELETE
@@ -79,6 +80,8 @@ func (u *Universal) getMethod(m HttpMethod) string {
 		return "PUT"
 	case DELETE:
 		return "DELETE"
+	case HEAD:
+		return "HEAD"
 	default:
 		return "GET"
 	}

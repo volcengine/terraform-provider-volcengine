@@ -54,6 +54,7 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
 	client.UniversalClient = NewUniversalClient(sess)
+	client.TosClient = NewTosClient(sess)
 
 	InitLocks()
 	InitSyncLimit()

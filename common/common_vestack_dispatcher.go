@@ -96,6 +96,16 @@ func (d *Dispatcher) Data(resourceService ResourceService, resourceDate *schema.
 	if info.ContentType == ContentTypeJson {
 		condition = sortAndStartTransJson(condition)
 	}
+	switch info.ServiceCategory {
+	case ServiceTos:
+		condition, err = convertToTosParams(info.RequestConverts, condition)
+		if err != nil {
+			return err
+		}
+		break
+	default:
+		break
+	}
 	collection, err = resourceService.ReadResources(condition)
 	if err != nil {
 		return err
