@@ -25,10 +25,10 @@ func EcsInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) b
 		}
 	}
 
-	//暂时不支持renew 所以在计费方式没有发生变化的时候 period的变化会被忽略
-	//if !d.HasChange("instance_charge_type") && (k == "period" || k == "include_data_volumes") {
-	//	return true
-	//}
+	//在计费方式没有发生变化的时候 period的变化会被忽略
+	if !d.HasChange("instance_charge_type") && (k == "period" || k == "include_data_volumes") {
+		return true
+	}
 
 	if d.Get("instance_charge_type").(string) == "PostPaid" && (k == "period" || k == "period_unit" || k == "auto_renew" || k == "auto_renew_period") {
 		return true

@@ -241,6 +241,9 @@ func (s *VestackRouteEntryService) RemoveResource(resourceData *schema.ResourceD
 					return resource.RetryableError(callErr)
 				})
 			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
+			},
 		},
 	}
 	return []ve.Callback{callback}

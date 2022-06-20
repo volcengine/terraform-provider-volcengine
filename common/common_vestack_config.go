@@ -12,7 +12,6 @@ import (
 	"github.com/volcengine/volcstack-go-sdk/service/rdsmysql"
 	"github.com/volcengine/volcstack-go-sdk/service/rdsmysqlv2"
 	"github.com/volcengine/volcstack-go-sdk/service/storageebs"
-	"github.com/volcengine/volcstack-go-sdk/service/vke"
 	"github.com/volcengine/volcstack-go-sdk/service/vpc"
 	"github.com/volcengine/volcstack-go-sdk/service/vpn"
 	"github.com/volcengine/volcstack-go-sdk/volcstack"
@@ -64,7 +63,6 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.AutoScalingClient = autoscaling.New(sess)
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
-	client.VkeClient = vke.New(sess)
 	client.UniversalClient = NewUniversalClient(sess)
 
 	InitLocks()

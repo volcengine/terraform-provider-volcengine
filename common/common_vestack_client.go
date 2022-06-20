@@ -8,7 +8,6 @@ import (
 	"github.com/volcengine/volcstack-go-sdk/service/rdsmysql"
 	"github.com/volcengine/volcstack-go-sdk/service/rdsmysqlv2"
 	"github.com/volcengine/volcstack-go-sdk/service/storageebs"
-	"github.com/volcengine/volcstack-go-sdk/service/vke"
 	"github.com/volcengine/volcstack-go-sdk/service/vpc"
 	"github.com/volcengine/volcstack-go-sdk/service/vpn"
 )
@@ -24,6 +23,5 @@ type SdkClient struct {
 	AutoScalingClient *autoscaling.AUTOSCALING
 	RdsClient         *rdsmysql.RDSMYSQL
 	RdsClientV2       *rdsmysqlv2.RDSMYSQLV2
-	VkeClient         *vke.VKE
 	UniversalClient   *Universal
 }
