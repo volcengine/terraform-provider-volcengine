@@ -225,11 +225,28 @@ func genIndex(pwd string) (prods []Product) {
 
 		products = append(products, pts)
 	}
+
+	//sort
+	sortProducts := make(map[string]Products)
+	var (
+		sortKeys     []string
+		productsSort []Products
+	)
+	for _, _p := range products {
+		sortProducts[_p.Name] = _p
+		sortKeys = append(sortKeys, _p.Name)
+	}
+	sort.Strings(sortKeys)
+
+	for _, k := range sortKeys {
+		productsSort = append(productsSort, sortProducts[k])
+	}
+
 	data := map[string]interface{}{
 		"cloud_mark":  cloudMark,
 		"cloud_title": cloudTitle,
 		"cloudPrefix": cloudPrefix,
-		"Products":    products,
+		"Products":    productsSort,
 	}
 
 	filename := pwd + docRoot + "/" + fmt.Sprintf("%s.erb", cloudMark)
