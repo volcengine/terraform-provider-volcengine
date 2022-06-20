@@ -424,8 +424,9 @@ func (s *VestackNodePoolService) RemoveResource(resourceData *schema.ResourceDat
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"Id":        resourceData.Id(),
-				"ClusterId": resourceData.Get("cluster_id"),
+				"Id":                       resourceData.Id(),
+				"ClusterId":                resourceData.Get("cluster_id"),
+				"CascadingDeleteResources": resourceData.Get("cascading_delete_resources"),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
