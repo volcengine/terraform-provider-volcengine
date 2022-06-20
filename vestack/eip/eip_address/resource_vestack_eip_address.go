@@ -13,7 +13,7 @@ import (
 Import
 Eip address can be imported using the id, e.g.
 ```
-$ terraform import vestack_eip_address.default eip-274oj9a8rs9a87fap8sf9515b
+$ terraform import volcstack_eip_address.default eip-274oj9a8rs9a87fap8sf9515b
 ```
 
 */
@@ -33,7 +33,7 @@ func ResourceVestackEipAddress() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PostPaidByBandwidth", "PostPaidByTraffic"}, false),
-				Description:  "The billing type of the EIP Address.",
+				Description:  "The billing type of the EIP Address. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic`.",
 			},
 			"bandwidth": {
 				Type:        schema.TypeInt,
@@ -64,6 +64,11 @@ func ResourceVestackEipAddress() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The status of the EIP.",
+			},
+			"eip_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The ip address of the EIP.",
 			},
 		},
 	}
