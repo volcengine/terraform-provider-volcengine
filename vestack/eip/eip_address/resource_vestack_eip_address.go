@@ -13,7 +13,7 @@ import (
 Import
 Eip address can be imported using the id, e.g.
 ```
-$ terraform import volcstack_eip_address.default eip-274oj9a8rs9a87fap8sf9515b
+$ terraform import vestack_eip_address.default eip-274oj9a8rs9a87fap8sf9515b
 ```
 
 */
