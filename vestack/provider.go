@@ -145,6 +145,9 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"vestack_snat_entry":  snat_entry.ResourceVestackSnatEntry(),
 			"vestack_nat_gateway": nat_gateway.ResourceVestackNatGateway(),
+
+			//================= TOS =================
+			"vestack_tos_bucket": bucket.ResourceVestackTosBucket(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

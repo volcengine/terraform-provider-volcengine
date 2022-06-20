@@ -2,6 +2,7 @@ package bucket
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -42,7 +43,7 @@ func (s *VestackTosBucketService) ReadResources(condition map[string]interface{}
 	if err != nil {
 		return data, err
 	}
-	results, err = ve.ObtainSdkValue("Buckets", *resp)
+	results, err = ve.ObtainSdkValue(ve.TosResponse+".Buckets", *resp)
 	if err != nil {
 		return data, err
 	}
@@ -51,18 +52,52 @@ func (s *VestackTosBucketService) ReadResources(condition map[string]interface{}
 }
 
 func (s *VestackTosBucketService) ReadResource(resourceData *schema.ResourceData, instanceId string) (data map[string]interface{}, err error) {
+	tos := s.Client.TosClient
 	var (
-		results []interface{}
-		ok      bool
+		action string
+		resp   *map[string]interface{}
+		ok     bool
+		header *http.Header
+		acl    map[string]interface{}
 	)
-	results, err = s.ReadResources(nil)
+
+	if instanceId == "" {
+		instanceId = s.ReadResourceId(resourceData.Id())
+	} else {
+		instanceId = s.ReadResourceId(instanceId)
+	}
+
+	action = "HeadBucket"
+	logger.Debug(logger.ReqFormat, action, instanceId)
+	resp, err = tos.DoTosCall(ve.TosInfo{
+		HttpMethod: ve.HEAD,
+		Domain:     instanceId,
+	}, nil)
 	if err != nil {
 		return data, err
 	}
-	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
-			return data, fmt.Errorf("Value is not map ")
+	data = make(map[string]interface{})
+
+	if header, ok = (*resp)[ve.TosHeader].(*http.Header); ok {
+		if header.Get("x-tos-storage-class") != "" {
+			data["TosStorageClass"] = header.Get("x-tos-storage-class")
 		}
+	}
+
+	action = "GetBucketAcl"
+	req := map[string]interface{}{
+		"acl": "",
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err = tos.DoTosCall(ve.TosInfo{
+		HttpMethod: ve.GET,
+		Domain:     instanceId,
+	}, &req)
+	if err != nil {
+		return data, err
+	}
+	if acl, ok = (*resp)[ve.TosResponse].(map[string]interface{}); ok {
+		data["TosAcl"] = acl
 	}
 
 	if len(data) == 0 {
@@ -76,7 +111,64 @@ func (VestackTosBucketService) RefreshResourceState(data *schema.ResourceData, s
 }
 
 func (VestackTosBucketService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
-	return nil
+	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		return m, map[string]ve.ResponseConvert{
+			"TosAcl": {
+				Convert: func(i interface{}) interface{} {
+					owner, _ := ve.ObtainSdkValue("Owner.ID", i)
+					grants, _ := ve.ObtainSdkValue("Grants", i)
+					logger.Debug(logger.RespFormat, "CreateBucket", owner)
+					var (
+						read  bool
+						write bool
+					)
+					for _, grant := range grants.([]interface{}) {
+						id, _ := ve.ObtainSdkValue("Grantee.ID", grant)
+						canned, _ := ve.ObtainSdkValue("Grantee.Canned", grant)
+						t, _ := ve.ObtainSdkValue("Grantee.Type", grant)
+						permission, _ := ve.ObtainSdkValue("Permission", grant)
+						if canned != nil && canned.(string) == "AllUsers" && t.(string) == "Group" {
+							if permission.(string) == "READ" {
+								read = true
+								continue
+							} else if permission.(string) == "WRITE" {
+								write = true
+								continue
+							}
+						}
+
+						if canned != nil && canned.(string) == "AuthenticatedUsers" && t.(string) == "Group" {
+							if permission.(string) == "READ" {
+								return "authenticated-read"
+							}
+							break
+						}
+
+						logger.Debug(logger.RespFormat, "CreateBucket", id)
+						logger.Debug(logger.RespFormat, "CreateBucket", t)
+						if id != nil && id.(string) == owner.(string) && t.(string) == "CanonicalUser" {
+							if permission.(string) == "FULL_CONTROL" {
+								return "private"
+							} else if permission.(string) == "READ" {
+								return "bucket-owner-read"
+							}
+							break
+
+						}
+
+					}
+					if read && !write {
+						return "public-read"
+					}
+					if read && write {
+						return "public-read-write"
+					}
+					return ""
+				},
+			},
+		}, nil
+	}
+	return []ve.ResourceResponseHandler{handler}
 }
 
 func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -103,7 +195,7 @@ func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceDa
 				},
 				"tos_storage_class": {
 					ConvertType: ve.ConvertDefault,
-					TargetField: "tos-storage-class",
+					TargetField: "x-tos-storage-class",
 					SpecialParam: &ve.SpecialParam{
 						Type: ve.HeaderParam,
 					},
@@ -131,8 +223,43 @@ func (VestackTosBucketService) ModifyResource(data *schema.ResourceData, resourc
 	return nil
 }
 
-func (s *VestackTosBucketService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return nil
+func (s *VestackTosBucketService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DeleteBucket",
+			ConvertMode: ve.RequestConvertIgnore,
+			SdkParam: &map[string]interface{}{
+				"BucketName": s.ReadResourceId(resourceData.Id()),
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//删除Bucket
+				return s.Client.TosClient.DoTosCall(ve.TosInfo{
+					HttpMethod: ve.DELETE,
+					Domain:     (*call.SdkParam)["BucketName"].(string),
+				}, nil)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on  reading tos on delete %q, %w", s.ReadResourceId(d.Id()), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VestackTosBucketService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
@@ -173,6 +300,9 @@ func (s *VestackTosBucketService) DatasourceResources(data *schema.ResourceData,
 	}
 }
 
-func (VestackTosBucketService) ReadResourceId(s string) string {
-	return s[strings.Index(s, ":")+1:]
+func (s *VestackTosBucketService) ReadResourceId(id string) string {
+	if strings.HasPrefix(id, s.Client.Region+":") {
+		return id[strings.Index(id, ":")+1:]
+	}
+	return id
 }

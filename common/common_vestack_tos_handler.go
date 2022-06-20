@@ -346,14 +346,18 @@ func tosUnmarshal(r *request.Request) {
 		}
 
 		if reflect.TypeOf(r.Data) == reflect.TypeOf(&map[string]interface{}{}) {
+			(*r.Data.(*map[string]interface{}))[TosHeader] = r.HTTPResponse.Header
+			temp := make(map[string]interface{})
 			if len(body) == 0 {
+				(*r.Data.(*map[string]interface{}))[TosResponse] = temp
 				return
 			}
-			if err = json.Unmarshal(body, &r.Data); err != nil {
+			if err = json.Unmarshal(body, &temp); err != nil {
 				fmt.Printf("Unmarshal err, %v\n", err)
 				r.Error = err
 				return
 			}
+			(*r.Data.(*map[string]interface{}))[TosResponse] = temp
 		}
 
 	}

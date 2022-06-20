@@ -8,10 +8,11 @@ import (
 )
 
 const (
-	TosPath   = "PATH"
-	TosDomain = "DOMAIN"
-	TosHeader = "HEADER"
-	TosParam  = "PARAM"
+	TosPath     = "PATH"
+	TosDomain   = "DOMAIN"
+	TosHeader   = "HEADER"
+	TosParam    = "PARAM"
+	TosResponse = "RESPONSE"
 )
 
 func convertToTosParams(convert map[string]RequestConvert, condition map[string]interface{}) (result map[string]interface{}, err error) {
@@ -40,7 +41,6 @@ func convertToTosParams(convert map[string]RequestConvert, condition map[string]
 							result[TosDomain] = v1
 							delete(condition, k1)
 						}
-						break
 					case HeaderParam:
 						if v1, ok := condition[k1]; ok {
 							if _, ok1 := v1.(string); !ok1 {
@@ -49,7 +49,6 @@ func convertToTosParams(convert map[string]RequestConvert, condition map[string]
 							result[TosHeader].(map[string]string)[k1] = v1.(string)
 							delete(condition, k1)
 						}
-						break
 					case PathParam:
 						if v1, ok := condition[k1]; ok {
 							if _, ok1 := v1.(string); !ok1 {
@@ -61,7 +60,6 @@ func convertToTosParams(convert map[string]RequestConvert, condition map[string]
 							delete(condition, k1)
 						}
 					}
-					break
 				}
 			}
 			//sort
