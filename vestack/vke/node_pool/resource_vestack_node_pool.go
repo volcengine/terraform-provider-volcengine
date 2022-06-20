@@ -132,6 +132,7 @@ func ResourceVestackNodePool() *schema.Resource {
 						"instance_type_ids": {
 							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -140,6 +141,7 @@ func ResourceVestackNodePool() *schema.Resource {
 						"subnet_ids": {
 							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -195,17 +197,20 @@ func ResourceVestackNodePool() *schema.Resource {
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
+							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
 										Description:  "The type of SystemVolume.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
 										Optional:     true,
+										ForceNew:     true,
 										ValidateFunc: validation.IntBetween(20, 2048),
 										Description:  "The Size of SystemVolume.",
 									},
@@ -216,17 +221,20 @@ func ResourceVestackNodePool() *schema.Resource {
 						"data_volumes": {
 							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:         schema.TypeString,
 										Optional:     true,
+										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
 										Description:  "The type of DataVolumes.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
 										Optional:     true,
+										ForceNew:     true,
 										ValidateFunc: validation.IntBetween(20, 32768),
 										Description:  "The Size of DataVolumes.",
 									},
@@ -255,7 +263,6 @@ func ResourceVestackNodePool() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"labels": {
 							Type:     schema.TypeList,
-							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -275,7 +282,6 @@ func ResourceVestackNodePool() *schema.Resource {
 						},
 						"taints": {
 							Type:     schema.TypeList,
-							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
