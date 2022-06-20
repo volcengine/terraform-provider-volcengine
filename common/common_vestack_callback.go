@@ -15,19 +15,20 @@ type Callback struct {
 }
 
 type SdkCall struct {
-	Action         string
-	BeforeCall     BeforeCallFunc
-	ExecuteCall    ExecuteCallFunc
-	CallError      CallErrorFunc
-	AfterCall      AfterCallFunc
-	Convert        map[string]RequestConvert
-	ConvertMode    RequestConvertMode
-	SdkParam       *map[string]interface{}
-	RequestIdField string
-	Refresh        *StateRefresh
-	ExtraRefresh   map[ResourceService]*StateRefresh
-	ContentType    RequestContentType
-	LockId         LockId
+	Action          string
+	BeforeCall      BeforeCallFunc
+	ExecuteCall     ExecuteCallFunc
+	CallError       CallErrorFunc
+	AfterCall       AfterCallFunc
+	Convert         map[string]RequestConvert
+	ConvertMode     RequestConvertMode
+	SdkParam        *map[string]interface{}
+	RequestIdField  string
+	Refresh         *StateRefresh
+	ExtraRefresh    map[ResourceService]*StateRefresh
+	ContentType     RequestContentType
+	LockId          LockId
+	ServiceCategory ServiceCategory
 }
 
 type StateRefresh struct {
@@ -159,6 +160,19 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 					resp *map[string]interface{}
 				)
 				doExecute := true
+
+				switch fn.ServiceCategory {
+				case ServiceTos:
+					var trans map[string]interface{}
+					trans, err = convertToTosParams(fn.Convert, *fn.SdkParam)
+					if err != nil {
+						return err
+					}
+					fn.SdkParam = &trans
+				case DefaultServiceCategory:
+					break
+				}
+
 				if fn.BeforeCall != nil {
 					doExecute, err = fn.BeforeCall(d, client, fn)
 				}

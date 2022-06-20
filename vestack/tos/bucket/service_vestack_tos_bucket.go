@@ -79,15 +79,59 @@ func (VestackTosBucketService) WithResourceResponseHandlers(m map[string]interfa
 	return nil
 }
 
-func (VestackTosBucketService) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return nil
+func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	//create bucket
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			ServiceCategory: ve.ServiceTos,
+			Action:          "CreateBucket",
+			ConvertMode:     ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"bucket_name": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "BucketName",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.DomainParam,
+					},
+				},
+				"tos_acl": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "x-tos-acl",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+				},
+				"tos_storage_class": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "tos-storage-class",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+				},
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//创建Bucket
+				return s.Client.TosClient.DoTosCall(ve.TosInfo{
+					HttpMethod: ve.PUT,
+					Domain:     (*call.SdkParam)[ve.TosDomain].(string),
+					Header:     (*call.SdkParam)[ve.TosHeader].(map[string]string),
+				}, nil)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				d.SetId(s.Client.Region + ":" + (*call.SdkParam)[ve.TosDomain].(string))
+				return nil
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (VestackTosBucketService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return nil
 }
 
-func (VestackTosBucketService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VestackTosBucketService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return nil
 }
 
@@ -107,6 +151,9 @@ func (s *VestackTosBucketService) DatasourceResources(data *schema.ResourceData,
 		ResponseConverts: map[string]ve.ResponseConvert{},
 		ExtraData: func(sourceData []interface{}) (extraData []interface{}, err error) {
 			for _, v := range sourceData {
+				if v.(map[string]interface{})["Location"].(string) != s.Client.Region {
+					continue
+				}
 				if ok {
 					if name.(string) == v.(map[string]interface{})["Name"].(string) {
 						v.(map[string]interface{})["BucketId"] = s.Client.Region + ":" + v.(map[string]interface{})["Name"].(string)
