@@ -139,6 +139,11 @@ func DataSourceVestackVkeVkeClusters() *schema.Resource {
 							Computed:    true,
 							Description: "The delete protection of the cluster.",
 						},
+						"kubernetes_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The version of Kubernetes specified when creating the VKE cluster.",
+						},
 						"status": {
 							Type:        schema.TypeList,
 							MaxItems:    1,

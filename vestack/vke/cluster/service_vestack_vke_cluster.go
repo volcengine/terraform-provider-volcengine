@@ -444,7 +444,9 @@ func (s *VestackVkeClusterService) ModifyResource(resourceData *schema.ResourceD
 		},
 	}
 
-	if resourceData.HasChange("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth") {
+	if resourceData.HasChange("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth") &&
+		!resourceData.HasChange("cluster_config.0.api_server_public_access_enabled"){
+		// enable public access, vke will create eip automatic
 		eipAllocationId := resourceData.Get("eip_allocation_id").(string)
 		modifyEipCallback := ve.Callback{
 			Call: ve.SdkCall{
@@ -491,7 +493,15 @@ func (s *VestackVkeClusterService) RemoveResource(resourceData *schema.ResourceD
 				//删除Cluster
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
+			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				if protection, ok := d.Get("delete_protection_enabled").(bool); ok && protection {
+					// 开启集群保护，直接返回失败
+					return baseErr
+				}
+
 				//出现错误后重试
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
 					_, callErr := s.ReadResource(d, "")

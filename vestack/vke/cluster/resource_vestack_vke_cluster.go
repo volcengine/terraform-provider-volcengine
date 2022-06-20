@@ -2,9 +2,9 @@ package cluster
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
@@ -47,6 +47,12 @@ func ResourceVestackVkeCluster() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "The delete protection of the cluster.",
+			},
+			"kubernetes_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The version of Kubernetes specified when creating a VKE cluster (specified to patch version), if not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.",
 			},
 			"cluster_config": {
 				Type:        schema.TypeList,
@@ -91,9 +97,6 @@ func ResourceVestackVkeCluster() *schema.Resource {
 													Optional:     true,
 													Description:  "Billing type of public IP.",
 													ValidateFunc: validation.StringInSlice([]string{"PostPaidByBandwidth", "PostPaidByTraffic"}, false),
-													DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-														return d.Id() != ""
-													},
 												},
 												"bandwidth": {
 													Type:        schema.TypeInt,
