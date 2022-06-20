@@ -56,6 +56,18 @@ func (s *VestackSecurityGroupRuleService) CreateResource(resourceData *schema.Re
 		Call: ve.SdkCall{
 			Action:      action,
 			ConvertMode: ve.RequestConvertAll,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if resourceData.Get("cidr_ip") == "" && resourceData.Get("source_group_id") == "" {
+					return false, fmt.Errorf("At least one of cidr_ip and source_group_id exists. ")
+				}
+				protocol := resourceData.Get("protocol").(string)
+				start := resourceData.Get("port_start").(int)
+				end := resourceData.Get("port_end").(int)
+				if err := validateProtocol(protocol, start, end); err != nil {
+					return false, err
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				if direction == string(DirectionEgress) {
@@ -130,25 +142,9 @@ func (s *VestackSecurityGroupRuleService) ModifyResource(resourceData *schema.Re
 				start, _ := strconv.Atoi((*call.SdkParam)["PortStart"].(string))
 				end, _ := strconv.Atoi((*call.SdkParam)["PortEnd"].(string))
 
-				switch protocol {
-				case "tcp":
-					if start < 1 || end < 1 {
-						return false, fmt.Errorf("Protocol is tcp,Port start or end must between 1-65535. ")
-					}
-				case "udp":
-					if start < 1 || end < 1 {
-						return false, fmt.Errorf("Protocol is udp,Port start or end must between 1-65535. ")
-					}
-				case "icmp":
-					if start != -1 || end != -1 {
-						return false, fmt.Errorf("Protocol is icmp,Port start or end must -1. ")
-					}
-				case "all":
-					if start != -1 || end != -1 {
-						return false, fmt.Errorf("Protocol is all,Port start or end must -1. ")
-					}
+				if err := validateProtocol(protocol, start, end); err != nil {
+					return false, err
 				}
-				return true, nil
 
 				d.SetId(ruleId)
 
@@ -203,6 +199,9 @@ func (s *VestackSecurityGroupRuleService) RemoveResource(resourceData *schema.Re
 				"Protocol":        protocol,
 				"SecurityGroupId": securityGroupId,
 				"CidrIp":          cidrIp,
+				"Priority":        resourceData.Get("priority"),
+				"Policy":          resourceData.Get("policy"),
+				"SourceGroupId":   resourceData.Get("source_group_id"),
 			},
 
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -259,4 +258,26 @@ func importSecurityGroupRule(d *schema.ResourceData, meta interface{}) ([]*schem
 func (s *VestackSecurityGroupRuleService) ReadResourceId(id string) string {
 	items := strings.Split(id, ":")
 	return items[0]
+}
+
+func validateProtocol(protocol string, start, end int) error {
+	switch protocol {
+	case "tcp":
+		if start < 1 || end < 1 {
+			return fmt.Errorf("Protocol is tcp,Port start or end must between 1-65535. ")
+		}
+	case "udp":
+		if start < 1 || end < 1 {
+			return fmt.Errorf("Protocol is udp,Port start or end must between 1-65535. ")
+		}
+	case "icmp":
+		if start != -1 || end != -1 {
+			return fmt.Errorf("Protocol is icmp,Port start or end must -1. ")
+		}
+	case "all":
+		if start != -1 || end != -1 {
+			return fmt.Errorf("Protocol is all,Port start or end must -1. ")
+		}
+	}
+	return nil
 }

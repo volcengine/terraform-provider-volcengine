@@ -50,6 +50,8 @@ func (s *VestackSubnetService) ReadResources(m map[string]interface{}) (data []i
 			}
 		}
 
+		logger.Debug(logger.RespFormat, action, condition, *resp)
+
 		results, err = ve.ObtainSdkValue("Result.Subnets", *resp)
 		if err != nil {
 			return data, err
