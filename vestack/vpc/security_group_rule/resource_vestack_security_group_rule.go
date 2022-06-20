@@ -71,7 +71,7 @@ func ResourceVestackSecurityGroupRule() *schema.Resource {
 			},
 			"cidr_ip": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "Cidr ip of egress/ingress Rule.",
 			},

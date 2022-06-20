@@ -33,7 +33,7 @@ func ResourceVestackEipAddress() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PostPaidByBandwidth", "PostPaidByTraffic"}, false),
-				Description:  "The billing type of the EIP Address.",
+				Description:  "The billing type of the EIP Address. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic`.",
 			},
 			"bandwidth": {
 				Type:        schema.TypeInt,
@@ -64,6 +64,11 @@ func ResourceVestackEipAddress() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The status of the EIP.",
+			},
+			"eip_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The ip address of the EIP.",
 			},
 		},
 	}
