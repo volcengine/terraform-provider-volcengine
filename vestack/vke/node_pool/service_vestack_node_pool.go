@@ -229,7 +229,7 @@ func (s *VestackNodePoolService) CreateResource(resourceData *schema.ResourceDat
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonObject,
+							ConvertType: ve.ConvertJsonArray,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"key": {
 									ConvertType: ve.ConvertJsonObject,
@@ -240,7 +240,7 @@ func (s *VestackNodePoolService) CreateResource(resourceData *schema.ResourceDat
 							},
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonObject,
+							ConvertType: ve.ConvertJsonArray,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"key": {
 									ConvertType: ve.ConvertJsonObject,
@@ -307,13 +307,13 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"cluster_id": {
-					ConvertType: ve.ConvertJsonObject,
+					TargetField: "ClusterId",
 				},
 				"client_token": {
-					ConvertType: ve.ConvertJsonObject,
+					TargetField: "ClientToken",
 				},
 				"name": {
-					ConvertType: ve.ConvertJsonObject,
+					TargetField: "Name",
 				},
 				"node_config": {
 					ConvertType: ve.ConvertJsonObject,
@@ -349,7 +349,7 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonObject,
+							ConvertType: ve.ConvertJsonArray,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"key": {
 									ConvertType: ve.ConvertJsonObject,
@@ -360,7 +360,7 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 							},
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonObject,
+							ConvertType: ve.ConvertJsonArray,
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"key": {
 									ConvertType: ve.ConvertJsonObject,
