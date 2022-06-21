@@ -2,9 +2,9 @@ package node
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
@@ -25,12 +25,14 @@ func ResourceVestackVkeNode() *schema.Resource {
 		Update: resourceVestackVkeNodeUpdate,
 		Delete: resourceVestackVkeNodeDelete,
 		Importer: &schema.ResourceImporter{
-			State: vkeNodeImporter,
+			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
 			"client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
 				Description: "The client token.",
 			},
 			"cluster_id": {
@@ -39,22 +41,19 @@ func ResourceVestackVkeNode() *schema.Resource {
 				ForceNew:    true,
 				Description: "The cluster id.",
 			},
-			"instance_ids": {
-				Type:     schema.TypeSet,
-				Required: true,
-				MinItems: 1,
-				MaxItems: 100,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
+			"instance_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 				Description: "The instance ids.",
 			},
 			"keep_instance_name": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				ForceNew:    true,
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return len(d.Id()) != 0
+				},
 				Description: "The flag of keep instance name.",
 			},
 			"additional_container_storage_enabled": {
@@ -65,10 +64,14 @@ func ResourceVestackVkeNode() *schema.Resource {
 				Description: "The flag of additional container storage enable.",
 			},
 			"container_storage_path": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					flag := d.Get("additional_container_storage_enabled")
+					return flag == nil || !flag.(bool)
+				},
 				Description: "The container storage path.",
 			},
 			"cascading_delete_resources": {
@@ -81,13 +84,10 @@ func ResourceVestackVkeNode() *schema.Resource {
 				Optional:    true,
 				Description: "Is cascading delete resource.",
 			},
-			"node_ids": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The node ids.",
+			"node_pool_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The node pool id.",
 			},
 		},
 	}
