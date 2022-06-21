@@ -57,6 +57,18 @@ func tosSign(req *request.Request) {
 func tosBuild(r *request.Request) {
 	body := url.Values{}
 
+	params := r.Params
+	if reflect.TypeOf(r.Params) == reflect.TypeOf(&map[string]interface{}{}) {
+		if v, ok := (*r.Params.(*map[string]interface{}))[TosInfoUrlParam]; ok {
+			for k1, v1 := range v.(map[string]string) {
+				body.Add(k1, v1)
+			}
+		}
+		if v, ok := (*r.Params.(*map[string]interface{}))[TosInfoInput]; ok {
+			params = v
+		}
+	}
+
 	if r.Config.ExtraUserAgent != nil && *r.Config.ExtraUserAgent != "" {
 		if strings.HasPrefix(*r.Config.ExtraUserAgent, "/") {
 			request.AddToUserAgent(r, *r.Config.ExtraUserAgent)
@@ -69,8 +81,15 @@ func tosBuild(r *request.Request) {
 	r.HTTPRequest.URL.RawQuery = body.Encode()
 	r.HTTPRequest.Host = r.HTTPRequest.URL.Host
 
-	if reflect.TypeOf(r.Params) == reflect.TypeOf(&map[string]interface{}{}) {
-		m := *(r.Params).(*map[string]interface{})
+	v := r.HTTPRequest.Header.Get("Content-Type")
+	if len(v) > 0 && strings.Contains(strings.ToLower(v), "application/json") {
+		b, _ := json.Marshal(params)
+		r.SetStringBody(string(b))
+		return
+	}
+
+	if reflect.TypeOf(params) == reflect.TypeOf(&map[string]interface{}{}) {
+		m := *(params).(*map[string]interface{})
 		for k, v := range m {
 			if reflect.TypeOf(v).String() == "string" {
 				body.Add(k, v.(string))

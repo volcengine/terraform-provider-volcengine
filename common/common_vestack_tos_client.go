@@ -11,13 +11,20 @@ import (
 	"github.com/volcengine/volcstack-go-sdk/volcstack/session"
 )
 
+const (
+	TosInfoUrlParam = "TOS_URL_PARAM"
+	TosInfoInput    = "TOS_INPUT"
+)
+
 type Tos struct {
 	Session *session.Session
 }
 
 type TosInfo struct {
+	ContentType ContentType
 	HttpMethod  HttpMethod
 	Path        []string
+	UrlParam    map[string]string
 	Header      map[string]string
 	Domain      string
 	ContentPath string
@@ -90,6 +97,7 @@ func (u *Tos) newTosClient(domain string) *client.Client {
 
 func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
 	c := u.newTosClient(info.Domain)
+	trueInput := make(map[string]interface{})
 	var httpPath string
 
 	if len(info.Path) > 0 {
@@ -105,8 +113,16 @@ func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *ma
 	if input == nil {
 		input = &map[string]interface{}{}
 	}
+	trueInput[TosInfoInput] = input
+	if len(info.UrlParam) > 0 {
+		trueInput[TosInfoUrlParam] = info.UrlParam
+	}
 	output = &map[string]interface{}{}
-	req := c.NewRequest(op, input, output)
+	req := c.NewRequest(op, &trueInput, output)
+
+	if getContentType(info.ContentType) == "application/json" {
+		req.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
+	}
 
 	if info.ContentPath != "" && (op.HTTPMethod == "PUT" || op.HTTPMethod == "POST") {
 		content, _ := ioutil.ReadFile(info.ContentPath)

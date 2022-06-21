@@ -58,6 +58,11 @@ func ResourceVestackTosBucket() *schema.Resource {
 				Default:     "STANDARD",
 				Description: "The storage type of the bucket.",
 			},
+			"enable_version": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "The flag of enable tos version.",
+			},
 		},
 	}
 	return resource

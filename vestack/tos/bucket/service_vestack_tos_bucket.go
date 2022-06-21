@@ -54,11 +54,12 @@ func (s *VestackTosBucketService) ReadResources(condition map[string]interface{}
 func (s *VestackTosBucketService) ReadResource(resourceData *schema.ResourceData, instanceId string) (data map[string]interface{}, err error) {
 	tos := s.Client.TosClient
 	var (
-		action string
-		resp   *map[string]interface{}
-		ok     bool
-		header *http.Header
-		acl    map[string]interface{}
+		action  string
+		resp    *map[string]interface{}
+		ok      bool
+		header  *http.Header
+		acl     map[string]interface{}
+		version map[string]interface{}
 	)
 
 	if instanceId == "" {
@@ -100,6 +101,22 @@ func (s *VestackTosBucketService) ReadResource(resourceData *schema.ResourceData
 		data["TosAcl"] = acl
 	}
 
+	action = "GetBucketVersioning"
+	req = map[string]interface{}{
+		"versioning": "",
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err = tos.DoTosCall(ve.TosInfo{
+		HttpMethod: ve.GET,
+		Domain:     instanceId,
+	}, &req)
+	if err != nil {
+		return data, err
+	}
+	if version, ok = (*resp)[ve.TosResponse].(map[string]interface{}); ok {
+		data["EnableVersion"] = version
+	}
+
 	if len(data) == 0 {
 		return data, fmt.Errorf("bucket %s not exist ", instanceId)
 	}
@@ -113,6 +130,15 @@ func (VestackTosBucketService) RefreshResourceState(data *schema.ResourceData, s
 func (VestackTosBucketService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return m, map[string]ve.ResponseConvert{
+			"EnableVersion": {
+				Convert: func(i interface{}) interface{} {
+					status, _ := ve.ObtainSdkValue("Status", i)
+					if status.(string) != "Enabled" {
+						return false
+					}
+					return true
+				},
+			},
 			"TosAcl": {
 				Convert: func(i interface{}) interface{} {
 					owner, _ := ve.ObtainSdkValue("Owner.ID", i)
@@ -216,7 +242,60 @@ func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceDa
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	//version
+	callbackVersion := ve.Callback{
+		Call: ve.SdkCall{
+			ContentType:     ve.ContentTypeJson,
+			ServiceCategory: ve.ServiceTos,
+			Action:          "PutBucketVersioning",
+			ConvertMode:     ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"bucket_name": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "BucketName",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.DomainParam,
+					},
+				},
+				"enable_version": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "Status",
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						if i.(bool) {
+							return "Enabled"
+						} else {
+							return ""
+						}
+					},
+					ForceGet: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				//if disable version,skip this call
+				if (*call.SdkParam)[ve.TosParam].(map[string]interface{})["Status"] == "" {
+					return false, nil
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//PutVersion
+				condition := (*call.SdkParam)[ve.TosParam].(map[string]interface{})
+				return s.Client.TosClient.DoTosCall(ve.TosInfo{
+					HttpMethod: ve.PUT,
+					Domain:     (*call.SdkParam)[ve.TosDomain].(string),
+					UrlParam: map[string]string{
+						"versioning": "",
+					},
+				}, &condition)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				d.SetId(s.Client.Region + ":" + (*call.SdkParam)[ve.TosDomain].(string))
+				return nil
+			},
+		},
+	}
+	return []ve.Callback{callback, callbackVersion}
 }
 
 func (VestackTosBucketService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -240,7 +319,6 @@ func (s *VestackTosBucketService) RemoveResource(resourceData *schema.ResourceDa
 				}, nil)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
-				//出现错误后重试
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
 					_, callErr := s.ReadResource(d, "")
 					if callErr != nil {

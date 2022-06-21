@@ -43,4 +43,5 @@ const (
 	DomainParam SpecialParamType = iota
 	HeaderParam
 	PathParam
+	UrlParam
 )

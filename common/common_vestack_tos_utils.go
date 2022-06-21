@@ -12,16 +12,18 @@ const (
 	TosDomain   = "DOMAIN"
 	TosHeader   = "HEADER"
 	TosParam    = "PARAM"
+	TosUrlParam = "URL_PARAM"
 	TosResponse = "RESPONSE"
 )
 
 func convertToTosParams(convert map[string]RequestConvert, condition map[string]interface{}) (result map[string]interface{}, err error) {
 	if len(condition) > 0 {
 		result = map[string]interface{}{
-			TosDomain: "",
-			TosHeader: make(map[string]string),
-			TosPath:   []string{},
-			TosParam:  condition,
+			TosDomain:   "",
+			TosHeader:   make(map[string]string),
+			TosPath:     []string{},
+			TosParam:    condition,
+			TosUrlParam: make(map[string]string),
 		}
 
 		if len(convert) > 0 {
@@ -39,6 +41,14 @@ func convertToTosParams(convert map[string]RequestConvert, condition map[string]
 								return result, fmt.Errorf("%s must a string type", k)
 							}
 							result[TosDomain] = v1
+							delete(condition, k1)
+						}
+					case UrlParam:
+						if v1, ok := condition[k1]; ok {
+							if _, ok1 := v1.(string); !ok1 {
+								return result, fmt.Errorf("%s must a string type", k)
+							}
+							result[TosUrlParam].(map[string]string)[k1] = v1.(string)
 							delete(condition, k1)
 						}
 					case HeaderParam:

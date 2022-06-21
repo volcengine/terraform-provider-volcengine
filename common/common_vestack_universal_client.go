@@ -87,7 +87,7 @@ func (u *Universal) getMethod(m HttpMethod) string {
 	}
 }
 
-func (u *Universal) getContentType(m ContentType) string {
+func getContentType(m ContentType) string {
 	switch m {
 	case ApplicationJSON:
 		return "application/json"
@@ -109,7 +109,7 @@ func (u *Universal) DoCall(info UniversalInfo, input *map[string]interface{}) (o
 	output = &map[string]interface{}{}
 	req := c.NewRequest(op, input, output)
 
-	if u.getContentType(info.ContentType) == "application/json" {
+	if getContentType(info.ContentType) == "application/json" {
 		req.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
 	err = req.Send()
