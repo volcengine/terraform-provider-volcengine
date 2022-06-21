@@ -45,7 +45,7 @@ func ResourceVestackVkeNode() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The instance ids.",
+				Description: "The instance id.",
 			},
 			"keep_instance_name": {
 				Type:     schema.TypeBool,
