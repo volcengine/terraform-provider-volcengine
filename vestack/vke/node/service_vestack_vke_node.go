@@ -213,17 +213,10 @@ func (s *VestackVkeNodeService) RemoveResource(resourceData *schema.ResourceData
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"ClusterId":  resourceData.Get("cluster_id"),
-				"NodePoolId": resourceData.Get("node_pool_id"),
-				"Ids.1":      resourceData.Id(),
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if resourceData.Get("cascading_delete_resources") != nil {
-					for i, v := range resourceData.Get("cascading_delete_resources").(*schema.Set).List() {
-						(*call.SdkParam)[fmt.Sprintf("CascadingDeleteResources.%d", i+1)] = v.(string)
-					}
-				}
-				return true, nil
+				"ClusterId":                  resourceData.Get("cluster_id"),
+				"NodePoolId":                 resourceData.Get("node_pool_id"),
+				"Ids.1":                      resourceData.Id(),
+				"CascadingDeleteResources.1": "Ecs",
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
