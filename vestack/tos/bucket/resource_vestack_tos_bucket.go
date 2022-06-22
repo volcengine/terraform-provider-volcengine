@@ -34,7 +34,7 @@ func ResourceVestackTosBucket() *schema.Resource {
 				ForceNew:    true,
 				Description: "The name of the bucket.",
 			},
-			"tos_acl": {
+			"public_acl": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ValidateFunc: validation.StringInSlice([]string{
@@ -47,7 +47,7 @@ func ResourceVestackTosBucket() *schema.Resource {
 				Default:     "private",
 				Description: "The public acl control of bucket.",
 			},
-			"tos_storage_class": {
+			"storage_class": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -62,6 +62,39 @@ func ResourceVestackTosBucket() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "The flag of enable tos version.",
+			},
+			"account_acl": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The user set of grant full control.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"account_id": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"acl_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Default:  "CanonicalUser",
+							ValidateFunc: validation.StringInSlice([]string{
+								"CanonicalUser",
+							}, false),
+						},
+						"permission": {
+							Type:     schema.TypeString,
+							Required: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"FULL_CONTROL",
+								"READ",
+								"READ_ACP",
+								"WRITE",
+								"WRITE_ACP",
+							}, false),
+						},
+					},
+				},
+				Set: tosAccountAclHash,
 			},
 		},
 	}

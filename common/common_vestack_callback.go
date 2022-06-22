@@ -70,7 +70,7 @@ func (c *SdkCall) InitWriteCall(resourceData *schema.ResourceData, resource *sch
 	return err
 }
 
-func sortAndStartTransJson(source map[string]interface{}) map[string]interface{} {
+func SortAndStartTransJson(source map[string]interface{}) map[string]interface{} {
 	target := make(map[string]interface{})
 	var a []string
 	for k := range source {
@@ -184,7 +184,7 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 					case ContentTypeDefault:
 						break
 					case ContentTypeJson:
-						jsonParam := sortAndStartTransJson(*fn.SdkParam)
+						jsonParam := SortAndStartTransJson(*fn.SdkParam)
 						fn.SdkParam = &jsonParam
 						break
 					}

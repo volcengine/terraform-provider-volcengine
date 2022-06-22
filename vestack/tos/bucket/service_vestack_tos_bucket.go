@@ -98,7 +98,8 @@ func (s *VestackTosBucketService) ReadResource(resourceData *schema.ResourceData
 		return data, err
 	}
 	if acl, ok = (*resp)[ve.TosResponse].(map[string]interface{}); ok {
-		data["TosAcl"] = acl
+		data["PublicAcl"] = acl
+		data["AccountAcl"] = acl
 	}
 
 	action = "GetBucketVersioning"
@@ -123,11 +124,24 @@ func (s *VestackTosBucketService) ReadResource(resourceData *schema.ResourceData
 	return data, nil
 }
 
-func (VestackTosBucketService) RefreshResourceState(data *schema.ResourceData, strings []string, duration time.Duration, s string) *resource.StateChangeConf {
+func (s *VestackTosBucketService) RefreshResourceState(data *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return nil
 }
 
-func (VestackTosBucketService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
+func (s *VestackTosBucketService) getIdPermission(p string, grants []interface{}) []interface{} {
+	var result []interface{}
+	for _, grant := range grants {
+		permission, _ := ve.ObtainSdkValue("Permission", grant)
+		id, _ := ve.ObtainSdkValue("Grantee.ID", grant)
+		t, _ := ve.ObtainSdkValue("Grantee.Type", grant)
+		if id != nil && t.(string) == "CanonicalUser" && p == permission.(string) {
+			result = append(result, "Id="+id.(string))
+		}
+	}
+	return result
+}
+
+func (s *VestackTosBucketService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return m, map[string]ve.ResponseConvert{
 			"EnableVersion": {
@@ -139,11 +153,34 @@ func (VestackTosBucketService) WithResourceResponseHandlers(m map[string]interfa
 					return true
 				},
 			},
-			"TosAcl": {
+			"AccountAcl": {
+				Convert: func(i interface{}) interface{} {
+					var accountAcl []interface{}
+					owner, _ := ve.ObtainSdkValue("Owner.ID", i)
+					grants, _ := ve.ObtainSdkValue("Grants", i)
+					for _, grant := range grants.([]interface{}) {
+						permission, _ := ve.ObtainSdkValue("Permission", grant)
+						id, _ := ve.ObtainSdkValue("Grantee.ID", grant)
+						if id == nil {
+							continue
+						}
+						if id == owner && permission == "FULL_CONTROL" {
+							continue
+						}
+						g := map[string]interface{}{
+							"AccountId":  id,
+							"AclType":    "CanonicalUser",
+							"Permission": permission,
+						}
+						accountAcl = append(accountAcl, g)
+					}
+					return accountAcl
+				},
+			},
+			"PublicAcl": {
 				Convert: func(i interface{}) interface{} {
 					owner, _ := ve.ObtainSdkValue("Owner.ID", i)
 					grants, _ := ve.ObtainSdkValue("Grants", i)
-					logger.Debug(logger.RespFormat, "CreateBucket", owner)
 					var (
 						read  bool
 						write bool
@@ -170,8 +207,6 @@ func (VestackTosBucketService) WithResourceResponseHandlers(m map[string]interfa
 							break
 						}
 
-						logger.Debug(logger.RespFormat, "CreateBucket", id)
-						logger.Debug(logger.RespFormat, "CreateBucket", t)
 						if id != nil && id.(string) == owner.(string) && t.(string) == "CanonicalUser" {
 							if permission.(string) == "FULL_CONTROL" {
 								return "private"
@@ -212,14 +247,14 @@ func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceDa
 						Type: ve.DomainParam,
 					},
 				},
-				"tos_acl": {
+				"public_acl": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "x-tos-acl",
 					SpecialParam: &ve.SpecialParam{
 						Type: ve.HeaderParam,
 					},
 				},
-				"tos_storage_class": {
+				"storage_class": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "x-tos-storage-class",
 					SpecialParam: &ve.SpecialParam{
@@ -245,7 +280,6 @@ func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceDa
 	//version
 	callbackVersion := ve.Callback{
 		Call: ve.SdkCall{
-			ContentType:     ve.ContentTypeJson,
 			ServiceCategory: ve.ServiceTos,
 			Action:          "PutBucketVersioning",
 			ConvertMode:     ve.RequestConvertInConvert,
@@ -277,29 +311,138 @@ func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceDa
 				}
 				return true, nil
 			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//PutVersion
-				condition := (*call.SdkParam)[ve.TosParam].(map[string]interface{})
-				return s.Client.TosClient.DoTosCall(ve.TosInfo{
-					HttpMethod: ve.PUT,
-					Domain:     (*call.SdkParam)[ve.TosDomain].(string),
-					UrlParam: map[string]string{
-						"versioning": "",
-					},
-				}, &condition)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(s.Client.Region + ":" + (*call.SdkParam)[ve.TosDomain].(string))
-				return nil
-			},
+			ExecuteCall: s.executePutBucketVersioning(),
 		},
 	}
-	return []ve.Callback{callback, callbackVersion}
+	//acl
+	callbackAcl := ve.Callback{
+		Call: ve.SdkCall{
+			ServiceCategory: ve.ServiceTos,
+			Action:          "PutBucketAcl",
+			ConvertMode:     ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"bucket_name": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "BucketName",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.DomainParam,
+					},
+				},
+				"account_acl": {
+					ConvertType: ve.ConvertListN,
+					TargetField: "Grants",
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"account_id": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "Grantee.ID",
+						},
+						"acl_type": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "Grantee.Type",
+						},
+						"permission": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "Permission",
+						},
+					},
+				},
+			},
+			BeforeCall:  s.beforePutBucketAcl(),
+			ExecuteCall: s.executePutBucketAcl(),
+		},
+	}
+	return []ve.Callback{callback, callbackVersion, callbackAcl}
 }
 
-func (VestackTosBucketService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return nil
+func (s *VestackTosBucketService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+	if data.HasChange("enable_version") {
+		//version
+		callbackVersion := ve.Callback{
+			Call: ve.SdkCall{
+				ServiceCategory: ve.ServiceTos,
+				Action:          "PutBucketVersioning",
+				ConvertMode:     ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"bucket_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketName",
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.DomainParam,
+						},
+						ForceGet: true,
+					},
+					"enable_version": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "Status",
+						Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+							if i.(bool) {
+								return "Enabled"
+							} else {
+								return "Suspended"
+							}
+						},
+						ForceGet: true,
+					},
+				},
+				ExecuteCall: s.executePutBucketVersioning(),
+			},
+		}
+		callbacks = append(callbacks, callbackVersion)
+	}
+	var grant = []string{
+		"public_acl",
+		"account_acl",
+	}
+	for _, v := range grant {
+		if data.HasChange(v) {
+			callbackAcl := ve.Callback{
+				Call: ve.SdkCall{
+					ServiceCategory: ve.ServiceTos,
+					Action:          "PutBucketAcl",
+					ConvertMode:     ve.RequestConvertInConvert,
+					Convert: map[string]ve.RequestConvert{
+						"bucket_name": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "BucketName",
+							SpecialParam: &ve.SpecialParam{
+								Type: ve.DomainParam,
+							},
+							ForceGet: true,
+						},
+						"account_acl": {
+							ConvertType: ve.ConvertListN,
+							TargetField: "Grants",
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"account_id": {
+									ConvertType: ve.ConvertDefault,
+									TargetField: "Grantee.ID",
+									ForceGet:    true,
+								},
+								"acl_type": {
+									ConvertType: ve.ConvertDefault,
+									TargetField: "Grantee.Type",
+									ForceGet:    true,
+								},
+								"permission": {
+									ConvertType: ve.ConvertDefault,
+									TargetField: "Permission",
+									ForceGet:    true,
+								},
+							},
+							ForceGet: true,
+						},
+					},
+					BeforeCall:  s.beforePutBucketAcl(),
+					ExecuteCall: s.executePutBucketAcl(),
+				},
+			}
+			callbacks = append(callbacks, callbackAcl)
+			break
+		}
+	}
+
+	return callbacks
 }
 
 func (s *VestackTosBucketService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -383,4 +526,138 @@ func (s *VestackTosBucketService) ReadResourceId(id string) string {
 		return id[strings.Index(id, ":")+1:]
 	}
 	return id
+}
+
+func (s *VestackTosBucketService) mergePublicAcl(acl string, param *map[string]interface{}, ownerId string) {
+	if _, ok := (*param)["Grants"]; !ok {
+		(*param)["Grants"] = []interface{}{}
+	}
+	vs := (*param)["Grants"].([]interface{})
+
+	defer func() {
+		(*param)["Grants"] = vs
+	}()
+
+	switch acl {
+	case "private":
+		m := map[string]interface{}{
+			"Grantee": map[string]interface{}{
+				"Id":   ownerId,
+				"Type": "CanonicalUser",
+			},
+			"Permission": "FULL_CONTROL",
+		}
+		vs = append(vs, m)
+		return
+	case "public-read":
+		m := map[string]interface{}{
+			"Grantee": map[string]interface{}{
+				"Canned": "AllUsers",
+				"Type":   "Group",
+			},
+			"Permission": "READ",
+		}
+		vs = append(vs, m)
+		return
+	case "public-read-write":
+		m := map[string]interface{}{
+			"Grantee": map[string]interface{}{
+				"Canned": "AllUsers",
+				"Type":   "Group",
+			},
+			"Permission": "WRITE",
+		}
+		vs = append(vs, m)
+		return
+	case "authenticated-read":
+		m := map[string]interface{}{
+			"Grantee": map[string]interface{}{
+				"Canned": "AuthenticatedUsers",
+				"Type":   "Group",
+			},
+			"Permission": "READ",
+		}
+		vs = append(vs, m)
+		return
+	case "bucket-owner-read":
+		m := map[string]interface{}{
+			"Grantee": map[string]interface{}{
+				"Id":   ownerId,
+				"Type": "CanonicalUser",
+			},
+			"Permission": "READ",
+		}
+		vs = append(vs, m)
+		return
+	}
+}
+
+func (s *VestackTosBucketService) beforePutBucketAcl() ve.BeforeCallFunc {
+	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+		//read acl before call and merge all acl
+		data, err := s.Client.TosClient.DoTosCall(ve.TosInfo{
+			HttpMethod: ve.GET,
+			Domain:     (*call.SdkParam)[ve.TosDomain].(string),
+			UrlParam: map[string]string{
+				"acl": "",
+			},
+		}, nil)
+		if err != nil {
+			return false, err
+		}
+
+		sourceAclParam := ve.SortAndStartTransJson((*call.SdkParam)[ve.TosParam].(map[string]interface{}))
+		ownerId, _ := ve.ObtainSdkValue("Owner.ID", (*data)[ve.TosResponse])
+
+		grants, _ := ve.ObtainSdkValue("Grants", sourceAclParam)
+		for _, grant := range grants.([]interface{}) {
+			id, _ := ve.ObtainSdkValue("Grantee.ID", grant)
+			p, _ := ve.ObtainSdkValue("Permission", grant)
+			if id == ownerId && p == "FULL_CONTROL" {
+				return false, fmt.Errorf("can not set FULL_CONTROL for owner")
+			}
+		}
+
+		//merge owner
+		owner, _ := ve.ObtainSdkValue("Owner", (*data)[ve.TosResponse])
+		sourceAclParam["Owner"] = owner
+		//merge public_acl
+		s.mergePublicAcl(d.Get("public_acl").(string), &sourceAclParam, ownerId.(string))
+
+		(*call.SdkParam)[ve.TosParam] = sourceAclParam
+		return true, nil
+	}
+}
+
+func (s *VestackTosBucketService) executePutBucketAcl() ve.ExecuteCallFunc {
+	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+		logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+		//PutAcl
+		param := (*call.SdkParam)[ve.TosParam].(map[string]interface{})
+		return s.Client.TosClient.DoTosCall(ve.TosInfo{
+			HttpMethod:  ve.PUT,
+			ContentType: ve.ApplicationJSON,
+			Domain:      (*call.SdkParam)[ve.TosDomain].(string),
+			Header:      (*call.SdkParam)[ve.TosHeader].(map[string]string),
+			UrlParam: map[string]string{
+				"acl": "",
+			},
+		}, &param)
+	}
+}
+
+func (s *VestackTosBucketService) executePutBucketVersioning() ve.ExecuteCallFunc {
+	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+		logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+		//PutVersion
+		condition := (*call.SdkParam)[ve.TosParam].(map[string]interface{})
+		return s.Client.TosClient.DoTosCall(ve.TosInfo{
+			ContentType: ve.ApplicationJSON,
+			HttpMethod:  ve.PUT,
+			Domain:      (*call.SdkParam)[ve.TosDomain].(string),
+			UrlParam: map[string]string{
+				"versioning": "",
+			},
+		}, &condition)
+	}
 }

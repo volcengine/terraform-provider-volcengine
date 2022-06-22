@@ -56,7 +56,9 @@ func convertToTosParams(convert map[string]RequestConvert, condition map[string]
 							if _, ok1 := v1.(string); !ok1 {
 								return result, fmt.Errorf("%s must a string type", k)
 							}
-							result[TosHeader].(map[string]string)[k1] = v1.(string)
+							if v1.(string) != "" {
+								result[TosHeader].(map[string]string)[k1] = v1.(string)
+							}
 							delete(condition, k1)
 						}
 					case PathParam:
