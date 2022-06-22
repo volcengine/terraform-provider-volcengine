@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
@@ -73,16 +72,6 @@ func ResourceVestackVkeNode() *schema.Resource {
 					return flag == nil || !flag.(bool)
 				},
 				Description: "The container storage path.",
-			},
-			"cascading_delete_resources": {
-				Type: schema.TypeSet,
-				Set:  schema.HashString,
-				Elem: &schema.Schema{
-					Type:         schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{"Ecs"}, false),
-				},
-				Optional:    true,
-				Description: "Is cascading delete resource.",
 			},
 			"node_pool_id": {
 				Type:        schema.TypeString,
