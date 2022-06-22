@@ -2,6 +2,7 @@ package bucket
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -24,6 +25,11 @@ func ResourceVestackTosBucket() *schema.Resource {
 		Read:   resourceVestackTosBucketRead,
 		Update: resourceVestackTosBucketUpdate,
 		Delete: resourceVestackTosBucketDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(2 * time.Minute),
+			Update: schema.DefaultTimeout(2 * time.Minute),
+			Delete: schema.DefaultTimeout(2 * time.Minute),
+		},
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},

@@ -8,7 +8,7 @@ resource "vestack_tos_bucket" "default" {
     permission = "READ"
   }
   account_acl {
-    account_id = "2000"
+    account_id = "2001"
     permission = "WRITE_ACP"
   }
 }

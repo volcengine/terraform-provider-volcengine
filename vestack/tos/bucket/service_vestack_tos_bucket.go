@@ -125,7 +125,16 @@ func (s *VestackTosBucketService) ReadResource(resourceData *schema.ResourceData
 }
 
 func (s *VestackTosBucketService) RefreshResourceState(data *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
-	return nil
+	return &resource.StateChangeConf{
+		Pending:    []string{},
+		Delay:      60 * time.Second,
+		MinTimeout: 60 * time.Second,
+		Target:     target,
+		Timeout:    timeout,
+		Refresh: func() (result interface{}, state string, err error) {
+			return data, "Success", err
+		},
+	}
 }
 
 func (s *VestackTosBucketService) getIdPermission(p string, grants []interface{}) []interface{} {
@@ -349,6 +358,10 @@ func (s *VestackTosBucketService) CreateResource(resourceData *schema.ResourceDa
 			},
 			BeforeCall:  s.beforePutBucketAcl(),
 			ExecuteCall: s.executePutBucketAcl(),
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Success"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
 		},
 	}
 	return []ve.Callback{callback, callbackVersion, callbackAcl}
@@ -435,6 +448,10 @@ func (s *VestackTosBucketService) ModifyResource(data *schema.ResourceData, reso
 					},
 					BeforeCall:  s.beforePutBucketAcl(),
 					ExecuteCall: s.executePutBucketAcl(),
+					Refresh: &ve.StateRefresh{
+						Target:  []string{"Success"},
+						Timeout: data.Timeout(schema.TimeoutCreate),
+					},
 				},
 			}
 			callbacks = append(callbacks, callbackAcl)
