@@ -79,7 +79,11 @@ func (s *VestackNodePoolService) ReadResources(m map[string]interface{}) (data [
 
 func (s *VestackNodePoolService) ReadResource(resourceData *schema.ResourceData, nodePoolId string) (data map[string]interface{}, err error) {
 	var (
-		result *map[string]interface{}
+		results interface{}
+		resp    *map[string]interface{}
+		result  map[string]interface{}
+		temp    []interface{}
+		ok      bool
 	)
 	if nodePoolId == "" {
 		nodePoolId = s.ReadResourceId(resourceData.Id())
@@ -93,17 +97,35 @@ func (s *VestackNodePoolService) ReadResource(resourceData *schema.ResourceData,
 	}
 
 	logger.Debug(logger.RespFormat, "ReadResource ", condition)
-	result, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
-	logger.Debug(logger.RespFormat, "ReadResource ", result)
+	resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+	logger.Debug(logger.RespFormat, "ReadResource ", resp)
 
 	if err != nil {
 		return data, err
 	}
-	if result == nil {
+	if resp == nil {
 		return data, fmt.Errorf("NodePool %s not exist ", nodePoolId)
 	}
 
-	return *result, err
+	results, err = ve.ObtainSdkValue("Result.Items", *resp)
+	if err != nil {
+		return data, err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+
+	if temp, ok = results.([]interface{}); !ok {
+		return data, errors.New("Result.Items is not Slice")
+	}
+
+	if temp == nil || len(temp) == 0 {
+		return data, fmt.Errorf("NodePool %s not exist ", nodePoolId)
+	}
+
+	result = temp[0].(map[string]interface{})
+	logger.Debug(logger.RespFormat, "result of ReadResource ", result)
+	return result, err
 }
 
 func (s *VestackNodePoolService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
@@ -125,7 +147,7 @@ func (s *VestackNodePoolService) RefreshResourceState(resourceData *schema.Resou
 				return nil, "", err
 			}
 			//这里vke是Status是一个Object，取Phase字段判断是否失败
-			status = demo["Result"].(map[string]interface{})["Items"].([]interface{})[0].(map[string]interface{})["Status"].(map[string]interface{})["Phase"]
+			status = demo["Status"].(map[string]interface{})["Phase"]
 			if err != nil {
 				return nil, "", err
 			}
@@ -142,6 +164,27 @@ func (s *VestackNodePoolService) RefreshResourceState(resourceData *schema.Resou
 
 func (VestackNodePoolService) WithResourceResponseHandlers(nodePool map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		var (
+			security     = make([]interface{}, 0)
+			systemVolume = make([]interface{}, 0)
+			login        = make([]interface{}, 0)
+		)
+
+		priSecurity := nodePool["NodeConfig"].(map[string]interface{})["Security"]
+		priLogin := priSecurity.(map[string]interface{})["Login"]
+		delete(nodePool, "Login")
+		login = append(login, priLogin)
+		priSecurity.(map[string]interface{})["Login"] = login
+		security = append(security, priSecurity)
+
+		delete(nodePool, "Security")
+		nodePool["NodeConfig"].(map[string]interface{})["Security"] = security
+
+		priSystemVolume := nodePool["NodeConfig"].(map[string]interface{})["SystemVolume"]
+		systemVolume = append(systemVolume, priSystemVolume)
+		delete(nodePool, "SystemVolume")
+		nodePool["NodeConfig"].(map[string]interface{})["SystemVolume"] = systemVolume
+
 		return nodePool, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -411,7 +454,7 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 					security := nodeconfig.(map[string]interface{})["Security"]
 					if security != nil {
 						login := security.(map[string]interface{})["Login"]
-						if login != nil && login.(map[string]interface{})["SshKeyPairName"].(string) == "" {
+						if login != nil && login.(map[string]interface{})["SshKeyPairName"] != nil && login.(map[string]interface{})["SshKeyPairName"].(string) != "" {
 							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{}), "SshKeyPairName")
 						}
 					}
