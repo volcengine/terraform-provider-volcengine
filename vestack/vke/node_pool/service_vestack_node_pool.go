@@ -405,6 +405,17 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				//adapt vke api
+				nodeconfig := (*call.SdkParam)["NodeConfig"]
+				if nodeconfig != nil {
+					security := nodeconfig.(map[string]interface{})["Security"]
+					if security != nil {
+						login := security.(map[string]interface{})["Login"]
+						if login != nil && login.(map[string]interface{})["SshKeyPairName"].(string) == "" {
+							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{}), "SshKeyPairName")
+						}
+					}
+				}
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -424,12 +435,15 @@ func (s *VestackNodePoolService) RemoveResource(resourceData *schema.ResourceDat
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"Id":                       resourceData.Id(),
-				"ClusterId":                resourceData.Get("cluster_id"),
+				"Id":        resourceData.Id(),
+				"ClusterId": resourceData.Get("cluster_id"),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 1*time.Minute)
 			},
 		},
 	}
