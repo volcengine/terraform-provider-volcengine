@@ -224,7 +224,6 @@ func (s *VestackCenBandwidthPackageService) ModifyResource(resourceData *schema.
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//修改vpc属性
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},

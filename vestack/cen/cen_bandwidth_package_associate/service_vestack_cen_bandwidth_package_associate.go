@@ -174,7 +174,7 @@ func (s *VestackCenBandwidthPackageAssociateService) RemoveResource(resourceData
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//删除VP， todo 前台提示包年包月不删除
+				// todo 前台提示包年包月不删除
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
