@@ -313,14 +313,6 @@ func ResourceVestackNodePool() *schema.Resource {
 				},
 				Description: "The KubernetesConfig of NodeConfig.",
 			},
-			"cascading_delete_resources": {
-				Type:     schema.TypeList,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The CascadingDeleteResources of NodePool.",
-			},
 		},
 	}
 }
