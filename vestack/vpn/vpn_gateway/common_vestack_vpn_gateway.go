@@ -28,19 +28,6 @@ var billingTypeResponseConvert = func(i interface{}) interface{} {
 	return ty
 }
 
-var renewTypeRequestConvert = func(data *schema.ResourceData, old interface{}) interface{} {
-	ty := 0
-	switch old.(string) {
-	case "ManualRenew":
-		ty = 1
-	case "AutoRenew":
-		ty = 2
-	case "NoneRenew":
-		ty = 3
-	}
-	return ty
-}
-
 var renewTypeResponseConvert = func(v interface{}) interface{} {
 	if v == nil {
 		return ""

@@ -201,7 +201,7 @@ func (VestackVpnConnectionService) WithResourceResponseHandlers(v map[string]int
 func (s *VestackVpnConnectionService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 
-	// 创建vpn
+	// 创建vpnConnection
 	createVpnConnection := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateVpnConnection",
@@ -297,7 +297,7 @@ func (s *VestackVpnConnectionService) CreateResource(resourceData *schema.Resour
 func (s *VestackVpnConnectionService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 
-	// 修改vpn
+	// 修改vpnConnection
 	modifyCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyVpnConnectionAttributes",

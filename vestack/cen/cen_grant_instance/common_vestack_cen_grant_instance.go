@@ -2,8 +2,9 @@ package cen_grant_instance
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
 var cenGrantInstanceImporter = func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {

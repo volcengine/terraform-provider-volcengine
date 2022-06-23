@@ -140,7 +140,6 @@ func (s *VestackCenGrantInstanceService) RefreshResourceState(resourceData *sche
 			return demo, status.(string), err
 		},
 	}
-
 }
 
 func (VestackCenGrantInstanceService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {

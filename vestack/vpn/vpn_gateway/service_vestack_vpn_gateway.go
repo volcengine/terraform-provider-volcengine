@@ -204,7 +204,7 @@ func (VestackVpnGatewayService) WithResourceResponseHandlers(v map[string]interf
 func (s *VestackVpnGatewayService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 
-	// 创建vpn
+	// 创建VpnGateway
 	createVpnGateway := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateVpnGateway",
