@@ -31,6 +31,10 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/security_group_rule"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/subnet"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/vpc"
+	"github.com/volcengine/terraform-provider-vestack/vestack/vpn/customer_gateway"
+	"github.com/volcengine/terraform-provider-vestack/vestack/vpn/vpn_connection"
+	"github.com/volcengine/terraform-provider-vestack/vestack/vpn/vpn_gateway"
+	"github.com/volcengine/terraform-provider-vestack/vestack/vpn/vpn_gateway_route"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -104,6 +108,12 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"vestack_snat_entries": snat_entry.DataSourceVestackSnatEntries(),
 			"vestack_nat_gateways": nat_gateway.DataSourceVestackNatGateways(),
+
+			// ================ VPN ================
+			"vestack_vpn_gateways":       vpn_gateway.DataSourceVestackVpnGateways(),
+			"vestack_customer_gateways":  customer_gateway.DataSourceVestackCustomerGateways(),
+			"vestack_vpn_connections":    vpn_connection.DataSourceVestackVpnConnections(),
+			"vestack_vpn_gateway_routes": vpn_gateway_route.DataSourceVestackVpnGatewayRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"vestack_vpc":                      vpc.ResourceVestackVpc(),
@@ -141,6 +151,12 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"vestack_snat_entry":  snat_entry.ResourceVestackSnatEntry(),
 			"vestack_nat_gateway": nat_gateway.ResourceVestackNatGateway(),
+
+			// ================ VPN ================
+			"vestack_vpn_gateway":       vpn_gateway.ResourceVestackVpnGateway(),
+			"vestack_customer_gateway":  customer_gateway.ResourceVestackCustomerGateway(),
+			"vestack_vpn_connection":    vpn_connection.ResourceVestackVpnConnection(),
+			"vestack_vpn_gateway_route": vpn_gateway_route.ResourceVestackVpnGatewayRoute(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
