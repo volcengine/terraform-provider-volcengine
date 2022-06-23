@@ -23,6 +23,7 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/snat_entry"
 	"github.com/volcengine/terraform-provider-vestack/vestack/tos/bucket"
+	"github.com/volcengine/terraform-provider-vestack/vestack/tos/object"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/route_entry"
@@ -148,6 +149,7 @@ func Provider() terraform.ResourceProvider {
 
 			//================= TOS =================
 			"vestack_tos_bucket": bucket.ResourceVestackTosBucket(),
+			"vestack_tos_object": object.ResourceVestackTosObject(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

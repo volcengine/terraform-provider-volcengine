@@ -1,4 +1,4 @@
-package bucket
+package object
 
 import (
 	"fmt"
@@ -13,19 +13,19 @@ import (
 /*
 
 Import
-Tos Bucket can be imported using the id, e.g.
+TOS Object can be imported using the id, e.g.
 ```
-$ terraform import vestack_tos_bucket.default region:bucketName
+$ terraform import vestack_tos_object.default bucketName:objectName
 ```
 
 */
 
-func ResourceVestackTosBucket() *schema.Resource {
+func ResourceVestackTosObject() *schema.Resource {
 	resource := &schema.Resource{
-		Create: resourceVestackTosBucketCreate,
-		Read:   resourceVestackTosBucketRead,
-		Update: resourceVestackTosBucketUpdate,
-		Delete: resourceVestackTosBucketDelete,
+		Create: resourceVestackTosObjectCreate,
+		Read:   resourceVestackTosObjectRead,
+		Update: resourceVestackTosObjectUpdate,
+		Delete: resourceVestackTosObjectDelete,
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
 			Update: schema.DefaultTimeout(2 * time.Minute),
@@ -34,10 +34,11 @@ func ResourceVestackTosBucket() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
 				items := strings.Split(data.Id(), ":")
-				if len(items) != 1 {
-					return []*schema.ResourceData{data}, fmt.Errorf("import id must be of the form bucketName")
+				if len(items) != 2 {
+					return []*schema.ResourceData{data}, fmt.Errorf("import id must be of the form bucketName:objectName")
 				}
 				_ = data.Set("bucket_name", items[0])
+				_ = data.Set("object_name", items[1])
 				return []*schema.ResourceData{data}, nil
 			},
 		},
@@ -47,6 +48,34 @@ func ResourceVestackTosBucket() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: "The name of the bucket.",
+			},
+			"object_name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The name of the object.",
+			},
+			"file_path": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The file path for upload.",
+			},
+			"encryption": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"AES256",
+				}, false),
+				Description: "The encryption of the object.Valid value is AES256.",
+			},
+			"content_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "The content type of the object.",
 			},
 			"public_acl": {
 				Type:     schema.TypeString,
@@ -72,12 +101,6 @@ func ResourceVestackTosBucket() *schema.Resource {
 				Default:     "STANDARD",
 				Description: "The storage type of the object.Valid value is STANDARD|IA.",
 			},
-			"enable_version": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "The flag of enable tos version.",
-			},
-
 			"account_acl": {
 				Type:        schema.TypeSet,
 				Optional:    true,
@@ -119,36 +142,36 @@ func ResourceVestackTosBucket() *schema.Resource {
 	return resource
 }
 
-func resourceVestackTosBucketCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Create(tosBucketService, d, ResourceVestackTosBucket())
+func resourceVestackTosObjectCreate(d *schema.ResourceData, meta interface{}) (err error) {
+	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
+	err = tosBucketService.Dispatcher.Create(tosBucketService, d, ResourceVestackTosObject())
 	if err != nil {
 		return fmt.Errorf("error on creating tos bucket  %q, %s", d.Id(), err)
 	}
-	return resourceVestackTosBucketRead(d, meta)
+	return resourceVestackTosObjectRead(d, meta)
 }
 
-func resourceVestackTosBucketRead(d *schema.ResourceData, meta interface{}) (err error) {
-	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Read(tosBucketService, d, ResourceVestackTosBucket())
+func resourceVestackTosObjectRead(d *schema.ResourceData, meta interface{}) (err error) {
+	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
+	err = tosBucketService.Dispatcher.Read(tosBucketService, d, ResourceVestackTosObject())
 	if err != nil {
 		return fmt.Errorf("error on reading tos bucket %q, %s", d.Id(), err)
 	}
 	return err
 }
 
-func resourceVestackTosBucketUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Update(tosBucketService, d, ResourceVestackTosBucket())
+func resourceVestackTosObjectUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
+	err = tosBucketService.Dispatcher.Update(tosBucketService, d, ResourceVestackTosObject())
 	if err != nil {
 		return fmt.Errorf("error on updating tos bucket  %q, %s", d.Id(), err)
 	}
-	return resourceVestackTosBucketRead(d, meta)
+	return resourceVestackTosObjectRead(d, meta)
 }
 
-func resourceVestackTosBucketDelete(d *schema.ResourceData, meta interface{}) (err error) {
-	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Delete(tosBucketService, d, ResourceVestackTosBucket())
+func resourceVestackTosObjectDelete(d *schema.ResourceData, meta interface{}) (err error) {
+	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
+	err = tosBucketService.Dispatcher.Delete(tosBucketService, d, ResourceVestackTosObject())
 	if err != nil {
 		return fmt.Errorf("error on deleting tos bucket %q, %s", d.Id(), err)
 	}

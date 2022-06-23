@@ -371,12 +371,19 @@ func tosUnmarshal(r *request.Request) {
 				(*r.Data.(*map[string]interface{}))[TosResponse] = temp
 				return
 			}
-			if err = json.Unmarshal(body, &temp); err != nil {
-				fmt.Printf("Unmarshal err, %v\n", err)
-				r.Error = err
-				return
+
+			if strings.ToLower(r.HTTPResponse.Header.Get("Content-Type")) == "application/json" {
+				if err = json.Unmarshal(body, &temp); err != nil {
+					fmt.Printf("Unmarshal err, %v\n", err)
+					r.Error = err
+					return
+				}
+				(*r.Data.(*map[string]interface{}))[TosResponse] = temp
+			} else {
+				(*r.Data.(*map[string]interface{}))[TosResponse] = temp
+				//(*r.Data.(*map[string]interface{}))[TosPlainResponse] = string(body)
 			}
-			(*r.Data.(*map[string]interface{}))[TosResponse] = temp
+
 		}
 
 	}

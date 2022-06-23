@@ -44,4 +44,5 @@ const (
 	HeaderParam
 	PathParam
 	UrlParam
+	FilePathParam
 )
