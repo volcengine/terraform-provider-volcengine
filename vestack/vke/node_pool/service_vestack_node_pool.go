@@ -454,7 +454,7 @@ func (s *VestackNodePoolService) ModifyResource(resourceData *schema.ResourceDat
 					security := nodeconfig.(map[string]interface{})["Security"]
 					if security != nil {
 						login := security.(map[string]interface{})["Login"]
-						if login != nil && login.(map[string]interface{})["SshKeyPairName"] != nil && login.(map[string]interface{})["SshKeyPairName"].(string) != "" {
+						if login != nil && login.(map[string]interface{})["SshKeyPairName"] != nil && login.(map[string]interface{})["SshKeyPairName"].(string) == "" {
 							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{}), "SshKeyPairName")
 						}
 					}
