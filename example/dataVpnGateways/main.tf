@@ -1,3 +1,3 @@
-data "vestack_vpn_connections" "default"{
-  ids = ["vgw-274k2fxp9vrb47fap8twei18c"]
+data "vestack_vpn_gateways" "default"{
+  ids = ["vgw-2c012ea9fm5mo2dx0efxg46qi"]
 }

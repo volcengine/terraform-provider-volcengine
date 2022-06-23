@@ -1,5 +1,5 @@
 resource "vestack_vpn_gateway_route" "foo" {
-  vpn_gateway_id = "vgw-2d689v3lxs0zk58ozfebct3fc"
+  vpn_gateway_id = "vgw-2c012ea9fm5mo2dx0efxg46qi"
   destination_cidr_block = "192.168.0.0/20"
-  next_hop_id = "vgc-2bytcbwy2txj42dx0efb93tag"
+  next_hop_id = "vgc-2d5ww3ww2lwcg58ozfe61ppc3"
 }

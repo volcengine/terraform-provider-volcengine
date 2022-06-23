@@ -1,8 +1,9 @@
-package customer_gateway
+package cen_bandwidth_package
 
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,33 +13,33 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/logger"
 )
 
-type VestackCustomerGatewayService struct {
+type VestackCenBandwidthPackageService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewCustomerGatewayService(c *ve.SdkClient) *VestackCustomerGatewayService {
-	return &VestackCustomerGatewayService{
+func NewCenBandwidthPackageService(c *ve.SdkClient) *VestackCenBandwidthPackageService {
+	return &VestackCenBandwidthPackageService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VestackCustomerGatewayService) GetClient() *ve.SdkClient {
+func (s *VestackCenBandwidthPackageService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VestackCustomerGatewayService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VestackCenBandwidthPackageService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
 		ok      bool
 		nameSet = make(map[string]bool)
 	)
-	if _, ok = m["CustomerGatewayNames.1"]; ok {
+	if _, ok = m["CenBandwidthPackageNames.1"]; ok {
 		i := 1
 		for {
-			filed := fmt.Sprintf("CustomerGatewayNames.%d", i)
+			filed := fmt.Sprintf("CenBandwidthPackageNames.%d", i)
 			tmpName, ok := m[filed]
 			if !ok {
 				break
@@ -48,9 +49,9 @@ func (s *VestackCustomerGatewayService) ReadResources(m map[string]interface{}) 
 			delete(m, filed)
 		}
 	}
-	gateways, err := ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
+	packages, err := ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		universalClient := s.Client.UniversalClient
-		action := "DescribeCustomerGateways"
+		action := "DescribeCenBandwidthPackages"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
@@ -64,7 +65,7 @@ func (s *VestackCustomerGatewayService) ReadResources(m map[string]interface{}) 
 			}
 		}
 		logger.Debug(logger.RespFormat, action, resp)
-		results, err = ve.ObtainSdkValue("Result.CustomerGateways", *resp)
+		results, err = ve.ObtainSdkValue("Result.CenBandwidthPackages", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -72,25 +73,25 @@ func (s *VestackCustomerGatewayService) ReadResources(m map[string]interface{}) 
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.CustomerGateways is not Slice")
+			return data, errors.New("Result.CenBandwidthPackages is not Slice")
 		}
 		return data, err
 	})
 	if err != nil || len(nameSet) == 0 {
-		return gateways, err
+		return packages, err
 	}
 
 	res := make([]interface{}, 0)
-	for _, gateway := range gateways {
-		if !nameSet[gateway.(map[string]interface{})["CustomerGatewayName"].(string)] {
+	for _, v := range packages {
+		if !nameSet[v.(map[string]interface{})["CenBandwidthPackageName"].(string)] {
 			continue
 		}
-		res = append(res, gateway)
+		res = append(res, v)
 	}
 	return res, nil
 }
 
-func (s *VestackCustomerGatewayService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VestackCenBandwidthPackageService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -99,7 +100,7 @@ func (s *VestackCustomerGatewayService) ReadResource(resourceData *schema.Resour
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
-		"CustomerGatewayIds.1": id,
+		"CenBandwidthPackageIds.1": id,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -111,12 +112,12 @@ func (s *VestackCustomerGatewayService) ReadResource(resourceData *schema.Resour
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("CustomerGateway %s not exist ", id)
+		return data, fmt.Errorf("cen bandwidth package %s not exist ", id)
 	}
 	return data, err
 }
 
-func (s *VestackCustomerGatewayService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VestackCenBandwidthPackageService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -140,7 +141,7 @@ func (s *VestackCustomerGatewayService) RefreshResourceState(resourceData *schem
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("CustomerGateway status  error, status:%s", status.(string))
+					return nil, "", fmt.Errorf("cen status error, status:%s", status.(string))
 				}
 			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
@@ -150,22 +151,30 @@ func (s *VestackCustomerGatewayService) RefreshResourceState(resourceData *schem
 
 }
 
-func (VestackCustomerGatewayService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
+func (VestackCenBandwidthPackageService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return v, nil, nil
+		return v, map[string]ve.ResponseConvert{
+			"BillingType": {
+				TargetField: "billing_type",
+				Convert:     billingTypeResponseConvert,
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 
 }
 
-func (s *VestackCustomerGatewayService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callbacks := make([]ve.Callback, 0)
-
-	// 创建CustomerGateway
-	createCustomerGateway := ve.Callback{
+func (s *VestackCenBandwidthPackageService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateCustomerGateway",
+			Action:      "CreateCenBandwidthPackage",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"billing_type": {
+					TargetField: "BillingType",
+					Convert:     billingTypeRequestConvert,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
@@ -176,7 +185,7 @@ func (s *VestackCustomerGatewayService) CreateResource(resourceData *schema.Reso
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
-				id, _ := ve.ObtainSdkValue("Result.CustomerGatewayId", *resp)
+				id, _ := ve.ObtainSdkValue("Result.CenBandwidthPackageId", *resp)
 				d.SetId(id.(string))
 				return nil
 			},
@@ -186,22 +195,20 @@ func (s *VestackCustomerGatewayService) CreateResource(resourceData *schema.Reso
 			},
 		},
 	}
-	callbacks = append(callbacks, createCustomerGateway)
-
-	return callbacks
+	return []ve.Callback{callback}
 
 }
 
-func (s *VestackCustomerGatewayService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callbacks := make([]ve.Callback, 0)
-
-	// 修改CustomerGateway
-	modifyCallback := ve.Callback{
+func (s *VestackCenBandwidthPackageService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "ModifyCustomerGatewayAttributes",
+			Action:      "ModifyCenBandwidthPackageAttributes",
 			ConvertMode: ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
-				"customer_gateway_name": {
+				"bandwidth": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"cen_bandwidth_package_name": {
 					ConvertType: ve.ConvertDefault,
 				},
 				"description": {
@@ -209,34 +216,37 @@ func (s *VestackCustomerGatewayService) ModifyResource(resourceData *schema.Reso
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) < 1 {
+				if len(*call.SdkParam) == 0 {
 					return false, nil
 				}
-				(*call.SdkParam)["CustomerGatewayId"] = d.Id()
+				(*call.SdkParam)["CenBandwidthPackageId"] = d.Id()
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//修改vpc属性
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
-	callbacks = append(callbacks, modifyCallback)
-
-	return callbacks
+	return []ve.Callback{callback}
 }
 
-func (s *VestackCustomerGatewayService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VestackCenBandwidthPackageService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DeleteCustomerGateway",
+			Action:      "DeleteCenBandwidthPackage",
 			ConvertMode: ve.RequestConvertIgnore,
 			SdkParam: &map[string]interface{}{
-				"CustomerGatewayId": resourceData.Id(),
+				"CenBandwidthPackageId": resourceData.Id(),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				//删除CenBandwidthPackage
+				log.Println("[WARN] Cannot destroy PrePaid resource vestack_cen_bandwidth_package. Terraform will remove this resource from the state file, however resources may remain.")
+
+				//return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				return nil, nil
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -246,56 +256,56 @@ func (s *VestackCustomerGatewayService) RemoveResource(resourceData *schema.Reso
 						if ve.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading CustomerGateway on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading cen bandwidth package on delete %q, %w", d.Id(), callErr))
 						}
 					}
-					resp, callErr := call.ExecuteCall(d, client, call)
-					logger.Debug(logger.AllFormat, call.Action, call.SdkParam, resp, callErr)
+					_, callErr = call.ExecuteCall(d, client, call)
 					if callErr == nil {
 						return nil
 					}
 					return resource.RetryableError(callErr)
 				})
 			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
-			},
 		},
 	}
 	return []ve.Callback{callback}
 }
 
-func (s *VestackCustomerGatewayService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VestackCenBandwidthPackageService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
 			"ids": {
-				TargetField: "CustomerGatewayIds",
+				TargetField: "CenBandwidthPackageIds",
 				ConvertType: ve.ConvertWithN,
 			},
-			"customer_gateway_names": {
-				TargetField: "CustomerGatewayNames",
+			"cen_bandwidth_package_names": {
+				TargetField: "CenBandwidthPackageNames",
 				ConvertType: ve.ConvertWithN,
 			},
 		},
-		NameField:    "CustomerGatewayName",
-		IdField:      "CustomerGatewayId",
-		CollectField: "customer_gateways",
+		NameField:    "CenBandwidthPackageName",
+		IdField:      "CenBandwidthPackageId",
+		CollectField: "bandwidth_packages",
 		ResponseConverts: map[string]ve.ResponseConvert{
-			"CustomerGatewayId": {
+			"CenBandwidthPackageId": {
 				TargetField: "id",
 				KeepDefault: true,
+			},
+			"BillingType": {
+				TargetField: "billing_type",
+				Convert:     billingTypeResponseConvert,
 			},
 		},
 	}
 }
 
-func (s *VestackCustomerGatewayService) ReadResourceId(id string) string {
+func (s *VestackCenBandwidthPackageService) ReadResourceId(id string) string {
 	return id
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
-		ServiceName: "vpn",
+		ServiceName: "cen",
 		Action:      actionName,
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,

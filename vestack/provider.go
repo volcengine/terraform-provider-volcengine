@@ -4,6 +4,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
+	"github.com/volcengine/terraform-provider-vestack/vestack/cen/cen"
+	"github.com/volcengine/terraform-provider-vestack/vestack/cen/cen_attach_instance"
+	"github.com/volcengine/terraform-provider-vestack/vestack/cen/cen_bandwidth_package"
+	"github.com/volcengine/terraform-provider-vestack/vestack/cen/cen_bandwidth_package_associate"
+	"github.com/volcengine/terraform-provider-vestack/vestack/cen/cen_grant_instance"
+	"github.com/volcengine/terraform-provider-vestack/vestack/cen/cen_inter_region_bandwidth"
+	"github.com/volcengine/terraform-provider-vestack/vestack/cen/cen_route_entry"
 	"github.com/volcengine/terraform-provider-vestack/vestack/clb/acl"
 	"github.com/volcengine/terraform-provider-vestack/vestack/clb/acl_entry"
 	"github.com/volcengine/terraform-provider-vestack/vestack/clb/certificate"
@@ -109,6 +116,14 @@ func Provider() terraform.ResourceProvider {
 			"vestack_snat_entries": snat_entry.DataSourceVestackSnatEntries(),
 			"vestack_nat_gateways": nat_gateway.DataSourceVestackNatGateways(),
 
+			// ================ Cen ================
+			"vestack_cens":                        cen.DataSourceVestackCens(),
+			"vestack_cen_attach_instances":        cen_attach_instance.DataSourceVestackCenAttachInstances(),
+			"vestack_cen_bandwidth_packages":      cen_bandwidth_package.DataSourceVestackCenBandwidthPackages(),
+			"vestack_cen_inter_region_bandwidths": cen_inter_region_bandwidth.DataSourceVestackCenInterRegionBandwidths(),
+			//"vestack_cen_service_route_entries": 	cen_service_route_entry.DataSourceVestackCenServiceRouteEntries(),
+			"vestack_cen_route_entries": cen_route_entry.DataSourceVestackCenRouteEntries(),
+
 			// ================ VPN ================
 			"vestack_vpn_gateways":       vpn_gateway.DataSourceVestackVpnGateways(),
 			"vestack_customer_gateways":  customer_gateway.DataSourceVestackCustomerGateways(),
@@ -151,6 +166,16 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"vestack_snat_entry":  snat_entry.ResourceVestackSnatEntry(),
 			"vestack_nat_gateway": nat_gateway.ResourceVestackNatGateway(),
+
+			// ================ Cen ================
+			"vestack_cen":                             cen.ResourceVestackCen(),
+			"vestack_cen_attach_instance":             cen_attach_instance.ResourceVestackCenAttachInstance(),
+			"vestack_cen_grant_instance":              cen_grant_instance.ResourceVestackCenGrantInstance(),
+			"vestack_cen_bandwidth_package":           cen_bandwidth_package.ResourceVestackCenBandwidthPackage(),
+			"vestack_cen_bandwidth_package_associate": cen_bandwidth_package_associate.ResourceVestackCenBandwidthPackageAssociate(),
+			"vestack_cen_inter_region_bandwidth":      cen_inter_region_bandwidth.ResourceVestackCenInterRegionBandwidth(),
+			//"vestack_cen_service_route_entry": 			cen_service_route_entry.ResourceVestackCenServiceRouteEntry(),
+			//"vestack_cen_route_entry": 					cen_route_entry.ResourceVestackCenRouteEntry(),
 
 			// ================ VPN ================
 			"vestack_vpn_gateway":       vpn_gateway.ResourceVestackVpnGateway(),

@@ -49,16 +49,16 @@ func (s *VestackVpnConnectionService) ReadResources(m map[string]interface{}) (d
 		}
 	}
 	connections, err := ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		vpnClient := s.Client.VpnClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeVpnConnections"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vpnClient.DescribeVpnConnectionsCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vpnClient.DescribeVpnConnectionsCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -274,7 +274,7 @@ func (s *VestackVpnConnectionService) CreateResource(resourceData *schema.Resour
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpnClient.CreateVpnConnectionCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -385,7 +385,7 @@ func (s *VestackVpnConnectionService) ModifyResource(resourceData *schema.Resour
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpnClient.ModifyVpnConnectionAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
@@ -404,7 +404,7 @@ func (s *VestackVpnConnectionService) RemoveResource(resourceData *schema.Resour
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpnClient.DeleteVpnConnectionCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -414,7 +414,7 @@ func (s *VestackVpnConnectionService) RemoveResource(resourceData *schema.Resour
 						if ve.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading VpnConnection on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading VpnConnection on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					resp, callErr := call.ExecuteCall(d, client, call)
@@ -424,6 +424,9 @@ func (s *VestackVpnConnectionService) RemoveResource(resourceData *schema.Resour
 					}
 					return resource.RetryableError(callErr)
 				})
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
 		},
 	}
@@ -495,4 +498,14 @@ func (s *VestackVpnConnectionService) DatasourceResources(*schema.ResourceData, 
 
 func (s *VestackVpnConnectionService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpn",
+		Action:      actionName,
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+	}
 }

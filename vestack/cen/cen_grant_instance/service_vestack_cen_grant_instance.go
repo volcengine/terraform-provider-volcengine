@@ -1,8 +1,9 @@
-package vpn_gateway_route
+package cen_grant_instance
 
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -11,31 +12,35 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/logger"
 )
 
-type VestackVpnGatewayRouteService struct {
+type VestackCenGrantInstanceService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewVpnGatewayRouteService(c *ve.SdkClient) *VestackVpnGatewayRouteService {
-	return &VestackVpnGatewayRouteService{
+func NewCenGrantInstanceService(c *ve.SdkClient) *VestackCenGrantInstanceService {
+	return &VestackCenGrantInstanceService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VestackVpnGatewayRouteService) GetClient() *ve.SdkClient {
+func (s *VestackCenGrantInstanceService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VestackVpnGatewayRouteService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VestackCenGrantInstanceService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
 		ok      bool
+		cenId   interface{}
 	)
-	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
+	if cenId, ok = m["CenId"]; ok {
+		delete(m, "CenId")
+	}
+	rules, err := ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		universalClient := s.Client.UniversalClient
-		action := "DescribeVpnGatewayRoutes"
+		action := "DescribeInstanceGrantedRules"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
@@ -49,7 +54,7 @@ func (s *VestackVpnGatewayRouteService) ReadResources(m map[string]interface{}) 
 			}
 		}
 		logger.Debug(logger.RespFormat, action, resp)
-		results, err = ve.ObtainSdkValue("Result.VpnGatewayRoutes", *resp)
+		results, err = ve.ObtainSdkValue("Result.CenGrantRules", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -57,13 +62,24 @@ func (s *VestackVpnGatewayRouteService) ReadResources(m map[string]interface{}) 
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.VpnGatewayRoutes is not Slice")
+			return data, errors.New("Result.CenGrantRules is not Slice")
 		}
 		return data, err
 	})
+	if err != nil || cenId == nil || len(data) == 0 {
+		return rules, err
+	}
+	res := make([]interface{}, 0)
+	for _, tmp := range data {
+		if tmp.(map[string]interface{})["CenId"].(string) != cenId.(string) {
+			continue
+		}
+		res = append(res, tmp)
+	}
+	return res, nil
 }
 
-func (s *VestackVpnGatewayRouteService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VestackCenGrantInstanceService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -71,8 +87,12 @@ func (s *VestackVpnGatewayRouteService) ReadResource(resourceData *schema.Resour
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
+	ids := strings.Split(id, ":")
 	req := map[string]interface{}{
-		"VpnGatewayRouteIds.1": id,
+		"CenId":            ids[0],
+		"InstanceId":       ids[2],
+		"InstanceType":     ids[3],
+		"InstanceRegionId": ids[4],
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -84,12 +104,12 @@ func (s *VestackVpnGatewayRouteService) ReadResource(resourceData *schema.Resour
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("VpnGatewayRoute %s not exist ", id)
+		return data, fmt.Errorf("cen grant instance %s not exist ", id)
 	}
 	return data, err
 }
 
-func (s *VestackVpnGatewayRouteService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VestackCenGrantInstanceService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -113,16 +133,17 @@ func (s *VestackVpnGatewayRouteService) RefreshResourceState(resourceData *schem
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("VpnGatewayRoute  status  error, status:%s", status.(string))
+					return nil, "", fmt.Errorf("cen grant instance status error, status:%s", status.(string))
 				}
 			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
 			return demo, status.(string), err
 		},
 	}
+
 }
 
-func (VestackVpnGatewayRouteService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
+func (VestackCenGrantInstanceService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return v, nil, nil
 	}
@@ -130,50 +151,47 @@ func (VestackVpnGatewayRouteService) WithResourceResponseHandlers(v map[string]i
 
 }
 
-func (s *VestackVpnGatewayRouteService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callbacks := make([]ve.Callback, 0)
-
-	// 创建route
-	createVpnGatewayRoute := ve.Callback{
+func (s *VestackCenGrantInstanceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateVpnGatewayRoute",
-			ConvertMode: ve.RequestConvertAll,
+			Action:      "GrantInstanceToCen",
+			ConvertMode: ve.RequestConvertInConvert,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
-				id, _ := ve.ObtainSdkValue("Result.VpnGatewayRouteId", *resp)
-				d.SetId(id.(string))
+				d.SetId(fmt.Sprintf("%v:%v:%v:%v:%v", d.Get("cen_id"), d.Get("cen_owner_id"),
+					d.Get("instance_id"), d.Get("instance_type"), d.Get("instance_region_id")))
 				return nil
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Available"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
 		},
 	}
-	callbacks = append(callbacks, createVpnGatewayRoute)
-
-	return callbacks
+	return []ve.Callback{callback}
 
 }
 
-func (s *VestackVpnGatewayRouteService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VestackCenGrantInstanceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VestackVpnGatewayRouteService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VestackCenGrantInstanceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	ids := strings.Split(resourceData.Id(), ":")
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DeleteVpnGatewayRoute",
+			Action:      "RevokeInstanceFromCen",
 			ConvertMode: ve.RequestConvertIgnore,
 			SdkParam: &map[string]interface{}{
-				"VpnGatewayRouteId": resourceData.Id(),
+				"CenId":            ids[0],
+				"CenOwnerId":       ids[1],
+				"InstanceId":       ids[2],
+				"InstanceType":     ids[3],
+				"InstanceRegionId": ids[4],
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//删除VPC
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
@@ -184,11 +202,10 @@ func (s *VestackVpnGatewayRouteService) RemoveResource(resourceData *schema.Reso
 						if ve.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading VpnGatewayRoute on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading cen grant instance on delete %q, %w", d.Id(), callErr))
 						}
 					}
-					resp, callErr := call.ExecuteCall(d, client, call)
-					logger.Debug(logger.AllFormat, call.Action, call.SdkParam, resp, callErr)
+					_, callErr = call.ExecuteCall(d, client, call)
 					if callErr == nil {
 						return nil
 					}
@@ -196,39 +213,26 @@ func (s *VestackVpnGatewayRouteService) RemoveResource(resourceData *schema.Reso
 				})
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
 			},
 		},
 	}
 	return []ve.Callback{callback}
 }
 
-func (s *VestackVpnGatewayRouteService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VestackCenGrantInstanceService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "VpnGatewayRouteIds",
-				ConvertType: ve.ConvertWithN,
-			},
-		},
-		IdField:      "VpnGatewayRouteId",
-		CollectField: "vpn_gateway_routes",
-		ResponseConverts: map[string]ve.ResponseConvert{
-			"VpnGatewayRouteId": {
-				TargetField: "id",
-				KeepDefault: true,
-			},
-		},
+		CollectField: "grant_rules",
 	}
 }
 
-func (s *VestackVpnGatewayRouteService) ReadResourceId(id string) string {
+func (s *VestackCenGrantInstanceService) ReadResourceId(id string) string {
 	return id
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
-		ServiceName: "vpn",
+		ServiceName: "cen",
 		Action:      actionName,
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -49,16 +50,15 @@ func (s *VestackVpnGatewayService) ReadResources(m map[string]interface{}) (data
 		}
 	}
 	gateways, err := ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		vpnClient := s.Client.VpnClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeVpnGateways"
-		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vpnClient.DescribeVpnGatewaysCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vpnClient.DescribeVpnGatewaysCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -137,7 +137,7 @@ func (s *VestackVpnGatewayService) ReadResource(resourceData *schema.ResourceDat
 	if len(tmpData) == 0 {
 		return data, fmt.Errorf("VpnGatewaysBilling %s not exist ", id)
 	}
-	data["RenewType"] = renewTypeResponseConvert(tmpData[0].(map[string]interface{})["RenewType"])
+	data["RenewType"] = tmpData[0].(map[string]interface{})["RenewType"]
 	data["RemainRenewTimes"] = int(tmpData[0].(map[string]interface{})["RemainRenewTimes"].(float64))
 
 	return data, err
@@ -179,10 +179,21 @@ func (s *VestackVpnGatewayService) RefreshResourceState(resourceData *schema.Res
 
 func (VestackVpnGatewayService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		if v["BillingType"].(float64) == 1 {
+			ct, _ := time.Parse("2006-01-02T15:04:05", v["CreationTime"].(string)[0:strings.Index(v["CreationTime"].(string), "+")])
+			et, _ := time.Parse("2006-01-02T15:04:05", v["ExpiredTime"].(string)[0:strings.Index(v["ExpiredTime"].(string), "+")])
+			y := et.Year() - ct.Year()
+			m := et.Month() - ct.Month()
+			v["Period"] = y*12 + int(m)
+		}
 		return v, map[string]ve.ResponseConvert{
 			"BillingType": {
 				TargetField: "billing_type",
 				Convert:     billingTypeResponseConvert,
+			},
+			"RenewType": {
+				TargetField: "renew_type",
+				Convert:     renewTypeResponseConvert,
 			},
 		}, nil
 	}
@@ -220,11 +231,21 @@ func (s *VestackVpnGatewayService) CreateResource(resourceData *schema.ResourceD
 				"vpn_gateway_name": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"billing_type": {
+					TargetField: "BillingType",
+					Convert:     billingTypeRequestConvert,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) < 1 {
+					return false, nil
+				}
+				(*call.SdkParam)["PeriodUnit"] = "Month"
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				(*call.SdkParam)["BillingType"] = 1
-				return s.Client.VpnClient.CreateVpnGatewayCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -240,11 +261,6 @@ func (s *VestackVpnGatewayService) CreateResource(resourceData *schema.ResourceD
 	}
 	callbacks = append(callbacks, createVpnGateway)
 
-	// 修改计费方式
-	if resourceData.Get("renew_type") != nil && resourceData.Get("renew_type").(string) != "ManualRenew" {
-		callbacks = append(callbacks, s.setVpnGatewayRenewal())
-	}
-
 	return callbacks
 
 }
@@ -252,7 +268,7 @@ func (s *VestackVpnGatewayService) CreateResource(resourceData *schema.ResourceD
 func (s *VestackVpnGatewayService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 
-	// 修改vpn
+	// 修改vpnGateway
 	modifyCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyVpnGatewayAttributes",
@@ -277,19 +293,49 @@ func (s *VestackVpnGatewayService) ModifyResource(resourceData *schema.ResourceD
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpnClient.ModifyVpnGatewayAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
 	callbacks = append(callbacks, modifyCallback)
 
-	// 修改计费方式
-	if resourceData.Get("renew_type") != nil {
-		if resourceData.HasChange("renew_type") ||
-			(resourceData.Get("renew_type").(string) == "AutoRenew" &&
-				(resourceData.HasChange("renew_period") || resourceData.HasChange("remain_renew_times"))) {
-			callbacks = append(callbacks, s.setVpnGatewayRenewal())
+	// 续费时长
+	if resourceData.Get("renew_type").(string) == "ManualRenew" && resourceData.HasChange("period") {
+		renewVpnGateway := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "RenewVpnGateway",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"period": {
+						ConvertType: ve.ConvertDefault,
+						Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+							o, n := data.GetChange("period")
+							return n.(int) - o.(int)
+						},
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["PeriodUnit"] = "Month"
+						(*call.SdkParam)["VpnGatewayId"] = d.Id()
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Available"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
 		}
+		callbacks = append(callbacks, renewVpnGateway)
 	}
 
 	return callbacks
@@ -304,10 +350,10 @@ func (s *VestackVpnGatewayService) RemoveResource(resourceData *schema.ResourceD
 				"VpnGatewayId": resourceData.Id(),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				//logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				// todo 打印前台提示日志
-				log.Println("[WARN] Cannot destroy resource vestack_vpn_gateway. Terraform will remove this resource from the state file, however resources may remain.")
-				//return s.Client.VpnClient.DeleteVpnGatewayCommon(call.SdkParam)
+				log.Println("[WARN] Cannot destroy PrePaid resource vestack_vpn_gateway. Terraform will remove this resource from the state file, however resources may remain.")
+				//return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				return nil, nil
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
@@ -366,37 +412,12 @@ func (s *VestackVpnGatewayService) ReadResourceId(id string) string {
 	return id
 }
 
-func (s *VestackVpnGatewayService) setVpnGatewayRenewal() ve.Callback {
-	return ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "SetVpnGatewayRenewal",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"renew_period": {
-					ConvertType: ve.ConvertDefault,
-					ForceGet:    true,
-				},
-				"renew_type": {
-					TargetField: "RenewType",
-					Convert:     renewTypeRequestConvert,
-					ForceGet:    true,
-				},
-				"remain_renew_times": {
-					ConvertType: ve.ConvertDefault,
-					ForceGet:    true,
-				},
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) < 1 {
-					return false, nil
-				}
-				(*call.SdkParam)["VpnGatewayId"] = d.Id()
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpnClient.SetVpnGatewayRenewalCommon(call.SdkParam)
-			},
-		},
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpn",
+		Action:      actionName,
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 	}
 }
