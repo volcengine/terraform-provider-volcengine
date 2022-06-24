@@ -354,7 +354,7 @@ func tosUnmarshal(r *request.Request) {
 				return
 			}
 
-			if strings.ToLower(r.HTTPResponse.Header.Get("Content-Type")) == "application/json" {
+			if strings.Contains(strings.ToLower(r.HTTPResponse.Header.Get("Accept")), "application/json") {
 				if err = json.Unmarshal(body, &temp); err != nil {
 					fmt.Printf("Unmarshal err, %v\n", err)
 					r.Error = err
