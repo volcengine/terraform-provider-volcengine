@@ -93,7 +93,58 @@ func (s *VestackTosObjectService) ReadResource(resourceData *schema.ResourceData
 		}
 
 		if header.Get("X-Tos-Version-Id") != "" {
-			data["VersionId"] = header.Get("X-Tos-Version-Id")
+			action = "ListObjects"
+			logger.Debug(logger.ReqFormat, action, bucketName+":"+instanceId)
+
+			var (
+				nextVersionIdMarker string
+				versionIds          []string
+			)
+
+			for {
+				urlParam := map[string]string{
+					"prefix":   instanceId,
+					"max-keys": "100",
+					"versions": "",
+				}
+				if nextVersionIdMarker != "" {
+					urlParam["key-marker"] = instanceId
+					urlParam["version-id-marker"] = nextVersionIdMarker
+				}
+
+				resp, err = tos.DoTosCall(ve.TosInfo{
+					HttpMethod: ve.GET,
+					Domain:     bucketName,
+					UrlParam:   urlParam,
+				}, nil)
+
+				if err != nil {
+					return data, err
+				}
+				versions, _ := ve.ObtainSdkValue(ve.TosResponse+".Versions", *resp)
+				next, _ := ve.ObtainSdkValue(ve.TosResponse+".NextVersionIdMarker", *resp)
+
+				if versions == nil || len(versions.([]interface{})) == 0 {
+					break
+				}
+
+				if next == nil || next.(string) == "" {
+					nextVersionIdMarker = ""
+				} else {
+					nextVersionIdMarker = next.(string)
+				}
+
+				for _, version := range versions.([]interface{}) {
+					versionId, _ := ve.ObtainSdkValue("VersionId", version)
+					versionIds = append(versionIds, versionId.(string))
+				}
+
+				if nextVersionIdMarker == "" {
+					break
+				}
+			}
+			logger.Debug(logger.ReqFormat, action, versionIds)
+			data["VersionIds"] = versionIds
 		}
 	}
 
@@ -356,17 +407,33 @@ func (s *VestackTosObjectService) RemoveResource(resourceData *schema.ResourceDa
 				"ObjectName": s.ReadResourceId(resourceData.Id()),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				condition := make(map[string]interface{})
-				if d.Get("version_id") != "" {
-					condition["versionId"] = d.Get("version_id")
+
+				if d.Get("version_ids") != nil && len(d.Get("version_ids").(*schema.Set).List()) > 0 {
+					for _, vv := range d.Get("version_ids").(*schema.Set).List() {
+						condition := make(map[string]interface{})
+						condition["versionId"] = vv
+						//remove Object-with-version
+						logger.Debug(logger.RespFormat, call.Action, condition)
+						_, err := s.Client.TosClient.DoTosCall(ve.TosInfo{
+							HttpMethod: ve.DELETE,
+							Domain:     (*call.SdkParam)["BucketName"].(string),
+							Path:       []string{(*call.SdkParam)["ObjectName"].(string)},
+						}, &condition)
+						if err != nil {
+							return nil, err
+						}
+					}
+				} else {
+					//remove Object-no-version
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.TosClient.DoTosCall(ve.TosInfo{
+						HttpMethod: ve.DELETE,
+						Domain:     (*call.SdkParam)["BucketName"].(string),
+						Path:       []string{(*call.SdkParam)["ObjectName"].(string)},
+					}, nil)
 				}
-				//删除Object
-				return s.Client.TosClient.DoTosCall(ve.TosInfo{
-					HttpMethod: ve.DELETE,
-					Domain:     (*call.SdkParam)["BucketName"].(string),
-					Path:       []string{(*call.SdkParam)["ObjectName"].(string)},
-				}, &condition)
+
+				return nil, nil
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
