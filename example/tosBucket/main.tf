@@ -1,6 +1,6 @@
 resource "vestack_tos_bucket" "default" {
-  bucket_name = "test-xym-tf"
-  storage_class ="IA"
+  bucket_name = "test-xym-1"
+#  storage_class ="IA"
   public_acl = "private"
   enable_version = true
   account_acl {

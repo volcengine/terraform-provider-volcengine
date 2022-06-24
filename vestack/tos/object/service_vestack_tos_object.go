@@ -91,6 +91,10 @@ func (s *VestackTosObjectService) ReadResource(resourceData *schema.ResourceData
 		if header.Get("X-Tos-Server-Side-Encryption") != "" {
 			data["Encryption"] = header.Get("X-Tos-Server-Side-Encryption")
 		}
+
+		if header.Get("X-Tos-Version-Id") != "" {
+			data["VersionId"] = header.Get("X-Tos-Version-Id")
+		}
 	}
 
 	action = "GetObjectAcl"
@@ -353,12 +357,16 @@ func (s *VestackTosObjectService) RemoveResource(resourceData *schema.ResourceDa
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				condition := make(map[string]interface{})
+				if d.Get("version_id") != "" {
+					condition["versionId"] = d.Get("version_id")
+				}
 				//删除Object
 				return s.Client.TosClient.DoTosCall(ve.TosInfo{
 					HttpMethod: ve.DELETE,
 					Domain:     (*call.SdkParam)["BucketName"].(string),
 					Path:       []string{(*call.SdkParam)["ObjectName"].(string)},
-				}, nil)
+				}, &condition)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {

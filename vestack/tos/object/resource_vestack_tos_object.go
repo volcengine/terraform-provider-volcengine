@@ -101,6 +101,11 @@ func ResourceVestackTosObject() *schema.Resource {
 				Default:     "STANDARD",
 				Description: "The storage type of the object.Valid value is STANDARD|IA.",
 			},
+			"version_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The version id of the object if exist.",
+			},
 			"account_acl": {
 				Type:        schema.TypeSet,
 				Optional:    true,

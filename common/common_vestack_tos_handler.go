@@ -19,6 +19,7 @@ import (
 
 	"github.com/volcengine/volcstack-go-sdk/volcstack"
 	"github.com/volcengine/volcstack-go-sdk/volcstack/request"
+	"github.com/volcengine/volcstack-go-sdk/volcstack/volcstackbody"
 	"github.com/volcengine/volcstack-go-sdk/volcstack/volcstackerr"
 )
 
@@ -69,46 +70,27 @@ func tosBuild(r *request.Request) {
 		}
 	}
 
+	r.Params = params
+
+	r.HTTPRequest.Host = r.HTTPRequest.URL.Host
 	if r.Config.ExtraUserAgent != nil && *r.Config.ExtraUserAgent != "" {
 		if strings.HasPrefix(*r.Config.ExtraUserAgent, "/") {
 			request.AddToUserAgent(r, *r.Config.ExtraUserAgent)
 		} else {
 			request.AddToUserAgent(r, "/"+*r.Config.ExtraUserAgent)
 		}
-
 	}
-
-	r.HTTPRequest.URL.RawQuery = body.Encode()
-	r.HTTPRequest.Host = r.HTTPRequest.URL.Host
-
-	v := r.HTTPRequest.Header.Get("Content-Type")
-	if len(v) > 0 && strings.Contains(strings.ToLower(v), "application/json") {
-		b, _ := json.Marshal(params)
-		r.SetStringBody(string(b))
-		return
+	contentType := r.HTTPRequest.Header.Get("Content-Type")
+	if (strings.ToUpper(r.HTTPRequest.Method) == "PUT" ||
+		strings.ToUpper(r.HTTPRequest.Method) == "POST" ||
+		strings.ToUpper(r.HTTPRequest.Method) == "DELETE" ||
+		strings.ToUpper(r.HTTPRequest.Method) == "PATCH") &&
+		strings.Contains(strings.ToLower(contentType), "application/json") {
+		r.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
+		volcstackbody.BodyJson(&body, r)
+	} else {
+		volcstackbody.BodyParam(&body, r)
 	}
-
-	if reflect.TypeOf(params) == reflect.TypeOf(&map[string]interface{}{}) {
-		m := *(params).(*map[string]interface{})
-		for k, v := range m {
-			if reflect.TypeOf(v).String() == "string" {
-				body.Add(k, v.(string))
-			} else {
-				body.Add(k, fmt.Sprintf("%v", v))
-			}
-		}
-	}
-
-	r.HTTPRequest.URL.Query()
-	if r.Config.ExtraHttpParameters != nil {
-		extra := r.Config.ExtraHttpParameters(r.Context())
-		if extra != nil {
-			for k, value := range extra {
-				body.Add(k, value)
-			}
-		}
-	}
-	r.HTTPRequest.URL.RawQuery = body.Encode()
 }
 
 type tosMetadata struct {

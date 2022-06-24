@@ -1,8 +1,8 @@
 resource "vestack_tos_object" "default" {
-  bucket_name = "test-xym-tf"
+  bucket_name = "test-xym-1"
   object_name = "demo_xym"
   file_path = "/Users/bytedance/Work/Go/build/test.txt"
-  storage_class ="IA"
+#  storage_class ="IA"
   public_acl = "private"
   encryption = "AES256"
   #content_type = "text/plain"
