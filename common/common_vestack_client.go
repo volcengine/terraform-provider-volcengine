@@ -23,4 +23,5 @@ type SdkClient struct {
 	AutoScalingClient *autoscaling.AUTOSCALING
 	RdsClient         *rdsmysql.RDSMYSQL
 	RdsClientV2       *rdsmysqlv2.RDSMYSQLV2
+	UniversalClient   *Universal
 }

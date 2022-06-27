@@ -8,10 +8,6 @@ require (
 	github.com/hashicorp/hcl/v2 v2.0.0
 	github.com/hashicorp/terraform-plugin-sdk v1.7.0
 	github.com/stretchr/testify v1.7.0
-	github.com/volcengine/volcstack-go-sdk v1.0.0
+	github.com/volcengine/volcstack-go-sdk v1.0.2
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 )
-
-//以后正式开源后，直接在required的位置依赖github上的sdk 不在用这种gitlib的替换方式
-//后续开发过程中可以用这种replace方式 但是replace在提交过程不要提交到版本库
-//replace github.com/volcengine/volcstack-go-sdk => code.byted.org/iaasng/volcstack-go-sdk v0.0.0-20220407103158-2d4f8f46287a

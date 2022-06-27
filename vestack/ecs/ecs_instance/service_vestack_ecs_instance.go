@@ -407,7 +407,7 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"RUNNING"},
+				Target:  []string{"RUNNING", "STOPPED"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
@@ -433,6 +433,10 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				//if image changed ,password change in replaceSystemVolume,not here
+				if _, ok := (*call.SdkParam)["Password"]; ok && d.HasChange("image_id") {
+					delete(*call.SdkParam, "Password")
+				}
 				if len(*call.SdkParam) > 1 {
 					return true, nil
 				}
@@ -451,7 +455,7 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"RUNNING"},
+				Target:  []string{"RUNNING", "STOPPED"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
@@ -502,7 +506,7 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"RUNNING"},
+				Target:  []string{"RUNNING", "STOPPED"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
@@ -534,7 +538,7 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 					return nil
 				},
 				Refresh: &ve.StateRefresh{
-					Target:  []string{"RUNNING"},
+					Target:  []string{"RUNNING", "STOPPED"},
 					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
@@ -575,7 +579,7 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"RUNNING"},
+				Target:  []string{"RUNNING", "STOPPED"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
@@ -583,6 +587,9 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 	callbacks = append(callbacks, extendVolume)
 	//image change
 	if resourceData.HasChange("image_id") {
+		//先需要关机才能重装系统
+		stopInstance := s.StartOrStopInstanceCallback(resourceData, true)
+		callbacks = append(callbacks, stopInstance)
 		replaceSystemVolume := ve.Callback{
 			Call: ve.SdkCall{
 				Action:         "ReplaceSystemVolume",
@@ -662,7 +669,7 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 					return nil
 				},
 				Refresh: &ve.StateRefresh{
-					Target:  []string{"RUNNING"},
+					Target:  []string{"RUNNING", "STOPPED"},
 					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
@@ -671,15 +678,32 @@ func (s *VestackEcsService) ModifyResource(resourceData *schema.ResourceData, re
 	}
 
 	//总体重启 如果需要
+	var stopped bool
+
 	stopInstance := s.StartOrStopInstanceCallback(resourceData, true)
 	stopInstance.Call.BeforeCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-		return passwordChange, nil
+		instance, err := s.ReadResource(resourceData, resourceData.Id())
+		if err != nil {
+			return false, err
+		}
+		status, err := ve.ObtainSdkValue("Status", instance)
+		if err != nil {
+			return false, err
+		}
+		if status.(string) == "RUNNING" {
+			return passwordChange, nil
+		}
+		return false, nil
+	}
+	stopInstance.Call.AfterCall = func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+		stopped = true
+		return nil
 	}
 	callbacks = append(callbacks, stopInstance)
 
 	startInstance := s.StartOrStopInstanceCallback(resourceData, false)
 	startInstance.Call.BeforeCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-		return passwordChange, nil
+		return stopped && passwordChange, nil
 	}
 	callbacks = append(callbacks, startInstance)
 
@@ -805,9 +829,6 @@ func (s *VestackEcsService) StartOrStopInstanceCallback(resourceData *schema.Res
 			ConvertMode: ve.RequestConvertIgnore,
 			SdkParam: &map[string]interface{}{
 				"InstanceId": resourceData.Id(),
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return nil
 			},
 		},
 	}

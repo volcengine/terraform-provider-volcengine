@@ -50,6 +50,8 @@ func (s *VestackSubnetService) ReadResources(m map[string]interface{}) (data []i
 			}
 		}
 
+		logger.Debug(logger.RespFormat, action, condition, *resp)
+
 		results, err = ve.ObtainSdkValue("Result.Subnets", *resp)
 		if err != nil {
 			return data, err
@@ -209,20 +211,7 @@ func (s *VestackSubnetService) RemoveResource(resourceData *schema.ResourceData,
 				return s.Client.VpcClient.DeleteSubnetCommon(call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// 由于异步删除问题 这里补充一个轮询查询(临时解决方案)
-				return resource.Retry(3*time.Minute, func() *resource.RetryError {
-					_, callErr := s.ReadResource(d, id)
-					// 能查询成功代表还在删除中，重试
-					if callErr == nil {
-						return resource.RetryableError(fmt.Errorf("Subnet still in removing status "))
-					} else {
-						if ve.ResourceNotFoundError(callErr) {
-							return nil
-						} else {
-							return resource.NonRetryableError(callErr)
-						}
-					}
-				})
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

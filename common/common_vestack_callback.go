@@ -1,11 +1,13 @@
 package common
 
 import (
+	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -40,6 +42,7 @@ type CallErrorFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall,
 type ExecuteCallFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall) (*map[string]interface{}, error)
 type AfterCallFunc func(d *schema.ResourceData, client *SdkClient, resp *map[string]interface{}, call SdkCall) error
 type BeforeCallFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall) (bool, error)
+type ReadResourceFunc func(d *schema.ResourceData, resourceId string) (map[string]interface{}, error)
 
 type LockId func(d *schema.ResourceData) string
 
@@ -218,4 +221,20 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 		}
 	}
 	return err
+}
+
+func CheckResourceUtilRemoved(d *schema.ResourceData, readResourceFunc ReadResourceFunc, timeout time.Duration) error {
+	return resource.Retry(timeout, func() *resource.RetryError {
+		_, callErr := readResourceFunc(d, d.Id())
+		// 能查询成功代表还在删除中，重试
+		if callErr == nil {
+			return resource.RetryableError(fmt.Errorf("resource still in removing status "))
+		} else {
+			if ResourceNotFoundError(callErr) {
+				return nil
+			} else {
+				return resource.NonRetryableError(callErr)
+			}
+		}
+	})
 }
