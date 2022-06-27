@@ -42,6 +42,12 @@ func ResourceVestackTosObject() *schema.Resource {
 				return []*schema.ResourceData{data}, nil
 			},
 		},
+		CustomizeDiff: func(diff *schema.ResourceDiff, i interface{}) (err error) {
+			if diff.Id() != "" && diff.HasChange("file_path") && !diff.Get("enable_version").(bool) {
+				return diff.ForceNew("file_path")
+			}
+			return err
+		},
 		Schema: map[string]*schema.Schema{
 			"bucket_name": {
 				Type:        schema.TypeString,
@@ -56,9 +62,9 @@ func ResourceVestackTosObject() *schema.Resource {
 				Description: "The name of the object.",
 			},
 			"file_path": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Required: true,
+				//ForceNew:    true,
 				Description: "The file path for upload.",
 			},
 			"encryption": {
@@ -145,6 +151,11 @@ func ResourceVestackTosObject() *schema.Resource {
 					},
 				},
 				Set: ve.TosAccountAclHash,
+			},
+			"enable_version": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "The flag of enable tos version.",
 			},
 		},
 	}

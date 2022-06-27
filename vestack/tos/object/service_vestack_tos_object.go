@@ -56,11 +56,12 @@ func (s *VestackTosObjectService) ReadResource(resourceData *schema.ResourceData
 	tos := s.Client.TosClient
 	bucketName := resourceData.Get("bucket_name").(string)
 	var (
-		action string
-		resp   *map[string]interface{}
-		ok     bool
-		header http.Header
-		acl    map[string]interface{}
+		action        string
+		resp          *map[string]interface{}
+		ok            bool
+		header        http.Header
+		acl           map[string]interface{}
+		bucketVersion map[string]interface{}
 	)
 
 	if instanceId == "" {
@@ -166,6 +167,22 @@ func (s *VestackTosObjectService) ReadResource(resourceData *schema.ResourceData
 		data["AccountAcl"] = acl
 	}
 
+	action = "GetBucketVersioning"
+	req = map[string]interface{}{
+		"versioning": "",
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err = tos.DoTosCall(ve.TosInfo{
+		HttpMethod: ve.GET,
+		Domain:     bucketName,
+	}, &req)
+	if err != nil {
+		return data, err
+	}
+	if bucketVersion, ok = (*resp)[ve.TosResponse].(map[string]interface{}); ok {
+		data["EnableVersion"] = bucketVersion
+	}
+
 	if len(data) == 0 {
 		return data, fmt.Errorf("object %s not exist ", instanceId)
 	}
@@ -188,6 +205,15 @@ func (s *VestackTosObjectService) RefreshResourceState(data *schema.ResourceData
 func (VestackTosObjectService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return m, map[string]ve.ResponseConvert{
+			"EnableVersion": {
+				Convert: func(i interface{}) interface{} {
+					status, _ := ve.ObtainSdkValue("Status", i)
+					if status.(string) != "Enabled" {
+						return false
+					}
+					return true
+				},
+			},
 			"AccountAcl": {
 				Convert: ve.ConvertTosAccountAcl(),
 			},
@@ -201,196 +227,29 @@ func (VestackTosObjectService) WithResourceResponseHandlers(m map[string]interfa
 
 func (s *VestackTosObjectService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	//create object
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			ServiceCategory: ve.ServiceTos,
-			Action:          "CreateObject",
-			ConvertMode:     ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"bucket_name": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "BucketName",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.DomainParam,
-					},
-				},
-				"object_name": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "ObjectName",
-					SpecialParam: &ve.SpecialParam{
-						Type:  ve.PathParam,
-						Index: 0,
-					},
-				},
-				"public_acl": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "x-tos-acl",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.HeaderParam,
-					},
-				},
-				"storage_class": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "x-tos-storage-class",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.HeaderParam,
-					},
-				},
-				"content_type": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "content-type",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.HeaderParam,
-					},
-				},
-				"file_path": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "file-path",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.FilePathParam,
-					},
-				},
-				"encryption": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "x-tos-server-side-encryption",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.HeaderParam,
-					},
-				},
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//创建Object
-				return s.Client.TosClient.DoTosCall(ve.TosInfo{
-					HttpMethod:  ve.PUT,
-					Domain:      (*call.SdkParam)[ve.TosDomain].(string),
-					Header:      (*call.SdkParam)[ve.TosHeader].(map[string]string),
-					Path:        (*call.SdkParam)[ve.TosPath].([]string),
-					ContentPath: (*call.SdkParam)[ve.TosFilePath].(string),
-				}, nil)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId((*call.SdkParam)[ve.TosDomain].(string) + ":" + (*call.SdkParam)[ve.TosPath].([]string)[0])
-				return nil
-			},
-		},
-	}
+	callback := s.createOrReplaceObject(resourceData, resource, false)
 	//acl
-	callbackAcl := ve.Callback{
-		Call: ve.SdkCall{
-			ServiceCategory: ve.ServiceTos,
-			Action:          "PutObjectAcl",
-			ConvertMode:     ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"bucket_name": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "BucketName",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.DomainParam,
-					},
-				},
-				"object_name": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "ObjectName",
-					SpecialParam: &ve.SpecialParam{
-						Type:  ve.PathParam,
-						Index: 0,
-					},
-				},
-				"account_acl": {
-					ConvertType: ve.ConvertListN,
-					TargetField: "Grants",
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"account_id": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "Grantee.ID",
-						},
-						"acl_type": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "Grantee.Type",
-						},
-						"permission": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "Permission",
-						},
-					},
-				},
-			},
-			BeforeCall:  s.beforePutObjectAcl(),
-			ExecuteCall: s.executePutObjectAcl(),
-			//Refresh: &ve.StateRefresh{
-			//	Target:  []string{"Success"},
-			//	Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			//},
-		},
-	}
+	callbackAcl := s.createOrUpdateObjectAcl(resourceData, resource, false)
 	return []ve.Callback{callback, callbackAcl}
 }
 
 func (s *VestackTosObjectService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
-	var grant = []string{
-		"public_acl",
-		"account_acl",
-	}
-	for _, v := range grant {
-		if data.HasChange(v) {
-			callbackAcl := ve.Callback{
-				Call: ve.SdkCall{
-					ServiceCategory: ve.ServiceTos,
-					Action:          "PutBucketAcl",
-					ConvertMode:     ve.RequestConvertInConvert,
-					Convert: map[string]ve.RequestConvert{
-						"bucket_name": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "BucketName",
-							SpecialParam: &ve.SpecialParam{
-								Type: ve.DomainParam,
-							},
-							ForceGet: true,
-						},
-						"object_name": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "ObjectName",
-							SpecialParam: &ve.SpecialParam{
-								Type:  ve.PathParam,
-								Index: 0,
-							},
-						},
-						"account_acl": {
-							ConvertType: ve.ConvertListN,
-							TargetField: "Grants",
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"account_id": {
-									ConvertType: ve.ConvertDefault,
-									TargetField: "Grantee.ID",
-									ForceGet:    true,
-								},
-								"acl_type": {
-									ConvertType: ve.ConvertDefault,
-									TargetField: "Grantee.Type",
-									ForceGet:    true,
-								},
-								"permission": {
-									ConvertType: ve.ConvertDefault,
-									TargetField: "Permission",
-									ForceGet:    true,
-								},
-							},
-							ForceGet: true,
-						},
-					},
-					BeforeCall:  s.beforePutObjectAcl(),
-					ExecuteCall: s.executePutObjectAcl(),
-					Refresh: &ve.StateRefresh{
-						Target:  []string{"Success"},
-						Timeout: data.Timeout(schema.TimeoutCreate),
-					},
-				},
+	if data.HasChange("file_path") {
+		callbacks = append(callbacks, s.createOrReplaceObject(data, resource, true))
+		callbacks = append(callbacks, s.createOrUpdateObjectAcl(data, resource, true))
+	} else {
+		var grant = []string{
+			"public_acl",
+			"account_acl",
+		}
+		for _, v := range grant {
+			if data.HasChange(v) {
+				callbackAcl := s.createOrUpdateObjectAcl(data, resource, true)
+				callbacks = append(callbacks, callbackAcl)
+				break
 			}
-			callbacks = append(callbacks, callbackAcl)
-			break
 		}
 	}
 
@@ -508,6 +367,7 @@ func (s *VestackTosObjectService) ReadResourceId(id string) string {
 
 func (s *VestackTosObjectService) beforePutObjectAcl() ve.BeforeCallFunc {
 	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+		logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 		data, err := s.Client.TosClient.DoTosCall(ve.TosInfo{
 			HttpMethod: ve.GET,
 			Domain:     (*call.SdkParam)[ve.TosDomain].(string),
@@ -534,5 +394,152 @@ func (s *VestackTosObjectService) executePutObjectAcl() ve.ExecuteCallFunc {
 				"acl": "",
 			},
 		}, &param)
+	}
+}
+
+func (s *VestackTosObjectService) createOrUpdateObjectAcl(resourceData *schema.ResourceData, resource *schema.Resource, isUpdate bool) ve.Callback {
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			ServiceCategory: ve.ServiceTos,
+			Action:          "PutObjectAcl",
+			ConvertMode:     ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"bucket_name": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "BucketName",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.DomainParam,
+					},
+					ForceGet: isUpdate,
+				},
+				"object_name": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "ObjectName",
+					SpecialParam: &ve.SpecialParam{
+						Type:  ve.PathParam,
+						Index: 0,
+					},
+					ForceGet: isUpdate,
+				},
+				"account_acl": {
+					ConvertType: ve.ConvertListN,
+					TargetField: "Grants",
+					ForceGet:    isUpdate,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"account_id": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "Grantee.ID",
+							ForceGet:    isUpdate,
+						},
+						"acl_type": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "Grantee.Type",
+							ForceGet:    isUpdate,
+						},
+						"permission": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "Permission",
+							ForceGet:    isUpdate,
+						},
+					},
+				},
+			},
+			BeforeCall:  s.beforePutObjectAcl(),
+			ExecuteCall: s.executePutObjectAcl(),
+			//Refresh: &ve.StateRefresh{
+			//	Target:  []string{"Success"},
+			//	Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			//},
+		},
+	}
+	if isUpdate {
+		callback.Call.Refresh = &ve.StateRefresh{
+			Target:  []string{"Success"},
+			Timeout: resourceData.Timeout(schema.TimeoutCreate),
+		}
+	}
+	return callback
+}
+
+func (s *VestackTosObjectService) createOrReplaceObject(resourceData *schema.ResourceData, resource *schema.Resource, isUpdate bool) ve.Callback {
+	return ve.Callback{
+		Call: ve.SdkCall{
+			ServiceCategory: ve.ServiceTos,
+			Action:          "PutObject",
+			ConvertMode:     ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"bucket_name": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "BucketName",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.DomainParam,
+					},
+					ForceGet: isUpdate,
+				},
+				"object_name": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "ObjectName",
+					SpecialParam: &ve.SpecialParam{
+						Type:  ve.PathParam,
+						Index: 0,
+					},
+					ForceGet: isUpdate,
+				},
+				"public_acl": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "x-tos-acl",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+					ForceGet: isUpdate,
+				},
+				"storage_class": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "x-tos-storage-class",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+					ForceGet: isUpdate,
+				},
+				"content_type": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "Content-Type",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+					ForceGet: isUpdate,
+				},
+				"file_path": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "file-path",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.FilePathParam,
+					},
+				},
+				"encryption": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "x-tos-server-side-encryption",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+					ForceGet: isUpdate,
+				},
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//创建Object
+				return s.Client.TosClient.DoTosCall(ve.TosInfo{
+					HttpMethod:  ve.PUT,
+					Domain:      (*call.SdkParam)[ve.TosDomain].(string),
+					Header:      (*call.SdkParam)[ve.TosHeader].(map[string]string),
+					Path:        (*call.SdkParam)[ve.TosPath].([]string),
+					ContentPath: (*call.SdkParam)[ve.TosFilePath].(string),
+				}, nil)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				d.SetId((*call.SdkParam)[ve.TosDomain].(string) + ":" + (*call.SdkParam)[ve.TosPath].([]string)[0])
+				return nil
+			},
+		},
 	}
 }

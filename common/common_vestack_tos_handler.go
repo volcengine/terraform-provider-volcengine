@@ -89,7 +89,13 @@ func tosBuild(r *request.Request) {
 		r.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
 		volcstackbody.BodyJson(&body, r)
 	} else {
+		if len(contentType) > 0 && !strings.Contains(strings.ToLower(contentType), "x-www-form-urlencoded") {
+			r.HTTPRequest.Header.Del("Content-Type")
+		}
 		volcstackbody.BodyParam(&body, r)
+		if len(contentType) > 0 {
+			r.HTTPRequest.Header.Set("Content-Type", contentType)
+		}
 	}
 }
 
@@ -354,7 +360,8 @@ func tosUnmarshal(r *request.Request) {
 				return
 			}
 
-			if strings.Contains(strings.ToLower(r.HTTPResponse.Header.Get("Accept")), "application/json") {
+			if strings.Contains(strings.ToLower(r.HTTPResponse.Header.Get("Accept")), "application/json") ||
+				strings.Contains(strings.ToLower(r.HTTPResponse.Header.Get("Content-Type")), "application/json") {
 				if err = json.Unmarshal(body, &temp); err != nil {
 					fmt.Printf("Unmarshal err, %v\n", err)
 					r.Error = err
