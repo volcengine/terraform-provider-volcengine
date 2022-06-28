@@ -10,9 +10,9 @@ import (
 /*
 
 Import
-Scaling instance attachment can be imported using the scaling_group_id:instance_id.1:instance_id2..., e.g.
+Scaling instance attachment can be imported using the scaling_group_id, e.g.
 ```
-$ terraform import vestack_scaling_instance_attach.default scg-mizl7m1kqccg5smt1bdpijuj:i-***:i-***
+$ terraform import vestack_scaling_instance_attach.default scg-mizl7m1kqccg5smt1bdpijuj
 ```
 
 */
@@ -36,8 +36,7 @@ func ResourceVestackScalingInstanceAttach() *schema.Resource {
 			"instance_ids": {
 				Type:        schema.TypeSet,
 				Required:    true,
-				MinItems:    1,
-				MaxItems:    20,
+				MinItems:    0,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Set:         schema.HashString,
 				Description: "The list of instance ids the scaling group.",

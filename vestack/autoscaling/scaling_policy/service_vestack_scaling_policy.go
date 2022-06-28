@@ -35,16 +35,16 @@ func (s *VestackScalingPolicyService) ReadResources(m map[string]interface{}) (d
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		autoScalingClient := s.Client.AutoScalingClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeScalingPolicies"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = autoScalingClient.DescribeScalingPoliciesCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = autoScalingClient.DescribeScalingPoliciesCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -137,7 +137,10 @@ func (VestackScalingPolicyService) WithResourceResponseHandlers(scalingPolicy ma
 }
 
 func (s *VestackScalingPolicyService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
+	callbacks := make([]ve.Callback, 0)
+
+	// 创建伸缩规则
+	createPolicyCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateScalingPolicy",
 			ConvertMode: ve.RequestConvertAll,
@@ -181,29 +184,12 @@ func (s *VestackScalingPolicyService) CreateResource(resourceData *schema.Resour
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.CreateScalingPolicyCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
 				id, _ := ve.ObtainSdkValue("Result.ScalingPolicyId", *resp)
 				d.SetId(fmt.Sprintf("%v:%v", d.Get("scaling_group_id"), id))
-				if resourceData.Get("active") != nil && resourceData.Get("active").(bool) {
-					//action := "EnableScalingGroup"
-					//param := &map[string]interface{}{"ScalingGroupId": resourceData.Get("scaling_group_id")}
-					//logger.Debug(logger.RespFormat, action, param)
-					//if _, err := s.Client.AutoScalingClient.EnableScalingGroupCommon(param); err != nil {
-					//	logger.Debug(logger.ErrFormat, action, param, err)
-					//	return err
-					//}
-
-					action := "EnableScalingPolicy"
-					param := &map[string]interface{}{"ScalingPolicyId": id}
-					logger.Debug(logger.RespFormat, action, param)
-					if _, err := s.Client.AutoScalingClient.EnableScalingPolicyCommon(param); err != nil {
-						logger.Debug(logger.ErrFormat, action, param, err)
-						return err
-					}
-				}
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
@@ -212,8 +198,14 @@ func (s *VestackScalingPolicyService) CreateResource(resourceData *schema.Resour
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, createPolicyCallback)
 
+	// 启用伸缩规则
+	if resourceData.Get("active") != nil && resourceData.Get("active").(bool) {
+		callbacks = append(callbacks, s.enableOrDisablePolicyCallback(resourceData))
+	}
+
+	return callbacks
 }
 
 func (s *VestackScalingPolicyService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -260,7 +252,7 @@ func (s *VestackScalingPolicyService) ModifyResource(resourceData *schema.Resour
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.ModifyScalingPolicyCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return nil
@@ -335,7 +327,7 @@ func (s *VestackScalingPolicyService) ModifyResource(resourceData *schema.Resour
 		//}
 
 		// 伸缩规则状态变更
-		callbacks = append(callbacks, s.enableOrDisablePolicyCallback(ids[1], resourceData))
+		callbacks = append(callbacks, s.enableOrDisablePolicyCallback(resourceData))
 	}
 
 	return callbacks
@@ -352,7 +344,7 @@ func (s *VestackScalingPolicyService) RemoveResource(resourceData *schema.Resour
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.DeleteScalingPolicyCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -385,7 +377,7 @@ func (s *VestackScalingPolicyService) DatasourceResources(*schema.ResourceData, 
 				ConvertType: ve.ConvertWithN,
 			},
 			"scaling_policy_names": {
-				TargetField: "ScalingPolicyIds",
+				TargetField: "ScalingPolicyNames",
 				ConvertType: ve.ConvertWithN,
 			},
 		},
@@ -435,27 +427,31 @@ func (s *VestackScalingPolicyService) DatasourceResources(*schema.ResourceData, 
 }
 
 func (s *VestackScalingPolicyService) ReadResourceId(id string) string {
-	return id
+	return strings.Split(id, ":")[1]
 }
 
-func (s *VestackScalingPolicyService) enableOrDisablePolicyCallback(policyId string, d *schema.ResourceData) ve.Callback {
-	param := &map[string]interface{}{
-		"ScalingPolicyId": policyId,
-	}
-	enable := d.Get("active").(bool)
+func (s *VestackScalingPolicyService) enableOrDisablePolicyCallback(resourceData *schema.ResourceData) ve.Callback {
+	enable := resourceData.Get("active").(bool)
 	if enable {
 		return ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "EnableScalingPolicy",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam:    param,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["ScalingPolicyId"] = strings.Split(d.Id(), ":")[1]
+					return true, nil
+				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.AutoScalingClient.EnableScalingPolicyCommon(call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					if err != nil {
+						err = fmt.Errorf("enable scaling policy err: %s", err.Error())
+					}
+					return resp, err
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"Active"},
-					Timeout: d.Timeout(schema.TimeoutUpdate),
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		}
@@ -464,16 +460,29 @@ func (s *VestackScalingPolicyService) enableOrDisablePolicyCallback(policyId str
 			Call: ve.SdkCall{
 				Action:      "DisableScalingPolicy",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam:    param,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["ScalingPolicyId"] = strings.Split(d.Id(), ":")[1]
+					return true, nil
+				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.AutoScalingClient.DisableScalingPolicyCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"InActive"},
-					Timeout: d.Timeout(schema.TimeoutUpdate),
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		}
+	}
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "auto_scaling",
+		Action:      actionName,
+		Version:     "2020-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 	}
 }

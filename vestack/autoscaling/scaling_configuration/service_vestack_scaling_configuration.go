@@ -34,16 +34,16 @@ func (s *VestackScalingConfigurationService) ReadResources(m map[string]interfac
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		autoScalingClient := s.Client.AutoScalingClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeScalingConfigurations"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = autoScalingClient.DescribeScalingConfigurationsCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = autoScalingClient.DescribeScalingConfigurationsCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -86,6 +86,20 @@ func (s *VestackScalingConfigurationService) ReadResource(resourceData *schema.R
 	if len(data) == 0 {
 		return data, fmt.Errorf("ScalingConfiguration %s not exist ", id)
 	}
+
+	// 查看伸缩组状态
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeScalingGroups"),
+		&map[string]interface{}{"ScalingGroupIds.1": data["ScalingGroupId"]})
+	if err != nil {
+		return data, fmt.Errorf("describe scaling group err: %s", err.Error())
+	}
+	groups, err := ve.ObtainSdkValue("Result.ScalingGroups", *resp)
+	if groups == nil || len(groups.([]interface{})) == 0 {
+		return data, fmt.Errorf("scaling group %s not found", data["ScalingGroupId"])
+	}
+	data["ScalingGroupStatus"] = groups.([]interface{})[0].(map[string]interface{})["LifecycleState"].(string)
+	data["ActiveScalingConfigurationId"] = groups.([]interface{})[0].(map[string]interface{})["ActiveScalingConfigurationId"].(string)
+
 	return data, err
 }
 
@@ -113,7 +127,7 @@ func (s *VestackScalingConfigurationService) RefreshResourceState(resourceData *
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("ScalingConfiguration  LifecycleState  error, status:%s", status.(string))
+					return nil, "", fmt.Errorf("ScalingConfiguration LifecycleState error, status:%s", status.(string))
 				}
 			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
@@ -126,6 +140,9 @@ func (s *VestackScalingConfigurationService) RefreshResourceState(resourceData *
 func (VestackScalingConfigurationService) WithResourceResponseHandlers(scalingConfiguration map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		scalingConfiguration["active"] = scalingConfiguration["LifecycleState"].(string) == "Active"
+		scalingConfiguration["enable"] = !(scalingConfiguration["ScalingGroupStatus"].(string) == "InActive" ||
+			scalingConfiguration["ScalingGroupStatus"].(string) == "Deleting")
+		scalingConfiguration["substitute"] = scalingConfiguration["ActiveScalingConfigurationId"]
 		return scalingConfiguration, nil, nil
 	}
 
@@ -142,6 +159,7 @@ func (s *VestackScalingConfigurationService) CreateResource(resourceData *schema
 			Convert: map[string]ve.RequestConvert{
 				"volumes": {
 					ConvertType: ve.ConvertListN,
+					ForceGet:    true,
 				},
 				"security_group_ids": {
 					ConvertType: ve.ConvertWithN,
@@ -161,23 +179,12 @@ func (s *VestackScalingConfigurationService) CreateResource(resourceData *schema
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.CreateScalingConfigurationCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
 				id, _ := ve.ObtainSdkValue("Result.ScalingConfigurationId", *resp)
 				d.SetId(id.(string))
-				if resourceData.Get("active") != nil && resourceData.Get("active").(bool) {
-					param := &map[string]interface{}{
-						"ScalingConfigurationId": id,
-						"ScalingGroupId":         d.Get("scaling_group_id"),
-					}
-					logger.Debug(logger.RespFormat, "EnableScalingConfiguration", param)
-					if _, err := s.Client.AutoScalingClient.EnableScalingConfigurationCommon(param); err != nil {
-						logger.Debug(logger.ErrFormat, "EnableScalingConfiguration", param, err)
-						return err
-					}
-				}
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
@@ -187,6 +194,33 @@ func (s *VestackScalingConfigurationService) CreateResource(resourceData *schema
 		},
 	}
 	callbacks = append(callbacks, createConfigCallback)
+
+	// 启用伸缩组
+	if resourceData.Get("active") != nil && resourceData.Get("active").(bool) {
+		callbacks = append(callbacks, ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "EnableScalingConfiguration",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"scaling_group_id": {
+						ConvertType: ve.ConvertDefault,
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["ScalingConfigurationId"] = d.Id()
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Active"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		})
+	}
 
 	// 使能伸缩组
 	if resourceData.Get("enable") != nil {
@@ -199,26 +233,6 @@ func (s *VestackScalingConfigurationService) CreateResource(resourceData *schema
 
 func (s *VestackScalingConfigurationService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
-
-	// 使能伸缩配置
-	if resourceData.HasChange("active") && resourceData.Get("active").(bool) { // 使用当前伸缩配置
-		callbacks = append(callbacks, s.enableConfigurationCallback(resourceData.Id(), resourceData))
-	} else if resourceData.Get("active") != nil &&
-		!resourceData.Get("active").(bool) &&
-		(resourceData.HasChange("active") || resourceData.HasChange("substitute")) { // 使用其他伸缩配置
-		substituteId := resourceData.Get("substitute")
-		if substituteId == nil || len(substituteId.(string)) == 0 {
-			callbacks = append(callbacks, ve.Callback{
-				Call: ve.SdkCall{
-					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-						return nil, errors.New("miss substitute configuration")
-					},
-				},
-			})
-		} else {
-			callbacks = append(callbacks, s.enableConfigurationCallback(substituteId.(string), resourceData))
-		}
-	}
 
 	// 修改伸缩配置
 	modifyConfigurationCallback := ve.Callback{
@@ -280,33 +294,48 @@ func (s *VestackScalingConfigurationService) ModifyResource(resourceData *schema
 				if len(*call.SdkParam) < 2 {
 					return false, nil
 				}
+				if d.HasChange("eip_bandwidth") || d.HasChange("eip_isp") || d.HasChange("eip_billing_type") {
+					(*call.SdkParam)["Eip.Bandwidth"] = d.Get("eip_bandwidth")
+					(*call.SdkParam)["Eip.ISP"] = d.Get("eip_isp")
+					(*call.SdkParam)["Eip.BillingType"] = d.Get("eip_billing_type")
+				}
+				if d.HasChange("volumes") {
+					for i, ele := range d.Get("volumes").([]interface{}) {
+						volume := ele.(map[string]interface{})
+						(*call.SdkParam)[fmt.Sprintf("Volumes.%d.DeleteWithInstance", i+1)] = volume["delete_with_instance"]
+						(*call.SdkParam)[fmt.Sprintf("Volumes.%d.Size", i+1)] = volume["size"]
+						(*call.SdkParam)[fmt.Sprintf("Volumes.%d.VolumeType", i+1)] = volume["volume_type"]
+					}
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.ModifyScalingConfigurationCommon(call.SdkParam)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				readResource, err := s.ReadResource(resourceData, resourceData.Id())
-				logger.Debug(logger.RespFormat, call.Action, readResource)
-				if err != nil {
-					return err
-				}
-				if readResource["Eip"] != nil {
-					eip := readResource["Eip"].(map[string]interface{})
-					resourceData.Set("eip_bandwidth", eip["Bandwidth"])
-					resourceData.Set("eip_isp", eip["ISP"])
-					resourceData.Set("eip_billing_type", eip["BillingType"])
-				} else {
-					resourceData.Set("eip_bandwidth", 0)
-					resourceData.Set("eip_isp", "")
-					resourceData.Set("eip_billing_type", "")
-				}
-				return nil
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
 	callbacks = append(callbacks, modifyConfigurationCallback)
+
+	// 使能伸缩配置
+	if resourceData.HasChange("active") && resourceData.Get("active").(bool) { // 使用当前伸缩配置
+		callbacks = append(callbacks, s.enableConfigurationCallback(resourceData.Id(), resourceData))
+	} else if resourceData.Get("active") != nil &&
+		!resourceData.Get("active").(bool) &&
+		(resourceData.HasChange("active") || resourceData.HasChange("substitute")) { // 使用其他伸缩配置
+		substituteId := resourceData.Get("substitute")
+		if substituteId == nil || len(substituteId.(string)) == 0 || substituteId.(string) == resourceData.Id() {
+			callbacks = append(callbacks, ve.Callback{
+				Call: ve.SdkCall{
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						return nil, errors.New("scaling group need a substitute configuration rather than the current scaling configuration")
+					},
+				},
+			})
+		} else {
+			callbacks = append(callbacks, s.enableConfigurationCallback(substituteId.(string), resourceData))
+		}
+	}
 
 	// 使能伸缩组
 	if resourceData.HasChange("enable") {
@@ -326,7 +355,7 @@ func (s *VestackScalingConfigurationService) RemoveResource(resourceData *schema
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.DeleteScalingConfigurationCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -404,7 +433,7 @@ func (s *VestackScalingConfigurationService) enableConfigurationCallback(enableC
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.EnableScalingConfigurationCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{status},
@@ -427,7 +456,7 @@ func (s *VestackScalingConfigurationService) enableOrDisableGroupCallback(resour
 				SdkParam:    param,
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.AutoScalingClient.EnableScalingGroupCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 			},
 		}
@@ -439,9 +468,19 @@ func (s *VestackScalingConfigurationService) enableOrDisableGroupCallback(resour
 				SdkParam:    param,
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.AutoScalingClient.DisableScalingGroupCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 			},
 		}
+	}
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "auto_scaling",
+		Action:      actionName,
+		Version:     "2020-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 	}
 }

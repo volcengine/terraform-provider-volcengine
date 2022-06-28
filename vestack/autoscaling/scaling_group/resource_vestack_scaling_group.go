@@ -79,15 +79,15 @@ func ResourceVestackScalingGroup() *schema.Resource {
 					"OldestScalingConfigurationWithNewestInstance",
 				}, false),
 			},
-			//"db_instance_ids": {
-			//	Type:     schema.TypeSet,
-			//	Optional: true,
-			//	Elem: &schema.Schema{
-			//		Type: schema.TypeString,
-			//	},
-			//	Set:         schema.HashString,
-			//	Description: "The list of the DB instance ids.",
-			//},
+			"db_instance_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "The list of the DB instance ids.",
+			},
 			"multi_az_policy": {
 				Type:     schema.TypeString,
 				Optional: true,

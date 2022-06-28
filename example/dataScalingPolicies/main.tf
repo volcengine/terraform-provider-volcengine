@@ -1,4 +1,4 @@
 data "vestack_scaling_policies" "default"{
-  ids = ["sp-yblfsbod7p72q1zolp2d"]
-  scaling_group_id = "scg-ybl7in2wc6cm9tnusra3"
+  scaling_group_id = "scg-ybqm0b6kcigh9zu9ce6t"
+  ids = ["sp-ybruzckr8bgh9zrxw29v"]
 }

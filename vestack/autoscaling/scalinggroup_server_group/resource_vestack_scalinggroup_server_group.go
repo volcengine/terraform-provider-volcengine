@@ -56,6 +56,11 @@ func ResourceVestackScalinggroupServerGroup() *schema.Resource {
 							Description:  "The weight of the instance.",
 							ValidateFunc: validation.IntBetween(0, 100),
 						},
+						"load_balancer_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The load balancer id.",
+						},
 					},
 				},
 				Set: serverGroupAttributeHash,

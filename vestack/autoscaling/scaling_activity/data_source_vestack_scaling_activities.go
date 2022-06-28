@@ -23,6 +23,23 @@ func DataSourceVestackScalingActivities() *schema.Resource {
 				Required:    true,
 				Description: "A Id of Scaling Group.",
 			},
+			"start_time": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: timeValidation,
+				Description:  "A start time to start a Scaling Activity.",
+			},
+			"end_time": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: timeValidation,
+				Description:  "An end time to start a Scaling Activity.",
+			},
+			"status_code": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A status code of Scaling Activity.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -62,7 +79,7 @@ func DataSourceVestackScalingActivities() *schema.Resource {
 						"stopped_at": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The update time of Scaling Activity.",
+							Description: "The stopped time of Scaling Activity.",
 						},
 						"task_category": {
 							Type:        schema.TypeString,

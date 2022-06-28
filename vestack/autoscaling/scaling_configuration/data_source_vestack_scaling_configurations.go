@@ -2,6 +2,7 @@ package scaling_configuration
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
@@ -31,6 +32,12 @@ func DataSourceVestackScalingConfigurations() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "An id of scaling group.",
+			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of scaling configuration.",
 			},
 
 			"output_file": {

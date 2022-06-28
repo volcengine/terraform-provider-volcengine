@@ -39,6 +39,12 @@ func DataSourceVestackScalingPolicies() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Scheduled", "Recurrence", "Manual", "Alarm"}, false),
 				Description:  "A type of scaling policy.",
 			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of scaling policy.",
+			},
 
 			"output_file": {
 				Type:        schema.TypeString,

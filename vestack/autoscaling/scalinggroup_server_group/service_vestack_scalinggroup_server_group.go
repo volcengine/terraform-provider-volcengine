@@ -35,16 +35,16 @@ func (s *VestackScalinggroupServerGroupService) ReadResources(m map[string]inter
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		autoScalingClient := s.Client.AutoScalingClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeScalingGroups"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = autoScalingClient.DescribeScalingGroupsCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = autoScalingClient.DescribeScalingGroupsCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -121,7 +121,6 @@ func (s *VestackScalinggroupServerGroupService) RefreshResourceState(resourceDat
 			return demo, status.(string), err
 		},
 	}
-
 }
 
 func (VestackScalinggroupServerGroupService) WithResourceResponseHandlers(scalingGroup map[string]interface{}) []ve.ResourceResponseHandler {
@@ -135,7 +134,7 @@ func (VestackScalinggroupServerGroupService) WithResourceResponseHandlers(scalin
 func (s *VestackScalinggroupServerGroupService) CreateResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateScalingGroup",
+			Action:      "AttachServerGroups",
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
 				"server_group_attributes": {
@@ -144,7 +143,7 @@ func (s *VestackScalinggroupServerGroupService) CreateResource(resourceData *sch
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.AttachServerGroupsCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -206,13 +205,13 @@ func (s *VestackScalinggroupServerGroupService) ModifyResource(resourceData *sch
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.DetachServerGroupsCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
 	addLoadBalancerAttributeCallback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "AttachLoadBalancers",
+			Action:      "AttachServerGroups",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if attrAdd != nil && len(attrAdd.List()) > 0 {
@@ -231,7 +230,7 @@ func (s *VestackScalinggroupServerGroupService) ModifyResource(resourceData *sch
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.AttachServerGroupsCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -272,7 +271,7 @@ func (s *VestackScalinggroupServerGroupService) RemoveResource(resourceData *sch
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.DetachServerGroupsCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -303,4 +302,14 @@ func (s *VestackScalinggroupServerGroupService) DatasourceResources(*schema.Reso
 
 func (s *VestackScalinggroupServerGroupService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "auto_scaling",
+		Action:      actionName,
+		Version:     "2020-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+	}
 }

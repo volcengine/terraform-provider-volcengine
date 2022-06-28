@@ -34,16 +34,16 @@ func (s *VestackScalingActivityService) ReadResources(m map[string]interface{}) 
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		asClient := s.Client.AutoScalingClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeScalingActivities"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = asClient.DescribeScalingActivitiesCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = asClient.DescribeScalingActivitiesCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -133,4 +133,14 @@ func (s *VestackScalingActivityService) DatasourceResources(*schema.ResourceData
 
 func (s *VestackScalingActivityService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "auto_scaling",
+		Action:      actionName,
+		Version:     "2020-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+	}
 }

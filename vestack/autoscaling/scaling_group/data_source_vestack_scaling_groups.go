@@ -2,6 +2,7 @@ package scaling_group
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
@@ -26,6 +27,12 @@ func DataSourceVestackScalingGroups() *schema.Resource {
 				},
 				Set:         schema.HashString,
 				Description: "A list of scaling group names.",
+			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of scaling group.",
 			},
 
 			"output_file": {
@@ -134,6 +141,35 @@ func DataSourceVestackScalingGroups() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Description: "The list of db instance ids.",
+						},
+						"server_group_attributes": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"load_balancer_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The load balancer id.",
+									},
+									"port": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The port receiving request of the server group.",
+									},
+									"server_group_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The server group id.",
+									},
+									"weight": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The weight of the instance.",
+									},
+								},
+							},
+							Description: "The list of server group attributes.",
 						},
 					},
 				},

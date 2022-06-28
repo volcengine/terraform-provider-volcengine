@@ -2,6 +2,7 @@ package scaling_lifecycle_hook
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
@@ -32,6 +33,12 @@ func DataSourceVestackScalingLifecycleHooks() *schema.Resource {
 				},
 				Set:         schema.HashString,
 				Description: "A list of lifecycle hook names.",
+			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of lifecycle hook.",
 			},
 
 			"output_file": {

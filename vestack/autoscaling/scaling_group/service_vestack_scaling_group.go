@@ -3,6 +3,7 @@ package scaling_group
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -34,16 +35,16 @@ func (s *VestackScalingGroupService) ReadResources(m map[string]interface{}) (da
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		autoScalingClient := s.Client.AutoScalingClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeScalingGroups"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = autoScalingClient.DescribeScalingGroupsCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = autoScalingClient.DescribeScalingGroupsCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -179,7 +180,7 @@ func (s *VestackScalingGroupService) CreateResource(resourceData *schema.Resourc
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.CreateScalingGroupCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -250,57 +251,57 @@ func (s *VestackScalingGroupService) ModifyResource(resourceData *schema.Resourc
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.ModifyScalingGroupCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
 	callbacks = append(callbacks, modifyGroupCallback)
 
-	// 修改RDS属性, todo 接口升级后取消注释
-	//rdsAdd, rdsRemove, _, _ := ve.GetSetDifference("db_instance_ids", resourceData, schema.HashString, false)
-	//removeDBInstanceCallback := ve.Callback{
-	//	Call: ve.SdkCall{
-	//		Action:      "DetachDBInstances",
-	//		ConvertMode:    ve.RequestConvertIgnore,
-	//		BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-	//			if len(rdsRemove.List()) > 0 {
-	//				(*call.SdkParam)["ScalingGroupId"] = d.Id()
-	//				(*call.SdkParam)["ForceDetach"] = true
-	//				for index, dbId := range rdsRemove.List() {
-	//					(*call.SdkParam)["DBInstanceIds."+strconv.Itoa(index+1)] = dbId.(string)
-	//				}
-	//				return true, nil
-	//			}
-	//			return false, nil
-	//		},
-	//		ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-	//			logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-	//			return s.Client.AutoScalingClient.DetachDBInstancesCommon(call.SdkParam)
-	//		},
-	//	},
-	//}
-	//addDBInstanceCallback := ve.Callback{
-	//	Call: ve.SdkCall{
-	//		Action:      "AttachDBInstances",
-	//		ConvertMode:    ve.RequestConvertIgnore,
-	//		BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-	//			if len(rdsAdd.List()) > 0 {
-	//				(*call.SdkParam)["ScalingGroupId"] = d.Id()
-	//				(*call.SdkParam)["ForceAttach"] = true
-	//				for index, dbId := range rdsAdd.List() {
-	//					(*call.SdkParam)["DBInstanceIds."+strconv.Itoa(index+1)] = dbId.(string)
-	//				}
-	//				return true, nil
-	//			}
-	//			return false, nil
-	//		},
-	//		ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-	//			logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-	//			return s.Client.AutoScalingClient.AttachDBInstancesCommon(call.SdkParam)
-	//		},
-	//	},
-	//}
-	//callbacks = append(callbacks, removeDBInstanceCallback, addDBInstanceCallback)
+	// 修改RDS属性
+	rdsAdd, rdsRemove, _, _ := ve.GetSetDifference("db_instance_ids", resourceData, schema.HashString, false)
+	removeDBInstanceCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DetachDBInstances",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if rdsRemove != nil && len(rdsRemove.List()) > 0 {
+					(*call.SdkParam)["ScalingGroupId"] = d.Id()
+					(*call.SdkParam)["ForceDetach"] = true
+					for index, dbId := range rdsRemove.List() {
+						(*call.SdkParam)["DBInstanceIds."+strconv.Itoa(index+1)] = dbId.(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	addDBInstanceCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AttachDBInstances",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if rdsAdd != nil && len(rdsAdd.List()) > 0 {
+					(*call.SdkParam)["ScalingGroupId"] = d.Id()
+					(*call.SdkParam)["ForceAttach"] = true
+					for index, dbId := range rdsAdd.List() {
+						(*call.SdkParam)["DBInstanceIds."+strconv.Itoa(index+1)] = dbId.(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeDBInstanceCallback, addDBInstanceCallback)
 
 	return callbacks
 }
@@ -315,7 +316,7 @@ func (s *VestackScalingGroupService) RemoveResource(resourceData *schema.Resourc
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.AutoScalingClient.DeleteScalingGroupCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -375,4 +376,14 @@ func (s *VestackScalingGroupService) DatasourceResources(*schema.ResourceData, *
 
 func (s *VestackScalingGroupService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "auto_scaling",
+		Action:      actionName,
+		Version:     "2020-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+	}
 }

@@ -3,7 +3,7 @@ package scaling_instance_attach
 import (
 	"errors"
 	"fmt"
-	"strings"
+	"math"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -35,16 +35,15 @@ func (s *VestackScalingInstanceAttachService) ReadResources(m map[string]interfa
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 50, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		autoScalingClient := s.Client.AutoScalingClient
+		universalClient := s.Client.UniversalClient
 		action := "DescribeScalingInstances"
-		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = autoScalingClient.DescribeScalingInstancesCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = autoScalingClient.DescribeScalingInstancesCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -66,17 +65,16 @@ func (s *VestackScalingInstanceAttachService) ReadResources(m map[string]interfa
 
 func (s *VestackScalingInstanceAttachService) ReadResource(resourceData *schema.ResourceData, id string) (res map[string]interface{}, err error) {
 	var (
-		results []interface{}
-		lossIds []string
-		data    = make(map[string]interface{})
+		results     []interface{}
+		data        = make(map[string]interface{})
+		instanceIds = make([]string, 0)
 	)
 	if len(id) == 0 {
 		id = resourceData.Id()
 	}
-	ids := strings.Split(id, ":")
-	req := formatInstanceIdsRequest(ids[1:])
-	req["ScalingGroupId"] = ids[0]
-	results, err = s.ReadResources(req)
+
+	// 查询伸缩组下所有实例id
+	results, err = s.ReadResources(map[string]interface{}{"ScalingGroupId": id})
 	if err != nil {
 		return data, err
 	}
@@ -85,16 +83,23 @@ func (s *VestackScalingInstanceAttachService) ReadResource(resourceData *schema.
 		if !ok {
 			return data, errors.New("Value is not map ")
 		}
-		data[tmpData["InstanceId"].(string)] = tmpData
+		instanceIds = append(instanceIds, tmpData["InstanceId"].(string))
 	}
-	for _, tmpId := range ids[1:] {
-		if _, ok := data[tmpId]; !ok {
-			lossIds = append(lossIds, tmpId)
-		}
+
+	// 查看伸缩组状态
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeScalingGroups"),
+		&map[string]interface{}{"ScalingGroupIds.1": id})
+	if err != nil {
+		return data, fmt.Errorf("describe scaling group err: %s", err.Error())
 	}
-	if len(lossIds) > 0 {
-		return data, fmt.Errorf("instance not found: %s", strings.Join(lossIds, ","))
+	groups, err := ve.ObtainSdkValue("Result.ScalingGroups", *resp)
+	if groups == nil || len(groups.([]interface{})) == 0 {
+		return data, fmt.Errorf("scaling group %s not found", id)
 	}
+
+	data["InstanceIds"] = instanceIds
+	data["Status"] = groups.([]interface{})[0].(map[string]interface{})["LifecycleState"].(string)
+
 	return data, nil
 }
 
@@ -107,71 +112,26 @@ func (s *VestackScalingInstanceAttachService) RefreshResourceState(resourceData 
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				demo          map[string]interface{}
-				targetStatus  = target[0]
-				mutableStatus = map[string]bool{
-					"Init":     true,
-					"Pending":  true,
-					"Removing": true,
-				}
-				existIdMap        = make(map[string]bool)
-				existIds, lossIds []string
+				demo       map[string]interface{}
+				status     interface{}
+				failStates []string
 			)
-			ids := strings.Split(id, ":")[1:]
-
-			// 查看伸缩组状态
-			resp, err := s.Client.AutoScalingClient.DescribeScalingGroupsCommon(&map[string]interface{}{"ScalingGroupId": ids[0]})
-			if err != nil {
-				return resp, "Error", err
-			}
-			groups, err := ve.ObtainSdkValue("Result.ScalingGroups", *resp)
-			if err != nil || groups == nil {
-				return resp, "Error", errors.New("invalid scaling group id")
-			}
-			g := groups.([]interface{})
-			if len(g) == 0 {
-				return resp, "Error", errors.New("invalid scaling group id")
-			}
-			if g[0].(map[string]interface{})["LifecycleState"].(string) == "Locked" {
-				return g[0], "Locked", errors.New("scaling group has a active activity")
-			}
-
-			// 查看伸缩实例
+			failStates = append(failStates, "Error")
 			demo, err = s.ReadResource(resourceData, id)
-			if err != nil && !strings.Contains(err.Error(), "instance not found") {
+			if err != nil {
 				return nil, "", err
 			}
-			for instanceId, data := range demo {
-				tmpStatus, ok := data.(map[string]interface{})["Status"].(string)
-				if !ok {
-					return demo, "", errors.New("fail to get instance status")
-				}
-				if _, ok = mutableStatus[tmpStatus]; ok {
-					return nil, "", fmt.Errorf("instance %s is in mutable state: %s", instanceId, tmpStatus)
-				}
-				existIdMap[instanceId] = true
+			status, err = ve.ObtainSdkValue("Status", demo)
+			if err != nil {
+				return nil, "", err
 			}
-			for _, tmpId := range ids {
-				if existIdMap[tmpId] {
-					existIds = append(existIds, tmpId)
-				} else {
-					lossIds = append(lossIds, tmpId)
+			for _, v := range failStates {
+				if v == status.(string) {
+					return nil, "", fmt.Errorf("scaling group Status error, status:%s", status.(string))
 				}
 			}
-			if targetStatus == "Attached" {
-				if len(lossIds) == 0 {
-					return demo, targetStatus, nil
-				}
-				return demo, "Error", fmt.Errorf("%s attach fail", strings.Join(lossIds, "、"))
-			} else if targetStatus == "Removed" {
-				if len(existIds) == 0 {
-					return demo, targetStatus, nil
-				}
-				return demo, "Error", fmt.Errorf("%s remove fail", strings.Join(existIds, "、"))
-			}
-
 			//注意 返回的第一个参数不能为空 否则会一直等下去
-			return demo, "Error", fmt.Errorf("dont support target status: %s", targetStatus)
+			return demo, status.(string), err
 		},
 	}
 
@@ -187,7 +147,7 @@ func (VestackScalingInstanceAttachService) WithResourceResponseHandlers(scalingG
 
 func (s *VestackScalingInstanceAttachService) CreateResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	instanceIds := d.Get("instance_ids").(*schema.Set)
-	return []ve.Callback{s.attachInstances(d.Get("scaling_group_id").(string), convertSliceInterfaceToString(instanceIds.List()), d.Timeout(schema.TimeoutUpdate))}
+	return s.attachInstances(d.Get("scaling_group_id").(string), convertSliceInterfaceToString(instanceIds.List()), d.Timeout(schema.TimeoutUpdate))
 }
 
 func (s *VestackScalingInstanceAttachService) ModifyResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -198,24 +158,11 @@ func (s *VestackScalingInstanceAttachService) ModifyResource(d *schema.ResourceD
 
 	attachIds, removeIds, _, _ := ve.GetSetDifference("instance_ids", d, schema.HashString, false)
 	if removeIds != nil && removeIds.Len() > 0 {
-		callbacks = append(callbacks, s.removeInstances(scalingGroupId, convertSliceInterfaceToString(removeIds.List()), d.Timeout(schema.TimeoutUpdate)))
+		callbacks = append(callbacks, s.removeInstances(scalingGroupId, convertSliceInterfaceToString(removeIds.List()), d.Timeout(schema.TimeoutUpdate))...)
 	}
 
 	if attachIds != nil && attachIds.Len() > 0 {
-		callbacks = append(callbacks, s.attachInstances(scalingGroupId, convertSliceInterfaceToString(attachIds.List()), d.Timeout(schema.TimeoutUpdate)))
-	}
-
-	if len(callbacks) > 0 {
-		callbacks = append(callbacks, ve.Callback{
-			Call: ve.SdkCall{
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					// 更新resource id
-					d.SetId(fmt.Sprintf("%s:%s", d.Get("scaling_group_id"),
-						strings.Join(convertSliceInterfaceToString(d.Get("instance_ids").(*schema.Set).List()), ":")))
-					return &map[string]interface{}{}, nil
-				},
-			},
-		})
+		callbacks = append(callbacks, s.attachInstances(scalingGroupId, convertSliceInterfaceToString(attachIds.List()), d.Timeout(schema.TimeoutUpdate))...)
 	}
 
 	return callbacks
@@ -223,7 +170,7 @@ func (s *VestackScalingInstanceAttachService) ModifyResource(d *schema.ResourceD
 
 func (s *VestackScalingInstanceAttachService) RemoveResource(d *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	instanceIds := d.Get("instance_ids").(*schema.Set)
-	return []ve.Callback{s.removeInstances(d.Get("scaling_group_id").(string), convertSliceInterfaceToString(instanceIds.List()), d.Timeout(schema.TimeoutDelete))}
+	return s.removeInstances(d.Get("scaling_group_id").(string), convertSliceInterfaceToString(instanceIds.List()), d.Timeout(schema.TimeoutDelete))
 }
 
 func (s *VestackScalingInstanceAttachService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
@@ -234,67 +181,105 @@ func (s *VestackScalingInstanceAttachService) ReadResourceId(id string) string {
 	return id
 }
 
-func (s *VestackScalingInstanceAttachService) attachInstances(groupId string, instanceIds []string, timeout time.Duration) ve.Callback {
-	return ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "AttachInstances",
-			ConvertMode: ve.RequestConvertIgnore,
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(instanceIds) < 0 {
-					return false, nil
-				}
-				param := formatInstanceIdsRequest(instanceIds)
-				param["ScalingGroupId"] = groupId
-				*call.SdkParam = param
-				d.SetId(fmt.Sprintf("%s:%s", groupId, strings.Join(instanceIds, ":")))
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				common, err := s.Client.AutoScalingClient.AttachInstancesCommon(call.SdkParam)
-				if err != nil {
-					return common, err
-				}
-				time.Sleep(10 * time.Second) // attach以后需要等一下，否则查不到数据
-				return common, nil
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Attached"},
-				Timeout: timeout,
-			},
-		},
+func (s *VestackScalingInstanceAttachService) attachInstances(groupId string, instanceIds []string, timeout time.Duration) []ve.Callback {
+	callbacks := make([]ve.Callback, 0)
+	if len(instanceIds) == 0 {
+		return callbacks
 	}
+	for i := 0; i < int(math.Ceil(float64(len(instanceIds))/float64(20))); i++ {
+		max := (i + 1) * 20
+		if max > len(instanceIds) {
+			max = len(instanceIds)
+		}
+		callbacks = append(callbacks, func(ids []string) ve.Callback {
+			return ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "AttachInstances",
+					ConvertMode: ve.RequestConvertIgnore,
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						if len(ids) < 0 {
+							return false, nil
+						}
+						logger.Debug(logger.RespFormat, call.Action, ids)
+						param := formatInstanceIdsRequest(ids)
+						param["ScalingGroupId"] = groupId
+						*call.SdkParam = param
+						return true, nil
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						common, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						if err != nil {
+							return common, err
+						}
+						time.Sleep(10 * time.Second) // attach以后需要等一下
+						return common, nil
+					},
+					AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+						d.SetId(d.Get("scaling_group_id").(string))
+						return nil
+					},
+					Refresh: &ve.StateRefresh{
+						Target:  []string{"Active"},
+						Timeout: timeout,
+					},
+				},
+			}
+		}(instanceIds[i*20:max]))
+	}
+	return callbacks
 }
 
-func (s *VestackScalingInstanceAttachService) removeInstances(groupId string, instanceIds []string, timeout time.Duration) ve.Callback {
-	return ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "RemoveInstances",
-			ConvertMode: ve.RequestConvertIgnore,
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(instanceIds) < 0 {
-					return false, nil
-				}
-				param := formatInstanceIdsRequest(instanceIds)
-				param["ScalingGroupId"] = groupId
-				*call.SdkParam = param
-				d.SetId(fmt.Sprintf("%s:%s", groupId, strings.Join(instanceIds, ":")))
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				common, err := s.Client.AutoScalingClient.RemoveInstancesCommon(call.SdkParam)
-				if err != nil {
-					return common, err
-				}
-				time.Sleep(5 * time.Second)
-				d.SetId(fmt.Sprintf("%s:%s", groupId, strings.Join(instanceIds, ":")))
-				return common, nil
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Removed"},
-				Timeout: timeout,
-			},
-		},
+func (s *VestackScalingInstanceAttachService) removeInstances(groupId string, instanceIds []string, timeout time.Duration) []ve.Callback {
+	callbacks := make([]ve.Callback, 0)
+	if len(instanceIds) == 0 {
+		return callbacks
+	}
+	for i := 0; i < int(math.Ceil(float64(len(instanceIds))/float64(20))); i++ {
+		max := (i + 1) * 20
+		if max > len(instanceIds) {
+			max = len(instanceIds)
+		}
+		callbacks = append(callbacks, func(ids []string) ve.Callback {
+			return ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "RemoveInstances",
+					ConvertMode: ve.RequestConvertIgnore,
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						if len(ids) < 0 {
+							return false, nil
+						}
+						param := formatInstanceIdsRequest(ids)
+						param["ScalingGroupId"] = groupId
+						*call.SdkParam = param
+						return true, nil
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						common, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						if err != nil {
+							return common, err
+						}
+						time.Sleep(10 * time.Second) // remove以后需要等一下
+						return common, nil
+					},
+					Refresh: &ve.StateRefresh{
+						Target:  []string{"Active"},
+						Timeout: timeout,
+					},
+				},
+			}
+		}(instanceIds[i*20:max]))
+	}
+	return callbacks
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "auto_scaling",
+		Action:      actionName,
+		Version:     "2020-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 	}
 }
