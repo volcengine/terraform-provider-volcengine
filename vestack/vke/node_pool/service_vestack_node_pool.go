@@ -513,6 +513,19 @@ func (s *VestackNodePoolService) DatasourceResources(*schema.ResourceData, *sche
 					},
 				},
 			},
+			"cluster_ids": {
+				TargetField: "Filter.ClusterIds",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"name": {
+				TargetField: "Filter.Name",
+			},
+			"create_client_token": {
+				TargetField: "Filter.CreateClientToken",
+			},
+			"update_client_token": {
+				TargetField: "Filter.UpdateClientToken",
+			},
 		},
 		NameField:    "Name",
 		IdField:      "Id",

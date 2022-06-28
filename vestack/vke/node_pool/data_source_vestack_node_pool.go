@@ -64,6 +64,15 @@ func DataSourceVestackNodePools() *schema.Resource {
 				Optional:    true,
 				Description: "The ClusterId of NodePool.",
 			},
+			"cluster_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A ClusterIds of NodePool IDs.",
+			},
 			"create_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,

@@ -81,6 +81,15 @@ func ResourceVestackNodePool() *schema.Resource {
 				ForceNew:    true,
 				Description: "The clusterId  of NodePool.",
 			},
+			"cluster_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A clusterIds of NodePool.",
+			},
 			"client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
