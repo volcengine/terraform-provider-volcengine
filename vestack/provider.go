@@ -20,9 +20,12 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/vestack/ecs/zone"
 	"github.com/volcengine/terraform-provider-vestack/vestack/eip/eip_address"
 	"github.com/volcengine/terraform-provider-vestack/vestack/eip/eip_associate"
+	"github.com/volcengine/terraform-provider-vestack/vestack/iam/access_key"
 	"github.com/volcengine/terraform-provider-vestack/vestack/iam/iam_policy"
 	"github.com/volcengine/terraform-provider-vestack/vestack/iam/iam_role"
 	"github.com/volcengine/terraform-provider-vestack/vestack/iam/iam_role_policy_attachment"
+	"github.com/volcengine/terraform-provider-vestack/vestack/iam/iam_user"
+	"github.com/volcengine/terraform-provider-vestack/vestack/iam/login_profile"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/snat_entry"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface"
@@ -111,6 +114,9 @@ func Provider() terraform.ResourceProvider {
 			// ================ IAM ================
 			"vestack_iam_policies": iam_policy.DataSourceVestackIamPolicies(),
 			"vestack_iam_roles":    iam_role.DataSourceVestackIamRoles(),
+
+			// ================ IAM ================
+			"vestack_iam_users": iam_user.DataSourceVestackIamUsers(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"vestack_vpc":                      vpc.ResourceVestackVpc(),
@@ -153,6 +159,11 @@ func Provider() terraform.ResourceProvider {
 			"vestack_iam_policy":                 iam_policy.ResourceVestackIamPolicy(),
 			"vestack_iam_role":                   iam_role.ResourceVestackIamRole(),
 			"vestack_iam_role_policy_attachment": iam_role_policy_attachment.ResourceVestackIamRolePolicyAttachment(),
+
+			// ================ IAM ================
+			"vestack_access_key":    access_key.ResourceVestackAccessKey(),
+			"vestack_iam_user":      iam_user.ResourceVestackIamUser(),
+			"vestack_login_profile": login_profile.ResourceVestackLoginProfile(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
