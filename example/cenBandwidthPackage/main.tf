@@ -1,4 +1,4 @@
-resource "vestack_cen_bandwidth_package" "foo" {
+resource "volcengine_cen_bandwidth_package" "foo" {
   local_geographic_region_set_id = "China"
   peer_geographic_region_set_id = "China"
   bandwidth = 32

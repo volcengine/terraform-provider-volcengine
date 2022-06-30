@@ -7,7 +7,7 @@ LINUX_SUPPORT_GOARCH=("386" "amd64" "arm64" "arm")
 MAC_SUPPORT_GOARCH=("amd64" "arm64")
 WIN_SUPPORT_GOARCH=("386" "amd64")
 
-NAME="terraform-provider-vestack"
+NAME="terraform-provider-volcengine"
 set -ea
 
 for goos in "${SUPPORT_GOOS[@]}"

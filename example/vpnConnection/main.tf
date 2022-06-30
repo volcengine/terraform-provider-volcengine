@@ -1,4 +1,4 @@
-resource "vestack_vpn_connection" "foo" {
+resource "volcengine_vpn_connection" "foo" {
   vpn_connection_name = "tf-test"
   description = "tf-test"
   vpn_gateway_id = "vgw-2c012ea9fm5mo2dx0efxg46qi"

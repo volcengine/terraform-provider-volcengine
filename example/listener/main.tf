@@ -1,4 +1,4 @@
-resource "vestack_listener" "foo" {
+resource "volcengine_listener" "foo" {
   load_balancer_id = "clb-273ylkl0a3i807fap8t4unbsq"
   listener_name = "Demo-HTTP-90"
   protocol = "HTTP"

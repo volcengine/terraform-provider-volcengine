@@ -1,12 +1,12 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_certificate"
-sidebar_current: "docs-vestack-resource-certificate"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_certificate"
+sidebar_current: "docs-volcengine-resource-certificate"
 description: |-
   Provides a resource to manage certificate
 ---
-# vestack_certificate
+# volcengine_certificate
 Provides a resource to manage certificate
 ## Example Usage
 ```hcl
@@ -17,7 +17,7 @@ variable "certificate" {
   })
 }
 
-resource "vestack_certificate" "foo" {
+resource "volcengine_certificate" "foo" {
   certificate_name = "demo-certificate"
   description      = "This is a clb certificate"
   public_key       = var.certificate.public_key
@@ -40,6 +40,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Certificate can be imported using the id, e.g.
 ```
-$ terraform import vestack_certificate.default cert-2fe5k****c16o5oxruvtk3qf5
+$ terraform import volcengine_certificate.default cert-2fe5k****c16o5oxruvtk3qf5
 ```
 

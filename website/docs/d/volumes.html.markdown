@@ -1,16 +1,16 @@
 ---
 subcategory: "EBS"
-layout: "vestack"
-page_title: "Vestack: vestack_volumes"
-sidebar_current: "docs-vestack-datasource-volumes"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_volumes"
+sidebar_current: "docs-volcengine-datasource-volumes"
 description: |-
   Use this data source to query detailed information of volumes
 ---
-# vestack_volumes
+# volcengine_volumes
 Use this data source to query detailed information of volumes
 ## Example Usage
 ```hcl
-data "vestack_volumes" "default" {
+data "volcengine_volumes" "default" {
   ids = ["vol-3tzg6y5imn3b9fchkedb"]
 }
 ```

@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_network_interface_attach"
-sidebar_current: "docs-vestack-resource-network_interface_attach"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_network_interface_attach"
+sidebar_current: "docs-volcengine-resource-network_interface_attach"
 description: |-
   Provides a resource to manage network interface attach
 ---
-# vestack_network_interface_attach
+# volcengine_network_interface_attach
 Provides a resource to manage network interface attach
 ## Example Usage
 ```hcl
-resource "vestack_network_interface_attach" "foo" {
+resource "volcengine_network_interface_attach" "foo" {
   network_interface_id = "eni-274ecj646ylts7fap8t6xbba1"
   instance_id          = "i-72q20hi6s082wcafdem8"
 }
@@ -29,6 +29,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Network interface attach can be imported using the network_interface_id:instance_id.
 ```
-$ terraform import vestack_network_interface_attach.default eni-bp1fg655nh68xyz9***:i-wijfn35c****
+$ terraform import volcengine_network_interface_attach.default eni-bp1fg655nh68xyz9***:i-wijfn35c****
 ```
 

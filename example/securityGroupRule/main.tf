@@ -1,4 +1,4 @@
-resource "vestack_security_group_rule" "g1test3" {
+resource "volcengine_security_group_rule" "g1test3" {
   direction = "egress"
   security_group_id = "sg-273ycgql3ig3k7fap8t3dyvqx"
   protocol = "tcp"

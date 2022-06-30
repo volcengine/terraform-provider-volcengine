@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_listeners"
-sidebar_current: "docs-vestack-datasource-listeners"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_listeners"
+sidebar_current: "docs-volcengine-datasource-listeners"
 description: |-
   Use this data source to query detailed information of listeners
 ---
-# vestack_listeners
+# volcengine_listeners
 Use this data source to query detailed information of listeners
 ## Example Usage
 ```hcl
-data "vestack_listeners" "default" {
+data "volcengine_listeners" "default" {
   ids = ["lsn-273yv0mhs5xj47fap8sehiiso", "lsn-273yw6zps6pz47fap8swa0q2z"]
 }
 ```

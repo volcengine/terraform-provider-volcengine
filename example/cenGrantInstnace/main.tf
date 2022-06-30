@@ -1,4 +1,4 @@
-resource "vestack_cen_grant_instance" "foo" {
+resource "volcengine_cen_grant_instance" "foo" {
   cen_id = "cen-2d6zdn0c1z5s058ozfcyf4lee"
   cen_owner_id = "210000****"
   instance_type = "VPC"

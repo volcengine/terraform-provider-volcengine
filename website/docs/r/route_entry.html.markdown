@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_route_entry"
-sidebar_current: "docs-vestack-resource-route_entry"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_route_entry"
+sidebar_current: "docs-volcengine-resource-route_entry"
 description: |-
   Provides a resource to manage route entry
 ---
-# vestack_route_entry
+# volcengine_route_entry
 Provides a resource to manage route entry
 ## Example Usage
 ```hcl
-resource "vestack_route_entry" "foo" {
+resource "volcengine_route_entry" "foo" {
   route_table_id         = "vtb-2744hslq5b7r47fap8tjomgnj"
   destination_cidr_block = "0.0.0.0/2"
   next_hop_type          = "NatGW"
@@ -38,6 +38,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Route entry can be imported using the route_table_id:route_entry_id, e.g.
 ```
-$ terraform import vestack_route_entry.default vtb-274e19skkuhog7fap8u4i8ird:rte-274e1g9ei4k5c7fap8sp974fq
+$ terraform import volcengine_route_entry.default vtb-274e19skkuhog7fap8u4i8ird:rte-274e1g9ei4k5c7fap8sp974fq
 ```
 
