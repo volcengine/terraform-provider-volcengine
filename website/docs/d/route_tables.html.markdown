@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_route_tables"
-sidebar_current: "docs-vestack-datasource-route_tables"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_route_tables"
+sidebar_current: "docs-volcengine-datasource-route_tables"
 description: |-
   Use this data source to query detailed information of route tables
 ---
-# vestack_route_tables
+# volcengine_route_tables
 Use this data source to query detailed information of route tables
 ## Example Usage
 ```hcl
-data "vestack_route_tables" "default" {
+data "volcengine_route_tables" "default" {
   ids              = ["vtb-274e19skkuhog7fap8u4i8ird", "vtb-2744hslq5b7r47fap8tjomgnj"]
   route_table_name = "vpc-fast"
 }

@@ -1,4 +1,4 @@
-resource "vestack_scaling_configuration" "foo" {
+resource "volcengine_scaling_configuration" "foo" {
   active = true
   enable = true
   substitute = "scc-ybrudzwsi3l8j1uft1gh"

@@ -1,3 +1,3 @@
-data "vestack_ecs_instances" "foo" {
+data "volcengine_ecs_instances" "foo" {
   ids = ["i-ebgy6xmgjve0384ncgsc"]
 }

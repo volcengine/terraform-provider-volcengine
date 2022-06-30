@@ -1,4 +1,4 @@
-resource "vestack_scalinggroup_server_group" "foo" {
+resource "volcengine_scalinggroup_server_group" "foo" {
   scaling_group_id = "scg-ybru8pazhgl8j1di4tyd"
   server_group_attributes {
     port = 2

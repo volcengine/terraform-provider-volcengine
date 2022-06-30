@@ -5,7 +5,7 @@ variable "certificate" {
   })
 }
 
-resource "vestack_certificate" "foo" {
+resource "volcengine_certificate" "foo" {
   certificate_name = "demo-certificate"
   description = "This is a clb certificate"
   public_key = var.certificate.public_key

@@ -1,16 +1,16 @@
 ---
 subcategory: "EIP"
-layout: "vestack"
-page_title: "Vestack: vestack_eip_addresses"
-sidebar_current: "docs-vestack-datasource-eip_addresses"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_eip_addresses"
+sidebar_current: "docs-volcengine-datasource-eip_addresses"
 description: |-
   Use this data source to query detailed information of eip addresses
 ---
-# vestack_eip_addresses
+# volcengine_eip_addresses
 Use this data source to query detailed information of eip addresses
 ## Example Usage
 ```hcl
-data "vestack_eip_addresses" "default" {
+data "volcengine_eip_addresses" "default" {
   ids = ["eip-2748mbpjqzhfk7fap8teu0k1a"]
 }
 ```

@@ -1,4 +1,4 @@
-resource "vestack_scaling_group" "foo" {
+resource "volcengine_scaling_group" "foo" {
   scaling_group_name = "tf-test"
   subnet_ids = ["subnet-3relrtnt9piww5zsk2hpje6c5", "subnet-2d6g96vyl3r4058ozfdjdoprz"]
   multi_az_policy = "BALANCE"

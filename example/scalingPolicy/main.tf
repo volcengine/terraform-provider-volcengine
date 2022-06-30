@@ -1,4 +1,4 @@
-resource "vestack_scaling_policy" "foo" {
+resource "volcengine_scaling_policy" "foo" {
   active = false
   scaling_group_id = "scg-ybqm0b6kcigh9zu9ce6t"
   scaling_policy_name = "tf-test"

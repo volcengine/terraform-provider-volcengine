@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_clbs"
-sidebar_current: "docs-vestack-datasource-clbs"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_clbs"
+sidebar_current: "docs-volcengine-datasource-clbs"
 description: |-
   Use this data source to query detailed information of clbs
 ---
-# vestack_clbs
+# volcengine_clbs
 Use this data source to query detailed information of clbs
 ## Example Usage
 ```hcl
-data "vestack_clbs" "default" {
+data "volcengine_clbs" "default" {
   ids = ["clb-273y2ok6ets007fap8txvf6us"]
 }
 ```

@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_security_group_rule"
-sidebar_current: "docs-vestack-resource-security_group_rule"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_security_group_rule"
+sidebar_current: "docs-volcengine-resource-security_group_rule"
 description: |-
   Provides a resource to manage security group rule
 ---
-# vestack_security_group_rule
+# volcengine_security_group_rule
 Provides a resource to manage security group rule
 ## Example Usage
 ```hcl
-resource "vestack_security_group_rule" "g1test3" {
+resource "volcengine_security_group_rule" "g1test3" {
   direction         = "egress"
   security_group_id = "sg-273ycgql3ig3k7fap8t3dyvqx"
   protocol          = "tcp"
@@ -41,6 +41,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 SecurityGroupRule can be imported using the id, e.g.
 ```
-$ terraform import vestack_security_group_rule.default ID is a string concatenated with colons(SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp)
+$ terraform import volcengine_security_group_rule.default ID is a string concatenated with colons(SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp)
 ```
 
