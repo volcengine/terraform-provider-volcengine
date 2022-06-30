@@ -6,6 +6,16 @@ import (
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
+/*
+
+Import
+Iam policy can be imported using the id, e.g.
+```
+$ terraform import vestack_iam_policy.default TerraformTestPolicy
+```
+
+*/
+
 func ResourceVestackIamPolicy() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVestackIamPolicyCreate,

@@ -96,12 +96,8 @@ func (s *VestackIamPolicyService) RefreshResourceState(data *schema.ResourceData
 
 func (s *VestackIamPolicyService) WithResourceResponseHandlers(policy map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return policy, map[string]ve.ResponseConvert{
-			"PolicyName": {
-				KeepDefault: true,
-				TargetField: "id",
-			},
-		}, nil
+		policy["Id"] = policy["PolicyName"]
+		return policy, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }

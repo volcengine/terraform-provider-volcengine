@@ -22,6 +22,7 @@ import (
 	"github.com/volcengine/terraform-provider-vestack/vestack/eip/eip_associate"
 	"github.com/volcengine/terraform-provider-vestack/vestack/iam/iam_policy"
 	"github.com/volcengine/terraform-provider-vestack/vestack/iam/iam_role"
+	"github.com/volcengine/terraform-provider-vestack/vestack/iam/iam_role_policy_attachment"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-vestack/vestack/nat/snat_entry"
 	"github.com/volcengine/terraform-provider-vestack/vestack/vpc/network_interface"
@@ -149,8 +150,9 @@ func Provider() terraform.ResourceProvider {
 			"vestack_nat_gateway": nat_gateway.ResourceVestackNatGateway(),
 
 			// ================ IAM ================
-			"vestack_iam_policy": iam_policy.ResourceVestackIamPolicy(),
-			"vestack_iam_role":   iam_role.ResourceVestackIamRole(),
+			"vestack_iam_policy":                 iam_policy.ResourceVestackIamPolicy(),
+			"vestack_iam_role":                   iam_role.ResourceVestackIamRole(),
+			"vestack_iam_role_policy_attachment": iam_role_policy_attachment.ResourceVestackIamRolePolicyAttachment(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

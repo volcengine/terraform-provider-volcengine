@@ -6,6 +6,16 @@ import (
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 )
 
+/*
+
+Import
+Iam role can be imported using the id, e.g.
+```
+$ terraform import vestack_iam_role.default TerraformTestRole
+```
+
+*/
+
 func ResourceVestackIamRole() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVestackIamRoleCreate,

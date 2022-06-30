@@ -96,12 +96,8 @@ func (s *VestackIamRoleService) RefreshResourceState(data *schema.ResourceData, 
 
 func (s *VestackIamRoleService) WithResourceResponseHandlers(role map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return role, map[string]ve.ResponseConvert{
-			"RoleName": {
-				KeepDefault: true,
-				TargetField: "id",
-			},
-		}, nil
+		role["Id"] = role["RoleName"]
+		return role, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
