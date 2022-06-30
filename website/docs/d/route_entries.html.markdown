@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_route_entries"
-sidebar_current: "docs-vestack-datasource-route_entries"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_route_entries"
+sidebar_current: "docs-volcengine-datasource-route_entries"
 description: |-
   Use this data source to query detailed information of route entries
 ---
-# vestack_route_entries
+# volcengine_route_entries
 Use this data source to query detailed information of route entries
 ## Example Usage
 ```hcl
-data "vestack_route_entries" "default" {
+data "volcengine_route_entries" "default" {
   ids            = []
   route_table_id = "vtb-274e19skkuhog7fap8u4i8ird"
 }

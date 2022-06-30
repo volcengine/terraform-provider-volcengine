@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_route_table"
-sidebar_current: "docs-vestack-resource-route_table"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_route_table"
+sidebar_current: "docs-volcengine-resource-route_table"
 description: |-
   Provides a resource to manage route table
 ---
-# vestack_route_table
+# volcengine_route_table
 Provides a resource to manage route table
 ## Example Usage
 ```hcl
-resource "vestack_route_table" "foo" {
+resource "volcengine_route_table" "foo" {
   vpc_id           = "vpc-2744hsjr475s07fap8t4jbl1c"
   route_table_name = "tf-test1"
   description      = "tf-test1"
@@ -31,6 +31,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Route table can be imported using the id, e.g.
 ```
-$ terraform import vestack_route_table.default vtb-274e0syt9av407fap8tle16kb
+$ terraform import volcengine_route_table.default vtb-274e0syt9av407fap8tle16kb
 ```
 

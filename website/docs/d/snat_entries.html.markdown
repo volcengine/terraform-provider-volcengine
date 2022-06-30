@@ -1,16 +1,16 @@
 ---
 subcategory: "NAT"
-layout: "vestack"
-page_title: "Vestack: vestack_snat_entries"
-sidebar_current: "docs-vestack-datasource-snat_entries"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_snat_entries"
+sidebar_current: "docs-volcengine-datasource-snat_entries"
 description: |-
   Use this data source to query detailed information of snat entries
 ---
-# vestack_snat_entries
+# volcengine_snat_entries
 Use this data source to query detailed information of snat entries
 ## Example Usage
 ```hcl
-data "vestack_snat_entries" "default" {
+data "volcengine_snat_entries" "default" {
   ids = ["snat-274zl8b1kxzb47fap8u35uune"]
 }
 ```

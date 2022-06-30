@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_subnet"
-sidebar_current: "docs-vestack-resource-subnet"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_subnet"
+sidebar_current: "docs-volcengine-resource-subnet"
 description: |-
   Provides a resource to manage subnet
 ---
-# vestack_subnet
+# volcengine_subnet
 Provides a resource to manage subnet
 ## Example Usage
 ```hcl
-resource "vestack_subnet" "foo" {
+resource "volcengine_subnet" "foo" {
   subnet_name = "subnet-test-2"
   cidr_block  = "192.168.1.0/24"
   zone_id     = "cn-beijing"
@@ -35,6 +35,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Subnet can be imported using the id, e.g.
 ```
-$ terraform import vestack_subnet.default subnet-274oj9a8rs9a87fap8sf9515b
+$ terraform import volcengine_subnet.default subnet-274oj9a8rs9a87fap8sf9515b
 ```
 

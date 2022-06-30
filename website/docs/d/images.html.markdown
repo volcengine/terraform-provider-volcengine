@@ -1,16 +1,16 @@
 ---
 subcategory: "ECS"
-layout: "vestack"
-page_title: "Vestack: vestack_images"
-sidebar_current: "docs-vestack-datasource-images"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_images"
+sidebar_current: "docs-volcengine-datasource-images"
 description: |-
   Use this data source to query detailed information of images
 ---
-# vestack_images
+# volcengine_images
 Use this data source to query detailed information of images
 ## Example Usage
 ```hcl
-data "vestack_images" "default" {
+data "volcengine_images" "default" {
   ids = ["image-cm9ssb4eqmhdas306zlp", "image-ybkzct2rtj4ay5rmlfc3"]
 }
 ```

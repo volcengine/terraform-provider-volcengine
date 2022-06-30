@@ -1,4 +1,4 @@
-resource "vestack_demo" "default" {
+resource "volcengine_demo" "default" {
   name = "vif-name"
   network_interfaces  {
     subnet_id = "vnet-id"

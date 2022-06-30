@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_vpcs"
-sidebar_current: "docs-vestack-datasource-vpcs"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_vpcs"
+sidebar_current: "docs-volcengine-datasource-vpcs"
 description: |-
   Use this data source to query detailed information of vpcs
 ---
-# vestack_vpcs
+# volcengine_vpcs
 Use this data source to query detailed information of vpcs
 ## Example Usage
 ```hcl
-data "vestack_vpcs" "default" {
+data "volcengine_vpcs" "default" {
   ids = ["vpc-mizl7m1kqccg5smt1bdpijuj"]
 }
 ```

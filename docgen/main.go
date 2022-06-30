@@ -15,8 +15,8 @@ import (
 	"github.com/fatih/color"
 	"github.com/hashicorp/hcl/v2/hclwrite"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/volcengine/terraform-provider-vestack/common"
-	ve "github.com/volcengine/terraform-provider-vestack/vestack"
+	"github.com/volcengine/terraform-provider-volcengine/common"
+	ve "github.com/volcengine/terraform-provider-volcengine/volcengine"
 )
 
 const (
@@ -87,11 +87,11 @@ In addition to all arguments above, the following attributes are exported:
 )
 
 const (
-	cloudMark    = "vestack"
-	cloudTitle   = "Vestack"
+	cloudMark    = "volcengine"
+	cloudTitle   = "Volcengine"
 	cloudPrefix  = cloudMark + "_"
 	docRoot      = "/website"
-	providerRoot = "/vestack"
+	providerRoot = "/volcengine"
 	exampleRoot  = "/example"
 )
 
