@@ -1,3 +1,3 @@
-data "vestack_iam_policies" "default" {
+data "volcengine_iam_policies" "default" {
   query = "AdministratorAccess"
 }

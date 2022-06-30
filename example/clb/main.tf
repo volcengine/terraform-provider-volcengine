@@ -1,4 +1,4 @@
-resource "vestack_clb" "foo" {
+resource "volcengine_clb" "foo" {
   type = "public"
   subnet_id = "subnet-2744i7u9alnnk7fap8tkq8aft"
   load_balancer_spec = "small_1"

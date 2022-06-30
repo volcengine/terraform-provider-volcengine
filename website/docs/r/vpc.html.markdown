@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_vpc"
-sidebar_current: "docs-vestack-resource-vpc"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_vpc"
+sidebar_current: "docs-volcengine-resource-vpc"
 description: |-
   Provides a resource to manage vpc
 ---
-# vestack_vpc
+# volcengine_vpc
 Provides a resource to manage vpc
 ## Example Usage
 ```hcl
-resource "vestack_vpc" "foo" {
+resource "volcengine_vpc" "foo" {
   vpc_name    = "tf-test-2"
   cidr_block  = "172.16.0.0/16"
   dns_servers = ["8.8.8.8", "114.114.114.114"]
@@ -45,6 +45,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 VPC can be imported using the id, e.g.
 ```
-$ terraform import vestack_vpc.default vpc-mizl7m1kqccg5smt1bdpijuj
+$ terraform import volcengine_vpc.default vpc-mizl7m1kqccg5smt1bdpijuj
 ```
 

@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_certificates"
-sidebar_current: "docs-vestack-datasource-certificates"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_certificates"
+sidebar_current: "docs-volcengine-datasource-certificates"
 description: |-
   Use this data source to query detailed information of certificates
 ---
-# vestack_certificates
+# volcengine_certificates
 Use this data source to query detailed information of certificates
 ## Example Usage
 ```hcl
-data "vestack_certificates" "default" {
+data "volcengine_certificates" "default" {
   ids = ["cert-274scdwqufwg07fap8u5fu8pi"]
 }
 ```

@@ -1,2 +1,2 @@
-data "vestack_iam_roles" "default" {
+data "volcengine_iam_roles" "default" {
 }

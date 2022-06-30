@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_server_group"
-sidebar_current: "docs-vestack-resource-server_group"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_server_group"
+sidebar_current: "docs-volcengine-resource-server_group"
 description: |-
   Provides a resource to manage server group
 ---
-# vestack_server_group
+# volcengine_server_group
 Provides a resource to manage server group
 ## Example Usage
 ```hcl
-resource "vestack_server_group" "foo" {
+resource "volcengine_server_group" "foo" {
   load_balancer_id  = "clb-273z7d4r8tvk07fap8tsniyfe"
   server_group_name = "demo-demo11"
   description       = "hello demo11"
@@ -32,6 +32,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 ServerGroupServer can be imported using the id, e.g.
 ```
-$ terraform import vestack_server_group_server.default rs-3ciynux6i1x4w****rszh49sj
+$ terraform import volcengine_server_group_server.default rs-3ciynux6i1x4w****rszh49sj
 ```
 

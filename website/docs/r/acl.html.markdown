@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_acl"
-sidebar_current: "docs-vestack-resource-acl"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_acl"
+sidebar_current: "docs-volcengine-resource-acl"
 description: |-
   Provides a resource to manage acl
 ---
-# vestack_acl
+# volcengine_acl
 Provides a resource to manage acl
 ## Example Usage
 ```hcl
-resource "vestack_acl" "foo" {
+resource "volcengine_acl" "foo" {
   acl_name = "tf-test-2"
   acl_entries {
     entry       = "172.20.1.0/24"
@@ -43,6 +43,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Acl can be imported using the id, e.g.
 ```
-$ terraform import vestack_acl.default acl-mizl7m1kqccg5smt1bdpijuj
+$ terraform import volcengine_acl.default acl-mizl7m1kqccg5smt1bdpijuj
 ```
 

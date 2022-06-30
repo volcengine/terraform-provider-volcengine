@@ -1,16 +1,16 @@
 ---
 subcategory: "NAT"
-layout: "vestack"
-page_title: "Vestack: vestack_nat_gateway"
-sidebar_current: "docs-vestack-resource-nat_gateway"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_nat_gateway"
+sidebar_current: "docs-volcengine-resource-nat_gateway"
 description: |-
   Provides a resource to manage nat gateway
 ---
-# vestack_nat_gateway
+# volcengine_nat_gateway
 Provides a resource to manage nat gateway
 ## Example Usage
 ```hcl
-resource "vestack_nat_gateway" "foo" {
+resource "volcengine_nat_gateway" "foo" {
   vpc_id           = "vpc-2740cxyk9im0w7fap8u013dfe"
   subnet_id        = "subnet-2740cym8mv9q87fap8u3hfx4i"
   spec             = "Medium"
@@ -36,6 +36,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 NatGateway can be imported using the id, e.g.
 ```
-$ terraform import vestack_nat_gateway.default ngw-vv3t043k05sm****
+$ terraform import volcengine_nat_gateway.default ngw-vv3t043k05sm****
 ```
 

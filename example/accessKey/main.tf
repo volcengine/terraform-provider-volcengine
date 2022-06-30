@@ -1,4 +1,4 @@
-resource "vestack_access_key" "foo" {
+resource "volcengine_access_key" "foo" {
   user_name = "tf-test1"
   status = "active"
   secret_file = "./sk"

@@ -1,16 +1,16 @@
 ---
 subcategory: "EIP"
-layout: "vestack"
-page_title: "Vestack: vestack_eip_address"
-sidebar_current: "docs-vestack-resource-eip_address"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_eip_address"
+sidebar_current: "docs-volcengine-resource-eip_address"
 description: |-
   Provides a resource to manage eip address
 ---
-# vestack_eip_address
+# volcengine_eip_address
 Provides a resource to manage eip address
 ## Example Usage
 ```hcl
-resource "vestack_eip_address" "foo" {
+resource "volcengine_eip_address" "foo" {
   billing_type = "PostPaidByBandwidth"
   bandwidth    = 1
   isp          = "BGP"
@@ -36,6 +36,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Eip address can be imported using the id, e.g.
 ```
-$ terraform import vestack_eip_address.default eip-274oj9a8rs9a87fap8sf9515b
+$ terraform import volcengine_eip_address.default eip-274oj9a8rs9a87fap8sf9515b
 ```
 

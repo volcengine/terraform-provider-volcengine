@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_network_interface"
-sidebar_current: "docs-vestack-resource-network_interface"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_network_interface"
+sidebar_current: "docs-volcengine-resource-network_interface"
 description: |-
   Provides a resource to manage network interface
 ---
-# vestack_network_interface
+# volcengine_network_interface
 Provides a resource to manage network interface
 ## Example Usage
 ```hcl
-resource "vestack_network_interface" "foo" {
+resource "volcengine_network_interface" "foo" {
   subnet_id              = "subnet-2744ht7fhjthc7fap8tm10eqg"
   security_group_ids     = ["sg-2744hspo7jbpc7fap8t7lef1p"]
   primary_ip_address     = "192.168.0.253"
@@ -37,6 +37,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Network interface can be imported using the id, e.g.
 ```
-$ terraform import vestack_network_interface.default eni-bp1fgnh68xyz9****
+$ terraform import volcengine_network_interface.default eni-bp1fgnh68xyz9****
 ```
 
