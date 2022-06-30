@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_listener"
-sidebar_current: "docs-vestack-resource-listener"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_listener"
+sidebar_current: "docs-volcengine-resource-listener"
 description: |-
   Provides a resource to manage listener
 ---
-# vestack_listener
+# volcengine_listener
 Provides a resource to manage listener
 ## Example Usage
 ```hcl
-resource "vestack_listener" "foo" {
+resource "volcengine_listener" "foo" {
   load_balancer_id = "clb-273ylkl0a3i807fap8t4unbsq"
   listener_name    = "Demo-HTTP-90"
   protocol         = "HTTP"
@@ -68,6 +68,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Listener can be imported using the id, e.g.
 ```
-$ terraform import vestack_listener.default lsn-273yv0mhs5xj47fap8sehiiso
+$ terraform import volcengine_listener.default lsn-273yv0mhs5xj47fap8sehiiso
 ```
 

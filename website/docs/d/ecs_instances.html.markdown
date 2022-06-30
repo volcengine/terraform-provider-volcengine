@@ -1,16 +1,16 @@
 ---
 subcategory: "ECS"
-layout: "vestack"
-page_title: "Vestack: vestack_ecs_instances"
-sidebar_current: "docs-vestack-datasource-ecs_instances"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_ecs_instances"
+sidebar_current: "docs-volcengine-datasource-ecs_instances"
 description: |-
   Use this data source to query detailed information of ecs instances
 ---
-# vestack_ecs_instances
+# volcengine_ecs_instances
 Use this data source to query detailed information of ecs instances
 ## Example Usage
 ```hcl
-data "vestack_ecs_instances" "foo" {
+data "volcengine_ecs_instances" "foo" {
   ids = ["i-ebgy6xmgjve0384ncgsc"]
 }
 ```

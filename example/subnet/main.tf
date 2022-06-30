@@ -1,4 +1,4 @@
-resource "vestack_subnet" "foo" {
+resource "volcengine_subnet" "foo" {
   subnet_name = "subnet-test-2"
   cidr_block = "192.168.1.0/24"
   zone_id = "cn-beijing"

@@ -1,16 +1,16 @@
 ---
 subcategory: "NAT"
-layout: "vestack"
-page_title: "Vestack: vestack_snat_entry"
-sidebar_current: "docs-vestack-resource-snat_entry"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_snat_entry"
+sidebar_current: "docs-volcengine-resource-snat_entry"
 description: |-
   Provides a resource to manage snat entry
 ---
-# vestack_snat_entry
+# volcengine_snat_entry
 Provides a resource to manage snat entry
 ## Example Usage
 ```hcl
-resource "vestack_snat_entry" "foo" {
+resource "volcengine_snat_entry" "foo" {
   nat_gateway_id  = "ngw-2743w1f6iqby87fap8tvm9kop"
   subnet_id       = "subnet-2744i7u9alnnk7fap8tkq8aft"
   eip_id          = "eip-274zlae117nr47fap8tzl24v4"
@@ -33,6 +33,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Snat entry can be imported using the id, e.g.
 ```
-$ terraform import vestack_snat_entry.default snat-3fvhk47kf56****
+$ terraform import volcengine_snat_entry.default snat-3fvhk47kf56****
 ```
 

@@ -1,4 +1,4 @@
-resource "vestack_tos_object" "default" {
+resource "volcengine_tos_object" "default" {
   bucket_name = "test-xym-1"
   object_name = "demo_xym"
   file_path = "/Users/bytedance/Work/Go/build/test.txt"

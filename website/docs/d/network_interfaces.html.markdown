@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_network_interfaces"
-sidebar_current: "docs-vestack-datasource-network_interfaces"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_network_interfaces"
+sidebar_current: "docs-volcengine-datasource-network_interfaces"
 description: |-
   Use this data source to query detailed information of network interfaces
 ---
-# vestack_network_interfaces
+# volcengine_network_interfaces
 Use this data source to query detailed information of network interfaces
 ## Example Usage
 ```hcl
-data "vestack_network_interfaces" "default" {
+data "volcengine_network_interfaces" "default" {
   ids = ["eni-2744htx2w0j5s7fap8t3ivwze"]
 }
 ```

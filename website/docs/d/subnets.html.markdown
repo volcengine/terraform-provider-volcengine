@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_subnets"
-sidebar_current: "docs-vestack-datasource-subnets"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_subnets"
+sidebar_current: "docs-volcengine-datasource-subnets"
 description: |-
   Use this data source to query detailed information of subnets
 ---
-# vestack_subnets
+# volcengine_subnets
 Use this data source to query detailed information of subnets
 ## Example Usage
 ```hcl
-data "vestack_subnets" "default" {
+data "volcengine_subnets" "default" {
   ids = ["subnet-274zsa5kfmj287fap8soo5e19"]
 }
 ```

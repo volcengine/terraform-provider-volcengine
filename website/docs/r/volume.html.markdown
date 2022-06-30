@@ -1,16 +1,16 @@
 ---
 subcategory: "EBS"
-layout: "vestack"
-page_title: "Vestack: vestack_volume"
-sidebar_current: "docs-vestack-resource-volume"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_volume"
+sidebar_current: "docs-volcengine-resource-volume"
 description: |-
   Provides a resource to manage volume
 ---
-# vestack_volume
+# volcengine_volume
 Provides a resource to manage volume
 ## Example Usage
 ```hcl
-resource "vestack_volume" "foo" {
+resource "volcengine_volume" "foo" {
   volume_name = "terraform-test"
   zone_id     = "cn-lingqiu-a"
   volume_type = "PTSSD"
@@ -42,6 +42,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Volume can be imported using the id, e.g.
 ```
-$ terraform import vestack_volume.default vol-mizl7m1kqccg5smt1bdpijuj
+$ terraform import volcengine_volume.default vol-mizl7m1kqccg5smt1bdpijuj
 ```
 

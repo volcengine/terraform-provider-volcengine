@@ -1,3 +1,3 @@
-data "vestack_tos_buckets" "default" {
+data "volcengine_tos_buckets" "default" {
   name_regex= "test"
 }

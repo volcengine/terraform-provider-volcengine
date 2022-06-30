@@ -1,16 +1,16 @@
 ---
 subcategory: "ECS"
-layout: "vestack"
-page_title: "Vestack: vestack_ecs_instance_state"
-sidebar_current: "docs-vestack-resource-ecs_instance_state"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_ecs_instance_state"
+sidebar_current: "docs-volcengine-resource-ecs_instance_state"
 description: |-
   Provides a resource to manage ecs instance state
 ---
-# vestack_ecs_instance_state
+# volcengine_ecs_instance_state
 Provides a resource to manage ecs instance state
 ## Example Usage
 ```hcl
-resource "vestack_ecs_instance_state" "foo" {
+resource "volcengine_ecs_instance_state" "foo" {
   instance_id = "i-l8u2ai4j0fauo6mrpgk8"
   action      = "Start"
 }
@@ -30,6 +30,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 State Instance can be imported using the id, e.g.
 ```
-$ terraform import vestack_ecs_instance_state.default state:i-mizl7m1kqccg5smt1bdpijuj
+$ terraform import volcengine_ecs_instance_state.default state:i-mizl7m1kqccg5smt1bdpijuj
 ```
 

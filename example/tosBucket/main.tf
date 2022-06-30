@@ -1,4 +1,4 @@
-resource "vestack_tos_bucket" "default" {
+resource "volcengine_tos_bucket" "default" {
   bucket_name = "test-xym-1"
 #  storage_class ="IA"
   public_acl = "private"

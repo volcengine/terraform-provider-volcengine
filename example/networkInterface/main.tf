@@ -1,4 +1,4 @@
-resource "vestack_network_interface" "foo" {
+resource "volcengine_network_interface" "foo" {
   subnet_id = "subnet-2744ht7fhjthc7fap8tm10eqg"
   security_group_ids = ["sg-2744hspo7jbpc7fap8t7lef1p"]
   primary_ip_address = "192.168.0.253"
