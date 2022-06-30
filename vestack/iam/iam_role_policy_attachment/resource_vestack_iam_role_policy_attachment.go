@@ -65,14 +65,6 @@ func resourceVestackIamRolePolicyAttachmentRead(d *schema.ResourceData, meta int
 	return nil
 }
 
-func resourceVestackIamRolePolicyAttachmentUpdate(d *schema.ResourceData, meta interface{}) error {
-	iamRolePolicyAttachmentService := NewIamRolePolicyAttachmentService(meta.(*ve.SdkClient))
-	if err := iamRolePolicyAttachmentService.Dispatcher.Update(iamRolePolicyAttachmentService, d, ResourceVestackIamRolePolicyAttachment()); err != nil {
-		return fmt.Errorf("error on updating iam role policy attachment %q, %w", d.Id(), err)
-	}
-	return resourceVestackIamRolePolicyAttachmentRead(d, meta)
-}
-
 func resourceVestackIamRolePolicyAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	iamRolePolicyAttachmentService := NewIamRolePolicyAttachmentService(meta.(*ve.SdkClient))
 	if err := iamRolePolicyAttachmentService.Dispatcher.Delete(iamRolePolicyAttachmentService, d, ResourceVestackIamRolePolicyAttachment()); err != nil {
