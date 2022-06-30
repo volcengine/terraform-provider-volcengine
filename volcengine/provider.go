@@ -80,7 +80,7 @@ func Provider() terraform.ResourceProvider {
 			"disable_ssl": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("volcengine_DISABLE_SSL", nil),
+				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_DISABLE_SSL", nil),
 				Description: "Disable SSL for Volcengine Provider",
 			},
 		},
