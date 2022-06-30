@@ -1,7 +1,7 @@
 .idea/
 bin/
 vendor/
-terraform-provider-vestack
+terraform-provider-volcengine
 .terraform/
 *.tfstate
 *.tfstate.*
