@@ -2,11 +2,13 @@ package iam_policy
 
 import (
 	"errors"
+	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-vestack/common"
 	"github.com/volcengine/terraform-provider-vestack/logger"
-	"time"
 )
 
 type VestackIamPolicyService struct {
@@ -21,11 +23,11 @@ func NewIamPolicyService(c *ve.SdkClient) *VestackIamPolicyService {
 	}
 }
 
-func (v *VestackIamPolicyService) GetClient() *ve.SdkClient {
-	return v.Client
+func (s *VestackIamPolicyService) GetClient() *ve.SdkClient {
+	return s.Client
 }
 
-func (v *VestackIamPolicyService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VestackIamPolicyService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -35,12 +37,12 @@ func (v *VestackIamPolicyService) ReadResources(m map[string]interface{}) (data 
 		action := "ListPolicies"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = v.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = v.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -62,31 +64,146 @@ func (v *VestackIamPolicyService) ReadResources(m map[string]interface{}) (data 
 	})
 }
 
-func (v *VestackIamPolicyService) ReadResource(data *schema.ResourceData, s string) (map[string]interface{}, error) {
-	panic("implement me")
+func (s *VestackIamPolicyService) ReadResource(resourceData *schema.ResourceData, policyId string) (data map[string]interface{}, err error) {
+	var (
+		results []interface{}
+		ok      bool
+	)
+	if policyId == "" {
+		policyId = s.ReadResourceId(resourceData.Id())
+	}
+	req := map[string]interface{}{
+		"Query": policyId,
+	}
+	results, err = s.ReadResources(req)
+	if err != nil {
+		return data, err
+	}
+	for _, v := range results {
+		if data, ok = v.(map[string]interface{}); !ok {
+			return data, errors.New("value is not map")
+		}
+	}
+	if len(data) == 0 {
+		return data, fmt.Errorf("Policy %s not exist ", policyId)
+	}
+	return data, err
 }
 
-func (v *VestackIamPolicyService) RefreshResourceState(data *schema.ResourceData, strings []string, duration time.Duration, s string) *resource.StateChangeConf {
-	panic("implement me")
+func (s *VestackIamPolicyService) RefreshResourceState(data *schema.ResourceData, strings []string, duration time.Duration, id string) *resource.StateChangeConf {
+	return nil
 }
 
-func (v *VestackIamPolicyService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
-	panic("implement me")
+func (s *VestackIamPolicyService) WithResourceResponseHandlers(policy map[string]interface{}) []ve.ResourceResponseHandler {
+	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		return policy, map[string]ve.ResponseConvert{
+			"PolicyName": {
+				KeepDefault: true,
+				TargetField: "id",
+			},
+		}, nil
+	}
+	return []ve.ResourceResponseHandler{handler}
 }
 
-func (v *VestackIamPolicyService) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	panic("implement me")
+func (s *VestackIamPolicyService) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	createIamPolicyCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "CreatePolicy",
+			ConvertMode: ve.RequestConvertAll,
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				policyName, err := ve.ObtainSdkValue("Result.Policy.PolicyName", *resp)
+				if err != nil {
+					return err
+				}
+				d.SetId(policyName.(string))
+				return nil
+			},
+		},
+	}
+	return []ve.Callback{createIamPolicyCallback}
 }
 
-func (v *VestackIamPolicyService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	panic("implement me")
+func (s *VestackIamPolicyService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	updatePolicyCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UpdatePolicy",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["PolicyName"] = d.Get("policy_name")
+				if d.HasChange("policy_name") {
+					oldPolicyName, newPolicyName := d.GetChange("policy_name")
+					(*call.SdkParam)["PolicyName"] = oldPolicyName
+					(*call.SdkParam)["NewPolicyName"] = newPolicyName
+				}
+				if d.HasChange("policy_document") {
+					(*call.SdkParam)["NewPolicyDocument"] = d.Get("policy_document")
+				}
+				if d.HasChange("description") {
+					(*call.SdkParam)["NewDescription"] = d.Get("description")
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				if d.HasChange("policy_name") {
+					policyName, err := ve.ObtainSdkValue("Result.Policy.PolicyName", *resp)
+					if err != nil {
+						return err
+					}
+					d.SetId(policyName.(string))
+				}
+				return nil
+			},
+		},
+	}
+	return []ve.Callback{updatePolicyCallback}
 }
 
-func (v *VestackIamPolicyService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	panic("implement me")
+func (s *VestackIamPolicyService) RemoveResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	deletePolicyCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DeletePolicy",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["PolicyName"] = d.Id()
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading iam policy on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
+		},
+	}
+	return []ve.Callback{deletePolicyCallback}
 }
 
-func (v *VestackIamPolicyService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
+func (s *VestackIamPolicyService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"PolicyName": {
@@ -100,7 +217,7 @@ func (v *VestackIamPolicyService) DatasourceResources(data *schema.ResourceData,
 	}
 }
 
-func (v *VestackIamPolicyService) ReadResourceId(id string) string {
+func (s *VestackIamPolicyService) ReadResourceId(id string) string {
 	return id
 }
 

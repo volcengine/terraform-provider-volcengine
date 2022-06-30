@@ -15,7 +15,43 @@ func ResourceVestackIamPolicy() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
-		Schema: map[string]*schema.Schema{},
+		Schema: map[string]*schema.Schema{
+			"description": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The description of the Policy.",
+			},
+			"policy_document": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The document of the Policy.",
+			},
+			"policy_name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The name of the Policy.",
+			},
+			"policy_trn": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The resource name of the Policy.",
+			},
+			"policy_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The type of the Policy.",
+			},
+			"create_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The create time of the Policy.",
+			},
+			"update_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The update time of the Policy.",
+			},
+		},
 	}
 }
 
