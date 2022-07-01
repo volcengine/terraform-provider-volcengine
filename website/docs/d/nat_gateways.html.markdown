@@ -1,16 +1,16 @@
 ---
 subcategory: "NAT"
-layout: "vestack"
-page_title: "Vestack: vestack_nat_gateways"
-sidebar_current: "docs-vestack-datasource-nat_gateways"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_nat_gateways"
+sidebar_current: "docs-volcengine-datasource-nat_gateways"
 description: |-
   Use this data source to query detailed information of nat gateways
 ---
-# vestack_nat_gateways
+# volcengine_nat_gateways
 Use this data source to query detailed information of nat gateways
 ## Example Usage
 ```hcl
-data "vestack_nat_gateways" "default" {
+data "volcengine_nat_gateways" "default" {
   ids = ["ngw-2743w1f6iqby87fap8tvm9kop", "ngw-274gwbqe340zk7fap8spkzo7x"]
 }
 ```

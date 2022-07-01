@@ -1,4 +1,4 @@
-resource "vestack_vke_cluster" "foo" {
+resource "volcengine_vke_cluster" "foo" {
   name = "terraform-test-15"
   description = "created by terraform"
   delete_protection_enabled = false

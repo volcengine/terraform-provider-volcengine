@@ -1,16 +1,16 @@
 ---
 subcategory: "VPC"
-layout: "vestack"
-page_title: "Vestack: vestack_security_groups"
-sidebar_current: "docs-vestack-datasource-security_groups"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_security_groups"
+sidebar_current: "docs-volcengine-datasource-security_groups"
 description: |-
   Use this data source to query detailed information of security groups
 ---
-# vestack_security_groups
+# volcengine_security_groups
 Use this data source to query detailed information of security groups
 ## Example Usage
 ```hcl
-data "vestack_security_groups" "default" {
+data "volcengine_security_groups" "default" {
   ids = ["sg-273ycgql3ig3k7fap8t3dyvqx"]
 }
 ```

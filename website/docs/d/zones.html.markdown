@@ -1,16 +1,16 @@
 ---
 subcategory: "ECS"
-layout: "vestack"
-page_title: "Vestack: vestack_zones"
-sidebar_current: "docs-vestack-datasource-zones"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_zones"
+sidebar_current: "docs-volcengine-datasource-zones"
 description: |-
   Use this data source to query detailed information of zones
 ---
-# vestack_zones
+# volcengine_zones
 Use this data source to query detailed information of zones
 ## Example Usage
 ```hcl
-data "vestack_zones" "default" {
+data "volcengine_zones" "default" {
   ids = ["cn-lingqiu-a"]
 }
 ```

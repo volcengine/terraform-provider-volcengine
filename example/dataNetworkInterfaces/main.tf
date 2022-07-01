@@ -1,3 +1,3 @@
-data "vestack_network_interfaces" "default"{
+data "volcengine_network_interfaces" "default"{
   ids = ["eni-2744htx2w0j5s7fap8t3ivwze"]
 }

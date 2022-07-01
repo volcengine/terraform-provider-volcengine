@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_acls"
-sidebar_current: "docs-vestack-datasource-acls"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_acls"
+sidebar_current: "docs-volcengine-datasource-acls"
 description: |-
   Use this data source to query detailed information of acls
 ---
-# vestack_acls
+# volcengine_acls
 Use this data source to query detailed information of acls
 ## Example Usage
 ```hcl
-data "vestack_acls" "default" {
+data "volcengine_acls" "default" {
   ids = ["acl-3ti8n0rurx4bwbh9jzdy"]
 }
 ```

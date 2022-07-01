@@ -1,4 +1,4 @@
-resource "vestack_vke_node_pool" "vke_test" {
+resource "volcengine_vke_node_pool" "vke_test" {
     cluster_id = "ccah01nnqtofnluts98j0"
     name = "demo20"
     node_config {

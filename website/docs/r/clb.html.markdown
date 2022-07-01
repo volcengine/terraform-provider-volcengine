@@ -1,16 +1,16 @@
 ---
 subcategory: "CLB"
-layout: "vestack"
-page_title: "Vestack: vestack_clb"
-sidebar_current: "docs-vestack-resource-clb"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_clb"
+sidebar_current: "docs-volcengine-resource-clb"
 description: |-
   Provides a resource to manage clb
 ---
-# vestack_clb
+# volcengine_clb
 Provides a resource to manage clb
 ## Example Usage
 ```hcl
-resource "vestack_clb" "foo" {
+resource "volcengine_clb" "foo" {
   type               = "public"
   subnet_id          = "subnet-2744i7u9alnnk7fap8tkq8aft"
   load_balancer_spec = "small_1"
@@ -41,6 +41,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 CLB can be imported using the id, e.g.
 ```
-$ terraform import vestack_clb.default clb-273y2ok6ets007fap8txvf6us
+$ terraform import volcengine_clb.default clb-273y2ok6ets007fap8txvf6us
 ```
 

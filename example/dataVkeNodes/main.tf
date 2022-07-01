@@ -1,4 +1,4 @@
-data "vestack_vke_nodes" "default"{
+data "volcengine_vke_nodes" "default"{
   ids = ["ncaa3e5mrsferqkomi190"]
   cluster_ids = ["c123", "c456"]
   statuses {
