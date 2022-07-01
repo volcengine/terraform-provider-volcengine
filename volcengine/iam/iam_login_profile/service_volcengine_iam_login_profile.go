@@ -1,4 +1,4 @@
-package login_profile
+package iam_login_profile
 
 import (
 	"errors"
@@ -11,27 +11,27 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineLoginProfileService struct {
+type VolcengineIamLoginProfileService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewLoginProfileService(c *ve.SdkClient) *VolcengineLoginProfileService {
-	return &VolcengineLoginProfileService{
+func NewIamLoginProfileService(c *ve.SdkClient) *VolcengineIamLoginProfileService {
+	return &VolcengineIamLoginProfileService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineLoginProfileService) GetClient() *ve.SdkClient {
+func (s *VolcengineIamLoginProfileService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineLoginProfileService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineIamLoginProfileService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	return nil, nil
 }
 
-func (s *VolcengineLoginProfileService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineIamLoginProfileService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		result interface{}
 		ok     bool
@@ -61,11 +61,11 @@ func (s *VolcengineLoginProfileService) ReadResource(resourceData *schema.Resour
 	return data, err
 }
 
-func (s *VolcengineLoginProfileService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineIamLoginProfileService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{}
 }
 
-func (VolcengineLoginProfileService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineIamLoginProfileService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		delete(v, "Password")
 		return v, map[string]ve.ResponseConvert{}, nil
@@ -74,7 +74,7 @@ func (VolcengineLoginProfileService) WithResourceResponseHandlers(v map[string]i
 
 }
 
-func (s *VolcengineLoginProfileService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineIamLoginProfileService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateLoginProfile",
@@ -94,7 +94,7 @@ func (s *VolcengineLoginProfileService) CreateResource(resourceData *schema.Reso
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineLoginProfileService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineIamLoginProfileService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:         "UpdateLoginProfile",
@@ -109,7 +109,7 @@ func (s *VolcengineLoginProfileService) ModifyResource(resourceData *schema.Reso
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineLoginProfileService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineIamLoginProfileService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:         "DeleteLoginProfile",
@@ -125,11 +125,11 @@ func (s *VolcengineLoginProfileService) RemoveResource(resourceData *schema.Reso
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineLoginProfileService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineIamLoginProfileService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{}
 }
 
-func (s *VolcengineLoginProfileService) ReadResourceId(id string) string {
+func (s *VolcengineIamLoginProfileService) ReadResourceId(id string) string {
 	return id
 }
 

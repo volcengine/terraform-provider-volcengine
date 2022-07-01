@@ -169,18 +169,19 @@ func (s *VolcengineIamUserService) ModifyResource(resourceData *schema.ResourceD
 				"display_name": {
 					TargetField: "NewDisplayName",
 					ConvertType: ve.ConvertDefault,
+					Convert:     defaultConvert,
 				},
 				"mobile_phone": {
 					TargetField: "NewMobilePhone",
-					ConvertType: ve.ConvertDefault,
 				},
 				"email": {
 					TargetField: "NewEmail",
-					ConvertType: ve.ConvertDefault,
+					Convert:     defaultConvert,
 				},
 				"description": {
 					TargetField: "NewDescription",
 					ConvertType: ve.ConvertDefault,
+					Convert:     defaultConvert,
 				},
 			},
 			RequestIdField: "UserName",

@@ -1,4 +1,4 @@
-package access_key
+package iam_access_key
 
 import (
 	"fmt"
@@ -13,17 +13,17 @@ import (
 Import
 AccessKey can be imported using the AccessKeyId:UserName,  e.g.
 ```
-$ terraform import volcengine_access_key.default AKLTYmQ2MGFmY2RjNzAxNDQ3NDhiMTZjZmE3MGUyZ****:Name
+$ terraform import volcengine_iam_access_key.default AKLTYmQ2MGFmY2RjNzAxNDQ3NDhiMTZjZmE3MGUyZ****:Name
 ```
 
 */
 
-func ResourceVolcengineAccessKey() *schema.Resource {
+func ResourceVolcengineIamAccessKey() *schema.Resource {
 	resource := &schema.Resource{
-		Create: resourceVolcengineAccessKeyCreate,
-		Read:   resourceVolcengineAccessKeyRead,
-		Update: resourceVolcengineAccessKeyUpdate,
-		Delete: resourceVolcengineAccessKeyDelete,
+		Create: resourceVolcengineIamAccessKeyCreate,
+		Read:   resourceVolcengineIamAccessKeyRead,
+		Update: resourceVolcengineIamAccessKeyUpdate,
+		Delete: resourceVolcengineIamAccessKeyDelete,
 		Importer: &schema.ResourceImporter{
 			State: akSkImporter,
 		},
@@ -80,36 +80,36 @@ func ResourceVolcengineAccessKey() *schema.Resource {
 	return resource
 }
 
-func resourceVolcengineAccessKeyCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineAccessKey())
+func resourceVolcengineIamAccessKeyCreate(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Create(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on creating access key  %q, %s", d.Id(), err)
 	}
-	return resourceVolcengineAccessKeyRead(d, meta)
+	return resourceVolcengineIamAccessKeyRead(d, meta)
 }
 
-func resourceVolcengineAccessKeyRead(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineAccessKey())
+func resourceVolcengineIamAccessKeyRead(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Read(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on reading access key %q, %s", d.Id(), err)
 	}
 	return err
 }
 
-func resourceVolcengineAccessKeyUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineAccessKey())
+func resourceVolcengineIamAccessKeyUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Update(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on updating access key %q, %s", d.Id(), err)
 	}
-	return resourceVolcengineAccessKeyRead(d, meta)
+	return resourceVolcengineIamAccessKeyRead(d, meta)
 }
 
-func resourceVolcengineAccessKeyDelete(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineAccessKey())
+func resourceVolcengineIamAccessKeyDelete(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Delete(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on deleting access key %q, %s", d.Id(), err)
 	}
