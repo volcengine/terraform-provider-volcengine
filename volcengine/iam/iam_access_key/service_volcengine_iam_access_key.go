@@ -1,4 +1,4 @@
-package access_key
+package iam_access_key
 
 import (
 	"errors"
@@ -12,23 +12,23 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineAccessKeyService struct {
+type VolcengineIamAccessKeyService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewAccessKeyService(c *ve.SdkClient) *VolcengineAccessKeyService {
-	return &VolcengineAccessKeyService{
+func NewIamAccessKeyService(c *ve.SdkClient) *VolcengineIamAccessKeyService {
+	return &VolcengineIamAccessKeyService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineAccessKeyService) GetClient() *ve.SdkClient {
+func (s *VolcengineIamAccessKeyService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineAccessKeyService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineIamAccessKeyService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -90,7 +90,7 @@ func (s *VolcengineAccessKeyService) ReadResources(m map[string]interface{}) (da
 	return res, nil
 }
 
-func (s *VolcengineAccessKeyService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineIamAccessKeyService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -119,7 +119,7 @@ func (s *VolcengineAccessKeyService) ReadResource(resourceData *schema.ResourceD
 	return data, err
 }
 
-func (s *VolcengineAccessKeyService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineIamAccessKeyService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -153,7 +153,7 @@ func (s *VolcengineAccessKeyService) RefreshResourceState(resourceData *schema.R
 
 }
 
-func (VolcengineAccessKeyService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineIamAccessKeyService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return v, map[string]ve.ResponseConvert{}, nil
 	}
@@ -161,7 +161,7 @@ func (VolcengineAccessKeyService) WithResourceResponseHandlers(v map[string]inte
 
 }
 
-func (s *VolcengineAccessKeyService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineIamAccessKeyService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 
 	// 创建ak
@@ -220,7 +220,7 @@ func (s *VolcengineAccessKeyService) CreateResource(resourceData *schema.Resourc
 	return callbacks
 }
 
-func (s *VolcengineAccessKeyService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineIamAccessKeyService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 	if resourceData.HasChange("status") {
 		callbacks = append(callbacks, s.updateAccessKeyStatus(resourceData.Get("status").(string), resourceData))
@@ -228,7 +228,7 @@ func (s *VolcengineAccessKeyService) ModifyResource(resourceData *schema.Resourc
 	return callbacks
 }
 
-func (s *VolcengineAccessKeyService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineIamAccessKeyService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 
 	// 删除前需要将ak禁用
@@ -272,11 +272,11 @@ func (s *VolcengineAccessKeyService) RemoveResource(resourceData *schema.Resourc
 	return callbacks
 }
 
-func (s *VolcengineAccessKeyService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineIamAccessKeyService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{}
 }
 
-func (s *VolcengineAccessKeyService) ReadResourceId(id string) string {
+func (s *VolcengineIamAccessKeyService) ReadResourceId(id string) string {
 	return id
 }
 
@@ -290,7 +290,7 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 	}
 }
 
-func (s *VolcengineAccessKeyService) updateAccessKeyStatus(status string, resourceData *schema.ResourceData) ve.Callback {
+func (s *VolcengineIamAccessKeyService) updateAccessKeyStatus(status string, resourceData *schema.ResourceData) ve.Callback {
 	return ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateAccessKey",

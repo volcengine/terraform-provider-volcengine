@@ -10,7 +10,7 @@ import (
 /*
 
 Import
-IamUser can be imported using the UserName, e.g.
+Iam user can be imported using the UserName, e.g.
 ```
 $ terraform import volcengine_iam_user.default user_name
 ```
@@ -35,13 +35,13 @@ func ResourceVolcengineIamUser() *schema.Resource {
 			"display_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "The display name of the user.",
 			},
 			"mobile_phone": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The mobile phone of the user.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "The mobile phone of the user.",
+				DiffSuppressFunc: phoneDiffSuppressFunc,
 			},
 			"email": {
 				Type:        schema.TypeString,

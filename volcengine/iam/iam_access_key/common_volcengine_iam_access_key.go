@@ -1,4 +1,4 @@
-package access_key
+package iam_access_key
 
 import (
 	"fmt"
@@ -56,13 +56,14 @@ func getUserHomeDir() (string, error) {
 }
 
 var akSkImporter = func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
-	items := strings.Split(data.Id(), ":")
-	if len(items) < 1 || len(items) > 2 {
+	tmpId := data.Id()
+	items := strings.Split(tmpId, ":")
+	if len(items) < 1 {
 		return []*schema.ResourceData{data}, fmt.Errorf("import id must split with ':'")
 	}
 	data.SetId(items[0])
 	if len(items) > 1 {
-		if err := data.Set("user_name", items[1]); err != nil {
+		if err := data.Set("user_name", tmpId[len(items[0])+1:]); err != nil {
 			return []*schema.ResourceData{data}, err
 		}
 	}
