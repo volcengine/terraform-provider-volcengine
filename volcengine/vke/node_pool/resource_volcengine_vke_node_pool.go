@@ -2,6 +2,7 @@ package node_pool
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -263,6 +264,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						},
 					},
 				},
+				Description: "The Config of NodePool.",
 			},
 			"kubernetes_config": {
 				Type:     schema.TypeList,

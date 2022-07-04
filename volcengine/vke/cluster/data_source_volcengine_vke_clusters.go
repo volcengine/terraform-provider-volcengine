@@ -67,7 +67,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 			"statuses": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "The statuses of the cluster",
+				Description: "The statuses of the cluster.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"phase": {
