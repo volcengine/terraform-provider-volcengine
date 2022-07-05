@@ -76,12 +76,12 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 			"create_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The ClientToken when successfully created",
+				Description: "The ClientToken when successfully created.",
 			},
 			"update_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The ClientToken when last update was successful",
+				Description: "The ClientToken when last update was successful.",
 			},
 			"auto_scaling_enabled": {
 				Type:        schema.TypeBool,
@@ -107,7 +107,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"update_client_token": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The ClientToken when last update was successful",
+							Description: "The ClientToken when last update was successful.",
 						},
 						"cluster_id": {
 							Type:        schema.TypeString,

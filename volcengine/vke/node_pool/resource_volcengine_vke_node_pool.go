@@ -131,7 +131,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						},
 					},
 				},
-				Description: "The node pool elastic scaling configuration information",
+				Description: "The node pool elastic scaling configuration information.",
 			},
 			"node_config": {
 				Type:     schema.TypeList,
