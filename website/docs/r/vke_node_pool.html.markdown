@@ -41,21 +41,21 @@ resource "volcengine_vke_node_pool" "vke_test" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `auto_scaling_enabled` - (Optional) The Switch of AutoScaling.
-* `auto_scaling` - (Optional) The AutoScaling of NodePool.
+* `auto_scaling_enabled` - (Optional) Is enabled of AutoScaling.
+* `auto_scaling` - (Optional) The node pool elastic scaling configuration information.
 * `client_token` - (Optional) The ClientToken of NodePool.
-* `cluster_id` - (Optional, ForceNew) The clusterId  of NodePool.
+* `cluster_id` - (Optional, ForceNew) The ClusterId of NodePool.
 * `cluster_ids` - (Optional) The ClusterIds of NodePool.
-* `ids` - (Optional) A list of NodePool IDs.
+* `ids` - (Optional) The IDs of NodePool.
 * `kubernetes_config` - (Optional) The KubernetesConfig of NodeConfig.
 * `name` - (Optional) The Name of NodePool.
 * `node_config` - (Optional) The Config of NodePool.
-* `statuses` - (Optional) The Status of filter.
+* `statuses` - (Optional) The Status of NodePool.
 
 The `auto_scaling` object supports the following:
 
 * `desired_replicas` - (Optional) The DesiredReplicas of AutoScaling.
-* `enabled` - (Optional) The Enabled of AutoScaling.
+* `enabled` - (Optional) Is Enabled of AutoScaling.
 * `max_replicas` - (Optional) The MaxReplicas of AutoScaling.
 * `min_replicas` - (Optional) The MinReplicas of AutoScaling.
 * `priority` - (Optional) The Priority of AutoScaling.
@@ -63,7 +63,7 @@ The `auto_scaling` object supports the following:
 The `data_volumes` object supports the following:
 
 * `size` - (Optional, ForceNew) The Size of DataVolumes.
-* `type` - (Optional, ForceNew) The type of DataVolumes.
+* `type` - (Optional, ForceNew) The Type of DataVolumes.
 
 The `kubernetes_config` object supports the following:
 
@@ -85,7 +85,7 @@ The `node_config` object supports the following:
 
 * `additional_container_storage_enabled` - (Optional) The AdditionalContainerStorageEnabled of NodeConfig.
 * `data_volumes` - (Optional, ForceNew) The DataVolumes of NodeConfig.
-* `initialize_script` - (Optional) The InitializeScript of NodeConfig.
+* `initialize_script` - (Optional) The initializeScript of NodeConfig.
 * `instance_type_ids` - (Optional, ForceNew) The InstanceTypeIds of NodeConfig.
 * `security` - (Optional) The Security of NodeConfig.
 * `subnet_ids` - (Optional, ForceNew) The SubnetIds of NodeConfig.
@@ -99,13 +99,13 @@ The `security` object supports the following:
 
 The `statuses` object supports the following:
 
-* `conditions_type` - (Optional) The Type of NodePool Condition.
-* `phase` - (Optional) The Phase of NodePool.
+* `conditions_type` - (Optional) Indicates the status condition of the node pool in the active state.
+* `phase` - (Optional) The Phase of Status.
 
 The `system_volume` object supports the following:
 
 * `size` - (Optional, ForceNew) The Size of SystemVolume.
-* `type` - (Optional, ForceNew) The type of SystemVolume.
+* `type` - (Optional, ForceNew) The Type of SystemVolume.
 
 The `taints` object supports the following:
 
@@ -116,8 +116,8 @@ The `taints` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `create_client_token` - The create client token of NodePool.
-* `update_client_token` - The update client token of NodePool.
+* `create_client_token` - The CreateClientToken of NodePool.
+* `update_client_token` - The UpdateClientToken of NodePool.
 
 
 ## Import

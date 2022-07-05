@@ -54,14 +54,18 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"phase": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The Phase of Node.",
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"Creating", "Running", "Updating", "Deleting", "Failed"}, false),
+							Description:  "The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed`.",
 						},
 						"conditions_type": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The Type of Node Condition.",
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: "The Type of Node Condition, the value is `Progressing` or `Ok` or `Unschedulable` or `InitilizeFailed` or `Unknown`" +
+								" or `NotReady` or `Security` or `Balance` or `ResourceCleanupFailed`.",
+							ValidateFunc: validation.StringInSlice([]string{"Progressing", "Ok", "Unschedulable", "InitilizeFailed",
+								"NotReady", "Security", "Balance", "ResourceCleanupFailed", "Unknown"}, false),
 						},
 					},
 				},
