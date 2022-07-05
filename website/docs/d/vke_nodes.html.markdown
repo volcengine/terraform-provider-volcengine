@@ -36,8 +36,8 @@ The following arguments are supported:
 
 The `statuses` object supports the following:
 
-* `conditions_type` - (Optional) The Type of Node Condition.
-* `phase` - (Optional) The Phase of Node.
+* `conditions_type` - (Optional) The Type of Node Condition, the value is `Progressing` or `Ok` or `Unschedulable` or `InitilizeFailed` or `Unknown` or `NotReady` or `Security` or `Balance` or `ResourceCleanupFailed`.
+* `phase` - (Optional) The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
