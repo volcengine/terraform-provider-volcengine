@@ -53,14 +53,14 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return len(d.Id()) != 0
 				},
-				Description: "The flag of keep instance name.",
+				Description: "The flag of keep instance name, the value is `true` or `false`.",
 			},
 			"additional_container_storage_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
 				ForceNew:    true,
-				Description: "The flag of additional container storage enable.",
+				Description: "The flag of additional container storage enable, the value is `true` or `false`.",
 			},
 			"container_storage_path": {
 				Type:     schema.TypeString,

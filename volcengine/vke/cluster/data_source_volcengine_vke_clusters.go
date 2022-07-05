@@ -57,28 +57,28 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 			"delete_protection_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "The delete protection of the cluster.",
+				Description: "The delete protection of the cluster, the value is `true` or `false`.",
 			},
 			"pods_config_pod_network_mode": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The network mode of the pod.",
+				Description: "The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.",
 			},
 			"statuses": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "The statuses of the cluster.",
+				Description: "Array of cluster states to filter. (The elements of the array are logically ORed. A maximum of 15 state array elements can be filled at a time).",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"phase": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "The status of cluster.",
+							Description: "The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.",
 						},
 						"conditions_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "State conditions in the current primary state of the cluster.",
+							Description: "The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Balance`, `CreateError`, `ResourceCleanupFailed`, `Unknown`.",
 						},
 					},
 				},
@@ -86,12 +86,12 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 			"create_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "ClientToken when successfully created.",
+				Description: "ClientToken when the cluster is created successfully. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
 			},
 			"update_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "ClientToken when the last update was successful.",
+				Description: "The ClientToken when the last cluster update succeeded. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
 			},
 			"clusters": {
 				Description: "The collection of VkeCluster query.",
@@ -107,22 +107,22 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 						"create_client_token": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "ClientToken when successfully created.",
+							Description: "ClientToken on successful creation. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
 						},
 						"update_client_token": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "ClientToken when the last update was successful.",
+							Description: "ClientToken when the last update was successful. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
 						},
 						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The create time of the Cluster.",
+							Description: "Cluster creation time. UTC+0 time in standard RFC3339 format.",
 						},
 						"update_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The time the cluster was last admitted and executed/completed.",
+							Description: "The last time a request was accepted by the cluster and executed or completed. UTC+0 time in standard RFC3339 format.",
 						},
 						"name": {
 							Type:        schema.TypeString,
@@ -137,35 +137,35 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 						"delete_protection_enabled": {
 							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "The delete protection of the cluster.",
+							Description: "The delete protection of the cluster, the value is `true` or `false`.",
 						},
 						"kubernetes_version": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The version of Kubernetes specified when creating the VKE cluster.",
+							Description: "The Kubernetes version information corresponding to the cluster, specific to the patch version.",
 						},
 						"status": {
 							Type:        schema.TypeList,
 							MaxItems:    1,
 							Computed:    true,
-							Description: "The description of the cluster.",
+							Description: "The status of the cluster.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"phase": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The status of cluster.",
+										Description: "The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.",
 									},
 									"conditions": {
 										Type:        schema.TypeList,
 										Computed:    true,
-										Description: "State conditions in the current primary state of the cluster.",
+										Description: "The state condition in the current primary state of the cluster, that is, the reason for entering the primary state.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												"type": {
 													Type:        schema.TypeString,
 													Computed:    true,
-													Description: "State conditions in the current primary state of the cluster.",
+													Description: "The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Balance`, `CreateError`, `ResourceCleanupFailed`, `Unknown`.",
 												},
 											},
 										},
@@ -183,7 +183,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 									"vpc_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The VPC ID of the cluster control plane and the network of some nodes.",
+										Description: "The ID of the private network (VPC) where the network of the cluster control plane and some nodes is located.",
 									},
 									"subnet_ids": {
 										Type:     schema.TypeSet,
@@ -192,7 +192,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 											Type: schema.TypeString,
 										},
 										Set:         schema.HashString,
-										Description: "The list of Subnet IDs.",
+										Description: "The subnet ID for the cluster control plane to communicate within the private network.",
 									},
 									"security_group_ids": {
 										Type:     schema.TypeSet,
@@ -201,12 +201,12 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 											Type: schema.TypeString,
 										},
 										Set:         schema.HashString,
-										Description: "The list of Security Group IDs.",
+										Description: "The security group used by the cluster control plane and nodes.",
 									},
 									"api_server_public_access_enabled": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Description: "Cluster API Server public network access configuration.",
+										Description: "Cluster API Server public network access configuration, the value is `true` or `false`.",
 									},
 									"api_server_public_access_config": {
 										Type:        schema.TypeList,
@@ -225,12 +225,12 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 															"billing_type": {
 																Type:        schema.TypeString,
 																Computed:    true,
-																Description: "Billing type of public IP.",
+																Description: "Billing type of public IP, the value is `PostPaidByBandwidth` or `PostPaidByTraffic`.",
 															},
 															"bandwidth": {
 																Type:        schema.TypeInt,
 																Computed:    true,
-																Description: "Peak bandwidth of public IP.",
+																Description: "The peak bandwidth of the public IP, unit: Mbps.",
 															},
 															"isp": {
 																Type:        schema.TypeString,
@@ -247,7 +247,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 														Type: schema.TypeString,
 													},
 													Set:         schema.HashString,
-													Description: "IPv4 public network access whitelist.",
+													Description: "IPv4 public network access whitelist. A null value means all network segments (0.0.0.0/0) are allowed to pass.",
 												},
 											},
 										},
@@ -255,7 +255,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 									"resource_public_access_default_enabled": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Description: "Node public network access configuration.",
+										Description: "Node public network access configuration, the value is `true` or `false`.",
 									},
 									"api_server_endpoints": {
 										Type:        schema.TypeList,
@@ -310,7 +310,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 									"pod_network_mode": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Container Pod Network Type (CNI).",
+										Description: "Container Pod Network Type (CNI), the value is `Flannel` or `VpcCniShared`.",
 									},
 									"flannel_config": {
 										Type:        schema.TypeList,
@@ -326,12 +326,12 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 														Type: schema.TypeString,
 													},
 													Set:         schema.HashString,
-													Description: "Container Pod Network CIDR.",
+													Description: "Pod CIDR for the Flannel container network.",
 												},
 												"max_pods_per_node": {
 													Type:        schema.TypeInt,
 													Computed:    true,
-													Description: "Maximum number of Pod instances on a single node.",
+													Description: "The maximum number of single-node Pod instances for a Flannel container network.",
 												},
 											},
 										},
@@ -346,7 +346,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 												"vpc_id": {
 													Type:        schema.TypeString,
 													Computed:    true,
-													Description: "Maximum number of Pod instances on a single node.",
+													Description: "The private network where the cluster control plane network resides.",
 												},
 												"subnet_ids": {
 													Type:     schema.TypeSet,
@@ -355,7 +355,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 														Type: schema.TypeString,
 													},
 													Set:         schema.HashString,
-													Description: "List of subnets corresponding to the container Pod network.",
+													Description: "A list of Pod subnet IDs for the VPC-CNI container network.",
 												},
 											},
 										},

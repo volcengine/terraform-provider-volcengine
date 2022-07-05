@@ -35,23 +35,23 @@ func ResourceVolcengineNodePool() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set:         schema.HashString,
-				Description: "A list of NodePool IDs.",
+				Description: "The IDs of NodePool.",
 			},
 			"statuses": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				Description: "The Status of filter.",
+				Description: "The Status of NodePool.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"phase": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "The Phase of NodePool.",
+							Description: "The Phase of Status.",
 						},
 						"conditions_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "The Type of NodePool Condition.",
+							Description: "Indicates the status condition of the node pool in the active state.",
 						},
 					},
 				},
@@ -64,23 +64,23 @@ func ResourceVolcengineNodePool() *schema.Resource {
 			"create_client_token": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The create client token of NodePool.",
+				Description: "The CreateClientToken of NodePool.",
 			},
 			"update_client_token": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The update client token of NodePool.",
+				Description: "The UpdateClientToken of NodePool.",
 			},
 			"auto_scaling_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "The Switch of AutoScaling.",
+				Description: "Is enabled of AutoScaling.",
 			},
 			"cluster_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "The clusterId  of NodePool.",
+				Description: "The ClusterId of NodePool.",
 			},
 			"cluster_ids": {
 				Type:     schema.TypeSet,
@@ -105,7 +105,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "The Enabled of AutoScaling.",
+							Description: "Is Enabled of AutoScaling.",
 						},
 						"max_replicas": {
 							Type:         schema.TypeInt,
@@ -131,7 +131,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						},
 					},
 				},
-				Description: "The AutoScaling of NodePool.",
+				Description: "The node pool elastic scaling configuration information.",
 			},
 			"node_config": {
 				Type:     schema.TypeList,
@@ -215,7 +215,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Optional:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
-										Description:  "The type of SystemVolume.",
+										Description:  "The Type of SystemVolume.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
@@ -239,7 +239,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Optional:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
-										Description:  "The type of DataVolumes.",
+										Description:  "The Type of DataVolumes.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
@@ -255,7 +255,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"initialize_script": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "The InitializeScript of NodeConfig.",
+							Description: "The initializeScript of NodeConfig.",
 						},
 						"additional_container_storage_enabled": {
 							Type:        schema.TypeBool,
