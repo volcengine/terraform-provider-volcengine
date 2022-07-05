@@ -22,10 +22,10 @@ resource "volcengine_vke_node" "foo" {
 The following arguments are supported:
 * `cluster_id` - (Required, ForceNew) The cluster id.
 * `instance_id` - (Required, ForceNew) The instance id.
-* `additional_container_storage_enabled` - (Optional, ForceNew) The flag of additional container storage enable.
+* `additional_container_storage_enabled` - (Optional, ForceNew) The flag of additional container storage enable, the value is `true` or `false`.
 * `client_token` - (Optional, ForceNew) The client token.
 * `container_storage_path` - (Optional, ForceNew) The container storage path.
-* `keep_instance_name` - (Optional) The flag of keep instance name.
+* `keep_instance_name` - (Optional) The flag of keep instance name, the value is `true` or `false`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
