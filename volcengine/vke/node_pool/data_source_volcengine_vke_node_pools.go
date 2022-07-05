@@ -17,7 +17,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set:         schema.HashString,
-				Description: "A list of NodePool IDs.",
+				Description: "The IDs of NodePool.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -33,7 +33,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The total count of NodePools query.",
+				Description: "Returns the total amount of the data list.",
 			},
 			"statuses": {
 				Type:        schema.TypeList,
@@ -49,7 +49,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"conditions_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "The Type of Status.",
+							Description: "Indicates the status condition of the node pool in the active state.",
 						},
 					},
 				},
@@ -76,17 +76,17 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 			"create_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The create client token of NodePool.",
+				Description: "The ClientToken when successfully created.",
 			},
 			"update_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The update client token of NodePool.",
+				Description: "The ClientToken when last update was successful.",
 			},
 			"auto_scaling_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "The Switch of AutoScaling.",
+				Description: "Is enabled of AutoScaling.",
 			},
 			"node_pools": {
 				Description: "The collection of NodePools query.",
@@ -97,17 +97,17 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The ID of NodePool.",
+							Description: "The Id of NodePool.",
 						},
 						"create_client_token": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The CreateClientToken of NodePool.",
+							Description: "The ClientToken when successfully created.",
 						},
 						"update_client_token": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The UpdateClientToken of NodePool.",
+							Description: "The ClientToken when last update was successful.",
 						},
 						"cluster_id": {
 							Type:        schema.TypeString,
@@ -122,12 +122,12 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"description": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The description of NodePool.",
+							Description: "The Description of NodePool.",
 						},
 						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The CreateTime time of NodePool.",
+							Description: "The CreateTime of NodePool.",
 						},
 						"update_time": {
 							Type:        schema.TypeString,
@@ -150,7 +150,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"enabled": {
 							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "The switch of AutoScaling.",
+							Description: "Is Enabled of AutoScaling.",
 						},
 						"desired_replicas": {
 							Type:        schema.TypeInt,
@@ -195,12 +195,12 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 									"type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The type of SystemVolume.",
+										Description: "The Type of SystemVolume.",
 									},
 									"size": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The size of SystemVolume.",
+										Description: "The Size of SystemVolume.",
 									},
 								},
 							},
@@ -216,32 +216,32 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 									"total_count": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The totalCount of Node.",
+										Description: "The TotalCount of Node.",
 									},
 									"creating_count": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The creatingCount of Node.",
+										Description: "The CreatingCount of Node.",
 									},
 									"running_count": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The runningCount of Node.",
+										Description: "The RunningCount of Node.",
 									},
 									"updating_count": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The updatingCount of Node.",
+										Description: "The UpdatingCount of Node.",
 									},
 									"deleting_count": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The deletingCount of Node.",
+										Description: "The DeletingCount of Node.",
 									},
 									"failed_count": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The failedCount of Node.",
+										Description: "The FailedCount of Node.",
 									},
 								},
 							},
@@ -255,7 +255,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"label_content": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Description: "The Labels of KubernetesConfig.",
+							Description: "The LabelContent of KubernetesConfig.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"key": {
@@ -279,12 +279,12 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 									"type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The type of DataVolume.",
+										Description: "The Type of DataVolume.",
 									},
 									"size": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The size of DataVolume.",
+										Description: "The Size of DataVolume.",
 									},
 								},
 							},
@@ -298,26 +298,26 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 									"key": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The key of Taint.",
+										Description: "The Key of Taint.",
 									},
 									"value": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The value of Taint.",
+										Description: "The Value of Taint.",
 									},
 									"effect": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The effect of Taint.",
+										Description: "The Effect of Taint.",
 									},
 								},
 							},
-							Description: "The taintContent of NodeConfig.",
+							Description: "The TaintContent of NodeConfig.",
 						},
 						"additional_container_storage_enabled": {
 							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "The additionalContainerStorageEnabled of NodeConfig.",
+							Description: "Is AdditionalContainerStorageEnabled of NodeConfig.",
 						},
 						"instance_type_ids": {
 							Type:     schema.TypeList,
