@@ -11,10 +11,7 @@ import (
 /*
 
 Import
-AccessKey can be imported using the AccessKeyId:UserName,  e.g.
-```
-$ terraform import volcengine_iam_access_key.default AKLTYmQ2MGFmY2RjNzAxNDQ3NDhiMTZjZmE3MGUyZ****:Name
-```
+Iam access key don't support import
 
 */
 
@@ -24,9 +21,6 @@ func ResourceVolcengineIamAccessKey() *schema.Resource {
 		Read:   resourceVolcengineIamAccessKeyRead,
 		Update: resourceVolcengineIamAccessKeyUpdate,
 		Delete: resourceVolcengineIamAccessKeyDelete,
-		Importer: &schema.ResourceImporter{
-			State: akSkImporter,
-		},
 		Schema: map[string]*schema.Schema{
 			"user_name": {
 				Type:        schema.TypeString,
