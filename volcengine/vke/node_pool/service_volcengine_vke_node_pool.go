@@ -431,23 +431,23 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"enabled": {
 							ForceGet: true,
-							ConvertType: ve.ConvertJsonObject,
+							TargetField: "Enabled",
 						},
 						"max_replicas": {
 							ForceGet: true,
-							ConvertType: ve.ConvertJsonObject,
+							TargetField: "MaxReplicas",
 						},
 						"min_replicas": {
 							ForceGet: true,
-							ConvertType: ve.ConvertJsonObject,
+							TargetField: "MinReplicas",
 						},
 						"desired_replicas": {
 							ForceGet: true,
-							ConvertType: ve.ConvertJsonObject,
+							TargetField: "DesiredReplicas",
 						},
 						"priority": {
-							//ForceGet: true,
-							ConvertType: ve.ConvertJsonObject,
+							ForceGet: true,
+							TargetField: "Priority",
 						},
 					},
 				},
@@ -455,7 +455,6 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
-
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
