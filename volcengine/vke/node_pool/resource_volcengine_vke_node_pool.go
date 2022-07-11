@@ -105,27 +105,32 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Computed:    true,
 							Description: "Is Enabled of AutoScaling.",
 						},
 						"max_replicas": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 1000),
 							Description:  "The MaxReplicas of AutoScaling.",
 						},
 						"min_replicas": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: "The MinReplicas of AutoScaling.",
 						},
 						"desired_replicas": {
 							Type:        schema.TypeInt,
 							Optional:    true,
+							Computed:    true,
 							Description: "The DesiredReplicas of AutoScaling.",
 						},
 						"priority": {
 							Type:         schema.TypeInt,
 							Optional:     true,
+							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
 							Description:  "The Priority of AutoScaling.",
 						},
@@ -166,6 +171,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 									"security_group_ids": {
 										Type:     schema.TypeList,
 										Optional: true,
+										Computed: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},

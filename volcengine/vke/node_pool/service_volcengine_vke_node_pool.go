@@ -305,19 +305,24 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"enabled": {
-							ConvertType: ve.ConvertJsonObject,
+							ForceGet: true,
+							TargetField: "Enabled",
 						},
 						"max_replicas": {
-							ConvertType: ve.ConvertJsonObject,
+							ForceGet: true,
+							TargetField: "MaxReplicas",
 						},
 						"min_replicas": {
-							ConvertType: ve.ConvertJsonObject,
+							ForceGet: true,
+							TargetField: "MinReplicas",
 						},
 						"desired_replicas": {
-							ConvertType: ve.ConvertJsonObject,
+							ForceGet: true,
+							TargetField: "DesiredReplicas",
 						},
 						"priority": {
-							ConvertType: ve.ConvertJsonObject,
+							ForceGet: true,
+							TargetField: "Priority",
 						},
 					},
 				},
@@ -425,18 +430,23 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"enabled": {
+							ForceGet: true,
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"max_replicas": {
+							ForceGet: true,
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"min_replicas": {
+							ForceGet: true,
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"desired_replicas": {
+							ForceGet: true,
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"priority": {
+							//ForceGet: true,
 							ConvertType: ve.ConvertJsonObject,
 						},
 					},
@@ -445,6 +455,7 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
