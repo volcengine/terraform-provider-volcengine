@@ -1,8 +1,10 @@
 package volcengine
 
 import (
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"strings"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -117,9 +119,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nat_gateways": nat_gateway.DataSourceVolcengineNatGateways(),
 
 			// ================ VKE ================
-			"volcengine_vke_nodes":    node.DataSourceVolcengineVkeNodes(),
-			"volcengine_vke_clusters": cluster.DataSourceVolcengineVkeVkeClusters(),
+			"volcengine_vke_nodes":      node.DataSourceVolcengineVkeNodes(),
+			"volcengine_vke_clusters":   cluster.DataSourceVolcengineVkeVkeClusters(),
 			"volcengine_vke_node_pools": node_pool.DataSourceVolcengineNodePools(),
+
+			// ================ RDS V1 ==============
+			"volcengine_rds_instances": rds_instance.DataSourceVolcengineRdsInstances(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -159,9 +164,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
 
 			// ================ VKE ================
-			"volcengine_vke_node":    node.ResourceVolcengineVkeNode(),
-			"volcengine_vke_cluster": cluster.ResourceVolcengineVkeCluster(),
+			"volcengine_vke_node":      node.ResourceVolcengineVkeNode(),
+			"volcengine_vke_cluster":   cluster.ResourceVolcengineVkeCluster(),
 			"volcengine_vke_node_pool": node_pool.ResourceVolcengineNodePool(),
+
+			// ================ RDS V1 ==============
+			"volcengine_rds_instance": rds_instance.ResourceVolcengineRdsInstance(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
