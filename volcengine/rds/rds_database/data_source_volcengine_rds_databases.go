@@ -1,4 +1,4 @@
-package database
+package rds_database
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
