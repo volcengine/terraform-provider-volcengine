@@ -445,7 +445,7 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 	}
 
 	if resourceData.HasChange("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth") &&
-		!resourceData.HasChange("cluster_config.0.api_server_public_access_enabled"){
+		!resourceData.HasChange("cluster_config.0.api_server_public_access_enabled") {
 		// enable public access, vke will create eip automatic
 		eipAllocationId := resourceData.Get("eip_allocation_id").(string)
 		modifyEipCallback := ve.Callback{
