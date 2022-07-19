@@ -42,7 +42,7 @@ func ResourceVolcengineRdsAccount() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The password of the database account.\nillustrate\nCannot start with ! or @.\nThe length is 8~32 characters.\nIt consists of any three of uppercase letters, lowercase letters, numbers, and special characters.\nThe special characters are `!@#$%^*()_+-=`.",
+				Description: "The password of the database account.\nillustrate\nCannot start with `!` or `@`.\nThe length is 8~32 characters.\nIt consists of any three of uppercase letters, lowercase letters, numbers, and special characters.\nThe special characters are `!@#$%^*()_+-=`.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() != ""
 				},
