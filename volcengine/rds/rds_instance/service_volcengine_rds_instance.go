@@ -29,11 +29,12 @@ func (s *VolcengineRdsInstanceService) GetClient() *volc.SdkClient {
 
 func (s *VolcengineRdsInstanceService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		resp        *map[string]interface{}
+		results     interface{}
+		ok          bool
+		rdsInstance map[string]interface{}
 	)
-	return volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) ([]interface{}, error) {
+	data, err = volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "ListDBInstances"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
@@ -60,6 +61,34 @@ func (s *VolcengineRdsInstanceService) ReadResources(m map[string]interface{}) (
 		}
 		return data, err
 	})
+	if err != nil {
+		return data, err
+	}
+
+	for _, v := range data {
+		if rdsInstance, ok = v.(map[string]interface{}); !ok {
+			return data, errors.New("Value is not map ")
+		} else {
+			// query rds connection info
+			connResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeDBInstanceConnection"), &map[string]interface{}{
+				"InstanceId": rdsInstance["InstanceId"],
+			})
+			if err != nil {
+				logger.Info("DescribeDBInstanceConnection error:", err)
+				continue
+			}
+			connInfo, err := volc.ObtainSdkValue("Result.ConnectionInfo", *connResp)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.ConnectionInfo error:", err)
+				continue
+			}
+			if connInfo != nil {
+				rdsInstance["ConnectionInfo"] = connInfo
+			}
+		}
+	}
+
+	return data, err
 }
 
 func (s *VolcengineRdsInstanceService) ReadResource(resourceData *schema.ResourceData, rdsInstanceId string) (data map[string]interface{}, err error) {
@@ -83,22 +112,7 @@ func (s *VolcengineRdsInstanceService) ReadResource(resourceData *schema.Resourc
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("RdsInstance %s not exist ", rdsInstanceId)
-	}
-
-	// query rds connection info
-	connResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeDBInstanceConnection"), &map[string]interface{}{
-		"InstanceId": rdsInstanceId,
-	})
-	if err != nil {
-		return data, err
-	}
-	connInfo, err := volc.ObtainSdkValue("Result.ConnectionInfo", *connResp)
-	if err != nil {
-		return data, err
-	}
-	if connInfo != nil {
-		data["ConnectionInfo"] = connInfo
+		return data, fmt.Errorf("Rds instance %s not exist ", rdsInstanceId)
 	}
 
 	return data, err
@@ -128,7 +142,7 @@ func (s *VolcengineRdsInstanceService) RefreshResourceState(resourceData *schema
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("RdsInstance  status  error, status:%s", status.(string))
+					return nil, "", fmt.Errorf("Rds instance status error, status:%s ", status.(string))
 				}
 			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
@@ -172,6 +186,7 @@ func (s *VolcengineRdsInstanceService) CreateResource(resourceData *schema.Resou
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "CreateDBInstance",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertAll,
 			Convert: map[string]volc.RequestConvert{
 				"db_engine": {
@@ -216,6 +231,7 @@ func (s *VolcengineRdsInstanceService) RemoveResource(resourceData *schema.Resou
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "DeleteDBInstance",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertIgnore,
 			SdkParam: &map[string]interface{}{
 				"InstanceId": resourceData.Id(),
@@ -233,7 +249,7 @@ func (s *VolcengineRdsInstanceService) RemoveResource(resourceData *schema.Resou
 						if volc.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading rdsInstance on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading rds instance on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
@@ -250,12 +266,7 @@ func (s *VolcengineRdsInstanceService) RemoveResource(resourceData *schema.Resou
 
 func (s *VolcengineRdsInstanceService) DatasourceResources(*schema.ResourceData, *schema.Resource) volc.DataSourceInfo {
 	return volc.DataSourceInfo{
-		RequestConverts: map[string]volc.RequestConvert{
-			"ids": {
-				TargetField: "InstanceIds",
-				ConvertType: volc.ConvertWithN,
-			},
-		},
+		ContentType:  volc.ContentTypeJson,
 		NameField:    "InstanceName",
 		IdField:      "InstanceId",
 		CollectField: "rds_instances",

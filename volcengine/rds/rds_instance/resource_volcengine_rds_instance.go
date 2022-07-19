@@ -34,7 +34,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			},
 			"region": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The region of the RDS instance.",
 			},
@@ -46,7 +46,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			},
 			"db_engine": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The engine of the RDS instance.",
 			},
@@ -121,6 +121,18 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Description: "The purchase time of RDS instance.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Select the project to which the instance belongs. If this parameter is left blank, the new instance will not be added to any project.",
+			},
+			"subnet_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Subnet ID. The subnet must belong to the selected Availability Zone.",
 			},
 			"connection_info": {
 				Type:        schema.TypeList,

@@ -29,7 +29,7 @@ func ResourceVolcengineRdsAccount() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The ID of the RDS instance.",
 			},
@@ -42,6 +42,7 @@ func ResourceVolcengineRdsAccount() *schema.Resource {
 			"account_password": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The password of the database account.",
 			},
 			"account_type": {
