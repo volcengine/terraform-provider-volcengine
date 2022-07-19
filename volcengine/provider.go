@@ -1,6 +1,10 @@
 package volcengine
 
 import (
+	"strings"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -29,6 +33,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/route_entry"
@@ -79,6 +85,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_DISABLE_SSL", nil),
 				Description: "Disable SSL for Volcengine Provider",
 			},
+			"customer_headers": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_HEADERS", nil),
+				Description: "CUSTOMER HEADERS for Volcengine Provider",
+			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"volcengine_vpcs":               vpc.DataSourceVolcengineVpcs(),
@@ -111,6 +123,11 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
 			"volcengine_nat_gateways": nat_gateway.DataSourceVolcengineNatGateways(),
+
+			// ================ VKE ================
+			"volcengine_vke_nodes":      node.DataSourceVolcengineVkeNodes(),
+			"volcengine_vke_clusters":   cluster.DataSourceVolcengineVkeVkeClusters(),
+			"volcengine_vke_node_pools": node_pool.DataSourceVolcengineNodePools(),
 
 			// ================ IAM ================
 			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
@@ -154,6 +171,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
 
+			// ================ VKE ================
+			"volcengine_vke_node":      node.ResourceVolcengineVkeNode(),
+			"volcengine_vke_cluster":   cluster.ResourceVolcengineVkeCluster(),
+			"volcengine_vke_node_pool": node_pool.ResourceVolcengineNodePool(),
+
 			// ================ IAM ================
 			"volcengine_iam_policy":                 iam_policy.ResourceVolcengineIamPolicy(),
 			"volcengine_iam_role":                   iam_role.ResourceVolcengineIamRole(),
@@ -169,13 +191,26 @@ func Provider() terraform.ResourceProvider {
 
 func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := ve.Config{
-		AccessKey:    d.Get("access_key").(string),
-		SecretKey:    d.Get("secret_key").(string),
-		SessionToken: d.Get("session_token").(string),
-		Region:       d.Get("region").(string),
-		Endpoint:     d.Get("endpoint").(string),
-		DisableSSL:   d.Get("disable_ssl").(bool),
+		AccessKey:       d.Get("access_key").(string),
+		SecretKey:       d.Get("secret_key").(string),
+		SessionToken:    d.Get("session_token").(string),
+		Region:          d.Get("region").(string),
+		Endpoint:        d.Get("endpoint").(string),
+		DisableSSL:      d.Get("disable_ssl").(bool),
+		CustomerHeaders: map[string]string{},
 	}
+
+	headers := d.Get("customer_headers").(string)
+	if headers != "" {
+		hs1 := strings.Split(headers, ",")
+		for _, hh := range hs1 {
+			hs2 := strings.Split(hh, ":")
+			if len(hs2) == 2 {
+				config.CustomerHeaders[hs2[0]] = hs2[1]
+			}
+		}
+	}
+
 	client, err := config.Client()
 	return client, err
 }

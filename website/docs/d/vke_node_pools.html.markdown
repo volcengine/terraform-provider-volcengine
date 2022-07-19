@@ -1,0 +1,81 @@
+---
+subcategory: "VKE"
+layout: "volcengine"
+page_title: "Volcengine: volcengine_vke_node_pools"
+sidebar_current: "docs-volcengine-datasource-vke_node_pools"
+description: |-
+  Use this data source to query detailed information of vke node pools
+---
+# volcengine_vke_node_pools
+Use this data source to query detailed information of vke node pools
+## Example Usage
+```hcl
+data "volcengine_vke_node_pools" "vke_test" {
+  cluster_ids = ["ccabe57fqtofgrbln3dog"]
+  name        = "demo"
+}
+```
+## Argument Reference
+The following arguments are supported:
+* `auto_scaling_enabled` - (Optional) Is enabled of AutoScaling.
+* `cluster_id` - (Optional) The ClusterId of NodePool.
+* `cluster_ids` - (Optional) The ClusterIds of NodePool IDs.
+* `create_client_token` - (Optional) The ClientToken when successfully created.
+* `ids` - (Optional) The IDs of NodePool.
+* `name_regex` - (Optional) A Name Regex of NodePool.
+* `name` - (Optional) The Name of NodePool.
+* `output_file` - (Optional) File name where to save data source results.
+* `statuses` - (Optional) The Status of NodePool.
+* `update_client_token` - (Optional) The ClientToken when last update was successful.
+
+The `statuses` object supports the following:
+
+* `conditions_type` - (Optional) Indicates the status condition of the node pool in the active state.
+* `phase` - (Optional) The Phase of Status.
+
+## Attributes Reference
+In addition to all arguments above, the following attributes are exported:
+* `node_pools` - The collection of NodePools query.
+  * `additional_container_storage_enabled` - Is AdditionalContainerStorageEnabled of NodeConfig.
+  * `cluster_id` - The ClusterId of NodePool.
+  * `condition_types` - The Condition of Status.
+  * `cordon` - The Cordon of KubernetesConfig.
+  * `create_client_token` - The ClientToken when successfully created.
+  * `create_time` - The CreateTime of NodePool.
+  * `data_volumes` - The DataVolume of NodeConfig.
+    * `size` - The Size of DataVolume.
+    * `type` - The Type of DataVolume.
+  * `description` - The Description of NodePool.
+  * `desired_replicas` - The DesiredReplicas of AutoScaling.
+  * `enabled` - Is Enabled of AutoScaling.
+  * `id` - The Id of NodePool.
+  * `initialize_script` - The InitializeScript of NodeConfig.
+  * `instance_type_ids` - The InstanceTypeIds of NodeConfig.
+  * `label_content` - The LabelContent of KubernetesConfig.
+    * `key` - The Key of KubernetesConfig.
+    * `value` - The Value of KubernetesConfig.
+  * `max_replicas` - The MaxReplicas of AutoScaling.
+  * `min_replicas` - The MinReplicas of AutoScaling.
+  * `name` - The Name of NodePool.
+  * `node_statistics` - The NodeStatistics of NodeConfig.
+    * `creating_count` - The CreatingCount of Node.
+    * `deleting_count` - The DeletingCount of Node.
+    * `failed_count` - The FailedCount of Node.
+    * `running_count` - The RunningCount of Node.
+    * `total_count` - The TotalCount of Node.
+    * `updating_count` - The UpdatingCount of Node.
+  * `phase` - The Phase of Status.
+  * `priority` - The Priority of AutoScaling.
+  * `subnet_ids` - The SubnetId of NodeConfig.
+  * `system_volume` - The SystemVolume of NodeConfig.
+    * `size` - The Size of SystemVolume.
+    * `type` - The Type of SystemVolume.
+  * `taint_content` - The TaintContent of NodeConfig.
+    * `effect` - The Effect of Taint.
+    * `key` - The Key of Taint.
+    * `value` - The Value of Taint.
+  * `update_client_token` - The ClientToken when last update was successful.
+  * `update_time` - The UpdateTime time of NodePool.
+* `total_count` - Returns the total amount of the data list.
+
+

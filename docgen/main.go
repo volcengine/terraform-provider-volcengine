@@ -117,6 +117,8 @@ var resourceKeys = map[string]string{
 	"eip": "EIP",
 	"ebs": "EBS",
 	"nat": "NAT",
+	"vke": "VKE",
+	"iam": "IAM",
 }
 
 type Products struct {
