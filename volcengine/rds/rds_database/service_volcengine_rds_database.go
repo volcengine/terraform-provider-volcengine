@@ -164,7 +164,7 @@ func (s *VolcengineRdsDatabaseService) CreateResource(resourceData *schema.Resou
 			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertAll,
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//创建Database
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -203,7 +203,7 @@ func (s *VolcengineRdsDatabaseService) RemoveResource(resourceData *schema.Resou
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//删除Database
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},

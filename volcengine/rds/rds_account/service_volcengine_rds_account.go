@@ -135,7 +135,7 @@ func (s *VolcengineRdsAccountService) CreateResource(resourceData *schema.Resour
 			ConvertMode: volc.RequestConvertAll,
 			ContentType: volc.ContentTypeJson,
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//创建RdsAccount
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -171,7 +171,7 @@ func (s *VolcengineRdsAccountService) RemoveResource(resourceData *schema.Resour
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//删除RdsAccount
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},

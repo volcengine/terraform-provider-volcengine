@@ -75,7 +75,7 @@ func resourceVolcengineRdsIpListUpdate(d *schema.ResourceData, meta interface{})
 	if err != nil {
 		return fmt.Errorf("error on reading RDS ip list %q, %w", d.Id(), err)
 	}
-	return err
+	return resourceVolcengineRdsIpListRead(d, meta)
 }
 
 func resourceVolcengineRdsIpListDelete(d *schema.ResourceData, meta interface{}) (err error) {
