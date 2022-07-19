@@ -2,9 +2,9 @@ package rds_instance
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -46,24 +46,24 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Description: "The available zone of the RDS instance.",
 			},
 			"db_engine": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Database type. Value:\nMySQL (default).",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Description:  "Database type. Value:\nMySQL (default).",
 				ValidateFunc: validation.StringInSlice([]string{"MySQL"}, false),
 			},
 			"db_engine_version": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Instance type. Value:\nMySQL_Community_5_7\nMySQL_8_0.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				Description:  "Instance type. Value:\nMySQL_Community_5_7\nMySQL_8_0.",
 				ValidateFunc: validation.StringInSlice([]string{"MySQL_Community_5_7", "MySQL_8_0"}, false),
 			},
 			"instance_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Instance type. Value:\nHA: High availability version.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				Description:  "Instance type. Value:\nHA: High availability version.",
 				ValidateFunc: validation.StringInSlice([]string{"HA"}, false),
 			},
 			"instance_spec_name": {
@@ -73,10 +73,10 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Description: "Instance specification name, you can specify the specification name of the instance to be created. Value:\nrds.mysql.1c2g\nrds.mysql.2c4g\nrds.mysql.4c8g\nrds.mysql.4c16g\nrds.mysql.8c32g\nrds.mysql.16c64g\nrds.mysql.16c128g\nrds.mysql.32c128g\nrds.mysql.32c256g.",
 			},
 			"storage_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Instance storage type. Value:\nLocalSSD: Local SSD disk.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				Description:  "Instance storage type. Value:\nLocalSSD: Local SSD disk.",
 				ValidateFunc: validation.StringInSlice([]string{"LocalSSD"}, false),
 			},
 			"storage_space_gb": {
@@ -92,10 +92,10 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Description: "The vpc ID of the RDS instance.",
 			},
 			"number": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The number of instances purchased. The value is an integer between 1 and 10. The default value is 1.",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				Description:  "The number of instances purchased. The value is an integer between 1 and 10. The default value is 1.",
 				ValidateFunc: validation.IntBetween(1, 10),
 			},
 			"super_account_name": {
@@ -111,10 +111,10 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Description: "Set a high-privilege account password. The rules are as follows:\nOnly uppercase and lowercase letters, numbers and the following special characters _#!@$%^*()+=-.\nThe length needs to be within 8~32 characters.\nContains at least 3 of uppercase letters, lowercase letters, numbers or special characters.",
 			},
 			"charge_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Billing type. Value:\nPostPaid: Postpaid (pay-as-you-go).\nPrepaid: Prepaid (yearly and monthly).",
+				Type:         schema.TypeString,
+				Required:     true,
+				ForceNew:     true,
+				Description:  "Billing type. Value:\nPostPaid: Postpaid (pay-as-you-go).\nPrepaid: Prepaid (yearly and monthly).",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "Prepaid"}, false),
 			},
 			"auto_renew": {
