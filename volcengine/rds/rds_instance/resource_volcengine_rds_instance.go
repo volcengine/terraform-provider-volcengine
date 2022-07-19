@@ -2,6 +2,7 @@ package rds_instance
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
@@ -30,7 +31,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "The name of the RDS instance.",
+				Description: "Set the name of the instance. The naming rules are as follows:\n\nCannot start with a number, a dash (-).\nIt can only contain Chinese characters, letters, numbers, underscores (_) and underscores (-).\nThe length needs to be within 1~128 characters.",
 			},
 			"region": {
 				Type:        schema.TypeString,
@@ -48,31 +49,35 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "The engine of the RDS instance.",
+				Description: "Database type. Value:\nMySQL (default).",
+				ValidateFunc: validation.StringInSlice([]string{"MySQL"}, false),
 			},
 			"db_engine_version": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The engine version of the RDS instance.",
+				Description: "Instance type. Value:\nMySQL_Community_5_7\nMySQL_8_0.",
+				ValidateFunc: validation.StringInSlice([]string{"MySQL_Community_5_7", "MySQL_8_0"}, false),
 			},
 			"instance_type": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of the RDS instance.",
+				Description: "Instance type. Value:\nHA: High availability version.",
+				ValidateFunc: validation.StringInSlice([]string{"HA"}, false),
 			},
 			"instance_spec_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The spec name of the RDS instance.",
+				Description: "Instance specification name, you can specify the specification name of the instance to be created. Value:\nrds.mysql.1c2g\nrds.mysql.2c4g\nrds.mysql.4c8g\nrds.mysql.4c16g\nrds.mysql.8c32g\nrds.mysql.16c64g\nrds.mysql.16c128g\nrds.mysql.32c128g\nrds.mysql.32c256g.",
 			},
 			"storage_type": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The storage type of the RDS instance.",
+				Description: "Instance storage type. Value:\nLocalSSD: Local SSD disk.",
+				ValidateFunc: validation.StringInSlice([]string{"LocalSSD"}, false),
 			},
 			"storage_space_gb": {
 				Type:        schema.TypeInt,
@@ -90,34 +95,42 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "The purchase number of the RDS instance.",
+				Description: "The number of instances purchased. The value is an integer between 1 and 10. The default value is 1.",
+				ValidateFunc: validation.IntBetween(1, 10),
 			},
-			"instance_category": {
+			"super_account_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "The category of the RDS instance.",
+				Description: "Fill in the high-privileged user account name. The naming rules are as follows:\nUnique name.\nStart with a letter and end with a letter or number.\nConsists of lowercase letters, numbers, or underscores (_).\nThe length is 2~32 characters.\n[Keywords](https://www.volcengine.com/docs/6313/66162) are not allowed for account names.",
+			},
+			"supper_account_password": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Set a high-privilege account password. The rules are as follows:\nOnly uppercase and lowercase letters, numbers and the following special characters _#!@$%^*()+=-.\nThe length needs to be within 8~32 characters.\nContains at least 3 of uppercase letters, lowercase letters, numbers or special characters.",
 			},
 			"charge_type": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The charge type of the RDS instance.",
+				Description: "Billing type. Value:\nPostPaid: Postpaid (pay-as-you-go).\nPrepaid: Prepaid (yearly and monthly).",
+				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "Prepaid"}, false),
 			},
 			"auto_renew": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Whether to automatically renew.",
+				Description: "Whether to automatically renew. Default: false. Value:\ntrue: yes.\nfalse: no.",
 			},
 			"prepaid_period": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Purchase cycle in prepaid scenarios.",
+				Description: "The purchase cycle in the prepaid scenario. Value:\nMonth: monthly subscription.\nYear: yearly subscription.",
 			},
 			"used_time": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Optional:    true,
 				ForceNew:    true,
 				Description: "The purchase time of RDS instance.",
@@ -136,7 +149,6 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			},
 			"connection_info": {
 				Type:        schema.TypeList,
-				Optional:    true,
 				Computed:    true,
 				MaxItems:    1,
 				Description: "The connection info ot the RDS instance.",

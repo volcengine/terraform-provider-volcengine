@@ -113,8 +113,6 @@ func (s *VolcengineRdsAccountService) ReadResource(resourceData *schema.Resource
 		return data, fmt.Errorf("RDS account %s not exist ", RdsAccountId)
 	}
 
-	data["AccountPassword"] = resourceData.Get("account_password")
-
 	return data, err
 }
 

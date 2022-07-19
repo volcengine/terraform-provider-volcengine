@@ -36,13 +36,13 @@ func ResourceVolcengineRdsDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The name of the RDS database.",
+				Description: "Name database.\nillustrate:\nUnique name.\nThe length is 2~64 characters.\nStart with a letter and end with a letter or number.\nConsists of lowercase letters, numbers, and underscores (_) or dashes (-).\nDatabase names are disabled [keywords](https://www.volcengine.com/docs/6313/66162).",
 			},
 			"character_set_name": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The character set of the RDS database.",
+				Description: "Database character set. Currently supported character sets include: utf8, utf8mb4, latin1, ascii.",
 			},
 		},
 	}

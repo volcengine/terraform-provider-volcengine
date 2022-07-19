@@ -212,6 +212,11 @@ func (s *VolcengineRdsIpListService) RemoveResource(resourceData *schema.Resourc
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall, baseErr error) error {
+				if strings.HasPrefix(baseErr.Error(), "OperationDenied_SystemGroup") {
+					// 当前白名单组是系统默认组，无法执行该操作
+					return baseErr
+				}
+
 				//出现错误后重试
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
 					_, callErr := s.ReadResource(d, "")

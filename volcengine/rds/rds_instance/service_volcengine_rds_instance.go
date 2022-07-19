@@ -136,7 +136,7 @@ func (s *VolcengineRdsInstanceService) RefreshResourceState(resourceData *schema
 			if err != nil {
 				return nil, "", err
 			}
-			status, err = volc.ObtainSdkValue("Status", demo)
+			status, err = volc.ObtainSdkValue("InstanceStatus", demo)
 			if err != nil {
 				return nil, "", err
 			}
