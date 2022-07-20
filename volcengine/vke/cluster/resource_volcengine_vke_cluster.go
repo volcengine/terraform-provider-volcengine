@@ -96,7 +96,7 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 												"billing_type": {
 													Type:         schema.TypeString,
 													Optional:     true,
-													Description: "Billing type of public IP, the value is `PostPaidByBandwidth` or `PostPaidByTraffic`.",
+													Description:  "Billing type of public IP, the value is `PostPaidByBandwidth` or `PostPaidByTraffic`.",
 													ValidateFunc: validation.StringInSlice([]string{"PostPaidByBandwidth", "PostPaidByTraffic"}, false),
 												},
 												"bandwidth": {
@@ -131,7 +131,7 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 							Type:         schema.TypeString,
 							Required:     true,
 							ForceNew:     true,
-							Description: "The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.",
+							Description:  "The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.",
 							ValidateFunc: validation.StringInSlice([]string{"Flannel", "VpcCniShared"}, false),
 						},
 						"flannel_config": {
