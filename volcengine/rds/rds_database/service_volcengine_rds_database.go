@@ -12,39 +12,38 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineDatabaseService struct {
+type VolcengineRdsDatabaseService struct {
 	Client     *volc.SdkClient
 	Dispatcher *volc.Dispatcher
 }
 
-func NewDatabaseService(c *volc.SdkClient) *VolcengineDatabaseService {
-	return &VolcengineDatabaseService{
+func NewRdsDatabaseService(c *volc.SdkClient) *VolcengineRdsDatabaseService {
+	return &VolcengineRdsDatabaseService{
 		Client:     c,
 		Dispatcher: &volc.Dispatcher{},
 	}
 }
 
-func (s *VolcengineDatabaseService) GetClient() *volc.SdkClient {
+func (s *VolcengineRdsDatabaseService) GetClient() *volc.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineDatabaseService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
+func (s *VolcengineRdsDatabaseService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
 	list, err := volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
 		var (
 			resp    *map[string]interface{}
 			results interface{}
 			ok      bool
 		)
-		rdsClient := s.Client.RdsClient
 		action := "ListDatabases"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = rdsClient.ListDatabasesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = rdsClient.ListDatabasesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -87,16 +86,16 @@ func (s *VolcengineDatabaseService) ReadResources(m map[string]interface{}) ([]i
 	return res, nil
 }
 
-func (s *VolcengineDatabaseService) ReadResource(resourceData *schema.ResourceData, DatabaseId string) (data map[string]interface{}, err error) {
+func (s *VolcengineRdsDatabaseService) ReadResource(resourceData *schema.ResourceData, rdsDatabaseId string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
 	)
-	if DatabaseId == "" {
-		DatabaseId = s.ReadResourceId(resourceData.Id())
+	if rdsDatabaseId == "" {
+		rdsDatabaseId = s.ReadResourceId(resourceData.Id())
 	}
 
-	ids := strings.Split(DatabaseId, ":")
+	ids := strings.Split(rdsDatabaseId, ":")
 	if len(ids) != 2 {
 		return map[string]interface{}{}, fmt.Errorf("invalid database id")
 	}
@@ -118,13 +117,13 @@ func (s *VolcengineDatabaseService) ReadResource(resourceData *schema.ResourceDa
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("Database %s not exist ", DatabaseId)
+		return data, fmt.Errorf("RDS database %s not exist ", rdsDatabaseId)
 	}
 
 	return data, err
 }
 
-func (s *VolcengineDatabaseService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineRdsDatabaseService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -150,7 +149,7 @@ func (s *VolcengineDatabaseService) RefreshResourceState(resourceData *schema.Re
 	}
 }
 
-func (VolcengineDatabaseService) WithResourceResponseHandlers(database map[string]interface{}) []volc.ResourceResponseHandler {
+func (s *VolcengineRdsDatabaseService) WithResourceResponseHandlers(database map[string]interface{}) []volc.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]volc.ResponseConvert, error) {
 		return database, nil, nil
 	}
@@ -158,15 +157,16 @@ func (VolcengineDatabaseService) WithResourceResponseHandlers(database map[strin
 
 }
 
-func (s *VolcengineDatabaseService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
+func (s *VolcengineRdsDatabaseService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "CreateDatabase",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertAll,
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//创建Database
-				return s.Client.RdsClient.CreateDatabaseCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
 				id := fmt.Sprintf("%s:%s", d.Get("instance_id"), d.Get("db_name"))
@@ -182,29 +182,30 @@ func (s *VolcengineDatabaseService) CreateResource(resourceData *schema.Resource
 	return []volc.Callback{callback}
 }
 
-func (s *VolcengineDatabaseService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
+func (s *VolcengineRdsDatabaseService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
 	return []volc.Callback{}
 }
 
-func (s *VolcengineDatabaseService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {
+func (s *VolcengineRdsDatabaseService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "DeleteDatabase",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
 				databaseId := d.Id()
 				ids := strings.Split(databaseId, ":")
 				if len(ids) != 2 {
-					return false, fmt.Errorf("invalid rds account id")
+					return false, fmt.Errorf("invalid rds database id")
 				}
 				(*call.SdkParam)["InstanceId"] = ids[0]
 				(*call.SdkParam)["DBName"] = ids[1]
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//删除Database
-				return s.Client.RdsClient.DeleteDatabaseCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -214,7 +215,7 @@ func (s *VolcengineDatabaseService) RemoveResource(resourceData *schema.Resource
 						if volc.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading RDS account on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading RDS database on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
@@ -229,15 +230,16 @@ func (s *VolcengineDatabaseService) RemoveResource(resourceData *schema.Resource
 	return []volc.Callback{callback}
 }
 
-func (s *VolcengineDatabaseService) DatasourceResources(*schema.ResourceData, *schema.Resource) volc.DataSourceInfo {
+func (s *VolcengineRdsDatabaseService) DatasourceResources(*schema.ResourceData, *schema.Resource) volc.DataSourceInfo {
 	return volc.DataSourceInfo{
+		ContentType: volc.ContentTypeJson,
 		RequestConverts: map[string]volc.RequestConvert{
 			"db_status": {
 				TargetField: "DBStatus",
 			},
 		},
 		NameField:    "DBName",
-		CollectField: "databases",
+		CollectField: "rds_databases",
 		ResponseConverts: map[string]volc.ResponseConvert{
 			"DBPrivileges": {
 				TargetField: "db_privileges",
@@ -252,6 +254,16 @@ func (s *VolcengineDatabaseService) DatasourceResources(*schema.ResourceData, *s
 	}
 }
 
-func (s *VolcengineDatabaseService) ReadResourceId(id string) string {
+func (s *VolcengineRdsDatabaseService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) volc.UniversalInfo {
+	return volc.UniversalInfo{
+		ServiceName: "rds_mysql",
+		Version:     "2018-01-01",
+		HttpMethod:  volc.POST,
+		ContentType: volc.ApplicationJSON,
+		Action:      actionName,
+	}
 }

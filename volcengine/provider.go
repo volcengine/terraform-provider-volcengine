@@ -3,9 +3,6 @@ package volcengine
 import (
 	"strings"
 
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -27,8 +24,13 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_database"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/route_entry"
@@ -125,6 +127,9 @@ func Provider() terraform.ResourceProvider {
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instances": rds_instance.DataSourceVolcengineRdsInstances(),
+			"volcengine_rds_databases": rds_database.DataSourceVolcengineRdsDatabases(),
+			"volcengine_rds_accounts":  rds_account.DataSourceVolcengineRdsAccounts(),
+			"volcengine_rds_ip_lists":  rds_ip_list.DataSourceVolcengineRdsIpLists(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -170,6 +175,9 @@ func Provider() terraform.ResourceProvider {
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instance": rds_instance.ResourceVolcengineRdsInstance(),
+			"volcengine_rds_database": rds_database.ResourceVolcengineRdsDatabase(),
+			"volcengine_rds_account":  rds_account.ResourceVolcengineRdsAccount(),
+			"volcengine_rds_ip_list":  rds_ip_list.ResourceVolcengineRdsIpList(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

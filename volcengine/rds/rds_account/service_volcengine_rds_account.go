@@ -35,16 +35,16 @@ func (s *VolcengineRdsAccountService) ReadResources(m map[string]interface{}) ([
 			results interface{}
 			ok      bool
 		)
-		rdsClient := s.Client.RdsClient
+		universalClient := s.Client.UniversalClient
 		action := "ListAccounts"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = rdsClient.ListAccountsCommon(nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = rdsClient.ListAccountsCommon(&condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -113,8 +113,6 @@ func (s *VolcengineRdsAccountService) ReadResource(resourceData *schema.Resource
 		return data, fmt.Errorf("RDS account %s not exist ", RdsAccountId)
 	}
 
-	data["AccountPassword"] = resourceData.Get("account_password")
-
 	return data, err
 }
 
@@ -135,10 +133,11 @@ func (s *VolcengineRdsAccountService) CreateResource(resourceData *schema.Resour
 		Call: volc.SdkCall{
 			Action:      "CreateAccount",
 			ConvertMode: volc.RequestConvertAll,
+			ContentType: volc.ContentTypeJson,
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//创建RdsAccount
-				return s.Client.RdsClient.CreateAccountCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
 				id := fmt.Sprintf("%s:%s", d.Get("instance_id"), d.Get("account_name"))
@@ -159,6 +158,7 @@ func (s *VolcengineRdsAccountService) RemoveResource(resourceData *schema.Resour
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "DeleteAccount",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
 				rdsAccountId := d.Id()
@@ -171,9 +171,9 @@ func (s *VolcengineRdsAccountService) RemoveResource(resourceData *schema.Resour
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//删除RdsAccount
-				return s.Client.RdsClient.DeleteAccountCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -183,7 +183,7 @@ func (s *VolcengineRdsAccountService) RemoveResource(resourceData *schema.Resour
 						if volc.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading RDS account on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading RDS account on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
@@ -200,6 +200,7 @@ func (s *VolcengineRdsAccountService) RemoveResource(resourceData *schema.Resour
 
 func (s *VolcengineRdsAccountService) DatasourceResources(*schema.ResourceData, *schema.Resource) volc.DataSourceInfo {
 	return volc.DataSourceInfo{
+		ContentType:  volc.ContentTypeJson,
 		NameField:    "AccountName",
 		CollectField: "rds_accounts",
 		ResponseConverts: map[string]volc.ResponseConvert{
@@ -228,4 +229,14 @@ func (s *VolcengineRdsAccountService) DatasourceResources(*schema.ResourceData, 
 
 func (s *VolcengineRdsAccountService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) volc.UniversalInfo {
+	return volc.UniversalInfo{
+		ServiceName: "rds_mysql",
+		Version:     "2018-01-01",
+		HttpMethod:  volc.POST,
+		ContentType: volc.ApplicationJSON,
+		Action:      actionName,
+	}
 }

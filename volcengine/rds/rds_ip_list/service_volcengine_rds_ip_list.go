@@ -35,16 +35,15 @@ func (s *VolcengineRdsIpListService) ReadResources(condition map[string]interfac
 		ok      bool
 	)
 
-	rdsClient := s.Client.RdsClient
 	action := "ListDBInstanceIPLists"
 	logger.Debug(logger.ReqFormat, action, condition)
 	if condition == nil {
-		resp, err = rdsClient.ListDBInstanceIPListsCommon(nil)
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 		if err != nil {
 			return data, err
 		}
 	} else {
-		resp, err = rdsClient.ListDBInstanceIPListsCommon(&condition)
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 		if err != nil {
 			return data, err
 		}
@@ -140,6 +139,7 @@ func (s *VolcengineRdsIpListService) CreateResource(resourceData *schema.Resourc
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "CreateDBInstanceIPList",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertAll,
 			Convert: map[string]volc.RequestConvert{
 				"ip_list": {
@@ -147,9 +147,9 @@ func (s *VolcengineRdsIpListService) CreateResource(resourceData *schema.Resourc
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//创建RdsIpList
-				return s.Client.RdsClient.CreateDBInstanceIPListCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
 				id := fmt.Sprintf("%s:%s", d.Get("instance_id"), d.Get("group_name"))
@@ -165,6 +165,7 @@ func (s *VolcengineRdsIpListService) ModifyResource(resourceData *schema.Resourc
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "ModifyDBInstanceIPList",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertAll,
 			Convert: map[string]volc.RequestConvert{
 				"ip_list": {
@@ -182,7 +183,7 @@ func (s *VolcengineRdsIpListService) ModifyResource(resourceData *schema.Resourc
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.RdsClient.ModifyDBInstanceIPListCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
@@ -193,6 +194,7 @@ func (s *VolcengineRdsIpListService) RemoveResource(resourceData *schema.Resourc
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "DeleteDBInstanceIPList",
+			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
 				rdsIpListId := d.Id()
@@ -205,11 +207,16 @@ func (s *VolcengineRdsIpListService) RemoveResource(resourceData *schema.Resourc
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//删除RdsIpList
-				return s.Client.RdsClient.DeleteDBInstanceIPListCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall, baseErr error) error {
+				if strings.HasPrefix(baseErr.Error(), "OperationDenied_SystemGroup") {
+					// 当前白名单组是系统默认组，无法执行该操作
+					return baseErr
+				}
+
 				//出现错误后重试
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
 					_, callErr := s.ReadResource(d, "")
@@ -217,7 +224,7 @@ func (s *VolcengineRdsIpListService) RemoveResource(resourceData *schema.Resourc
 						if volc.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading RDS ip list on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading RDS ip list on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
@@ -234,6 +241,7 @@ func (s *VolcengineRdsIpListService) RemoveResource(resourceData *schema.Resourc
 
 func (s *VolcengineRdsIpListService) DatasourceResources(*schema.ResourceData, *schema.Resource) volc.DataSourceInfo {
 	return volc.DataSourceInfo{
+		ContentType:  volc.ContentTypeJson,
 		NameField:    "GroupName",
 		CollectField: "rds_ip_lists",
 		ResponseConverts: map[string]volc.ResponseConvert{
@@ -246,4 +254,14 @@ func (s *VolcengineRdsIpListService) DatasourceResources(*schema.ResourceData, *
 
 func (s *VolcengineRdsIpListService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) volc.UniversalInfo {
+	return volc.UniversalInfo{
+		ServiceName: "rds_mysql",
+		Version:     "2018-01-01",
+		HttpMethod:  volc.POST,
+		ContentType: volc.ApplicationJSON,
+		Action:      actionName,
+	}
 }

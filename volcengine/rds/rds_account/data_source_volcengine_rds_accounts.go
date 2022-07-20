@@ -10,22 +10,12 @@ func DataSourceVolcengineRdsAccounts() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineRdsAccountsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of database account IDs.",
-			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of database account.",
 			},
-
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,

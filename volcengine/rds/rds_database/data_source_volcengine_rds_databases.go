@@ -6,24 +6,15 @@ import (
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineDatabases() *schema.Resource {
+func DataSourceVolcengineRdsDatabases() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVolcengineDatabasesRead,
+		Read: dataSourceVolcengineRdsDatabasesRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of database IDs.",
-			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
-				Description:  "A Name Regex of database.",
+				Description:  "A Name Regex of RDS database.",
 			},
 
 			"output_file": {
@@ -35,7 +26,7 @@ func DataSourceVolcengineDatabases() *schema.Resource {
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The total count of database query.",
+				Description: "The total count of RDS database query.",
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
@@ -45,9 +36,9 @@ func DataSourceVolcengineDatabases() *schema.Resource {
 			"db_status": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The status of the database.",
+				Description: "The status of the RDS database.",
 			},
-			"databases": {
+			"rds_databases": {
 				Description: "The collection of RDS instance account query.",
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -56,27 +47,27 @@ func DataSourceVolcengineDatabases() *schema.Resource {
 						"id": {
 							Type:        schema.TypeString,
 							Computed:    true, // tf中不支持写值
-							Description: "The ID of the database.",
+							Description: "The ID of the RDS database.",
 						},
 						"db_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The name of the database.",
+							Description: "The name of the RDS database.",
 						},
 						"db_status": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The status of the database.",
+							Description: "The status of the RDS database.",
 						},
 						"character_set_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The character set of the database.",
+							Description: "The character set of the RDS database.",
 						},
 						"account_names": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The account names of the database.",
+							Description: "The account names of the RDS database.",
 						},
 					},
 				},
@@ -85,7 +76,7 @@ func DataSourceVolcengineDatabases() *schema.Resource {
 	}
 }
 
-func dataSourceVolcengineDatabasesRead(d *schema.ResourceData, meta interface{}) error {
-	databaseService := NewDatabaseService(meta.(*volc.SdkClient))
-	return databaseService.Dispatcher.Data(databaseService, d, DataSourceVolcengineDatabases())
+func dataSourceVolcengineRdsDatabasesRead(d *schema.ResourceData, meta interface{}) error {
+	databaseService := NewRdsDatabaseService(meta.(*volc.SdkClient))
+	return databaseService.Dispatcher.Data(databaseService, d, DataSourceVolcengineRdsDatabases())
 }

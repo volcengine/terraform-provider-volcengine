@@ -10,28 +10,17 @@ func DataSourceVolcengineRdsInstances() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineRdsInstancesRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of RDS instance IDs.",
-			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of RDS instance.",
 			},
-
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "File name where to save data source results.",
 			},
-
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
@@ -184,6 +173,47 @@ func DataSourceVolcengineRdsInstances() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The name of spec type.",
+									},
+								},
+							},
+						},
+						"connection_info": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "The connection info ot the RDS instance.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"internal_domain": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The internal domain of the RDS instance.",
+									},
+									"internal_port": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The interval port of the RDS instance.",
+									},
+									"public_domain": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The public domain of the RDS instance.",
+									},
+									"public_port": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The public port of the RDS instance.",
+									},
+									"enable_read_write_splitting": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Whether read-write separation is enabled.",
+									},
+									"enable_read_only": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Whether global read-only is enabled.",
 									},
 								},
 							},

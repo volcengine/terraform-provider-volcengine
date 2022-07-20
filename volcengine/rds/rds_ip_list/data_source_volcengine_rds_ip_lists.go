@@ -10,15 +10,6 @@ func DataSourceVolcengineRdsIpLists() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineRdsIpListsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of RDS ip list IDs.",
-			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -31,7 +22,6 @@ func DataSourceVolcengineRdsIpLists() *schema.Resource {
 				Optional:    true,
 				Description: "File name where to save data source results.",
 			},
-
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
