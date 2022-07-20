@@ -34,6 +34,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account_privilege"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
@@ -196,10 +197,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user_policy_attachment": iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
 
 			// ================ RDS V1 ==============
-			"volcengine_rds_instance": rds_instance.ResourceVolcengineRdsInstance(),
-			"volcengine_rds_database": rds_database.ResourceVolcengineRdsDatabase(),
-			"volcengine_rds_account":  rds_account.ResourceVolcengineRdsAccount(),
-			"volcengine_rds_ip_list":  rds_ip_list.ResourceVolcengineRdsIpList(),
+			"volcengine_rds_instance":          rds_instance.ResourceVolcengineRdsInstance(),
+			"volcengine_rds_database":          rds_database.ResourceVolcengineRdsDatabase(),
+			"volcengine_rds_account":           rds_account.ResourceVolcengineRdsAccount(),
+			"volcengine_rds_ip_list":           rds_ip_list.ResourceVolcengineRdsIpList(),
+			"volcengine_rds_account_privilege": rds_account_privilege.ResourceVolcengineRdsAccountPrivilege(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
