@@ -1,6 +1,10 @@
 package common
 
-import "github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+import (
+	"encoding/base64"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+)
 
 func EcsInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	if k == "force_restart" {
@@ -34,5 +38,20 @@ func EcsInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) b
 		return true
 	}
 
+	return false
+}
+
+func UserDateImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	if k == "user_data" {
+		_, base64DecodeError := base64.StdEncoding.DecodeString(new)
+		if base64DecodeError != nil {
+			return false
+		}
+		v := base64.StdEncoding.EncodeToString([]byte(old))
+		if v == new {
+			return true
+		}
+
+	}
 	return false
 }

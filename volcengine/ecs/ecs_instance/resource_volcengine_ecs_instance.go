@@ -89,10 +89,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The charge type of ECS instance.",
 			},
 			"user_data": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The user data of ECS instance.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: ve.UserDateImportDiffSuppress,
+				Description:      "The user data of ECS instance.",
 			},
 			"security_enhancement_strategy": {
 				Type:     schema.TypeString,
