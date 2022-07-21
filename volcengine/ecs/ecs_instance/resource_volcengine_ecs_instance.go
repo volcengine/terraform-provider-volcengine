@@ -199,6 +199,12 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of system volume.",
 			},
 
+			"deployment_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of Ecs Deployment Set.",
+			},
+
 			"data_volumes": {
 				Type:        schema.TypeList,
 				Optional:    true,

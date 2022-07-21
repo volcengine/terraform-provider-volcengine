@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 )
 
 type VolcengineEcsService struct {
@@ -394,6 +395,41 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 	var (
 		passwordChange bool
 	)
+	if resourceData.HasChange("deployment_set_id") {
+		deploymentSet := ve.Callback{
+			Call: ve.SdkCall{
+				Action:         "ModifyInstanceDeployment",
+				ConvertMode:    ve.RequestConvertInConvert,
+				Convert:        map[string]ve.RequestConvert{},
+				RequestIdField: "InstanceId",
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["DeploymentSetId"] = resourceData.Get("deployment_set_id")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
+				},
+			},
+		}
+		refresh := map[ve.ResourceService]*ve.StateRefresh{
+			ecs_deployment_set_associate.NewEcsDeploymentSetAssociateService(s.Client): {
+				Target:     []string{"success"},
+				Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+				ResourceId: resourceData.Get("deployment_set_id").(string) + ":" + resourceData.Id(),
+			},
+		}
+
+		if resourceData.Get("deployment_set_id").(string) != "" {
+			deploymentSet.Call.ExtraRefresh = refresh
+		}
+
+		callbacks = append(callbacks, deploymentSet)
+	}
+
 	modifyInstanceSpec := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyInstanceSpec",
@@ -959,4 +995,13 @@ func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraDa
 		return extraData, fmt.Errorf(errorStr)
 	}
 	return extraData, err
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "ecs",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
 }

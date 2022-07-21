@@ -3,6 +3,8 @@ package volcengine
 import (
 	"strings"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -116,9 +118,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_volumes": volume.DataSourceVolcengineVolumes(),
 
 			// ================ ECS ================
-			"volcengine_ecs_instances": ecs_instance.DataSourceVolcengineEcsInstances(),
-			"volcengine_images":        image.DataSourceVolcengineImages(),
-			"volcengine_zones":         zone.DataSourceVolcengineZones(),
+			"volcengine_ecs_instances":       ecs_instance.DataSourceVolcengineEcsInstances(),
+			"volcengine_images":              image.DataSourceVolcengineImages(),
+			"volcengine_zones":               zone.DataSourceVolcengineZones(),
+			"volcengine_ecs_deployment_sets": ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
@@ -164,8 +167,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_volume_attach": volume_attach.ResourceVolcengineVolumeAttach(),
 
 			// ================ ECS ================
-			"volcengine_ecs_instance":       ecs_instance.ResourceVolcengineEcsInstance(),
-			"volcengine_ecs_instance_state": ecs_instance_state.ResourceVolcengineEcsInstanceState(),
+			"volcengine_ecs_instance":                 ecs_instance.ResourceVolcengineEcsInstance(),
+			"volcengine_ecs_instance_state":           ecs_instance_state.ResourceVolcengineEcsInstanceState(),
+			"volcengine_ecs_deployment_set":           ecs_deployment_set.ResourceVolcengineEcsDeploymentSet(),
+			"volcengine_ecs_deployment_set_associate": ecs_deployment_set_associate.ResourceVolcengineEcsDeploymentSetAssociate(),
 
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
