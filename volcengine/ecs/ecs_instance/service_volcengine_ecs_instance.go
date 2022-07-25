@@ -1,6 +1,7 @@
 package ecs_instance
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"reflect"
@@ -341,6 +342,18 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 						},
 					},
 					StartIndex: 1,
+				},
+				"user_data": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "UserData",
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						_, base64DecodeError := base64.StdEncoding.DecodeString(i.(string))
+						if base64DecodeError == nil {
+							return i.(string)
+						} else {
+							return base64.StdEncoding.EncodeToString([]byte(i.(string)))
+						}
+					},
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -784,6 +797,16 @@ func (s *VolcengineEcsService) CommonResponseConvert() map[string]ve.ResponseCon
 			Convert: func(i interface{}) interface{} {
 				size, _ := strconv.Atoi(i.(string))
 				return size
+			},
+		},
+		"UserData": {
+			TargetField: "user_data",
+			Convert: func(i interface{}) interface{} {
+				v, base64DecodeError := base64.StdEncoding.DecodeString(i.(string))
+				if base64DecodeError != nil {
+					v = []byte(i.(string))
+				}
+				return string(v)
 			},
 		},
 		"DataVolumes": {

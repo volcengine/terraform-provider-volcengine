@@ -6,13 +6,13 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineTosObject() *schema.Resource {
+func DataSourceVolcengineTosObjects() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineTosObjectRead,
 		Schema: map[string]*schema.Schema{
 			"bucket_name": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "The name the TOS bucket.",
 			},
 			"object_name": {
@@ -68,5 +68,5 @@ func DataSourceVolcengineTosObject() *schema.Resource {
 
 func dataSourceVolcengineTosObjectRead(d *schema.ResourceData, meta interface{}) error {
 	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
-	return tosBucketService.Dispatcher.Data(tosBucketService, d, DataSourceVolcengineTosObject())
+	return tosBucketService.Dispatcher.Data(tosBucketService, d, DataSourceVolcengineTosObjects())
 }

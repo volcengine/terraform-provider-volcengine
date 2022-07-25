@@ -24,6 +24,13 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role_policy_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
@@ -124,8 +131,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_clusters":   cluster.DataSourceVolcengineVkeVkeClusters(),
 			"volcengine_vke_node_pools": node_pool.DataSourceVolcengineNodePools(),
 
+			// ================ IAM ================
+			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
+			"volcengine_iam_roles":    iam_role.DataSourceVolcengineIamRoles(),
+			"volcengine_iam_users":    iam_user.DataSourceVolcengineIamUsers(),
+
 			// ================ TOS ================
 			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
+			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -168,6 +181,15 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_node":      node.ResourceVolcengineVkeNode(),
 			"volcengine_vke_cluster":   cluster.ResourceVolcengineVkeCluster(),
 			"volcengine_vke_node_pool": node_pool.ResourceVolcengineNodePool(),
+
+			// ================ IAM ================
+			"volcengine_iam_policy":                 iam_policy.ResourceVolcengineIamPolicy(),
+			"volcengine_iam_role":                   iam_role.ResourceVolcengineIamRole(),
+			"volcengine_iam_role_policy_attachment": iam_role_policy_attachment.ResourceVolcengineIamRolePolicyAttachment(),
+			"volcengine_iam_access_key":             iam_access_key.ResourceVolcengineIamAccessKey(),
+			"volcengine_iam_user":                   iam_user.ResourceVolcengineIamUser(),
+			"volcengine_iam_login_profile":          iam_login_profile.ResourceVolcengineIamLoginProfile(),
+			"volcengine_iam_user_policy_attachment": iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
 
 			//================= TOS =================
 			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
