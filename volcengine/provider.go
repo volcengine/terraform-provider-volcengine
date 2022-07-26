@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -137,6 +138,7 @@ func Provider() terraform.ResourceProvider {
 
 			// ================ ESCloud =============
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
+			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
