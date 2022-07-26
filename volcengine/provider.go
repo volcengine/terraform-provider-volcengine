@@ -26,6 +26,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_associate"
+	esZone "github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy"
@@ -139,6 +140,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ ESCloud =============
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
 			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
+			"volcengine_escloud_zones":     esZone.DataSourceVolcengineESCloudZones(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
