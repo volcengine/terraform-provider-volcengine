@@ -156,7 +156,8 @@ func (s *VolcengineESCloudInstanceService) ReadResource(resourceData *schema.Res
 	if resourceData.Get("instance_configuration.0.configuration_code") != "" {
 		data["InstanceConfiguration"].(map[string]interface{})["ConfigurationCode"] = resourceData.Get("instance_configuration.0.configuration_code")
 	}
-	if resourceData.Get("instance_configuration.0.node_specs_assigns") != nil {
+	assigns := resourceData.Get("instance_configuration.0.node_specs_assigns")
+	if assigns != nil && len(assigns.([]interface{})) > 0 {
 		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = resourceData.Get("instance_configuration.0.node_specs_assigns")
 	}
 	return data, err
