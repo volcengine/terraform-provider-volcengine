@@ -147,23 +147,213 @@ func (s *VolcengineESCloudInstanceService) ReadResource(resourceData *schema.Res
 }
 
 func (s *VolcengineESCloudInstanceService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
-	return nil
+	return &resource.StateChangeConf{
+		Pending:    []string{},
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Target:     target,
+		Timeout:    timeout,
+
+		Refresh: func() (result interface{}, state string, err error) {
+			var (
+				demo       map[string]interface{}
+				status     interface{}
+				failStates []string
+			)
+			failStates = append(failStates, "Failed")
+			demo, err = s.ReadResource(resourceData, id)
+			if err != nil {
+				return nil, "", err
+			}
+			logger.Debug("Refresh ESCloud status resp:%v", "ReadResource", demo)
+			status, err = ve.ObtainSdkValue("Status", demo)
+			if err != nil {
+				return nil, "", err
+			}
+			for _, v := range failStates {
+				if v == status.(string) {
+					return nil, "", fmt.Errorf("ESCloud instance status error,status %s", status.(string))
+				}
+			}
+			return demo, status.(string), err
+		},
+	}
 }
 
-func (s *VolcengineESCloudInstanceService) WithResourceResponseHandlers(cluster map[string]interface{}) []ve.ResourceResponseHandler {
-	return nil
+func (s *VolcengineESCloudInstanceService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
+	delete(instance, "InstanceConfiguration")
+	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		return instance, nil, nil
+	}
+	return []ve.ResourceResponseHandler{handler}
 }
 
 func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return nil
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "CreateInstance",
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"instance_configuration": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"node_specs_assigns": {
+							ConvertType: ve.ConvertJsonObjectArray,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"type": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"number": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"resource_spec_name": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"storage_spec_name": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"storage_size": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+						"subnet": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"vpc": {
+							ConvertType: ve.ConvertJsonObject,
+							TargetField: "VPC",
+						},
+					},
+				},
+			},
+
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				id, _ := ve.ObtainSdkValue("Result.InstanceId", *resp)
+				d.SetId(id.(string))
+				return nil
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return nil
+	var callbacks []ve.Callback
+
+	if resourceData.HasChange("instance_configuration.0.instance_name") {
+		id := resourceData.Id()
+		name := resourceData.Get("instance_configuration.0.instance_name")
+
+		logger.DebugInfo("instance_name changed,new_name:%s", name)
+
+		renameCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "RenameInstance",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = id
+					(*call.SdkParam)["NewName"] = name
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo("RenameInstance"), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, renameCallback)
+	}
+
+	if resourceData.HasChange("instance_configuration.0.maintenance_day") || resourceData.HasChange("instance_configuration.0.maintenance_time") {
+		id := resourceData.Id()
+		maintenanceTime := resourceData.Get("instance_configuration.0.maintenance_time")
+		maintenanceDay := resourceData.Get("instance_configuration.0.maintenance_day")
+
+		logger.DebugInfo("maintenance changed:%v", maintenanceTime)
+		logger.DebugInfo("maintenance changed:%v", maintenanceDay)
+
+		modifyMaintenanceSettingCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyMaintenanceSetting",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = id
+					(*call.SdkParam)["MaintenanceTime"] = maintenanceTime
+					(*call.SdkParam)["MaintenanceDay"] = maintenanceDay
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo("ModifyMaintenanceSetting"), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, modifyMaintenanceSettingCallback)
+	}
+
+	if resourceData.HasChange("instance_configuration.0.admin_password") {
+		id := resourceData.Id()
+		password := resourceData.Get("instance_configuration.0.admin_password")
+		userName := resourceData.Get("instance_configuration.0.instance_name")
+
+		logger.DebugInfo("Modify admin password of instance %s.", id)
+
+		resetAdminPasswdCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ResetAdminPassword",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = id
+					(*call.SdkParam)["UserName"] = userName
+					(*call.SdkParam)["NewPassword"] = password
+					(*call.SdkParam)["Force"] = false
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo("ResetAdminPassword"), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, resetAdminPasswdCallback)
+	}
+
+	return callbacks
 }
 
 func (s *VolcengineESCloudInstanceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
-	return nil
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ReleaseInstance",
+			ContentType: ve.ContentTypeJson,
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["InstanceId"] = resourceData.Id()
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo("ReleaseInstance"), call.SdkParam)
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineESCloudInstanceService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {

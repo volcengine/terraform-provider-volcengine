@@ -192,6 +192,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user":                   iam_user.ResourceVolcengineIamUser(),
 			"volcengine_iam_login_profile":          iam_login_profile.ResourceVolcengineIamLoginProfile(),
 			"volcengine_iam_user_policy_attachment": iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
+
+			// ================ ESCloud ================
+			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
