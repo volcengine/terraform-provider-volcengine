@@ -2,12 +2,21 @@ package instance
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
+
+/*
+
+Import
+ESCloud Instance can be imported using the id, e.g.
+```
+$ terraform import volcengine_escloud_instance.default n769ewmjjqyqh5dv
+```
+
+*/
 
 func ResourceVolcengineESCloudInstance() *schema.Resource {
 	resource := &schema.Resource{
@@ -15,10 +24,9 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 		Read:   resourceVolcengineESCloudInstanceRead,
 		Update: resourceVolcengineESCloudInstanceUpdate,
 		Delete: resourceVolcengineESCloudInstanceDelete,
-		//Exists: resourceVolcengineESCloudInstanceExist,
-		//Importer: &schema.ResourceImporter{
-		//	State: schema.ImportStatePassthrough,
-		//},
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 		Schema: map[string]*schema.Schema{
 			"instance_configuration": {
 				Type:     schema.TypeList,
@@ -83,6 +91,7 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 						"configuration_code": {
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "Configuration code used for billing.",
 						},
 						"enable_pure_master": {
@@ -92,38 +101,40 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Description: "Whether the Master node is independent.",
 						},
 						"node_specs_assigns": {
-							Type:     schema.TypeList,
-							Required: true,
-
+							Type:        schema.TypeList,
+							Required:    true,
+							ForceNew:    true,
 							Description: "The number and configuration of various ESCloud instance node.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:        schema.TypeString,
 										Required:    true,
+										ForceNew:    true,
 										Description: "The type of node.",
 									},
 									"number": {
-										Type:     schema.TypeInt,
-										Required: true,
-
+										Type:        schema.TypeInt,
+										Required:    true,
+										ForceNew:    true,
 										Description: "The number of node.",
 									},
 									"resource_spec_name": {
-										Type:     schema.TypeString,
-										Required: true,
-
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
 										Description: "The name of compute resource spec.",
 									},
 									"storage_spec_name": {
-										Type:     schema.TypeString,
-										Required: true,
-
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
 										Description: "The name of storage spec.",
 									},
 									"storage_size": {
 										Type:        schema.TypeInt,
 										Required:    true,
+										ForceNew:    true,
 										Description: "The size of storage.",
 									},
 								},
@@ -174,20 +185,15 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 								},
 							},
 						},
-						//"period": {
-						//	Type:        schema.TypeInt,
-						//	Optional:    true,
-						//	Description: "period (Temporarily closed),",
-						//},
 						"project_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The project name  to which the ESCloud instance belongs.",
 						},
 						"maintenance_time": {
-							Type:     schema.TypeString,
-							Optional: true,
-							//Computed:    true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
 							Description: "The maintainable time period for the instance.",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								// 创建时不存在这个参数，修改时存在这个参数
@@ -195,16 +201,16 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							},
 						},
 						"maintenance_day": {
-							Type:     schema.TypeList,
-							Optional: true,
-							//Computed:    true,
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
 							Description: "The maintainable date for the instance.",
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								// 创建时不存在这个参数，修改时存在这个参数
 								return d.Id() == ""
+							},
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
 						},
 					},
@@ -250,18 +256,4 @@ func resourceVolcengineESCloudInstanceRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("Error on reading ESCloud instance %q,%s", d.Id(), err)
 	}
 	return err
-}
-
-func resourceVolcengineESCloudInstanceExist(d *schema.ResourceData, meta interface{}) (flag bool, err error) {
-	err = resourceVolcengineESCloudInstanceRead(d, meta)
-
-	if err != nil {
-		if strings.Contains(err.Error(), "notfound") || strings.Contains(err.Error(), "not found") ||
-			strings.Contains(err.Error(), "not exist") || strings.Contains(err.Error(), "not associate") ||
-			strings.Contains(err.Error(), "invalid") || strings.Contains(err.Error(), "not_found") {
-			return false, nil
-		}
-		return false, err
-	}
-	return true, nil
 }

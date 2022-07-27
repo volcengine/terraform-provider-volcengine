@@ -143,6 +143,22 @@ func (s *VolcengineESCloudInstanceService) ReadResource(resourceData *schema.Res
 	if len(data) == 0 {
 		return data, fmt.Errorf("Instance %s not exist ", id)
 	}
+	// Fixme: 临时解决方案
+	if data["MaintenanceTime"] != "" {
+		data["InstanceConfiguration"].(map[string]interface{})["MaintenanceTime"] = data["MaintenanceTime"]
+	}
+	if data["MaintenanceDay"] != nil {
+		data["InstanceConfiguration"].(map[string]interface{})["MaintenanceDay"] = data["MaintenanceDay"]
+	}
+	if resourceData.Get("instance_configuration.0.admin_password") != "" {
+		data["InstanceConfiguration"].(map[string]interface{})["AdminPassword"] = resourceData.Get("instance_configuration.0.admin_password")
+	}
+	if resourceData.Get("instance_configuration.0.configuration_code") != "" {
+		data["InstanceConfiguration"].(map[string]interface{})["ConfigurationCode"] = resourceData.Get("instance_configuration.0.configuration_code")
+	}
+	if resourceData.Get("instance_configuration.0.node_specs_assigns") != nil {
+		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = resourceData.Get("instance_configuration.0.node_specs_assigns")
+	}
 	return data, err
 }
 
@@ -181,9 +197,24 @@ func (s *VolcengineESCloudInstanceService) RefreshResourceState(resourceData *sc
 }
 
 func (s *VolcengineESCloudInstanceService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
-	delete(instance, "InstanceConfiguration")
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+		return instance, map[string]ve.ResponseConvert{
+			"InstanceConfiguration": {
+				TargetField: "instance_configuration",
+			},
+			"VPC": {
+				TargetField: "vpc",
+				Convert: func(i interface{}) interface{} {
+					return []interface{}{i}
+				},
+			},
+			"Subnet": {
+				TargetField: "subnet",
+				Convert: func(i interface{}) interface{} {
+					return []interface{}{i}
+				},
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }

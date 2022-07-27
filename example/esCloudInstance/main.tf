@@ -41,7 +41,5 @@ resource "volcengine_escloud_instance" "foo" {
       vpc_id= "vpc-3cj17x7u9bzeo6c6rrtzfpaeb"
       vpc_name = "test-1231新建"
     }
-    maintenance_time = "02:00-06:00"
-    maintenance_day = ["MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY","SUNDAY"]
   }
 }
