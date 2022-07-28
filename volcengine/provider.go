@@ -93,6 +93,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_HEADERS", nil),
 				Description: "CUSTOMER HEADERS for Volcengine Provider",
 			},
+			"proxy_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_PROXY_URL", nil),
+				Description: "PROXY URL for Volcengine Provider",
+			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"volcengine_vpcs":               vpc.DataSourceVolcengineVpcs(),
@@ -203,6 +209,7 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 		Endpoint:        d.Get("endpoint").(string),
 		DisableSSL:      d.Get("disable_ssl").(bool),
 		CustomerHeaders: map[string]string{},
+		ProxyUrl:        d.Get("proxy_url").(string),
 	}
 
 	headers := d.Get("customer_headers").(string)
