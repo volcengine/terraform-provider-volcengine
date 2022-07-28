@@ -44,6 +44,7 @@ resource "volcengine_ecs_instance" "default" {
     size                 = 100
     delete_with_instance = true
   }
+  deployment_set_id = ""
   #  secondary_network_interfaces {
   #    subnet_id = volcengine_subnet.foo1.id
   #    security_group_ids = [volcengine_security_group.foo1.id]
@@ -62,6 +63,7 @@ The following arguments are supported:
 * `auto_renew_period` - (Optional, ForceNew) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.
 * `auto_renew` - (Optional, ForceNew) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.
 * `data_volumes` - (Optional) The data volume collection of  ECS instance.
+* `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
 * `description` - (Optional) The description of ECS instance.
 * `host_name` - (Optional, ForceNew) The host name of ECS instance.
 * `hpc_cluster_id` - (Optional, ForceNew) The hpc cluster ID of ECS instance.

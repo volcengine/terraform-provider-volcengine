@@ -32,6 +32,7 @@ resource "volcengine_ecs_instance" "default" {
     size = 100
     delete_with_instance = true
   }
+  deployment_set_id = ""
 #  secondary_network_interfaces {
 #    subnet_id = volcengine_subnet.foo1.id
 #    security_group_ids = [volcengine_security_group.foo1.id]

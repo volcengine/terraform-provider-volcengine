@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 )
 
 type VolcengineEcsService struct {
@@ -393,39 +394,47 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) (callbacks []ve.Callback) {
 	var (
 		passwordChange bool
+		flag           bool
 	)
-	modifyInstanceSpec := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "ModifyInstanceSpec",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"instance_type": {
-					ConvertType: ve.ConvertDefault,
+	if resourceData.HasChange("deployment_set_id") {
+		deploymentSet := ve.Callback{
+			Call: ve.SdkCall{
+				Action:         "ModifyInstanceDeployment",
+				ConvertMode:    ve.RequestConvertInConvert,
+				Convert:        map[string]ve.RequestConvert{},
+				RequestIdField: "InstanceId",
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["DeploymentSetId"] = resourceData.Get("deployment_set_id")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
 				},
 			},
-			RequestIdField: "InstanceId",
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) > 1 {
-					return true, nil
-				}
-				return false, nil
+		}
+		refresh := map[ve.ResourceService]*ve.StateRefresh{
+			ecs_deployment_set_associate.NewEcsDeploymentSetAssociateService(s.Client): {
+				Target:     []string{"success"},
+				Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+				ResourceId: resourceData.Get("deployment_set_id").(string) + ":" + resourceData.Id(),
 			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				(*call.SdkParam)["ClientToken"] = uuid.New().String()
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//修改实例规格
-				return s.Client.EcsClient.ModifyInstanceSpecCommon(call.SdkParam)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return nil
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"RUNNING", "STOPPED"},
-				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
-			},
-		},
+		}
+
+		if resourceData.Get("deployment_set_id").(string) != "" {
+			deploymentSet.Call.ExtraRefresh = refresh
+		}
+
+		callbacks = append(callbacks, deploymentSet)
 	}
-	callbacks = append(callbacks, modifyInstanceSpec)
+
+	if resourceData.HasChange("password") && !resourceData.HasChange("image_id") {
+		passwordChange = true
+	}
+
 	modifyInstanceAttribute := ve.Callback{
 		Call: ve.SdkCall{
 			Action:         "ModifyInstanceAttribute",
@@ -460,12 +469,6 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改实例属性
 				return s.Client.EcsClient.ModifyInstanceAttributeCommon(call.SdkParam)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				if _, ok := (*call.SdkParam)["Password"]; ok {
-					passwordChange = true
-				}
-				return nil
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"RUNNING", "STOPPED"},
@@ -598,52 +601,6 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 		},
 	}
 	callbacks = append(callbacks, extendVolume)
-	//image change
-	if resourceData.HasChange("image_id") {
-		//先需要关机才能重装系统
-		stopInstance := s.StartOrStopInstanceCallback(resourceData, true)
-		callbacks = append(callbacks, stopInstance)
-		replaceSystemVolume := ve.Callback{
-			Call: ve.SdkCall{
-				Action:         "ReplaceSystemVolume",
-				ConvertMode:    ve.RequestConvertInConvert,
-				RequestIdField: "InstanceId",
-				Convert: map[string]ve.RequestConvert{
-					"image_id": {
-						ConvertType: ve.ConvertDefault,
-					},
-					"system_volume_size": {
-						ConvertType: ve.ConvertDefault,
-						ForceGet:    true,
-					},
-					"key_pair_name": {
-						ConvertType: ve.ConvertDefault,
-						ForceGet:    true,
-					},
-					"password": {
-						ConvertType: ve.ConvertDefault,
-						ForceGet:    true,
-					},
-					"user_data": {
-						ConvertType: ve.ConvertDefault,
-						ForceGet:    true,
-					},
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.EcsClient.ReplaceSystemVolumeCommon(call.SdkParam)
-				},
-				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-					return nil
-				},
-				Refresh: &ve.StateRefresh{
-					Target:  []string{"RUNNING"},
-					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
-				},
-			},
-		}
-		callbacks = append(callbacks, replaceSystemVolume)
-	}
 
 	if !resourceData.HasChange("instance_charge_type") && resourceData.Get("instance_charge_type").(string) == "PrePaid" {
 		//只有当没执行实例状态变更才生效并且是预付费
@@ -689,35 +646,99 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 		}
 		callbacks = append(callbacks, renewInstance)
 	}
-
-	//总体重启 如果需要
-	var stopped bool
-
-	stopInstance := s.StartOrStopInstanceCallback(resourceData, true)
-	stopInstance.Call.BeforeCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-		instance, err := s.ReadResource(resourceData, resourceData.Id())
-		if err != nil {
-			return false, err
-		}
-		status, err := ve.ObtainSdkValue("Status", instance)
-		if err != nil {
-			return false, err
-		}
-		if status.(string) == "RUNNING" {
-			return passwordChange, nil
-		}
-		return false, nil
+	//only password changed need stop
+	if passwordChange {
+		stopInstance := s.StartOrStopInstanceCallback(resourceData, true, &flag)
+		callbacks = append(callbacks, stopInstance)
 	}
-	stopInstance.Call.AfterCall = func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-		stopped = true
-		return nil
-	}
-	callbacks = append(callbacks, stopInstance)
+	//instance_type
+	if resourceData.HasChange("instance_type") {
+		//need stop before ModifyInstanceSpec
 
-	startInstance := s.StartOrStopInstanceCallback(resourceData, false)
-	startInstance.Call.BeforeCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-		return stopped && passwordChange, nil
+		stopInstance := s.StartOrStopInstanceCallback(resourceData, true, &flag)
+		callbacks = append(callbacks, stopInstance)
+
+		modifyInstanceSpec := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyInstanceSpec",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"instance_type": {
+						ConvertType: ve.ConvertDefault,
+					},
+				},
+				RequestIdField: "InstanceId",
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 1 {
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					//修改实例规格
+					return s.Client.EcsClient.ModifyInstanceSpecCommon(call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"RUNNING", "STOPPED"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, modifyInstanceSpec)
 	}
+	//image change
+	if resourceData.HasChange("image_id") {
+		//need stop before ReplaceSystemVolume
+		stopInstance := s.StartOrStopInstanceCallback(resourceData, true, &flag)
+		callbacks = append(callbacks, stopInstance)
+		replaceSystemVolume := ve.Callback{
+			Call: ve.SdkCall{
+				Action:         "ReplaceSystemVolume",
+				ConvertMode:    ve.RequestConvertInConvert,
+				RequestIdField: "InstanceId",
+				Convert: map[string]ve.RequestConvert{
+					"image_id": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"system_volume_size": {
+						ConvertType: ve.ConvertDefault,
+						ForceGet:    true,
+					},
+					"key_pair_name": {
+						ConvertType: ve.ConvertDefault,
+						ForceGet:    true,
+					},
+					"password": {
+						ConvertType: ve.ConvertDefault,
+						ForceGet:    true,
+					},
+					"user_data": {
+						ConvertType: ve.ConvertDefault,
+						ForceGet:    true,
+					},
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.EcsClient.ReplaceSystemVolumeCommon(call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"RUNNING"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, replaceSystemVolume)
+	}
+
+	startInstance := s.StartOrStopInstanceCallback(resourceData, false, &flag)
 	callbacks = append(callbacks, startInstance)
 
 	return callbacks
@@ -846,7 +867,7 @@ func (s *VolcengineEcsService) CommonResponseConvert() map[string]ve.ResponseCon
 	}
 }
 
-func (s *VolcengineEcsService) StartOrStopInstanceCallback(resourceData *schema.ResourceData, isStop bool) ve.Callback {
+func (s *VolcengineEcsService) StartOrStopInstanceCallback(resourceData *schema.ResourceData, isStop bool, flag *bool) ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			ConvertMode: ve.RequestConvertIgnore,
@@ -857,9 +878,27 @@ func (s *VolcengineEcsService) StartOrStopInstanceCallback(resourceData *schema.
 	}
 	if isStop {
 		callback.Call.Action = "StopInstance"
+		callback.Call.BeforeCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+			instance, err := s.ReadResource(resourceData, resourceData.Id())
+			if err != nil {
+				return false, err
+			}
+			status, err := ve.ObtainSdkValue("Status", instance)
+			if err != nil {
+				return false, err
+			}
+			if status.(string) == "RUNNING" {
+				return true, nil
+			}
+			return false, nil
+		}
 		callback.Call.ExecuteCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 			logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 			return s.Client.EcsClient.StopInstanceCommon(call.SdkParam)
+		}
+		callback.Call.AfterCall = func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+			*flag = true
+			return nil
 		}
 		callback.Call.Refresh = &ve.StateRefresh{
 			Target:  []string{"STOPPED"},
@@ -867,6 +906,20 @@ func (s *VolcengineEcsService) StartOrStopInstanceCallback(resourceData *schema.
 		}
 	} else {
 		callback.Call.Action = "StartInstance"
+		callback.Call.BeforeCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+			instance, err := s.ReadResource(resourceData, resourceData.Id())
+			if err != nil {
+				return false, err
+			}
+			status, err := ve.ObtainSdkValue("Status", instance)
+			if err != nil {
+				return false, err
+			}
+			if status.(string) == "RUNNING" {
+				return false, nil
+			}
+			return *flag, nil
+		}
 		callback.Call.ExecuteCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 			logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 			return s.Client.EcsClient.StartInstanceCommon(call.SdkParam)
@@ -959,4 +1012,13 @@ func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraDa
 		return extraData, fmt.Errorf(errorStr)
 	}
 	return extraData, err
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "ecs",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
 }

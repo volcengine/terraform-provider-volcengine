@@ -97,16 +97,27 @@ func (s *VolcengineVolumeService) RefreshResourceState(resourceData *schema.Reso
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				demo       map[string]interface{}
+				ebs        map[string]interface{}
 				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "error")
-			demo, err = s.ReadResource(resourceData, id)
-			if err != nil {
+
+			if err = resource.Retry(20*time.Minute, func() *resource.RetryError {
+				ebs, err = s.ReadResource(resourceData, id)
+				if err != nil {
+					if ve.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
 				return nil, "", err
 			}
-			status, err = ve.ObtainSdkValue("Status", demo)
+
+			status, err = ve.ObtainSdkValue("Status", ebs)
 			if err != nil {
 				return nil, "", err
 			}
@@ -115,7 +126,7 @@ func (s *VolcengineVolumeService) RefreshResourceState(resourceData *schema.Reso
 					return nil, "", fmt.Errorf("volume status error, status:%s", status.(string))
 				}
 			}
-			return demo, status.(string), err
+			return ebs, status.(string), err
 		},
 	}
 }
@@ -171,8 +182,8 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 					return s.Client.EbsClient.ModifyVolumeAttributeCommon(call.SdkParam)
 				},
 				Refresh: &ve.StateRefresh{
-					Target:  []string{"available"},
-					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+					Target:  []string{"available", "attached"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		})
@@ -193,8 +204,8 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 					return s.Client.EbsClient.ExtendVolumeCommon(call.SdkParam)
 				},
 				Refresh: &ve.StateRefresh{
-					Target:  []string{"available"},
-					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+					Target:  []string{"available", "attached"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		})
