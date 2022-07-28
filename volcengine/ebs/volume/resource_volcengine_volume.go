@@ -43,7 +43,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "The type of Volume.The valid value is ESSD_PL0 or ESSD_PL1 or ESSD_PL2 or PTSSD.",
+				Description:  "The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 				ValidateFunc: validation.StringInSlice([]string{"ESSD_PL0", "ESSD_PL1", "ESSD_PL2", "PTSSD", "ESSD_FlexPL"}, false),
 			},
 			"kind": {
