@@ -23,7 +23,7 @@ The following arguments are supported:
 * `kind` - (Required, ForceNew) The kind of Volume.
 * `size` - (Required) The size of Volume.
 * `volume_name` - (Required) The name of Volume.
-* `volume_type` - (Required, ForceNew) The type of Volume.
+* `volume_type` - (Required, ForceNew) The type of Volume.The valid value is ESSD_PL0 or ESSD_PL1 or ESSD_PL2 or PTSSD.
 * `zone_id` - (Required, ForceNew) The id of the Zone.
 * `delete_with_instance` - (Optional) Delete Volume with Attached Instance.
 * `description` - (Optional) The description of the Volume.
