@@ -12,7 +12,7 @@ Provides a resource to manage volume
 ```hcl
 resource "volcengine_volume" "foo" {
   volume_name = "terraform-test"
-  zone_id     = "cn-lingqiu-a"
+  zone_id     = "cn-beijing-a"
   volume_type = "PTSSD"
   kind        = "data"
   size        = 40
