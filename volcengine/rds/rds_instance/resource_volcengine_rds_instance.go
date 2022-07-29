@@ -91,13 +91,6 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: "The vpc ID of the RDS instance.",
 			},
-			"number": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true,
-				Description:  "The number of instances purchased. The value is an integer between 1 and 10. The default value is 1.",
-				ValidateFunc: validation.IntBetween(1, 10),
-			},
 			"super_account_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
