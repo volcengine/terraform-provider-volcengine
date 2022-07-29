@@ -41,7 +41,7 @@ func ResourceVolcengineRdsIpList() *schema.Resource {
 			},
 			"ip_list": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
