@@ -21,7 +21,7 @@ The following arguments are supported:
 * `deployment_set_name` - (Required) The name of ECS DeploymentSet.
 * `description` - (Optional) The description of ECS DeploymentSet.
 * `granularity` - (Optional, ForceNew) The granularity of ECS DeploymentSet.Valid values: switch, host, rack,Default is host.
-* `strategy` - (Optional, ForceNew) The strategy of ECS DeploymentSet.Valid values: Availability.Default is host.
+* `strategy` - (Optional, ForceNew) The strategy of ECS DeploymentSet.Valid values: Availability.Default is Availability.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
