@@ -396,40 +396,6 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 		passwordChange bool
 		flag           bool
 	)
-	if resourceData.HasChange("deployment_set_id") {
-		deploymentSet := ve.Callback{
-			Call: ve.SdkCall{
-				Action:         "ModifyInstanceDeployment",
-				ConvertMode:    ve.RequestConvertInConvert,
-				Convert:        map[string]ve.RequestConvert{},
-				RequestIdField: "InstanceId",
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					(*call.SdkParam)["DeploymentSetId"] = resourceData.Get("deployment_set_id")
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-					return nil
-				},
-			},
-		}
-		refresh := map[ve.ResourceService]*ve.StateRefresh{
-			ecs_deployment_set_associate.NewEcsDeploymentSetAssociateService(s.Client): {
-				Target:     []string{"success"},
-				Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-				ResourceId: resourceData.Get("deployment_set_id").(string) + ":" + resourceData.Id(),
-			},
-		}
-
-		if resourceData.Get("deployment_set_id").(string) != "" {
-			deploymentSet.Call.ExtraRefresh = refresh
-		}
-
-		callbacks = append(callbacks, deploymentSet)
-	}
 
 	if resourceData.HasChange("password") && !resourceData.HasChange("image_id") {
 		passwordChange = true
@@ -736,6 +702,43 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 			},
 		}
 		callbacks = append(callbacks, replaceSystemVolume)
+	}
+
+	if resourceData.HasChange("deployment_set_id") {
+		stopInstance := s.StartOrStopInstanceCallback(resourceData, true, &flag)
+		callbacks = append(callbacks, stopInstance)
+		deploymentSet := ve.Callback{
+			Call: ve.SdkCall{
+				Action:         "ModifyInstanceDeployment",
+				ConvertMode:    ve.RequestConvertInConvert,
+				Convert:        map[string]ve.RequestConvert{},
+				RequestIdField: "InstanceId",
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["DeploymentSetId"] = resourceData.Get("deployment_set_id")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
+				},
+			},
+		}
+		refresh := map[ve.ResourceService]*ve.StateRefresh{
+			ecs_deployment_set_associate.NewEcsDeploymentSetAssociateService(s.Client): {
+				Target:     []string{"success"},
+				Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+				ResourceId: resourceData.Get("deployment_set_id").(string) + ":" + resourceData.Id(),
+			},
+		}
+
+		if resourceData.Get("deployment_set_id").(string) != "" {
+			deploymentSet.Call.ExtraRefresh = refresh
+		}
+
+		callbacks = append(callbacks, deploymentSet)
 	}
 
 	startInstance := s.StartOrStopInstanceCallback(resourceData, false, &flag)

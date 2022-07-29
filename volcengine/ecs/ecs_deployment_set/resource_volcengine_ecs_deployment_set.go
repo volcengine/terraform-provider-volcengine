@@ -58,7 +58,7 @@ func ResourceVolcengineEcsDeploymentSet() *schema.Resource {
 					"Availability",
 				}, false),
 				Default:     "Availability",
-				Description: "The strategy of ECS DeploymentSet.Valid values: Availability.Default is host.",
+				Description: "The strategy of ECS DeploymentSet.Valid values: Availability.Default is Availability.",
 			},
 			"deployment_set_id": {
 				Type:        schema.TypeString,
