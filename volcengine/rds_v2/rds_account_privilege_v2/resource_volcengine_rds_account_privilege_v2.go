@@ -39,7 +39,7 @@ func ResourceVolcengineRdsAccountPrivilege() *schema.Resource {
 				ForceNew:    true,
 				Description: "Database account name. The rules are as follows:\nUnique name.\nStart with a letter and end with a letter or number.\nConsists of lowercase letters, numbers, or underscores (_).\nThe length is 2~32 characters.\nThe [keyword list](https://www.volcengine.com/docs/6313/66162) is disabled for database accounts, and certain reserved words, including root, admin, etc., cannot be used.",
 			},
-			"db_privileges": {
+			"account_privileges_info": {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "The privileges of the account.",
@@ -56,7 +56,7 @@ func ResourceVolcengineRdsAccountPrivilege() *schema.Resource {
 							Required:    true,
 							Description: "The privilege type of the account.",
 						},
-						"account_privilege_str": {
+						"account_privilege_custom": {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,

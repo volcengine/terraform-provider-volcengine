@@ -34,8 +34,8 @@ func (s *VolcengineRdsInstanceService) ReadResources(m map[string]interface{}) (
 		ok          bool
 		rdsInstance map[string]interface{}
 	)
-	data, err = volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) ([]interface{}, error) {
-		action := "ListDBInstances"
+	data, err = volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
+		action := "DescribeDBInstances"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
@@ -49,7 +49,7 @@ func (s *VolcengineRdsInstanceService) ReadResources(m map[string]interface{}) (
 			}
 		}
 
-		results, err = volc.ObtainSdkValue("Result.Datas", *resp)
+		results, err = volc.ObtainSdkValue("Result.InstancesInfo", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -61,8 +61,9 @@ func (s *VolcengineRdsInstanceService) ReadResources(m map[string]interface{}) (
 		}
 		return data, err
 	})
+
 	if err != nil {
-		return data, err
+		return nil, err
 	}
 
 	for _, v := range data {
@@ -70,21 +71,20 @@ func (s *VolcengineRdsInstanceService) ReadResources(m map[string]interface{}) (
 			return data, errors.New("Value is not map ")
 		} else {
 			// query rds connection info
-			connResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeDBInstanceConnection"), &map[string]interface{}{
+			instanceDetailInfo, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeDBInstanceDetail"), &map[string]interface{}{
 				"InstanceId": rdsInstance["InstanceId"],
 			})
 			if err != nil {
-				logger.Info("DescribeDBInstanceConnection error:", err)
+				logger.Info("DescribeDBInstanceDetail error:", err)
 				continue
 			}
-			connInfo, err := volc.ObtainSdkValue("Result.ConnectionInfo", *connResp)
+			nodeDetailInfo, err := volc.ObtainSdkValue("Result.NodeDetailInfo", *instanceDetailInfo)
 			if err != nil {
-				logger.Info("ObtainSdkValue Result.ConnectionInfo error:", err)
+				logger.Info("ObtainSdkValue Result.NodeDetailInfo error:", err)
 				continue
 			}
-			if connInfo != nil {
-				rdsInstance["ConnectionInfo"] = connInfo
-			}
+			rdsInstance["node_detail_info"] = nodeDetailInfo
+			rdsInstance["node_info"] = nodeDetailInfo
 		}
 	}
 
@@ -154,11 +154,6 @@ func (s *VolcengineRdsInstanceService) RefreshResourceState(resourceData *schema
 
 func (VolcengineRdsInstanceService) WithResourceResponseHandlers(rdsInstance map[string]interface{}) []volc.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]volc.ResponseConvert, error) {
-		instanceSpecName, err := volc.ObtainSdkValue("InstanceSpec.SpecName", rdsInstance)
-		if err != nil {
-			return nil, nil, err
-		}
-		rdsInstance["InstanceSpecName"] = instanceSpecName
 		return rdsInstance, map[string]volc.ResponseConvert{
 			"InstanceId": {
 				TargetField: "id",
@@ -170,11 +165,8 @@ func (VolcengineRdsInstanceService) WithResourceResponseHandlers(rdsInstance map
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
 			},
-			"StorageSpaceGB": {
-				TargetField: "storage_space_gb",
-			},
-			"VpcID": {
-				TargetField: "vpc_id",
+			"ChargeDetail": {
+				TargetField: "charge_info",
 			},
 		}, nil
 	}
@@ -189,17 +181,34 @@ func (s *VolcengineRdsInstanceService) CreateResource(resourceData *schema.Resou
 			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertAll,
 			Convert: map[string]volc.RequestConvert{
-				"db_engine": {
-					TargetField: "DBEngine",
-				},
 				"db_engine_version": {
 					TargetField: "DBEngineVersion",
 				},
-				"storage_space_gb": {
-					TargetField: "StorageSpaceGB",
+				"db_time_zone": {
+					TargetField: "DBTimeZone",
 				},
-				"vpc_id": {
-					TargetField: "VpcID",
+				"db_param_group_id": {
+					TargetField: "DBParamGroupId",
+				},
+				"charge_info": {
+					ConvertType: volc.ConvertJsonObject,
+				},
+				"node_info": {
+					ConvertType: volc.ConvertJsonObjectArray,
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						if i == nil {
+							return nil
+						}
+						nodeInfo := i.([]interface{})
+						for _, v := range nodeInfo {
+							if v == nil {
+								continue
+							}
+							node := v.(map[string]interface{})
+							node["node_operate_type"] = "Create"
+						}
+						return nodeInfo
+					},
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
@@ -266,7 +275,12 @@ func (s *VolcengineRdsInstanceService) RemoveResource(resourceData *schema.Resou
 
 func (s *VolcengineRdsInstanceService) DatasourceResources(*schema.ResourceData, *schema.Resource) volc.DataSourceInfo {
 	return volc.DataSourceInfo{
-		ContentType:  volc.ContentTypeJson,
+		ContentType: volc.ContentTypeJson,
+		RequestConverts: map[string]volc.RequestConvert{
+			"db_engine_version": {
+				TargetField: "DBEngineVersion",
+			},
+		},
 		NameField:    "InstanceName",
 		IdField:      "InstanceId",
 		CollectField: "rds_instances",
@@ -281,12 +295,6 @@ func (s *VolcengineRdsInstanceService) DatasourceResources(*schema.ResourceData,
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
 			},
-			"StorageSpaceGB": {
-				TargetField: "storage_space_gb",
-			},
-			"VpcID": {
-				TargetField: "vpc_id",
-			},
 		},
 	}
 }
@@ -298,7 +306,7 @@ func (s *VolcengineRdsInstanceService) ReadResourceId(id string) string {
 func getUniversalInfo(actionName string) volc.UniversalInfo {
 	return volc.UniversalInfo{
 		ServiceName: "rds_mysql",
-		Version:     "2018-01-01",
+		Version:     "2022-01-01",
 		HttpMethod:  volc.POST,
 		ContentType: volc.ApplicationJSON,
 		Action:      actionName,

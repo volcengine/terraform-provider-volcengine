@@ -31,35 +31,46 @@ func DataSourceVolcengineRdsInstances() *schema.Resource {
 				Optional:    true,
 				Description: "The id of the RDS instance.",
 			},
-			"instance_type": {
+			"instance_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The type of the RDS instance.",
+				Description: "The name of the RDS instance.",
 			},
 			"instance_status": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The status of the RDS instance.",
+				Description: "The status of the RDS instance, Value:\nRunning - running\nCreating - Creating\nDeleting - Deleting\nRestarting - Restarting\nRestoring - Restoring\nUpdating - changing\nUpgrading - Upgrading\nError - the error.",
 			},
-			"create_start_time": {
+			"db_engine_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The version of the RDS instance, Value:\nMySQL Community:\n    MySQL_5.7 - MySQL 5.7\n    MySQL_8_0 - MySQL 8.0\nPostgreSQL Community:\n    PostgreSQL_11 - PostgreSQL 11\n    PostgreSQL_12 - PostgreSQL 12\nMicrosoft SQL Server: Not available at this time\n    SQLServer_2019 - SQL Server 2019\nveDB for MySQL:\n    MySQL_8_0 - MySQL 8.0\nveDB for PostgreSQL:\n    PostgreSQL_13 - PostgreSQL 13.",
+			},
+			"instance_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The type of the RDS instance, Value:\nValue:\nRDS for MySQL:\n    HA - high availability version;\nRDS for PostgreSQL:\n    HA - high availability version;\nMicrosoft SQL Server: Not available at this time\n    Enterprise - Enterprise Edition\n    Standard - Standard Edition\n    Web - Web version\nveDB for MySQL:\n    Cluster - Cluster Edition\nveDB for PostgreSQL:\n    Cluster - Cluster Edition\nMySQL Sharding:\n    HA - high availability version;.",
+			},
+			"create_time_start": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The start time of creating RDS instance.",
 			},
-			"create_end_time": {
+			"create_time_end": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The end time of creating RDS instance.",
 			},
-			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The region of the RDS instance.",
-			},
-			"zone": {
+			"zone_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The available zone of the RDS instance.",
+			},
+			"charge_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "The charge type of the RDS instance.",
+				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
 			},
 			"rds_instances": {
 				Description: "The collection of RDS instance query.",
@@ -87,15 +98,15 @@ func DataSourceVolcengineRdsInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the RDS instance.",
 						},
-						"create_time": {
+						"region_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The create time of the RDS instance.",
+							Description: "The region of the RDS instance.",
 						},
-						"instance_type": {
+						"zone_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The type of the RDS instance.",
+							Description: "The available zone of the RDS instance.",
 						},
 						"db_engine": {
 							Type:        schema.TypeString,
@@ -107,113 +118,187 @@ func DataSourceVolcengineRdsInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The engine version of the RDS instance.",
 						},
-						"storage_space_gb": {
+						"instance_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The type of the RDS instance.",
+						},
+						"node_spec": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "General instance type, different from Custom instance type.",
+						},
+						"node_number": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The total storage GB of the RDS instance.",
+							Description: "The number of nodes.",
 						},
-						"region": {
+						"shard_number": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of shards.",
+						},
+						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The region of the RDS instance.",
+							Description: "The create time of the RDS instance.",
 						},
-						"zone": {
+						"storage_use": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The instance has used storage space. Unit: GB.",
+						},
+						"storage_space": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Total instance storage space. Unit: GB.",
+						},
+						"storage_type": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The available zone of the RDS instance.",
+							Description: "Instance storage type. When the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, the value is:\nLocalSSD - local SSD disk\nWhen the database type is veDB_MySQL/veDB_PostgreSQL, the value is:\nDistributedStorage - Distributed Storage.",
 						},
 						"vpc_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The vpc ID of the RDS instance.",
 						},
-						"update_time": {
+						"subnet_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The update time of the RDS instance.",
+							Description: "The subnet ID of the RDS instance.",
 						},
-						"charge_type": {
+						"time_zone": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The charge type of the RDS instance.",
+							Description: "Time zone.",
 						},
-						"charge_status": {
+						"port": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The charge status of the RDS instance.",
+							Description: "Instance intranet port.",
 						},
-						"read_only_instance_ids": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-							Set:         schema.HashString,
-							Description: "The ID list of read only instance.",
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Subordinate to the project.",
 						},
-						"instance_spec": {
+						"charge_detail": {
 							Type:        schema.TypeList,
 							Computed:    true,
 							MaxItems:    1,
 							MinItems:    1,
-							Description: "The spec type detail of RDS instance.",
+							Description: "Payment methods.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"cpu_num": {
-										Type:        schema.TypeInt,
-										Computed:    true,
-										Description: "The cpu core count of spec type.",
-									},
-									"mem_in_gb": {
-										Type:        schema.TypeInt,
-										Computed:    true,
-										Description: "The memory size(GB) of spec type.",
-									},
-									"spec_name": {
+									"charge_type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The name of spec type.",
+										Description: "Payment type. Value:\nPostPaid - Pay-As-You-Go\nPrePaid - Yearly and monthly (default).",
+									},
+									"auto_renew": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to automatically renew in prepaid scenarios.\nAutorenew_Enable\nAutorenew_Disable (default).",
+									},
+									"period_unit": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The purchase cycle in the prepaid scenario.\nMonth - monthly subscription (default)\nYear - Package year.",
+									},
+									"period": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "Purchase duration in prepaid scenarios. Default: 1.",
+									},
+									"charge_status": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Pay status. Value:\nnormal - normal\noverdue - overdue\n.",
+									},
+									"charge_start_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Billing start time (pay-as-you-go & monthly subscription).",
+									},
+									"charge_end_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Billing expiry time (yearly and monthly only).",
+									},
+									"overdue_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Shutdown time in arrears (pay-as-you-go & monthly subscription).",
+									},
+									"overdue_reclaim_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Estimated release time when arrears are closed (pay-as-you-go & monthly subscription).",
 									},
 								},
 							},
 						},
-						"connection_info": {
+						"node_detail_info": {
 							Type:        schema.TypeList,
-							Optional:    true,
 							Computed:    true,
-							MaxItems:    1,
-							Description: "The connection info ot the RDS instance.",
+							Description: "Instance node information.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"internal_domain": {
+									"instance_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The internal domain of the RDS instance.",
+										Description: "Instance ID.",
 									},
-									"internal_port": {
+									"node_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The interval port of the RDS instance.",
+										Description: "Node ID.",
 									},
-									"public_domain": {
+									"region_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The public domain of the RDS instance.",
+										Description: "Region ID, you can call the DescribeRegions query and use this parameter to specify the region where the instance is to be created.",
 									},
-									"public_port": {
+									"zone_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The public port of the RDS instance.",
+										Description: "Availability zone ID. Subsequent support for multi-availability zones can be separated and displayed by an English colon.",
 									},
-									"enable_read_write_splitting": {
+									"node_type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Whether read-write separation is enabled.",
+										Description: "Node type. Value: Primary: Primary node.\nSecondary: Standby node.\nReadOnly: Read-only node.",
 									},
-									"enable_read_only": {
+									"node_status": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Whether global read-only is enabled.",
+										Description: "Node state, value: aligned with instance state.",
+									},
+									"v_cpu": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "CPU size. For example: 1 means 1U.",
+									},
+									"memory": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "Memory size in GB.",
+									},
+									"node_spec": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "General instance type, different from Custom instance type.",
+									},
+									"create_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Node creation local time.",
+									},
+									"update_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Node updates local time.",
 									},
 								},
 							},

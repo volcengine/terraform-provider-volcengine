@@ -29,14 +29,14 @@ func (s *VolcengineRdsAccountService) GetClient() *volc.SdkClient {
 }
 
 func (s *VolcengineRdsAccountService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
-	list, err := volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
+	list, err := volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) (data []interface{}, err error) {
 		var (
 			resp    *map[string]interface{}
 			results interface{}
 			ok      bool
 		)
 		universalClient := s.Client.UniversalClient
-		action := "ListAccounts"
+		action := "DescribeDBAccounts"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
@@ -50,7 +50,7 @@ func (s *VolcengineRdsAccountService) ReadResources(m map[string]interface{}) ([
 			}
 		}
 
-		results, err = volc.ObtainSdkValue("Result.Datas", *resp)
+		results, err = volc.ObtainSdkValue("Result.AccountsInfo", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -58,7 +58,7 @@ func (s *VolcengineRdsAccountService) ReadResources(m map[string]interface{}) ([
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Datas is not Slice")
+			return data, errors.New("Result.AccountsInfo is not Slice")
 		}
 		return data, err
 	})
@@ -131,7 +131,7 @@ func (VolcengineRdsAccountService) WithResourceResponseHandlers(rdsAccount map[s
 func (s *VolcengineRdsAccountService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
 	callback := volc.Callback{
 		Call: volc.SdkCall{
-			Action:      "CreateAccount",
+			Action:      "CreateDBAccount",
 			ConvertMode: volc.RequestConvertAll,
 			ContentType: volc.ContentTypeJson,
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
@@ -157,7 +157,7 @@ func (s *VolcengineRdsAccountService) ModifyResource(resourceData *schema.Resour
 func (s *VolcengineRdsAccountService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {
 	callback := volc.Callback{
 		Call: volc.SdkCall{
-			Action:      "DeleteAccount",
+			Action:      "DeleteDBAccount",
 			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
@@ -204,8 +204,8 @@ func (s *VolcengineRdsAccountService) DatasourceResources(*schema.ResourceData, 
 		NameField:    "AccountName",
 		CollectField: "rds_accounts",
 		ResponseConverts: map[string]volc.ResponseConvert{
-			"DBPrivileges": {
-				TargetField: "db_privileges",
+			"AccountPrivilegesInfo": {
+				TargetField: "account_privileges_info",
 				Convert: func(i interface{}) interface{} {
 					dbPrivileges, ok := i.([]interface{})
 					if !ok {
@@ -234,7 +234,7 @@ func (s *VolcengineRdsAccountService) ReadResourceId(id string) string {
 func getUniversalInfo(actionName string) volc.UniversalInfo {
 	return volc.UniversalInfo{
 		ServiceName: "rds_mysql",
-		Version:     "2018-01-01",
+		Version:     "2022-01-01",
 		HttpMethod:  volc.POST,
 		ContentType: volc.ApplicationJSON,
 		Action:      actionName,

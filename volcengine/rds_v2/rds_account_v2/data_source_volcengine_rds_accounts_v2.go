@@ -63,7 +63,7 @@ func DataSourceVolcengineRdsAccounts() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the database account.",
 						},
-						"db_privileges": {
+						"account_privileges_info": {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "The privilege detail list of RDS instance account.",
@@ -79,7 +79,7 @@ func DataSourceVolcengineRdsAccounts() *schema.Resource {
 										Computed:    true,
 										Description: "The privilege type of the account.",
 									},
-									"account_privilege_str": {
+									"account_privilege_custom": {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The privilege string of the account.",

@@ -1,6 +1,10 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_account_privilege_v2"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_account_v2"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_database_v2"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
@@ -144,6 +148,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_databases": rds_database.DataSourceVolcengineRdsDatabases(),
 			"volcengine_rds_accounts":  rds_account.DataSourceVolcengineRdsAccounts(),
 			"volcengine_rds_ip_lists":  rds_ip_list.DataSourceVolcengineRdsIpLists(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
+			"volcengine_rds_databases_v2": rds_database_v2.DataSourceVolcengineRdsDatabases(),
+			"volcengine_rds_accounts_v2":  rds_account_v2.DataSourceVolcengineRdsAccounts(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -202,6 +211,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_account":           rds_account.ResourceVolcengineRdsAccount(),
 			"volcengine_rds_ip_list":           rds_ip_list.ResourceVolcengineRdsIpList(),
 			"volcengine_rds_account_privilege": rds_account_privilege.ResourceVolcengineRdsAccountPrivilege(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instance_v2":          rds_instance_v2.ResourceVolcengineRdsInstance(),
+			"volcengine_rds_database_v2":          rds_database_v2.ResourceVolcengineRdsDatabase(),
+			"volcengine_rds_account_v2":           rds_account_v2.ResourceVolcengineRdsAccount(),
+			"volcengine_rds_account_privilege_v2": rds_account_privilege_v2.ResourceVolcengineRdsAccountPrivilege(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

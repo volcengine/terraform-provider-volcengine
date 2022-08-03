@@ -12,7 +12,7 @@ import (
 Import
 Database can be imported using the id, e.g.
 ```
-$ terraform import volcengine_rds_database.default mysql-42b38c769c4b:dbname
+$ terraform import volcengine_rds_database_v2.default mysql-42b38c769c4b:dbname
 ```
 
 */

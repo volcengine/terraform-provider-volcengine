@@ -12,7 +12,7 @@ import (
 Import
 RDS account can be imported using the id, e.g.
 ```
-$ terraform import volcengine_rds_account.default mysql-42b38c769c4b:test
+$ terraform import volcengine_rds_account_v2.default mysql-42b38c769c4b:test
 ```
 
 */

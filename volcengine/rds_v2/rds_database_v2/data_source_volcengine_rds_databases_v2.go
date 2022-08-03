@@ -33,10 +33,10 @@ func DataSourceVolcengineRdsDatabases() *schema.Resource {
 				Required:    true,
 				Description: "The id of the RDS instance.",
 			},
-			"db_status": {
+			"db_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The status of the RDS database.",
+				Description: "The name of the RDS database.",
 			},
 			"rds_databases": {
 				Description: "The collection of RDS instance account query.",
@@ -64,10 +64,29 @@ func DataSourceVolcengineRdsDatabases() *schema.Resource {
 							Computed:    true,
 							Description: "The character set of the RDS database.",
 						},
-						"account_names": {
-							Type:        schema.TypeString,
+						"databases_privileges_info": {
+							Type:        schema.TypeList,
 							Computed:    true,
-							Description: "The account names of the RDS database.",
+							Description: "List of database account privileges.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"account_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the account to be authorized.",
+									},
+									"account_privilege": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Authorized database permission type, value: ReadWrite: read and write permission. ReadOnly: Read-only permission. DDLOnly: DDL permissions only. DMLOnly: DML permissions only. Custom: Custom permissions.",
+									},
+									"account_privilege_custom": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Database privilege string, required when AccountPrivilege is Custom, value: SELECTINSERTUPDATEDELETECREATEDROPREFERENCESINDEXALTERCREATE TEMPORARY TABLESLOCK TABLESEXECUTECREATE VIEWSHOW VIEWCREATE ROUTINEALTER ROUTINEEVENTTRIGGER\nillustrate:\nMultiple strings are separated by commas.",
+									},
+								},
+							},
 						},
 					},
 				},

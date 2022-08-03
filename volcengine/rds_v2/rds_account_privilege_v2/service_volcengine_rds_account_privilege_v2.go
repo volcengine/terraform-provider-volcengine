@@ -29,14 +29,14 @@ func (s *VolcengineRdsAccountPrivilegeService) GetClient() *volc.SdkClient {
 }
 
 func (s *VolcengineRdsAccountPrivilegeService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
-	list, err := volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
+	list, err := volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) (data []interface{}, err error) {
 		var (
 			resp    *map[string]interface{}
 			results interface{}
 			ok      bool
 		)
 		universalClient := s.Client.UniversalClient
-		action := "ListAccounts"
+		action := "DescribeDBAccounts"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
@@ -50,7 +50,7 @@ func (s *VolcengineRdsAccountPrivilegeService) ReadResources(m map[string]interf
 			}
 		}
 
-		results, err = volc.ObtainSdkValue("Result.Datas", *resp)
+		results, err = volc.ObtainSdkValue("Result.AccountsInfo", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -58,7 +58,7 @@ func (s *VolcengineRdsAccountPrivilegeService) ReadResources(m map[string]interf
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Datas is not Slice")
+			return data, errors.New("Result.AccountsInfo is not Slice")
 		}
 		return data, err
 	})
@@ -79,16 +79,16 @@ func (s *VolcengineRdsAccountPrivilegeService) ReadResources(m map[string]interf
 	return res, nil
 }
 
-func (s *VolcengineRdsAccountPrivilegeService) ReadResource(resourceData *schema.ResourceData, RdsAccountPrivilegeId string) (data map[string]interface{}, err error) {
+func (s *VolcengineRdsAccountPrivilegeService) ReadResource(resourceData *schema.ResourceData, rdsAccountPrivilegeId string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
 	)
-	if RdsAccountPrivilegeId == "" {
-		RdsAccountPrivilegeId = s.ReadResourceId(resourceData.Id())
+	if rdsAccountPrivilegeId == "" {
+		rdsAccountPrivilegeId = s.ReadResourceId(resourceData.Id())
 	}
 
-	ids := strings.Split(RdsAccountPrivilegeId, ":")
+	ids := strings.Split(rdsAccountPrivilegeId, ":")
 	if len(ids) != 2 {
 		return map[string]interface{}{}, fmt.Errorf("invalid rds account id")
 	}
@@ -110,7 +110,7 @@ func (s *VolcengineRdsAccountPrivilegeService) ReadResource(resourceData *schema
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("RDS account %s not exist ", RdsAccountPrivilegeId)
+		return data, fmt.Errorf("RDS account %s not exist ", rdsAccountPrivilegeId)
 	}
 
 	return data, err
@@ -123,8 +123,8 @@ func (s *VolcengineRdsAccountPrivilegeService) RefreshResourceState(resourceData
 func (VolcengineRdsAccountPrivilegeService) WithResourceResponseHandlers(rdsAccountPrivilege map[string]interface{}) []volc.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]volc.ResponseConvert, error) {
 		return rdsAccountPrivilege, map[string]volc.ResponseConvert{
-			"DBPrivileges": {
-				TargetField: "db_privileges",
+			"AccountPrivilegesInfo": {
+				TargetField: "account_privileges_info",
 				Convert: func(v interface{}) interface{} {
 					dbPrivileges, ok := v.([]interface{})
 					if !ok {
@@ -151,12 +151,12 @@ func (VolcengineRdsAccountPrivilegeService) WithResourceResponseHandlers(rdsAcco
 func (s *VolcengineRdsAccountPrivilegeService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
 	grantAccountPrivilegeCallbacks := make([]volc.Callback, 0)
 
-	dbPrivileges := resourceData.Get("db_privileges").(*schema.Set).List()
+	dbPrivileges := resourceData.Get("account_privileges_info").(*schema.Set).List()
 	for _, dbPrivilege := range dbPrivileges {
 		localPrivilege := dbPrivilege
 		callback := volc.Callback{
 			Call: volc.SdkCall{
-				Action:      "GrantAccountPrivilege",
+				Action:      "ModifyDBAccountPrivilege",
 				ConvertMode: volc.RequestConvertIgnore,
 				ContentType: volc.ContentTypeJson,
 				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
@@ -164,8 +164,9 @@ func (s *VolcengineRdsAccountPrivilegeService) CreateResource(resourceData *sche
 					(*call.SdkParam)["AccountName"] = d.Get("account_name")
 					if privilege, ok := localPrivilege.(map[string]interface{}); ok {
 						(*call.SdkParam)["DBName"] = privilege["db_name"]
-						(*call.SdkParam)["AccountPrivilege"] = privilege["account_privilege"]
-						(*call.SdkParam)["AccountPrivilegeStr"] = privilege["account_privilege_str"]
+						(*call.SdkParam)["Privilege"] = privilege["account_privilege"]
+						(*call.SdkParam)["PrivilegeCustom"] = privilege["account_privilege_custom"]
+						(*call.SdkParam)["ActionType"] = "Grant"
 					} else {
 						return false, errors.New("db_privileges' element is not map")
 					}
@@ -190,21 +191,21 @@ func (s *VolcengineRdsAccountPrivilegeService) CreateResource(resourceData *sche
 }
 
 func (s *VolcengineRdsAccountPrivilegeService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
-	if !resourceData.HasChange("db_privileges") {
+	if !resourceData.HasChange("account_privileges_info") {
 		return []volc.Callback{}
 	}
 
 	callbacks := make([]volc.Callback, 0)
 
 	// 1. compute add and remove
-	add, remove, _, _ := volc.GetSetDifference("db_privileges", resourceData, RdsAccountPrivilegeHash, false)
+	add, remove, _, _ := volc.GetSetDifference("account_privileges_info", resourceData, RdsAccountPrivilegeHash, false)
 	logger.Info("[ModifyRdsAccountPrivilege] add: %+v, remove: %+v", add, remove)
 
 	// 2. remove callback
 	if len(remove.List()) > 0 {
 		removeCallback := volc.Callback{
 			Call: volc.SdkCall{
-				Action:      "RevokeAccountPrivilege",
+				Action:      "ModifyDBAccountPrivilege",
 				ConvertMode: volc.RequestConvertIgnore,
 				ContentType: volc.ContentTypeJson,
 				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
@@ -234,7 +235,7 @@ func (s *VolcengineRdsAccountPrivilegeService) ModifyResource(resourceData *sche
 			localPrivilege := addPrivilege
 			callback := volc.Callback{
 				Call: volc.SdkCall{
-					Action:      "GrantAccountPrivilege",
+					Action:      "ModifyDBAccountPrivilege",
 					ConvertMode: volc.RequestConvertIgnore,
 					ContentType: volc.ContentTypeJson,
 					BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
@@ -242,8 +243,9 @@ func (s *VolcengineRdsAccountPrivilegeService) ModifyResource(resourceData *sche
 						(*call.SdkParam)["AccountName"] = d.Get("account_name")
 						if privilege, ok := localPrivilege.(map[string]interface{}); ok {
 							(*call.SdkParam)["DBName"] = privilege["db_name"]
-							(*call.SdkParam)["AccountPrivilege"] = privilege["account_privilege"]
-							(*call.SdkParam)["AccountPrivilegeStr"] = privilege["account_privilege_str"]
+							(*call.SdkParam)["Privilege"] = privilege["account_privilege"]
+							(*call.SdkParam)["PrivilegeCustom"] = privilege["account_privilege_custom"]
+							(*call.SdkParam)["ActionType"] = "Grant"
 						} else {
 							return false, errors.New("db_privileges' element is not map")
 						}
@@ -327,7 +329,7 @@ func (s *VolcengineRdsAccountPrivilegeService) ReadResourceId(id string) string 
 func getUniversalInfo(actionName string) volc.UniversalInfo {
 	return volc.UniversalInfo{
 		ServiceName: "rds_mysql",
-		Version:     "2018-01-01",
+		Version:     "2022-01-01",
 		HttpMethod:  volc.POST,
 		ContentType: volc.ApplicationJSON,
 		Action:      actionName,

@@ -13,7 +13,7 @@ import (
 Import
 RDS Instance can be imported using the id, e.g.
 ```
-$ terraform import volcengine_rds_instance.default mysql-42b38c769c4b
+$ terraform import volcengine_rds_instance_v2.default mysql-42b38c769c4b
 ```
 
 */
@@ -27,37 +27,12 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"instance_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Set the name of the instance. The naming rules are as follows:\n\nCannot start with a number, a dash (-).\nIt can only contain Chinese characters, letters, numbers, underscores (_) and underscores (-).\nThe length needs to be within 1~128 characters.",
-			},
-			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The region of the RDS instance.",
-			},
-			"zone": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The available zone of the RDS instance.",
-			},
-			"db_engine": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Description:  "Database type. Value:\nMySQL (default).",
-				ValidateFunc: validation.StringInSlice([]string{"MySQL"}, false),
-			},
 			"db_engine_version": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				Description:  "Instance type. Value:\nMySQL_Community_5_7\nMySQL_8_0.",
-				ValidateFunc: validation.StringInSlice([]string{"MySQL_Community_5_7", "MySQL_8_0"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"MySQL_5_7", "MySQL_8_0"}, false),
 			},
 			"instance_type": {
 				Type:         schema.TypeString,
@@ -66,116 +41,140 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Description:  "Instance type. Value:\nHA: High availability version.",
 				ValidateFunc: validation.StringInSlice([]string{"HA"}, false),
 			},
-			"instance_spec_name": {
+			"zone_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Instance specification name, you can specify the specification name of the instance to be created. Value:\nrds.mysql.1c2g\nrds.mysql.2c4g\nrds.mysql.4c8g\nrds.mysql.4c16g\nrds.mysql.8c32g\nrds.mysql.16c64g\nrds.mysql.16c128g\nrds.mysql.32c128g\nrds.mysql.32c256g.",
+				Description: "The available zone of the RDS instance.",
 			},
-			"storage_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "Instance storage type. Value:\nLocalSSD: Local SSD disk.",
-				ValidateFunc: validation.StringInSlice([]string{"LocalSSD"}, false),
-			},
-			"storage_space_gb": {
-				Type:        schema.TypeInt,
+			"node_spec": {
+				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The storage space(GB) of the RDS instance.",
+				Description: "General instance specification, this parameter is optional for RDS for MySQL, RDS for PostgreSQL and MySQL Sharding. Pass\nDescribeDBInstanceSpecs Query the instance specifications that can be sold.",
+			},
+			"storage_type": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Instance storage type. When the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, the value is:\nLocalSSD - local SSD disk\nWhen the database type is veDB_MySQL/veDB_PostgreSQL, the value is:\nDistributedStorage - Distributed Storage.",
+			},
+			"storage_space": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Instance storage space.\nWhen the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, value range: [20, 3000], unit: GB, increments every 100GB.\nWhen the database type is veDB_MySQL/veDB_PostgreSQL, this parameter does not need to be passed.",
 			},
 			"vpc_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The vpc ID of the RDS instance.",
-			},
-			"super_account_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Fill in the high-privileged user account name. The naming rules are as follows:\nUnique name.\nStart with a letter and end with a letter or number.\nConsists of lowercase letters, numbers, or underscores (_).\nThe length is 2~32 characters.\n[Keywords](https://www.volcengine.com/docs/6313/66162) are not allowed for account names.",
-			},
-			"supper_account_password": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Set a high-privilege account password. The rules are as follows:\nOnly uppercase and lowercase letters, numbers and the following special characters _#!@$%^*()+=-.\nThe length needs to be within 8~32 characters.\nContains at least 3 of uppercase letters, lowercase letters, numbers or special characters.",
-			},
-			"charge_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "Billing type. Value:\nPostPaid: Postpaid (pay-as-you-go).\nPrepaid: Prepaid (yearly and monthly).",
-				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "Prepaid"}, false),
-			},
-			"auto_renew": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Whether to automatically renew. Default: false. Value:\ntrue: yes.\nfalse: no.",
-			},
-			"prepaid_period": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The purchase cycle in the prepaid scenario. Value:\nMonth: monthly subscription.\nYear: yearly subscription.",
-			},
-			"used_time": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The purchase time of RDS instance.",
-			},
-			"project_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Select the project to which the instance belongs. If this parameter is left blank, the new instance will not be added to any project.",
+				Description: "Private network (VPC) ID. You can call the DescribeVpcs query and use this parameter to specify the VPC where the instance is to be created.",
 			},
 			"subnet_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Subnet ID. The subnet must belong to the selected Availability Zone.",
+				Description: "Subnet ID.",
 			},
-			"connection_info": {
+			"instance_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Instance name. Cannot start with a number or a dash\nCan only contain Chinese characters, letters, numbers, underscores and dashes\nThe length is limited between 1 ~ 128.",
+			},
+			"lower_case_table_names": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether the table name is case sensitive, the default value is 1.\nRanges:\n0: Table names are stored as fixed and table names are case-sensitive.\n1: Table names will be stored in lowercase and table names are not case sensitive.",
+			},
+			"db_time_zone": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Time zone. Support UTC -12:00 ~ +13:00.",
+			},
+			"db_param_group_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Parameter template ID. It only takes effect when the database type is MySQL/PostgreSQL/SQL_Server.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Subordinate to the project.",
+			},
+			"charge_info": {
 				Type:        schema.TypeList,
-				Computed:    true,
 				MaxItems:    1,
-				Description: "The connection info ot the RDS instance.",
+				Required:    true,
+				ForceNew:    true,
+				Description: "Payment methods.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"internal_domain": {
+						"charge_type": {
 							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The internal domain of the RDS instance.",
+							Required:    true,
+							ForceNew:    true,
+							Description: "Payment type. Value:\nPostPaid - Pay-As-You-Go\nPrePaid - Yearly and monthly (default).",
 						},
-						"internal_port": {
-							Type:        schema.TypeString,
+						"auto_renew": {
+							Type:        schema.TypeBool,
+							Optional:    true,
 							Computed:    true,
-							Description: "The interval port of the RDS instance.",
+							ForceNew:    true,
+							Description: "Whether to automatically renew in prepaid scenarios.\nAutorenew_Enable\nAutorenew_Disable (default).",
 						},
-						"public_domain": {
+						"period_unit": {
 							Type:        schema.TypeString,
+							Optional:    true,
 							Computed:    true,
-							Description: "The public domain of the RDS instance.",
+							ForceNew:    true,
+							Description: "The purchase cycle in the prepaid scenario.\nMonth - monthly subscription (default)\nYear - Package year.",
 						},
-						"public_port": {
-							Type:        schema.TypeString,
+						"period": {
+							Type:        schema.TypeInt,
+							Optional:    true,
 							Computed:    true,
-							Description: "The public port of the RDS instance.",
+							ForceNew:    true,
+							Description: "Purchase duration in prepaid scenarios. Default: 1.",
 						},
-						"enable_read_write_splitting": {
+					},
+				},
+			},
+			"node_info": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Instance specification configuration. This parameter is required for RDS for MySQL, RDS for PostgreSQL and MySQL Sharding. There is one and only one Primary node, one and only one Secondary node, and 0-10 Read-Only nodes.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Whether read-write separation is enabled.",
+							ForceNew:    true,
+							Description: "Node ID.",
 						},
-						"enable_read_only": {
+						"zone_id": {
 							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Whether global read-only is enabled.",
+							Required:    true,
+							ForceNew:    true,
+							Description: "You can call DescribeAvailabilityZones to query the availability zone where the node is located.",
+						},
+						"node_type": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "Node type, the value is \"Primary\", \"Secondary\", \"ReadOnly\".",
+						},
+						"node_spec": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "Masternode specs. Pass\nDescribeDBInstanceSpecs Query the instance specifications that can be sold.",
 						},
 					},
 				},

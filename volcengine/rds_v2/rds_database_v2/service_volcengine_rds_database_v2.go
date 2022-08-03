@@ -29,13 +29,13 @@ func (s *VolcengineRdsDatabaseService) GetClient() *volc.SdkClient {
 }
 
 func (s *VolcengineRdsDatabaseService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
-	list, err := volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
+	list, err := volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) (data []interface{}, err error) {
 		var (
 			resp    *map[string]interface{}
 			results interface{}
 			ok      bool
 		)
-		action := "ListDatabases"
+		action := "DescribeDatabases"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
@@ -49,7 +49,7 @@ func (s *VolcengineRdsDatabaseService) ReadResources(m map[string]interface{}) (
 			}
 		}
 
-		results, err = volc.ObtainSdkValue("Result.Datas", *resp)
+		results, err = volc.ObtainSdkValue("Result.DatabasesInfo", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -57,7 +57,7 @@ func (s *VolcengineRdsDatabaseService) ReadResources(m map[string]interface{}) (
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Datas is not Slice")
+			return data, errors.New("Result.DatabasesInfo is not Slice")
 		}
 		return data, err
 	})
@@ -151,7 +151,14 @@ func (s *VolcengineRdsDatabaseService) RefreshResourceState(resourceData *schema
 
 func (s *VolcengineRdsDatabaseService) WithResourceResponseHandlers(database map[string]interface{}) []volc.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]volc.ResponseConvert, error) {
-		return database, nil, nil
+		return database, map[string]volc.ResponseConvert{
+			"DBStatus": {
+				TargetField: "db_status",
+			},
+			"DBName": {
+				TargetField: "db_name",
+			},
+		}, nil
 	}
 	return []volc.ResourceResponseHandler{handler}
 
@@ -174,7 +181,7 @@ func (s *VolcengineRdsDatabaseService) CreateResource(resourceData *schema.Resou
 				return nil
 			},
 			Refresh: &volc.StateRefresh{
-				Target:  []string{"Running"},
+				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
 		},
@@ -234,16 +241,13 @@ func (s *VolcengineRdsDatabaseService) DatasourceResources(*schema.ResourceData,
 	return volc.DataSourceInfo{
 		ContentType: volc.ContentTypeJson,
 		RequestConverts: map[string]volc.RequestConvert{
-			"db_status": {
-				TargetField: "DBStatus",
+			"db_name": {
+				TargetField: "DBName",
 			},
 		},
 		NameField:    "DBName",
 		CollectField: "rds_databases",
 		ResponseConverts: map[string]volc.ResponseConvert{
-			"DBPrivileges": {
-				TargetField: "db_privileges",
-			},
 			"DBStatus": {
 				TargetField: "db_status",
 			},
@@ -261,7 +265,7 @@ func (s *VolcengineRdsDatabaseService) ReadResourceId(id string) string {
 func getUniversalInfo(actionName string) volc.UniversalInfo {
 	return volc.UniversalInfo{
 		ServiceName: "rds_mysql",
-		Version:     "2018-01-01",
+		Version:     "2022-01-01",
 		HttpMethod:  volc.POST,
 		ContentType: volc.ApplicationJSON,
 		Action:      actionName,

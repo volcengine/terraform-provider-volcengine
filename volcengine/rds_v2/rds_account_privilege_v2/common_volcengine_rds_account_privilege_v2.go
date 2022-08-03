@@ -71,7 +71,7 @@ func rdsAccountPrivilegeHashBase(m map[string]interface{}) (buf bytes.Buffer) {
 	buf.WriteString(fmt.Sprintf("%s-", dbName))
 	buf.WriteString(fmt.Sprintf("%s-", accountPrivilege))
 	if accountPrivilege == "custom" {
-		buf.WriteString(fmt.Sprintf("%s-", mappingAndSortAccountPrivilegeStr(strings.ToLower(m["account_privilege_str"].(string)))))
+		buf.WriteString(fmt.Sprintf("%s-", mappingAndSortAccountPrivilegeStr(strings.ToLower(m["account_privilege_custom"].(string)))))
 	}
 	return buf
 }
