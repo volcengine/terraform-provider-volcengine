@@ -195,20 +195,6 @@ func (s *VolcengineRdsInstanceService) CreateResource(resourceData *schema.Resou
 				},
 				"node_info": {
 					ConvertType: volc.ConvertJsonObjectArray,
-					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-						if i == nil {
-							return nil
-						}
-						nodeInfo := i.([]interface{})
-						for _, v := range nodeInfo {
-							if v == nil {
-								continue
-							}
-							node := v.(map[string]interface{})
-							node["node_operate_type"] = "Create"
-						}
-						return nodeInfo
-					},
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
