@@ -22,6 +22,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineRdsInstanceCreate,
 		Read:   resourceVolcengineRdsInstanceRead,
+		Update: resourceVolcengineRdsInstanceUpdate,
 		Delete: resourceVolcengineRdsInstanceDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -56,13 +57,11 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			"storage_type": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: "Instance storage type. When the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, the value is:\nLocalSSD - local SSD disk\nWhen the database type is veDB_MySQL/veDB_PostgreSQL, the value is:\nDistributedStorage - Distributed Storage.",
 			},
 			"storage_space": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Instance storage space.\nWhen the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, value range: [20, 3000], unit: GB, increments every 100GB.\nWhen the database type is veDB_MySQL/veDB_PostgreSQL, this parameter does not need to be passed.",
 			},
 			"vpc_id": {
@@ -148,32 +147,27 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			"node_info": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Instance specification configuration. This parameter is required for RDS for MySQL, RDS for PostgreSQL and MySQL Sharding. There is one and only one Primary node, one and only one Secondary node, and 0-10 Read-Only nodes.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"node_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							ForceNew:    true,
 							Description: "Node ID.",
 						},
 						"zone_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
-							Description: "You can call DescribeAvailabilityZones to query the availability zone where the node is located.",
+							Description: "Zone ID.",
 						},
 						"node_type": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 							Description: "Node type, the value is \"Primary\", \"Secondary\", \"ReadOnly\".",
 						},
 						"node_spec": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 							Description: "Masternode specs. Pass\nDescribeDBInstanceSpecs Query the instance specifications that can be sold.",
 						},
 					},
@@ -199,6 +193,15 @@ func resourceVolcengineRdsInstanceRead(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("error on reading RDS instance %q, %w", d.Id(), err)
 	}
 	return err
+}
+
+func resourceVolcengineRdsInstanceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	rdsInstanceService := NewRdsInstanceService(meta.(*volc.SdkClient))
+	err = rdsInstanceService.Dispatcher.Update(rdsInstanceService, d, ResourceVolcengineRdsInstance())
+	if err != nil {
+		return fmt.Errorf("error on updating RDS instance %q, %w", d.Id(), err)
+	}
+	return resourceVolcengineRdsInstanceRead(d, meta)
 }
 
 func resourceVolcengineRdsInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {

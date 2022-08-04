@@ -219,7 +219,125 @@ func (s *VolcengineRdsInstanceService) CreateResource(resourceData *schema.Resou
 }
 
 func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
-	return []volc.Callback{}
+	if !resourceData.HasChanges("storage_type", "storage_space", "node_info") {
+		return []volc.Callback{}
+	}
+
+	targetNodeInfo := make([]map[string]interface{}, 0)
+	if resourceData.HasChange("node_info") {
+		oldNodes, newNodes := resourceData.GetChange("node_info")
+		logger.Info("oldNodes:%v", oldNodes)
+		logger.Info("newNodes:%v", newNodes)
+
+		oldNodeMap := make(map[string]map[string]interface{})
+		newNodeMap := make(map[string]map[string]interface{})
+
+		oldNodeList := oldNodes.([]interface{})
+		for _, v := range oldNodeList {
+			node := v.(map[string]interface{})
+			oldNodeMap[node["node_id"].(string)] = node
+		}
+
+		newNodeList := newNodes.([]interface{})
+		for _, v := range newNodeList {
+			node := v.(map[string]interface{})
+			if node["node_id"] == nil {
+				// new node
+				continue
+			}
+			newNodeMap[node["node_id"].(string)] = node
+		}
+
+		for _, v := range newNodeList {
+			// exist, create, modify
+			node := v.(map[string]interface{})
+			if node["node_id"] == nil || node["node_id"].(string) == "" {
+				// new node
+				targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+					"ZoneId":          node["zone_id"],
+					"NodeSpec":        node["node_spec"],
+					"NodeType":        node["node_type"],
+					"NodeOperateType": "Create",
+				})
+				continue
+			}
+
+			if oldNode, ok := oldNodeMap[node["node_id"].(string)]; ok {
+				// exist or modify
+				oldNodeType := oldNode["node_type"].(string)
+				oldNodeSpec := oldNode["node_spec"].(string)
+
+				newNodeType := node["node_type"].(string)
+				newNodeSpec := node["node_spec"].(string)
+
+				if oldNodeType != newNodeType || oldNodeSpec != newNodeSpec {
+					// modify
+					targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+						"NodeId":          node["node_id"],
+						"ZoneId":          node["zone_id"],
+						"NodeSpec":        newNodeSpec,
+						"NodeType":        newNodeType,
+						"NodeOperateType": "Modify",
+					})
+				} else {
+					// exist
+					targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+						"NodeId":   node["node_id"],
+						"ZoneId":   node["zone_id"],
+						"NodeSpec": newNodeSpec,
+						"NodeType": newNodeType,
+					})
+				}
+			}
+		}
+
+		for _, v := range oldNodeList {
+			// delete
+			node := v.(map[string]interface{})
+			if _, ok := newNodeMap[node["node_id"].(string)]; !ok {
+				targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+					"NodeId":          node["node_id"],
+					"ZoneId":          node["zone_id"],
+					"NodeSpec":        node["node_spec"],
+					"NodeType":        node["node_type"],
+					"NodeOperateType": "Delete",
+				})
+			}
+		}
+
+		logger.Info("targetNodeInfo:%v", targetNodeInfo)
+	}
+
+	modifySpecCallback := volc.Callback{
+		Call: volc.SdkCall{
+			Action:      "ModifyDBInstanceSpec",
+			ContentType: volc.ContentTypeJson,
+			ConvertMode: volc.RequestConvertIgnore,
+			SdkParam: &map[string]interface{}{
+				"InstanceId": resourceData.Id(),
+			},
+			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+				(*call.SdkParam)["StorageType"] = d.Get("storage_type")
+				if d.HasChange("storage_space") {
+					(*call.SdkParam)["StorageSpace"] = d.Get("storage_space")
+				}
+				if d.HasChange("node_info") {
+					(*call.SdkParam)["NodeInfo"] = targetNodeInfo
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &volc.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+
+	return []volc.Callback{modifySpecCallback}
 }
 
 func (s *VolcengineRdsInstanceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {
