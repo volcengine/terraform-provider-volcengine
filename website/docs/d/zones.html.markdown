@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "ESCLOUD"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_zones"
 sidebar_current: "docs-volcengine-datasource-zones"
@@ -11,7 +11,7 @@ Use this data source to query detailed information of zones
 ## Example Usage
 ```hcl
 data "volcengine_zones" "default" {
-  ids = ["cn-lingqiu-a"]
+  ids = ["cn-beijing-a"]
 }
 ```
 ## Argument Reference
