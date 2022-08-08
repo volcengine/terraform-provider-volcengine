@@ -1,8 +1,6 @@
 resource "volcengine_rds_instance_v2" "foo" {
   db_engine_version = "MySQL_5_7"
   instance_type = "HA"
-  zone_id = "cn-guilin-a"
-  node_spec = "rds.mysql.1c2g"
   node_info {
     node_type = "Primary"
     node_spec = "rds.mysql.1c2g"
