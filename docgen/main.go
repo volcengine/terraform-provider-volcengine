@@ -111,14 +111,15 @@ type Product struct {
 }
 
 var resourceKeys = map[string]string{
-	"vpc": "VPC",
-	"ecs": "ECS",
-	"clb": "CLB",
-	"eip": "EIP",
-	"ebs": "EBS",
-	"nat": "NAT",
-	"vke": "VKE",
-	"iam": "IAM",
+	"vpc":     "VPC",
+	"ecs":     "ECS",
+	"clb":     "CLB",
+	"eip":     "EIP",
+	"ebs":     "EBS",
+	"nat":     "NAT",
+	"vke":     "VKE",
+	"iam":     "IAM",
+	"escloud": "ESCLOUD",
 }
 
 type Products struct {
