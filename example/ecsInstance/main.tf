@@ -16,7 +16,6 @@ resource "volcengine_security_group" "foo1" {
 }
 
 resource "volcengine_ecs_instance" "default" {
-  zone_id = "cn-beijing-a"
   image_id = "image-aagd56zrw2jtdro3bnrl"
   instance_type = "ecs.g1.large"
   instance_name = "xym-tf-test-2"

@@ -32,8 +32,9 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Description: "The available zone ID of ECS instance.",
 			},
 			"image_id": {

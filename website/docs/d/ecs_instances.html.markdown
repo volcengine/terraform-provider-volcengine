@@ -33,12 +33,18 @@ In addition to all arguments above, the following attributes are exported:
   * `cpus` - The number of ECS instance CPU cores.
   * `created_at` - The create time of ECS instance.
   * `description` - The description of ECS instance.
+  * `gpu_devices` - The GPU device info of Instance.
+    * `count` - The Count of GPU device.
+    * `encrypted_memory_size` - The Encrypted Memory Size of GPU device.
+    * `memory_size` - The Memory Size of GPU device.
+    * `product_name` - The Product Name of GPU device.
   * `host_name` - The host name of ECS instance.
   * `image_id` - The image ID of ECS instance.
   * `instance_charge_type` - The charge type of ECS instance.
   * `instance_id` - The ID of ECS instance.
   * `instance_name` - The name of ECS instance.
   * `instance_type` - The spec type of ECS instance.
+  * `is_gpu` - The Flag of GPU instance.If the instance is GPU,The flag is true.
   * `key_pair_id` - The ssh key ID of ECS instance.
   * `key_pair_name` - The ssh key name of ECS instance.
   * `memory_size` - The memory size of ECS instance.
