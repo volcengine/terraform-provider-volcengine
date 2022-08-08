@@ -5,6 +5,8 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -26,6 +28,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_associate"
+	esZone "github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy"
@@ -142,6 +145,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
 			"volcengine_iam_roles":    iam_role.DataSourceVolcengineIamRoles(),
 			"volcengine_iam_users":    iam_user.DataSourceVolcengineIamUsers(),
+
+			// ================ ESCloud =============
+			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
+			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
+			"volcengine_escloud_zones":     esZone.DataSourceVolcengineESCloudZones(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -195,6 +203,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user":                   iam_user.ResourceVolcengineIamUser(),
 			"volcengine_iam_login_profile":          iam_login_profile.ResourceVolcengineIamLoginProfile(),
 			"volcengine_iam_user_policy_attachment": iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
+
+			// ================ ESCloud ================
+			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
