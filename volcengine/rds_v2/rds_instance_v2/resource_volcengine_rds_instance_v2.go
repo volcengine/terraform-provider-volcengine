@@ -42,18 +42,6 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Description:  "Instance type. Value:\nHA: High availability version.",
 				ValidateFunc: validation.StringInSlice([]string{"HA"}, false),
 			},
-			"zone_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The available zone of the RDS instance.",
-			},
-			"node_spec": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "General instance specification, this parameter is optional for RDS for MySQL, RDS for PostgreSQL and MySQL Sharding. Pass\nDescribeDBInstanceSpecs Query the instance specifications that can be sold.",
-			},
 			"storage_type": {
 				Type:        schema.TypeString,
 				Required:    true,
