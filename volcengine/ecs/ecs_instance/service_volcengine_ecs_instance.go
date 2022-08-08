@@ -16,17 +16,20 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
 )
 
 type VolcengineEcsService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client        *ve.SdkClient
+	Dispatcher    *ve.Dispatcher
+	SubnetService *subnet.VolcengineSubnetService
 }
 
 func NewEcsService(c *ve.SdkClient) *VolcengineEcsService {
 	return &VolcengineEcsService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client:        c,
+		Dispatcher:    &ve.Dispatcher{},
+		SubnetService: subnet.NewSubnetService(c),
 	}
 }
 
@@ -150,6 +153,7 @@ func (s *VolcengineEcsService) RefreshResourceState(resourceData *schema.Resourc
 func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		var (
+			typeErr             error
 			ebsErr              error
 			userDataErr         error
 			networkInterfaceErr error
@@ -167,8 +171,26 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			ecs["Period"] = y*12 + int(m)
 		}
 
-		wg.Add(3)
+		wg.Add(4)
 		instanceId := ecs["InstanceId"]
+		//read instance type
+		go func() {
+			defer func() {
+				if _err := recover(); _err != nil {
+					logger.Debug(logger.ReqFormat, "DescribeInstancesType", _err)
+				}
+				wg.Done()
+			}()
+			temp := map[string]interface{}{
+				"InstanceTypeId": ecs["InstanceTypeId"],
+			}
+			_, typeErr = s.readInstanceTypes([]interface{}{temp})
+			if typeErr != nil {
+				return
+			}
+			syncMap.Store("GpuDevices", temp["GpuDevices"])
+			syncMap.Store("IsGpu", temp["IsGpu"])
+		}()
 		//read ebs data
 		go func() {
 			defer func() {
@@ -265,6 +287,7 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			ecs[key.(string)] = value
 			return true
 		})
+
 		//split primary vif and secondary vif
 		if networkInterfaces, ok1 := ecs["NetworkInterfaces"].([]interface{}); ok1 {
 			var dataNetworkInterfaces []interface{}
@@ -313,6 +336,10 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 			Action:      "RunInstances",
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
+				"zone_id": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
+				},
 				"system_volume_type": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "Volumes.1.VolumeType",
@@ -361,6 +388,24 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				(*call.SdkParam)["Volumes.1.DeleteWithInstance"] = true
 				(*call.SdkParam)["Count"] = 1
+
+				if _, ok := (*call.SdkParam)["ZoneId"]; !ok || (*call.SdkParam)["ZoneId"] == "" {
+					var (
+						vnet map[string]interface{}
+						err  error
+						zone interface{}
+					)
+					vnet, err = s.SubnetService.ReadResource(d, (*call.SdkParam)["NetworkInterfaces.1.SubnetId"].(string))
+					if err != nil {
+						return false, err
+					}
+					zone, err = ve.ObtainSdkValue("ZoneId", vnet)
+					if err != nil {
+						return false, err
+					}
+					(*call.SdkParam)["ZoneId"] = zone
+				}
+
 				if (*call.SdkParam)["InstanceChargeType"] == "PrePaid" {
 					if (*call.SdkParam)["Period"] == nil || (*call.SdkParam)["Period"].(int) < 1 {
 						return false, fmt.Errorf("Instance Charge Type is PrePaid.Must set Period more than 1. ")
@@ -800,7 +845,15 @@ func (s *VolcengineEcsService) DatasourceResources(data *schema.ResourceData, re
 		CollectField:     "instances",
 		ResponseConverts: s.CommonResponseConvert(),
 		ExtraData: func(sourceData []interface{}) (extraData []interface{}, err error) {
-			return s.readEbsVolumes(sourceData)
+			sourceData, err = s.readInstanceTypes(sourceData)
+			if err != nil {
+				return extraData, err
+			}
+			sourceData, err = s.readEbsVolumes(sourceData)
+			if err != nil {
+				return extraData, err
+			}
+			return sourceData, err
 		},
 	}
 }
@@ -860,6 +913,25 @@ func (s *VolcengineEcsService) CommonResponseConvert() map[string]ve.ResponseCon
 							if reflect.TypeOf(v["Size"]).Kind() == reflect.String {
 								v["Size"], _ = strconv.Atoi(v["Size"].(string))
 							}
+							results = append(results, v)
+						}
+					}
+				}
+				return results
+			},
+		},
+		"GpuDevices": {
+			TargetField: "gpu_devices",
+			Convert: func(i interface{}) interface{} {
+				var results []interface{}
+				if dd, ok := i.([]interface{}); ok {
+					for _, _data := range dd {
+						if v, ok1 := _data.(map[string]interface{}); ok1 {
+							memorySize, _ := ve.ObtainSdkValue("Memory.Size", v)
+							encryptedMemorySize, _ := ve.ObtainSdkValue("Memory.EncryptedSize", v)
+							delete(v, "Memory")
+							v["MemorySize"] = memorySize
+							v["EncryptedMemorySize"] = encryptedMemorySize
 							results = append(results, v)
 						}
 					}
@@ -937,6 +1009,99 @@ func (s *VolcengineEcsService) StartOrStopInstanceCallback(resourceData *schema.
 
 func (s *VolcengineEcsService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineEcsService) readInstanceTypes(sourceData []interface{}) (extraData []interface{}, err error) {
+	//merge instance_type_info
+	var (
+		wg      sync.WaitGroup
+		syncMap sync.Map
+	)
+	if len(sourceData) == 0 {
+		return sourceData, err
+	}
+	wg.Add(len(sourceData))
+	for _, data := range sourceData {
+		instance := data
+		var (
+			instanceTypeId interface{}
+			action         string
+			resp           *map[string]interface{}
+			results        interface{}
+			_err           error
+		)
+		go func() {
+			defer func() {
+				if e := recover(); e != nil {
+					logger.Debug(logger.ReqFormat, action, e)
+				}
+				ve.Release()
+				wg.Done()
+			}()
+			ve.Acquire()
+
+			instanceTypeId, _err = ve.ObtainSdkValue("InstanceTypeId", instance)
+			if _err != nil {
+				syncMap.Store(instanceTypeId, err)
+				return
+			}
+			//if exist continue
+			if _, ok := syncMap.Load(instanceTypeId); ok {
+				return
+			}
+
+			action = "DescribeInstanceTypes"
+			logger.Debug(logger.ReqFormat, action, instanceTypeId)
+			instanceTypeCondition := map[string]interface{}{
+				"InstanceTypeIds.1": instanceTypeId,
+			}
+			logger.Debug(logger.ReqFormat, action, instanceTypeCondition)
+			resp, _err = s.Client.EcsClient.DescribeInstanceTypesCommon(&instanceTypeCondition)
+			if _err != nil {
+				syncMap.Store(instanceTypeId, err)
+				return
+			}
+			logger.Debug(logger.RespFormat, action, instanceTypeCondition, *resp)
+			results, _err = ve.ObtainSdkValue("Result.InstanceTypes.0", *resp)
+			if _err != nil {
+				syncMap.Store(instanceTypeId, err)
+				return
+			}
+			syncMap.Store(instanceTypeId, results)
+		}()
+	}
+	wg.Wait()
+	var errorStr string
+	for _, instance := range sourceData {
+		var (
+			instanceTypeId interface{}
+			gpu            interface{}
+			gpuDevices     interface{}
+		)
+		instanceTypeId, err = ve.ObtainSdkValue("InstanceTypeId", instance)
+		if err != nil {
+			return
+		}
+		if v, ok := syncMap.Load(instanceTypeId); ok {
+			if e1, ok1 := v.(error); ok1 {
+				errorStr = errorStr + e1.Error() + ";"
+			}
+			gpu, _ = ve.ObtainSdkValue("Gpu", v)
+			if gpu != nil {
+				gpuDevices, _ = ve.ObtainSdkValue("Gpu.GpuDevices", v)
+				instance.(map[string]interface{})["GpuDevices"] = gpuDevices
+				instance.(map[string]interface{})["IsGpu"] = true
+			} else {
+				instance.(map[string]interface{})["GpuDevices"] = []interface{}{}
+				instance.(map[string]interface{})["IsGpu"] = false
+			}
+		}
+		extraData = append(extraData, instance)
+	}
+	if len(errorStr) > 0 {
+		return extraData, fmt.Errorf(errorStr)
+	}
+	return extraData, err
 }
 
 func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraData []interface{}, err error) {

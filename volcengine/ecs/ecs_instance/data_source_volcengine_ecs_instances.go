@@ -250,6 +250,40 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 								},
 							},
 						},
+						"is_gpu": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "The Flag of GPU instance.If the instance is GPU,The flag is true.",
+						},
+						"gpu_devices": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The GPU device info of Instance.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"count": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The Count of GPU device.",
+									},
+									"product_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Product Name of GPU device.",
+									},
+									"memory_size": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The Memory Size of GPU device.",
+									},
+									"encrypted_memory_size": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The Encrypted Memory Size of GPU device.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
