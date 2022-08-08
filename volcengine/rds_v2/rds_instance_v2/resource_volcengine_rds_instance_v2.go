@@ -32,7 +32,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "Instance type. Value:\nMySQL_Community_5_7\nMySQL_8_0.",
+				Description:  "Instance type. Value:\nMySQL_5_7\nMySQL_8_0.",
 				ValidateFunc: validation.StringInSlice([]string{"MySQL_5_7", "MySQL_8_0"}, false),
 			},
 			"instance_type": {
