@@ -26,14 +26,14 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `snat_entries` - The collection of snat entries.
-  * `eip_address` - The public ip address used by the SNAT entry.
-  * `eip_id` - The id of the public ip address used by the SNAT entry.
-  * `id` - The id of the SNAT entry.
-  * `nat_gateway_id` - The id of the nat gateway to which the entry belongs.
-  * `snat_entry_id` - The id of the SNAT entry.
-  * `snat_entry_name` - The name of the SNAT entry.
-  * `status` - The status of the SNAT entry.
-  * `subnet_id` - The id of the subnet that is required to access the internet.
+    * `eip_address` - The public ip address used by the SNAT entry.
+    * `eip_id` - The id of the public ip address used by the SNAT entry.
+    * `id` - The id of the SNAT entry.
+    * `nat_gateway_id` - The id of the nat gateway to which the entry belongs.
+    * `snat_entry_id` - The id of the SNAT entry.
+    * `snat_entry_name` - The name of the SNAT entry.
+    * `status` - The status of the SNAT entry.
+    * `subnet_id` - The id of the subnet that is required to access the internet.
 * `total_count` - The total count of snat entries query.
 
 

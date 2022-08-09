@@ -28,9 +28,9 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `account_id` - The account ID of VPC.
 * `associate_cens` - The associate cen list of VPC.
-  * `cen_id` - The ID of CEN.
-  * `cen_owner_id` - The owner ID of CEN.
-  * `cen_status` - The status of CEN.
+    * `cen_id` - The ID of CEN.
+    * `cen_owner_id` - The owner ID of CEN.
+    * `cen_status` - The status of CEN.
 * `auxiliary_cidr_blocks` - The auxiliary cidr block list of VPC.
 * `creation_time` - Creation time of VPC.
 * `nat_gateway_ids` - The nat gateway ID list of VPC.

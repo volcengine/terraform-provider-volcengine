@@ -23,7 +23,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `total_count` - The total count of zone query.
 * `zones` - The collection of zone query.
-  * `id` - The id of the zone.
-  * `zone_id` - The id of the zone.
+    * `id` - The id of the zone.
+    * `zone_id` - The id of the zone.
 
 
