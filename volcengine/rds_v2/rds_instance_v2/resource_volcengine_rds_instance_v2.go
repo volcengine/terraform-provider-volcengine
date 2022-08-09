@@ -134,7 +134,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			},
 			"node_info": {
 				Type:        schema.TypeList,
-				Optional:    true,
+				Required:    true,
 				Description: "Instance specification configuration. This parameter is required for RDS for MySQL, RDS for PostgreSQL and MySQL Sharding. There is one and only one Primary node, one and only one Secondary node, and 0-10 Read-Only nodes.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

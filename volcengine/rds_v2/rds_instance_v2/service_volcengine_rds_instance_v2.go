@@ -282,11 +282,10 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 				} else {
 					// exist
 					targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
-						"NodeId":          node["node_id"],
-						"ZoneId":          node["zone_id"],
-						"NodeSpec":        newNodeSpec,
-						"NodeType":        newNodeType,
-						"NodeOperateType": "",
+						"NodeId":   node["node_id"],
+						"ZoneId":   node["zone_id"],
+						"NodeSpec": newNodeSpec,
+						"NodeType": newNodeType,
 					})
 				}
 			}
@@ -307,6 +306,18 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 		}
 
 		logger.Info("targetNodeInfo:%v", targetNodeInfo)
+	} else {
+		// node info没改，也要按照exist传入
+		nodeInfo := resourceData.Get("node_info").([]interface{})
+		for _, v := range nodeInfo {
+			nodeMap := v.(map[string]interface{})
+			targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+				"NodeId":   nodeMap["node_id"],
+				"ZoneId":   nodeMap["zone_id"],
+				"NodeSpec": nodeMap["node_spec"],
+				"NodeType": nodeMap["node_type"],
+			})
+		}
 	}
 
 	modifySpecCallback := volc.Callback{
@@ -322,9 +333,7 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 				if d.HasChange("storage_space") {
 					(*call.SdkParam)["StorageSpace"] = d.Get("storage_space")
 				}
-				if d.HasChange("node_info") {
-					(*call.SdkParam)["NodeInfo"] = targetNodeInfo
-				}
+				(*call.SdkParam)["NodeInfo"] = targetNodeInfo
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
