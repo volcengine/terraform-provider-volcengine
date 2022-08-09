@@ -437,7 +437,7 @@ func genDoc(pwd string, product, docType, filename, name string, resource *schem
 // getAttributes get attributes from schema
 func getAttributes(step int, k string, v *schema.Schema) []string {
 	var attributes []string
-	ident := strings.Repeat(" ", step*2)
+	ident := strings.Repeat(" ", step*4)
 
 	if v.Description == "" {
 		return attributes

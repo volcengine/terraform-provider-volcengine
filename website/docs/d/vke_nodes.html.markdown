@@ -42,20 +42,20 @@ The `statuses` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `nodes` - The collection of Node query.
-  * `additional_container_storage_enabled` - Is Additional Container storage enables.
-  * `cluster_id` - The cluster id of node.
-  * `condition_types` - The Condition of Node.
-  * `container_storage_path` - The Storage Path.
-  * `create_client_token` - The create client token of node.
-  * `create_time` - The create time of Node.
-  * `id` - The ID of Node.
-  * `instance_id` - The instance id of node.
-  * `is_virtual` - Is virtual node.
-  * `name` - The name of Node.
-  * `node_pool_id` - The node pool id.
-  * `phase` - The Phase of Node.
-  * `roles` - The roles of node.
-  * `update_time` - The update time of Node.
+    * `additional_container_storage_enabled` - Is Additional Container storage enables.
+    * `cluster_id` - The cluster id of node.
+    * `condition_types` - The Condition of Node.
+    * `container_storage_path` - The Storage Path.
+    * `create_client_token` - The create client token of node.
+    * `create_time` - The create time of Node.
+    * `id` - The ID of Node.
+    * `instance_id` - The instance id of node.
+    * `is_virtual` - Is virtual node.
+    * `name` - The name of Node.
+    * `node_pool_id` - The node pool id.
+    * `phase` - The Phase of Node.
+    * `roles` - The roles of node.
+    * `update_time` - The update time of Node.
 * `total_count` - The total count of Node query.
 
 

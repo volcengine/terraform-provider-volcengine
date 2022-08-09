@@ -23,12 +23,12 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `roles` - The collection of Role query.
-  * `create_date` - The create time of the Role.
-  * `description` - The description of the Role.
-  * `id` - The ID of the Role.
-  * `role_name` - The name of the Role.
-  * `trn` - The resource name of the Role.
-  * `trust_policy_document` - The trust policy document of the Role.
+    * `create_date` - The create time of the Role.
+    * `description` - The description of the Role.
+    * `id` - The ID of the Role.
+    * `role_name` - The name of the Role.
+    * `trn` - The resource name of the Role.
+    * `trust_policy_document` - The trust policy document of the Role.
 * `total_count` - The total count of Role query.
 
 

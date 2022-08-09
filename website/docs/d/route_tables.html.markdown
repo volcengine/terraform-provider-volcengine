@@ -25,17 +25,17 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `route_tables` - The collection of route tables.
-  * `account_id` - The account id of the route table creator.
-  * `creation_time` - The create time of the route table.
-  * `description` - The description of the route table.
-  * `id` - The id of the route table.
-  * `route_table_id` - The id of the route table.
-  * `route_table_name` - The name of the route table.
-  * `route_table_type` - The type of the route table.
-  * `subnet_ids` - The list of the subnet ids to which the entry table associates.
-  * `update_time` - The last update time of the route table.
-  * `vpc_id` - The id of the virtual private cloud (VPC) to which the route entry belongs.
-  * `vpc_name` - The name of the virtual private cloud (VPC) to which the route entry belongs.
+    * `account_id` - The account id of the route table creator.
+    * `creation_time` - The create time of the route table.
+    * `description` - The description of the route table.
+    * `id` - The id of the route table.
+    * `route_table_id` - The id of the route table.
+    * `route_table_name` - The name of the route table.
+    * `route_table_type` - The type of the route table.
+    * `subnet_ids` - The list of the subnet ids to which the entry table associates.
+    * `update_time` - The last update time of the route table.
+    * `vpc_id` - The id of the virtual private cloud (VPC) to which the route entry belongs.
+    * `vpc_name` - The name of the virtual private cloud (VPC) to which the route entry belongs.
 * `total_count` - The total count of route table query.
 
 

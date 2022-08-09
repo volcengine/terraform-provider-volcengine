@@ -297,6 +297,7 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 						ecs["SubnetId"] = v1["SubnetId"]
 						ecs["SecurityGroupIds"] = v1["SecurityGroupIds"]
 						ecs["NetworkInterfaceId"] = v1["NetworkInterfaceId"]
+						ecs["PrimaryIpAddress"] = v1["PrimaryIpAddress"]
 					} else {
 						dataNetworkInterfaces = append(dataNetworkInterfaces, vif)
 					}

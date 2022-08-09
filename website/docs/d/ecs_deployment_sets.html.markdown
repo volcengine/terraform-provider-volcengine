@@ -25,11 +25,11 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `deployment_sets` - The collection of ECS DeploymentSet query.
-  * `deployment_set_id` - The ID of ECS DeploymentSet.
-  * `deployment_set_name` - The name of ECS DeploymentSet.
-  * `description` - The description of ECS DeploymentSet.
-  * `granularity` - The granularity of ECS DeploymentSet.
-  * `strategy` - The strategy of ECS DeploymentSet.
+    * `deployment_set_id` - The ID of ECS DeploymentSet.
+    * `deployment_set_name` - The name of ECS DeploymentSet.
+    * `description` - The description of ECS DeploymentSet.
+    * `granularity` - The granularity of ECS DeploymentSet.
+    * `strategy` - The strategy of ECS DeploymentSet.
 * `total_count` - The total count of ECS DeploymentSet query.
 
 
