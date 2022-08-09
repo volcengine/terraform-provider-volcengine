@@ -282,10 +282,11 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 				} else {
 					// exist
 					targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
-						"NodeId":   node["node_id"],
-						"ZoneId":   node["zone_id"],
-						"NodeSpec": newNodeSpec,
-						"NodeType": newNodeType,
+						"NodeId":          node["node_id"],
+						"ZoneId":          node["zone_id"],
+						"NodeSpec":        newNodeSpec,
+						"NodeType":        newNodeType,
+						"NodeOperateType": "",
 					})
 				}
 			}
