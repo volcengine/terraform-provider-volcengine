@@ -40,55 +40,55 @@ The `statuses` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `clusters` - The collection of VkeCluster query.
-  * `cluster_config` - The config of the cluster.
-    * `api_server_endpoints` - Endpoint information accessed by the cluster API Server.
-      * `private_ip` - Endpoint address of the cluster API Server private network.
-        * `ipv4` - Ipv4 address.
-      * `public_ip` - Endpoint address of the cluster API Server public network.
-        * `ipv4` - Ipv4 address.
-    * `api_server_public_access_config` - Cluster API Server public network access configuration.
-      * `access_source_ipsv4` - IPv4 public network access whitelist. A null value means all network segments (0.0.0.0/0) are allowed to pass.
-      * `public_access_network_config` - Public network access network configuration.
-        * `bandwidth` - The peak bandwidth of the public IP, unit: Mbps.
-        * `billing_type` - Billing type of public IP, the value is `PostPaidByBandwidth` or `PostPaidByTraffic`.
-        * `isp` - The ISP of public IP.
-    * `api_server_public_access_enabled` - Cluster API Server public network access configuration, the value is `true` or `false`.
-    * `resource_public_access_default_enabled` - Node public network access configuration, the value is `true` or `false`.
-    * `security_group_ids` - The security group used by the cluster control plane and nodes.
-    * `subnet_ids` - The subnet ID for the cluster control plane to communicate within the private network.
-    * `vpc_id` - The ID of the private network (VPC) where the network of the cluster control plane and some nodes is located.
-  * `create_time` - Cluster creation time. UTC+0 time in standard RFC3339 format.
-  * `delete_protection_enabled` - The delete protection of the cluster, the value is `true` or `false`.
-  * `description` - The description of the cluster.
-  * `eip_allocation_id` - Eip allocation Id.
-  * `id` - The ID of the Cluster.
-  * `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding.
-  * `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding.
-  * `kubernetes_version` - The Kubernetes version information corresponding to the cluster, specific to the patch version.
-  * `name` - The name of the cluster.
-  * `node_statistics` - Statistics on the number of nodes corresponding to each master state in the cluster.
-    * `creating_count` - Phase=Creating total number of nodes.
-    * `deleting_count` - Phase=Deleting total number of nodes.
-    * `failed_count` - Phase=Failed total number of nodes.
-    * `running_count` - Phase=Running total number of nodes.
-    * `stopped_count` - Phase=Stopped total number of nodes.
-    * `total_count` - Total number of nodes.
-    * `updating_count` - Phase=Updating total number of nodes.
-  * `pods_config` - The config of the pods.
-    * `flannel_config` - Flannel network configuration.
-      * `max_pods_per_node` - The maximum number of single-node Pod instances for a Flannel container network.
-      * `pod_cidrs` - Pod CIDR for the Flannel container network.
-    * `pod_network_mode` - Container Pod Network Type (CNI), the value is `Flannel` or `VpcCniShared`.
-    * `vpc_cni_config` - VPC-CNI network configuration.
-      * `subnet_ids` - A list of Pod subnet IDs for the VPC-CNI container network.
-      * `vpc_id` - The private network where the cluster control plane network resides.
-  * `services_config` - The config of the services.
-    * `service_cidrsv4` - The IPv4 private network address exposed by the service.
-  * `status` - The status of the cluster.
-    * `conditions` - The state condition in the current primary state of the cluster, that is, the reason for entering the primary state.
-      * `type` - The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Balance`, `CreateError`, `ResourceCleanupFailed`, `Unknown`.
-    * `phase` - The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.
-  * `update_time` - The last time a request was accepted by the cluster and executed or completed. UTC+0 time in standard RFC3339 format.
+    * `cluster_config` - The config of the cluster.
+        * `api_server_endpoints` - Endpoint information accessed by the cluster API Server.
+            * `private_ip` - Endpoint address of the cluster API Server private network.
+                * `ipv4` - Ipv4 address.
+            * `public_ip` - Endpoint address of the cluster API Server public network.
+                * `ipv4` - Ipv4 address.
+        * `api_server_public_access_config` - Cluster API Server public network access configuration.
+            * `access_source_ipsv4` - IPv4 public network access whitelist. A null value means all network segments (0.0.0.0/0) are allowed to pass.
+            * `public_access_network_config` - Public network access network configuration.
+                * `bandwidth` - The peak bandwidth of the public IP, unit: Mbps.
+                * `billing_type` - Billing type of public IP, the value is `PostPaidByBandwidth` or `PostPaidByTraffic`.
+                * `isp` - The ISP of public IP.
+        * `api_server_public_access_enabled` - Cluster API Server public network access configuration, the value is `true` or `false`.
+        * `resource_public_access_default_enabled` - Node public network access configuration, the value is `true` or `false`.
+        * `security_group_ids` - The security group used by the cluster control plane and nodes.
+        * `subnet_ids` - The subnet ID for the cluster control plane to communicate within the private network.
+        * `vpc_id` - The ID of the private network (VPC) where the network of the cluster control plane and some nodes is located.
+    * `create_time` - Cluster creation time. UTC+0 time in standard RFC3339 format.
+    * `delete_protection_enabled` - The delete protection of the cluster, the value is `true` or `false`.
+    * `description` - The description of the cluster.
+    * `eip_allocation_id` - Eip allocation Id.
+    * `id` - The ID of the Cluster.
+    * `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding.
+    * `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding.
+    * `kubernetes_version` - The Kubernetes version information corresponding to the cluster, specific to the patch version.
+    * `name` - The name of the cluster.
+    * `node_statistics` - Statistics on the number of nodes corresponding to each master state in the cluster.
+        * `creating_count` - Phase=Creating total number of nodes.
+        * `deleting_count` - Phase=Deleting total number of nodes.
+        * `failed_count` - Phase=Failed total number of nodes.
+        * `running_count` - Phase=Running total number of nodes.
+        * `stopped_count` - Phase=Stopped total number of nodes.
+        * `total_count` - Total number of nodes.
+        * `updating_count` - Phase=Updating total number of nodes.
+    * `pods_config` - The config of the pods.
+        * `flannel_config` - Flannel network configuration.
+            * `max_pods_per_node` - The maximum number of single-node Pod instances for a Flannel container network.
+            * `pod_cidrs` - Pod CIDR for the Flannel container network.
+        * `pod_network_mode` - Container Pod Network Type (CNI), the value is `Flannel` or `VpcCniShared`.
+        * `vpc_cni_config` - VPC-CNI network configuration.
+            * `subnet_ids` - A list of Pod subnet IDs for the VPC-CNI container network.
+            * `vpc_id` - The private network where the cluster control plane network resides.
+    * `services_config` - The config of the services.
+        * `service_cidrsv4` - The IPv4 private network address exposed by the service.
+    * `status` - The status of the cluster.
+        * `conditions` - The state condition in the current primary state of the cluster, that is, the reason for entering the primary state.
+            * `type` - The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Balance`, `CreateError`, `ResourceCleanupFailed`, `Unknown`.
+        * `phase` - The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.
+    * `update_time` - The last time a request was accepted by the cluster and executed or completed. UTC+0 time in standard RFC3339 format.
 * `total_count` - The total count of Cluster query.
 
 

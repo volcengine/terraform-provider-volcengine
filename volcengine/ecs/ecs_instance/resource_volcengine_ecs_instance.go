@@ -181,6 +181,12 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of primary networkInterface.",
 			},
 
+			"primary_ip_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The private ip address of primary networkInterface.",
+			},
+
 			"system_volume_type": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -261,6 +267,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Set: schema.HashString,
+						},
+						"primary_ip_address": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The private ip address of secondary networkInterface.",
 						},
 					},
 				},
