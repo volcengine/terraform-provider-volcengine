@@ -24,10 +24,10 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `total_count` - The total count of user query.
 * `users` - The collection of user.
-  * `account_id` - The account id of the user.
-  * `create_date` - The create date of the user.
-  * `trn` - The trn of the user.
-  * `update_date` - The update date of the user.
-  * `user_name` - The name of the user.
+    * `account_id` - The account id of the user.
+    * `create_date` - The create date of the user.
+    * `trn` - The trn of the user.
+    * `update_date` - The update date of the user.
+    * `user_name` - The name of the user.
 
 
