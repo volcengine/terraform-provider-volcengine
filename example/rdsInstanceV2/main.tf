@@ -3,12 +3,12 @@ resource "volcengine_rds_instance_v2" "foo" {
   instance_type = "HA"
   node_info {
     node_type = "Primary"
-    node_spec = "rds.mysql.1c2g"
+    node_spec = "rds.mysql.2c4g"
     zone_id = "cn-guilin-a"
   }
   node_info {
     node_type = "Secondary"
-    node_spec = "rds.mysql.1c2g"
+    node_spec = "rds.mysql.2c4g"
     zone_id = "cn-guilin-a"
   }
   node_info {

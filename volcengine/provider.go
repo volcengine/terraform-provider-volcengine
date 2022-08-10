@@ -1,6 +1,7 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -152,10 +153,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_users":    iam_user.DataSourceVolcengineIamUsers(),
 
 			// ================ RDS V1 ==============
-			"volcengine_rds_instances": rds_instance.DataSourceVolcengineRdsInstances(),
-			"volcengine_rds_databases": rds_database.DataSourceVolcengineRdsDatabases(),
-			"volcengine_rds_accounts":  rds_account.DataSourceVolcengineRdsAccounts(),
-			"volcengine_rds_ip_lists":  rds_ip_list.DataSourceVolcengineRdsIpLists(),
+			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),
+			"volcengine_rds_databases":           rds_database.DataSourceVolcengineRdsDatabases(),
+			"volcengine_rds_accounts":            rds_account.DataSourceVolcengineRdsAccounts(),
+			"volcengine_rds_ip_lists":            rds_ip_list.DataSourceVolcengineRdsIpLists(),
+			"volcengine_rds_parameter_templates": rds_parameter_template.DataSourceVolcengineRdsParameterTemplates(),
 
 			// ================ RDS V2 ==============
 			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
@@ -219,11 +221,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user_policy_attachment": iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
 
 			// ================ RDS V1 ==============
-			"volcengine_rds_instance":          rds_instance.ResourceVolcengineRdsInstance(),
-			"volcengine_rds_database":          rds_database.ResourceVolcengineRdsDatabase(),
-			"volcengine_rds_account":           rds_account.ResourceVolcengineRdsAccount(),
-			"volcengine_rds_ip_list":           rds_ip_list.ResourceVolcengineRdsIpList(),
-			"volcengine_rds_account_privilege": rds_account_privilege.ResourceVolcengineRdsAccountPrivilege(),
+			"volcengine_rds_instance":           rds_instance.ResourceVolcengineRdsInstance(),
+			"volcengine_rds_database":           rds_database.ResourceVolcengineRdsDatabase(),
+			"volcengine_rds_account":            rds_account.ResourceVolcengineRdsAccount(),
+			"volcengine_rds_ip_list":            rds_ip_list.ResourceVolcengineRdsIpList(),
+			"volcengine_rds_account_privilege":  rds_account_privilege.ResourceVolcengineRdsAccountPrivilege(),
+			"volcengine_rds_parameter_template": rds_parameter_template.ResourceVolcengineRdsParameterTemplate(),
 
 			// ================ RDS V2 ==============
 			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
