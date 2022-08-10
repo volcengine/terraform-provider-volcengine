@@ -224,6 +224,13 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 	}
 
 	targetNodeInfo := make([]map[string]interface{}, 0)
+
+	changePrimary := false
+	newPrimaryNodeId := ""
+	hasSecondary := false
+
+	hasNodeChange := false
+
 	if resourceData.HasChange("node_info") {
 		oldNodes, newNodes := resourceData.GetChange("node_info")
 		logger.Info("oldNodes:%v", oldNodes)
@@ -253,6 +260,7 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 			node := v.(map[string]interface{})
 			if node["node_id"] == nil || node["node_id"].(string) == "" {
 				// new node
+				hasNodeChange = true
 				targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
 					"ZoneId":          node["zone_id"],
 					"NodeSpec":        node["node_spec"],
@@ -270,15 +278,51 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 				newNodeType := node["node_type"].(string)
 				newNodeSpec := node["node_spec"].(string)
 
+				if newNodeType == "Secondary" {
+					hasSecondary = true
+				}
+
 				if oldNodeType != newNodeType || oldNodeSpec != newNodeSpec {
 					// modify
-					targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
-						"NodeId":          node["node_id"],
-						"ZoneId":          node["zone_id"],
-						"NodeSpec":        newNodeSpec,
-						"NodeType":        newNodeType,
-						"NodeOperateType": "Modify",
-					})
+					if oldNodeType == "Primary" || oldNodeType == "Secondary" {
+						// 接口不支持主备切换，仅支持配置变更
+						if oldNodeSpec != newNodeSpec {
+							// 仅变更规格
+							hasNodeChange = true
+							targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+								"NodeId":          node["node_id"],
+								"ZoneId":          node["zone_id"],
+								"NodeSpec":        newNodeSpec,
+								"NodeType":        oldNodeType,
+								"NodeOperateType": "Modify",
+							})
+						} else {
+							// 节点不做变更
+							targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+								"NodeId":   node["node_id"],
+								"ZoneId":   node["zone_id"],
+								"NodeSpec": oldNodeSpec,
+								"NodeType": oldNodeType,
+							})
+						}
+
+						if oldNodeType != newNodeType {
+							changePrimary = true
+							if newNodeType == "Primary" {
+								newPrimaryNodeId = node["node_id"].(string)
+							}
+						}
+					} else {
+						// 普通节点变更
+						hasNodeChange = true
+						targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
+							"NodeId":          node["node_id"],
+							"ZoneId":          node["zone_id"],
+							"NodeSpec":        newNodeSpec,
+							"NodeType":        newNodeType,
+							"NodeOperateType": "Modify",
+						})
+					}
 				} else {
 					// exist
 					targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
@@ -295,6 +339,7 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 			// delete
 			node := v.(map[string]interface{})
 			if _, ok := newNodeMap[node["node_id"].(string)]; !ok {
+				hasNodeChange = true
 				targetNodeInfo = append(targetNodeInfo, map[string]interface{}{
 					"NodeId":          node["node_id"],
 					"ZoneId":          node["zone_id"],
@@ -320,34 +365,70 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 		}
 	}
 
-	modifySpecCallback := volc.Callback{
-		Call: volc.SdkCall{
-			Action:      "ModifyDBInstanceSpec",
-			ContentType: volc.ContentTypeJson,
-			ConvertMode: volc.RequestConvertIgnore,
-			SdkParam: &map[string]interface{}{
-				"InstanceId": resourceData.Id(),
+	callbacks := make([]volc.Callback, 0)
+	if hasNodeChange {
+		modifySpecCallback := volc.Callback{
+			Call: volc.SdkCall{
+				Action:      "ModifyDBInstanceSpec",
+				ContentType: volc.ContentTypeJson,
+				ConvertMode: volc.RequestConvertIgnore,
+				SdkParam: &map[string]interface{}{
+					"InstanceId": resourceData.Id(),
+				},
+				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+					(*call.SdkParam)["StorageType"] = d.Get("storage_type")
+					if d.HasChange("storage_space") {
+						(*call.SdkParam)["StorageSpace"] = d.Get("storage_space")
+					}
+					(*call.SdkParam)["NodeInfo"] = targetNodeInfo
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &volc.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
 			},
-			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
-				(*call.SdkParam)["StorageType"] = d.Get("storage_type")
-				if d.HasChange("storage_space") {
-					(*call.SdkParam)["StorageSpace"] = d.Get("storage_space")
-				}
-				(*call.SdkParam)["NodeInfo"] = targetNodeInfo
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			Refresh: &volc.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			},
-		},
+		}
+		callbacks = append(callbacks, modifySpecCallback)
 	}
 
-	return []volc.Callback{modifySpecCallback}
+	if changePrimary {
+		changePrimaryCallback := volc.Callback{
+			Call: volc.SdkCall{
+				Action:      "ChangeDBInstanceHAMaster",
+				ContentType: volc.ContentTypeJson,
+				ConvertMode: volc.RequestConvertIgnore,
+				SdkParam: &map[string]interface{}{
+					"InstanceId": resourceData.Id(),
+				},
+				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+					if newPrimaryNodeId == "" {
+						return false, errors.New("non primary node")
+					}
+					if !hasSecondary {
+						return false, errors.New("non secondary node")
+					}
+					(*call.SdkParam)["NodeId"] = newPrimaryNodeId
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getV1UniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &volc.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, changePrimaryCallback)
+	}
+
+	return callbacks
 }
 
 func (s *VolcengineRdsInstanceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {
@@ -421,6 +502,16 @@ func getUniversalInfo(actionName string) volc.UniversalInfo {
 	return volc.UniversalInfo{
 		ServiceName: "rds_mysql",
 		Version:     "2022-01-01",
+		HttpMethod:  volc.POST,
+		ContentType: volc.ApplicationJSON,
+		Action:      actionName,
+	}
+}
+
+func getV1UniversalInfo(actionName string) volc.UniversalInfo {
+	return volc.UniversalInfo{
+		ServiceName: "rds_mysql",
+		Version:     "2018-01-01",
 		HttpMethod:  volc.POST,
 		ContentType: volc.ApplicationJSON,
 		Action:      actionName,
