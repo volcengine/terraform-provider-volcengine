@@ -111,7 +111,7 @@ func DataSourceVolcengineRdsParameterTemplates() *schema.Resource {
 									"running_value": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Parameter running value",
+										Description: "Parameter running value.",
 									},
 									"restart": {
 										Type:        schema.TypeBool,
@@ -126,7 +126,7 @@ func DataSourceVolcengineRdsParameterTemplates() *schema.Resource {
 									"description": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Parameter description",
+										Description: "Parameter description.",
 									},
 								},
 							},

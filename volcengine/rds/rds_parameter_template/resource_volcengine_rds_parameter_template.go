@@ -30,7 +30,7 @@ func ResourceVolcengineRdsParameterTemplate() *schema.Resource {
 			"template_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Parameter template name",
+				Description: "Parameter template name.",
 			},
 			"template_type": {
 				Type:        schema.TypeString,
@@ -58,7 +58,7 @@ func ResourceVolcengineRdsParameterTemplate() *schema.Resource {
 						"running_value": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "Parameter running value",
+							Description: "Parameter running value.",
 						},
 					},
 				},
@@ -66,7 +66,7 @@ func ResourceVolcengineRdsParameterTemplate() *schema.Resource {
 			"template_desc": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Parameter template description",
+				Description: "Parameter template description.",
 			},
 		},
 	}
