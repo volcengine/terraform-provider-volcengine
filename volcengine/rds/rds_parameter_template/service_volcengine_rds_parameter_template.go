@@ -187,17 +187,6 @@ func (s *VolcengineRdsParameterTemplateService) ModifyResource(resourceData *sch
 			Action:      "ModifyParameterTemplate",
 			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertIgnore,
-			Convert: map[string]volc.RequestConvert{
-				"template_params": {
-					ConvertType: volc.ConvertJsonObjectArray,
-				},
-				"template_name": {
-					ConvertType: volc.ConvertDefault,
-				},
-				"template_desc": {
-					ConvertType: volc.ConvertDefault,
-				},
-			},
 			SdkParam: &map[string]interface{}{
 				"TemplateId": resourceData.Id(),
 			},
