@@ -34,35 +34,29 @@ func (s *VolcengineRdsParameterTemplateService) ReadResources(m map[string]inter
 		ok                   bool
 		rdsParameterTemplate map[string]interface{}
 	)
-	data, err = volc.WithPageOffsetQuery(m, "Limit", "Offset", 20, 0, func(condition map[string]interface{}) ([]interface{}, error) {
-		action := "ListParameterTemplates"
-		logger.Debug(logger.ReqFormat, action, condition)
-		if condition == nil {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
-			if err != nil {
-				return data, err
-			}
-		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
-			if err != nil {
-				return data, err
-			}
-		}
-
-		results, err = volc.ObtainSdkValue("Result.Datas", *resp)
+	action := "ListParameterTemplates"
+	logger.Debug(logger.ReqFormat, action, m)
+	if m == nil {
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 		if err != nil {
 			return data, err
 		}
-		if results == nil {
-			results = []interface{}{}
+	} else {
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &m)
+		if err != nil {
+			return data, err
 		}
-		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Datas is not Slice")
-		}
-		return data, err
-	})
+	}
+
+	results, err = volc.ObtainSdkValue("Result.Datas", *resp)
 	if err != nil {
 		return data, err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	if data, ok = results.([]interface{}); !ok {
+		return data, errors.New("Result.Datas is not Slice")
 	}
 
 	for _, v := range data {
