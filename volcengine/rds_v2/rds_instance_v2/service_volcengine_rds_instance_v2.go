@@ -366,7 +366,7 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 	}
 
 	callbacks := make([]volc.Callback, 0)
-	if hasNodeChange {
+	if hasNodeChange || resourceData.HasChanges("storage_space", "storage_type") {
 		modifySpecCallback := volc.Callback{
 			Call: volc.SdkCall{
 				Action:      "ModifyDBInstanceSpec",
