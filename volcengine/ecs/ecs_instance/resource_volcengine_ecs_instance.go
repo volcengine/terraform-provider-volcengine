@@ -32,8 +32,9 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Description: "The available zone ID of ECS instance.",
 			},
 			"image_id": {
@@ -89,10 +90,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The charge type of ECS instance.",
 			},
 			"user_data": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The user data of ECS instance.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: ve.UserDateImportDiffSuppress,
+				Description:      "The user data of ECS instance.",
 			},
 			"security_enhancement_strategy": {
 				Type:     schema.TypeString,
@@ -179,6 +181,12 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of primary networkInterface.",
 			},
 
+			"primary_ip_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The private ip address of primary networkInterface.",
+			},
+
 			"system_volume_type": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -196,6 +204,12 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The ID of system volume.",
+			},
+
+			"deployment_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of Ecs Deployment Set.",
 			},
 
 			"data_volumes": {
@@ -253,6 +267,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Set: schema.HashString,
+						},
+						"primary_ip_address": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The private ip address of secondary networkInterface.",
 						},
 					},
 				},

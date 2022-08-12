@@ -111,14 +111,15 @@ type Product struct {
 }
 
 var resourceKeys = map[string]string{
-	"vpc": "VPC",
-	"ecs": "ECS",
-	"clb": "CLB",
-	"eip": "EIP",
-	"ebs": "EBS",
-	"nat": "NAT",
-	"vke": "VKE",
-	"iam": "IAM",
+	"vpc":     "VPC",
+	"ecs":     "ECS",
+	"clb":     "CLB",
+	"eip":     "EIP",
+	"ebs":     "EBS",
+	"nat":     "NAT",
+	"vke":     "VKE",
+	"iam":     "IAM",
+	"escloud": "ESCLOUD",
 }
 
 type Products struct {
@@ -436,7 +437,7 @@ func genDoc(pwd string, product, docType, filename, name string, resource *schem
 // getAttributes get attributes from schema
 func getAttributes(step int, k string, v *schema.Schema) []string {
 	var attributes []string
-	ident := strings.Repeat(" ", step*2)
+	ident := strings.Repeat(" ", step*4)
 
 	if v.Description == "" {
 		return attributes
