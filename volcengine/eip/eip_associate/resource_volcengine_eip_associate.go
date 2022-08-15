@@ -42,7 +42,7 @@ func ResourceVolcengineEipAssociate() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of the associated instance.",
+				Description: "The type of the associated instance,the value is `NAT` or `NetworkInterface` or `ClbInstance` or `EcsInstance` or `HaVip`.",
 			},
 			"private_ip_address": {
 				Type:        schema.TypeString,
