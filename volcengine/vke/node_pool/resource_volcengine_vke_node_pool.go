@@ -28,68 +28,16 @@ func ResourceVolcengineNodePool() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "The IDs of NodePool.",
-			},
-			"statuses": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "The Status of NodePool.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"phase": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The Phase of Status.",
-						},
-						"conditions_type": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Indicates the status condition of the node pool in the active state.",
-						},
-					},
-				},
-			},
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The Name of NodePool.",
-			},
-			"create_client_token": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The CreateClientToken of NodePool.",
-			},
-			"update_client_token": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The UpdateClientToken of NodePool.",
-			},
-			"auto_scaling_enabled": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Is enabled of AutoScaling.",
 			},
 			"cluster_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
 				Description: "The ClusterId of NodePool.",
-			},
-			"cluster_ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "The ClusterIds of NodePool.",
 			},
 			"client_token": {
 				Type:        schema.TypeString,
