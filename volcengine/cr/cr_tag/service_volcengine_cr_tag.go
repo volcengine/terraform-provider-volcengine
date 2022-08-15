@@ -207,7 +207,7 @@ func (s *VolcengineCrTagService) ReadResourceId(id string) string {
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
-		ServiceName: "cr_pre",
+		ServiceName: "cr",
 		Version:     "2022-05-12",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,

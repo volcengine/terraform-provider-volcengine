@@ -51,7 +51,7 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 			},
 		},
 	}
-	dataSource := DataSourceVolcengineCrRegistrys().Schema["registries"].Elem.(*schema.Resource).Schema
+	dataSource := DataSourceVolcengineCrRegistries().Schema["registries"].Elem.(*schema.Resource).Schema
 	ve.MergeDateSourceToResource(dataSource, &resource.Schema)
 	return resource
 }

@@ -6,7 +6,7 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineCrRegistrys() *schema.Resource {
+func DataSourceVolcengineCrRegistries() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineCrRegistriesRead,
 		Schema: map[string]*schema.Schema{
@@ -157,5 +157,5 @@ func DataSourceVolcengineCrRegistrys() *schema.Resource {
 
 func dataSourceVolcengineCrRegistriesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRegistryService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCrRegistrys())
+	return service.Dispatcher.Data(service, d, DataSourceVolcengineCrRegistries())
 }

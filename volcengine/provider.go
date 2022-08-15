@@ -11,12 +11,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
 
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/region"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -195,7 +189,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
 			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
 			// ================ CR ================
-			"volcengine_cr_registries":           cr_registry.DataSourceVolcengineCrRegistrys(),
+			"volcengine_cr_registries":           cr_registry.DataSourceVolcengineCrRegistries(),
 			"volcengine_cr_namespaces":           cr_namespace.DataSourceVolcengineCrNamespaces(),
 			"volcengine_cr_repositories":         cr_repository.DataSourceVolcengineCrRepositories(),
 			"volcengine_cr_tags":                 cr_tag.DataSourceVolcengineCrTags(),
