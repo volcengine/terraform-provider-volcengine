@@ -1,13 +1,8 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"strings"
-
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/region"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -22,12 +17,16 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/region"
 	esZone "github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
@@ -38,8 +37,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account_privilege"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_database"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/route_entry"
@@ -146,6 +152,16 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_roles":    iam_role.DataSourceVolcengineIamRoles(),
 			"volcengine_iam_users":    iam_user.DataSourceVolcengineIamUsers(),
 
+			// ================ RDS V1 ==============
+			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),
+			"volcengine_rds_databases":           rds_database.DataSourceVolcengineRdsDatabases(),
+			"volcengine_rds_accounts":            rds_account.DataSourceVolcengineRdsAccounts(),
+			"volcengine_rds_ip_lists":            rds_ip_list.DataSourceVolcengineRdsIpLists(),
+			"volcengine_rds_parameter_templates": rds_parameter_template.DataSourceVolcengineRdsParameterTemplates(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
+
 			// ================ ESCloud =============
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
 			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
@@ -203,6 +219,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user":                   iam_user.ResourceVolcengineIamUser(),
 			"volcengine_iam_login_profile":          iam_login_profile.ResourceVolcengineIamLoginProfile(),
 			"volcengine_iam_user_policy_attachment": iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
+
+			// ================ RDS V1 ==============
+			"volcengine_rds_instance":           rds_instance.ResourceVolcengineRdsInstance(),
+			"volcengine_rds_database":           rds_database.ResourceVolcengineRdsDatabase(),
+			"volcengine_rds_account":            rds_account.ResourceVolcengineRdsAccount(),
+			"volcengine_rds_ip_list":            rds_ip_list.ResourceVolcengineRdsIpList(),
+			"volcengine_rds_account_privilege":  rds_account_privilege.ResourceVolcengineRdsAccountPrivilege(),
+			"volcengine_rds_parameter_template": rds_parameter_template.ResourceVolcengineRdsParameterTemplate(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
 
 			// ================ ESCloud ================
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),

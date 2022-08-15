@@ -13,6 +13,7 @@ import (
 
 Import
 ECS Instance can be imported using the id, e.g.
+If Import,The data_volumes is sort by volume name
 ```
 $ terraform import volcengine_ecs_instance.default i-mizl7m1kqccg5smt1bdpijuj
 ```
@@ -191,7 +192,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of system volume.",
+				Description: "The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 			},
 
 			"system_volume_size": {
@@ -217,14 +218,14 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Optional:    true,
 				MaxItems:    15,
 				MinItems:    1,
-				Description: "The data volume collection of  ECS instance.",
+				Description: "The data volumes collection of  ECS instance.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"volume_type": {
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The type of volume.",
+							Description: "The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 						},
 						"size": {
 							Type:        schema.TypeInt,

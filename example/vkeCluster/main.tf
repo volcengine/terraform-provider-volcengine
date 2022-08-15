@@ -24,6 +24,6 @@ resource "volcengine_vke_cluster" "foo" {
     }
   }
   services_config {
-    service_cidrsv4 = ["172.30.0.0/17"]
+    service_cidrsv4 = ["192.168.0.0/16"]
   }
 }
