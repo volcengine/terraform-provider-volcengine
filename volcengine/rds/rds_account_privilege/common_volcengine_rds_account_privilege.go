@@ -61,7 +61,7 @@ func mappingAccountPrivilegeStr(accountPrivilegeStr string) []string {
 // mappingAndSortAccountPrivilegeStr RDS account privilege string mapping
 func mappingAndSortAccountPrivilegeStr(accountPrivilegeStr string) string {
 	mappingPrivileges := mappingAccountPrivilegeStr(accountPrivilegeStr)
-	sort.Sort(sort.StringSlice(mappingPrivileges))
+	sort.Strings(mappingPrivileges)
 	return strings.Join(mappingPrivileges, ",")
 }
 
