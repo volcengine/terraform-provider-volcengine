@@ -33,16 +33,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Optional:    true,
 				Description: "The Name of NodePool.",
 			},
-			"create_client_token": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The CreateClientToken of NodePool.",
-			},
-			"update_client_token": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The UpdateClientToken of NodePool.",
-			},
 			"cluster_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
