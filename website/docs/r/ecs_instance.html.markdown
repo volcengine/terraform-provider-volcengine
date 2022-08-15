@@ -57,7 +57,7 @@ The following arguments are supported:
 * `security_group_ids` - (Required) The security group ID set of primary networkInterface.
 * `subnet_id` - (Required, ForceNew) The subnet ID of primary networkInterface.
 * `system_volume_size` - (Required) The size of system volume.
-* `system_volume_type` - (Required, ForceNew) The type of system volume.
+* `system_volume_type` - (Required, ForceNew) The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `auto_renew_period` - (Optional, ForceNew) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.
 * `auto_renew` - (Optional, ForceNew) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.
 * `data_volumes` - (Optional) The data volume collection of  ECS instance.
@@ -79,7 +79,7 @@ The following arguments are supported:
 The `data_volumes` object supports the following:
 
 * `size` - (Required, ForceNew) The size of volume.
-* `volume_type` - (Required, ForceNew) The type of volume.
+* `volume_type` - (Required, ForceNew) The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `delete_with_instance` - (Optional, ForceNew) The delete with instance flag of volume.
 
 The `secondary_network_interfaces` object supports the following:

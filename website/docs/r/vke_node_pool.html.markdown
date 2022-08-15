@@ -41,16 +41,12 @@ resource "volcengine_vke_node_pool" "vke_test" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `auto_scaling_enabled` - (Optional) Is enabled of AutoScaling.
 * `auto_scaling` - (Optional) The node pool elastic scaling configuration information.
 * `client_token` - (Optional) The ClientToken of NodePool.
 * `cluster_id` - (Optional, ForceNew) The ClusterId of NodePool.
-* `cluster_ids` - (Optional) The ClusterIds of NodePool.
-* `ids` - (Optional) The IDs of NodePool.
 * `kubernetes_config` - (Optional) The KubernetesConfig of NodeConfig.
 * `name` - (Optional) The Name of NodePool.
 * `node_config` - (Optional) The Config of NodePool.
-* `statuses` - (Optional) The Status of NodePool.
 
 The `auto_scaling` object supports the following:
 
@@ -97,11 +93,6 @@ The `security` object supports the following:
 * `security_group_ids` - (Optional) The SecurityGroupIds of Security.
 * `security_strategies` - (Optional) The SecurityStrategies of Security.
 
-The `statuses` object supports the following:
-
-* `conditions_type` - (Optional) Indicates the status condition of the node pool in the active state.
-* `phase` - (Optional) The Phase of Status.
-
 The `system_volume` object supports the following:
 
 * `size` - (Optional, ForceNew) The Size of SystemVolume.
@@ -116,8 +107,7 @@ The `taints` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `create_client_token` - The CreateClientToken of NodePool.
-* `update_client_token` - The UpdateClientToken of NodePool.
+
 
 
 ## Import

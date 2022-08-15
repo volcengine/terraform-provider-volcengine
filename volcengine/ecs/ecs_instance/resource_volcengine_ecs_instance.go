@@ -191,7 +191,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of system volume.",
+				Description: "The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 			},
 
 			"system_volume_size": {
@@ -224,7 +224,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The type of volume.",
+							Description: "The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 						},
 						"size": {
 							Type:        schema.TypeInt,
