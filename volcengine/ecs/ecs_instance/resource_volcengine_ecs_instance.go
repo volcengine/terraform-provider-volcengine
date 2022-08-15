@@ -192,19 +192,19 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of system volumes, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
+				Description: "The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 			},
 
 			"system_volume_size": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "The size of system volumes.",
+				Description: "The size of system volume.",
 			},
 
 			"system_volume_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The ID of system volumes.",
+				Description: "The ID of system volume.",
 			},
 
 			"deployment_set_id": {
@@ -225,20 +225,20 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The type of volumes, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
+							Description: "The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 						},
 						"size": {
 							Type:        schema.TypeInt,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The size of volumes.",
+							Description: "The size of volume.",
 						},
 						"delete_with_instance": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
 							ForceNew:    true,
-							Description: "The delete with instance flag of volumes.",
+							Description: "The delete with instance flag of volume.",
 						},
 					},
 				},

@@ -219,33 +219,33 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 						"volumes": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Description: "The volumes detail collection of volumes.",
+							Description: "The volume detail collection of volume.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"volume_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The ID of volumes.",
+										Description: "The ID of volume.",
 									},
 									"volume_name": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The Name of volumes.",
+										Description: "The Name of volume.",
 									},
 									"volume_type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The type of volumes.",
+										Description: "The type of volume.",
 									},
 									"size": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The size of volumes.",
+										Description: "The size of volume.",
 									},
 									"delete_with_instance": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Description: "The delete with instance flag of volumes.",
+										Description: "The delete with instance flag of volume.",
 									},
 								},
 							},

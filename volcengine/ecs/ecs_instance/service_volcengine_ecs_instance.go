@@ -309,7 +309,7 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			}
 		}
 
-		//split System volumes and Data volumes
+		//split System volume and Data volumes
 		if volumes, ok1 := ecs["Volumes"].([]interface{}); ok1 {
 			var dataVolumes []interface{}
 			for _, volume := range volumes {
