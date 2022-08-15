@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -308,7 +309,7 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			}
 		}
 
-		//split System volume and Data volume
+		//split System volumes and Data volumes
 		if volumes, ok1 := ecs["Volumes"].([]interface{}); ok1 {
 			var dataVolumes []interface{}
 			for _, volume := range volumes {
@@ -323,7 +324,11 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 				}
 			}
 			if len(dataVolumes) > 0 {
-				ecs["DataVolumes"] = dataVolumes
+				v1 := volumeInfo{
+					list: dataVolumes,
+				}
+				sort.Sort(&v1)
+				ecs["DataVolumes"] = v1.list
 			}
 		}
 		return ecs, s.CommonResponseConvert(), nil
@@ -1190,4 +1195,20 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		Action:      actionName,
 	}
+}
+
+type volumeInfo struct {
+	list []interface{}
+}
+
+func (v *volumeInfo) Len() int {
+	return len(v.list)
+}
+
+func (v *volumeInfo) Less(i, j int) bool {
+	return v.list[i].(map[string]interface{})["VolumeName"].(string) < v.list[j].(map[string]interface{})["VolumeName"].(string)
+}
+
+func (v *volumeInfo) Swap(i, j int) {
+	v.list[i], v.list[j] = v.list[j], v.list[i]
 }

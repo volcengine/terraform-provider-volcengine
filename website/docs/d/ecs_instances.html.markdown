@@ -60,12 +60,12 @@ In addition to all arguments above, the following attributes are exported:
     * `status` - The status of ECS instance.
     * `stopped_mode` - The stop mode of ECS instance.
     * `updated_at` - The update time of ECS instance.
-    * `volumes` - The volume detail collection of volume.
-        * `delete_with_instance` - The delete with instance flag of volume.
-        * `size` - The size of volume.
-        * `volume_id` - The ID of volume.
-        * `volume_name` - The Name of volume.
-        * `volume_type` - The type of volume.
+    * `volumes` - The volumes detail collection of volumes.
+        * `delete_with_instance` - The delete with instance flag of volumes.
+        * `size` - The size of volumes.
+        * `volume_id` - The ID of volumes.
+        * `volume_name` - The Name of volumes.
+        * `volume_type` - The type of volumes.
     * `vpc_id` - The VPC ID of ECS instance.
     * `zone_id` - The available zone ID of ECS instance.
 * `total_count` - The total count of ECS instance query.

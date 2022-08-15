@@ -10,22 +10,22 @@ description: |-
 Provides a resource to manage ecs instance
 ## Example Usage
 ```hcl
-resource "volcengine_vpc" "foo" {
-  vpc_name   = "tf-test-2"
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "volcengine_subnet" "foo1" {
-  subnet_name = "subnet-test-1"
-  cidr_block  = "172.16.1.0/24"
-  zone_id     = "cn-beijing-a"
-  vpc_id      = volcengine_vpc.foo.id
-}
-
-resource "volcengine_security_group" "foo1" {
-  depends_on = [volcengine_subnet.foo1]
-  vpc_id     = volcengine_vpc.foo.id
-}
+#resource "volcengine_vpc" "foo" {
+#  vpc_name = "tf-test-2"
+#  cidr_block = "172.16.0.0/16"
+#}
+#
+#resource "volcengine_subnet" "foo1" {
+#  subnet_name = "subnet-test-1"
+#  cidr_block = "172.16.1.0/24"
+#  zone_id = "cn-beijing-a"
+#  vpc_id = volcengine_vpc.foo.id
+#}
+#
+#resource "volcengine_security_group" "foo1" {
+#  depends_on = [volcengine_subnet.foo1]
+#  vpc_id = volcengine_vpc.foo.id
+#}
 
 resource "volcengine_ecs_instance" "default" {
   image_id             = "image-aagd56zrw2jtdro3bnrl"
@@ -36,11 +36,16 @@ resource "volcengine_ecs_instance" "default" {
   instance_charge_type = "PostPaid"
   system_volume_type   = "PTSSD"
   system_volume_size   = 60
-  subnet_id            = volcengine_subnet.foo1.id
-  security_group_ids   = [volcengine_security_group.foo1.id]
+  subnet_id            = "subnet-13flm9jrrznk03n6nu5ksvxbh"
+  security_group_ids   = ["sg-13flm8y2fr1ts3n6nu5oo9bhj"]
   data_volumes {
     volume_type          = "PTSSD"
-    size                 = 100
+    size                 = 1000
+    delete_with_instance = true
+  }
+  data_volumes {
+    volume_type          = "PTSSD"
+    size                 = 50
     delete_with_instance = true
   }
   deployment_set_id = ""
@@ -56,11 +61,11 @@ The following arguments are supported:
 * `instance_type` - (Required) The instance type of ECS instance.
 * `security_group_ids` - (Required) The security group ID set of primary networkInterface.
 * `subnet_id` - (Required, ForceNew) The subnet ID of primary networkInterface.
-* `system_volume_size` - (Required) The size of system volume.
-* `system_volume_type` - (Required, ForceNew) The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
+* `system_volume_size` - (Required) The size of system volumes.
+* `system_volume_type` - (Required, ForceNew) The type of system volumes, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `auto_renew_period` - (Optional, ForceNew) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.
 * `auto_renew` - (Optional, ForceNew) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.
-* `data_volumes` - (Optional) The data volume collection of  ECS instance.
+* `data_volumes` - (Optional) The data volumes collection of  ECS instance.
 * `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
 * `description` - (Optional) The description of ECS instance.
 * `host_name` - (Optional, ForceNew) The host name of ECS instance.
@@ -78,9 +83,9 @@ The following arguments are supported:
 
 The `data_volumes` object supports the following:
 
-* `size` - (Required, ForceNew) The size of volume.
-* `volume_type` - (Required, ForceNew) The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
-* `delete_with_instance` - (Optional, ForceNew) The delete with instance flag of volume.
+* `size` - (Required, ForceNew) The size of volumes.
+* `volume_type` - (Required, ForceNew) The type of volumes, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
+* `delete_with_instance` - (Optional, ForceNew) The delete with instance flag of volumes.
 
 The `secondary_network_interfaces` object supports the following:
 
@@ -107,13 +112,14 @@ In addition to all arguments above, the following attributes are exported:
 * `primary_ip_address` - The private ip address of primary networkInterface.
 * `status` - The status of ECS instance.
 * `stopped_mode` - The stop mode of ECS instance.
-* `system_volume_id` - The ID of system volume.
+* `system_volume_id` - The ID of system volumes.
 * `updated_at` - The update time of ECS instance.
 * `vpc_id` - The VPC ID of ECS instance.
 
 
 ## Import
 ECS Instance can be imported using the id, e.g.
+If Import,The data_volumes is sort by volume name
 ```
 $ terraform import volcengine_ecs_instance.default i-mizl7m1kqccg5smt1bdpijuj
 ```
