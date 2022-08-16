@@ -2,6 +2,7 @@ package scaling_group
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -37,7 +38,7 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				Description:  "The default cooldown interval of the scaling group.",
+				Description:  "The default cooldown interval of the scaling group. Default value: 300.",
 				ValidateFunc: validation.IntBetween(5, 86400),
 			},
 			"subnet_ids": {
@@ -49,10 +50,14 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				},
 			},
 			"desire_instance_number": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				Description:  "The desire instance number of the scaling group.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The desire instance number of the scaling group.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					atoi, _ := strconv.Atoi(old)
+					return atoi < 0
+				},
 				ValidateFunc: validation.IntAtLeast(-1),
 			},
 			"min_instance_number": {
@@ -71,7 +76,7 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The instance terminate policy of the scaling group.",
+				Description: "The instance terminate policy of the scaling group. Valid values: OldestInstance, NewestInstance, OldestScalingConfigurationWithOldestInstance, OldestScalingConfigurationWithNewestInstance. Default value: OldestScalingConfigurationWithOldestInstance.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"OldestInstance",
 					"NewestInstance",
@@ -92,12 +97,11 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
-				ForceNew: true,
 				ValidateFunc: validation.StringInSlice([]string{
 					"PRIORITY",
 					"BALANCE",
 				}, false),
-				Description: "The multi az policy of the scaling group.",
+				Description: "The multi az policy of the scaling group. Valid values: PRIORITY, BALANCE. Default value: PRIORITY.",
 			},
 		},
 	}

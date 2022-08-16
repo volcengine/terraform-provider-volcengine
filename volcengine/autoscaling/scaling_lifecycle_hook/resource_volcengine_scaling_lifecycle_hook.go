@@ -50,13 +50,13 @@ func ResourceVolcengineScalingLifecycleHook() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"SCALE_IN", "SCALE_OUT"}, false),
-				Description:  "The type of the lifecycle hook.",
+				Description:  "The type of the lifecycle hook. Valid values: SCALE_IN, SCALE_OUT.",
 			},
 			"lifecycle_hook_policy": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"CONTINUE", "REJECT"}, false),
-				Description:  "The policy of the lifecycle hook.",
+				Description:  "The policy of the lifecycle hook. Valid values: CONTINUE, REJECT.",
 			},
 		},
 	}

@@ -132,7 +132,7 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 						"multi_az_policy": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The multi az policy of the scaling group.",
+							Description: "The multi az policy of the scaling group. Valid values: PRIORITY, BALANCE.",
 						},
 						"db_instance_ids": {
 							Type:     schema.TypeList,

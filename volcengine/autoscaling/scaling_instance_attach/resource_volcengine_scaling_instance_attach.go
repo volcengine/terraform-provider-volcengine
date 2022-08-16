@@ -36,7 +36,6 @@ func ResourceVolcengineScalingInstanceAttach() *schema.Resource {
 			"instance_ids": {
 				Type:        schema.TypeSet,
 				Required:    true,
-				MinItems:    0,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Set:         schema.HashString,
 				Description: "The list of instance ids the scaling group.",

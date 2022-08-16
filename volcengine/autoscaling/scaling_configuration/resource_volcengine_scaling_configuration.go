@@ -32,12 +32,12 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Computed:    true,
-				Description: "The active flag of the scaling configuration. when set true, the scaling group which the scaling configuration belongs will use it.",
+				Description: "The active flag of the scaling configuration. Valid values: true or false. when set true, the scaling group which the scaling configuration belongs will use it.",
 			},
 			"enable": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Description: "The enable flag of the scaling group. when set true, the scaling group which the scaling configuration belongs will be enabled.",
+				Description: "The enable flag of the scaling group. Valid values: true or false. when set true, the scaling group which the scaling configuration belongs will be enabled.",
 			},
 			"substitute": {
 				Type:             schema.TypeString,
@@ -49,7 +49,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 			"lifecycle_state": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The lifecycle state of the scaling configuration.",
+				Description: "The lifecycle state of the scaling configuration.Valid values: InActive or Active.",
 			},
 			"scaling_configuration_name": {
 				Type:        schema.TypeString,
@@ -70,6 +70,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 			"instance_types": {
 				Type:     schema.TypeList,
 				Required: true,
+				MaxItems: 10,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -108,7 +109,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 				Optional:     true,
 				Default:      "Active",
 				ValidateFunc: validation.StringInSlice([]string{"Active", "InActive"}, false),
-				Description:  "The Ecs security enhancement strategy which the scaling configuration set.",
+				Description:  "The Ecs security enhancement strategy which the scaling configuration set. Valid values: Active, InActive.",
 			},
 			"volumes": {
 				Type:        schema.TypeList,
@@ -123,15 +124,16 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 							Description: "The type of volume.",
 						},
 						"size": {
-							Type:        schema.TypeInt,
-							Required:    true,
-							Description: "The size of volume.",
+							Type:         schema.TypeInt,
+							Required:     true,
+							ValidateFunc: validation.IntAtLeast(1),
+							Description:  "The size of volume.",
 						},
 						"delete_with_instance": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     true,
-							Description: "The delete with instance flag of volume.",
+							Description: "The delete with instance flag of volume. Valid values: true, false. Default value: true.",
 						},
 					},
 				},
@@ -157,7 +159,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: eipDiffSuppressFunc,
 				ValidateFunc:     validation.StringInSlice([]string{"BGP", "ChinaMobile", "ChinaUnicom", "ChinaTelecom"}, false),
-				Description:      "The EIP ISP which the scaling configuration set.",
+				Description:      "The EIP ISP which the scaling configuration set. Valid values: BGP, ChinaMobile, ChinaUnicom, ChinaTelecom.",
 			},
 			"eip_billing_type": {
 				Type:             schema.TypeString,
@@ -165,7 +167,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 				Computed:         true,
 				DiffSuppressFunc: eipDiffSuppressFunc,
 				ValidateFunc:     validation.StringInSlice([]string{"PostPaidByBandwidth", "PostPaidByTraffic"}, false),
-				Description:      "The EIP billing type which the scaling configuration set.",
+				Description:      "The EIP billing type which the scaling configuration set. Valid values: PostPaidByBandwidth, PostPaidByTraffic.",
 			},
 			"user_data": {
 				Type:        schema.TypeString,

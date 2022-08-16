@@ -170,6 +170,9 @@ func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.Reso
 					TargetField: "DesireInstanceNumber",
 					// 如果为0时，需要这样转一下，要不然不会出现在请求参数
 					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						if _, ok := data.GetOkExists("desire_instance_number"); !ok {
+							return -1
+						}
 						return i
 					},
 				},

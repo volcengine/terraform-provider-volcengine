@@ -37,7 +37,7 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The status of the scaling policy.",
+				Description: "The status of the scaling policy. Valid values: Active, InActive.",
 			},
 			"scaling_group_id": {
 				Type:        schema.TypeString,
@@ -55,13 +55,13 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Scheduled", "Recurrence", "Alarm"}, false),
-				Description:  "The type of scaling policy.",
+				Description:  "The type of scaling policy. Valid values: Scheduled, Recurrence, Alarm.",
 			},
 			"adjustment_type": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"QuantityChangeInCapacity", "PercentChangeInCapacity", "TotalCapacity"}, false),
-				Description:  "The adjustment type of the scaling policy.",
+				Description:  "The adjustment type of the scaling policy. Valid values: QuantityChangeInCapacity, PercentChangeInCapacity, TotalCapacity.",
 			},
 			"adjustment_value": {
 				Type:        schema.TypeInt,
@@ -73,7 +73,7 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.IntBetween(-1, 86400),
-				Description:  "The cooldown of the scaling policy.",
+				Description:  "The cooldown of the scaling policy. Default value is the cooldown time of the scaling group.",
 			},
 			"scheduled_policy_launch_time": {
 				Type:             schema.TypeString,
@@ -94,7 +94,8 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: policyDiffSuppressFunc("Recurrence"),
-				Description:      "The recurrence type the scheduled policy of the scaling policy.",
+				ValidateFunc:     validation.StringInSlice([]string{"Daily", "Weekly", "Monthly", "Cron"}, false),
+				Description:      "The recurrence type the scheduled policy of the scaling policy. Valid values: Daily, Weekly, Monthly, Cron.",
 			},
 			"scheduled_policy_recurrence_value": {
 				Type:             schema.TypeString,
@@ -106,13 +107,13 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Default:          "Static",
+				ValidateFunc:     validation.StringInSlice([]string{"Static"}, false),
 				DiffSuppressFunc: policyDiffSuppressFunc("Alarm"),
-				Description:      "The rule type of the alarm policy of the scaling policy.",
+				Description:      "The rule type of the alarm policy of the scaling policy. Valid value: Static.",
 			},
 			"alarm_policy_evaluation_count": {
 				Type:             schema.TypeInt,
 				Optional:         true,
-				Default:          3,
 				DiffSuppressFunc: policyDiffSuppressFunc("Alarm"),
 				ValidateFunc:     validation.IntBetween(1, 180),
 				Description:      "The evaluation count of the alarm policy of the scaling policy.",
@@ -121,7 +122,7 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: policyDiffSuppressFunc("Alarm"),
-				Description:      "The metric name of the alarm policy condition of the scaling policy.",
+				Description:      "The metric name of the alarm policy condition of the scaling policy. Valid values: CpuTotal_Max, CpuTotal_Min, CpuTotal_Avg, MemoryUsedUtilization_Max, MemoryUsedUtilization_Min, MemoryUsedUtilization_Avg, Instance_CpuBusy_Max, Instance_CpuBusy_Min, Instance_CpuBusy_Avg.",
 			},
 			"alarm_policy_condition_metric_unit": {
 				Type:             schema.TypeString,
@@ -135,7 +136,7 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: policyDiffSuppressFunc("Alarm"),
 				ValidateFunc:     validation.StringInSlice([]string{">", "<", "="}, false),
-				Description:      "The comparison operator of the alarm policy condition of the scaling policy.",
+				Description:      "The comparison operator of the alarm policy condition of the scaling policy. Valid values: >, <, =.",
 			},
 			"alarm_policy_condition_threshold": {
 				Type:             schema.TypeString,

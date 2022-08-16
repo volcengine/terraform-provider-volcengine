@@ -37,7 +37,7 @@ func DataSourceVolcengineScalingPolicies() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Scheduled", "Recurrence", "Manual", "Alarm"}, false),
-				Description:  "A type of scaling policy.",
+				Description:  "A type of scaling policy. Valid values: Scheduled, Recurrence, Manual, Alarm.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,

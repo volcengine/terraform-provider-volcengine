@@ -2,6 +2,7 @@ package scaling_activity
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -36,9 +37,17 @@ func DataSourceVolcengineScalingActivities() *schema.Resource {
 				Description:  "An end time to start a Scaling Activity.",
 			},
 			"status_code": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "A status code of Scaling Activity.",
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Init",
+					"Running",
+					"Success",
+					"PartialSuccess",
+					"Error",
+					"Rejected",
+					"Exception"}, false),
+				Description: "A status code of Scaling Activity. Valid values: Init, Running, Success, PartialSuccess, Error, Rejected, Exception.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
