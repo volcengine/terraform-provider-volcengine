@@ -55,7 +55,7 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 			"weight": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "The weight of the instance.",
+				Description: "The weight of the instance, range in 0~100.",
 			},
 			"ip": {
 				Type:        schema.TypeString,

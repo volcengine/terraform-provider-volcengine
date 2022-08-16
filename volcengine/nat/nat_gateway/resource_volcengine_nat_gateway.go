@@ -60,7 +60,7 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "PostPaid",
-				Description:  "The billing type of the NatGateway.",
+				Description:  "The billing type of the NatGateway, the value is `PostPaid`.",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 			},
 			//"period_unit": {
