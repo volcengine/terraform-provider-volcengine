@@ -266,6 +266,21 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						"additional_container_storage_enabled": {
 							ConvertType: ve.ConvertJsonObject,
 						},
+						"image_id": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"instance_charge_type": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"period": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"auto_renew": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"auto_renew_period": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -328,6 +343,18 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				// AutoRenew为false时框架会忽略，这里特殊处理一下
+				nodeConfig, ok := d.GetOkExists("node_config")
+				if ok {
+					tmp := nodeConfig.([]interface{})
+					if len(tmp) > 0 {
+						autoRenew, ok := tmp[0].(map[string]interface{})["auto_renew"]
+						if ok {
+							(*call.SdkParam)["NodeConfig"].(map[string]interface{})["AutoRenew"] = autoRenew
+						}
+					}
+				}
+
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
@@ -632,11 +659,14 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 					return results
 				},
 			},
+			"NodeConfig.ImageId": {
+				TargetField: "image_id",
+			},
 			"NodeConfig.SystemVolume": {
 				TargetField: "system_volume",
 				Convert: func(i interface{}) interface{} {
 					var results []interface{}
-					if i.(map[string]interface{})["Type"] == nil || i.(map[string]interface{})["size"] == nil {
+					if i.(map[string]interface{})["Type"] == nil || i.(map[string]interface{})["Size"] == nil {
 						return results
 					}
 					volume := make(map[string]interface{}, 0)
@@ -661,6 +691,47 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 					return results
 				},
 			},
+			"NodeConfig.Security.SecurityGroupIds": {
+				TargetField: "security_group_ids",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						results = dd
+					}
+					return results
+				},
+			},
+			"NodeConfig.Security.SecurityStrategyEnabled": {
+				TargetField: "security_strategy_enabled",
+			},
+			"NodeConfig.Security.SecurityStrategies": {
+				TargetField: "security_strategies",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						results = dd
+					}
+					return results
+				},
+			},
+			"NodeConfig.Security.Login.Type": {
+				TargetField: "login_type",
+			},
+			"NodeConfig.Security.Login.SshKeyPairName": {
+				TargetField: "login_key_pair_name",
+			},
+			"NodeConfig.InstanceChargeType": {
+				TargetField: "instance_charge_type",
+			},
+			"NodeConfig.Period": {
+				TargetField: "period",
+			},
+			"NodeConfig.AutoRenew": {
+				TargetField: "auto_renew",
+			},
+			"NodeConfig.AutoRenewPeriod": {
+				TargetField: "auto_renew_period",
+			},
 			"NodeStatistics": {
 				TargetField: "node_statistics",
 				Convert: func(i interface{}) interface{} {
@@ -671,6 +742,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 					label["updating_count"] = int(i.(map[string]interface{})["UpdatingCount"].(float64))
 					label["deleting_count"] = int(i.(map[string]interface{})["DeletingCount"].(float64))
 					label["failed_count"] = int(i.(map[string]interface{})["FailedCount"].(float64))
+					label["stopped_count"] = int(i.(map[string]interface{})["StoppedCount"].(float64))
+					label["stopping_count"] = int(i.(map[string]interface{})["StoppingCount"].(float64))
+					label["starting_count"] = int(i.(map[string]interface{})["StartingCount"].(float64))
 					return label
 				},
 			},
