@@ -276,7 +276,8 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"auto_renew": {
-							ConvertType: ve.ConvertJsonObject,
+							ForceGet:    true,
+							TargetField: "AutoRenew",
 						},
 						"auto_renew_period": {
 							ConvertType: ve.ConvertJsonObject,
@@ -343,18 +344,6 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				// AutoRenew为false时框架会忽略，这里特殊处理一下
-				nodeConfig, ok := d.GetOkExists("node_config")
-				if ok {
-					tmp := nodeConfig.([]interface{})
-					if len(tmp) > 0 {
-						autoRenew, ok := tmp[0].(map[string]interface{})["auto_renew"]
-						if ok {
-							(*call.SdkParam)["NodeConfig"].(map[string]interface{})["AutoRenew"] = autoRenew
-						}
-					}
-				}
-
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)

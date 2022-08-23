@@ -270,7 +270,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -286,6 +286,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 									},
 								},
 							},
+							Set:         kubernetesConfigLabelHash,
 							Description: "The Labels of KubernetesConfig.",
 						},
 						"taints": {

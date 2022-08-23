@@ -1,6 +1,10 @@
 package node_pool
 
 import (
+	"bytes"
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -14,4 +18,16 @@ var prePaidAndAutoNewDiffSuppressFunc = func(k, old, new string, d *schema.Resou
 	chargeType := nodeConfig["instance_charge_type"].(string)
 	autoRenew := nodeConfig["auto_renew"].(bool)
 	return chargeType != "PrePaid" || !autoRenew
+}
+
+var kubernetesConfigLabelHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
+	return hashcode.String(buf.String())
 }
