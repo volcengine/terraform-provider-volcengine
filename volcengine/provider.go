@@ -1,8 +1,10 @@
 package volcengine
 
 import (
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"strings"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -207,9 +209,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
 
 			// ================ VKE ================
-			"volcengine_vke_node":      node.ResourceVolcengineVkeNode(),
-			"volcengine_vke_cluster":   cluster.ResourceVolcengineVkeCluster(),
-			"volcengine_vke_node_pool": node_pool.ResourceVolcengineNodePool(),
+			"volcengine_vke_node":              node.ResourceVolcengineVkeNode(),
+			"volcengine_vke_cluster":           cluster.ResourceVolcengineVkeCluster(),
+			"volcengine_vke_node_pool":         node_pool.ResourceVolcengineNodePool(),
+			"volcengine_vke_default_node_pool": default_node_pool.ResourceVolcengineDefaultNodePool(),
 
 			// ================ IAM ================
 			"volcengine_iam_policy":                 iam_policy.ResourceVolcengineIamPolicy(),

@@ -1,0 +1,35 @@
+package default_node_pool
+
+import (
+	"bytes"
+	"fmt"
+	"strconv"
+	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+)
+
+func defaultNodePoolNodeHash(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%s-", strings.ToLower(m["instance_id"].(string))))
+	buf.WriteString(fmt.Sprintf("%s-", strings.ToLower(strconv.FormatBool(m["keep_instance_name"].(bool)))))
+	buf.WriteString(fmt.Sprintf("%s-", strings.ToLower(strconv.FormatBool(m["additional_container_storage_enabled"].(bool)))))
+	buf.WriteString(fmt.Sprintf("%s-", strings.ToLower(m["image_id"].(string))))
+	buf.WriteString(fmt.Sprintf("%s", strings.ToLower(m["container_storage_path"].(string))))
+	return hashcode.String(buf.String())
+}
+
+func defaultNodePoolDiffSuppress() schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		key := strings.ReplaceAll(k, "container_storage_path", "") + "additional_container_storage_enabled"
+		if d.Get(key) == false {
+			return true
+		}
+		return false
+	}
+}
