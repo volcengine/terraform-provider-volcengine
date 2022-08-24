@@ -132,6 +132,9 @@ func (VolcengineEipAddressService) WithResourceResponseHandlers(eip map[string]i
 				TargetField: "billing_type",
 				Convert:     billingTypeResponseConvert,
 			},
+			"ISP": {
+				TargetField: "isp",
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
