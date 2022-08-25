@@ -41,9 +41,9 @@ func ResourceVolcengineEcsKeyPair() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				StateFunc: func(v interface{}) string {
-					switch v.(type) {
+					switch ele := v.(type) {
 					case string:
-						return strings.TrimSpace(v.(string))
+						return strings.TrimSpace(ele)
 					default:
 						return ""
 					}
