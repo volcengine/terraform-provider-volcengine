@@ -396,6 +396,9 @@ func (s *VolcengineDefaultNodePoolService) processNodeInstances(resourceData *sc
 	if add != nil {
 		for _, v := range add.List() {
 			m := v.(map[string]interface{})
+			if m["instance_id"] == nil || len(m["instance_id"].(string)) == 0 {
+				continue
+			}
 			key := strconv.FormatBool(m["keep_instance_name"].(bool)) + ":" + strconv.FormatBool(m["additional_container_storage_enabled"].(bool)) + ":" +
 				m["image_id"].(string) + ":" + m["container_storage_path"].(string)
 			if _, ok1 := newNode[key]; !ok1 {
@@ -478,6 +481,9 @@ func (s *VolcengineDefaultNodePoolService) processNodeInstances(resourceData *sc
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					(*call.SdkParam)["ClientToken"] = "default-nodeService-pool-" + uuid.New().String()
 					(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
+					if (*call.SdkParam)["Value"] == nil || len((*call.SdkParam)["Value"].([]string)) == 0 {
+						return false, nil
+					}
 					for i, v1 := range (*call.SdkParam)["Value"].([]string) {
 						(*call.SdkParam)["InstanceIds."+strconv.Itoa(i+1)] = v1
 					}
