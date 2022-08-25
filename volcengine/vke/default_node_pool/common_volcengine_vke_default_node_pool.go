@@ -56,3 +56,8 @@ var kubernetesConfigLabelHash = func(v interface{}) int {
 	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
 	return hashcode.String(buf.String())
 }
+
+var defaultNodePoolImporter = func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
+	data.Set("is_import", true)
+	return []*schema.ResourceData{data}, nil
+}

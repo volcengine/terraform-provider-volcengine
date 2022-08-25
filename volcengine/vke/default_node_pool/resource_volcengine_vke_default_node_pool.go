@@ -13,6 +13,9 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 		Update: resourceVolcengineDefaultNodePoolUpdate,
 		Read:   resourceVolcengineDefaultNodePoolUpdate,
 		Delete: resourceVolcengineNodePoolDelete,
+		Importer: &schema.ResourceImporter{
+			State: defaultNodePoolImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
 				Type:        schema.TypeString,
@@ -193,6 +196,11 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 					},
 				},
 				Description: "The Config of NodePool.",
+			},
+			"is_import": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "Is import of the DefaultNodePool. It only works when imported, set to true.",
 			},
 		},
 	}

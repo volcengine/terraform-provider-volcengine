@@ -74,24 +74,34 @@ func (s *VolcengineDefaultNodePoolService) ReadResource(resourceData *schema.Res
 
 	instanceMap := make(map[string]string)
 	instances := resourceData.Get("instances").(*schema.Set)
-	for _, ins := range instances.List() {
-		instancesId, _ := ve.ObtainSdkValue("instance_id", ins)
-		imageId, _ := ve.ObtainSdkValue("image_id", ins)
-		instanceMap[instancesId.(string)] = imageId.(string)
-	}
 	var ins []interface{}
-	for _, n := range nodes {
-		instancesId, _ := ve.ObtainSdkValue("InstanceId", n)
-		if v, ok := instanceMap[instancesId.(string)]; ok {
-			if v == "" {
-				n.(map[string]interface{})["ImageId"] = ""
-			}
+	if resourceData.Get("is_import").(bool) {
+		// 第一次导入的时候由于读不到tf文件的数据，在这里默认导入所有的节点
+		for _, n := range nodes {
 			n.(map[string]interface{})["Phase"], _ = ve.ObtainSdkValue("Status.Phase", n)
 			ins = append(ins, n)
+		}
+		resourceData.Set("is_import", false)
+	} else {
+		for _, ins := range instances.List() {
+			instancesId, _ := ve.ObtainSdkValue("instance_id", ins)
+			imageId, _ := ve.ObtainSdkValue("image_id", ins)
+			instanceMap[instancesId.(string)] = imageId.(string)
+		}
+		for _, n := range nodes {
+			instancesId, _ := ve.ObtainSdkValue("InstanceId", n)
+			if v, ok := instanceMap[instancesId.(string)]; ok {
+				if v == "" {
+					n.(map[string]interface{})["ImageId"] = ""
+				}
+				n.(map[string]interface{})["Phase"], _ = ve.ObtainSdkValue("Status.Phase", n)
+				ins = append(ins, n)
+			}
 		}
 	}
 
 	data["Instances"] = ins
+	logger.Debug(logger.RespFormat, "VolcengineDefaultNodePoolService result ", data)
 
 	return data, err
 }
@@ -256,7 +266,80 @@ func (s *VolcengineDefaultNodePoolService) CreateResource(resourceData *schema.R
 func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var calls []ve.Callback
 	// 先修改节点池配置
-	calls = append(calls, s.nodePoolService.ModifyResource(resourceData, resource)...)
+	calls = append(calls, ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UpdateNodePoolConfig",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"node_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"security": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"login": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+								"security_group_ids": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"security_strategies": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+							},
+						},
+						"initialize_script": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+				"kubernetes_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"labels": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"taints": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"cordon": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) < 1 {
+					return false, nil
+				}
+				(*call.SdkParam)["Id"] = d.Id()
+				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				//adapt vke api
+				nodeconfig := (*call.SdkParam)["NodeConfig"]
+				if nodeconfig != nil {
+					security := nodeconfig.(map[string]interface{})["Security"]
+					if security != nil {
+						login := security.(map[string]interface{})["Login"]
+						if login != nil && login.(map[string]interface{})["SshKeyPairName"] != nil && login.(map[string]interface{})["SshKeyPairName"].(string) == "" {
+							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{}), "SshKeyPairName")
+						}
+					}
+				}
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+		},
+	})
 	//修改实例
 	if resourceData.HasChange("instances") {
 		calls = s.processNodeInstances(resourceData, calls)

@@ -145,7 +145,7 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 		}
 
 		// 每个节点池有个默认安全组，名称是${cluster_id}-common, 如果没有配置默认安全组，在这里过滤一下默认安全组
-		defaultSecurityGroupName := fmt.Sprintf("%v-common", resourceData.Get("cluster_id"))
+		defaultSecurityGroupName := fmt.Sprintf("%v-common", result["ClusterId"])
 		nameMap := make(map[string]string)
 		filteredSecurityGroupIds := make([]interface{}, 0)
 		defaultCount := 0
