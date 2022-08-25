@@ -62,12 +62,14 @@ func ResourceVolcengineEcsKeyPair() *schema.Resource {
 				Description: "Target file to save info.",
 			},
 			"finger_print": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The finger print info.",
 			},
 			"key_pair_id": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The id of key pair.",
 			},
 		},
 	}
