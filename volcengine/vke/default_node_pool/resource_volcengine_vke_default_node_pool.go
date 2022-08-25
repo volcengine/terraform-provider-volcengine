@@ -32,10 +32,11 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 							Description: "The instance id.",
 						},
 						"keep_instance_name": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Default:     false,
-							Description: "The flag of keep instance name, the value is `true` or `false`.Default is `false`.",
+							Type:             schema.TypeBool,
+							Optional:         true,
+							Default:          false,
+							DiffSuppressFunc: defaultNodePoolKeepNameDiffSuppress(),
+							Description:      "The flag of keep instance name, the value is `true` or `false`.Default is `false`.",
 						},
 						"additional_container_storage_enabled": {
 							Type:        schema.TypeBool,
@@ -56,6 +57,16 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 							DiffSuppressFunc: defaultNodePoolDiffSuppress(),
 							Description:      "The container storage path.When additional_container_storage_enabled is `false` will ignore.",
 						},
+						"id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The node Id to the ECS Instance.",
+						},
+						"phase": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The status phase to the Node.",
+						},
 					},
 				},
 				Description: "The ECS InstanceIds add to NodePool.",
@@ -68,7 +79,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -84,6 +95,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 									},
 								},
 							},
+							Set:         kubernetesConfigLabelHash,
 							Description: "The Labels of KubernetesConfig.",
 						},
 						"taints": {

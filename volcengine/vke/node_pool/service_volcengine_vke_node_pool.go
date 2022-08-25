@@ -11,17 +11,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/security_group"
 )
 
 type VolcengineNodePoolService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client               *ve.SdkClient
+	Dispatcher           *ve.Dispatcher
+	securityGroupService *security_group.VolcengineSecurityGroupService
 }
 
 func NewNodePoolService(c *ve.SdkClient) *VolcengineNodePoolService {
 	return &VolcengineNodePoolService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client:               c,
+		Dispatcher:           &ve.Dispatcher{},
+		securityGroupService: security_group.NewSecurityGroupService(c),
 	}
 }
 
@@ -124,6 +127,59 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 	}
 
 	result = temp[0].(map[string]interface{})
+	result["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{})["Password"] =
+		resourceData.Get("node_config.0.security.0.login.0.password")
+
+	// 安全组过滤默认安全组
+	tmpSecurityGroupIds := result["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["SecurityGroupIds"].([]interface{})
+	if len(tmpSecurityGroupIds) > 0 {
+		// 查询安全组
+		securityGroupIdMap := make(map[string]interface{})
+		for i, securityGroupId := range tmpSecurityGroupIds {
+			securityGroupIdMap[fmt.Sprintf("SecurityGroupIds.%d", i+1)] = securityGroupId
+		}
+		securityGroups, err := s.securityGroupService.ReadResources(securityGroupIdMap)
+		logger.Debug(logger.RespFormat, "DescribeSecurityGroups", securityGroupIdMap, securityGroups)
+		if err != nil {
+			return nil, err
+		}
+
+		// 每个节点池有个默认安全组，名称是${cluster_id}-common, 如果没有配置默认安全组，在这里过滤一下默认安全组
+		defaultSecurityGroupName := fmt.Sprintf("%v-common", resourceData.Get("cluster_id"))
+		nameMap := make(map[string]string)
+		filteredSecurityGroupIds := make([]interface{}, 0)
+		defaultCount := 0
+		defaultSecurityGroupId := ""
+		for _, securityGroup := range securityGroups {
+			nameMap[securityGroup.(map[string]interface{})["SecurityGroupId"].(string)] = securityGroup.(map[string]interface{})["SecurityGroupName"].(string)
+		}
+		for _, securityGroupId := range tmpSecurityGroupIds {
+			if nameMap[securityGroupId.(string)] == defaultSecurityGroupName {
+				defaultCount++
+				defaultSecurityGroupId = securityGroupId.(string)
+				continue
+			}
+			filteredSecurityGroupIds = append(filteredSecurityGroupIds, securityGroupId)
+		}
+		if defaultCount > 1 {
+			return nil, fmt.Errorf("default security group is not unique")
+		}
+
+		// 如果用户传了默认安全组id，不需要过滤
+		oldSecurityGroupIds := resourceData.Get("node_config.0.security.0.security_group_ids").([]interface{})
+		useDefaultSecurityGroupId := false
+		for _, securityGroupId := range oldSecurityGroupIds {
+			if securityGroupId.(string) == defaultSecurityGroupId {
+				useDefaultSecurityGroupId = true
+			}
+		}
+		if !useDefaultSecurityGroupId {
+			result["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["SecurityGroupIds"] = filteredSecurityGroupIds
+		}
+
+		logger.Debug(logger.RespFormat, "filteredSecurityGroupIds", tmpSecurityGroupIds, filteredSecurityGroupIds)
+	}
+
 	logger.Debug(logger.RespFormat, "result of ReadResource ", result)
 	return result, err
 }
@@ -367,7 +423,7 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateNodePoolConfig",
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertInConvert,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"cluster_id": {
@@ -486,7 +542,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					}
 				}
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Running"},

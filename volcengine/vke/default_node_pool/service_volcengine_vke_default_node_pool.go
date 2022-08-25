@@ -31,6 +31,10 @@ func NewDefaultNodePoolService(c *ve.SdkClient) *VolcengineDefaultNodePoolServic
 	}
 }
 
+const (
+	DefaultNodePoolName = "vke-default-nodepool"
+)
+
 func (s *VolcengineDefaultNodePoolService) GetClient() *ve.SdkClient {
 	return s.Client
 }
@@ -50,7 +54,11 @@ func (s *VolcengineDefaultNodePoolService) ReadResource(resourceData *schema.Res
 	if err != nil {
 		return data, err
 	}
-	//判断一下是否为默认节点池
+
+	// 只能导入默认节点池，不是默认节点池直接报错
+	if data["Name"].(string) != DefaultNodePoolName {
+		return nil, fmt.Errorf("only the default node pool is supported")
+	}
 
 	data["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{})["Password"] =
 		resourceData.Get("node_config.0.security.0.login.0.password")
@@ -78,6 +86,7 @@ func (s *VolcengineDefaultNodePoolService) ReadResource(resourceData *schema.Res
 			if v == "" {
 				n.(map[string]interface{})["ImageId"] = ""
 			}
+			n.(map[string]interface{})["Phase"], _ = ve.ObtainSdkValue("Status.Phase", n)
 			ins = append(ins, n)
 		}
 	}
@@ -133,7 +142,7 @@ func (s *VolcengineDefaultNodePoolService) RefreshResourceState(resourceData *sc
 			}
 
 			for _, v := range statuses {
-				if v != "Running" {
+				if v != "Running" && v != "Stopped" && v != "Failed" {
 					return nodes, v, err
 				}
 			}
@@ -246,7 +255,8 @@ func (s *VolcengineDefaultNodePoolService) CreateResource(resourceData *schema.R
 
 func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var calls []ve.Callback
-	//修改节点池 -争取复用逻辑 不匹配就重新写
+	// 先修改节点池配置
+	calls = append(calls, s.nodePoolService.ModifyResource(resourceData, resource)...)
 	//修改实例
 	if resourceData.HasChange("instances") {
 		calls = s.processNodeInstances(resourceData, calls)
@@ -296,25 +306,82 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 
 func (s *VolcengineDefaultNodePoolService) processNodeInstances(resourceData *schema.ResourceData, calls []ve.Callback) []ve.Callback {
 	add, remove, _, _ := ve.GetSetDifference("instances", resourceData, defaultNodePoolNodeHash, false)
+	logger.Debug(logger.RespFormat, "processNodeInstancesAdd", add)
+	logger.Debug(logger.RespFormat, "processNodeInstancesRemove", remove)
 	newNode := make(map[string][]string)
 	var delNode []string
-	for _, v := range add.List() {
-		m := v.(map[string]interface{})
-		key := strconv.FormatBool(m["keep_instance_name"].(bool)) + ":" + strconv.FormatBool(m["additional_container_storage_enabled"].(bool)) + ":" +
-			m["container_storage_path"].(string)
-		if _, ok1 := newNode[key]; !ok1 {
-			newNode[key] = []string{}
+	if add != nil {
+		for _, v := range add.List() {
+			m := v.(map[string]interface{})
+			key := strconv.FormatBool(m["keep_instance_name"].(bool)) + ":" + strconv.FormatBool(m["additional_container_storage_enabled"].(bool)) + ":" +
+				m["image_id"].(string) + ":" + m["container_storage_path"].(string)
+			if _, ok1 := newNode[key]; !ok1 {
+				newNode[key] = []string{}
+			}
+			newNode[key] = append(newNode[key], m["instance_id"].(string))
 		}
-		newNode[key] = append(newNode[key], m["instance_id"].(string))
 	}
 	if remove != nil {
 		for _, v := range remove.List() {
 			m := v.(map[string]interface{})
-			delNode = append(delNode, m["instance_id"].(string))
+			delNode = append(delNode, m["id"].(string))
 		}
 	}
-	//先删除节点 注意锁一下节点池状态
 
+	// 删除节点
+	for i := 0; i < len(delNode)/100+1; i++ {
+		start := i * 100
+		end := (i + 1) * 100
+		if end > len(delNode) {
+			end = len(delNode)
+		}
+		if end <= start {
+			break
+		}
+		calls = append(calls, func(nodeIds []string, clusterId, nodePoolId string) ve.Callback {
+			return ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "DeleteNodes",
+					ConvertMode: ve.RequestConvertIgnore,
+					ContentType: ve.ContentTypeJson,
+					SdkParam: &map[string]interface{}{
+						"ClusterId":  clusterId,
+						"NodePoolId": nodePoolId,
+					},
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						if len(nodeIds) < 1 {
+							return false, nil
+						}
+						for index, id := range nodeIds {
+							(*call.SdkParam)[fmt.Sprintf("Ids.%d", index+1)] = id
+						}
+						return true, nil
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						logger.Debug(logger.RespFormat, call.Action, resp, err)
+						return resp, err
+					},
+					Refresh: &ve.StateRefresh{
+						Target:  []string{"Running"},
+						Timeout: resourceData.Timeout(schema.TimeoutCreate),
+					},
+					ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+						node_pool.NewNodePoolService(s.Client): {
+							Target:  []string{"Running"},
+							Timeout: resourceData.Timeout(schema.TimeoutCreate),
+						},
+					},
+					LockId: func(d *schema.ResourceData) string {
+						return d.Get("cluster_id").(string)
+					},
+				},
+			}
+		}(delNode[start:end], resourceData.Get("cluster_id").(string), resourceData.Id()))
+	}
+
+	// 新增加节点
 	for k, v := range newNode {
 		nodeCall := ve.Callback{
 			Call: ve.SdkCall{
@@ -349,8 +416,7 @@ func (s *VolcengineDefaultNodePoolService) processNodeInstances(resourceData *sc
 					delete(*call.SdkParam, "Value")
 
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-
-					return false, nil
+					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
