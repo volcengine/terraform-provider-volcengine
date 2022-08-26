@@ -96,10 +96,6 @@ func (s *VolcengineListenerService) ReadResource(resourceData *schema.ResourceDa
 	if err != nil {
 		return nil, err
 	}
-	timeout, err := ve.ObtainSdkValue("Result.EstablishedTimeout", *listenerAttr)
-	if err != nil {
-		return nil, err
-	}
 	desc, err := ve.ObtainSdkValue("Result.Description", *listenerAttr)
 	if err != nil {
 		return nil, err
@@ -112,7 +108,6 @@ func (s *VolcengineListenerService) ReadResource(resourceData *schema.ResourceDa
 	if err != nil {
 		return nil, err
 	}
-	_ = resourceData.Set("established_timeout", int(timeout.(float64)))
 	_ = resourceData.Set("description", desc.(string))
 	_ = resourceData.Set("load_balancer_id", loadBalancerId.(string))
 	_ = resourceData.Set("scheduler", scheduler.(string))
