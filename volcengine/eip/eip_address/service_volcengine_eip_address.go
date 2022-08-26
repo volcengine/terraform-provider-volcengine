@@ -174,13 +174,18 @@ func (s *VolcengineEipAddressService) CreateResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyEipAddressAttributes",
 			ConvertMode: ve.RequestConvertAll,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["AllocationId"] = d.Id()
-				return true, nil
+				if len(*call.SdkParam) > 0 {
+					(*call.SdkParam)["AllocationId"] = d.Id()
+					return true, nil
+				}
+				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -192,16 +197,47 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 			},
 			Convert: map[string]ve.RequestConvert{
 				"billing_type": {
-					TargetField: "BillingType",
-					Convert:     billingTypeRequestConvert,
+					Ignore: true,
 				},
 				"isp": {
-					TargetField: "ISP",
+					Ignore: true,
 				},
 			},
 		},
 	}
-	return []ve.Callback{callback}
+
+	callbacks = append(callbacks, callback)
+
+	if resourceData.HasChange("billing_type") {
+		chargeTypeCall := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ConvertEipAddressBillingType",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"billing_type": {
+						Convert: billingTypeRequestConvert,
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["AllocationId"] = d.Id()
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Available"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, chargeTypeCall)
+	}
+	return callbacks
 }
 
 func (s *VolcengineEipAddressService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -278,4 +314,13 @@ func (s *VolcengineEipAddressService) DatasourceResources(*schema.ResourceData, 
 
 func (s *VolcengineEipAddressService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
 }
