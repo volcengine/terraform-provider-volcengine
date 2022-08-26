@@ -30,7 +30,7 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"server_group_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The ID of the ServerGroup.",
 			},
@@ -41,13 +41,13 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The ID of ecs instance or the network card bound to ecs instance.",
 			},
 			"type": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Required:     true,
 				ForceNew:     true,
 				Description:  "The type of instance. Optional choice contains `ecs`, `eni`.",
 				ValidateFunc: validation.StringInSlice([]string{"ecs", "eni"}, false),
@@ -61,11 +61,12 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Description: "The private ip of the instance.",
 			},
 			"port": {
 				Type:        schema.TypeInt,
-				Optional:    true,
+				Required:    true,
 				Description: "The port receiving request.",
 			},
 			"description": {
