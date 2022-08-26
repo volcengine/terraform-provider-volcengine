@@ -13,7 +13,7 @@ import (
 Import
 ServerGroupServer can be imported using the id, e.g.
 ```
-$ terraform import volcengine_server_group_server.default rs-3ciynux6i1x4w****rszh49sj
+$ terraform import volcengine_server_group_server.default rsp-274xltv2*****8tlv3q3s:rs-3ciynux6i1x4w****rszh49sj
 ```
 
 */
