@@ -30,8 +30,8 @@ The following arguments are supported:
 
 The `statuses` object supports the following:
 
-* `conditions_type` - (Optional) Indicates the status condition of the node pool in the active state.
-* `phase` - (Optional) The Phase of Status.
+* `conditions_type` - (Optional) Indicates the status condition of the node pool in the active state. The value can be `Progressing` or `Ok` or `VersionPartlyUpgraded` or `StockOut` or `LimitedByQuota` or `Balance` or `Degraded` or `ClusterVersionUpgrading` or `Cluster` or `ResourceCleanupFailed` or `Unknown` or `ClusterNotRunning` or `SetByProvider`.
+* `phase` - (Optional) The Phase of Status. The value can be `Creating` or `Running` or `Updating` or `Deleting` or `Failed` or `Scaling`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

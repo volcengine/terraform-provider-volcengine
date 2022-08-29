@@ -21,7 +21,7 @@ resource "volcengine_iam_access_key" "foo" {
 The following arguments are supported:
 * `pgp_key` - (Optional, ForceNew) Either a base-64 encoded PGP public key, or a keybase username in the form `keybase:some_person_that_exists`.
 * `secret_file` - (Optional, ForceNew) The file to save the access id and secret. Strongly suggest you to specified it when you creating access key, otherwise, you wouldn't get its secret ever.
-* `status` - (Optional) The status of the access key.
+* `status` - (Optional) The status of the access key, Optional choice contains `active` or `inactive`.
 * `user_name` - (Optional, ForceNew) The user name.
 
 ## Attributes Reference

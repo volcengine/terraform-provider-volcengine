@@ -21,9 +21,9 @@ resource "volcengine_eip_address" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `billing_type` - (Required, ForceNew) The billing type of the EIP Address. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic`.
-* `bandwidth` - (Optional) The peek bandwidth of the EIP.
+* `bandwidth` - (Optional) The peek bandwidth of the EIP, the value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic.
 * `description` - (Optional) The description of the EIP.
-* `isp` - (Optional, ForceNew) The ISP of the EIP.
+* `isp` - (Optional, ForceNew) The ISP of the EIP, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.
 * `name` - (Optional) The name of the EIP Address.
 
 ## Attributes Reference

@@ -11,29 +11,65 @@ Provides a resource to manage listener
 ## Example Usage
 ```hcl
 resource "volcengine_listener" "foo" {
-  load_balancer_id = "clb-273ylkl0a3i807fap8t4unbsq"
+  load_balancer_id = "clb-274xltt3rfmyo7fap8sv1jq39"
   listener_name    = "Demo-HTTP-90"
   protocol         = "HTTP"
   port             = 90
-  server_group_id  = "rsp-273yv0kir1vk07fap8tt9jtwg"
+  server_group_id  = "rsp-274xltv2sjoxs7fap8tlv3q3s"
   health_check {
     enabled              = "on"
     interval             = 10
     timeout              = 3
     healthy_threshold    = 5
     un_healthy_threshold = 2
-    domain               = "github.com"
+    domain               = "volcengine.com"
     http_code            = "http_2xx"
     method               = "GET"
     uri                  = "/"
   }
   enabled = "on"
 }
+
+resource "volcengine_listener" "bar" {
+  load_balancer_id = "clb-274xltt3rfmyo7fap8sv1jq39"
+  listener_name    = "Demo-HTTP-91"
+  protocol         = "HTTP"
+  port             = 91
+  server_group_id  = "rsp-274xltv2sjoxs7fap8tlv3q3s"
+  health_check {
+    enabled              = "on"
+    interval             = 10
+    timeout              = 3
+    healthy_threshold    = 5
+    un_healthy_threshold = 2
+    domain               = "volcengine.com"
+    http_code            = "http_2xx"
+    method               = "GET"
+    uri                  = "/"
+  }
+  enabled = "on"
+}
+
+resource "volcengine_listener" "demo" {
+  load_balancer_id = "clb-274xltt3rfmyo7fap8sv1jq39"
+  protocol         = "TCP"
+  port             = 92
+  server_group_id  = "rsp-274xltv2sjoxs7fap8tlv3q3s"
+  health_check {
+    enabled              = "on"
+    interval             = 10
+    timeout              = 3
+    healthy_threshold    = 5
+    un_healthy_threshold = 2
+  }
+  enabled             = "on"
+  established_timeout = 10
+}
 ```
 ## Argument Reference
 The following arguments are supported:
 * `load_balancer_id` - (Required, ForceNew) The region of the request.
-* `port` - (Required, ForceNew) The port receiving request of the Listener.
+* `port` - (Required, ForceNew) The port receiving request of the Listener, the value range in 1~65535.
 * `protocol` - (Required, ForceNew) The protocol of the Listener. Optional choice contains `TCP`, `UDP`, `HTTP`, `HTTPS`.
 * `server_group_id` - (Required) The server group id associated with the listener.
 * `acl_ids` - (Optional) The id list of the Acl.
@@ -51,12 +87,12 @@ The `health_check` object supports the following:
 
 * `domain` - (Optional) The domain of health check.
 * `enabled` - (Optional) The enable status of health check function. Optional choice contains `on`, `off`.
-* `healthy_threshold` - (Optional) The healthy threshold of health check.
-* `http_code` - (Optional) The normal http status code of health check.
-* `interval` - (Optional) The interval executing health check.
-* `method` - (Optional) The method of health check.
-* `timeout` - (Optional) The response timeout of health check.
-* `un_healthy_threshold` - (Optional) The unhealthy threshold of health check.
+* `healthy_threshold` - (Optional) The healthy threshold of health check, default 3, range in 2~10.
+* `http_code` - (Optional) The normal http status code of health check, the value can be `http_2xx` or `http_3xx` or `http_4xx` or `http_5xx`.
+* `interval` - (Optional) The interval executing health check, default 2, range in 1~300.
+* `method` - (Optional) The method of health check, the value can be `GET` or `HEAD`.
+* `timeout` - (Optional) The response timeout of health check, default 2, range in 1~60..
+* `un_healthy_threshold` - (Optional) The unhealthy threshold of health check, default 3, range in 2~10.
 * `uri` - (Optional) The uri of health check.
 
 ## Attributes Reference

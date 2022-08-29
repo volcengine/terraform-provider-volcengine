@@ -21,7 +21,7 @@ The following arguments are supported:
 * `destination_cidr_block` - (Optional) A destination CIDR block of route entry.
 * `ids` - (Optional) A list of route entry ids.
 * `next_hop_id` - (Optional) An id of next hop.
-* `next_hop_type` - (Optional) A type of next hop.
+* `next_hop_type` - (Optional) A type of next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`.
 * `output_file` - (Optional) File name where to save data source results.
 * `route_entry_name` - (Optional) A name of route entry.
 * `route_entry_type` - (Optional) A type of route entry.
