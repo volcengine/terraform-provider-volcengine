@@ -177,12 +177,20 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if (*call.SdkParam)["Protocol"] == "HTTP" || (*call.SdkParam)["Protocol"] == "HTTPS" {
+				protocol := (*call.SdkParam)["Protocol"].(string)
+				// 1. established_timeout
+				if protocol == "HTTP" || protocol == "HTTPS" {
 					// not allow establish_timeout
 					if _, ok := (*call.SdkParam)["EstablishedTimeout"]; ok {
 						return false, errors.New("established_timeout is not allowed for HTTP or HTTPS")
 					}
 				}
+
+				// 2. certificate_id
+				if protocol != "HTTPS" && (*call.SdkParam)["CertificateId"] != nil {
+					return false, errors.New("certificate_id is only allowed for HTTPS")
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -237,6 +245,20 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				protocol := d.Get("protocol").(string)
+				// 1. established_timeout
+				if protocol == "HTTP" || protocol == "HTTPS" {
+					// not allow establish_timeout
+					if _, ok := (*call.SdkParam)["EstablishedTimeout"]; ok {
+						return false, errors.New("established_timeout is not allowed for HTTP or HTTPS")
+					}
+				}
+
+				// 2. certificate_id
+				if protocol != "HTTPS" && (*call.SdkParam)["CertificateId"] != nil {
+					return false, errors.New("certificate_id is only allowed for HTTPS")
+				}
+
 				(*call.SdkParam)["ListenerId"] = d.Id()
 				aclStatus := d.Get("acl_status")
 				if aclStatus, ok := aclStatus.(string); ok && aclStatus == "on" {
