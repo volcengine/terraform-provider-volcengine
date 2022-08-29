@@ -72,7 +72,7 @@ func ResourceVolcengineListener() *schema.Resource {
 				Description:  "The enable status of the Listener. Optional choice contains `on`, `off`.",
 				ValidateFunc: validation.StringInSlice([]string{"on", "off"}, false),
 			},
-			"established_timeout": { // create时设置了，但协议是HTTP，则不让创建
+			"established_timeout": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
