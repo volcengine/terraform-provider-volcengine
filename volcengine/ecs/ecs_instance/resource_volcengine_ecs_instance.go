@@ -13,6 +13,7 @@ import (
 
 Import
 ECS Instance can be imported using the id, e.g.
+If Import,The data_volumes is sort by volume name
 ```
 $ terraform import volcengine_ecs_instance.default i-mizl7m1kqccg5smt1bdpijuj
 ```
@@ -32,8 +33,9 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Description: "The available zone ID of ECS instance.",
 			},
 			"image_id": {
@@ -89,10 +91,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The charge type of ECS instance.",
 			},
 			"user_data": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The user data of ECS instance.",
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: ve.UserDateImportDiffSuppress,
+				Description:      "The user data of ECS instance.",
 			},
 			"security_enhancement_strategy": {
 				Type:     schema.TypeString,
@@ -179,11 +182,17 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of primary networkInterface.",
 			},
 
+			"primary_ip_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The private ip address of primary networkInterface.",
+			},
+
 			"system_volume_type": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of system volume.",
+				Description: "The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 			},
 
 			"system_volume_size": {
@@ -198,19 +207,25 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of system volume.",
 			},
 
+			"deployment_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of Ecs Deployment Set.",
+			},
+
 			"data_volumes": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    15,
 				MinItems:    1,
-				Description: "The data volume collection of  ECS instance.",
+				Description: "The data volumes collection of  ECS instance.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"volume_type": {
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The type of volume.",
+							Description: "The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 						},
 						"size": {
 							Type:        schema.TypeInt,
@@ -253,6 +268,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Set: schema.HashString,
+						},
+						"primary_ip_address": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The private ip address of secondary networkInterface.",
 						},
 					},
 				},

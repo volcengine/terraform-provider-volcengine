@@ -24,14 +24,14 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `certificates` - The collection of Certificate query.
-  * `certificate_id` - The ID of the Certificate.
-  * `certificate_name` - The name of the Certificate.
-  * `create_time` - The create time of the Certificate.
-  * `description` - The description of the Certificate.
-  * `domain_name` - The domain name of the Certificate.
-  * `expired_at` - The expire time of the Certificate.
-  * `id` - The ID of the Certificate.
-  * `listeners` - The ID list of the Listener.
+    * `certificate_id` - The ID of the Certificate.
+    * `certificate_name` - The name of the Certificate.
+    * `create_time` - The create time of the Certificate.
+    * `description` - The description of the Certificate.
+    * `domain_name` - The domain name of the Certificate.
+    * `expired_at` - The expire time of the Certificate.
+    * `id` - The ID of the Certificate.
+    * `listeners` - The ID list of the Listener.
 * `total_count` - The total count of Certificate query.
 
 
