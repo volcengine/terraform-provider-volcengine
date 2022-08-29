@@ -37,12 +37,20 @@ func ResourceVolcengineCertificate() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: "The public key of the Certificate.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// 创建时支持，修改不支持
+					return d.Id() != ""
+				},
 			},
 			"private_key": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				Description: "The private key of the Certificate.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// 创建时支持，修改不支持
+					return d.Id() != ""
+				},
 			},
 			"description": {
 				Type:        schema.TypeString,
