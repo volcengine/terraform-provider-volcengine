@@ -30,7 +30,8 @@ func ResourceVolcengineClb() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"region_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The region of the request.",
 			},

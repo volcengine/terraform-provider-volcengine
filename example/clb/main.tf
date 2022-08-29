@@ -1,7 +1,7 @@
 resource "volcengine_clb" "foo" {
   type = "public"
-  subnet_id = "subnet-2744i7u9alnnk7fap8tkq8aft"
+  subnet_id = "subnet-273xjcb6wohs07fap8sz3ihhs"
   load_balancer_spec = "small_1"
-  region_id = "cn-north-3"
   description = "Demo"
+  load_balancer_name = "terraform-auto-create"
 }
