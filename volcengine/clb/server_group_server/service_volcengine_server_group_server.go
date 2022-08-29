@@ -201,9 +201,10 @@ func (s *VolcengineServerGroupServerService) getEcsPrimaryPrivateIp(instanceId s
 		data    []interface{}
 	)
 
-	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeInstances"), &map[string]interface{}{
+	resp, err := s.Client.EcsClient.DescribeInstancesCommon(&map[string]interface{}{
 		"InstanceIds.1": instanceId,
 	})
+
 	if err != nil {
 		return "", err
 	}
@@ -385,14 +386,4 @@ func (s *VolcengineServerGroupServerService) queryLoadBalancerId(serverGroupId s
 		return "", err
 	}
 	return clbId.(string), nil
-}
-
-func getUniversalInfo(actionName string) ve.UniversalInfo {
-	return ve.UniversalInfo{
-		ServiceName: "ecs",
-		Version:     "2020-04-01",
-		HttpMethod:  ve.GET,
-		ContentType: ve.Default,
-		Action:      actionName,
-	}
 }
