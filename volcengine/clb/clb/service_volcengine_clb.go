@@ -86,6 +86,9 @@ func (s *VolcengineClbService) ReadResource(resourceData *schema.ResourceData, c
 	if len(data) == 0 {
 		return data, fmt.Errorf("Clb %s not exist ", clbId)
 	}
+
+	data["RegionId"] = s.Client.Region
+
 	return data, err
 }
 
@@ -170,6 +173,12 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 						return i
 					},
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if _, ok := (*call.SdkParam)["RegionId"]; !ok {
+					(*call.SdkParam)["RegionId"] = s.Client.Region
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
