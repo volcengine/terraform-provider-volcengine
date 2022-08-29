@@ -45,7 +45,7 @@ func DataSourceVolcengineRouteEntries() *schema.Resource {
 			"next_hop_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "A type of next hop.",
+				Description: "A type of next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`.",
 			},
 
 			"output_file": {

@@ -22,7 +22,7 @@ resource "volcengine_nat_gateway" "foo" {
 The following arguments are supported:
 * `subnet_id` - (Required, ForceNew) The ID of the Subnet.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC.
-* `billing_type` - (Optional, ForceNew) The billing type of the NatGateway.
+* `billing_type` - (Optional, ForceNew) The billing type of the NatGateway, the value is `PostPaid`.
 * `description` - (Optional) The description of the NatGateway.
 * `nat_gateway_name` - (Optional) The name of the NatGateway.
 * `spec` - (Optional) The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large`.

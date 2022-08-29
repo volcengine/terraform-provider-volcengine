@@ -157,7 +157,7 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										ForceNew:    true,
-										Description: "The maximum number of single-node Pod instances for a Flannel container network.",
+										Description: "The maximum number of single-node Pod instances for a Flannel container network, the value can be `16` or `32` or `64` or `128` or `256`.",
 									},
 								},
 							},

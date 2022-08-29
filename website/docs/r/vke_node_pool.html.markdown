@@ -50,16 +50,16 @@ The following arguments are supported:
 
 The `auto_scaling` object supports the following:
 
-* `desired_replicas` - (Optional) The DesiredReplicas of AutoScaling.
+* `desired_replicas` - (Optional) The DesiredReplicas of AutoScaling, default 0.
 * `enabled` - (Optional) Is Enabled of AutoScaling.
-* `max_replicas` - (Optional) The MaxReplicas of AutoScaling.
-* `min_replicas` - (Optional) The MinReplicas of AutoScaling.
-* `priority` - (Optional) The Priority of AutoScaling.
+* `max_replicas` - (Optional) The MaxReplicas of AutoScaling, default 10, range in 1~1000.
+* `min_replicas` - (Optional) The MinReplicas of AutoScaling, default 0.
+* `priority` - (Optional) The Priority of AutoScaling, default 10, rang in 0~100.
 
 The `data_volumes` object supports the following:
 
-* `size` - (Optional, ForceNew) The Size of DataVolumes.
-* `type` - (Optional, ForceNew) The Type of DataVolumes.
+* `size` - (Optional, ForceNew) The Size of DataVolumes, the value range in 20~32768.
+* `type` - (Optional, ForceNew) The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0`.
 
 The `kubernetes_config` object supports the following:
 
@@ -91,16 +91,16 @@ The `security` object supports the following:
 
 * `login` - (Optional) The Login of Security.
 * `security_group_ids` - (Optional) The SecurityGroupIds of Security.
-* `security_strategies` - (Optional) The SecurityStrategies of Security.
+* `security_strategies` - (Optional) The SecurityStrategies of Security, the value can be empty or `Hids`.
 
 The `system_volume` object supports the following:
 
-* `size` - (Optional, ForceNew) The Size of SystemVolume.
-* `type` - (Optional, ForceNew) The Type of SystemVolume.
+* `size` - (Optional, ForceNew) The Size of SystemVolume, the value range in 20~2048.
+* `type` - (Optional, ForceNew) The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0`.
 
 The `taints` object supports the following:
 
-* `effect` - (Optional) The Effect of Taints.
+* `effect` - (Optional) The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.
 * `key` - (Optional) The Key of Taints.
 * `value` - (Optional) The Value of Taints.
 
