@@ -175,8 +175,10 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if _, ok := (*call.SdkParam)["RegionId"]; !ok {
+				if regionId, ok := (*call.SdkParam)["RegionId"]; !ok {
 					(*call.SdkParam)["RegionId"] = *s.Client.ClbClient.Config.Region
+				} else if regionId.(string) != *s.Client.ClbClient.Config.Region {
+					return false, fmt.Errorf("region_id is not equal to provider region config(%s)", *s.Client.ClbClient.Config.Region)
 				}
 				return true, nil
 			},
