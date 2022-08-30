@@ -13,7 +13,7 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 			"status": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "A status of EIP.",
+				Description:  "A status of EIP, the value can be `Attaching` or `Detaching` or `Attached` or `Available`.",
 				ValidateFunc: validation.StringInSlice([]string{"Attaching", "Detaching", "Attached", "Available"}, false),
 			},
 			"eip_addresses": {
@@ -42,13 +42,13 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 			"isp": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "An ISP of EIP Address.",
+				Description:  "An ISP of EIP Address, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.",
 				ValidateFunc: validation.StringInSlice([]string{"BGP", "ChinaMobile", "ChinaUnicom", "ChinaTelecom"}, false),
 			},
 			"associated_instance_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "A type of associated instance.",
+				Description:  "A type of associated instance, the value can be `Nat`, `NetworkInterface`, `ClbInstance` or `EcsInstance`.",
 				ValidateFunc: validation.StringInSlice([]string{"Nat", "NetworkInterface", "ClbInstance", "EcsInstance"}, false),
 			},
 			"associated_instance_id": {

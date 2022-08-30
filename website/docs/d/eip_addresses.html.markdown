@@ -17,13 +17,13 @@ data "volcengine_eip_addresses" "default" {
 ## Argument Reference
 The following arguments are supported:
 * `associated_instance_id` - (Optional) An id of associated instance.
-* `associated_instance_type` - (Optional) A type of associated instance.
+* `associated_instance_type` - (Optional) A type of associated instance, the value can be `Nat`, `NetworkInterface`, `ClbInstance` or `EcsInstance`.
 * `eip_addresses` - (Optional) A list of EIP ip address that you want to query.
 * `ids` - (Optional) A list of EIP allocation ids.
-* `isp` - (Optional) An ISP of EIP Address.
+* `isp` - (Optional) An ISP of EIP Address, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.
 * `name` - (Optional) A name of EIP.
 * `output_file` - (Optional) File name where to save data source results.
-* `status` - (Optional) A status of EIP.
+* `status` - (Optional) A status of EIP, the value can be `Attaching` or `Detaching` or `Attached` or `Available`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

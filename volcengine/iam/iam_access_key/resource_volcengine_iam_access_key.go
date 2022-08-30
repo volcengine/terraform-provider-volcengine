@@ -34,7 +34,7 @@ func ResourceVolcengineIamAccessKey() *schema.Resource {
 				Optional:     true,
 				Default:      "active",
 				ValidateFunc: validation.StringInSlice([]string{"active", "inactive"}, false),
-				Description:  "The status of the access key.",
+				Description:  "The status of the access key, Optional choice contains `active` or `inactive`.",
 			},
 			"pgp_key": {
 				Type:        schema.TypeString,
