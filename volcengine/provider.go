@@ -3,9 +3,6 @@ package volcengine
 import (
 	"strings"
 
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -23,6 +20,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
@@ -44,8 +43,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
@@ -139,6 +140,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_images":              image.DataSourceVolcengineImages(),
 			"volcengine_zones":               zone.DataSourceVolcengineZones(),
 			"volcengine_ecs_deployment_sets": ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
+			"volcengine_ecs_key_pairs":       ecs_key_pair.DataSourceVolcengineEcsKeyPairs(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
@@ -203,6 +205,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_instance_state":           ecs_instance_state.ResourceVolcengineEcsInstanceState(),
 			"volcengine_ecs_deployment_set":           ecs_deployment_set.ResourceVolcengineEcsDeploymentSet(),
 			"volcengine_ecs_deployment_set_associate": ecs_deployment_set_associate.ResourceVolcengineEcsDeploymentSetAssociate(),
+			"volcengine_ecs_key_pair":                 ecs_key_pair.ResourceVolcengineEcsKeyPair(),
+			"volcengine_ecs_key_pair_associate":       ecs_key_pair_associate.ResourceVolcengineEcsKeyPairAssociate(),
 
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),

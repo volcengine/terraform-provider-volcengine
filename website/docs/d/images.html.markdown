@@ -22,7 +22,7 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of Image.
 * `os_type` - (Optional) The operating system type of Image.
 * `output_file` - (Optional) File name where to save data source results.
-* `status` - (Optional) A list of Image status.
+* `status` - (Optional) A list of Image status, the value can be `available` or `creating` or `error`.
 * `visibility` - (Optional) The visibility of Image.
 
 ## Attributes Reference

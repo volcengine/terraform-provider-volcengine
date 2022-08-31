@@ -63,13 +63,13 @@ The `instance_configuration` object supports the following:
 
 * `admin_password` - (Required) The password of administrator account.
 * `admin_user_name` - (Required, ForceNew) The name of administrator account(should be admin).
-* `charge_type` - (Required, ForceNew) The charge type of ESCloud instance.
+* `charge_type` - (Required, ForceNew) The charge type of ESCloud instance, the value can be PostPaid or PrePaid.
 * `configuration_code` - (Required, ForceNew) Configuration code used for billing.
 * `enable_https` - (Required, ForceNew) Whether Https access is enabled.
 * `enable_pure_master` - (Required, ForceNew) Whether the Master node is independent.
 * `node_specs_assigns` - (Required, ForceNew) The number and configuration of various ESCloud instance node.
 * `region_id` - (Required, ForceNew) The region ID of ESCloud instance.
-* `version` - (Required, ForceNew) The version of ESCloud instance.
+* `version` - (Required, ForceNew) The version of ESCloud instance, the value is V6_7 or V7_10.
 * `zone_id` - (Required, ForceNew) The available zone ID of ESCloud instance.
 * `zone_number` - (Required, ForceNew) The zone count of the ESCloud instance used.
 * `instance_name` - (Optional) The name of ESCloud instance.
@@ -82,10 +82,10 @@ The `instance_configuration` object supports the following:
 The `node_specs_assigns` object supports the following:
 
 * `number` - (Required, ForceNew) The number of node.
-* `resource_spec_name` - (Required, ForceNew) The name of compute resource spec.
+* `resource_spec_name` - (Required, ForceNew) The name of compute resource spec, the value is `kibana.x2.small` or `es.x4.medium` or `es.x4.large` or `es.x4.xlarge` or `es.x2.2xlarge` or `es.x4.2xlarge` or `es.x2.3xlarge`.
 * `storage_size` - (Required, ForceNew) The size of storage.
 * `storage_spec_name` - (Required, ForceNew) The name of storage spec.
-* `type` - (Required, ForceNew) The type of node.
+* `type` - (Required, ForceNew) The type of node, the value is `Master` or `Hot` or `Kibana`.
 
 The `subnet` object supports the following:
 

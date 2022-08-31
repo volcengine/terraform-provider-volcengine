@@ -21,14 +21,14 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 			"type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "A type of ENI.",
+				Description:  "A type of ENI, Optional choice contains `primary`, `secondary`.",
 				ValidateFunc: validation.StringInSlice([]string{"primary", "secondary"}, false),
 			},
 			"status": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Creating", "Available", "Attaching", "InUse", "Detaching", "Deleting"}, false),
-				Description:  "A status of ENI.",
+				Description:  "A status of ENI, Optional choice contains `Creating`, `Available`, `Attaching`, `InUse`, `Detaching`, `Deleting`.",
 			},
 			"vpc_id": {
 				Type:        schema.TypeString,

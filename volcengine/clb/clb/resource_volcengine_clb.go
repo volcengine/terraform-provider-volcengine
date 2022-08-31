@@ -30,7 +30,8 @@ func ResourceVolcengineClb() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"region_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The region of the request.",
 			},
@@ -75,7 +76,7 @@ func ResourceVolcengineClb() *schema.Resource {
 			"modification_protection_status": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "The status of the console modification protection.",
+				Description:  "The status of the console modification protection, the value can be `NonProtection` or `ConsoleProtection`.",
 				ValidateFunc: validation.StringInSlice([]string{"NonProtection", "ConsoleProtection"}, false),
 			},
 			"modification_protection_reason": {
@@ -86,14 +87,14 @@ func ResourceVolcengineClb() *schema.Resource {
 			"load_balancer_spec": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The specification of the CLB.",
+				Description: "The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`.",
 			},
 			"load_balancer_billing_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				Description:  "The billing type of the CLB.",
+				Description:  "The billing type of the CLB, the value can be `PostPaid`.",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 			},
 			//"period_unit": {

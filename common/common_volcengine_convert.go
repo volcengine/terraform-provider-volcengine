@@ -100,6 +100,12 @@ func ResponseToResourceData(d *schema.ResourceData, resource *schema.Resource, d
 						} else {
 							targetValue = v
 						}
+					} else if _, ok3 := r.Elem.(schema.ValueType); ok3 {
+						if convert.Convert != nil {
+							targetValue = convert.Convert(v)
+						} else {
+							targetValue = v
+						}
 					}
 				} else {
 					if convert.Convert != nil {

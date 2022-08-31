@@ -127,7 +127,7 @@ func (s *VolcengineServerGroupServerService) RefreshResourceState(resourceData *
 	return nil
 }
 
-func (VolcengineServerGroupServerService) WithResourceResponseHandlers(serverGroupServer map[string]interface{}) []ve.ResourceResponseHandler {
+func (*VolcengineServerGroupServerService) WithResourceResponseHandlers(serverGroupServer map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return serverGroupServer, nil, nil
 	}
@@ -151,9 +151,19 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 				(*call.SdkParam)["Servers.1.InstanceId"] = d.Get("instance_id")
 				(*call.SdkParam)["Servers.1.Type"] = d.Get("type")
 				(*call.SdkParam)["Servers.1.Weight"] = d.Get("weight")
-				(*call.SdkParam)["Servers.1.Ip"] = d.Get("ip")
 				(*call.SdkParam)["Servers.1.Port"] = d.Get("port")
 				(*call.SdkParam)["Servers.1.Description"] = d.Get("description")
+
+				ip := d.Get("ip").(string)
+				if ip == "" {
+					// query ecs primary private ip
+					ip, err = s.getEcsPrimaryPrivateIp(d.Get("instance_id").(string))
+					if err != nil {
+						return false, err
+					}
+				}
+				(*call.SdkParam)["Servers.1.Ip"] = ip
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -181,6 +191,61 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 	}
 	return []ve.Callback{callback}
 
+}
+
+func (s *VolcengineServerGroupServerService) getEcsPrimaryPrivateIp(instanceId string) (string, error) {
+	var (
+		err     error
+		results interface{}
+		ok      bool
+		data    []interface{}
+	)
+
+	resp, err := s.Client.EcsClient.DescribeInstancesCommon(&map[string]interface{}{
+		"InstanceIds.1": instanceId,
+	})
+
+	if err != nil {
+		return "", err
+	}
+
+	results, err = ve.ObtainSdkValue("Result.Instances", *resp)
+	if err != nil {
+		return "", err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	if data, ok = results.([]interface{}); !ok {
+		return "", errors.New("Result.Instances is not Slice")
+	}
+
+	if len(data) == 0 {
+		return "", fmt.Errorf("Instance %s not exist ", instanceId)
+	}
+
+	interfaces, err := ve.ObtainSdkValue("NetworkInterfaces", data[0])
+	if err != nil {
+		return "", err
+	}
+
+	primaryPrivateIp := ""
+	if networkInterfaces, ok := interfaces.([]interface{}); !ok {
+		return "", errors.New("NetworkInterfaces is not Slice")
+	} else {
+		for _, v := range networkInterfaces {
+			vv := v.(map[string]interface{})
+			if vv["Type"].(string) == "primary" {
+				primaryPrivateIp = vv["PrimaryIpAddress"].(string)
+			}
+		}
+	}
+
+	if primaryPrivateIp == "" {
+		return "", fmt.Errorf("Instance %s primary ip not exist ", instanceId)
+	}
+
+	return primaryPrivateIp, nil
 }
 
 func (s *VolcengineServerGroupServerService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
