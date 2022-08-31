@@ -11,17 +11,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 )
 
 type VolcengineVkeNodeService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client          *ve.SdkClient
+	Dispatcher      *ve.Dispatcher
+	nodePoolService *node_pool.VolcengineNodePoolService
 }
 
 func NewVolcengineVkeNodeService(c *ve.SdkClient) *VolcengineVkeNodeService {
 	return &VolcengineVkeNodeService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client:          c,
+		Dispatcher:      &ve.Dispatcher{},
+		nodePoolService: node_pool.NewNodePoolService(c),
 	}
 }
 
@@ -213,10 +216,26 @@ func (s *VolcengineVkeNodeService) RemoveResource(resourceData *schema.ResourceD
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"ClusterId":                  resourceData.Get("cluster_id"),
-				"NodePoolId":                 resourceData.Get("node_pool_id"),
-				"Ids.1":                      resourceData.Id(),
-				"CascadingDeleteResources.1": "Ecs",
+				"ClusterId":  resourceData.Get("cluster_id"),
+				"NodePoolId": resourceData.Get("node_pool_id"),
+				"Ids.1":      resourceData.Id(),
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				nodePool, err := s.nodePoolService.ReadResources(map[string]interface{}{
+					"Filter": map[string]interface{}{
+						"Ids": []string{d.Get("node_pool_id").(string)},
+					},
+				})
+				if err != nil {
+					return false, err
+				}
+				if len(nodePool) == 0 {
+					return false, fmt.Errorf("node pool not found")
+				}
+				if nodePool[0].(map[string]interface{})["Name"] != "vke-default-nodepool" { // 非默认节点池，删除实例
+					(*call.SdkParam)["CascadingDeleteResources.1"] = "Ecs"
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)

@@ -61,15 +61,15 @@ The `instance_configuration` object supports the following:
 * `enable_https` - (Required, ForceNew) Whether Https access is enabled.
 * `enable_pure_master` - (Required, ForceNew) Whether the Master node is independent.
 * `node_specs_assigns` - (Required, ForceNew) The number and configuration of various ESCloud instance node.
-* `region_id` - (Required, ForceNew) The region ID of ESCloud instance.
 * `subnet_id` - (Required, ForceNew) The ID of subnet, the subnet must belong to the AZ selected.
 * `version` - (Required, ForceNew) The version of ESCloud instance, the value is V6_7 or V7_10.
-* `zone_id` - (Required, ForceNew) The available zone ID of ESCloud instance.
 * `zone_number` - (Required, ForceNew) The zone count of the ESCloud instance used.
 * `instance_name` - (Optional) The name of ESCloud instance.
 * `maintenance_day` - (Optional) The maintainable date for the instance.
 * `maintenance_time` - (Optional) The maintainable time period for the instance.
 * `project_name` - (Optional) The project name  to which the ESCloud instance belongs.
+* `region_id` - (Optional) The region ID of ESCloud instance.
+* `zone_id` - (Optional) The available zone ID of ESCloud instance.
 
 The `node_specs_assigns` object supports the following:
 

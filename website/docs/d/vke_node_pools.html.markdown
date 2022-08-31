@@ -37,6 +37,8 @@ The `statuses` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `node_pools` - The collection of NodePools query.
     * `additional_container_storage_enabled` - Is AdditionalContainerStorageEnabled of NodeConfig.
+    * `auto_renew_period` - The AutoRenewPeriod of the PrePaid instance of NodeConfig.
+    * `auto_renew` - Is auto renew of the PrePaid instance of NodeConfig.
     * `cluster_id` - The ClusterId of NodePool.
     * `condition_types` - The Condition of Status.
     * `cordon` - The Cordon of KubernetesConfig.
@@ -45,15 +47,18 @@ In addition to all arguments above, the following attributes are exported:
     * `data_volumes` - The DataVolume of NodeConfig.
         * `size` - The Size of DataVolume.
         * `type` - The Type of DataVolume.
-    * `description` - The Description of NodePool.
     * `desired_replicas` - The DesiredReplicas of AutoScaling.
     * `enabled` - Is Enabled of AutoScaling.
     * `id` - The Id of NodePool.
+    * `image_id` - The ImageId of NodeConfig.
     * `initialize_script` - The InitializeScript of NodeConfig.
+    * `instance_charge_type` - The InstanceChargeType of NodeConfig.
     * `instance_type_ids` - The InstanceTypeIds of NodeConfig.
     * `label_content` - The LabelContent of KubernetesConfig.
         * `key` - The Key of KubernetesConfig.
         * `value` - The Value of KubernetesConfig.
+    * `login_key_pair_name` - The login SshKeyPairName of NodeConfig.
+    * `login_type` - The login type of NodeConfig.
     * `max_replicas` - The MaxReplicas of AutoScaling.
     * `min_replicas` - The MinReplicas of AutoScaling.
     * `name` - The Name of NodePool.
@@ -62,10 +67,17 @@ In addition to all arguments above, the following attributes are exported:
         * `deleting_count` - The DeletingCount of Node.
         * `failed_count` - The FailedCount of Node.
         * `running_count` - The RunningCount of Node.
+        * `starting_count` - The StartingCount of Node.
+        * `stopped_count` - The StoppedCount of Node.
+        * `stopping_count` - The StoppingCount of Node.
         * `total_count` - The TotalCount of Node.
         * `updating_count` - The UpdatingCount of Node.
+    * `period` - The period of the PrePaid instance of NodeConfig.
     * `phase` - The Phase of Status.
     * `priority` - The Priority of AutoScaling.
+    * `security_group_ids` - The SecurityGroupIds of NodeConfig.
+    * `security_strategies` - The SecurityStrategies of NodeConfig.
+    * `security_strategy_enabled` - The SecurityStrategyEnabled of NodeConfig.
     * `subnet_ids` - The SubnetId of NodeConfig.
     * `system_volume` - The SystemVolume of NodeConfig.
         * `size` - The Size of SystemVolume.
