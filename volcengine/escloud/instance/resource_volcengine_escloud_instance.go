@@ -44,14 +44,14 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 						},
 						"region_id": {
 							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
+							Optional:    true,
+							Computed:    true,
 							Description: "The region ID of ESCloud instance.",
 						},
 						"zone_id": {
 							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
+							Optional:    true,
+							Computed:    true,
 							Description: "The available zone ID of ESCloud instance.",
 						},
 						"zone_number": {

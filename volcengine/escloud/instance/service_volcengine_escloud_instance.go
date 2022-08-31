@@ -254,15 +254,22 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				var (
-					resp    *map[string]interface{}
 					results interface{}
 					subnets []interface{}
 					vpcs    []interface{}
 					ok      bool
 				)
-				subnetId := d.Get("instance_configuration.0.subnet_id")
+
+				// check region
+				regionId := *(s.Client.ClbClient.Config.Region)
+				if regionCustom, ok := d.GetOkExists("instance_configuration.0.region_id"); ok {
+					if regionId != regionCustom.(string) {
+						return false, fmt.Errorf("region does not match")
+					}
+				}
 
 				// describe subnet
+				subnetId := d.Get("instance_configuration.0.subnet_id")
 				req := map[string]interface{}{
 					"SubnetIds.1": subnetId,
 				}
@@ -287,6 +294,15 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 				}
 				subnetName := subnets[0].(map[string]interface{})["SubnetName"]
 				vpcId := subnets[0].(map[string]interface{})["VpcId"]
+				zoneId := subnets[0].(map[string]interface{})["ZoneId"]
+
+				//check zone
+				if zoneCustom, ok := d.GetOkExists("instance_configuration.0.zone_id"); ok {
+					logger.DebugInfo("custom zone id exist,%v", zoneCustom)
+					if zoneCustom.(string) != zoneId {
+						return false, fmt.Errorf("zone does not match")
+					}
+				}
 
 				// describe vpc
 				req = map[string]interface{}{
@@ -323,6 +339,8 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 						"SubnetId":   subnetId,
 						"SubnetName": subnetName,
 					},
+					"RegionId": regionId,
+					"ZoneId":   zoneId,
 				}
 				(*call.SdkParam)["InstanceConfiguration"] = instanceConfiguration
 				logger.DebugInfo("sdk param:%v", *call.SdkParam)
