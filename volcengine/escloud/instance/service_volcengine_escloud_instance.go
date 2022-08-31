@@ -177,7 +177,7 @@ func (s *VolcengineESCloudInstanceService) RefreshResourceState(resourceData *sc
 				status     interface{}
 				failStates []string
 			)
-			failStates = append(failStates, "Failed")
+			failStates = append(failStates, "CreateFailed", "Error")
 			demo, err = s.ReadResource(resourceData, id)
 			if err != nil {
 				return nil, "", err
@@ -249,15 +249,97 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 								},
 							},
 						},
-						"subnet": {
-							ConvertType: ve.ConvertJsonObject,
-						},
-						"vpc": {
-							ConvertType: ve.ConvertJsonObject,
-							TargetField: "VPC",
-						},
 					},
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				var (
+					results interface{}
+					subnets []interface{}
+					vpcs    []interface{}
+					ok      bool
+				)
+
+				// check region
+				regionId := *(s.Client.ClbClient.Config.Region)
+				if regionCustom, ok := (*call.SdkParam)["InstanceConfiguration.RegionId"]; ok {
+					if regionId != regionCustom.(string) {
+						return false, fmt.Errorf("region does not match")
+					}
+				}
+
+				// describe subnet
+				subnetId := (*call.SdkParam)["InstanceConfiguration.SubnetId"]
+				req := map[string]interface{}{
+					"SubnetIds.1": subnetId,
+				}
+				action := "DescribeSubnets"
+				resp, err := s.Client.VpcClient.DescribeSubnetsCommon(&req)
+				if err != nil {
+					return false, err
+				}
+				logger.Debug(logger.RespFormat, action, req, *resp)
+				results, err = ve.ObtainSdkValue("Result.Subnets", *resp)
+				if err != nil {
+					return false, err
+				}
+				if results == nil {
+					results = []interface{}{}
+				}
+				if subnets, ok = results.([]interface{}); !ok {
+					return false, errors.New("Result.Subnets is not Slice")
+				}
+				if len(subnets) == 0 {
+					return false, fmt.Errorf("subnet %s not exist", subnetId.(string))
+				}
+				subnetName := subnets[0].(map[string]interface{})["SubnetName"]
+				vpcId := subnets[0].(map[string]interface{})["VpcId"]
+				zoneId := subnets[0].(map[string]interface{})["ZoneId"]
+
+				//check zone
+				if zoneCustom, ok := (*call.SdkParam)["InstanceConfiguration.ZoneId"]; ok {
+					if zoneCustom.(string) != zoneId {
+						return false, fmt.Errorf("zone does not match")
+					}
+				}
+
+				// describe vpc
+				req = map[string]interface{}{
+					"Vpcs.1": vpcId,
+				}
+				action = "DescribeVpcs"
+				resp, err = s.Client.VpcClient.DescribeVpcsCommon(&req)
+				if err != nil {
+					return false, err
+				}
+				logger.Debug(logger.RespFormat, action, req, *resp)
+				results, err = ve.ObtainSdkValue("Result.Vpcs", *resp)
+				if err != nil {
+					return false, err
+				}
+				if results == nil {
+					results = []interface{}{}
+				}
+				if vpcs, ok = results.([]interface{}); !ok {
+					return false, errors.New("Result.Vpcs is not Slice")
+				}
+				if len(vpcs) == 0 {
+					return false, fmt.Errorf("vpc %s not exist", subnetId.(string))
+				}
+				vpcName := vpcs[0].(map[string]interface{})["VpcName"]
+				(*call.SdkParam)["InstanceConfiguration.VPC"] = map[string]interface{}{
+					"VpcId":   vpcId,
+					"VpcName": vpcName,
+				}
+				(*call.SdkParam)["InstanceConfiguration.Subnet"] = map[string]interface{}{
+					"SubnetId":   subnetId,
+					"SubnetName": subnetName,
+				}
+				(*call.SdkParam)["InstanceConfiguration.RegionId"] = regionId
+				(*call.SdkParam)["InstanceConfiguration.ZoneId"] = zoneId
+
+				logger.DebugInfo("sdk param:%v", *call.SdkParam)
+				return true, nil
 			},
 
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
