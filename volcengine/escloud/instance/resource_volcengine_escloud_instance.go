@@ -44,14 +44,14 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 						},
 						"region_id": {
 							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
+							Optional:    true,
+							Computed:    true,
 							Description: "The region ID of ESCloud instance.",
 						},
 						"zone_id": {
 							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
+							Optional:    true,
+							Computed:    true,
 							Description: "The available zone ID of ESCloud instance.",
 						},
 						"zone_number": {
@@ -145,45 +145,11 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Optional:    true,
 							Description: "The name of ESCloud instance.",
 						},
-						"vpc": {
-							Type:        schema.TypeList,
-							MaxItems:    1,
-							Optional:    true,
-							Description: "Information about the VPC where the instance is located.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"vpc_id": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "The ID of vpc.",
-									},
-									"vpc_name": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "The name of vpc.",
-									},
-								},
-							},
-						},
-						"subnet": {
-							Type:        schema.TypeList,
-							MaxItems:    1,
-							Optional:    true,
+						"subnet_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
 							Description: "The ID of subnet, the subnet must belong to the AZ selected.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"subnet_id": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "The ID of subnet.",
-									},
-									"subnet_name": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "The name of subnet.",
-									},
-								},
-							},
 						},
 						"project_name": {
 							Type:        schema.TypeString,
