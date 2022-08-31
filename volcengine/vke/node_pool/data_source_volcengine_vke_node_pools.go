@@ -119,11 +119,6 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The Name of NodePool.",
 						},
-						"description": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The Description of NodePool.",
-						},
 						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -179,6 +174,42 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Description: "The SubnetId of NodeConfig.",
+						},
+						"image_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ImageId of NodeConfig.",
+						},
+						"security_group_ids": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The SecurityGroupIds of NodeConfig.",
+						},
+						"security_strategy_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "The SecurityStrategyEnabled of NodeConfig.",
+						},
+						"security_strategies": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The SecurityStrategies of NodeConfig.",
+						},
+						"login_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The login type of NodeConfig.",
+						},
+						"login_key_pair_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The login SshKeyPairName of NodeConfig.",
 						},
 						"initialize_script": {
 							Type:        schema.TypeString,
@@ -242,6 +273,21 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 										Type:        schema.TypeInt,
 										Computed:    true,
 										Description: "The FailedCount of Node.",
+									},
+									"stopped_count": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The StoppedCount of Node.",
+									},
+									"stopping_count": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The StoppingCount of Node.",
+									},
+									"starting_count": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The StartingCount of Node.",
 									},
 								},
 							},
@@ -326,6 +372,26 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Description: "The InstanceTypeIds of NodeConfig.",
+						},
+						"instance_charge_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The InstanceChargeType of NodeConfig.",
+						},
+						"period": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The period of the PrePaid instance of NodeConfig.",
+						},
+						"auto_renew": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Is auto renew of the PrePaid instance of NodeConfig.",
+						},
+						"auto_renew_period": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The AutoRenewPeriod of the PrePaid instance of NodeConfig.",
 						},
 					},
 				},

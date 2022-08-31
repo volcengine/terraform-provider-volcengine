@@ -13,16 +13,16 @@ Provides a resource to manage escloud instance
 resource "volcengine_escloud_instance" "foo" {
   instance_configuration {
     version            = "V7_10"
-    region_id          = "cn-north-4"
-    zone_id            = "cn-langfang-a"
+    region_id          = "cn-xxx"
+    zone_id            = "cn-xxx"
     zone_number        = 1
     enable_https       = true
     admin_user_name    = "admin"
-    admin_password     = "1qaz!QAZ"
+    admin_password     = "xxxxxx"
     charge_type        = "PostPaid"
     configuration_code = "es.standard"
     enable_pure_master = false
-    instance_name      = "from-tf2"
+    instance_name      = "from-tf4"
     node_specs_assigns {
       type               = "Master"
       number             = 3
@@ -41,17 +41,10 @@ resource "volcengine_escloud_instance" "foo" {
       type               = "Kibana"
       number             = 1
       resource_spec_name = "kibana.x2.small"
-      storage_spec_name  = ""
+      storage_spec_name  = "es.volume.essd.pl0"
       storage_size       = 0
     }
-    subnet {
-      subnet_id   = "subnet-1g0d5yqrsxszk8ibuxxzile2l"
-      subnet_name = "subnet-1g0d5yqrsxszk8ibuxxzile2l"
-    }
-    vpc {
-      vpc_id   = "vpc-3cj17x7u9bzeo6c6rrtzfpaeb"
-      vpc_name = "test-1231新建"
-    }
+    subnet_id = "subnet-2bz9vxrixqigw2dx0eextz50p"
   }
 }
 ```
@@ -68,16 +61,15 @@ The `instance_configuration` object supports the following:
 * `enable_https` - (Required, ForceNew) Whether Https access is enabled.
 * `enable_pure_master` - (Required, ForceNew) Whether the Master node is independent.
 * `node_specs_assigns` - (Required, ForceNew) The number and configuration of various ESCloud instance node.
-* `region_id` - (Required, ForceNew) The region ID of ESCloud instance.
+* `subnet_id` - (Required, ForceNew) The ID of subnet, the subnet must belong to the AZ selected.
 * `version` - (Required, ForceNew) The version of ESCloud instance, the value is V6_7 or V7_10.
-* `zone_id` - (Required, ForceNew) The available zone ID of ESCloud instance.
 * `zone_number` - (Required, ForceNew) The zone count of the ESCloud instance used.
 * `instance_name` - (Optional) The name of ESCloud instance.
 * `maintenance_day` - (Optional) The maintainable date for the instance.
 * `maintenance_time` - (Optional) The maintainable time period for the instance.
 * `project_name` - (Optional) The project name  to which the ESCloud instance belongs.
-* `subnet` - (Optional) The ID of subnet, the subnet must belong to the AZ selected.
-* `vpc` - (Optional) Information about the VPC where the instance is located.
+* `region_id` - (Optional) The region ID of ESCloud instance.
+* `zone_id` - (Optional) The available zone ID of ESCloud instance.
 
 The `node_specs_assigns` object supports the following:
 
@@ -86,16 +78,6 @@ The `node_specs_assigns` object supports the following:
 * `storage_size` - (Required, ForceNew) The size of storage.
 * `storage_spec_name` - (Required, ForceNew) The name of storage spec.
 * `type` - (Required, ForceNew) The type of node, the value is `Master` or `Hot` or `Kibana`.
-
-The `subnet` object supports the following:
-
-* `subnet_id` - (Required) The ID of subnet.
-* `subnet_name` - (Required) The name of subnet.
-
-The `vpc` object supports the following:
-
-* `vpc_id` - (Required) The ID of vpc.
-* `vpc_name` - (Required) The name of vpc.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
