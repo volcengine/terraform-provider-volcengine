@@ -67,6 +67,9 @@ import (
 	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance_parameter"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance_parameter_log"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/mongodb_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/mongodb_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/mongodb_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/dnat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
@@ -274,6 +277,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_mongodb_allow_lists":             allow_list.DataSourceVolcengineMongoDBAllowLists(),
 			"volcengine_mongodb_instance_parameters":     instance_parameter.DataSourceVolcengineMongoDBInstanceParameters(),
 			"volcengine_mongodb_instance_parameter_logs": instance_parameter_log.DataSourceVolcengineMongoDBInstanceParameterLogParameters(),
+			"volcengine_mongodb_regions":                 mongodb_region.DataSourceVolcengineMongoDBRegions(),
+			"volcengine_mongodb_zones":                   mongodb_zone.DataSourceVolcengineMongoDBZones(),
+			"volcengine_mongodb_accounts":                mongodb_account.DataSourceVolcengineMongoDBAccounts(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
