@@ -7,6 +7,16 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
+/*
+
+Import
+VKE default node can be imported using the node id, e.g.
+```
+$ terraform import volcengine_vke_default_node.default nc5t5epmrsf****
+```
+
+*/
+
 func ResourceVolcengineDefaultNodePool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineDefaultNodePoolCreate,
