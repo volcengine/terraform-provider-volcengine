@@ -262,14 +262,14 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 
 				// check region
 				regionId := *(s.Client.ClbClient.Config.Region)
-				if regionCustom, ok := d.GetOkExists("instance_configuration.0.region_id"); ok {
+				if regionCustom, ok := (*call.SdkParam)["InstanceConfiguration.RegionId"]; ok {
 					if regionId != regionCustom.(string) {
 						return false, fmt.Errorf("region does not match")
 					}
 				}
 
 				// describe subnet
-				subnetId := d.Get("instance_configuration.0.subnet_id")
+				subnetId := (*call.SdkParam)["InstanceConfiguration.SubnetId"]
 				req := map[string]interface{}{
 					"SubnetIds.1": subnetId,
 				}
@@ -297,8 +297,7 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 				zoneId := subnets[0].(map[string]interface{})["ZoneId"]
 
 				//check zone
-				if zoneCustom, ok := d.GetOkExists("instance_configuration.0.zone_id"); ok {
-					logger.DebugInfo("custom zone id exist,%v", zoneCustom)
+				if zoneCustom, ok := (*call.SdkParam)["InstanceConfiguration.ZoneId"]; ok {
 					if zoneCustom.(string) != zoneId {
 						return false, fmt.Errorf("zone does not match")
 					}
@@ -328,23 +327,18 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 					return false, fmt.Errorf("vpc %s not exist", subnetId.(string))
 				}
 				vpcName := vpcs[0].(map[string]interface{})["VpcName"]
-				logger.DebugInfo("vpcId:%v", vpcId)
-
-				instanceConfiguration := map[string]interface{}{
-					"VPC": map[string]interface{}{
-						"VpcId":   vpcId,
-						"VpcName": vpcName,
-					},
-					"Subnet": map[string]interface{}{
-						"SubnetId":   subnetId,
-						"SubnetName": subnetName,
-					},
-					"RegionId": regionId,
-					"ZoneId":   zoneId,
+				(*call.SdkParam)["InstanceConfiguration.VPC"] = map[string]interface{}{
+					"VpcId":   vpcId,
+					"VpcName": vpcName,
 				}
-				(*call.SdkParam)["InstanceConfiguration"] = instanceConfiguration
-				logger.DebugInfo("sdk param:%v", *call.SdkParam)
+				(*call.SdkParam)["InstanceConfiguration.Subnet"] = map[string]interface{}{
+					"SubnetId":   subnetId,
+					"SubnetName": subnetName,
+				}
+				(*call.SdkParam)["InstanceConfiguration.RegionId"] = regionId
+				(*call.SdkParam)["InstanceConfiguration.ZoneId"] = zoneId
 
+				logger.DebugInfo("sdk param:%v", *call.SdkParam)
 				return true, nil
 			},
 
