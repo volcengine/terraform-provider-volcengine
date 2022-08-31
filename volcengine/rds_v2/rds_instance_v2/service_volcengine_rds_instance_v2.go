@@ -105,20 +105,26 @@ func convertConnectionInfo(connectionInfo interface{}) interface{} {
 	if connectionInfo == nil {
 		return nil
 	}
+	var connection []interface{}
 	if connectionInfoArr, ok := connectionInfo.([]interface{}); ok {
 		for _, v := range connectionInfoArr {
 			if vv, ok := v.(map[string]interface{}); ok {
+				endpointType := vv["EndpointType"].(string)
+				if endpointType != "Cluster" {
+					continue
+				}
 				addresses := vv["Address"].([]interface{})
 				for _, address := range addresses {
 					if addressMap, ok := address.(map[string]interface{}); ok {
 						addressMap["IpAddress"] = addressMap["IPAddress"]
 					}
 				}
+				connection = append(connection, v)
 			}
 		}
 	}
 
-	return connectionInfo
+	return connection
 }
 
 func (s *VolcengineRdsInstanceService) ReadResource(resourceData *schema.ResourceData, rdsInstanceId string) (data map[string]interface{}, err error) {
