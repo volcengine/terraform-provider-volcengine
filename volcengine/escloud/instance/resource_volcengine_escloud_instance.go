@@ -117,10 +117,12 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 										Description:  "The type of node, the value is `Master` or `Hot` or `Kibana`.",
 									},
 									"number": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										ForceNew:    true,
-										Description: "The number of node.",
+										Type:     schema.TypeInt,
+										Required: true,
+										ForceNew: true,
+										Description: "The number of node. If EnablePureMaster is `Ture`, number is `3` for master node, number is range in `1-50` for hot node. " +
+											"If EnablePureMaster is `False`, number is `1` for master node, number is `0` for hot node, or " +
+											"number is `3` for master node, number is range in `0-47` for hot node. ",
 									},
 									"resource_spec_name": {
 										Type:        schema.TypeString,
