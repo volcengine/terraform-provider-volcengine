@@ -37,10 +37,11 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"version": {
-							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
-							Description: "The version of ESCloud instance, the value is V6_7 or V7_10.",
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"V6_7", "V7_10"}, false),
+							Description:  "The version of ESCloud instance, the value is V6_7 or V7_10.",
 						},
 						"region_id": {
 							Type:        schema.TypeString,
@@ -67,10 +68,11 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Description: "Whether Https access is enabled.",
 						},
 						"admin_user_name": {
-							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
-							Description: "The name of administrator account(should be admin).",
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"admin"}, false),
+							Description:  "The name of administrator account(should be admin).",
 						},
 						"admin_password": {
 							Type:        schema.TypeString,
@@ -108,10 +110,11 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:        schema.TypeString,
-										Required:    true,
-										ForceNew:    true,
-										Description: "The type of node, the value is `Master` or `Hot` or `Kibana`.",
+										Type:         schema.TypeString,
+										Required:     true,
+										ForceNew:     true,
+										ValidateFunc: validation.StringInSlice([]string{"Master", "Hot", "Kibana"}, false),
+										Description:  "The type of node, the value is `Master` or `Hot` or `Kibana`.",
 									},
 									"number": {
 										Type:        schema.TypeInt,
