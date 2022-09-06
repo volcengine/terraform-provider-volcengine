@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
+	"strconv"
 	"strings"
 	"time"
 
@@ -161,6 +163,10 @@ func (s *VolcengineESCloudInstanceService) ReadResource(resourceData *schema.Res
 	if assigns != nil && len(assigns.([]interface{})) > 0 {
 		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = resourceData.Get("instance_configuration.0.node_specs_assigns")
 	}
+	if subnet, ok := data["InstanceConfiguration"].(map[string]interface{})["Subnet"]; ok {
+		data["InstanceConfiguration"].(map[string]interface{})["SubnetId"] = subnet.(map[string]interface{})["SubnetId"]
+	}
+
 	return data, err
 }
 
@@ -523,6 +529,79 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 			},
 		}
 		callbacks = append(callbacks, resetAdminPasswdCallback)
+	}
+
+	if resourceData.HasChange("instance_configuration.0.node_specs_assigns") {
+		logger.DebugInfo("NodeSpecsAssigns:%v", resourceData.Get("instance_configuration.0.node_specs_assigns"))
+		scaleCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ScaleInstance",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"instance_configuration": {
+						ConvertType: ve.ConvertJsonObject,
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"node_specs_assigns": {
+								ConvertType: ve.ConvertJsonObjectArray,
+							},
+						},
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					totalNodeNumber := 0
+					var nodeSpecsAssigns []map[string]interface{}
+					nodeSpecs := d.Get("instance_configuration.0.node_specs_assigns").([]interface{})
+					for i, node := range nodeSpecs {
+						if node.(map[string]interface{})["type"].(string) == "Master" {
+							if d.HasChange("instance_configuration.0.node_specs_assigns." + strconv.Itoa(i) + ".number") {
+								return false, fmt.Errorf("master node number is can not be modified")
+							}
+						}
+						if node.(map[string]interface{})["type"].(string) == "Master" || node.(map[string]interface{})["type"].(string) == "Hot" {
+							nodeNumber := d.Get("instance_configuration.0.node_specs_assigns." + strconv.Itoa(i) + ".number")
+							totalNodeNumber += nodeNumber.(int)
+						}
+						nodeSpecsAssigns = append(nodeSpecsAssigns, map[string]interface{}{
+							"Type":             node.(map[string]interface{})["type"],
+							"Number":           node.(map[string]interface{})["number"],
+							"ResourceSpecName": node.(map[string]interface{})["resource_spec_name"],
+							"StorageSpecName":  node.(map[string]interface{})["storage_spec_name"],
+							"StorageSize":      node.(map[string]interface{})["storage_size"],
+						})
+					}
+					if totalNodeNumber == 1 {
+						return false, fmt.Errorf("single-node cluster does not allow scale")
+					}
+					// check node specs
+					(*call.SdkParam)["InstanceConfiguration.EnablePureMaster"] = d.Get("instance_configuration.0.enable_pure_master")
+					err := preCheckNodeSpec(call)
+					if err != nil {
+						return false, err
+					}
+
+					uid, err := uuid.NewUUID()
+					if err != nil {
+						return false, fmt.Errorf("generate ClientToken failed ")
+					}
+					(*call.SdkParam)["ClientToken"] = uid.String()
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["NodeSpecsAssigns"] = nodeSpecsAssigns
+					(*call.SdkParam)["ConfigurationCode"] = d.Get("instance_configuration.0.configuration_code")
+					(*call.SdkParam)["Force"] = false
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, scaleCallback)
 	}
 
 	return callbacks
