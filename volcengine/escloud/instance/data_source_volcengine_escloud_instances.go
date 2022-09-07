@@ -147,6 +147,16 @@ func DataSourceVolcengineESCloudInstances() *schema.Resource {
 							Computed:    true,
 							Description: "whether enable es private network.",
 						},
+						"es_public_domain": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The es public domain of instance.",
+						},
+						"es_private_domain": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The es private domain of instance.",
+						},
 						"es_public_endpoint": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -156,6 +166,11 @@ func DataSourceVolcengineESCloudInstances() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The es private endpoint of instance.",
+						},
+						"es_inner_endpoint": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The es inner endpoint of instance.",
 						},
 						"enable_kibana_public_network": {
 							Type:        schema.TypeBool,
@@ -198,6 +213,11 @@ func DataSourceVolcengineESCloudInstances() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The name of project.",
+									},
+									"period": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The period of project.",
 									},
 									"region_id": {
 										Type:        schema.TypeString,
