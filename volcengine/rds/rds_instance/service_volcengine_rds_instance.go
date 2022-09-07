@@ -201,6 +201,9 @@ func (s *VolcengineRdsInstanceService) CreateResource(resourceData *schema.Resou
 				"vpc_id": {
 					TargetField: "VpcID",
 				},
+				"supper_account_password": {
+					TargetField: "SuperAccountPassword",
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
