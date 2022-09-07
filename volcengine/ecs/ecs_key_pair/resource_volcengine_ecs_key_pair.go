@@ -56,10 +56,11 @@ func ResourceVolcengineEcsKeyPair() *schema.Resource {
 				Description: "The description of key pair.",
 			},
 			"key_file": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Target file to save info.",
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Description: "Target file to save private key. It is recommended that the value not be empty. " +
+					"You only have one chance to download the private key, the volcengine will not save your private key, please keep it safe.",
 			},
 			"finger_print": {
 				Type:        schema.TypeString,
