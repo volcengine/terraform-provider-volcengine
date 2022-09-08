@@ -60,7 +60,8 @@ func ResourceVolcengineEcsKeyPair() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				Description: "Target file to save private key. It is recommended that the value not be empty. " +
-					"You only have one chance to download the private key, the volcengine will not save your private key, please keep it safe.",
+					"You only have one chance to download the private key, the volcengine will not save your private key, please keep it safe. " +
+					"In the TF import scenario, this field will not write the private key locally.",
 			},
 			"finger_print": {
 				Type:        schema.TypeString,
