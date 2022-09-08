@@ -1,4 +1,4 @@
-package common
+package ecs_instance
 
 import (
 	"encoding/base64"
@@ -10,18 +10,18 @@ func EcsInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) b
 	if k == "force_restart" {
 		return true
 	}
-	//由于一些字段暂时无法支持从查询中返回 所以现在设立做特殊处理拦截变更 用来适配导入的场景 后续支持后在对导入场景做优化
-	if d.Id() != "" {
-		if k == "security_enhancement_strategy" {
-			return true
-		}
-		if k == "auto_renew" {
-			return true
-		}
-		if k == "auto_renew_period" {
-			return true
-		}
-	}
+	//由于一些字段暂时无法支持从查询中返回 所以现在设立做特殊处理拦截变更 用来适配导入的场景 后续支持后在对导入场景做优化 此模式会导致不一致问题 去除
+	//if d.Id() != "" {
+	//	if k == "security_enhancement_strategy" {
+	//		return true
+	//	}
+	//	if k == "auto_renew" {
+	//		return true
+	//	}
+	//	if k == "auto_renew_period" {
+	//		return true
+	//	}
+	//}
 
 	if d.Id() == "" {
 		if k == "include_data_volumes" {
