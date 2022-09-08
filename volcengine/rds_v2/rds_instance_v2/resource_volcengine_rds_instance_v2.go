@@ -163,6 +163,99 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 					},
 				},
 			},
+			"connection_info": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "The connection info ot the RDS instance.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"endpoint_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Instance connection terminal ID.",
+						},
+						"endpoint_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The instance connection terminal name.",
+						},
+						"endpoint_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Terminal type:\nCluster: The default terminal. (created by default)\nPrimary: Primary node terminal.\nCustom: Custom terminal.\nDirect: Direct connection to the terminal. (Only the operation and maintenance side)\nAllNode: All node terminals. (Only the operation and maintenance side).",
+						},
+						"read_write_mode": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Read and write mode:\nReadWrite: read and write\nReadOnly: read only (default).",
+						},
+						"description": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Address description.",
+						},
+						"auto_add_new_nodes": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "When the terminal type is read-write terminal or read-only terminal, it supports setting whether new nodes are automatically added. Value:\nTRUE - join automatically\nFALSE - do not automatically join\nDefault value FALSE.",
+						},
+						"enable_read_write_splitting": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether read-write separation is enabled, value: Enable: Enable. Disable: Disabled.",
+						},
+						"enable_read_only": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether global read-only is enabled, value: Enable: Enable. Disable: Disabled.",
+						},
+						"read_only_node_weight": {
+							Type:        schema.TypeMap,
+							Computed:    true,
+							Description: "The list of nodes configured by the connection terminal and the corresponding read-only weights.",
+							Elem:        schema.TypeInt,
+						},
+						"address": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Address list.", Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"network_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Network address type, temporarily Private, Public, PublicService.",
+									},
+									"domain": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Connect domain name.",
+									},
+									"ip_address": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The IP Address.",
+									},
+									"port": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Port.",
+									},
+									"subnet_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Subnet ID, valid only for private addresses.",
+									},
+									"eip_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ID of the EIP, only valid for Public addresses.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }

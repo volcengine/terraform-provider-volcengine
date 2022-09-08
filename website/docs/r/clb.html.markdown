@@ -12,24 +12,24 @@ Provides a resource to manage clb
 ```hcl
 resource "volcengine_clb" "foo" {
   type               = "public"
-  subnet_id          = "subnet-2744i7u9alnnk7fap8tkq8aft"
+  subnet_id          = "subnet-273xjcb6wohs07fap8sz3ihhs"
   load_balancer_spec = "small_1"
-  region_id          = "cn-north-3"
   description        = "Demo"
+  load_balancer_name = "terraform-auto-create"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `load_balancer_spec` - (Required) The specification of the CLB.
-* `region_id` - (Required, ForceNew) The region of the request.
+* `load_balancer_spec` - (Required) The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`.
 * `subnet_id` - (Required, ForceNew) The id of the Subnet.
 * `type` - (Required, ForceNew) The type of the CLB. And optional choice contains `public` or `private`.
 * `description` - (Optional) The description of the CLB.
 * `eni_address` - (Optional, ForceNew) The eni address of the CLB.
-* `load_balancer_billing_type` - (Optional, ForceNew) The billing type of the CLB.
+* `load_balancer_billing_type` - (Optional, ForceNew) The billing type of the CLB, the value can be `PostPaid`.
 * `load_balancer_name` - (Optional) The name of the CLB.
 * `modification_protection_reason` - (Optional) The reason of the console modification protection.
-* `modification_protection_status` - (Optional) The status of the console modification protection.
+* `modification_protection_status` - (Optional) The status of the console modification protection, the value can be `NonProtection` or `ConsoleProtection`.
+* `region_id` - (Optional, ForceNew) The region of the request.
 * `vpc_id` - (Optional, ForceNew) The id of the VPC.
 
 ## Attributes Reference

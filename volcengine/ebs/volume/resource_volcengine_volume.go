@@ -51,7 +51,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"data"}, false),
-				Description:  "The kind of Volume.",
+				Description:  "The kind of Volume, the value is `data`.",
 			},
 			"size": {
 				Type:         schema.TypeInt,
@@ -70,7 +70,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 				Default:      "PostPaid",
-				Description:  "The charge type of the Volume.",
+				Description:  "The charge type of the Volume, the value is `PostPaid`.",
 			},
 			"status": {
 				Type:        schema.TypeString,

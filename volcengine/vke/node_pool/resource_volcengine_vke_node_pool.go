@@ -48,6 +48,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Type:     schema.TypeList,
 				MaxItems: 1,
 				Optional: true,
+				Computed: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -61,26 +62,26 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 1000),
-							Description:  "The MaxReplicas of AutoScaling.",
+							Description:  "The MaxReplicas of AutoScaling, default 10, range in 1~1000.",
 						},
 						"min_replicas": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    true,
-							Description: "The MinReplicas of AutoScaling.",
+							Description: "The MinReplicas of AutoScaling, default 0.",
 						},
 						"desired_replicas": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    true,
-							Description: "The DesiredReplicas of AutoScaling.",
+							Description: "The DesiredReplicas of AutoScaling, default 0.",
 						},
 						"priority": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
-							Description:  "The Priority of AutoScaling.",
+							Description:  "The Priority of AutoScaling, default 10, rang in 0~100.",
 						},
 					},
 				},
@@ -89,12 +90,12 @@ func ResourceVolcengineNodePool() *schema.Resource {
 			"node_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_type_ids": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Required: true,
 							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -103,7 +104,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						},
 						"subnet_ids": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Required: true,
 							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
@@ -113,7 +114,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"security": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
-							Optional: true,
+							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"security_group_ids": {
@@ -131,7 +132,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
-										Description: "The SecurityStrategies of Security.",
+										Description: "The SecurityStrategies of Security, the value can be empty or `Hids`.",
 									},
 									"login": {
 										Type:     schema.TypeList,
@@ -161,6 +162,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
+							Computed: true,
 							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -169,14 +171,14 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Optional:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
-										Description:  "The Type of SystemVolume.",
+										Description:  "The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0`.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.IntBetween(20, 2048),
-										Description:  "The Size of SystemVolume.",
+										Description:  "The Size of SystemVolume, the value range in 20~2048.",
 									},
 								},
 							},
@@ -193,14 +195,14 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Optional:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
-										Description:  "The Type of DataVolumes.",
+										Description:  "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0`.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
 										Optional:     true,
 										ForceNew:     true,
 										ValidateFunc: validation.IntBetween(20, 32768),
-										Description:  "The Size of DataVolumes.",
+										Description:  "The Size of DataVolumes, the value range in 20~32768.",
 									},
 								},
 							},
@@ -216,6 +218,47 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Optional:    true,
 							Description: "The AdditionalContainerStorageEnabled of NodeConfig.",
 						},
+						"image_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							ForceNew:    true,
+							Description: "The ImageId of NodeConfig.",
+						},
+						"instance_charge_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "PostPaid",
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
+							Description:  "The InstanceChargeType of PrePaid instance of NodeConfig. Valid values: PostPaid, PrePaid. Default value: PostPaid.",
+						},
+						"period": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
+							DiffSuppressFunc: prePaidDiffSuppressFunc,
+							Description:      "The Period of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Unit: month. when InstanceChargeType is PrePaid, default value is 12.",
+						},
+						"auto_renew": {
+							Type:             schema.TypeBool,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: prePaidDiffSuppressFunc,
+							Description:      "Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.",
+						},
+						"auto_renew_period": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 6, 12}),
+							DiffSuppressFunc: prePaidAndAutoNewDiffSuppressFunc,
+							Description:      "The AutoRenewPeriod of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 6, 12. Unit: month. when InstanceChargeType is PrePaid and AutoRenew enable, default value is 1.",
+						},
 					},
 				},
 				Description: "The Config of NodePool.",
@@ -227,7 +270,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -243,6 +286,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 									},
 								},
 							},
+							Set:         kubernetesConfigLabelHash,
 							Description: "The Labels of KubernetesConfig.",
 						},
 						"taints": {
@@ -263,7 +307,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 									"effect": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Description: "The Effect of Taints.",
+										Description: "The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.",
 									},
 								},
 							},

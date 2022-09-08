@@ -90,32 +90,40 @@ func (s *VolcengineListenerService) ReadResource(resourceData *schema.ResourceDa
 
 	clbClient := s.Client.ClbClient
 
-	listenerAttr, err := clbClient.DescribeListenerAttributesCommon(&map[string]interface{}{
+	listenerResp, err := clbClient.DescribeListenerAttributesCommon(&map[string]interface{}{
 		"ListenerId": listenerId,
 	})
 	if err != nil {
 		return nil, err
 	}
-	timeout, err := ve.ObtainSdkValue("Result.EstablishedTimeout", *listenerAttr)
+
+	listenerAttrMap := make(map[string]interface{})
+
+	timeout, err := ve.ObtainSdkValue("Result.EstablishedTimeout", *listenerResp)
 	if err != nil {
 		return nil, err
 	}
-	desc, err := ve.ObtainSdkValue("Result.Description", *listenerAttr)
+	desc, err := ve.ObtainSdkValue("Result.Description", *listenerResp)
 	if err != nil {
 		return nil, err
 	}
-	loadBalancerId, err := ve.ObtainSdkValue("Result.LoadBalancerId", *listenerAttr)
+	loadBalancerId, err := ve.ObtainSdkValue("Result.LoadBalancerId", *listenerResp)
 	if err != nil {
 		return nil, err
 	}
-	scheduler, err := ve.ObtainSdkValue("Result.Scheduler", *listenerAttr)
+	scheduler, err := ve.ObtainSdkValue("Result.Scheduler", *listenerResp)
 	if err != nil {
 		return nil, err
 	}
-	_ = resourceData.Set("established_timeout", int(timeout.(float64)))
-	_ = resourceData.Set("description", desc.(string))
-	_ = resourceData.Set("load_balancer_id", loadBalancerId.(string))
-	_ = resourceData.Set("scheduler", scheduler.(string))
+
+	listenerAttrMap["EstablishedTimeout"] = timeout
+	listenerAttrMap["Description"] = desc
+	listenerAttrMap["LoadBalancerId"] = loadBalancerId
+	listenerAttrMap["Scheduler"] = scheduler
+
+	for k, v := range listenerAttrMap {
+		data[k] = v
+	}
 
 	return data, err
 }
@@ -147,7 +155,7 @@ func (s *VolcengineListenerService) RefreshResourceState(resourceData *schema.Re
 
 }
 
-func (VolcengineListenerService) WithResourceResponseHandlers(listener map[string]interface{}) []ve.ResourceResponseHandler {
+func (*VolcengineListenerService) WithResourceResponseHandlers(listener map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return listener, nil, nil
 	}
@@ -167,6 +175,23 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 				"health_check": {
 					ConvertType: ve.ConvertListUnique,
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				protocol := (*call.SdkParam)["Protocol"].(string)
+				// 1. established_timeout
+				if protocol == "HTTP" || protocol == "HTTPS" {
+					// not allow establish_timeout
+					if _, ok := (*call.SdkParam)["EstablishedTimeout"]; ok {
+						return false, errors.New("established_timeout is not allowed for HTTP or HTTPS")
+					}
+				}
+
+				// 2. certificate_id
+				if protocol != "HTTPS" && (*call.SdkParam)["CertificateId"] != nil {
+					return false, errors.New("certificate_id is only allowed for HTTPS")
+				}
+
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -220,6 +245,20 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				protocol := d.Get("protocol").(string)
+				// 1. established_timeout
+				if protocol == "HTTP" || protocol == "HTTPS" {
+					// not allow establish_timeout
+					if _, ok := (*call.SdkParam)["EstablishedTimeout"]; ok {
+						return false, errors.New("established_timeout is not allowed for HTTP or HTTPS")
+					}
+				}
+
+				// 2. certificate_id
+				if protocol != "HTTPS" && (*call.SdkParam)["CertificateId"] != nil {
+					return false, errors.New("certificate_id is only allowed for HTTPS")
+				}
+
 				(*call.SdkParam)["ListenerId"] = d.Id()
 				aclStatus := d.Get("acl_status")
 				if aclStatus, ok := aclStatus.(string); ok && aclStatus == "on" {

@@ -58,7 +58,7 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 			"additional_container_storage_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     true,
+				Default:     false,
 				ForceNew:    true,
 				Description: "The flag of additional container storage enable, the value is `true` or `false`.",
 			},

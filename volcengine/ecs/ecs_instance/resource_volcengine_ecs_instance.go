@@ -88,7 +88,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 					"PostPaid",
 					"PrePaid",
 				}, false),
-				Description: "The charge type of ECS instance.",
+				Description: "The charge type of ECS instance, the value can be `PrePaid` or `PostPaid`.",
 			},
 			"user_data": {
 				Type:             schema.TypeString,
@@ -107,7 +107,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				}, false),
 				Default:          "Active",
 				DiffSuppressFunc: ve.EcsInstanceImportDiffSuppress,
-				Description:      "The security enhancement strategy of ECS instance.Default is true.",
+				Description:      "The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.",
 			},
 			"hpc_cluster_id": {
 				Type:        schema.TypeString,

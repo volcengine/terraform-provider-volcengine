@@ -13,7 +13,7 @@ import (
 Import
 ServerGroupServer can be imported using the id, e.g.
 ```
-$ terraform import volcengine_server_group_server.default rs-3ciynux6i1x4w****rszh49sj
+$ terraform import volcengine_server_group_server.default rsp-274xltv2*****8tlv3q3s:rs-3ciynux6i1x4w****rszh49sj
 ```
 
 */
@@ -30,7 +30,7 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"server_group_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The ID of the ServerGroup.",
 			},
@@ -41,13 +41,13 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "The ID of ecs instance or the network card bound to ecs instance.",
 			},
 			"type": {
 				Type:         schema.TypeString,
-				Optional:     true,
+				Required:     true,
 				ForceNew:     true,
 				Description:  "The type of instance. Optional choice contains `ecs`, `eni`.",
 				ValidateFunc: validation.StringInSlice([]string{"ecs", "eni"}, false),
@@ -55,17 +55,18 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 			"weight": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "The weight of the instance.",
+				Description: "The weight of the instance, range in 0~100.",
 			},
 			"ip": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Description: "The private ip of the instance.",
 			},
 			"port": {
 				Type:        schema.TypeInt,
-				Optional:    true,
+				Required:    true,
 				Description: "The port receiving request.",
 			},
 			"description": {
