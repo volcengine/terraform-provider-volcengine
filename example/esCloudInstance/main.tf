@@ -2,15 +2,13 @@
 resource "volcengine_escloud_instance" "foo" {
   instance_configuration {
     version            = "V7_10"
-    region_id          = "cn-xxx"
-    zone_id            = "cn-xxx"
     zone_number        = 1
     enable_https       = true
     admin_user_name    = "admin"
-    admin_password     = "xxxxxx"
+    admin_password     = "xxxx"
     charge_type        = "PostPaid"
     configuration_code = "es.standard"
-    enable_pure_master = false
+    enable_pure_master = true
     instance_name      = "from-tf4"
     node_specs_assigns {
       type               = "Master"
@@ -21,8 +19,8 @@ resource "volcengine_escloud_instance" "foo" {
     }
     node_specs_assigns {
       type               = "Hot"
-      number             = 0
-      resource_spec_name = "es.x4.medium"
+      number             = 2
+      resource_spec_name = "es.x4.large"
       storage_spec_name  = "es.volume.essd.pl0"
       storage_size       = 100
     }

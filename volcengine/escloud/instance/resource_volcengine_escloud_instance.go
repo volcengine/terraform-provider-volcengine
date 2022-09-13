@@ -37,21 +37,28 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"version": {
-							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
-							Description: "The version of ESCloud instance, the value is V6_7 or V7_10.",
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"V6_7", "V7_10"}, false),
+							Description:  "The version of ESCloud instance, the value is V6_7 or V7_10.",
 						},
 						"region_id": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return d.Id() != ""
+							},
 							Description: "The region ID of ESCloud instance.",
 						},
 						"zone_id": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return d.Id() != ""
+							},
 							Description: "The available zone ID of ESCloud instance.",
 						},
 						"zone_number": {
@@ -67,10 +74,11 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Description: "Whether Https access is enabled.",
 						},
 						"admin_user_name": {
-							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
-							Description: "The name of administrator account(should be admin).",
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"admin"}, false),
+							Description:  "The name of administrator account(should be admin).",
 						},
 						"admin_password": {
 							Type:        schema.TypeString,
@@ -91,7 +99,6 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 						"configuration_code": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 							Description: "Configuration code used for billing.",
 						},
 						"enable_pure_master": {
@@ -103,38 +110,33 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 						"node_specs_assigns": {
 							Type:        schema.TypeList,
 							Required:    true,
-							ForceNew:    true,
 							Description: "The number and configuration of various ESCloud instance node.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:        schema.TypeString,
-										Required:    true,
-										ForceNew:    true,
-										Description: "The type of node, the value is `Master` or `Hot` or `Kibana`.",
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"Master", "Hot", "Kibana"}, false),
+										Description:  "The type of node, the value is `Master` or `Hot` or `Kibana`.",
 									},
 									"number": {
 										Type:        schema.TypeInt,
 										Required:    true,
-										ForceNew:    true,
 										Description: "The number of node.",
 									},
 									"resource_spec_name": {
 										Type:        schema.TypeString,
 										Required:    true,
-										ForceNew:    true,
 										Description: "The name of compute resource spec, the value is `kibana.x2.small` or `es.x4.medium` or `es.x4.large` or `es.x4.xlarge` or `es.x2.2xlarge` or `es.x4.2xlarge` or `es.x2.3xlarge`.",
 									},
 									"storage_spec_name": {
 										Type:        schema.TypeString,
 										Required:    true,
-										ForceNew:    true,
 										Description: "The name of storage spec.",
 									},
 									"storage_size": {
 										Type:        schema.TypeInt,
 										Required:    true,
-										ForceNew:    true,
 										Description: "The size of storage.",
 									},
 								},
@@ -178,6 +180,15 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
+						},
+						"force_restart_after_scale": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return d.Id() == ""
+							},
+							Description: "Whether to force restart when changes are made. If true, it means that the cluster will be forced to restart without paying attention to instance availability.",
 						},
 					},
 				},

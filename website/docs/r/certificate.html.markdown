@@ -19,8 +19,8 @@ resource "volcengine_certificate" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `private_key` - (Required, ForceNew) The private key of the Certificate.
-* `public_key` - (Required, ForceNew) The public key of the Certificate.
+* `private_key` - (Required, ForceNew) The private key of the Certificate. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `public_key` - (Required, ForceNew) The public key of the Certificate. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `certificate_name` - (Optional, ForceNew) The name of the Certificate.
 * `description` - (Optional, ForceNew) The description of the Certificate.
 

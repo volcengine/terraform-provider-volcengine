@@ -53,7 +53,7 @@ LocalSSD: Local SSD disk.
 * `zone` - (Required, ForceNew) The available zone of the RDS instance.
 * `auto_renew` - (Optional, ForceNew) Whether to automatically renew. Default: false. Value:
 true: yes.
-false: no.
+false: no. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `db_engine` - (Optional, ForceNew) Database type. Value:
 MySQL (default).
 * `instance_name` - (Optional, ForceNew) Set the name of the instance. The naming rules are as follows:
@@ -63,8 +63,8 @@ It can only contain Chinese characters, letters, numbers, underscores (_) and un
 The length needs to be within 1~128 characters.
 * `prepaid_period` - (Optional, ForceNew) The purchase cycle in the prepaid scenario. Value:
 Month: monthly subscription.
-Year: yearly subscription.
-* `project_name` - (Optional, ForceNew) Select the project to which the instance belongs. If this parameter is left blank, the new instance will not be added to any project.
+Year: yearly subscription. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `project_name` - (Optional, ForceNew) Select the project to which the instance belongs. If this parameter is left blank, the new instance will not be added to any project. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `region` - (Optional, ForceNew) The region of the RDS instance.
 * `super_account_name` - (Optional, ForceNew) Fill in the high-privileged user account name. The naming rules are as follows:
 Unique name.
@@ -72,11 +72,15 @@ Start with a letter and end with a letter or number.
 Consists of lowercase letters, numbers, or underscores (_).
 The length is 2~32 characters.
 [Keywords](https://www.volcengine.com/docs/6313/66162) are not allowed for account names.
-* `supper_account_password` - (Optional, ForceNew) Set a high-privilege account password. The rules are as follows:
+* `super_account_password` - (Optional, ForceNew) Set a high-privilege account password. The rules are as follows:
 Only uppercase and lowercase letters, numbers and the following special characters _#!@$%^*()+=-.
 The length needs to be within 8~32 characters.
 Contains at least 3 of uppercase letters, lowercase letters, numbers or special characters.
-* `used_time` - (Optional, ForceNew) The purchase time of RDS instance.
+* `supper_account_password` - (Optional, ForceNew, **Deprecated**) supper_account_password is deprecated, use super_account_password instead Set a high-privilege account password. The rules are as follows:
+Only uppercase and lowercase letters, numbers and the following special characters _#!@$%^*()+=-.
+The length needs to be within 8~32 characters.
+Contains at least 3 of uppercase letters, lowercase letters, numbers or special characters.
+* `used_time` - (Optional, ForceNew) The purchase time of RDS instance. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
