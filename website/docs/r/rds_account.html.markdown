@@ -30,7 +30,7 @@ illustrate
 Cannot start with `!` or `@`.
 The length is 8~32 characters.
 It consists of any three of uppercase letters, lowercase letters, numbers, and special characters.
-The special characters are `!@#$%^*()_+-=`.
+The special characters are `!@#$%^*()_+-=`. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `account_type` - (Required, ForceNew) Database account type, value:
 Super: A high-privilege account. Only one database account can be created for an instance.
 Normal: An account with ordinary privileges.
