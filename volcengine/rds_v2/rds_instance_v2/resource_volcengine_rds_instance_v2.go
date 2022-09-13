@@ -80,13 +80,13 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Time zone. Support UTC -12:00 ~ +13:00.",
+				Description: "Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"db_param_group_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Parameter template ID. It only takes effect when the database type is MySQL/PostgreSQL/SQL_Server.",
+				Description: "Parameter template ID. It only takes effect when the database type is MySQL/PostgreSQL/SQL_Server. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
