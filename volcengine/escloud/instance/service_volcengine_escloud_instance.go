@@ -388,7 +388,7 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 
 				// describe vpc
 				req = map[string]interface{}{
-					"Vpcs.1": vpcId,
+					"VpcIds.1": vpcId,
 				}
 				action = "DescribeVpcs"
 				resp, err = s.Client.VpcClient.DescribeVpcsCommon(&req)
