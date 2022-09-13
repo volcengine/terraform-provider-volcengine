@@ -54,8 +54,8 @@ When the database type is veDB_MySQL/veDB_PostgreSQL, the value is:
 DistributedStorage - Distributed Storage.
 * `subnet_id` - (Required, ForceNew) Subnet ID.
 * `vpc_id` - (Required, ForceNew) Private network (VPC) ID. You can call the DescribeVpcs query and use this parameter to specify the VPC where the instance is to be created.
-* `db_param_group_id` - (Optional, ForceNew) Parameter template ID. It only takes effect when the database type is MySQL/PostgreSQL/SQL_Server.
-* `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00.
+* `db_param_group_id` - (Optional, ForceNew) Parameter template ID. It only takes effect when the database type is MySQL/PostgreSQL/SQL_Server. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `instance_name` - (Optional, ForceNew) Instance name. Cannot start with a number or a dash
 Can only contain Chinese characters, letters, numbers, underscores and dashes
 The length is limited between 1 ~ 128.

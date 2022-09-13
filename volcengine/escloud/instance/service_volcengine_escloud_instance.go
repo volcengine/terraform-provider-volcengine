@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -160,6 +163,10 @@ func (s *VolcengineESCloudInstanceService) ReadResource(resourceData *schema.Res
 	if assigns != nil && len(assigns.([]interface{})) > 0 {
 		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = resourceData.Get("instance_configuration.0.node_specs_assigns")
 	}
+	if subnet, ok := data["InstanceConfiguration"].(map[string]interface{})["Subnet"]; ok {
+		data["InstanceConfiguration"].(map[string]interface{})["SubnetId"] = subnet.(map[string]interface{})["SubnetId"]
+	}
+
 	return data, err
 }
 
@@ -220,6 +227,78 @@ func (s *VolcengineESCloudInstanceService) WithResourceResponseHandlers(instance
 	return []ve.ResourceResponseHandler{handler}
 }
 
+func preCheckNodeSpec(call ve.SdkCall) error {
+	// check node number
+	var enablePureMaster bool
+	if enablePureMasterValue, ok := (*call.SdkParam)["InstanceConfiguration.EnablePureMaster"]; ok {
+		enablePureMaster = enablePureMasterValue.(bool)
+	} else {
+		enablePureMaster = false
+	}
+
+	/**
+	打平拆分
+	InstanceConfiguration.NodeSpecsAssigns.1.StorageSpecName:es.volume.essd.pl0
+	InstanceConfiguration.NodeSpecsAssigns.1.Type:Master
+	*/
+	nodeConfigs := map[string]map[string]interface{}{}
+	for key, value := range *call.SdkParam {
+		if (strings.Contains(key, "InstanceConfiguration.NodeSpecsAssigns")) && (value == "Master" || value == "Hot" || value == "Kibana") {
+			if _, exist := nodeConfigs[value.(string)]; exist {
+				return fmt.Errorf("repeated node configs: %s", value)
+			}
+			slices := strings.Split(key, ".")
+			prefix := strings.TrimSuffix(key, slices[len(slices)-1])
+
+			var number int
+			if v, ok := (*call.SdkParam)[prefix+"Number"]; ok {
+				number = v.(int)
+			}
+			nodeConfigs[value.(string)] = map[string]interface{}{
+				"StorageSpecName":  (*call.SdkParam)[prefix+"StorageSpecName"],
+				"StorageSize":      (*call.SdkParam)[prefix+"StorageSize"],
+				"ResourceSpecName": (*call.SdkParam)[prefix+"ResourceSpecName"],
+				"Number":           number,
+			}
+		}
+	}
+	if len(nodeConfigs) != 3 {
+		return fmt.Errorf(" Master, Hot or Kibana NodeSpecsAssigns should be configured.")
+	}
+
+	if enablePureMaster {
+		// MasterNodeNumber指定的为专属主节点个数，并且取值固定为3。
+		// HotNodeNumber指定独立数据节点个数，取值为1-50。此时MasterNode和HotNode计算存储配置可以不一致。
+		if nodeConfigs["Master"]["Number"] != 3 {
+			return fmt.Errorf(" Master node number muster be 3 if enable_pure_master is true.")
+		}
+		if nodeConfigs["Hot"]["Number"].(int) < 1 || nodeConfigs["Hot"]["Number"].(int) > 50 {
+			return fmt.Errorf(" Hot node number muster range in 1-50 if enable_pure_master is true.")
+		}
+	} else {
+		// MasterNodeNumber=1，HotNodeNumber必需为0，此时代表创建一个单节点的ES实例。
+		// MasterNodeNumber=3，HotNodeNumber可选值为0-47，此时MasterNode和HotNode计算存储配置必须一致。
+		if nodeConfigs["Master"]["Number"] == 1 {
+			if nodeConfigs["Hot"]["Number"] != 0 {
+				return fmt.Errorf(" Hot node number muster 0 if enable_pure_master is false and master node number is 1.")
+			}
+		} else if nodeConfigs["Master"]["Number"] == 3 {
+			if nodeConfigs["Hot"]["Number"].(int) < 0 || nodeConfigs["Hot"]["Number"].(int) > 47 {
+				return fmt.Errorf(" Hot node number muster range in 0-47 if enable_pure_master is false and master node number is 3.")
+			}
+
+			if nodeConfigs["Master"]["ResourceSpecName"] != nodeConfigs["Hot"]["ResourceSpecName"] ||
+				nodeConfigs["Master"]["StorageSpecName"] != nodeConfigs["Hot"]["StorageSpecName"] ||
+				nodeConfigs["Master"]["StorageSize"] != nodeConfigs["Hot"]["StorageSize"] {
+				return fmt.Errorf(" Hot and Master node spec shoud be same if enable_pure_master is false and master node number is 3.")
+			}
+		} else {
+			return fmt.Errorf(" Master node number muster be 1 or 3 if enable_pure_master is false.")
+		}
+	}
+	return nil
+}
+
 func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
@@ -259,6 +338,10 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 					vpcs    []interface{}
 					ok      bool
 				)
+				// check specs
+				if err := preCheckNodeSpec(call); err != nil {
+					return false, err
+				}
 
 				// check region
 				regionId := *(s.Client.ClbClient.Config.Region)
@@ -305,7 +388,7 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 
 				// describe vpc
 				req = map[string]interface{}{
-					"Vpcs.1": vpcId,
+					"VpcIds.1": vpcId,
 				}
 				action = "DescribeVpcs"
 				resp, err = s.Client.VpcClient.DescribeVpcsCommon(&req)
@@ -446,6 +529,79 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 			},
 		}
 		callbacks = append(callbacks, resetAdminPasswdCallback)
+	}
+
+	if resourceData.HasChange("instance_configuration.0.node_specs_assigns") {
+		logger.DebugInfo("NodeSpecsAssigns:%v", resourceData.Get("instance_configuration.0.node_specs_assigns"))
+		scaleCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ScaleInstance",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"instance_configuration": {
+						ConvertType: ve.ConvertJsonObject,
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"node_specs_assigns": {
+								ConvertType: ve.ConvertJsonObjectArray,
+							},
+						},
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					totalNodeNumber := 0
+					var nodeSpecsAssigns []map[string]interface{}
+					nodeSpecs := d.Get("instance_configuration.0.node_specs_assigns").([]interface{})
+					for i, node := range nodeSpecs {
+						if node.(map[string]interface{})["type"].(string) == "Master" {
+							if d.HasChange("instance_configuration.0.node_specs_assigns." + strconv.Itoa(i) + ".number") {
+								return false, fmt.Errorf("master node number is can not be modified")
+							}
+						}
+						if node.(map[string]interface{})["type"].(string) == "Master" || node.(map[string]interface{})["type"].(string) == "Hot" {
+							nodeNumber := d.Get("instance_configuration.0.node_specs_assigns." + strconv.Itoa(i) + ".number")
+							totalNodeNumber += nodeNumber.(int)
+						}
+						nodeSpecsAssigns = append(nodeSpecsAssigns, map[string]interface{}{
+							"Type":             node.(map[string]interface{})["type"],
+							"Number":           node.(map[string]interface{})["number"],
+							"ResourceSpecName": node.(map[string]interface{})["resource_spec_name"],
+							"StorageSpecName":  node.(map[string]interface{})["storage_spec_name"],
+							"StorageSize":      node.(map[string]interface{})["storage_size"],
+						})
+					}
+					if totalNodeNumber == 1 {
+						return false, fmt.Errorf("single-node cluster does not allow scale")
+					}
+					// check node specs
+					(*call.SdkParam)["InstanceConfiguration.EnablePureMaster"] = d.Get("instance_configuration.0.enable_pure_master")
+					err := preCheckNodeSpec(call)
+					if err != nil {
+						return false, err
+					}
+
+					uid, err := uuid.NewUUID()
+					if err != nil {
+						return false, fmt.Errorf("generate ClientToken failed ")
+					}
+					(*call.SdkParam)["ClientToken"] = uid.String()
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["NodeSpecsAssigns"] = nodeSpecsAssigns
+					(*call.SdkParam)["ConfigurationCode"] = d.Get("instance_configuration.0.configuration_code")
+					(*call.SdkParam)["Force"] = false
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, scaleCallback)
 	}
 
 	return callbacks

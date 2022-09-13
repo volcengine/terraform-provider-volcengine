@@ -59,6 +59,7 @@ func (s *VolcengineVpcService) ReadResources(m map[string]interface{}) (data []i
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Vpcs is not Slice")
 		}
+
 		return data, err
 	})
 }
@@ -85,6 +86,10 @@ func (s *VolcengineVpcService) ReadResource(resourceData *schema.ResourceData, v
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("Vpc %s not exist ", vpcId)
+	}
+
+	if _, ok1 := data["AuxiliaryCidrBlocks"]; !ok1 {
+		data["AuxiliaryCidrBlocks"] = []string{}
 	}
 	return data, err
 }

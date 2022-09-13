@@ -187,10 +187,10 @@ func DataSourceVolcengineESCloudInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The kibana private domain of instance.",
 						},
-						"kibana_public_endpoint": {
+						"kibana_public_domain": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The kibana public endpoint of instance.",
+							Description: "The kibana public domain of instance.",
 						},
 						"instance_configuration": {
 							Type:        schema.TypeList,
