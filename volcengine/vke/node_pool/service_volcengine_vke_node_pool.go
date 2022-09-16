@@ -306,15 +306,7 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 							},
 						},
 						"data_volumes": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"type": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"size": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
@@ -344,29 +336,10 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"effect": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -469,29 +442,10 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"effect": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -732,6 +686,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 							volume := make(map[string]interface{}, 0)
 							volume["size"] = strconv.FormatFloat(_data.(map[string]interface{})["Size"].(float64), 'g', 5, 32)
 							volume["type"] = _data.(map[string]interface{})["Type"].(string)
+							if p, ok := _data.(map[string]interface{})["MountPoint"]; ok { // 可能不存在
+								volume["mount_point"] = p.(string)
+							}
 							results = append(results, volume)
 						}
 					}

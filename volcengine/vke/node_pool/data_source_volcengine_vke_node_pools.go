@@ -332,6 +332,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 										Computed:    true,
 										Description: "The Size of DataVolume.",
 									},
+									"mount_point": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The target mount directory of the disk.",
+									},
 								},
 							},
 							Description: "The DataVolume of NodeConfig.",
