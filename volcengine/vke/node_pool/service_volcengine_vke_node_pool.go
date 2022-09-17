@@ -481,20 +481,6 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
-
-				if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok {
-					(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{
-						"Labels": []interface{}{},
-						"Taints": []interface{}{},
-					}
-				} else {
-					if _, ok = (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"]; !ok {
-						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = []interface{}{}
-					}
-					if _, ok = (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"]; !ok {
-						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = []interface{}{}
-					}
-				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -509,6 +495,63 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						}
 					}
 				}
+
+				if d.HasChange("kubernetes_config") {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok { // 列表被删除
+						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{
+							"Labels": []interface{}{},
+							"Taints": []interface{}{},
+						}
+					}
+				}
+
+				labelsChange := false
+				taintsChange := false
+				if d.HasChange("kubernetes_config.0.taints") {
+					taintsChange = true
+				}
+				if d.HasChange("kubernetes_config.0.labels") {
+					labelsChange = true
+				}
+				if labelsChange || taintsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{}
+					}
+				}
+				if labelsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"]; !ok { // 被清空了
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = []interface{}{}
+					}
+				}
+				if taintsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = []interface{}{}
+					}
+				}
+
+				if labelsChange && (!taintsChange) {
+					var taints []interface{}
+					for _, taint := range d.Get("kubernetes_config.0.taints").([]interface{}) {
+						t := taint.(map[string]interface{})
+						taints = append(taints, map[string]interface{}{
+							"Key":    t["key"],
+							"Value":  t["value"],
+							"Effect": t["effect"],
+						})
+					}
+					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = taints
+				} else if taintsChange && (!labelsChange) {
+					var labels []interface{}
+					for _, label := range d.Get("kubernetes_config.0.labels").(*schema.Set).List() { // for set
+						t := label.(map[string]interface{})
+						labels = append(labels, map[string]interface{}{
+							"Key":   t["key"],
+							"Value": t["value"],
+						})
+					}
+					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = labels
+				}
+
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
