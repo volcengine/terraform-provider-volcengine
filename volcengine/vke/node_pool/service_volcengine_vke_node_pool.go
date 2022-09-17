@@ -481,6 +481,20 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
+
+				if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok {
+					(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{
+						"Labels": []interface{}{},
+						"Taints": []interface{}{},
+					}
+				} else {
+					if _, ok = (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = []interface{}{}
+					}
+					if _, ok = (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = []interface{}{}
+					}
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -495,7 +509,7 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						}
 					}
 				}
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
