@@ -222,6 +222,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"additional_container_storage_enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "The AdditionalContainerStorageEnabled of NodeConfig.",
 						},
 						"image_id": {
