@@ -385,9 +385,10 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 	}
 	if list, ok = v.([]interface{}); ok {
 		for index, v1 := range list {
+			_index := index
 			if m1, ok1 := v1.(map[string]interface{}); ok1 {
 				if isSet {
-					index = m.F(m1)
+					_index = m.F(m1)
 				}
 				for k2, v2 := range m1 {
 					flag := false
@@ -398,7 +399,7 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 						if len(indexes) > 0 {
 							schemaKey = fmt.Sprintf("%s.%d.%s", schemaChain+k, indexes[index], k2)
 						} else {
-							schemaKey = fmt.Sprintf("%s.%d.%s", schemaChain+k, index, k2)
+							schemaKey = fmt.Sprintf("%s.%d.%s", schemaChain+k, _index, k2)
 						}
 
 						if forceGet {

@@ -177,11 +177,13 @@ func BeforeTosPutAcl(d *schema.ResourceData, call SdkCall, data *map[string]inte
 	ownerId, _ := ObtainSdkValue("Owner.ID", (*data)[TosResponse])
 
 	grants, _ := ObtainSdkValue("Grants", sourceAclParam)
-	for _, grant := range grants.([]interface{}) {
-		id, _ := ObtainSdkValue("Grantee.ID", grant)
-		p, _ := ObtainSdkValue("Permission", grant)
-		if id == ownerId && p == "FULL_CONTROL" {
-			return false, fmt.Errorf("can not set FULL_CONTROL for owner")
+	if grants != nil {
+		for _, grant := range grants.([]interface{}) {
+			id, _ := ObtainSdkValue("Grantee.ID", grant)
+			p, _ := ObtainSdkValue("Permission", grant)
+			if id == ownerId && p == "FULL_CONTROL" {
+				return false, fmt.Errorf("can not set FULL_CONTROL for owner")
+			}
 		}
 	}
 
@@ -200,21 +202,23 @@ func ConvertTosAccountAcl() FieldResponseConvert {
 		var accountAcl []interface{}
 		owner, _ := ObtainSdkValue("Owner.ID", i)
 		grants, _ := ObtainSdkValue("Grants", i)
-		for _, grant := range grants.([]interface{}) {
-			permission, _ := ObtainSdkValue("Permission", grant)
-			id, _ := ObtainSdkValue("Grantee.ID", grant)
-			if id == nil {
-				continue
+		if grants != nil {
+			for _, grant := range grants.([]interface{}) {
+				permission, _ := ObtainSdkValue("Permission", grant)
+				id, _ := ObtainSdkValue("Grantee.ID", grant)
+				if id == nil {
+					continue
+				}
+				if id == owner && permission == "FULL_CONTROL" {
+					continue
+				}
+				g := map[string]interface{}{
+					"AccountId":  id,
+					"AclType":    "CanonicalUser",
+					"Permission": permission,
+				}
+				accountAcl = append(accountAcl, g)
 			}
-			if id == owner && permission == "FULL_CONTROL" {
-				continue
-			}
-			g := map[string]interface{}{
-				"AccountId":  id,
-				"AclType":    "CanonicalUser",
-				"Permission": permission,
-			}
-			accountAcl = append(accountAcl, g)
 		}
 		return accountAcl
 	}
@@ -228,39 +232,42 @@ func ConvertTosPublicAcl() FieldResponseConvert {
 			read  bool
 			write bool
 		)
-		for _, grant := range grants.([]interface{}) {
-			id, _ := ObtainSdkValue("Grantee.ID", grant)
-			canned, _ := ObtainSdkValue("Grantee.Canned", grant)
-			t, _ := ObtainSdkValue("Grantee.Type", grant)
-			permission, _ := ObtainSdkValue("Permission", grant)
-			if canned != nil && canned.(string) == "AllUsers" && t.(string) == "Group" {
-				if permission.(string) == "READ" {
-					read = true
-					continue
-				} else if permission.(string) == "WRITE" {
-					write = true
-					continue
+		if grants != nil {
+			for _, grant := range grants.([]interface{}) {
+				id, _ := ObtainSdkValue("Grantee.ID", grant)
+				canned, _ := ObtainSdkValue("Grantee.Canned", grant)
+				t, _ := ObtainSdkValue("Grantee.Type", grant)
+				permission, _ := ObtainSdkValue("Permission", grant)
+				if canned != nil && canned.(string) == "AllUsers" && t.(string) == "Group" {
+					if permission.(string) == "READ" {
+						read = true
+						continue
+					} else if permission.(string) == "WRITE" {
+						write = true
+						continue
+					}
 				}
-			}
 
-			if canned != nil && canned.(string) == "AuthenticatedUsers" && t.(string) == "Group" {
-				if permission.(string) == "READ" {
-					return "authenticated-read"
+				if canned != nil && canned.(string) == "AuthenticatedUsers" && t.(string) == "Group" {
+					if permission.(string) == "READ" {
+						return "authenticated-read"
+					}
+					break
 				}
-				break
-			}
 
-			if id != nil && id.(string) == owner.(string) && t.(string) == "CanonicalUser" {
-				if permission.(string) == "FULL_CONTROL" {
-					return "private"
-				} else if permission.(string) == "READ" {
-					return "bucket-owner-read"
+				if id != nil && id.(string) == owner.(string) && t.(string) == "CanonicalUser" {
+					if permission.(string) == "FULL_CONTROL" {
+						return "private"
+					} else if permission.(string) == "READ" {
+						return "bucket-owner-read"
+					}
+					break
+
 				}
-				break
 
 			}
-
 		}
+
 		if read && !write {
 			return "public-read"
 		}
