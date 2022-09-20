@@ -208,10 +208,7 @@ func (VolcengineTosObjectService) WithResourceResponseHandlers(m map[string]inte
 			"EnableVersion": {
 				Convert: func(i interface{}) interface{} {
 					status, _ := ve.ObtainSdkValue("Status", i)
-					if status.(string) != "Enabled" {
-						return false
-					}
-					return true
+					return status.(string) == "Enabled"
 				},
 			},
 			"AccountAcl": {

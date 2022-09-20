@@ -29,18 +29,18 @@ var tosUnmarshalHandler = request.NamedHandler{Name: "TosUnmarshalHandler", Fn: 
 var tosUnmarshalErrorHandler = request.NamedHandler{Name: "TosUnmarshalErrorHandler", Fn: tosUnmarshalError}
 
 func tosSign(req *request.Request) {
-	region := req.ClientInfo.SigningRegion
+	//region := req.ClientInfo.SigningRegion
 
 	var (
 		c Credentials
 	)
 
-	region = volcengine.StringValue(req.Config.Region)
+	region := volcengine.StringValue(req.Config.Region)
 
-	name := req.ClientInfo.SigningName
-	if name == "" {
-		name = req.ClientInfo.ServiceID
-	}
+	//name := req.ClientInfo.SigningName
+	//if name == "" {
+	//	name = req.ClientInfo.ServiceID
+	//}
 
 	value, _ := req.Config.Credentials.Get()
 
