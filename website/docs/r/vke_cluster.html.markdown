@@ -36,7 +36,7 @@ resource "volcengine_vke_cluster" "foo" {
     }
   }
   services_config {
-    service_cidrsv4 = ["172.30.0.0/17"]
+    service_cidrsv4 = ["192.168.0.0/16"]
   }
 }
 ```
@@ -64,7 +64,7 @@ The `cluster_config` object supports the following:
 
 The `flannel_config` object supports the following:
 
-* `max_pods_per_node` - (Optional, ForceNew) The maximum number of single-node Pod instances for a Flannel container network.
+* `max_pods_per_node` - (Optional, ForceNew) The maximum number of single-node Pod instances for a Flannel container network, the value can be `16` or `32` or `64` or `128` or `256`.
 * `pod_cidrs` - (Optional, ForceNew) Pod CIDR for the Flannel container network.
 
 The `pods_config` object supports the following:

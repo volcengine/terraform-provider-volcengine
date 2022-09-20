@@ -1,5 +1,5 @@
 ---
-subcategory: "TOS"
+subcategory: "TOS(BETA)"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_tos_bucket"
 sidebar_current: "docs-volcengine-resource-tos_bucket"

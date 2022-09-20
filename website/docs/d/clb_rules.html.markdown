@@ -28,11 +28,11 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `rules` - The collection of Rule query.
-  * `description` - The Description of Rule.
-  * `domain` - The Domain of Rule.
-  * `id` - The Id of Rule.
-  * `rule_id` - The Id of Rule.
-  * `server_group_id` - The Id of Server Group.
-  * `url` - The Url of Rule.
+    * `description` - The Description of Rule.
+    * `domain` - The Domain of Rule.
+    * `id` - The Id of Rule.
+    * `rule_id` - The Id of Rule.
+    * `server_group_id` - The Id of Server Group.
+    * `url` - The Url of Rule.
 
 

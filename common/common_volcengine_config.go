@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/volcengine/volcengine-go-sdk/service/autoscaling"
 	"github.com/volcengine/volcengine-go-sdk/service/clb"
@@ -28,6 +29,7 @@ type Config struct {
 	Endpoint        string
 	DisableSSL      bool
 	CustomerHeaders map[string]string
+	ProxyUrl        string
 }
 
 func (c *Config) Client() (*SdkClient, error) {
@@ -47,6 +49,15 @@ func (c *Config) Client() (*SdkClient, error) {
 			}
 		}).
 		WithEndpoint(volcengineutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
+
+	if c.ProxyUrl != "" {
+		u, _ := url.Parse(c.ProxyUrl)
+		t := &http.Transport{
+			Proxy: http.ProxyURL(u),
+		}
+		httpClient := http.DefaultClient
+		httpClient.Transport = t
+	}
 
 	sess, err := session.NewSession(config)
 	if err != nil {

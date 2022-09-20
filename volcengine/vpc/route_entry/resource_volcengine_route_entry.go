@@ -49,7 +49,7 @@ func ResourceVolcengineRouteEntry() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "The type of the next hop.",
+				Description:  "The type of the next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`.",
 				ValidateFunc: validation.StringInSlice([]string{"Instance", "NetworkInterface", "NatGW", "VpnGW"}, false),
 			},
 			"next_hop_id": {

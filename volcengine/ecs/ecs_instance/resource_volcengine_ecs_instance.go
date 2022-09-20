@@ -13,6 +13,7 @@ import (
 
 Import
 ECS Instance can be imported using the id, e.g.
+If Import,The data_volumes is sort by volume name
 ```
 $ terraform import volcengine_ecs_instance.default i-mizl7m1kqccg5smt1bdpijuj
 ```
@@ -32,8 +33,9 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				Description: "The available zone ID of ECS instance.",
 			},
 			"image_id": {
@@ -86,13 +88,13 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 					"PostPaid",
 					"PrePaid",
 				}, false),
-				Description: "The charge type of ECS instance.",
+				Description: "The charge type of ECS instance, the value can be `PrePaid` or `PostPaid`.",
 			},
 			"user_data": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				DiffSuppressFunc: ve.UserDateImportDiffSuppress,
+				DiffSuppressFunc: UserDateImportDiffSuppress,
 				Description:      "The user data of ECS instance.",
 			},
 			"security_enhancement_strategy": {
@@ -103,9 +105,8 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 					"Active",
 					"InActive",
 				}, false),
-				Default:          "Active",
-				DiffSuppressFunc: ve.EcsInstanceImportDiffSuppress,
-				Description:      "The security enhancement strategy of ECS instance.Default is true.",
+				Default:     "Active",
+				Description: "The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"hpc_cluster_id": {
 				Type:        schema.TypeString,
@@ -117,7 +118,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Default:          12,
-				DiffSuppressFunc: ve.EcsInstanceImportDiffSuppress,
+				DiffSuppressFunc: EcsInstanceImportDiffSuppress,
 				Description:      "The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.",
 			},
 			//"period_unit": {
@@ -135,23 +136,23 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Optional:         true,
 				ForceNew:         true,
 				Default:          true,
-				DiffSuppressFunc: ve.EcsInstanceImportDiffSuppress,
-				Description:      "The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.",
+				DiffSuppressFunc: EcsInstanceImportDiffSuppress,
+				Description:      "The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"auto_renew_period": {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				ForceNew:         true,
 				Default:          1,
-				DiffSuppressFunc: ve.EcsInstanceImportDiffSuppress,
-				Description:      "The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.",
+				DiffSuppressFunc: EcsInstanceImportDiffSuppress,
+				Description:      "The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 
 			"include_data_volumes": {
 				Type:             schema.TypeBool,
 				Optional:         true,
 				Default:          false,
-				DiffSuppressFunc: ve.EcsInstanceImportDiffSuppress,
+				DiffSuppressFunc: EcsInstanceImportDiffSuppress,
 				Description:      "The include data volumes flag of ECS instance.Only effective when change instance charge type.include_data_volumes.",
 			},
 
@@ -180,11 +181,17 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of primary networkInterface.",
 			},
 
+			"primary_ip_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The private ip address of primary networkInterface.",
+			},
+
 			"system_volume_type": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of system volume.",
+				Description: "The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 			},
 
 			"system_volume_size": {
@@ -199,19 +206,25 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of system volume.",
 			},
 
+			"deployment_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of Ecs Deployment Set.",
+			},
+
 			"data_volumes": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    15,
 				MinItems:    1,
-				Description: "The data volume collection of  ECS instance.",
+				Description: "The data volumes collection of  ECS instance.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"volume_type": {
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The type of volume.",
+							Description: "The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 						},
 						"size": {
 							Type:        schema.TypeInt,
@@ -254,6 +267,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Set: schema.HashString,
+						},
+						"primary_ip_address": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The private ip address of secondary networkInterface.",
 						},
 					},
 				},
