@@ -45,6 +45,7 @@ In addition to all arguments above, the following attributes are exported:
     * `create_client_token` - The ClientToken when successfully created.
     * `create_time` - The CreateTime of NodePool.
     * `data_volumes` - The DataVolume of NodeConfig.
+        * `mount_point` - The target mount directory of the disk.
         * `size` - The Size of DataVolume.
         * `type` - The Type of DataVolume.
     * `desired_replicas` - The DesiredReplicas of AutoScaling.

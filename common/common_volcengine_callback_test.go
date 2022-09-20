@@ -16,12 +16,12 @@ func TestSortAndStartTransJson1(t *testing.T) {
 			"ClusterId": "12345",
 		},
 	}
-	resp := sortAndStartTransJson(req)
+	resp := SortAndStartTransJson(req)
 	assert.Equal(t, resp, target)
 }
 
 func TestSortAndStartTransJson2(t *testing.T) {
-	req := sortAndStartTransJson(map[string]interface{}{
+	req := SortAndStartTransJson(map[string]interface{}{
 		"Filter.Ids.1": "id123",
 		"Filter.Ids.2": "id456",
 	})
@@ -30,12 +30,12 @@ func TestSortAndStartTransJson2(t *testing.T) {
 			"Ids": []interface{}{"id123", "id456"},
 		},
 	}
-	resp := sortAndStartTransJson(req)
+	resp := SortAndStartTransJson(req)
 	assert.Equal(t, resp, target)
 }
 
 func TestSortAndStartTransJson3(t *testing.T) {
-	req := sortAndStartTransJson(map[string]interface{}{
+	req := SortAndStartTransJson(map[string]interface{}{
 		"Filter.ClusterId": "12345",
 		"Filter.Ids.1":     "id123",
 		"Filter.Ids.2":     "id456",
@@ -61,7 +61,7 @@ func TestSortAndStartTransJson3(t *testing.T) {
 			},
 		},
 	}
-	resp := sortAndStartTransJson(req)
+	resp := SortAndStartTransJson(req)
 	assert.Equal(t, resp, target)
 
 	str := `{"Filter":{"ClusterId":"12345","Ids":["id123","id456"],"Nets":[{"Subnet":"subnet1"},{"Subnet":"subnet2"},{"Subnet":"subnet3"}]}}`

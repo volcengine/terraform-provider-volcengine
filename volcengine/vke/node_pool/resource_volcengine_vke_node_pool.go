@@ -170,8 +170,8 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Type:         schema.TypeString,
 										Optional:     true,
 										ForceNew:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
-										Description:  "The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0`.",
+										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0", "ESSD_FlexPL"}, false),
+										Description:  "The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
@@ -194,8 +194,8 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Type:         schema.TypeString,
 										Optional:     true,
 										ForceNew:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0"}, false),
-										Description:  "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0`.",
+										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0", "ESSD_FlexPL"}, false),
+										Description:  "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
@@ -203,6 +203,12 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										ForceNew:     true,
 										ValidateFunc: validation.IntBetween(20, 32768),
 										Description:  "The Size of DataVolumes, the value range in 20~32768.",
+									},
+									"mount_point": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: "The target mount directory of the disk. Must start with `/`.",
 									},
 								},
 							},
@@ -216,6 +222,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"additional_container_storage_enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							ForceNew:    true,
 							Description: "The AdditionalContainerStorageEnabled of NodeConfig.",
 						},
 						"image_id": {

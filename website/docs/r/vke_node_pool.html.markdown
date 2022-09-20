@@ -61,8 +61,9 @@ The `auto_scaling` object supports the following:
 
 The `data_volumes` object supports the following:
 
+* `mount_point` - (Optional, ForceNew) The target mount directory of the disk. Must start with `/`.
 * `size` - (Optional, ForceNew) The Size of DataVolumes, the value range in 20~32768.
-* `type` - (Optional, ForceNew) The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0`.
+* `type` - (Optional, ForceNew) The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.
 
 The `kubernetes_config` object supports the following:
 
@@ -85,7 +86,7 @@ The `node_config` object supports the following:
 * `instance_type_ids` - (Required, ForceNew) The InstanceTypeIds of NodeConfig.
 * `security` - (Required) The Security of NodeConfig.
 * `subnet_ids` - (Required, ForceNew) The SubnetIds of NodeConfig.
-* `additional_container_storage_enabled` - (Optional) The AdditionalContainerStorageEnabled of NodeConfig.
+* `additional_container_storage_enabled` - (Optional, ForceNew) The AdditionalContainerStorageEnabled of NodeConfig.
 * `auto_renew_period` - (Optional, ForceNew) The AutoRenewPeriod of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 6, 12. Unit: month. when InstanceChargeType is PrePaid and AutoRenew enable, default value is 1.
 * `auto_renew` - (Optional, ForceNew) Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.
 * `data_volumes` - (Optional, ForceNew) The DataVolumes of NodeConfig.
@@ -104,7 +105,7 @@ The `security` object supports the following:
 The `system_volume` object supports the following:
 
 * `size` - (Optional, ForceNew) The Size of SystemVolume, the value range in 20~2048.
-* `type` - (Optional, ForceNew) The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0`.
+* `type` - (Optional, ForceNew) The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.
 
 The `taints` object supports the following:
 
