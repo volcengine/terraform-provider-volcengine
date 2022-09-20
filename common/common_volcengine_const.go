@@ -29,3 +29,20 @@ const (
 	ContentTypeDefault RequestContentType = iota
 	ContentTypeJson
 )
+
+type ServiceCategory int
+
+const (
+	DefaultServiceCategory ServiceCategory = iota
+	ServiceTos
+)
+
+type SpecialParamType int
+
+const (
+	DomainParam SpecialParamType = iota
+	HeaderParam
+	PathParam
+	UrlParam
+	FilePathParam
+)

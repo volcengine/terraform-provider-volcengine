@@ -17,19 +17,20 @@ type Callback struct {
 }
 
 type SdkCall struct {
-	Action         string
-	BeforeCall     BeforeCallFunc
-	ExecuteCall    ExecuteCallFunc
-	CallError      CallErrorFunc
-	AfterCall      AfterCallFunc
-	Convert        map[string]RequestConvert
-	ConvertMode    RequestConvertMode
-	SdkParam       *map[string]interface{}
-	RequestIdField string
-	Refresh        *StateRefresh
-	ExtraRefresh   map[ResourceService]*StateRefresh
-	ContentType    RequestContentType
-	LockId         LockId
+	Action          string
+	BeforeCall      BeforeCallFunc
+	ExecuteCall     ExecuteCallFunc
+	CallError       CallErrorFunc
+	AfterCall       AfterCallFunc
+	Convert         map[string]RequestConvert
+	ConvertMode     RequestConvertMode
+	SdkParam        *map[string]interface{}
+	RequestIdField  string
+	Refresh         *StateRefresh
+	ExtraRefresh    map[ResourceService]*StateRefresh
+	ContentType     RequestContentType
+	LockId          LockId
+	ServiceCategory ServiceCategory
 }
 
 type StateRefresh struct {
@@ -69,7 +70,7 @@ func (c *SdkCall) InitWriteCall(resourceData *schema.ResourceData, resource *sch
 	return err
 }
 
-func sortAndStartTransJson(source map[string]interface{}) map[string]interface{} {
+func SortAndStartTransJson(source map[string]interface{}) map[string]interface{} {
 	target := make(map[string]interface{})
 	var a []string
 	for k := range source {
@@ -162,6 +163,19 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 					resp *map[string]interface{}
 				)
 				doExecute := true
+
+				switch fn.ServiceCategory {
+				case ServiceTos:
+					var trans map[string]interface{}
+					trans, err = convertToTosParams(fn.Convert, *fn.SdkParam)
+					if err != nil {
+						return err
+					}
+					fn.SdkParam = &trans
+				case DefaultServiceCategory:
+					break
+				}
+
 				if fn.BeforeCall != nil {
 					doExecute, err = fn.BeforeCall(d, client, fn)
 				}
@@ -170,7 +184,7 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 					case ContentTypeDefault:
 						break
 					case ContentTypeJson:
-						jsonParam := sortAndStartTransJson(*fn.SdkParam)
+						jsonParam := SortAndStartTransJson(*fn.SdkParam)
 						fn.SdkParam = &jsonParam
 						break
 					}

@@ -26,6 +26,7 @@ type DataSourceInfo struct {
 	CollectField     string
 	ContentType      RequestContentType
 	ExtraData        ExtraData
+	ServiceCategory  ServiceCategory
 }
 
 func DataSourceToRequest(d *schema.ResourceData, r *schema.Resource, info DataSourceInfo) (req map[string]interface{}, err error) {

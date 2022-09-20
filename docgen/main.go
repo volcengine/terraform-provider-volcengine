@@ -122,6 +122,7 @@ var resourceKeys = map[string]string{
 	"escloud": "ESCLOUD",
 	"rds":     "RDS_MYSQL",
 	"rds_v2":  "RDS_MYSQL",
+	"tos":     "TOS(BETA)",
 }
 
 type Products struct {
