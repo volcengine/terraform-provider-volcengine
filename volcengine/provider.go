@@ -45,6 +45,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
@@ -170,6 +172,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
 			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
 			"volcengine_escloud_zones":     esZone.DataSourceVolcengineESCloudZones(),
+
+			// ================ TOS ================
+			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
+			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -240,6 +246,10 @@ func Provider() terraform.ResourceProvider {
 
 			// ================ ESCloud ================
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
+
+			//================= TOS =================
+			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object": object.ResourceVolcengineTosObject(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

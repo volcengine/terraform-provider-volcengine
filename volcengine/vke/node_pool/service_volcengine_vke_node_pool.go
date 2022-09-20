@@ -306,15 +306,7 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 							},
 						},
 						"data_volumes": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"type": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"size": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
@@ -344,29 +336,10 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"effect": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -469,29 +442,10 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"effect": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -541,7 +495,64 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						}
 					}
 				}
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+
+				if d.HasChange("kubernetes_config") {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok { // 列表被删除
+						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{
+							"Labels": []interface{}{},
+							"Taints": []interface{}{},
+						}
+					}
+				}
+
+				labelsChange := false
+				taintsChange := false
+				if d.HasChange("kubernetes_config.0.taints") {
+					taintsChange = true
+				}
+				if d.HasChange("kubernetes_config.0.labels") {
+					labelsChange = true
+				}
+				if labelsChange || taintsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{}
+					}
+				}
+				if labelsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"]; !ok { // 被清空了
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = []interface{}{}
+					}
+				}
+				if taintsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = []interface{}{}
+					}
+				}
+
+				if labelsChange && (!taintsChange) {
+					var taints []interface{}
+					for _, taint := range d.Get("kubernetes_config.0.taints").([]interface{}) {
+						t := taint.(map[string]interface{})
+						taints = append(taints, map[string]interface{}{
+							"Key":    t["key"],
+							"Value":  t["value"],
+							"Effect": t["effect"],
+						})
+					}
+					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = taints
+				} else if taintsChange && (!labelsChange) {
+					var labels []interface{}
+					for _, label := range d.Get("kubernetes_config.0.labels").(*schema.Set).List() { // for set
+						t := label.(map[string]interface{})
+						labels = append(labels, map[string]interface{}{
+							"Key":   t["key"],
+							"Value": t["value"],
+						})
+					}
+					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = labels
+				}
+
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
@@ -732,6 +743,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 							volume := make(map[string]interface{}, 0)
 							volume["size"] = strconv.FormatFloat(_data.(map[string]interface{})["Size"].(float64), 'g', 5, 32)
 							volume["type"] = _data.(map[string]interface{})["Type"].(string)
+							if p, ok := _data.(map[string]interface{})["MountPoint"]; ok { // 可能不存在
+								volume["mount_point"] = p.(string)
+							}
 							results = append(results, volume)
 						}
 					}
