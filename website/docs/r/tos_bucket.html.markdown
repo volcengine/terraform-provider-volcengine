@@ -31,7 +31,7 @@ The following arguments are supported:
 * `account_acl` - (Optional) The user set of grant full control.
 * `enable_version` - (Optional) The flag of enable tos version.
 * `public_acl` - (Optional) The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.
-* `storage_class` - (Optional, ForceNew) The storage type of the object.Valid value is STANDARD|IA.
+* `storage_class` - (Optional, ForceNew) The storage type of the object.Valid value is STANDARD|IA|ARCHIVE_FR.Default is STANDARD.
 
 The `account_acl` object supports the following:
 
