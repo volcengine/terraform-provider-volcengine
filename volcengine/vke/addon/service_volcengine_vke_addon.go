@@ -1,15 +1,16 @@
 package addon
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 )
 
 type VolcengineVkeAddonService struct {
@@ -34,30 +35,8 @@ func (s *VolcengineVkeAddonService) ReadResources(condition map[string]interface
 		results interface{}
 		ok      bool
 	)
-
-	if filter, filterExist := condition["Filter"]; filterExist {
-		if podsConfig, exist := filter.(map[string]interface{})["PodsConfig"]; exist {
-			if podNetworkMode, ex := podsConfig.(map[string]interface{})["PodNetworkMode"]; ex {
-				condition["Filter"].(map[string]interface{})["PodsConfig.PodNetworkMode"] = podNetworkMode
-				delete(condition["Filter"].(map[string]interface{}), "PodsConfig")
-			}
-		}
-	}
-
-	// 适配 Conditions.Type 字段
-	if filter, filterExist := condition["Filter"]; filterExist {
-		if statuses, exist := filter.(map[string]interface{})["Statuses"]; exist {
-			for index, status := range statuses.([]interface{}) {
-				if ty, ex := status.(map[string]interface{})["ConditionsType"]; ex {
-					condition["Filter"].(map[string]interface{})["Statuses"].([]interface{})[index].(map[string]interface{})["Conditions.Type"] = ty
-					delete(condition["Filter"].(map[string]interface{})["Statuses"].([]interface{})[index].(map[string]interface{}), "ConditionsType")
-				}
-			}
-		}
-	}
-
 	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		action := "ListClusters"
+		action := "ListAddons"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
@@ -70,6 +49,7 @@ func (s *VolcengineVkeAddonService) ReadResources(condition map[string]interface
 				return data, err
 			}
 		}
+		logger.Debug(logger.RespFormat, action, condition, *resp)
 
 		results, err = ve.ObtainSdkValue("Result.Items", *resp)
 		if err != nil {
@@ -83,106 +63,29 @@ func (s *VolcengineVkeAddonService) ReadResources(condition map[string]interface
 		}
 		return data, err
 	})
-	if err != nil {
-		return data, err
-	}
-
-	// get extra data
-	for _, d := range data {
-		if cluster, ok := d.(map[string]interface{}); ok {
-			// 2. get kubeconfig and eip allocation id
-			clusterId := cluster["Id"].(string)
-			publicAccess, err := ve.ObtainSdkValue("ClusterConfig.ApiServerPublicAccessEnabled", cluster)
-			if err != nil {
-				logger.Info("Get cluster public access failed, cluster: %+v, err: %s", cluster, err.Error())
-				return data, err
-			}
-			publicIp, err := ve.ObtainSdkValue("ClusterConfig.ApiServerEndpoints.PublicIp.Ipv4", cluster)
-			if err != nil || publicIp == "" {
-				logger.Info("Get cluster public ip error or public ip is empty, cluster: %+v, err: %v", cluster, err)
-			} else {
-				if publicAccess, ok := publicAccess.(bool); ok && publicAccess {
-					// a. get public kubeconfig
-					publicKubeconfigResp, err := s.getKubeconfig(clusterId, "Public")
-					if err != nil {
-						logger.Info("Get public kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
-						return data, err
-					}
-
-					if kubeconfig, ok := (*publicKubeconfigResp)["Result"].(map[string]interface{}); ok {
-						cluster["KubeconfigPublic"] = kubeconfig["Kubeconfig"]
-					}
-
-					// b. get eip data
-					eipAddressResp, err := s.Client.VpcClient.DescribeEipAddressesCommon(&map[string]interface{}{
-						"EipAddresses.1": publicIp,
-					})
-					if err != nil {
-						return data, err
-					}
-					eipAddresses, err := ve.ObtainSdkValue("Result.EipAddresses", *eipAddressResp)
-					if err != nil {
-						return data, err
-					}
-
-					if eipAddresses, ok := eipAddresses.([]interface{}); !ok {
-						return data, errors.New("Result.EipAddresses is not Slice")
-					} else if len(eipAddresses) == 0 {
-						return data, errors.New(fmt.Sprintf("Eip %s not found", publicIp))
-					} else {
-						// get eip allocation id
-						cluster["EipAllocationId"] = eipAddresses[0].(map[string]interface{})["AllocationId"].(string)
-
-						// get eip bandwidth, billing_type, isp
-						if clusterConfig, exist := cluster["ClusterConfig"]; exist {
-							if apiServerPublicAccessConfig, exist := clusterConfig.(map[string]interface{})["ApiServerPublicAccessConfig"]; exist {
-								if publicAccessNetworkConfig, exist := apiServerPublicAccessConfig.(map[string]interface{})["PublicAccessNetworkConfig"]; exist {
-									if eipConfig, ok := publicAccessNetworkConfig.(map[string]interface{}); ok {
-										eipConfig["BillingType"] = eipAddresses[0].(map[string]interface{})["BillingType"]
-										eipConfig["Bandwidth"] = eipAddresses[0].(map[string]interface{})["Bandwidth"]
-										eipConfig["Isp"] = eipAddresses[0].(map[string]interface{})["ISP"]
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-
-			privateKubeconfigResp, err := s.getKubeconfig(clusterId, "Private")
-			if err != nil {
-				logger.Info("Get private kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
-				return data, err
-			}
-
-			if kubeconfig, ok := (*privateKubeconfigResp)["Result"].(map[string]interface{}); ok {
-				cluster["KubeconfigPrivate"] = kubeconfig["Kubeconfig"]
-			}
-		}
-	}
-
 	return data, err
 }
 
-func (s *VolcengineVkeAddonService) getKubeconfig(clusterId, accessType string) (*map[string]interface{}, error) {
-	kubeconfigReq := &map[string]interface{}{
-		"ClusterId": clusterId,
-		"Type":      accessType,
-	}
-	return s.Client.UniversalClient.DoCall(getUniversalInfo("GetKubeconfig"), kubeconfigReq)
-}
-
-func (s *VolcengineVkeAddonService) ReadResource(resourceData *schema.ResourceData, clusterId string) (data map[string]interface{}, err error) {
+func (s *VolcengineVkeAddonService) ReadResource(resourceData *schema.ResourceData, resourceId string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
 	)
-	if clusterId == "" {
-		clusterId = s.ReadResourceId(resourceData.Id())
+	if resourceId == "" {
+		resourceId = s.ReadResourceId(resourceData.Id())
 	}
+	ids := strings.Split(resourceId, ":")
+	if len(ids) != 2 {
+		return map[string]interface{}{}, fmt.Errorf("invalid addon id")
+	}
+
+	clusterId := ids[0]
+	name := ids[1]
+
 	req := map[string]interface{}{
 		"Filter": map[string]interface{}{
-			"Ids": []string{clusterId},
+			"ClusterIds": []string{clusterId},
+			"Names":      []string{name},
 		},
 	}
 	results, err = s.ReadResources(req)
@@ -195,7 +98,7 @@ func (s *VolcengineVkeAddonService) ReadResource(resourceData *schema.ResourceDa
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("Vke Cluster %s not exist ", clusterId)
+		return data, fmt.Errorf("Vke Addon %s:%s not exist ", clusterId, name)
 	}
 	return data, err
 }
@@ -224,109 +127,31 @@ func (s *VolcengineVkeAddonService) RefreshResourceState(resourceData *schema.Re
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf(" Vke Cluster status error, status:%s", status.(string))
+					return nil, "", fmt.Errorf(" Vke addon status error, status:%s", status.(string))
 				}
 			}
-			//注意 返回的第一个参数不能为空 否则会一直等下去
 			return demo, status.(string), err
 		},
 	}
 
 }
 
-func (VolcengineVkeAddonService) WithResourceResponseHandlers(cluster map[string]interface{}) []ve.ResourceResponseHandler {
-	if clusterConfig, ok := cluster["ClusterConfig"]; ok {
-		if apiServerPublicAccessConfig, ok := clusterConfig.(map[string]interface{})["ApiServerPublicAccessConfig"]; ok {
-			if publicAccessNetworkConfig, ok := apiServerPublicAccessConfig.(map[string]interface{})["PublicAccessNetworkConfig"]; ok {
-				apiServerPublicAccessConfig.(map[string]interface{})["PublicAccessNetworkConfig"] = []interface{}{publicAccessNetworkConfig}
-			}
-			clusterConfig.(map[string]interface{})["ApiServerPublicAccessConfig"] = []interface{}{apiServerPublicAccessConfig}
-		}
-	}
-
-	if podsConfig, ok := cluster["PodsConfig"]; ok {
-		if flannelConfig, ok := podsConfig.(map[string]interface{})["FlannelConfig"]; ok {
-			podsConfig.(map[string]interface{})["FlannelConfig"] = []interface{}{flannelConfig}
-		}
-		if vpcCniConfig, ok := podsConfig.(map[string]interface{})["VpcCniConfig"]; ok {
-			podsConfig.(map[string]interface{})["VpcCniConfig"] = []interface{}{vpcCniConfig}
-		}
-	}
-
-	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return cluster, map[string]ve.ResponseConvert{
-			"ClusterConfig": {
-				TargetField: "cluster_config",
-			},
-		}, nil
-	}
-	return []ve.ResourceResponseHandler{handler}
+func (VolcengineVkeAddonService) WithResourceResponseHandlers(data map[string]interface{}) []ve.ResourceResponseHandler {
+	return []ve.ResourceResponseHandler{}
 }
 
 func (s *VolcengineVkeAddonService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateCluster",
+			Action:      "CreateAddon",
 			ContentType: ve.ContentTypeJson,
-			Convert: map[string]ve.RequestConvert{
-				"cluster_config": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"subnet_ids": {
-							ConvertType: ve.ConvertJsonArray,
-						},
-						"api_server_public_access_config": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"public_access_network_config": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
-						},
-					},
-				},
-				"pods_config": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"flannel_config": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"pod_cidrs": {
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-						"vpc_cni_config": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"subnet_ids": {
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
-				},
-				"services_config": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"service_cidrsv4": {
-							ConvertType: ve.ConvertJsonArray,
-						},
-					},
-				},
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				return true, nil
-			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//创建cluster
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				//注意 获取内容 这个地方不能是指针 需要转一次
-				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
-				d.SetId(id.(string))
+				id := fmt.Sprintf("%s:%s", d.Get("cluster_id"), d.Get("name"))
+				d.SetId(id)
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
@@ -342,63 +167,24 @@ func (s *VolcengineVkeAddonService) CreateResource(resourceData *schema.Resource
 func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "UpdateClusterConfig",
+			Action:      "UpdateAddonConfig",
 			ContentType: ve.ContentTypeJson,
-			Convert: map[string]ve.RequestConvert{
-				"cluster_config": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"subnet_ids": {
-							ConvertType: ve.ConvertJsonArray,
-						},
-						"api_server_public_access_config": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"public_access_network_config": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
-						},
-					},
-				},
-				"pods_config": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"flannel_config": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"pod_cidrs": {
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-						"vpc_cni_config": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"subnet_ids": {
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
-				},
-				"services_config": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"service_cidrsv4": {
-							ConvertType: ve.ConvertJsonArray,
-						},
-					},
-				},
-			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-
-				(*call.SdkParam)["Id"] = d.Id()
+				databaseId := d.Id()
+				ids := strings.Split(databaseId, ":")
+				if len(ids) != 2 {
+					return false, fmt.Errorf("invalid addon id")
+				}
+				(*call.SdkParam)["ClusterId"] = ids[0]
+				(*call.SdkParam)["Name"] = ids[1]
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//修改cluster属性
+				req, err := json.Marshal(*call.SdkParam)
+				if err != nil {
+					return nil, err
+				}
+				logger.Debug(logger.ReqFormat, call.Action, string(req))
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
@@ -407,65 +193,34 @@ func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.Resource
 			},
 		},
 	}
-
-	if resourceData.HasChange("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth") &&
-		!resourceData.HasChange("cluster_config.0.api_server_public_access_enabled") {
-		// enable public access, vke will create eip automatic
-		eipAllocationId := resourceData.Get("eip_allocation_id").(string)
-		modifyEipCallback := ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "ModifyEipAddresses",
-				ContentType: ve.ContentTypeDefault,
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					(*call.SdkParam)["AllocationId"] = eipAllocationId
-					(*call.SdkParam)["Bandwidth"] = d.Get("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth")
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					//修改eip属性
-					return s.Client.VpcClient.ModifyEipAddressAttributesCommon(call.SdkParam)
-				},
-				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-					eip_address.NewEipAddressService(s.Client): {
-						Target:     []string{"Available", "Attached", "Attaching", "Detaching"},
-						Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
-						ResourceId: eipAllocationId,
-					},
-				},
-			},
-		}
-		return []ve.Callback{modifyEipCallback, callback}
-	}
-
 	return []ve.Callback{callback}
 }
 
 func (s *VolcengineVkeAddonService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DeleteCluster",
+			Action:      "DeleteAddon",
 			ContentType: ve.ContentTypeJson,
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Id"] = resourceData.Id()
-				(*call.SdkParam)["CascadingDeleteResources"] = []string{"NodePoolResource", "Clb", "Nat"}
+				databaseId := d.Id()
+				ids := strings.Split(databaseId, ":")
+				if len(ids) != 2 {
+					return false, fmt.Errorf("invalid addon id")
+				}
+				(*call.SdkParam)["ClusterId"] = ids[0]
+				(*call.SdkParam)["Name"] = ids[1]
+				(*call.SdkParam)["CascadingDeleteResources"] = []string{"Crd"}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//删除Cluster
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
-				if protection, ok := d.Get("delete_protection_enabled").(bool); ok && protection {
-					// 开启集群保护，直接返回失败
-					return baseErr
-				}
-
 				//出现错误后重试
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
 					_, callErr := s.ReadResource(d, "")
@@ -473,7 +228,7 @@ func (s *VolcengineVkeAddonService) RemoveResource(resourceData *schema.Resource
 						if ve.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on  reading cluster on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on  reading addon on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
@@ -491,15 +246,21 @@ func (s *VolcengineVkeAddonService) RemoveResource(resourceData *schema.Resource
 func (s *VolcengineVkeAddonService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "Filter.Ids",
+			"cluster_ids": {
+				TargetField: "Filter.ClusterIds",
 				ConvertType: ve.ConvertJsonArray,
 			},
-			"delete_protection_enabled": {
-				TargetField: "Filter.DeleteProtectionEnabled",
+			"names": {
+				TargetField: "Filter.Names",
+				ConvertType: ve.ConvertJsonArray,
 			},
-			"pods_config_pod_network_mode": {
-				TargetField: "Filter.PodsConfig.PodNetworkMode",
+			"deploy_mode": {
+				TargetField: "Filter.DeployModes",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"deploy_node_types": {
+				TargetField: "Filter.DeployNodeTypes",
+				ConvertType: ve.ConvertJsonArray,
 			},
 			"statuses": {
 				TargetField: "Filter.Statuses",
@@ -522,16 +283,7 @@ func (s *VolcengineVkeAddonService) DatasourceResources(*schema.ResourceData, *s
 		},
 		ContentType:  ve.ContentTypeJson,
 		NameField:    "Name",
-		IdField:      "Id",
-		CollectField: "clusters",
-		ResponseConverts: map[string]ve.ResponseConvert{
-			"ClusterConfig": {
-				TargetField: "cluster_config",
-				Convert: func(i interface{}) interface{} {
-					return i
-				},
-			},
-		},
+		CollectField: "addons",
 	}
 }
 
