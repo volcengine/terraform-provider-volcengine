@@ -193,7 +193,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 							Description: "Address description.",
 						},
 						"auto_add_new_nodes": {
-							Type:        schema.TypeBool,
+							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "When the terminal type is read-write terminal or read-only terminal, it supports setting whether new nodes are automatically added. Value:\nTRUE - join automatically\nFALSE - do not automatically join\nDefault value FALSE.",
 						},
@@ -208,10 +208,28 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 							Description: "Whether global read-only is enabled, value: Enable: Enable. Disable: Disabled.",
 						},
 						"read_only_node_weight": {
-							Type:        schema.TypeMap,
+							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "The list of nodes configured by the connection terminal and the corresponding read-only weights.",
-							Elem:        schema.TypeInt,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"node_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ID of the node.",
+									},
+									"node_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The type of the node.",
+									},
+									"weight": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The weight of the node.",
+									},
+								},
+							},
 						},
 						"address": {
 							Type:        schema.TypeList,
