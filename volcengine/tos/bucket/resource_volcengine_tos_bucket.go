@@ -68,9 +68,10 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"STANDARD",
 					"IA",
+					"ARCHIVE_FR",
 				}, false),
 				Default:     "STANDARD",
-				Description: "The storage type of the object.Valid value is STANDARD|IA.",
+				Description: "The storage type of the object.Valid value is STANDARD|IA|ARCHIVE_FR.Default is STANDARD.",
 			},
 			"enable_version": {
 				Type:        schema.TypeBool,
