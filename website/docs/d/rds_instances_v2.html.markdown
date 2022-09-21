@@ -93,10 +93,7 @@ Year - Package year.
             * `network_type` - Network address type, temporarily Private, Public, PublicService.
             * `port` - The Port.
             * `subnet_id` - Subnet ID, valid only for private addresses.
-        * `auto_add_new_nodes` - When the terminal type is read-write terminal or read-only terminal, it supports setting whether new nodes are automatically added. Value:
-TRUE - join automatically
-FALSE - do not automatically join
-Default value FALSE.
+        * `auto_add_new_nodes` - When the terminal type is read-write terminal or read-only terminal, it supports setting whether new nodes are automatically added.
         * `description` - Address description.
         * `enable_read_only` - Whether global read-only is enabled, value: Enable: Enable. Disable: Disabled.
         * `enable_read_write_splitting` - Whether read-write separation is enabled, value: Enable: Enable. Disable: Disabled.
@@ -109,6 +106,9 @@ Custom: Custom terminal.
 Direct: Direct connection to the terminal. (Only the operation and maintenance side)
 AllNode: All node terminals. (Only the operation and maintenance side).
         * `read_only_node_weight` - The list of nodes configured by the connection terminal and the corresponding read-only weights.
+            * `node_id` - The ID of the node.
+            * `node_type` - The type of the node.
+            * `weight` - The weight of the node.
         * `read_write_mode` - Read and write mode:
 ReadWrite: read and write
 ReadOnly: read only (default).
