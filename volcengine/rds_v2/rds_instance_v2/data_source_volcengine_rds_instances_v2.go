@@ -337,7 +337,7 @@ func DataSourceVolcengineRdsInstances() *schema.Resource {
 									"auto_add_new_nodes": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "When the terminal type is read-write terminal or read-only terminal, it supports setting whether new nodes are automatically added. Value:\nTRUE - join automatically\nFALSE - do not automatically join\nDefault value FALSE.",
+										Description: "When the terminal type is read-write terminal or read-only terminal, it supports setting whether new nodes are automatically added.",
 									},
 									"enable_read_write_splitting": {
 										Type:        schema.TypeString,
