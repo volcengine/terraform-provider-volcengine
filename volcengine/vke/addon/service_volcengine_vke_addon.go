@@ -100,14 +100,19 @@ func (s *VolcengineVkeAddonService) ReadResource(resourceData *schema.ResourceDa
 	if len(data) == 0 {
 		return data, fmt.Errorf("Vke Addon %s:%s not exist ", clusterId, name)
 	}
+	if cfg, ok := resourceData.GetOkExists("config"); ok {
+		// 返回的 config 可能会添加默认参数，这里始终使用创建的
+		data["Config"] = cfg
+	}
 	return data, err
 }
 
 func (s *VolcengineVkeAddonService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+	failStateTimes := 0 // 处于Failed状态的组件可能经过短暂的时间（自愈）状态变成 Running
 	return &resource.StateChangeConf{
 		Pending:    []string{},
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
 		Target:     target,
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
@@ -127,7 +132,11 @@ func (s *VolcengineVkeAddonService) RefreshResourceState(resourceData *schema.Re
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf(" Vke addon status error, status:%s", status.(string))
+					failStateTimes++
+					if failStateTimes > 10 { // 硬编码：检查10次还是错误状态
+						return nil, "", fmt.Errorf(" Vke addon status error, status:%s", status.(string))
+					}
+					return demo, "", nil
 				}
 			}
 			return demo, status.(string), err
@@ -221,6 +230,9 @@ func (s *VolcengineVkeAddonService) RemoveResource(resourceData *schema.Resource
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				if strings.Contains(baseErr.Error(), "forbidden to delete required addon") { // 一些组件禁止删除，直接返回
+					return baseErr
+				}
 				//出现错误后重试
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
 					_, callErr := s.ReadResource(d, "")

@@ -55,24 +55,28 @@ func ResourceVolcengineVkeAddon() *schema.Resource {
 			"version": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The version info of the cluster.",
 			},
 			"deploy_mode": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The deploy mode.",
 			},
 			"deploy_node_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The deploy node type.",
 			},
 			"config": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The config info.",
 			},
 		},
