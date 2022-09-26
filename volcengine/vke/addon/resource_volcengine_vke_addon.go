@@ -74,10 +74,11 @@ func ResourceVolcengineVkeAddon() *schema.Resource {
 				Description: "The deploy node type.",
 			},
 			"config": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The config info.",
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				Description: "The config info of addon. " +
+					"Please notice that `ingress-nginx` component prohibits updating config, can only works on the web console.",
 			},
 		},
 	}

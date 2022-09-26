@@ -186,6 +186,11 @@ func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.Resource
 				}
 				(*call.SdkParam)["ClusterId"] = ids[0]
 				(*call.SdkParam)["Name"] = ids[1]
+
+				if ids[1] == "ingress-nginx" {
+					return false, fmt.Errorf("ingress-nginx addon prohibits updating config")
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
