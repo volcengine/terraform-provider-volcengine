@@ -534,6 +534,9 @@ func (s *VolcengineVkeClusterService) DatasourceResources(*schema.ResourceData, 
 			"delete_protection_enabled": {
 				TargetField: "Filter.DeleteProtectionEnabled",
 			},
+			"name": {
+				TargetField: "Filter.Name",
+			},
 			"pods_config_pod_network_mode": {
 				TargetField: "Filter.PodsConfig.PodNetworkMode",
 			},
