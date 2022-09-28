@@ -47,10 +47,12 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/route_entry"
@@ -149,9 +151,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nat_gateways": nat_gateway.DataSourceVolcengineNatGateways(),
 
 			// ================ VKE ================
-			"volcengine_vke_nodes":      node.DataSourceVolcengineVkeNodes(),
-			"volcengine_vke_clusters":   cluster.DataSourceVolcengineVkeVkeClusters(),
-			"volcengine_vke_node_pools": node_pool.DataSourceVolcengineNodePools(),
+			"volcengine_vke_nodes":          node.DataSourceVolcengineVkeNodes(),
+			"volcengine_vke_clusters":       cluster.DataSourceVolcengineVkeVkeClusters(),
+			"volcengine_vke_node_pools":     node_pool.DataSourceVolcengineNodePools(),
+			"volcengine_vke_addons":         addon.DataSourceVolcengineVkeAddons(),
+			"volcengine_vke_support_addons": support_addon.DataSourceVolcengineVkeVkeSupportedAddons(),
 
 			// ================ IAM ================
 			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
@@ -222,6 +226,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_node":              node.ResourceVolcengineVkeNode(),
 			"volcengine_vke_cluster":           cluster.ResourceVolcengineVkeCluster(),
 			"volcengine_vke_node_pool":         node_pool.ResourceVolcengineNodePool(),
+			"volcengine_vke_addon":             addon.ResourceVolcengineVkeAddon(),
 			"volcengine_vke_default_node_pool": default_node_pool.ResourceVolcengineDefaultNodePool(),
 
 			// ================ IAM ================

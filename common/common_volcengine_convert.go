@@ -16,6 +16,7 @@ type ResponseConvert struct {
 	KeepDefault bool
 	Convert     FieldResponseConvert
 	Ignore      bool
+	Chain       string
 }
 
 type FieldRequestConvert func(*schema.ResourceData, interface{}) interface{}
