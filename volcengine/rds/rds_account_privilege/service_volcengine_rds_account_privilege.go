@@ -201,7 +201,7 @@ func (s *VolcengineRdsAccountPrivilegeService) ModifyResource(resourceData *sche
 	logger.Info("[ModifyRdsAccountPrivilege] add: %+v, remove: %+v", add, remove)
 
 	// 2. remove callback
-	if len(remove.List()) > 0 {
+	if remove != nil && len(remove.List()) > 0 {
 		removeCallback := volc.Callback{
 			Call: volc.SdkCall{
 				Action:      "RevokeAccountPrivilege",
@@ -227,7 +227,7 @@ func (s *VolcengineRdsAccountPrivilegeService) ModifyResource(resourceData *sche
 	}
 
 	// 3. add callbacks
-	if len(add.List()) > 0 {
+	if add != nil && len(add.List()) > 0 {
 		grantAccountPrivilegeCallbacks := make([]volc.Callback, 0)
 
 		for _, addPrivilege := range add.List() {
