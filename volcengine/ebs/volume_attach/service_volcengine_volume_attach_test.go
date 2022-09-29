@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
 func Test_ResourceNotFoundError(t *testing.T) {

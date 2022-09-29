@@ -32,7 +32,7 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Start", "Stop"}, false),
-				Description:  "Start or Stop of Instance Action.",
+				Description:  "Start or Stop of Instance Action, the value can be `Start` or `Stop`.",
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
@@ -51,7 +51,7 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 					}
 					return false
 				},
-				Description: "Stop Mode of Instance.",
+				Description: "Stop Mode of Instance, the value can be `KeepCharging` or `StopCharging`, default `KeepCharging`.",
 			},
 			"status": {
 				Type:        schema.TypeString,

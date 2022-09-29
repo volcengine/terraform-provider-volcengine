@@ -52,9 +52,14 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/route_entry"
@@ -171,9 +176,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpn_gateway_routes": vpn_gateway_route.DataSourceVolcengineVpnGatewayRoutes(),
 
 			// ================ VKE ================
-			"volcengine_vke_nodes":      node.DataSourceVolcengineVkeNodes(),
-			"volcengine_vke_clusters":   cluster.DataSourceVolcengineVkeVkeClusters(),
-			"volcengine_vke_node_pools": node_pool.DataSourceVolcengineNodePools(),
+			"volcengine_vke_nodes":          node.DataSourceVolcengineVkeNodes(),
+			"volcengine_vke_clusters":       cluster.DataSourceVolcengineVkeVkeClusters(),
+			"volcengine_vke_node_pools":     node_pool.DataSourceVolcengineNodePools(),
+			"volcengine_vke_addons":         addon.DataSourceVolcengineVkeAddons(),
+			"volcengine_vke_support_addons": support_addon.DataSourceVolcengineVkeVkeSupportedAddons(),
 
 			// ================ IAM ================
 			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
@@ -194,6 +201,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
 			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
 			"volcengine_escloud_zones":     esZone.DataSourceVolcengineESCloudZones(),
+
+			// ================ TOS ================
+			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
+			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -253,9 +264,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpn_gateway_route": vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
 
 			// ================ VKE ================
-			"volcengine_vke_node":      node.ResourceVolcengineVkeNode(),
-			"volcengine_vke_cluster":   cluster.ResourceVolcengineVkeCluster(),
-			"volcengine_vke_node_pool": node_pool.ResourceVolcengineNodePool(),
+			"volcengine_vke_node":              node.ResourceVolcengineVkeNode(),
+			"volcengine_vke_cluster":           cluster.ResourceVolcengineVkeCluster(),
+			"volcengine_vke_node_pool":         node_pool.ResourceVolcengineNodePool(),
+			"volcengine_vke_addon":             addon.ResourceVolcengineVkeAddon(),
+			"volcengine_vke_default_node_pool": default_node_pool.ResourceVolcengineDefaultNodePool(),
 
 			// ================ IAM ================
 			"volcengine_iam_policy":                 iam_policy.ResourceVolcengineIamPolicy(),
@@ -279,6 +292,10 @@ func Provider() terraform.ResourceProvider {
 
 			// ================ ESCloud ================
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
+
+			//================= TOS =================
+			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object": object.ResourceVolcengineTosObject(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

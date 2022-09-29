@@ -54,8 +54,8 @@ When the database type is veDB_MySQL/veDB_PostgreSQL, the value is:
 DistributedStorage - Distributed Storage.
 * `subnet_id` - (Required, ForceNew) Subnet ID.
 * `vpc_id` - (Required, ForceNew) Private network (VPC) ID. You can call the DescribeVpcs query and use this parameter to specify the VPC where the instance is to be created.
-* `db_param_group_id` - (Optional, ForceNew) Parameter template ID. It only takes effect when the database type is MySQL/PostgreSQL/SQL_Server.
-* `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00.
+* `db_param_group_id` - (Optional, ForceNew) Parameter template ID. It only takes effect when the database type is MySQL/PostgreSQL/SQL_Server. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `instance_name` - (Optional, ForceNew) Instance name. Cannot start with a number or a dash
 Can only contain Chinese characters, letters, numbers, underscores and dashes
 The length is limited between 1 ~ 128.
@@ -91,7 +91,33 @@ DescribeDBInstanceSpecs Query the instance specifications that can be sold.
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-
+* `connection_info` - The connection info ot the RDS instance.
+    * `address` - Address list.
+        * `domain` - Connect domain name.
+        * `eip_id` - The ID of the EIP, only valid for Public addresses.
+        * `ip_address` - The IP Address.
+        * `network_type` - Network address type, temporarily Private, Public, PublicService.
+        * `port` - The Port.
+        * `subnet_id` - Subnet ID, valid only for private addresses.
+    * `auto_add_new_nodes` - When the terminal type is read-write terminal or read-only terminal, it supports setting whether new nodes are automatically added.
+    * `description` - Address description.
+    * `enable_read_only` - Whether global read-only is enabled, value: Enable: Enable. Disable: Disabled.
+    * `enable_read_write_splitting` - Whether read-write separation is enabled, value: Enable: Enable. Disable: Disabled.
+    * `endpoint_id` - Instance connection terminal ID.
+    * `endpoint_name` - The instance connection terminal name.
+    * `endpoint_type` - Terminal type:
+Cluster: The default terminal. (created by default)
+Primary: Primary node terminal.
+Custom: Custom terminal.
+Direct: Direct connection to the terminal. (Only the operation and maintenance side)
+AllNode: All node terminals. (Only the operation and maintenance side).
+    * `read_only_node_weight` - The list of nodes configured by the connection terminal and the corresponding read-only weights.
+        * `node_id` - The ID of the node.
+        * `node_type` - The type of the node.
+        * `weight` - The weight of the node.
+    * `read_write_mode` - Read and write mode:
+ReadWrite: read and write
+ReadOnly: read only (default).
 
 
 ## Import

@@ -19,7 +19,7 @@ resource "volcengine_ecs_key_pair" "default" {
 The following arguments are supported:
 * `key_pair_name` - (Required, ForceNew) The name of key pair.
 * `description` - (Optional) The description of key pair.
-* `key_file` - (Optional, ForceNew) Target file to save info.
+* `key_file` - (Optional, ForceNew) Target file to save private key. It is recommended that the value not be empty. You only have one chance to download the private key, the volcengine will not save your private key, please keep it safe. In the TF import scenario, this field will not write the private key locally.
 * `public_key` - (Optional, ForceNew) Public key string.
 
 ## Attributes Reference

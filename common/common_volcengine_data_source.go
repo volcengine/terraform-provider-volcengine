@@ -26,6 +26,7 @@ type DataSourceInfo struct {
 	CollectField     string
 	ContentType      RequestContentType
 	ExtraData        ExtraData
+	ServiceCategory  ServiceCategory
 }
 
 func DataSourceToRequest(d *schema.ResourceData, r *schema.Resource, info DataSourceInfo) (req map[string]interface{}, err error) {
@@ -121,7 +122,20 @@ func mergeDatasource(resource *schema.Resource, collectField string, item map[st
 			if extraMapping != nil {
 				if _, ok := extraMapping[k]; ok {
 					m = extraMapping[k]
-					target = m.TargetField
+					if m.Chain == "" {
+						//if no chain to set auto check convert in elem.schema.if in and set new target
+						if _, ok1 := elem.Schema[m.TargetField]; ok1 {
+							target = m.TargetField
+						} else {
+							m = ResponseConvert{}
+						}
+					} else if strings.HasSuffix(collectField, m.Chain) {
+						// if set a chain,auto check is in collectField chain
+						target = m.TargetField
+					} else {
+						//do nothing
+						m = ResponseConvert{}
+					}
 				}
 			}
 			if targetValue, ok := elem.Schema[target]; ok {

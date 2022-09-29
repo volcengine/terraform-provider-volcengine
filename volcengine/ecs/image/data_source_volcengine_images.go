@@ -46,7 +46,7 @@ func DataSourceVolcengineImages() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set:         schema.HashString,
-				Description: "A list of Image status.",
+				Description: "A list of Image status, the value can be `available` or `creating` or `error`.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,

@@ -106,7 +106,7 @@ In addition to all arguments above, the following attributes are exported:
         * `zone_number` - The zone number of instance.
     * `instance_id` - The Id of instance.
     * `kibana_private_domain` - The kibana private domain of instance.
-    * `kibana_public_endpoint` - The kibana public endpoint of instance.
+    * `kibana_public_domain` - The kibana public domain of instance.
     * `maintenance_day` - The maintenance day of instance.
     * `maintenance_time` - The maintenance time of instance.
     * `namespace` - The namespace of instance.

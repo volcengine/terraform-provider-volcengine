@@ -26,7 +26,7 @@ func GetSetDifference(key string, d *schema.ResourceData, f schema.SchemaSetFunc
 		remove = removeProbably.Difference(addProbably)
 
 		if supportUpdate {
-			modify = removeProbably.Difference(remove)
+			modify = removeProbably.Difference(add)
 		}
 
 		return add, remove, modify, cache

@@ -58,21 +58,21 @@ The following arguments are supported:
 * `subnet_id` - (Required, ForceNew) The subnet ID of primary networkInterface.
 * `system_volume_size` - (Required) The size of system volume.
 * `system_volume_type` - (Required, ForceNew) The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
-* `auto_renew_period` - (Optional, ForceNew) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.
-* `auto_renew` - (Optional, ForceNew) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.
+* `auto_renew_period` - (Optional, ForceNew) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `auto_renew` - (Optional, ForceNew) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `data_volumes` - (Optional) The data volumes collection of  ECS instance.
 * `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
 * `description` - (Optional) The description of ECS instance.
 * `host_name` - (Optional, ForceNew) The host name of ECS instance.
 * `hpc_cluster_id` - (Optional, ForceNew) The hpc cluster ID of ECS instance.
 * `include_data_volumes` - (Optional) The include data volumes flag of ECS instance.Only effective when change instance charge type.include_data_volumes.
-* `instance_charge_type` - (Optional) The charge type of ECS instance.
+* `instance_charge_type` - (Optional) The charge type of ECS instance, the value can be `PrePaid` or `PostPaid`.
 * `instance_name` - (Optional) The name of ECS instance.
 * `key_pair_name` - (Optional, ForceNew) The ssh key name of ECS instance.
 * `password` - (Optional) The password of ECS instance.
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.
 * `secondary_network_interfaces` - (Optional) The secondary networkInterface detail collection of ECS instance.
-* `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance.Default is true.
+* `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `user_data` - (Optional) The user data of ECS instance.
 * `zone_id` - (Optional, ForceNew) The available zone ID of ECS instance.
 

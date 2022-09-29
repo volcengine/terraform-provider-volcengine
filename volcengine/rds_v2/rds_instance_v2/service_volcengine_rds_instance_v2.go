@@ -78,17 +78,53 @@ func (s *VolcengineRdsInstanceService) ReadResources(m map[string]interface{}) (
 				logger.Info("DescribeDBInstanceDetail error:", err)
 				continue
 			}
+
+			// 1. node info
 			nodeDetailInfo, err := volc.ObtainSdkValue("Result.NodeDetailInfo", *instanceDetailInfo)
 			if err != nil {
 				logger.Info("ObtainSdkValue Result.NodeDetailInfo error:", err)
 				continue
 			}
-			rdsInstance["node_detail_info"] = nodeDetailInfo
-			rdsInstance["node_info"] = nodeDetailInfo
+			rdsInstance["NodeDetailInfo"] = nodeDetailInfo
+			rdsInstance["NodeInfo"] = nodeDetailInfo
+
+			// 2. connection info
+			connectionInfo, err := volc.ObtainSdkValue("Result.ConnectionInfo", *instanceDetailInfo)
+			if err != nil {
+				return data, err
+			}
+
+			rdsInstance["ConnectionInfo"] = convertConnectionInfo(connectionInfo)
 		}
 	}
 
 	return data, err
+}
+
+func convertConnectionInfo(connectionInfo interface{}) interface{} {
+	if connectionInfo == nil {
+		return nil
+	}
+	var connection []interface{}
+	if connectionInfoArr, ok := connectionInfo.([]interface{}); ok {
+		for _, v := range connectionInfoArr {
+			if vv, ok := v.(map[string]interface{}); ok {
+				endpointType := vv["EndpointType"].(string)
+				if endpointType != "Cluster" {
+					continue
+				}
+				addresses := vv["Address"].([]interface{})
+				for _, address := range addresses {
+					if addressMap, ok := address.(map[string]interface{}); ok {
+						addressMap["IpAddress"] = addressMap["IPAddress"]
+					}
+				}
+				connection = append(connection, v)
+			}
+		}
+	}
+
+	return connection
 }
 
 func (s *VolcengineRdsInstanceService) ReadResource(resourceData *schema.ResourceData, rdsInstanceId string) (data map[string]interface{}, err error) {
@@ -152,7 +188,7 @@ func (s *VolcengineRdsInstanceService) RefreshResourceState(resourceData *schema
 
 }
 
-func (VolcengineRdsInstanceService) WithResourceResponseHandlers(rdsInstance map[string]interface{}) []volc.ResourceResponseHandler {
+func (*VolcengineRdsInstanceService) WithResourceResponseHandlers(rdsInstance map[string]interface{}) []volc.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]volc.ResponseConvert, error) {
 		return rdsInstance, map[string]volc.ResponseConvert{
 			"InstanceId": {

@@ -11,17 +11,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/security_group"
 )
 
 type VolcengineNodePoolService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client               *ve.SdkClient
+	Dispatcher           *ve.Dispatcher
+	securityGroupService *security_group.VolcengineSecurityGroupService
 }
 
 func NewNodePoolService(c *ve.SdkClient) *VolcengineNodePoolService {
 	return &VolcengineNodePoolService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client:               c,
+		Dispatcher:           &ve.Dispatcher{},
+		securityGroupService: security_group.NewSecurityGroupService(c),
 	}
 }
 
@@ -124,6 +127,59 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 	}
 
 	result = temp[0].(map[string]interface{})
+	result["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{})["Password"] =
+		resourceData.Get("node_config.0.security.0.login.0.password")
+
+	// 安全组过滤默认安全组
+	tmpSecurityGroupIds := result["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["SecurityGroupIds"].([]interface{})
+	if len(tmpSecurityGroupIds) > 0 {
+		// 查询安全组
+		securityGroupIdMap := make(map[string]interface{})
+		for i, securityGroupId := range tmpSecurityGroupIds {
+			securityGroupIdMap[fmt.Sprintf("SecurityGroupIds.%d", i+1)] = securityGroupId
+		}
+		securityGroups, err := s.securityGroupService.ReadResources(securityGroupIdMap)
+		logger.Debug(logger.RespFormat, "DescribeSecurityGroups", securityGroupIdMap, securityGroups)
+		if err != nil {
+			return nil, err
+		}
+
+		// 每个节点池有个默认安全组，名称是${cluster_id}-common, 如果没有配置默认安全组，在这里过滤一下默认安全组
+		defaultSecurityGroupName := fmt.Sprintf("%v-common", result["ClusterId"])
+		nameMap := make(map[string]string)
+		filteredSecurityGroupIds := make([]interface{}, 0)
+		defaultCount := 0
+		defaultSecurityGroupId := ""
+		for _, securityGroup := range securityGroups {
+			nameMap[securityGroup.(map[string]interface{})["SecurityGroupId"].(string)] = securityGroup.(map[string]interface{})["SecurityGroupName"].(string)
+		}
+		for _, securityGroupId := range tmpSecurityGroupIds {
+			if nameMap[securityGroupId.(string)] == defaultSecurityGroupName {
+				defaultCount++
+				defaultSecurityGroupId = securityGroupId.(string)
+				continue
+			}
+			filteredSecurityGroupIds = append(filteredSecurityGroupIds, securityGroupId)
+		}
+		if defaultCount > 1 {
+			return nil, fmt.Errorf("default security group is not unique")
+		}
+
+		// 如果用户传了默认安全组id，不需要过滤
+		oldSecurityGroupIds := resourceData.Get("node_config.0.security.0.security_group_ids").([]interface{})
+		useDefaultSecurityGroupId := false
+		for _, securityGroupId := range oldSecurityGroupIds {
+			if securityGroupId.(string) == defaultSecurityGroupId {
+				useDefaultSecurityGroupId = true
+			}
+		}
+		if !useDefaultSecurityGroupId {
+			result["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["SecurityGroupIds"] = filteredSecurityGroupIds
+		}
+
+		logger.Debug(logger.RespFormat, "filteredSecurityGroupIds", tmpSecurityGroupIds, filteredSecurityGroupIds)
+	}
+
 	logger.Debug(logger.RespFormat, "result of ReadResource ", result)
 	return result, err
 }
@@ -250,20 +306,28 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 							},
 						},
 						"data_volumes": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"type": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"size": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"additional_container_storage_enabled": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"image_id": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"instance_charge_type": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"period": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"auto_renew": {
+							ForceGet:    true,
+							TargetField: "AutoRenew",
+						},
+						"auto_renew_period": {
 							ConvertType: ve.ConvertJsonObject,
 						},
 					},
@@ -272,29 +336,10 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"effect": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -351,7 +396,7 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateNodePoolConfig",
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertInConvert,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"cluster_id": {
@@ -397,29 +442,10 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonArray,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"key": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"value": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"effect": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -469,8 +495,67 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						}
 					}
 				}
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+
+				if d.HasChange("kubernetes_config") {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok { // 列表被删除
+						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{
+							"Labels": []interface{}{},
+							"Taints": []interface{}{},
+						}
+					}
+				}
+
+				labelsChange := false
+				taintsChange := false
+				if d.HasChange("kubernetes_config.0.taints") {
+					taintsChange = true
+				}
+				if d.HasChange("kubernetes_config.0.labels") {
+					labelsChange = true
+				}
+				if labelsChange || taintsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{}
+					}
+				}
+				if labelsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"]; !ok { // 被清空了
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = []interface{}{}
+					}
+				}
+				if taintsChange {
+					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"]; !ok {
+						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = []interface{}{}
+					}
+				}
+
+				if labelsChange && (!taintsChange) {
+					var taints []interface{}
+					for _, taint := range d.Get("kubernetes_config.0.taints").([]interface{}) {
+						t := taint.(map[string]interface{})
+						taints = append(taints, map[string]interface{}{
+							"Key":    t["key"],
+							"Value":  t["value"],
+							"Effect": t["effect"],
+						})
+					}
+					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = taints
+				} else if taintsChange && (!labelsChange) {
+					var labels []interface{}
+					for _, label := range d.Get("kubernetes_config.0.labels").(*schema.Set).List() { // for set
+						t := label.(map[string]interface{})
+						labels = append(labels, map[string]interface{}{
+							"Key":   t["key"],
+							"Value": t["value"],
+						})
+					}
+					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = labels
+				}
+
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Running"},
@@ -632,11 +717,14 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 					return results
 				},
 			},
+			"NodeConfig.ImageId": {
+				TargetField: "image_id",
+			},
 			"NodeConfig.SystemVolume": {
 				TargetField: "system_volume",
 				Convert: func(i interface{}) interface{} {
 					var results []interface{}
-					if i.(map[string]interface{})["Type"] == nil || i.(map[string]interface{})["size"] == nil {
+					if i.(map[string]interface{})["Type"] == nil || i.(map[string]interface{})["Size"] == nil {
 						return results
 					}
 					volume := make(map[string]interface{}, 0)
@@ -655,11 +743,55 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 							volume := make(map[string]interface{}, 0)
 							volume["size"] = strconv.FormatFloat(_data.(map[string]interface{})["Size"].(float64), 'g', 5, 32)
 							volume["type"] = _data.(map[string]interface{})["Type"].(string)
+							if p, ok := _data.(map[string]interface{})["MountPoint"]; ok { // 可能不存在
+								volume["mount_point"] = p.(string)
+							}
 							results = append(results, volume)
 						}
 					}
 					return results
 				},
+			},
+			"NodeConfig.Security.SecurityGroupIds": {
+				TargetField: "security_group_ids",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						results = dd
+					}
+					return results
+				},
+			},
+			"NodeConfig.Security.SecurityStrategyEnabled": {
+				TargetField: "security_strategy_enabled",
+			},
+			"NodeConfig.Security.SecurityStrategies": {
+				TargetField: "security_strategies",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						results = dd
+					}
+					return results
+				},
+			},
+			"NodeConfig.Security.Login.Type": {
+				TargetField: "login_type",
+			},
+			"NodeConfig.Security.Login.SshKeyPairName": {
+				TargetField: "login_key_pair_name",
+			},
+			"NodeConfig.InstanceChargeType": {
+				TargetField: "instance_charge_type",
+			},
+			"NodeConfig.Period": {
+				TargetField: "period",
+			},
+			"NodeConfig.AutoRenew": {
+				TargetField: "auto_renew",
+			},
+			"NodeConfig.AutoRenewPeriod": {
+				TargetField: "auto_renew_period",
 			},
 			"NodeStatistics": {
 				TargetField: "node_statistics",
@@ -671,6 +803,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 					label["updating_count"] = int(i.(map[string]interface{})["UpdatingCount"].(float64))
 					label["deleting_count"] = int(i.(map[string]interface{})["DeletingCount"].(float64))
 					label["failed_count"] = int(i.(map[string]interface{})["FailedCount"].(float64))
+					label["stopped_count"] = int(i.(map[string]interface{})["StoppedCount"].(float64))
+					label["stopping_count"] = int(i.(map[string]interface{})["StoppingCount"].(float64))
+					label["starting_count"] = int(i.(map[string]interface{})["StartingCount"].(float64))
 					return label
 				},
 			},

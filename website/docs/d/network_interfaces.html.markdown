@@ -22,9 +22,9 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `primary_ip_addresses` - (Optional) A list of primary IP address of ENI.
 * `security_group_id` - (Optional) An id of the security group to which the secondary ENI belongs.
-* `status` - (Optional) A status of ENI.
+* `status` - (Optional) A status of ENI, Optional choice contains `Creating`, `Available`, `Attaching`, `InUse`, `Detaching`, `Deleting`.
 * `subnet_id` - (Optional) An id of the subnet to which the ENI is connected.
-* `type` - (Optional) A type of ENI.
+* `type` - (Optional) A type of ENI, Optional choice contains `primary`, `secondary`.
 * `vpc_id` - (Optional) An id of the virtual private cloud (VPC) to which the ENI belongs.
 
 ## Attributes Reference

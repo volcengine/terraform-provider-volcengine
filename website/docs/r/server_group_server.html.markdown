@@ -11,24 +11,23 @@ Provides a resource to manage server group server
 ## Example Usage
 ```hcl
 resource "volcengine_server_group_server" "foo" {
-  server_group_id = "rsp-273zn4ewlhkw07fap8tig9ujz"
-  instance_id     = "i-72q1zvko6i5lnawvg940"
+  server_group_id = "rsp-274xltv2sjoxs7fap8tlv3q3s"
+  instance_id     = "i-ybp1scasbe72q1vq35wv"
   type            = "ecs"
   weight          = 100
-  ip              = "192.168.100.99"
   port            = 80
   description     = "This is a server"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
+* `instance_id` - (Required, ForceNew) The ID of ecs instance or the network card bound to ecs instance.
+* `port` - (Required) The port receiving request.
+* `server_group_id` - (Required, ForceNew) The ID of the ServerGroup.
+* `type` - (Required, ForceNew) The type of instance. Optional choice contains `ecs`, `eni`.
 * `description` - (Optional) The description of the instance.
-* `instance_id` - (Optional, ForceNew) The ID of ecs instance or the network card bound to ecs instance.
 * `ip` - (Optional, ForceNew) The private ip of the instance.
-* `port` - (Optional) The port receiving request.
-* `server_group_id` - (Optional, ForceNew) The ID of the ServerGroup.
-* `type` - (Optional, ForceNew) The type of instance. Optional choice contains `ecs`, `eni`.
-* `weight` - (Optional) The weight of the instance.
+* `weight` - (Optional) The weight of the instance, range in 0~100.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -39,6 +38,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 ServerGroupServer can be imported using the id, e.g.
 ```
-$ terraform import volcengine_server_group_server.default rs-3ciynux6i1x4w****rszh49sj
+$ terraform import volcengine_server_group_server.default rsp-274xltv2*****8tlv3q3s:rs-3ciynux6i1x4w****rszh49sj
 ```
 

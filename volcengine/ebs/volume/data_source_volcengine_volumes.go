@@ -55,7 +55,7 @@ func DataSourceVolcengineVolumes() *schema.Resource {
 				Optional: true,
 				ValidateFunc: validation.StringInSlice([]string{"available", "attaching", "attached",
 					"detaching", "creating", "deleting", "error", "extending"}, false),
-				Description: "The Status of Volume.",
+				Description: "The Status of Volume, the value can be `available` or `attaching` or `attached` or `detaching` or `creating` or `deleting` or `error` or `extending`.",
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
