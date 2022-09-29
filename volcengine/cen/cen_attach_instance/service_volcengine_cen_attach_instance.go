@@ -155,6 +155,9 @@ func (s *VolcengineCenAttachInstanceService) CreateResource(resourceData *schema
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -201,6 +204,9 @@ func (s *VolcengineCenAttachInstanceService) RemoveResource(resourceData *schema
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
 			},
 		},
 	}
