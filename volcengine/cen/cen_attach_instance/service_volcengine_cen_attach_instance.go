@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen"
 )
 
 type VolcengineCenAttachInstanceService struct {
@@ -155,6 +156,13 @@ func (s *VolcengineCenAttachInstanceService) CreateResource(resourceData *schema
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				cen.NewCenService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("cen_id").(string),
+				},
+			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("instance_id").(string)
 			},
@@ -204,6 +212,13 @@ func (s *VolcengineCenAttachInstanceService) RemoveResource(resourceData *schema
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				cen.NewCenService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: ids[0],
+				},
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("instance_id").(string)
