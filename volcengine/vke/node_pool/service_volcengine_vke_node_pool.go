@@ -49,6 +49,21 @@ func (s *VolcengineNodePoolService) ReadResources(m map[string]interface{}) (dat
 			delete(condition, "AutoScalingEnabled")
 		}
 
+		// 单独适配 ClusterId 字段，将 ClusterId 加入 Filter.ClusterIds
+		if clusterId, clusterIdExist := condition["ClusterId"]; clusterIdExist {
+			if filter, filterExist := condition["Filter"]; filterExist {
+				if _, clusterIdsExist := filter.(map[string]interface{})["ClusterIds"]; clusterIdsExist {
+					condition["Filter"].(map[string]interface{})["ClusterIds"] = append(condition["Filter"].(map[string]interface{})["ClusterIds"].([]interface{}), clusterId)
+				} else {
+					condition["Filter"].(map[string]interface{})["ClusterIds"] = []interface{}{clusterId}
+				}
+			} else {
+				condition["Filter"] = make(map[string]interface{})
+				condition["Filter"].(map[string]interface{})["ClusterIds"] = []interface{}{clusterId}
+			}
+			delete(condition, "ClusterId")
+		}
+
 		action := "ListNodePools"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {

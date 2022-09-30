@@ -59,6 +59,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 				Optional:    true,
 				Description: "The Name of NodePool.",
 			},
+			"cluster_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ClusterId of NodePool.",
+			},
 			"cluster_ids": {
 				Type:     schema.TypeSet,
 				Optional: true,
