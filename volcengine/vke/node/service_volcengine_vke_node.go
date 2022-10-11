@@ -291,6 +291,10 @@ func (s *VolcengineVkeNodeService) DatasourceResources(*schema.ResourceData, *sc
 				TargetField: "Filter.NodePoolIds",
 				ConvertType: ve.ConvertJsonArray,
 			},
+			"zone_ids": {
+				TargetField: "Filter.ZoneIds",
+				ConvertType: ve.ConvertJsonArray,
+			},
 			"statuses": {
 				TargetField: "Filter.Statuses",
 				ConvertType: ve.ConvertJsonObjectArray,
