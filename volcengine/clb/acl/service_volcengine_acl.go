@@ -210,7 +210,7 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			Action:      "RemoveAclEntries",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(remove.List()) > 0 {
+				if remove != nil && len(remove.List()) > 0 {
 					(*call.SdkParam)["AclId"] = d.Id()
 					for index, entry := range remove.List() {
 						(*call.SdkParam)["Entries."+strconv.Itoa(index+1)] = entry.(map[string]interface{})["entry"].(string)
@@ -237,7 +237,7 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			Action:      "AddAclEntries",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(add.List()) > 0 {
+				if add != nil && len(add.List()) > 0 {
 					(*call.SdkParam)["AclId"] = d.Id()
 					for index, entry := range add.List() {
 						(*call.SdkParam)["AclEntries."+strconv.Itoa(index+1)+"."+"Entry"] = entry.(map[string]interface{})["entry"].(string)
