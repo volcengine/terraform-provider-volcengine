@@ -42,6 +42,15 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The Node Pool IDs.",
 			},
+			"zone_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "The Zone IDs.",
+			},
 			"create_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -56,8 +65,8 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 						"phase": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Creating", "Running", "Updating", "Deleting", "Failed"}, false),
-							Description:  "The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed`.",
+							ValidateFunc: validation.StringInSlice([]string{"Creating", "Running", "Updating", "Deleting", "Failed", "Starting", "Stopping", "Stopped"}, false),
+							Description:  "The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed` or `Starting` or `Stopping` or `Stopped`.",
 						},
 						"conditions_type": {
 							Type:     schema.TypeString,
@@ -139,6 +148,11 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The node pool id.",
+						},
+						"zone_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The zone id.",
 						},
 						"roles": {
 							Type:        schema.TypeList,
