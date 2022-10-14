@@ -33,29 +33,22 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 				Description: "The list of registry types.",
 			},
 			"statuses": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "The list of registry statuses.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"phase": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The phase of status.",
-							ValidateFunc: validation.StringInSlice([]string{
-								"Creating", "Running", "Stopped", "Starting", "Deleting", "Failed",
-							}, false),
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "The phase of status.",
+							ValidateFunc: validation.StringInSlice([]string{"Creating", "Running", "Stopped", "Starting", "Deleting", "Failed"}, false),
 						},
-						"conditions": {
-							Type:        schema.TypeSet,
-							Optional:    true,
-							Description: "The condition of registry.",
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-								ValidateFunc: validation.StringInSlice([]string{
-									"Ok", "Progressing", "Degraded", "Balance", "Released", "Unknown",
-								}, false),
-							},
+						"condition": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Description:  "The condition of registry.",
+							ValidateFunc: validation.StringInSlice([]string{"Ok", "Progressing", "Degraded", "Balance", "Released", "Unknown"}, false),
 						},
 					},
 				},
@@ -76,7 +69,7 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 				Description: "The collection of registry query.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"registry": {
+						"name": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The name of registry.",
@@ -92,7 +85,7 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 							Description: "The charge type of registry.",
 						},
 						"status": {
-							Type:        schema.TypeSet,
+							Type:        schema.TypeList,
 							MaxItems:    1,
 							Computed:    true,
 							Description: "The status of registry.",
@@ -130,7 +123,7 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 							Description: "The status of user.",
 						},
 						"domains": {
-							Type:        schema.TypeSet,
+							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "The domain of registry.",
 							Elem: &schema.Resource{

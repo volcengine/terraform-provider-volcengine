@@ -1,8 +1,8 @@
 data "volcengine_cr_registries" "foo"{
-  # names=["tf-1"]
+  # names=["liaoliuqing-prune-test"]
   # types=["Enterprise"]
   statuses {
       phase="Running"
-      conditions=["Ok"]
+      condition="Ok"
     }
 }

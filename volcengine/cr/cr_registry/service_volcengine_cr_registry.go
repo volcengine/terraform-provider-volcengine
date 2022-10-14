@@ -70,6 +70,15 @@ func (s *VolcengineCrRegistryService) ReadResources(m map[string]interface{}) (d
 				"Registry": ins["Name"],
 			}
 
+			status, err := ve.ObtainSdkValue("Status.Phase", ins)
+			if err != nil {
+				return data, err
+			}
+			if status.(string) == "Creating" {
+				logger.DebugInfo("registry status is Running,skip GetUser and ListDomains%s", "")
+				continue
+			}
+
 			//get user
 			action = "GetUser"
 			logger.Debug(logger.ReqFormat, action, condition)
@@ -82,13 +91,13 @@ func (s *VolcengineCrRegistryService) ReadResources(m map[string]interface{}) (d
 			if err != nil {
 				return data, err
 			}
-			status, err := ve.ObtainSdkValue("Result.Status", *resp)
+			userStatus, err := ve.ObtainSdkValue("Result.Status", *resp)
 			if err != nil {
 				return data, err
 			}
 
 			data[i].(map[string]interface{})["Username"] = usernaem
-			data[i].(map[string]interface{})["Status"] = status
+			data[i].(map[string]interface{})["UserStatus"] = userStatus
 
 			//get domainss
 			action = "ListDomains"
@@ -284,12 +293,7 @@ func (s *VolcengineCrRegistryService) DatasourceResources(*schema.ResourceData, 
 			},
 			"statuses": {
 				TargetField: "Filter.Statuses",
-				ConvertType: ve.ConvertJsonArray,
-			},
-		},
-		ResponseConverts: map[string]ve.ResponseConvert{
-			"Name": {
-				TargetField: "registry",
+				ConvertType: ve.ConvertJsonObjectArray,
 			},
 		},
 	}

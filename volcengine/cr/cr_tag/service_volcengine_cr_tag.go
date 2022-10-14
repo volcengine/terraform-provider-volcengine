@@ -189,7 +189,7 @@ func (s *VolcengineCrTagService) DatasourceResources(*schema.ResourceData, *sche
 		IdField:      "Name",
 		CollectField: "tags",
 		RequestConverts: map[string]ve.RequestConvert{
-			"name": {
+			"names": {
 				TargetField: "Filter.Names",
 				ConvertType: ve.ConvertJsonArray,
 			},
