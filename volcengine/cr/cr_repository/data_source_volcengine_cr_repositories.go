@@ -72,6 +72,11 @@ func DataSourceVolcengineCrRepositories() *schema.Resource {
 							Computed:    true,
 							Description: "The access level of repository.",
 						},
+						"description": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The description of repository.",
+						},
 						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
