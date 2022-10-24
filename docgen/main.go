@@ -123,6 +123,7 @@ var resourceKeys = map[string]string{
 	"rds":     "RDS_MYSQL",
 	"rds_v2":  "RDS_MYSQL",
 	"tos":     "TOS(BETA)",
+	"cr":      "CR",
 }
 
 type Products struct {
