@@ -51,7 +51,7 @@ func (s *VolcengineCrRepositoryService) ReadResources(m map[string]interface{}) 
 			}
 		}
 
-		logger.Debug(logger.RespFormat, action, condition, resp)
+		logger.Debug(logger.RespFormat, action, condition, *resp)
 		results, err = ve.ObtainSdkValue("Result.Items", *resp)
 		if err != nil {
 			return data, err
