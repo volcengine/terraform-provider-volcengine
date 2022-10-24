@@ -3,6 +3,14 @@ package volcengine
 import (
 	"strings"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -180,6 +188,13 @@ func Provider() terraform.ResourceProvider {
 			// ================ TOS ================
 			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
 			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
+			// ================ CR ================
+			"volcengine_cr_registries":           cr_registry.DataSourceVolcengineCrRegistries(),
+			"volcengine_cr_namespaces":           cr_namespace.DataSourceVolcengineCrNamespaces(),
+			"volcengine_cr_repositories":         cr_repository.DataSourceVolcengineCrRepositories(),
+			"volcengine_cr_tags":                 cr_tag.DataSourceVolcengineCrTags(),
+			"volcengine_cr_authorization_tokens": cr_authorization_token.DataSourceVolcengineCrAuthorizationTokens(),
+			"volcengine_cr_endpoints":            cr_endpoint.DataSourceVolcengineCrEndpoints(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -255,6 +270,13 @@ func Provider() terraform.ResourceProvider {
 			//================= TOS =================
 			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
 			"volcengine_tos_object": object.ResourceVolcengineTosObject(),
+			// ================ CR ================
+			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
+			"volcengine_cr_registry_state": cr_registry_state.ResourceVolcengineCrRegistryState(),
+			"volcengine_cr_namespace":      cr_namespace.ResourceVolcengineCrNamespace(),
+			"volcengine_cr_repository":     cr_repository.ResourceVolcengineCrRepository(),
+			"volcengine_cr_tag":            cr_tag.ResourceVolcengineCrTag(),
+			"volcengine_cr_endpoint":       cr_endpoint.ResourceVolcengineCrEndpoint(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
