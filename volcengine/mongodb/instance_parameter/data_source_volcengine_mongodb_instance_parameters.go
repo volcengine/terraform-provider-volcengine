@@ -28,7 +28,7 @@ func DataSourceVolcengineMongoDBInstanceParameters() *schema.Resource {
 			"parameter_role": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "The node type of instance parameter.",
+				Description:  "The node type of instance parameter,valid value contains `Node`,`Shard`,`ConfigServer`,`Mongos`.",
 				ValidateFunc: validation.StringInSlice([]string{"Node", "Shard", "ConfigServer", "Mongos"}, false),
 			},
 			"parameter_names": {

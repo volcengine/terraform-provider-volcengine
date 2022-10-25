@@ -69,7 +69,7 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 									"instance_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The instance id that bound to the allow list .",
+										Description: "The instance id that bound to the allow list.",
 									},
 									"instance_name": {
 										Type:        schema.TypeString,

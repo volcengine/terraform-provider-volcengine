@@ -40,6 +40,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"instance_id": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The instance id.",
 			},
 			"object_id": {

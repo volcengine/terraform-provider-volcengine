@@ -38,9 +38,10 @@ func ResourceVolcengineMongoDBAllowList() *schema.Resource {
 				Description: "The description of allow list.",
 			},
 			"allow_list_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The IP address type of allow list.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"IPv4"}, false),
+				Description:  "The IP address type of allow list,valid value contains `IPv4`.",
 			},
 			"allow_list": {
 				Type:        schema.TypeString,

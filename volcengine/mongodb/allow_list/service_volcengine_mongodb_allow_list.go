@@ -3,7 +3,6 @@ package allow_list
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -127,14 +126,10 @@ func (s *VolcengineMongoDBAllowListService) ReadResource(resourceData *schema.Re
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	parts := strings.Split(id, ":")
-	if len(parts) != 2 {
-		return data, fmt.Errorf("the format of import id must be 'allow_list:instanceId'")
-	}
 	regionId := resourceData.Get("region_id")
 	req := map[string]interface{}{
 		"RegionId":   regionId,
-		"InstanceId": parts[1],
+		"InstanceId": id,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {

@@ -2,6 +2,7 @@ package instance
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -25,9 +26,10 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 				Description: "The instance name to query.",
 			},
 			"instance_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The instance type to query.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "The type of instance to query,the valid value contains `ReplicaSet` or `ShardedCluster`.",
+				ValidateFunc: validation.StringInSlice([]string{"ReplicaSet", "ShardedCluster"}, false),
 			},
 			"instance_status": {
 				Type:        schema.TypeString,
@@ -35,14 +37,16 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 				Description: "The instance status to query.",
 			},
 			"db_engine": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The database engine to query.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"MongoDB"}, false),
+				Description:  "The db engine to query,valid value contains `MongoDB`.",
 			},
 			"db_engine_version": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The database engine version to query.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"MongoDB_4_0"}, false),
+				Description:  "The version of db engine to query,valid value contains `MongoDB_4_0`.",
 			},
 			"create_start_time": {
 				Type:        schema.TypeString,
@@ -63,6 +67,11 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The end time of update to query.",
+			},
+			"vpc_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The vpc id of instance to query.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
