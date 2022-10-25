@@ -56,6 +56,11 @@ func (s *VolcengineMongoDBAllowListService) DatasourceResources(data *schema.Res
 		NameField:    "AllowListName",
 		CollectField: "allow_lists",
 		ContentType:  ve.ContentTypeJson,
+		RequestConverts: map[string]ve.RequestConvert{
+			"allow_list_ids": {
+				TargetField: "AllowListIds",
+			},
+		},
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"AllowListIPNum": {
 				TargetField: "allow_list_ip_num",
@@ -72,6 +77,24 @@ func (s *VolcengineMongoDBAllowListService) ReadResources(condition map[string]i
 		resp    *map[string]interface{}
 		results interface{}
 	)
+
+	if allowListIds, ok := condition["AllowListIds"]; ok {
+		for _, allowListId := range allowListIds.([]interface{}) {
+			detail, err := s.readAllowListDetails(allowListId.(string))
+			if err != nil {
+				logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
+				continue
+			}
+			data = append(data, detail)
+		}
+		//detail, err := s.readAllowListDetails(allowListId.(string))
+		//if err != nil {
+		//	logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
+		//	return nil, err
+		//}
+		return data, nil
+	}
+
 	action := "DescribeAllowLists"
 	logger.Debug(logger.ReqFormat, action, condition)
 	if condition == nil {
@@ -112,7 +135,6 @@ func (s *VolcengineMongoDBAllowListService) ReadResources(condition map[string]i
 		allowList["AllowList"] = detail.(map[string]interface{})["AllowList"]
 		allowList["AssociatedInstances"] = detail.(map[string]interface{})["AssociatedInstances"]
 
-		logger.DebugInfo("ins:   %v", allowList)
 		data = append(data, allowList)
 	}
 	return data, nil
@@ -126,10 +148,8 @@ func (s *VolcengineMongoDBAllowListService) ReadResource(resourceData *schema.Re
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	regionId := resourceData.Get("region_id")
 	req := map[string]interface{}{
-		"RegionId":   regionId,
-		"InstanceId": id,
+		"AllowListIds": []interface{}{id},
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -179,40 +199,43 @@ func (s *VolcengineMongoDBAllowListService) CreateResource(resourceData *schema.
 }
 
 func (s *VolcengineMongoDBAllowListService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callbacks := make([]ve.Callback, 0)
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ModifyAllowList",
+			ConvertMode: ve.RequestConvertAll,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["AllowListId"] = d.Id()
+				(*call.SdkParam)["AllowListName"] = resourceData.Get("allow_list_name")
 
-	if resourceData.HasChange("allow_list_name") || resourceData.HasChange("allow_list_desc") ||
-		resourceData.HasChange("allow_list") || resourceData.HasChange("apply_instance_num") {
-		callback := ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "ModifyAllowList",
-				ConvertMode: ve.RequestConvertIgnore,
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					(*call.SdkParam)["AllowListId"] = d.Id()
-					if resourceData.HasChange("allow_list_name") {
-						(*call.SdkParam)["AllowListName"] = resourceData.Get("allow_list_name")
+				if resourceData.HasChange("allow_list") {
+					//describe allow list, get instance num
+					var applyInstanceNum int
+					detail, err := s.readAllowListDetails(d.Id())
+					if err != nil {
+						return false, fmt.Errorf("read allow list detail faield")
 					}
-					if resourceData.HasChange("allow_list_desc") {
-						(*call.SdkParam)["AllowListDesc"] = resourceData.Get("AllowListDesc")
+					if associatedInstances, ok := detail.(map[string]interface{})["AssociatedInstances"]; !ok {
+						return false, fmt.Errorf("read AssociatedInstances failed")
+					} else {
+						applyInstanceNum = len(associatedInstances.([]interface{}))
 					}
-					if resourceData.HasChange("allow_list") {
-						(*call.SdkParam)["AllowList"] = resourceData.Get("allow_list")
-					}
-					if resourceData.HasChange("apply_instance_num") {
-						(*call.SdkParam)["ApplyInstanceNum"] = resourceData.Get("apply_instance_num")
-					}
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
+
+					//num, ok := resourceData.GetOkExists("apply_instance_num")
+					//if !ok {
+					//	return false, fmt.Errorf("apply_instance_num is required if you need to modify allow_list")
+					//}
+					(*call.SdkParam)["ApplyInstanceNum"] = applyInstanceNum
+				}
+				return true, nil
 			},
-		}
-		callbacks = append(callbacks, callback)
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
 	}
 
-	return callbacks
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineMongoDBAllowListService) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {

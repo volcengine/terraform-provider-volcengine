@@ -16,8 +16,16 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The instance ID to query.",
+			},
+			"allow_list_ids": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The allow list IDs to query.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 			"allow_lists": {
 				Description: "The collection of mongodb allow list query.",

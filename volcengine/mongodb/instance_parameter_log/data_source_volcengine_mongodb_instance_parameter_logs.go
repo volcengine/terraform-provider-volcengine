@@ -5,9 +5,9 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineMongoDBInstanceParameterLogParameters() *schema.Resource {
+func DataSourceVolcengineMongoDBInstanceParameterLogs() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVolcengineMongoDBInstanceParameterLogParametersRead,
+		Read: dataSourceVolcengineMongoDBInstanceParameterLogsRead,
 		Schema: map[string]*schema.Schema{
 			"output_file": {
 				Type:        schema.TypeString,
@@ -78,7 +78,7 @@ func DataSourceVolcengineMongoDBInstanceParameterLogParameters() *schema.Resourc
 	}
 }
 
-func dataSourceVolcengineMongoDBInstanceParameterLogParametersRead(d *schema.ResourceData, meta interface{}) error {
-	service := NewMongoDBInstanceParameterLogParameterService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBInstanceParameterLogParameters())
+func dataSourceVolcengineMongoDBInstanceParameterLogsRead(d *schema.ResourceData, meta interface{}) error {
+	service := NewMongoDBInstanceParameterLogService(meta.(*ve.SdkClient))
+	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBInstanceParameterLogs())
 }

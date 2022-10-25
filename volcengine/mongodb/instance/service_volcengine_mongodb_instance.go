@@ -27,7 +27,7 @@ func (s *VolcengineMongoDBInstanceService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineMongoDBInstanceService) readInstanceDetails(id string) (instance interface{}, err error) {
+func (s *VolcengineMongoDBInstanceService) ReadInstanceDetails(id string) (instance interface{}, err error) {
 	var (
 		resp *map[string]interface{}
 	)
@@ -42,12 +42,30 @@ func (s *VolcengineMongoDBInstanceService) readInstanceDetails(id string) (insta
 	}
 	logger.Debug(logger.RespFormat, action, resp)
 
-	instance, err = ve.ObtainSdkValue("Result.DBInstance", *resp) //TODO：文档与实际测试不符，由reflect.Typeof(instance)可知返回只有一个instance，不是数组
+	instance, err = ve.ObtainSdkValue("Result.DBInstance", *resp)
 	if err != nil {
 		return instance, err
 	}
 
 	return instance, err
+}
+
+func (s *VolcengineMongoDBInstanceService) readSSLDetails(id string) (ssl interface{}, err error) {
+	var (
+		resp *map[string]interface{}
+	)
+	action := "DescribeDBInstanceSSL"
+	cond := map[string]interface{}{
+		"InstanceId": id,
+	}
+	logger.Debug(logger.RespFormat, action, cond)
+	resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &cond)
+	if err != nil {
+		return ssl, err
+	}
+	logger.Debug(logger.RespFormat, action, resp)
+
+	return ve.ObtainSdkValue("Result", *resp)
 }
 
 func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
@@ -97,9 +115,15 @@ func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]in
 				continue
 			}
 
-			detail, err := s.readInstanceDetails(instanceId)
+			detail, err := s.ReadInstanceDetails(instanceId)
 			if err != nil {
 				logger.DebugInfo("read instance %s detail failed,err:%v.", instanceId, err)
+				data = append(data, ele)
+				continue
+			}
+			ssl, err := s.readSSLDetails(instanceId)
+			if err != nil {
+				logger.DebugInfo("read instance ssl information of %s failed,err:%v.", instanceId, err)
 				data = append(data, ele)
 				continue
 			}
@@ -108,8 +132,9 @@ func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]in
 			ins["Mongos"] = detail.(map[string]interface{})["Mongos"]
 			ins["Shards"] = detail.(map[string]interface{})["Shards"]
 
-			logger.DebugInfo("ins:   %v", ins)
-
+			ins["SSLEnable"] = ssl.(map[string]interface{})["SSLEnable"]
+			ins["SSLIsValid"] = ssl.(map[string]interface{})["IsValid"]
+			ins["SSLExpiredTime"] = ssl.(map[string]interface{})["SSLExpiredTime"]
 			data = append(data, ins)
 		}
 		return data, nil
@@ -141,6 +166,46 @@ func (s *VolcengineMongoDBInstanceService) ReadResource(resourceData *schema.Res
 	if len(data) == 0 {
 		return data, fmt.Errorf("instance %s is not exist", id)
 	}
+
+	// import时设置默认值
+	if _, ok := resourceData.GetOkExists("ssl_action"); !ok {
+		data["SslAction"] = "-"
+	}
+	if _, ok := resourceData.GetOkExists("restart_instance"); !ok {
+		data["RestartInstance"] = false
+	}
+
+	if data["InstanceType"].(string) == "ReplicaSet" {
+		if temp, ok := data["Nodes"]; ok && temp != nil {
+			nodes := temp.([]interface{})
+			data["NodeNumber"] = len(nodes)
+			data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
+		} else {
+			data["NodeNumber"] = 0
+		}
+	}
+	if data["InstanceType"].(string) == "ShardedCluster" {
+		if temp, ok := data["Mongos"]; ok && temp != nil {
+			mongos := temp.([]interface{})
+			data["MongosNodeNumber"] = len(mongos)
+			data["MongosNodeSpec"] = mongos[0].(map[string]interface{})["NodeSpec"]
+		} else {
+			data["MongosNodeNumber"] = 0
+		}
+		if temp, ok := data["Shards"]; ok && temp != nil {
+			shards := temp.([]interface{})
+			data["ShardNumber"] = len(shards)
+			if tmp, ok := shards[0].(map[string]interface{})["Nodes"]; ok {
+				nodes := tmp.([]interface{})
+				data["StorageSpaceGb"] = nodes[0].(map[string]interface{})["TotalStorageGB"]
+				data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
+				data["NodeNumber"] = len(nodes)
+			}
+		} else {
+			data["ShardNumber"] = 0
+			data["StorageSpaceGb"] = 0
+		}
+	}
 	return data, err
 }
 
@@ -158,7 +223,7 @@ func (s *VolcengineMongoDBInstanceService) RefreshResourceState(resourceData *sc
 				status     interface{}
 				failStates []string
 			)
-			failStates = append(failStates, "CreateFailed", "Failed") //TODO:check fail statues.
+			failStates = append(failStates, "CreateFailed", "Failed")
 
 			logger.DebugInfo("start refresh :%s", id)
 			instance, err = s.ReadResource(resourceData, id)
@@ -184,7 +249,17 @@ func (s *VolcengineMongoDBInstanceService) RefreshResourceState(resourceData *sc
 
 func (s *VolcengineMongoDBInstanceService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+		return instance, map[string]ve.ResponseConvert{
+			"DBEngine": {
+				TargetField: "db_ending",
+			},
+			"DBEngineVersion": {
+				TargetField: "db_engine_version",
+			},
+			"DBEngineVersionStr": {
+				TargetField: "db_engine_version_str",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -266,7 +341,7 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
 				id, _ := ve.ObtainSdkValue("Result.InstanceId", *resp)
 				d.SetId(id.(string))
-				time.Sleep(time.Second * 5) //如果创建之后立即refresh，DescribeDBInstances会查找不到这个实例直接返回错误..
+				time.Sleep(time.Second * 10) //如果创建之后立即refresh，DescribeDBInstances会查找不到这个实例直接返回错误..
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
@@ -331,6 +406,14 @@ func (s *VolcengineMongoDBInstanceService) ModifyResource(resourceData *schema.R
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					time.Sleep(time.Second * 10) //变更之后立即refresh，实例状态还是Running将立即返回..
+					return nil
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
 			},
 		}
 		callbacks = append(callbacks, callback)
@@ -366,6 +449,30 @@ func (s *VolcengineMongoDBInstanceService) ModifyResource(resourceData *schema.R
 		}
 		callbacks = append(callbacks, callback)
 	}
+	if resourceData.HasChange("super_account_password") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ResetDBAccount",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					(*call.SdkParam)["AccountName"] = d.Get("super_account_name")
+					(*call.SdkParam)["AccountPassword"] = d.Get("super_account_password")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
 
 	return callbacks
 }
@@ -382,6 +489,9 @@ func (s *VolcengineMongoDBInstanceService) RemoveResource(resourceData *schema.R
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
 			},
 		},
 	}
@@ -421,7 +531,7 @@ func (s *VolcengineMongoDBInstanceService) DatasourceResources(data *schema.Reso
 			"UsedMemoryGB": {
 				TargetField: "used_memory_gb",
 			},
-			"UsecvCPU": {
+			"UsedvCPU": {
 				TargetField: "used_vcpu",
 			},
 			"TotalStorageGB": {
@@ -429,6 +539,15 @@ func (s *VolcengineMongoDBInstanceService) DatasourceResources(data *schema.Reso
 			},
 			"UsedStorageGB": {
 				TargetField: "used_storage_gb",
+			},
+			"SSLEnable": {
+				TargetField: "ssl_enable",
+			},
+			"SSLIsValid": {
+				TargetField: "ssl_is_valid",
+			},
+			"SSLExpireTime": {
+				TargetField: "ssl_expire_time",
 			},
 		},
 	}

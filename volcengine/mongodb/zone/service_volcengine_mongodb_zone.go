@@ -1,4 +1,4 @@
-package mongodb_zone
+package zone
 
 import (
 	"errors"

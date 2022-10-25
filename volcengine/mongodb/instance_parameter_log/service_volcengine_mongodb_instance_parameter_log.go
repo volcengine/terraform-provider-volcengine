@@ -10,23 +10,23 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineMongoDBInstanceParameterLogParameterService struct {
+type VolcengineMongoDBInstanceParameterLogService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewMongoDBInstanceParameterLogParameterService(c *ve.SdkClient) *VolcengineMongoDBInstanceParameterLogParameterService {
-	return &VolcengineMongoDBInstanceParameterLogParameterService{
+func NewMongoDBInstanceParameterLogService(c *ve.SdkClient) *VolcengineMongoDBInstanceParameterLogService {
+	return &VolcengineMongoDBInstanceParameterLogService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) GetClient() *ve.SdkClient {
+func (s *VolcengineMongoDBInstanceParameterLogService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineMongoDBInstanceParameterLogService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -62,41 +62,41 @@ func (s *VolcengineMongoDBInstanceParameterLogParameterService) ReadResources(co
 	})
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineMongoDBInstanceParameterLogService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	return data, err
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineMongoDBInstanceParameterLogService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{}
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
+func (s *VolcengineMongoDBInstanceParameterLogService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return instance, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineMongoDBInstanceParameterLogService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineMongoDBInstanceParameterLogService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineMongoDBInstanceParameterLogService) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineMongoDBInstanceParameterLogService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		CollectField: "parameter_change_logs",
 		ContentType:  ve.ContentTypeJson,
 	}
 }
 
-func (s *VolcengineMongoDBInstanceParameterLogParameterService) ReadResourceId(id string) string {
+func (s *VolcengineMongoDBInstanceParameterLogService) ReadResourceId(id string) string {
 	return id
 }
 

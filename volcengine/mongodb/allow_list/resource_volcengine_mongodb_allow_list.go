@@ -35,6 +35,7 @@ func ResourceVolcengineMongoDBAllowList() *schema.Resource {
 			"allow_list_desc": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The description of allow list.",
 			},
 			"allow_list_type": {
@@ -49,17 +50,23 @@ func ResourceVolcengineMongoDBAllowList() *schema.Resource {
 				Description: "IP address or IP address segment in CIDR format.",
 			},
 			"modify_mode": {
-				Type:         schema.TypeString,
-				Optional:     true,
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
 				Default:      "Cover",
 				ValidateFunc: validation.StringInSlice([]string{"Cover", "Append", "Delete"}, false),
 				Description:  "The modify mode.",
 			},
-			"apply_instance_num": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "The instance number bound to the allow list.",
-			},
+			//"apply_instance_num": {
+			//	Type:     schema.TypeInt,
+			//	Optional: true,
+			//	DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			//		return d.Id() == ""
+			//	},
+			//	Description: "The instance number bound to the allow list,this parameter is required if you need to modify `AllowList`.",
+			//},
 		},
 	}
 	return resource

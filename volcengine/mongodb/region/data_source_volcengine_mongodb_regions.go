@@ -1,4 +1,4 @@
-package mongodb_region
+package region
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"

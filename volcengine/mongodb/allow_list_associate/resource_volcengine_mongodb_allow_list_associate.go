@@ -7,6 +7,16 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
+/*
+
+Import
+mongosdb allow list associate can be imported using the instanceId:allowListId, e.g.
+```
+$ terraform import volcengine_mongosdb_allow_list_associate.default mongo-replica-e405f8e2****:acl-d1fd76693bd54e658912e7337d5b****
+```
+
+*/
+
 func ResourceVolcengineMongodbAllowListAssociate() *schema.Resource {
 	resource := &schema.Resource{
 		Read:   resourceVolcengineMongodbAllowListAssociateRead,

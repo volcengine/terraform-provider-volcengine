@@ -1,4 +1,4 @@
-package mongodb_zone
+package zone
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"

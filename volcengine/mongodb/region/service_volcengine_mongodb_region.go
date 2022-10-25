@@ -1,4 +1,4 @@
-package mongodb_region
+package region
 
 import (
 	"errors"

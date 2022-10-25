@@ -40,13 +40,12 @@ func (s *VolcengineMongodbAllowListAssociateService) ReadResources(m map[string]
 
 func (s *VolcengineMongodbAllowListAssociateService) ReadResource(resourceData *schema.ResourceData, tmpId string) (data map[string]interface{}, err error) {
 	var (
-		ids         []string
-		instanceId  string
-		req         map[string]interface{}
-		output      *map[string]interface{}
-		results     interface{}
-		ok          bool
-		statusInter interface{}
+		ids        []string
+		instanceId string
+		req        map[string]interface{}
+		output     *map[string]interface{}
+		results    interface{}
+		ok         bool
 	)
 	if tmpId == "" {
 		tmpId = s.ReadResourceId(resourceData.Id())
@@ -67,7 +66,7 @@ func (s *VolcengineMongodbAllowListAssociateService) ReadResource(resourceData *
 	if err != nil {
 		return data, err
 	}
-	results, err = ve.ObtainSdkValue("Result", *output)
+	results, err = ve.ObtainSdkValue("Result.DBInstance", *output)
 	if err != nil {
 		return data, err
 	}
@@ -77,14 +76,6 @@ func (s *VolcengineMongodbAllowListAssociateService) ReadResource(resourceData *
 	if len(data) == 0 {
 		return data, fmt.Errorf("instance(%v) is not existed", instanceId)
 	}
-
-	if statusInter, ok = data["Status"]; !ok {
-		return data, fmt.Errorf("have no Status")
-	}
-	if _, ok = statusInter.(string); !ok {
-		return data, fmt.Errorf("type of statusInter is not string")
-	}
-
 	return data, nil
 }
 
@@ -99,7 +90,7 @@ func (s *VolcengineMongodbAllowListAssociateService) RefreshResourceState(resour
 		Refresh: func() (result interface{}, state string, err error) {
 			logger.DebugInfo("Refresh status", 0)
 			var failStatus []string
-			failStatus = append(failStatus, "TaskFailed")
+			failStatus = append(failStatus, "CreateFailed")
 
 			output, err := s.ReadResource(resourceData, id)
 			if err != nil {
@@ -107,14 +98,14 @@ func (s *VolcengineMongodbAllowListAssociateService) RefreshResourceState(resour
 				return nil, "", err
 			}
 			var status interface{}
-			status, err = ve.ObtainSdkValue("Status", output)
+			status, err = ve.ObtainSdkValue("InstanceStatus", output)
 			if err != nil {
-				logger.DebugInfo("ObtainSdkValue failed", 0)
+				logger.DebugInfo("ObtainSdkValue InstanceStatus failed", 0)
 				return nil, "", err
 			}
 			statusStr, ok := status.(string)
 			if !ok {
-				logger.DebugInfo("Type of status is not string", 0)
+				logger.DebugInfo("Type of InstanceStatus is not string", 0)
 				return nil, "", fmt.Errorf("type of status if not string")
 			}
 			for _, v := range failStatus {

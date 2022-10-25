@@ -422,9 +422,24 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 						},
 						"zone_id": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Computed:    true,
 							ForceNew:    true,
 							Description: "The zone ID of instance.",
+						},
+						"ssl_enable": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether ssl enabled.",
+						},
+						"ssl_is_valid": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether ssl is valid.",
+						},
+						"ssl_expire_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ssl expire time.",
 						},
 					},
 				},

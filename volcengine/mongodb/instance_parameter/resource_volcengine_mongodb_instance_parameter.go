@@ -11,18 +11,20 @@ import (
 /*
 
 Import
-mongosdb parameter can be imported using the param:instanceId, e.g.
+mongosdb parameter can be imported using the param:instanceId:parameterName, e.g.
 ```
-$ terraform import volcengine_mongosdb_instance_parameter.default param:mongo-replica-e405f8e2****
+$ terraform import volcengine_mongodb_instance_parameter.default param:mongo-replica-e405f8e2****:connPoolMaxConnsPerHost
 ```
 
 */
 
 func mongoDBParameterImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	items := strings.Split(d.Id(), ":")
-	if len(items) != 2 || items[0] != "param" {
-		return []*schema.ResourceData{d}, fmt.Errorf("the format of import id must be 'param:instanceId'")
+	if len(items) != 3 || items[0] != "param" {
+		return []*schema.ResourceData{d}, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName'")
 	}
+	d.Set("instance_id", items[1])
+	d.Set("parameter_name", items[2])
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -41,37 +43,53 @@ func ResourceVolcengineMongoDBInstanceParameter() *schema.Resource {
 				Required:    true,
 				Description: "The instance ID.",
 			},
-			"parameters": {
-				Type:        schema.TypeList,
+			"parameter_name": {
+				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The parameters to modify.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"parameter_name": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The name of parameter.",
-						},
-						"parameter_role": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The node type to which the parameter belongs.",
-						},
-						"parameter_value": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The value of parameter.",
-						},
-					},
-				},
+				Computed:    true,
+				Description: "The name of parameter.",
 			},
+			"parameter_role": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The node type to which the parameter belongs.",
+			},
+			"parameter_value": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The value of parameter.",
+			},
+			//"parameters_object": {
+			//	Type:        schema.TypeList,
+			//	Optional:    true,
+			//	Description: "The parameters to modify.",
+			//	Elem: &schema.Resource{
+			//		Schema: map[string]*schema.Schema{
+			//			"parameter_name": {
+			//				Type:        schema.TypeString,
+			//				Required:    true,
+			//				Description: "The name of parameter.",
+			//			},
+			//			"parameter_role": {
+			//				Type:        schema.TypeString,
+			//				Required:    true,
+			//				Description: "The node type to which the parameter belongs.",
+			//			},
+			//			"parameter_value": {
+			//				Type:        schema.TypeString,
+			//				Required:    true,
+			//				Description: "The value of parameter.",
+			//			},
+			//		},
+			//	},
+			//},
 		},
 	}
 	return resource
 }
 
 func resourceVolcengineMongoDBInstanceParameterCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	return nil
+	return fmt.Errorf("mongodb instance parameter not allow creating,please import first")
 }
 
 func resourceVolcengineMongoDBInstanceParameterUpdate(d *schema.ResourceData, meta interface{}) (err error) {

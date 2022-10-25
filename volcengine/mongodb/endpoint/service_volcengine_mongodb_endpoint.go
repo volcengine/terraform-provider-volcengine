@@ -3,8 +3,9 @@ package endpoint
 import (
 	"errors"
 	"fmt"
-	"strings"
 	"time"
+
+	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -63,33 +64,32 @@ func (s *VolcengineMongoDBEndpointService) ReadResources(condition map[string]in
 	return data, err
 }
 
-func (s *VolcengineMongoDBEndpointService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
-	var (
-		results []interface{}
-		ok      bool
-	)
-	if id == "" {
-		id = s.ReadResourceId(resourceData.Id())
-	}
-	parts := strings.Split(id, ":")
-	if len(parts) != 2 {
-		return data, fmt.Errorf("the format of import id must be 'endpoint:instanceId'")
-	}
+func (s *VolcengineMongoDBEndpointService) GetEndpoint(instanceId, endpointId, networkType, objectId string) (endpoint map[string]interface{}, err error) {
 	req := map[string]interface{}{
-		"InstanceId": parts[1],
+		"InstanceId": instanceId,
 	}
-	results, err = s.ReadResources(req)
+	results, err := s.ReadResources(req)
 	if err != nil {
-		return data, err
+		return nil, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
-			return data, errors.New("value is not map")
+		dbEndpoint, ok := v.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("dbEndpoint value is not map")
+		}
+		if endpointId != "" && endpointId == dbEndpoint["EndpointId"].(string) {
+			return dbEndpoint, nil
+		}
+		if networkType == dbEndpoint["NetworkType"].(string) { // private or public
+			if objectId == "" || (objectId != "" && objectId == dbEndpoint["ObjectId"].(string)) { //endpointType is ReplicaSet if objectId is empty
+				return dbEndpoint, nil
+			}
 		}
 	}
-	if len(data) == 0 {
-		return data, fmt.Errorf("endpoint of instance %s is not exist", id)
-	}
+	return nil, fmt.Errorf("the endpoint not found")
+}
+
+func (s *VolcengineMongoDBEndpointService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	return data, err
 }
 
@@ -105,32 +105,71 @@ func (s *VolcengineMongoDBEndpointService) WithResourceResponseHandlers(instance
 }
 
 func (s *VolcengineMongoDBEndpointService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	instanceId := resourceData.Get("instance_id").(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateDBEndpoint",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-				"mongos_node_ids": {
-					ConvertType: ve.ConvertJsonArray,
-				},
 				"eip_ids": {
 					ConvertType: ve.ConvertJsonArray,
 				},
+				"mongos_node_ids": {
+					ConvertType: ve.ConvertJsonArray,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				networkType := d.Get("network_type")
+				eipIds := d.Get("eip_ids")
+				if networkType != nil && networkType.(string) == "Public" {
+					if eipIds == nil {
+						return false, fmt.Errorf("eip_ids is required when network_type is 'Public'")
+					}
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
-				id := d.Get("instance_id")
-				d.SetId("endpoint:" + id.(string))
-				return nil
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				mongodbInstance.NewMongoDBInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: instanceId,
+				},
+			},
+			LockId: func(d *schema.ResourceData) string {
+				logger.Debug("lock instance id:%s", instanceId, "")
+				return instanceId
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	obtainEndpointIdCallback := ve.Callback{
+		Call: ve.SdkCall{
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				networkType := "Private"
+				if a, ok := d.GetOkExists("network_type"); ok {
+					networkType = a.(string)
+				}
+				objectId := ""
+				if a, ok := d.GetOkExists("object_id"); ok {
+					objectId = a.(string)
+				}
+				endpoint, err := s.GetEndpoint(instanceId, "", networkType, objectId)
+				if err != nil {
+					return nil, err
+				}
+				endpointId := endpoint["EndpointId"].(string)
+				d.Set("endpoint_id", endpointId)
+				d.SetId(fmt.Sprintf("%s:%s", instanceId, endpointId))
+				return nil, nil
+			},
+		},
+	}
+
+	return []ve.Callback{callback, obtainEndpointIdCallback}
 }
 
 func (s *VolcengineMongoDBEndpointService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -138,36 +177,33 @@ func (s *VolcengineMongoDBEndpointService) ModifyResource(resourceData *schema.R
 }
 
 func (s *VolcengineMongoDBEndpointService) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	instanceId := resourceData.Get("instance_id").(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteDBEndpoint",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"mongos_node_ids": {
-					ConvertType: ve.ConvertJsonArray,
-				},
-			},
+			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				// DescribeDBEndpoint : obtain EndpointId
-				id := d.Id()
-				parts := strings.Split(id, ":")
-				if len(parts) != 2 {
-					return false, fmt.Errorf("the format of import id must be 'endpoint:instanceId'")
-				}
-				instanceId := parts[1]
-				data, err := s.ReadResource(d, instanceId)
-				if err != nil {
-					return false, fmt.Errorf("get endpoint id failed")
-				}
-				endpointId := data["EndpointId"]
-
 				(*call.SdkParam)["InstanceId"] = instanceId
-				(*call.SdkParam)["EndpointId"] = endpointId
+				(*call.SdkParam)["EndpointId"] = d.Get("endpoint_id")
+				if d.Get("mongos_node_id") != nil {
+					(*call.SdkParam)["MongosNodeIds"] = []interface{}{d.Get("mongos_node_id")}
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				mongodbInstance.NewMongoDBInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: instanceId,
+				},
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return instanceId
 			},
 		},
 	}

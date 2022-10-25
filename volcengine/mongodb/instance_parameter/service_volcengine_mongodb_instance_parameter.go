@@ -3,6 +3,7 @@ package instance_parameter
 import (
 	"errors"
 	"fmt"
+	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 	"strings"
 	"time"
 
@@ -66,13 +67,12 @@ func (s *VolcengineMongoDBInstanceParameterService) ReadResource(resourceData *s
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	parts := strings.Split(id, ":")
-	if len(parts) != 2 {
-		return data, fmt.Errorf("the format of import id must be 'endpoint:instanceId'")
+	if len(parts) != 3 {
+		return data, fmt.Errorf("the format of import id must be 'endpoint:instanceId:parameterName'")
 	}
 	req := map[string]interface{}{
 		"InstanceId":     parts[1],
-		"ParameterRole":  resourceData.Get("parameter_role"),
-		"ParameterNames": resourceData.Get("parameter_names"),
+		"ParameterNames": parts[2],
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -86,7 +86,17 @@ func (s *VolcengineMongoDBInstanceParameterService) ReadResource(resourceData *s
 	if len(data) == 0 {
 		return data, fmt.Errorf("parameters of instance %s is not exist", id)
 	}
-	return data, err
+	params, ok := data["InstanceParameters"]
+	if !ok || len(params.([]interface{})) == 0 {
+		return data, fmt.Errorf("parameters is empty")
+	}
+	param := params.([]interface{})[0]
+	return map[string]interface{}{
+		"ParameterName":  param.(map[string]interface{})["ParameterNames"],
+		"ParameterRole":  param.(map[string]interface{})["ParameterRole"],
+		"ParameterValue": param.(map[string]interface{})["ParameterValue"],
+	}, err
+
 }
 
 func (s *VolcengineMongoDBInstanceParameterService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
@@ -105,29 +115,35 @@ func (s *VolcengineMongoDBInstanceParameterService) CreateResource(resourceData 
 }
 
 func (s *VolcengineMongoDBInstanceParameterService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	id := s.ReadResourceId(resourceData.Id())
+	parts := strings.Split(id, ":")
+	instanceId := parts[1]
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyDBInstanceParameters",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"parameters": {
-					TargetField: "Parameters",
-					ConvertType: ve.ConvertJsonArray,
-				},
-			},
-
+			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				id := s.ReadResourceId(resourceData.Id())
-				parts := strings.Split(id, ":")
-				if len(parts) != 2 {
-					return false, fmt.Errorf("the format of import id must be 'endpoint:instanceId'")
+				(*call.SdkParam)["InstanceId"] = instanceId
+				(*call.SdkParam)["ParametersObject"] = map[string]interface{}{
+					"ParameterName":  parts[2],
+					"ParameterRole":  d.Get("parameter_role"),
+					"ParameterValue": d.Get("parameter_value"),
 				}
-				(*call.SdkParam)["InstanceId"] = parts[1]
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				mongodbInstance.NewMongoDBInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: instanceId,
+				},
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return instanceId
 			},
 		},
 	}
@@ -141,7 +157,7 @@ func (s *VolcengineMongoDBInstanceParameterService) RemoveResource(resourceData 
 func (s *VolcengineMongoDBInstanceParameterService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		IdField:      "InstanceId",
-		CollectField: "instance_parameters",
+		CollectField: "parameters",
 		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"DBEngine": {
@@ -149,6 +165,9 @@ func (s *VolcengineMongoDBInstanceParameterService) DatasourceResources(data *sc
 			},
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
+			},
+			"ParameterNames": {
+				TargetField: "parameter_name",
 			},
 		},
 	}

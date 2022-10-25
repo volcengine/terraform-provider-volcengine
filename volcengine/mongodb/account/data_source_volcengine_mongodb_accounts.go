@@ -1,4 +1,4 @@
-package mongodb_account
+package account
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -11,9 +11,9 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 		Read: dataSourceVolcengineAccountsRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Required: true,
+				// ForceNew:    true,
 				Description: "Target query mongo instance id.",
 			},
 			"account_name": {
@@ -75,6 +75,6 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 }
 
 func dataSourceVolcengineAccountsRead(d *schema.ResourceData, meta interface{}) error {
-	regionService := NewService(meta.(*ve.SdkClient))
+	regionService := NewMongoDBAccountService(meta.(*ve.SdkClient))
 	return regionService.Dispatcher.Data(regionService, d, DataSourceVolcengineMongoDBAccounts())
 }

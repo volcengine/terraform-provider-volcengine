@@ -1,4 +1,6 @@
 resource "volcengine_mongodb_endpoint" "foo"{
-    instance_id="mongo-shard-011d2479***"
-    mongos_node_ids=["mongo-shard-9a554522****-0","mongo-shard-9a554522****-1"]
+    instance_id="mongo-shard-xxx"
+    object_id="mongo-shard-xxx-s1"
+    network_type="Public"
+    eip_ids=["eip-xx","eip-xx"]
 }
