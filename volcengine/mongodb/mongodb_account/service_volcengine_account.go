@@ -113,6 +113,11 @@ func (s *VolcengineMongoDBAccountService) DatasourceResources(data *schema.Resou
 	return ve.DataSourceInfo{
 		NameField:    "AccountName",
 		CollectField: "accounts",
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"DBName": {
+				TargetField: "db_name",
+			},
+		},
 	}
 }
 
