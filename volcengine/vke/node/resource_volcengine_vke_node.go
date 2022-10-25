@@ -62,6 +62,77 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 				ForceNew:    true,
 				Description: "The flag of additional container storage enable, the value is `true` or `false`.",
 			},
+			"image_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The ImageId of NodeConfig.",
+			},
+			"initialize_script": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The initializeScript of Node.",
+			},
+			"kubernetes_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "The KubernetesConfig of Node.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"labels": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Key of Labels.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Value of Labels.",
+									},
+								},
+							},
+							Set:         kubernetesConfigLabelHash,
+							Description: "The Labels of KubernetesConfig.",
+						},
+						"taints": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Key of Taints.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Value of Taints.",
+									},
+									"effect": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.",
+									},
+								},
+							},
+							Description: "The Taints of KubernetesConfig.",
+						},
+						"cordon": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "The Cordon of KubernetesConfig.",
+						},
+					},
+				},
+			},
 			"container_storage_path": {
 				Type:     schema.TypeString,
 				Optional: true,

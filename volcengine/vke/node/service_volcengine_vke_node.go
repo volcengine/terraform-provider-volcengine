@@ -196,6 +196,26 @@ func (s *VolcengineVkeNodeService) CreateResource(resourceData *schema.ResourceD
 				"instance_id": {
 					TargetField: "InstanceIds.1",
 				},
+				"image_id": {
+					TargetField: "ImageId",
+				},
+				"initialize_script": {
+					TargetField: "InitializeScript",
+				},
+				"kubernetes_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"labels": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+						"taints": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+						"cordon": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("cluster_id").(string)
@@ -331,6 +351,40 @@ func (s *VolcengineVkeNodeService) DatasourceResources(*schema.ResourceData, *sc
 					}
 					return results
 				},
+			},
+			"KubernetesConfig.Labels": {
+				TargetField: "labels",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						for _, data := range dd {
+							label := make(map[string]string)
+							label["key"] = data.(map[string]interface{})["Key"].(string)
+							label["value"] = data.(map[string]interface{})["Value"].(string)
+							results = append(results, label)
+						}
+					}
+					return results
+				},
+			},
+			"KubernetesConfig.Taints": {
+				TargetField: "taints",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						for _, data := range dd {
+							label := make(map[string]string)
+							label["key"] = data.(map[string]interface{})["Key"].(string)
+							label["value"] = data.(map[string]interface{})["Value"].(string)
+							label["effect"] = data.(map[string]interface{})["Effect"].(string)
+							results = append(results, label)
+						}
+					}
+					return results
+				},
+			},
+			"KubernetesConfig.Cordon": {
+				TargetField: "cordon",
 			},
 		},
 	}

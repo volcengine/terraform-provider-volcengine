@@ -180,6 +180,64 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 							Computed:    true,
 							Description: "The Storage Path.",
 						},
+						"image_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ImageId of NodeConfig.",
+						},
+						"initialize_script": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The InitializeScript of NodeConfig.",
+						},
+						"labels": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The Label of KubernetesConfig.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of KubernetesConfig.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of KubernetesConfig.",
+									},
+								},
+							},
+						},
+						"taints": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The Taint of KubernetesConfig.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Taint.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Taint.",
+									},
+									"effect": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Effect of Taint.",
+									},
+								},
+							},
+						},
+						"cordon": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "The Cordon of KubernetesConfig.",
+						},
 					},
 				},
 			},

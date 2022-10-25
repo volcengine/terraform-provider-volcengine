@@ -47,15 +47,25 @@ In addition to all arguments above, the following attributes are exported:
     * `cluster_id` - The cluster id of node.
     * `condition_types` - The Condition of Node.
     * `container_storage_path` - The Storage Path.
+    * `cordon` - The Cordon of KubernetesConfig.
     * `create_client_token` - The create client token of node.
     * `create_time` - The create time of Node.
     * `id` - The ID of Node.
+    * `image_id` - The ImageId of NodeConfig.
+    * `initialize_script` - The InitializeScript of NodeConfig.
     * `instance_id` - The instance id of node.
     * `is_virtual` - Is virtual node.
+    * `labels` - The Label of KubernetesConfig.
+        * `key` - The Key of KubernetesConfig.
+        * `value` - The Value of KubernetesConfig.
     * `name` - The name of Node.
     * `node_pool_id` - The node pool id.
     * `phase` - The Phase of Node.
     * `roles` - The roles of node.
+    * `taints` - The Taint of KubernetesConfig.
+        * `effect` - The Effect of Taint.
+        * `key` - The Key of Taint.
+        * `value` - The Value of Taint.
     * `update_time` - The update time of Node.
     * `zone_id` - The zone id.
 * `total_count` - The total count of Node query.
