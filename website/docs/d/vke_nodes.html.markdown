@@ -33,11 +33,12 @@ The following arguments are supported:
 * `node_pool_ids` - (Optional) The Node Pool IDs.
 * `output_file` - (Optional) File name where to save data source results.
 * `statuses` - (Optional) The Status of filter.
+* `zone_ids` - (Optional) The Zone IDs.
 
 The `statuses` object supports the following:
 
 * `conditions_type` - (Optional) The Type of Node Condition, the value is `Progressing` or `Ok` or `Unschedulable` or `InitilizeFailed` or `Unknown` or `NotReady` or `Security` or `Balance` or `ResourceCleanupFailed`.
-* `phase` - (Optional) The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed`.
+* `phase` - (Optional) The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed` or `Starting` or `Stopping` or `Stopped`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -56,6 +57,7 @@ In addition to all arguments above, the following attributes are exported:
     * `phase` - The Phase of Node.
     * `roles` - The roles of node.
     * `update_time` - The update time of Node.
+    * `zone_id` - The zone id.
 * `total_count` - The total count of Node query.
 
 
