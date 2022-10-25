@@ -94,13 +94,13 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Required:    true,
 				Description: "The subnet id of instance.",
 			},
-			"supper_account_name": {
+			"super_account_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"root"}, false),
 				Description:  "The name of database account,must be `root`.",
 			},
-			"supper_account_password": {
+			"super_account_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The password of database account.",
