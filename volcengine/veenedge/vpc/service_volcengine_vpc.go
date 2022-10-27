@@ -229,6 +229,7 @@ func (s *VolcengineVpcService) DatasourceResources(*schema.ResourceData, *schema
 		},
 		ContentType:  ve.ContentTypeJson,
 		IdField:      "vpc_identity",
+		NameField:    "vpc_name",
 		CollectField: "vpc_instances",
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"vpc_identity": {
