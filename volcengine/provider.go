@@ -7,6 +7,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_activity"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_configuration"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_lifecycle_hook"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_policy"
@@ -118,6 +119,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_scaling_policies":        scaling_policy.DataSourceVolcengineScalingPolicies(),
 			"volcengine_scaling_activities":      scaling_activity.DataSourceVolcengineScalingActivities(),
 			"volcengine_scaling_lifecycle_hooks": scaling_lifecycle_hook.DataSourceVolcengineScalingLifecycleHooks(),
+			"volcengine_scaling_instances":       scaling_instance.DataSourceVolcengineScalingInstances(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),

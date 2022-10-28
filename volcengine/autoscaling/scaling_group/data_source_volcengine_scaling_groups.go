@@ -171,6 +171,16 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 							},
 							Description: "The list of server group attributes.",
 						},
+						"launch_template_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the launch template bound to the scaling group.",
+						},
+						"launch_template_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The version of the launch template bound to the scaling group.",
+						},
 					},
 				},
 			},

@@ -4,15 +4,16 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
 /*
 
 Import
-Scaling instance attachment can be imported using the scaling_group_id, e.g.
+Scaling instance attachment can be imported using the scaling_group_id and instance_id, e.g.
 ```
-$ terraform import volcengine_scaling_instance_attach.default scg-mizl7m1kqccg5smt1bdpijuj
+$ terraform import volcengine_scaling_instance_attach.default scg-mizl7m1kqccg5smt1bdpijuj:i-l8u2ai4j0fauo6mrpgk8
 ```
 
 */
@@ -24,21 +25,43 @@ func ResourceVolcengineScalingInstanceAttach() *schema.Resource {
 		Update: resourceVolcengineScalingInstanceAttachUpdate,
 		Delete: resourceVolcengineScalingInstanceAttachDelete,
 		Importer: &schema.ResourceImporter{
-			State: scalingInstanceImporter,
+			State: importScalingInstanceAttach,
 		},
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The id of the scaling group..",
+				Description: "The id of the scaling group.",
 			},
-			"instance_ids": {
-				Type:        schema.TypeSet,
+			"instance_id": {
+				Type:        schema.TypeString,
 				Required:    true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-				Set:         schema.HashString,
-				Description: "The list of instance ids the scaling group.",
+				ForceNew:    true,
+				Description: "The id of the instance.",
+			},
+			"entrusted": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to host the instance to a scaling group. Default value is false.",
+			},
+			"delete_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Remove",
+					"Detach",
+				}, false),
+				Description: "The type of delete activity. Valid values: Remove, Detach. Default value is Remove.",
+			},
+			"detach_option": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"both",
+					"none",
+				}, false),
+				Description: "Whether to cancel the association of the instance with the load balancing and public network IP. Valid values: both, none. Default value is both.",
 			},
 		},
 	}
@@ -49,7 +72,7 @@ func resourceVolcengineScalingInstanceAttachCreate(d *schema.ResourceData, meta 
 	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
 	err = scalingInstanceAttachService.Dispatcher.Create(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
 	if err != nil {
-		return fmt.Errorf("error on creating ScalingInatanceAttach %q, %s", d.Id(), err)
+		return fmt.Errorf("error on creating ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineScalingInstanceAttachRead(d, meta)
 }
@@ -58,7 +81,7 @@ func resourceVolcengineScalingInstanceAttachRead(d *schema.ResourceData, meta in
 	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
 	err = scalingInstanceAttachService.Dispatcher.Read(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
 	if err != nil {
-		return fmt.Errorf("error on reading ScalingInatanceAttach %q, %s", d.Id(), err)
+		return fmt.Errorf("error on reading ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
 	return err
 }
@@ -67,7 +90,7 @@ func resourceVolcengineScalingInstanceAttachUpdate(d *schema.ResourceData, meta 
 	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
 	err = scalingInstanceAttachService.Dispatcher.Update(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
 	if err != nil {
-		return fmt.Errorf("error on updating ScalingInatanceAttach %q, %s", d.Id(), err)
+		return fmt.Errorf("error on updating ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineScalingInstanceAttachRead(d, meta)
 }
@@ -76,7 +99,7 @@ func resourceVolcengineScalingInstanceAttachDelete(d *schema.ResourceData, meta 
 	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
 	err = scalingInstanceAttachService.Dispatcher.Delete(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
 	if err != nil {
-		return fmt.Errorf("error on deleting ScalingInatanceAttach %q, %s", d.Id(), err)
+		return fmt.Errorf("error on deleting ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
 	return err
 }
