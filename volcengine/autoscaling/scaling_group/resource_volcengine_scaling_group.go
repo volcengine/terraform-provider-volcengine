@@ -103,6 +103,24 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				}, false),
 				Description: "The multi az policy of the scaling group. Valid values: PRIORITY, BALANCE. Default value: PRIORITY.",
 			},
+			"active_scaling_configuration_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"launch_template_id", "launch_template_version"},
+				Description:   "The ID of the scaling configuration bound to the scaling group.",
+			},
+			"launch_template_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"active_scaling_configuration_id"},
+				Description:   "The ID of the launch template bound to the scaling group.",
+			},
+			"launch_template_version": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"active_scaling_configuration_id"},
+				Description:   "The version of the launch template bound to the scaling group.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineScalingGroups().Schema["scaling_groups"].Elem.(*schema.Resource).Schema

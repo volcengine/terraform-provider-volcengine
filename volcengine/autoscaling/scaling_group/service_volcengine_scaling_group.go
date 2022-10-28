@@ -241,10 +241,9 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 				"default_cooldown": {
 					ConvertType: ve.ConvertDefault,
 				},
-				// 暂不支持修改
-				//"multi_az_policy": {
-				//	TargetField: "MultiAZPolicy",
-				//},
+				"multi_az_policy": {
+					TargetField: "MultiAZPolicy",
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) < 2 {
@@ -354,9 +353,6 @@ func (s *VolcengineScalingGroupService) DatasourceResources(*schema.ResourceData
 			"scaling_group_names": {
 				TargetField: "ScalingGroupNames",
 				ConvertType: ve.ConvertWithN,
-			},
-			"multi_az_policy": {
-				TargetField: "MultiAZPolicy",
 			},
 		},
 		NameField:    "ScalingGroupName",

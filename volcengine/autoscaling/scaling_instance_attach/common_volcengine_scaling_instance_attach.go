@@ -2,22 +2,31 @@ package scaling_instance_attach
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-var scalingInstanceImporter = func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
-	if err := data.Set("scaling_group_id", data.Id()); err != nil {
+func importScalingInstanceAttach(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
+	var err error
+	items := strings.Split(data.Id(), ":")
+	if len(items) != 2 {
+		return []*schema.ResourceData{data}, fmt.Errorf("import id must be of the form ScalingGroupId:InstanceId")
+	}
+	err = data.Set("scaling_group_id", items[0])
+	if err != nil {
+		return []*schema.ResourceData{data}, err
+	}
+	err = data.Set("instance_id", items[1])
+	if err != nil {
 		return []*schema.ResourceData{data}, err
 	}
 	return []*schema.ResourceData{data}, nil
 }
 
-func formatInstanceIdsRequest(instanceIds []string) map[string]interface{} {
+func formatInstanceIdsRequest(instanceId string) map[string]interface{} {
 	var res = make(map[string]interface{}, 0)
-	for i, id := range instanceIds {
-		res[fmt.Sprintf("InstanceIds.%d", i+1)] = id
-	}
+	res["InstanceIds.1"] = instanceId
 	return res
 }
 
