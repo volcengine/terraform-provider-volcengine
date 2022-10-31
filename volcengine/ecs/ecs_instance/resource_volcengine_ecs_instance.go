@@ -95,7 +95,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: UserDateImportDiffSuppress,
-				Description:      "The user data of ECS instance.",
+				Description:      "The user data of ECS instance, this field must be encrypted with base64.",
 			},
 			"security_enhancement_strategy": {
 				Type:     schema.TypeString,

@@ -143,7 +143,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 												"password": {
 													Type:        schema.TypeString,
 													Optional:    true,
-													Description: "The Password of Security.",
+													Description: "The Password of Security, this field must be encrypted with base64.",
 												},
 												"ssh_key_pair_name": {
 													Type:        schema.TypeString,

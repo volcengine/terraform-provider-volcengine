@@ -78,7 +78,7 @@ The `labels` object supports the following:
 
 The `login` object supports the following:
 
-* `password` - (Optional) The Password of Security.
+* `password` - (Optional) The Password of Security, this field must be encrypted with base64.
 * `ssh_key_pair_name` - (Optional) The SshKeyPairName of Security.
 
 The `node_config` object supports the following:
