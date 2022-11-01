@@ -162,6 +162,10 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			wg                  sync.WaitGroup
 			syncMap             sync.Map
 		)
+		// 使用小写的 Hostname
+		if _, exist := ecs["HostName"]; exist {
+			delete(ecs, "HostName")
+		}
 
 		//计算period
 		if ecs["InstanceChargeType"].(string) == "PrePaid" {
@@ -868,6 +872,9 @@ func (s *VolcengineEcsService) CommonResponseConvert() map[string]ve.ResponseCon
 	return map[string]ve.ResponseConvert{
 		"Id": {
 			TargetField: "instance_id",
+		},
+		"Hostname": {
+			TargetField: "host_name",
 		},
 		"InstanceTypeId": {
 			TargetField: "instance_type",
