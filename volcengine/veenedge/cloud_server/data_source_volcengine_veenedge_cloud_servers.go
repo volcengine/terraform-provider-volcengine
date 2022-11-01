@@ -2,6 +2,7 @@ package cloud_server
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -17,6 +18,12 @@ func DataSourceVolcengineVeenedgeCloudServers() *schema.Resource {
 				},
 				Set:         schema.HashString,
 				Description: "A list of cloud server IDs.",
+			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of Cloud Server.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
