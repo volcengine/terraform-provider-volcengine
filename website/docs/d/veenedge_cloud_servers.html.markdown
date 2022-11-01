@@ -16,6 +16,7 @@ data "volcengine_veenedge_cloud_servers" "default" {
 ## Argument Reference
 The following arguments are supported:
 * `ids` - (Optional) A list of cloud server IDs.
+* `name_regex` - (Optional) A Name Regex of Cloud Server.
 * `output_file` - (Optional) File name where to save data source results.
 
 ## Attributes Reference
