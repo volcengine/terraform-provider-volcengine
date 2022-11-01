@@ -73,7 +73,7 @@ The following arguments are supported:
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.
 * `secondary_network_interfaces` - (Optional) The secondary networkInterface detail collection of ECS instance.
 * `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
-* `user_data` - (Optional) The user data of ECS instance.
+* `user_data` - (Optional) The user data of ECS instance, this field must be encrypted with base64.
 * `zone_id` - (Optional, ForceNew) The available zone ID of ECS instance.
 
 The `data_volumes` object supports the following:
