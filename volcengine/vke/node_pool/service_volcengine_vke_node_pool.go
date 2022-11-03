@@ -350,6 +350,9 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						"auto_renew_period": {
 							ConvertType: ve.ConvertJsonObject,
 						},
+						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -456,6 +459,22 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
 						},
+						"subnet_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"period": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"auto_renew": {
+							ForceGet:    true,
+							TargetField: "AutoRenew",
+						},
+						"auto_renew_period": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -463,9 +482,11 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
 							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
 						},
 						"taints": {
 							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -516,61 +537,20 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					}
 				}
 
-				if d.HasChange("kubernetes_config") {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok { // 列表被删除
-						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{
-							"Labels": []interface{}{},
-							"Taints": []interface{}{},
+				instanceChargeType := d.Get("node_config").([]interface{})[0].(map[string]interface{})["instance_charge_type"].(string)
+				if instanceChargeType != "PrePaid" {
+					if nodeCfg, ok := (*call.SdkParam)["NodeConfig"]; ok {
+						if _, ok := nodeCfg.(map[string]interface{})["AutoRenew"]; ok {
+							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{}), "AutoRenew")
 						}
 					}
 				}
 
-				labelsChange := false
-				taintsChange := false
-				if d.HasChange("kubernetes_config.0.taints") {
-					taintsChange = true
-				}
-				if d.HasChange("kubernetes_config.0.labels") {
-					labelsChange = true
-				}
-				if labelsChange || taintsChange {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok {
-						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{}
-					}
-				}
-				if labelsChange {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"]; !ok { // 被清空了
-						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = []interface{}{}
-					}
-				}
-				if taintsChange {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"]; !ok {
-						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = []interface{}{}
-					}
-				}
-
-				if labelsChange && (!taintsChange) {
-					var taints []interface{}
-					for _, taint := range d.Get("kubernetes_config.0.taints").([]interface{}) {
-						t := taint.(map[string]interface{})
-						taints = append(taints, map[string]interface{}{
-							"Key":    t["key"],
-							"Value":  t["value"],
-							"Effect": t["effect"],
-						})
-					}
-					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = taints
-				} else if taintsChange && (!labelsChange) {
-					var labels []interface{}
-					for _, label := range d.Get("kubernetes_config.0.labels").(*schema.Set).List() { // for set
-						t := label.(map[string]interface{})
-						labels = append(labels, map[string]interface{}{
-							"Key":   t["key"],
-							"Value": t["value"],
-						})
-					}
-					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = labels
-				}
+				// 当列表被删除时，入参添加空列表来置空
+				ve.DefaultMapValue(call.SdkParam, "KubernetesConfig", map[string]interface{}{
+					"Labels": []interface{}{},
+					"Taints": []interface{}{},
+				})
 
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -815,6 +795,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"NodeConfig.AutoRenewPeriod": {
 				TargetField: "auto_renew_period",
+			},
+			"NodeConfig.NamePrefix": {
+				TargetField: "name_prefix",
 			},
 			"NodeStatistics": {
 				TargetField: "node_statistics",

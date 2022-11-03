@@ -398,6 +398,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The AutoRenewPeriod of the PrePaid instance of NodeConfig.",
 						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The NamePrefix of NodeConfig.",
+						},
 					},
 				},
 			},

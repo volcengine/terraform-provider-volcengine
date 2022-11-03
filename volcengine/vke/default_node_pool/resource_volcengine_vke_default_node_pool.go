@@ -203,6 +203,12 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 							Optional:    true,
 							Description: "The initializeScript of NodeConfig.",
 						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The NamePrefix of NodeConfig.",
+						},
 					},
 				},
 				Description: "The Config of NodePool.",

@@ -105,7 +105,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"subnet_ids": {
 							Type:     schema.TypeList,
 							Required: true,
-							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -244,7 +243,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
 							DiffSuppressFunc: prePaidDiffSuppressFunc,
 							Description:      "The Period of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Unit: month. when InstanceChargeType is PrePaid, default value is 12.",
@@ -253,7 +251,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: prePaidDiffSuppressFunc,
 							Description:      "Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.",
 						},
@@ -261,10 +258,15 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 6, 12}),
 							DiffSuppressFunc: prePaidAndAutoNewDiffSuppressFunc,
 							Description:      "The AutoRenewPeriod of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 6, 12. Unit: month. when InstanceChargeType is PrePaid and AutoRenew enable, default value is 1.",
+						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The NamePrefix of NodeConfig.",
 						},
 					},
 				},
@@ -314,6 +316,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 									"effect": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Default:     "NoSchedule",
 										Description: "The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.",
 									},
 								},

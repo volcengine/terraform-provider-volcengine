@@ -223,6 +223,9 @@ func (s *VolcengineDefaultNodePoolService) CreateResource(resourceData *schema.R
 								},
 							},
 						},
+						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 			},
@@ -290,6 +293,9 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 							},
 						},
 						"initialize_script": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"name_prefix": {
 							ConvertType: ve.ConvertJsonObject,
 						},
 					},
