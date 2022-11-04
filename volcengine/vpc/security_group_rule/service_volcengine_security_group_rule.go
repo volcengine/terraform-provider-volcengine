@@ -1,6 +1,7 @@
 package security_group_rule
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -95,11 +96,45 @@ func (s *VolcengineSecurityGroupRuleService) CreateResource(resourceData *schema
 }
 
 func (s *VolcengineSecurityGroupRuleService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
-	return nil, nil
+	var (
+		resp    *map[string]interface{}
+		results interface{}
+		ok      bool
+	)
+
+	vpcClient := s.Client.VpcClient
+	action := "DescribeSecurityGroupAttributes"
+	logger.Debug(logger.ReqFormat, action, condition)
+	if condition == nil {
+		resp, err = vpcClient.DescribeSecurityGroupAttributesCommon(nil)
+		if err != nil {
+			return data, err
+		}
+	} else {
+		resp, err = vpcClient.DescribeSecurityGroupAttributesCommon(&condition)
+		if err != nil {
+			return data, err
+		}
+	}
+
+	results, err = ve.ObtainSdkValue("Result.Permissions", *resp)
+
+	if err != nil {
+		return data, err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	if data, ok = results.([]interface{}); !ok {
+		return data, errors.New("Result.Permissions is not Slice")
+	}
+	logger.Debug(logger.ReqFormat, "", data)
+
+	return data, err
 }
 
 func (s *VolcengineSecurityGroupRuleService) ReadResource(resourceData *schema.ResourceData, tmpId string) (data map[string]interface{}, err error) {
-	return nil, nil
+	return data, err
 }
 
 func (s *VolcengineSecurityGroupRuleService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
@@ -218,8 +253,18 @@ func (s *VolcengineSecurityGroupRuleService) RemoveResource(resourceData *schema
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineSecurityGroupRuleService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{}
+func (s *VolcengineSecurityGroupRuleService) DatasourceResources(d *schema.ResourceData, r *schema.Resource) ve.DataSourceInfo {
+	return ve.DataSourceInfo{
+		CollectField: "security_group_rules",
+		ExtraData: func(sourceData []interface{}) ([]interface{}, error) {
+			var next []interface{}
+			for _, i := range sourceData {
+				i.(map[string]interface{})["SecurityGroupId"] = d.Get("security_group_id")
+				next = append(next, i)
+			}
+			return next, nil
+		},
+	}
 }
 
 func importSecurityGroupRule(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
