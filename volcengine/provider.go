@@ -130,12 +130,13 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"volcengine_vpcs":               vpc.DataSourceVolcengineVpcs(),
-			"volcengine_subnets":            subnet.DataSourceVolcengineSubnets(),
-			"volcengine_route_tables":       route_table.DataSourceVolcengineRouteTables(),
-			"volcengine_route_entries":      route_entry.DataSourceVolcengineRouteEntries(),
-			"volcengine_security_groups":    security_group.DataSourceVolcengineSecurityGroups(),
-			"volcengine_network_interfaces": network_interface.DataSourceVolcengineNetworkInterfaces(),
+			"volcengine_vpcs":                 vpc.DataSourceVolcengineVpcs(),
+			"volcengine_subnets":              subnet.DataSourceVolcengineSubnets(),
+			"volcengine_route_tables":         route_table.DataSourceVolcengineRouteTables(),
+			"volcengine_route_entries":        route_entry.DataSourceVolcengineRouteEntries(),
+			"volcengine_security_groups":      security_group.DataSourceVolcengineSecurityGroups(),
+			"volcengine_security_group_rules": security_group_rule.DataSourceVolcengineSecurityGroupRules(),
+			"volcengine_network_interfaces":   network_interface.DataSourceVolcengineNetworkInterfaces(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
