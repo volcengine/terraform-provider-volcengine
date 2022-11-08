@@ -49,6 +49,26 @@ func (s *VolcengineNodePoolService) ReadResources(m map[string]interface{}) (dat
 			delete(condition, "AutoScalingEnabled")
 		}
 
+		// 单独适配 ClusterId 字段，将 ClusterId 加入 Filter.ClusterIds
+		if filter, filterExist := condition["Filter"]; filterExist {
+			if clusterId, clusterIdExist := filter.(map[string]interface{})["ClusterId"]; clusterIdExist {
+				if clusterIds, clusterIdsExist := filter.(map[string]interface{})["ClusterIds"]; clusterIdsExist {
+					appendFlag := true
+					for _, id := range clusterIds.([]interface{}) {
+						if id == clusterId {
+							appendFlag = false
+						}
+					}
+					if appendFlag {
+						condition["Filter"].(map[string]interface{})["ClusterIds"] = append(condition["Filter"].(map[string]interface{})["ClusterIds"].([]interface{}), clusterId)
+					}
+				} else {
+					condition["Filter"].(map[string]interface{})["ClusterIds"] = []interface{}{clusterId}
+				}
+				delete(condition["Filter"].(map[string]interface{}), "ClusterId")
+			}
+		}
+
 		action := "ListNodePools"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
@@ -607,6 +627,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 						TargetField: "ConditionsType",
 					},
 				},
+			},
+			"cluster_id": {
+				TargetField: "Filter.ClusterId",
 			},
 			"cluster_ids": {
 				TargetField: "Filter.ClusterIds",

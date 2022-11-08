@@ -111,18 +111,20 @@ type Product struct {
 }
 
 var resourceKeys = map[string]string{
-	"vpc":     "VPC",
-	"ecs":     "ECS",
-	"clb":     "CLB",
-	"eip":     "EIP",
-	"ebs":     "EBS",
-	"nat":     "NAT",
-	"vke":     "VKE",
-	"iam":     "IAM",
-	"escloud": "ESCLOUD",
-	"rds":     "RDS_MYSQL",
-	"rds_v2":  "RDS_MYSQL",
-	"tos":     "TOS(BETA)",
+	"vpc":      "VPC",
+	"ecs":      "ECS",
+	"clb":      "CLB",
+	"eip":      "EIP",
+	"ebs":      "EBS",
+	"nat":      "NAT",
+	"vke":      "VKE",
+	"iam":      "IAM",
+	"escloud":  "ESCLOUD",
+	"rds":      "RDS_MYSQL",
+	"rds_v2":   "RDS_MYSQL",
+	"tos":      "TOS(BETA)",
+	"cr":       "CR",
+	"veenedge": "VEENEDGE",
 }
 
 type Products struct {

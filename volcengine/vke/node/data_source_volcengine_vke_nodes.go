@@ -42,6 +42,15 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The Node Pool IDs.",
 			},
+			"zone_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "The Zone IDs.",
+			},
 			"create_client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -56,8 +65,8 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 						"phase": {
 							Type:         schema.TypeString,
 							Optional:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Creating", "Running", "Updating", "Deleting", "Failed"}, false),
-							Description:  "The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed`.",
+							ValidateFunc: validation.StringInSlice([]string{"Creating", "Running", "Updating", "Deleting", "Failed", "Starting", "Stopping", "Stopped"}, false),
+							Description:  "The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed` or `Starting` or `Stopping` or `Stopped`.",
 						},
 						"conditions_type": {
 							Type:     schema.TypeString,
@@ -140,6 +149,11 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 							Computed:    true,
 							Description: "The node pool id.",
 						},
+						"zone_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The zone id.",
+						},
 						"roles": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -165,6 +179,64 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The Storage Path.",
+						},
+						"image_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ImageId of NodeConfig.",
+						},
+						"initialize_script": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The InitializeScript of NodeConfig.",
+						},
+						"labels": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The Label of KubernetesConfig.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of KubernetesConfig.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of KubernetesConfig.",
+									},
+								},
+							},
+						},
+						"taints": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The Taint of KubernetesConfig.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Taint.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Taint.",
+									},
+									"effect": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Effect of Taint.",
+									},
+								},
+							},
+						},
+						"cordon": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "The Cordon of KubernetesConfig.",
 						},
 					},
 				},

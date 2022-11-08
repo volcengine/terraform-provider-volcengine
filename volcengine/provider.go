@@ -3,6 +3,14 @@ package volcengine
 import (
 	"strings"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -54,6 +62,11 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/available_resource"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/cloud_server"
+	veInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/instance_types"
+	veVpc "github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/vpc"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
@@ -128,12 +141,13 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"volcengine_vpcs":               vpc.DataSourceVolcengineVpcs(),
-			"volcengine_subnets":            subnet.DataSourceVolcengineSubnets(),
-			"volcengine_route_tables":       route_table.DataSourceVolcengineRouteTables(),
-			"volcengine_route_entries":      route_entry.DataSourceVolcengineRouteEntries(),
-			"volcengine_security_groups":    security_group.DataSourceVolcengineSecurityGroups(),
-			"volcengine_network_interfaces": network_interface.DataSourceVolcengineNetworkInterfaces(),
+			"volcengine_vpcs":                 vpc.DataSourceVolcengineVpcs(),
+			"volcengine_subnets":              subnet.DataSourceVolcengineSubnets(),
+			"volcengine_route_tables":         route_table.DataSourceVolcengineRouteTables(),
+			"volcengine_route_entries":        route_entry.DataSourceVolcengineRouteEntries(),
+			"volcengine_security_groups":      security_group.DataSourceVolcengineSecurityGroups(),
+			"volcengine_security_group_rules": security_group_rule.DataSourceVolcengineSecurityGroupRules(),
+			"volcengine_network_interfaces":   network_interface.DataSourceVolcengineNetworkInterfaces(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
@@ -205,6 +219,21 @@ func Provider() terraform.ResourceProvider {
 			// ================ TOS ================
 			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
 			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
+
+			// ================ CR ================
+			"volcengine_cr_registries":           cr_registry.DataSourceVolcengineCrRegistries(),
+			"volcengine_cr_namespaces":           cr_namespace.DataSourceVolcengineCrNamespaces(),
+			"volcengine_cr_repositories":         cr_repository.DataSourceVolcengineCrRepositories(),
+			"volcengine_cr_tags":                 cr_tag.DataSourceVolcengineCrTags(),
+			"volcengine_cr_authorization_tokens": cr_authorization_token.DataSourceVolcengineCrAuthorizationTokens(),
+			"volcengine_cr_endpoints":            cr_endpoint.DataSourceVolcengineCrEndpoints(),
+
+			// ================ Veenedge ================
+			"volcengine_veenedge_cloud_servers":       cloud_server.DataSourceVolcengineVeenedgeCloudServers(),
+			"volcengine_veenedge_instances":           veInstance.DataSourceVolcengineInstances(),
+			"volcengine_veenedge_instance_types":      instance_types.DataSourceVolcengineInstanceTypes(),
+			"volcengine_veenedge_available_resources": available_resource.DataSourceVolcengineAvailableResources(),
+			"volcengine_veenedge_vpcs":                veVpc.DataSourceVolcengineVpcs(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -296,6 +325,19 @@ func Provider() terraform.ResourceProvider {
 			//================= TOS =================
 			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
 			"volcengine_tos_object": object.ResourceVolcengineTosObject(),
+
+			// ================ CR ================
+			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
+			"volcengine_cr_registry_state": cr_registry_state.ResourceVolcengineCrRegistryState(),
+			"volcengine_cr_namespace":      cr_namespace.ResourceVolcengineCrNamespace(),
+			"volcengine_cr_repository":     cr_repository.ResourceVolcengineCrRepository(),
+			"volcengine_cr_tag":            cr_tag.ResourceVolcengineCrTag(),
+			"volcengine_cr_endpoint":       cr_endpoint.ResourceVolcengineCrEndpoint(),
+
+			// ================ Veenedge ================
+			"volcengine_veenedge_cloud_server": cloud_server.ResourceVolcengineCloudServer(),
+			"volcengine_veenedge_instance":     veInstance.ResourceVolcengineInstance(),
+			"volcengine_veenedge_vpc":          veVpc.ResourceVolcengineVpc(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

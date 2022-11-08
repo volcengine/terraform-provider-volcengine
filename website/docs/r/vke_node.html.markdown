@@ -25,7 +25,27 @@ The following arguments are supported:
 * `additional_container_storage_enabled` - (Optional, ForceNew) The flag of additional container storage enable, the value is `true` or `false`.
 * `client_token` - (Optional, ForceNew) The client token.
 * `container_storage_path` - (Optional, ForceNew) The container storage path.
+* `image_id` - (Optional, ForceNew) The ImageId of NodeConfig.
+* `initialize_script` - (Optional) The initializeScript of Node.
 * `keep_instance_name` - (Optional) The flag of keep instance name, the value is `true` or `false`.
+* `kubernetes_config` - (Optional) The KubernetesConfig of Node.
+
+The `kubernetes_config` object supports the following:
+
+* `cordon` - (Optional) The Cordon of KubernetesConfig.
+* `labels` - (Optional) The Labels of KubernetesConfig.
+* `taints` - (Optional) The Taints of KubernetesConfig.
+
+The `labels` object supports the following:
+
+* `key` - (Optional) The Key of Labels.
+* `value` - (Optional) The Value of Labels.
+
+The `taints` object supports the following:
+
+* `effect` - (Optional) The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.
+* `key` - (Optional) The Key of Taints.
+* `value` - (Optional) The Value of Taints.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
