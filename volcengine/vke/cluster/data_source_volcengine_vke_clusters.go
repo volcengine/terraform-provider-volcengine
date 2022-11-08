@@ -446,7 +446,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 						"tags": {
 							Type:        schema.TypeSet,
 							Computed:    true,
-							Description: "Tags.",
+							Description: "Tags of the Cluster.",
 							Set:         ve.VkeTagsResponseHash,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{

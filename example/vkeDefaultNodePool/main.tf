@@ -9,7 +9,7 @@ resource "volcengine_vke_default_node_pool" "default" {
             security_strategies = ["Hids"]
         }
         initialize_script = "ISMvYmluL2Jhc2gKZWNobyAx"
-        node_config_tags = {
+        ecs_tags = {
             type = "ecs"
         }
     }

@@ -448,9 +448,7 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 				(*call.SdkParam)["Id"] = d.Id()
 
 				// 删除UpdateClusterConfig中的Tags字段
-				if _, exist := (*call.SdkParam)["Tags"]; exist {
-					delete(*call.SdkParam, "Tags")
-				}
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -634,7 +632,7 @@ func (s *VolcengineVkeClusterService) setResourceTags(resourceData *schema.Resou
 			Action:      "UntagResources",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if removedTags != nil && len(removedTags) > 0 {
+				if len(removedTags) > 0 {
 					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
 					(*call.SdkParam)["ResourceType"] = resourceType
 					(*call.SdkParam)["TagKeys"] = make([]string, 0)
@@ -649,11 +647,6 @@ func (s *VolcengineVkeClusterService) setResourceTags(resourceData *schema.Resou
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				//假如需要异步状态 这里需要等一下
-				time.Sleep(time.Duration(5) * time.Second)
-				return nil
-			},
 		},
 	}
 	callbacks = append(callbacks, removeCallback)
@@ -663,7 +656,7 @@ func (s *VolcengineVkeClusterService) setResourceTags(resourceData *schema.Resou
 			Action:      "TagResources",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if addedTags != nil && len(addedTags) > 0 {
+				if len(addedTags) > 0 {
 					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
 					(*call.SdkParam)["ResourceType"] = resourceType
 					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)

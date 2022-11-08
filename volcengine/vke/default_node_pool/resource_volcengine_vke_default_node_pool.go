@@ -211,7 +211,14 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
 						},
-						"node_config_tags": ve.TagsSchema(),
+						"ecs_tags": {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Description: "Tags for Ecs.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					},
 				},
 				Description: "The Config of NodePool.",

@@ -17,7 +17,7 @@ resource "volcengine_vke_node_pool" "vke_test" {
         }
         instance_charge_type = "PrePaid"
         period = 1
-        node_config_tags = {
+        ecs_tags = {
             type = "ecs"
         }
     }
