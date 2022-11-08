@@ -14,6 +14,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_attach_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_bandwidth_package"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_bandwidth_package_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_grant_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_inter_region_bandwidth"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/acl"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/acl_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/certificate"
@@ -75,6 +82,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/security_group_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/customer_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_connection"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway_route"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -164,6 +175,20 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
 			"volcengine_nat_gateways": nat_gateway.DataSourceVolcengineNatGateways(),
 
+			// ================ Cen ================
+			"volcengine_cens":                        cen.DataSourceVolcengineCens(),
+			"volcengine_cen_attach_instances":        cen_attach_instance.DataSourceVolcengineCenAttachInstances(),
+			"volcengine_cen_bandwidth_packages":      cen_bandwidth_package.DataSourceVolcengineCenBandwidthPackages(),
+			"volcengine_cen_inter_region_bandwidths": cen_inter_region_bandwidth.DataSourceVolcengineCenInterRegionBandwidths(),
+			//"volcengine_cen_service_route_entries": 	cen_service_route_entry.DataSourceVolcengineCenServiceRouteEntries(),
+			"volcengine_cen_route_entries": cen_route_entry.DataSourceVolcengineCenRouteEntries(),
+
+			// ================ VPN ================
+			"volcengine_vpn_gateways":       vpn_gateway.DataSourceVolcengineVpnGateways(),
+			"volcengine_customer_gateways":  customer_gateway.DataSourceVolcengineCustomerGateways(),
+			"volcengine_vpn_connections":    vpn_connection.DataSourceVolcengineVpnConnections(),
+			"volcengine_vpn_gateway_routes": vpn_gateway_route.DataSourceVolcengineVpnGatewayRoutes(),
+
 			// ================ VKE ================
 			"volcengine_vke_nodes":          node.DataSourceVolcengineVkeNodes(),
 			"volcengine_vke_clusters":       cluster.DataSourceVolcengineVkeVkeClusters(),
@@ -250,6 +275,22 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
+
+			// ================ Cen ================
+			"volcengine_cen":                             cen.ResourceVolcengineCen(),
+			"volcengine_cen_attach_instance":             cen_attach_instance.ResourceVolcengineCenAttachInstance(),
+			"volcengine_cen_grant_instance":              cen_grant_instance.ResourceVolcengineCenGrantInstance(),
+			"volcengine_cen_bandwidth_package":           cen_bandwidth_package.ResourceVolcengineCenBandwidthPackage(),
+			"volcengine_cen_bandwidth_package_associate": cen_bandwidth_package_associate.ResourceVolcengineCenBandwidthPackageAssociate(),
+			"volcengine_cen_inter_region_bandwidth":      cen_inter_region_bandwidth.ResourceVolcengineCenInterRegionBandwidth(),
+			//"volcengine_cen_service_route_entry": 			cen_service_route_entry.ResourceVolcengineCenServiceRouteEntry(),
+			//"volcengine_cen_route_entry": 					cen_route_entry.ResourceVolcengineCenRouteEntry(),
+
+			// ================ VPN ================
+			"volcengine_vpn_gateway":       vpn_gateway.ResourceVolcengineVpnGateway(),
+			"volcengine_customer_gateway":  customer_gateway.ResourceVolcengineCustomerGateway(),
+			"volcengine_vpn_connection":    vpn_connection.ResourceVolcengineVpnConnection(),
+			"volcengine_vpn_gateway_route": vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
 
 			// ================ VKE ================
 			"volcengine_vke_node":              node.ResourceVolcengineVkeNode(),

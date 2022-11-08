@@ -125,6 +125,8 @@ var resourceKeys = map[string]string{
 	"tos":      "TOS(BETA)",
 	"cr":       "CR",
 	"veenedge": "VEENEDGE",
+	"cen":      "CEN(BETA)",
+	"vpn":      "VPN(BETA)",
 }
 
 type Products struct {
