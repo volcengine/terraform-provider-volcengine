@@ -33,6 +33,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 				ForceNew:    true,
 				Description: "The ClusterId of NodePool.",
 			},
+			"tags": ve.TagsSchema(),
 			"instances": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -129,6 +130,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 									"effect": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Default:     "NoSchedule",
 										Description: "The Effect of Taints.",
 									},
 								},
@@ -209,6 +211,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
 						},
+						"node_config_tags": ve.TagsSchema(),
 					},
 				},
 				Description: "The Config of NodePool.",

@@ -450,6 +450,15 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 								break
 							}
 							break
+						case reflect.Map:
+							// 暂定Map类型必须通过Convert函数转换成[]map[string]interface{}
+							if t.NextLevelConvert[k2].Convert != nil {
+								err = Convert(d, k2, t.NextLevelConvert[k2].Convert(d, v2), t.NextLevelConvert[k2], 0, req, k3, t.NextLevelConvert[k2].ForceGet, contentType, k4, nil)
+							}
+							if err != nil {
+								return err
+							}
+							break
 						default:
 							k3 = k3 + GetFinalKey(t, k2, false)
 							(*req)[k3] = v2

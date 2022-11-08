@@ -26,4 +26,7 @@ resource "volcengine_vke_cluster" "foo" {
   services_config {
     service_cidrsv4 = ["192.168.0.0/16"]
   }
+  tags = {
+    type = "Cluster"
+  }
 }

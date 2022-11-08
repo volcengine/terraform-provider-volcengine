@@ -13,7 +13,7 @@ import (
 Import
 NodePool can be imported using the id, e.g.
 ```
-$ terraform import volcengine_node_pools.default pcabe57vqtofgrbln3dp0
+$ terraform import volcengine_vke_node_pool.default pcabe57vqtofgrbln3dp0
 ```
 
 */
@@ -44,6 +44,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Optional:    true,
 				Description: "The ClientToken of NodePool.",
 			},
+			"tags": ve.TagsSchema(),
 			"auto_scaling": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -268,6 +269,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
 						},
+						"node_config_tags": ve.TagsSchema(),
 					},
 				},
 				Description: "The Config of NodePool.",

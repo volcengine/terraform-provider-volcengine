@@ -93,6 +93,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 				Optional:    true,
 				Description: "The ClientToken when the last cluster update succeeded. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
 			},
+			"tags": ve.TagsSchema(),
 			"clusters": {
 				Description: "The collection of VkeCluster query.",
 				Type:        schema.TypeList,
@@ -441,6 +442,31 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "Eip allocation Id.",
+						},
+						"tags": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "Tags.",
+							Set:         ve.VkeTagsResponseHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Tags.",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Type of Tags.",
+									},
+								},
+							},
 						},
 					},
 				},

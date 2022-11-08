@@ -208,6 +208,14 @@ func (s *VolcengineVkeClusterService) ReadResource(resourceData *schema.Resource
 	if len(data) == 0 {
 		return data, fmt.Errorf("Vke Cluster %s not exist ", clusterId)
 	}
+
+	logger.Debug(logger.RespFormat, "data of ReadResource ", data)
+	if tagsResponse, ok := data["Tags"]; ok {
+		tagsResponseMap := ve.TagsListToMap(tagsResponse)
+		data["Tags"] = tagsResponseMap
+	}
+	logger.Debug(logger.RespFormat, "data of ReadResource ", data)
+
 	return data, err
 }
 
@@ -342,6 +350,13 @@ func (s *VolcengineVkeClusterService) CreateResource(resourceData *schema.Resour
 						},
 					},
 				},
+				"tags": {
+					TargetField: "Tags",
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						tags := ve.TagsMapToList(i)
+						return tags
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
@@ -372,6 +387,8 @@ func (s *VolcengineVkeClusterService) CreateResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateClusterConfig",
@@ -428,8 +445,12 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 					realBillingType := billingTypeRequestConvert(d, billingType)
 					(*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"] = realBillingType
 				}
-
 				(*call.SdkParam)["Id"] = d.Id()
+
+				// 删除UpdateClusterConfig中的Tags字段
+				if _, exist := (*call.SdkParam)["Tags"]; exist {
+					delete(*call.SdkParam, "Tags")
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -443,6 +464,7 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 			},
 		},
 	}
+	callbacks = append(callbacks, callback)
 
 	if resourceData.HasChange("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth") &&
 		!resourceData.HasChange("cluster_config.0.api_server_public_access_enabled") {
@@ -471,10 +493,13 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 				},
 			},
 		}
-		return []ve.Callback{modifyEipCallback, callback}
+		callbacks = append(callbacks, modifyEipCallback)
 	}
 
-	return []ve.Callback{callback}
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, "Cluster", callbacks)
+
+	return callbacks
 }
 
 func (s *VolcengineVkeClusterService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -558,6 +583,13 @@ func (s *VolcengineVkeClusterService) DatasourceResources(*schema.ResourceData, 
 			"update_client_token": {
 				TargetField: "Filter.UpdateClientToken",
 			},
+			"tags": {
+				TargetField: "Tags",
+				Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+					tags := ve.TagsMapToList(i)
+					return tags
+				},
+			},
 		},
 		ContentType:  ve.ContentTypeJson,
 		NameField:    "Name",
@@ -592,6 +624,66 @@ func (s *VolcengineVkeClusterService) DatasourceResources(*schema.ResourceData, 
 
 func (s *VolcengineVkeClusterService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineVkeClusterService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags := ve.GetTagsDifference("tags", resourceData)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for key, _ := range removedTags {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), key)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				//假如需要异步状态 这里需要等一下
+				time.Sleep(time.Duration(5) * time.Second)
+				return nil
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					addedTagsList := ve.TagsMapToList(addedTags)
+					for _, tag := range addedTagsList {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

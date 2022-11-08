@@ -17,6 +17,9 @@ resource "volcengine_vke_node_pool" "vke_test" {
         }
         instance_charge_type = "PrePaid"
         period = 1
+        node_config_tags = {
+            type = "ecs"
+        }
     }
     kubernetes_config {
         labels {
@@ -27,5 +30,8 @@ resource "volcengine_vke_node_pool" "vke_test" {
             key   = "cccc"
             value = "dddd"
         }
+    }
+    tags = {
+        type = "NodePool"
     }
 }

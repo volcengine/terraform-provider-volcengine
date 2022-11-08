@@ -88,6 +88,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 				Optional:    true,
 				Description: "Is enabled of AutoScaling.",
 			},
+			"tags": ve.TagsSchema(),
 			"node_pools": {
 				Description: "The collection of NodePools query.",
 				Type:        schema.TypeList,
@@ -402,6 +403,32 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
+						},
+						"node_config_tags": ve.TagsSchemaComputed(),
+						"tags": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "Tags.",
+							Set:         ve.VkeTagsResponseHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Tags.",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Type of Tags.",
+									},
+								},
+							},
 						},
 					},
 				},
