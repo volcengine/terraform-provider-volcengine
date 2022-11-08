@@ -64,7 +64,7 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				ForceNew:     true,
 				Default:      "PrePaid",
 				ValidateFunc: validation.StringInSlice([]string{"PrePaid"}, false),
-				Description:  "The BillingType of the VPN gateway. Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove",
+				Description:  "The BillingType of the VPN gateway. Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.",
 			},
 			//"period_unit": {
 			//	Type:         schema.TypeString,
