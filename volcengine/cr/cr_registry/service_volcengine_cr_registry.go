@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -74,8 +75,8 @@ func (s *VolcengineCrRegistryService) ReadResources(m map[string]interface{}) (d
 			if err != nil {
 				return data, err
 			}
-			if status.(string) == "Creating" {
-				logger.DebugInfo("registry status is Running,skip GetUser and ListDomains%s", "")
+			if status.(string) == "Creating" || status.(string) == "Deleting" || status.(string) == "Failed" {
+				logger.DebugInfo("registry status is Creating/Deleting/Failed,skip GetUser and ListDomains%s", "")
 				continue
 			}
 
@@ -87,7 +88,7 @@ func (s *VolcengineCrRegistryService) ReadResources(m map[string]interface{}) (d
 				return data, err
 			}
 			logger.Debug(logger.RespFormat, action, condition, *resp)
-			usernaem, err := ve.ObtainSdkValue("Result.Username", *resp)
+			username, err := ve.ObtainSdkValue("Result.Username", *resp)
 			if err != nil {
 				return data, err
 			}
@@ -96,10 +97,10 @@ func (s *VolcengineCrRegistryService) ReadResources(m map[string]interface{}) (d
 				return data, err
 			}
 
-			data[i].(map[string]interface{})["Username"] = usernaem
+			data[i].(map[string]interface{})["Username"] = username
 			data[i].(map[string]interface{})["UserStatus"] = userStatus
 
-			//get domainss
+			//get domains
 			action = "ListDomains"
 			logger.Debug(logger.ReqFormat, action, condition)
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), condition)
@@ -144,7 +145,8 @@ func (s *VolcengineCrRegistryService) ReadResource(resourceData *schema.Resource
 	}
 
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		data, ok = v.(map[string]interface{})
+		if !ok {
 			return data, errors.New("value is not a map")
 		}
 	}
@@ -198,12 +200,15 @@ func (s *VolcengineCrRegistryService) WithResourceResponseHandlers(instance map[
 }
 
 func (s *VolcengineCrRegistryService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	callbacks := make([]ve.Callback, 0)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateRegistry",
+			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Name"] = resourceData.Get("name")
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -221,12 +226,8 @@ func (s *VolcengineCrRegistryService) CreateResource(resourceData *schema.Resour
 			},
 		},
 	}
-	return []ve.Callback{callback}
-}
-
-func (s *VolcengineCrRegistryService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callbacks := make([]ve.Callback, 0)
-	if resourceData.HasChange("password") {
+	callbacks = append(callbacks, callback)
+	if password, ok := resourceData.GetOkExists("password"); ok {
 		action := "SetUser"
 		callback := ve.Callback{
 			Call: ve.SdkCall{
@@ -234,7 +235,7 @@ func (s *VolcengineCrRegistryService) ModifyResource(resourceData *schema.Resour
 				ConvertMode: ve.RequestConvertAll,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					registry := resourceData.Id()
-					password := resourceData.Get("password").(string)
+					password := password.(string)
 
 					if password == "" {
 						return false, nil
@@ -258,14 +259,52 @@ func (s *VolcengineCrRegistryService) ModifyResource(resourceData *schema.Resour
 	return callbacks
 }
 
+func (s *VolcengineCrRegistryService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	callbacks := make([]ve.Callback, 0)
+	if resourceData.HasChange("password") {
+		action := "SetUser"
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      action,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					registry := resourceData.Id()
+					password := resourceData.Get("password").(string)
+
+					if password == "" {
+						return false, nil
+					}
+
+					bytes := []byte(password)
+					passwdBase64 := base64.StdEncoding.EncodeToString(bytes)
+
+					(*call.SdkParam)["Registry"] = registry
+					(*call.SdkParam)["Password"] = passwdBase64
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
+	if resourceData.HasChange("delete_immediately") {
+		resourceData.Set("delete_immediately", resourceData.Get("delete_immediately"))
+	}
+	return callbacks
+}
+
 func (s *VolcengineCrRegistryService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteRegistry",
+			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Name"] = resourceData.Id()
-				(*call.SdkParam)["DeleteImmediately"] = resourceData.Get("delete_immediately").(bool)
+				(*call.SdkParam)["Name"] = d.Id()
+				(*call.SdkParam)["DeleteImmediately"] = d.Get("delete_immediately")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
