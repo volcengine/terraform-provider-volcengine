@@ -21,7 +21,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineDefaultNodePoolCreate,
 		Update: resourceVolcengineDefaultNodePoolUpdate,
-		Read:   resourceVolcengineDefaultNodePoolUpdate,
+		Read:   resourceVolcengineDefaultNodePoolRead,
 		Delete: resourceVolcengineNodePoolDelete,
 		Importer: &schema.ResourceImporter{
 			State: defaultNodePoolImporter,
@@ -88,8 +88,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 			"kubernetes_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
@@ -139,8 +138,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 						},
 						"cordon": {
 							Type:        schema.TypeBool,
-							Optional:    true,
-							Computed:    true,
+							Required:    true,
 							Description: "The Cordon of KubernetesConfig.",
 						},
 					},
@@ -208,7 +206,6 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 						"name_prefix": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
 						},
 						"ecs_tags": {

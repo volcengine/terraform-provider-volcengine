@@ -61,7 +61,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"max_replicas": {
 							Type:         schema.TypeInt,
 							Optional:     true,
-							Computed:     true,
+							Default:      10,
 							ValidateFunc: validation.IntBetween(0, 1000),
 							Description:  "The MaxReplicas of AutoScaling, default 10, range in 1~1000.",
 						},
@@ -75,7 +75,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    true,
-							Description: "The DesiredReplicas of AutoScaling, default 0.",
+							Description: "The DesiredReplicas of AutoScaling, default 0，range in min_replicas to max_replicas.",
 						},
 						"priority": {
 							Type:         schema.TypeInt,
@@ -266,7 +266,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"name_prefix": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
 						},
 						"ecs_tags": {
@@ -284,7 +283,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 			"kubernetes_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
@@ -334,7 +333,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						},
 						"cordon": {
 							Type:        schema.TypeBool,
-							Optional:    true,
+							Required:    true,
 							Description: "The Cordon of KubernetesConfig.",
 						},
 					},

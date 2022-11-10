@@ -325,11 +325,11 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
-							ConvertType: ve.ConvertJsonArray,
+							ConvertType: ve.ConvertJsonObjectArray,
 							ForceGet:    true,
 						},
 						"taints": {
-							ConvertType: ve.ConvertJsonArray,
+							ConvertType: ve.ConvertJsonObjectArray,
 							ForceGet:    true,
 						},
 						"cordon": {
@@ -339,9 +339,6 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) < 1 {
-					return false, nil
-				}
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
 
