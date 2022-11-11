@@ -1,7 +1,4 @@
 resource "volcengine_scaling_configuration" "foo" {
-  active = true
-  enable = true
-  substitute = "scc-ybrudzwsi3l8j1uft1gh"
   scaling_configuration_name = "tf-test"
   scaling_group_id = "scg-ybru8pazhgl8j1di4tyd"
   image_id = "image-ybpbrfay1gl8j1srwwyz"

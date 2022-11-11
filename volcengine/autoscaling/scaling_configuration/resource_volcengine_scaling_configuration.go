@@ -28,29 +28,6 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Schema: map[string]*schema.Schema{
-			"active": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: "The active flag of the scaling configuration. Valid values: true or false. when set true, the scaling group which the scaling configuration belongs will use it.",
-			},
-			"enable": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "The enable flag of the scaling group. Valid values: true or false. when set true, the scaling group which the scaling configuration belongs will be enabled.",
-			},
-			"substitute": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				DiffSuppressFunc: substituteDiffSuppressFunc,
-				Description:      "The id of the substitute scaling configuration. when the active flag set false with the scaling configuration lifecycle state active, it must a valid substitute.",
-			},
-			"lifecycle_state": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The lifecycle state of the scaling configuration.Valid values: InActive or Active.",
-			},
 			"scaling_configuration_name": {
 				Type:        schema.TypeString,
 				Required:    true,
