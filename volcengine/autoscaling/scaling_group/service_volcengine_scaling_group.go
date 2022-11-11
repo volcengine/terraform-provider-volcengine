@@ -136,7 +136,8 @@ func (VolcengineScalingGroupService) WithResourceResponseHandlers(scalingGroup m
 
 }
 
-func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateScalingGroup",
@@ -147,10 +148,6 @@ func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.Reso
 				},
 				"server_group_attributes": {
 					ConvertType: ve.ConvertListN,
-				},
-				"db_instance_ids": {
-					TargetField: "DBInstanceIds",
-					ConvertType: ve.ConvertWithN,
 				},
 				"min_instance_number": {
 					TargetField: "MinInstanceNumber",
@@ -197,11 +194,44 @@ func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.Reso
 			},
 		},
 	}
+	callbacks = append(callbacks, callback)
+	// serverGroup
+	if resourceData.Get("server_group_attributes") != nil &&
+		len(resourceData.Get("server_group_attributes").(*schema.Set).List()) > 0 {
+		attachServerGroupCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "AttachServerGroup",
+				ConvertMode: ve.RequestConvertAll,
+				Convert: map[string]ve.RequestConvert{
+					"server_group_attributes": {
+						ConvertType: ve.ConvertListN,
+					},
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+					return resource.Retry(15*time.Minute, func() *resource.RetryError {
+						_, callErr := s.ReadResource(d, d.Get("scaling_group_id").(string))
+						if callErr != nil {
+							return resource.NonRetryableError(fmt.Errorf("error reading ScalingGroup: %q, %w", d.Id(), callErr))
+						}
+						_, callErr = call.ExecuteCall(d, client, call)
+						if callErr == nil {
+							return nil
+						}
+						return resource.RetryableError(callErr)
+					})
+				},
+			},
+		}
+		callbacks = append(callbacks, attachServerGroupCallback)
+	}
 	return []ve.Callback{callback}
-
 }
 
-func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
 	// 修改伸缩组
@@ -258,19 +288,18 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 		},
 	}
 	callbacks = append(callbacks, modifyGroupCallback)
-
-	// 修改RDS属性
-	rdsAdd, rdsRemove, _, _ := ve.GetSetDifference("db_instance_ids", resourceData, schema.HashString, false)
-	removeDBInstanceCallback := ve.Callback{
+	// serverGroup modify
+	attrAdd, attrRemove, _, _ := ve.GetSetDifference("server_group_attributes", resourceData, serverGroupAttributeHash, false)
+	removeAttrCallback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DetachDBInstances",
+			Action:      "DetachServerGroups",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if rdsRemove != nil && len(rdsRemove.List()) > 0 {
+				if attrRemove != nil && len(attrRemove.List()) > 0 {
 					(*call.SdkParam)["ScalingGroupId"] = d.Id()
-					(*call.SdkParam)["ForceDetach"] = true
-					for index, dbId := range rdsRemove.List() {
-						(*call.SdkParam)["DBInstanceIds."+strconv.Itoa(index+1)] = dbId.(string)
+					for index, attr := range attrRemove.List() {
+						(*call.SdkParam)["ServerGroupAttributes."+strconv.Itoa(index+1)+".ServerGroupId"] =
+							attr.(map[string]interface{})["server_group_id"].(string)
 					}
 					return true, nil
 				}
@@ -280,18 +309,35 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						return resource.NonRetryableError(fmt.Errorf("error on reading scaling group %q: %w", d.Id(), callErr))
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
 		},
 	}
-	addDBInstanceCallback := ve.Callback{
+	attachAttrCallback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "AttachDBInstances",
+			Action:      "AttachServerGroups",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if rdsAdd != nil && len(rdsAdd.List()) > 0 {
+				if attrAdd != nil && len(attrAdd.List()) > 0 {
 					(*call.SdkParam)["ScalingGroupId"] = d.Id()
-					(*call.SdkParam)["ForceAttach"] = true
-					for index, dbId := range rdsAdd.List() {
-						(*call.SdkParam)["DBInstanceIds."+strconv.Itoa(index+1)] = dbId.(string)
+					for index, attr := range attrAdd.List() {
+						(*call.SdkParam)["ServerGroupAttributes."+strconv.Itoa(index+1)+".Port"] =
+							attr.(map[string]interface{})["port"].(int)
+						(*call.SdkParam)["ServerGroupAttributes."+strconv.Itoa(index+1)+".ServerGroupId"] =
+							attr.(map[string]interface{})["server_group_id"].(string)
+						(*call.SdkParam)["ServerGroupAttributes."+strconv.Itoa(index+1)+".Weight"] =
+							attr.(map[string]interface{})["weight"].(int)
 					}
 					return true, nil
 				}
@@ -301,9 +347,22 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						return resource.NonRetryableError(fmt.Errorf("error on reading scaling group %q, %w", d.Id(), callErr))
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
 		},
 	}
-	callbacks = append(callbacks, removeDBInstanceCallback, addDBInstanceCallback)
+	callbacks = append(callbacks, removeAttrCallback, attachAttrCallback)
 
 	return callbacks
 }
@@ -362,9 +421,6 @@ func (s *VolcengineScalingGroupService) DatasourceResources(*schema.ResourceData
 			"ScalingGroupId": {
 				TargetField: "id",
 				KeepDefault: true,
-			},
-			"DBInstanceIds": {
-				TargetField: "db_instance_ids",
 			},
 			"MultiAZPolicy": {
 				TargetField: "multi_az_policy",

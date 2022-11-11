@@ -87,62 +87,15 @@ func (s *VolcengineScalingConfigurationService) ReadResource(resourceData *schem
 		return data, fmt.Errorf("ScalingConfiguration %s not exist ", id)
 	}
 
-	// 查看伸缩组状态
-	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeScalingGroups"),
-		&map[string]interface{}{"ScalingGroupIds.1": data["ScalingGroupId"]})
-	if err != nil {
-		return data, fmt.Errorf("describe scaling group err: %s", err.Error())
-	}
-	groups, err := ve.ObtainSdkValue("Result.ScalingGroups", *resp)
-	if groups == nil || len(groups.([]interface{})) == 0 {
-		return data, fmt.Errorf("scaling group %s not found", data["ScalingGroupId"])
-	}
-	data["ScalingGroupStatus"] = groups.([]interface{})[0].(map[string]interface{})["LifecycleState"].(string)
-	data["ActiveScalingConfigurationId"] = groups.([]interface{})[0].(map[string]interface{})["ActiveScalingConfigurationId"].(string)
-
 	return data, err
 }
 
 func (s *VolcengineScalingConfigurationService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
-		Pending:    []string{},
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
-		Target:     target,
-		Timeout:    timeout,
-		Refresh: func() (result interface{}, state string, err error) {
-			var (
-				demo       map[string]interface{}
-				status     interface{}
-				failStates []string
-			)
-			failStates = append(failStates, "Error")
-			demo, err = s.ReadResource(resourceData, id)
-			if err != nil {
-				return nil, "", err
-			}
-			status, err = ve.ObtainSdkValue("LifecycleState", demo)
-			if err != nil {
-				return nil, "", err
-			}
-			for _, v := range failStates {
-				if v == status.(string) {
-					return nil, "", fmt.Errorf("ScalingConfiguration LifecycleState error, status:%s", status.(string))
-				}
-			}
-			//注意 返回的第一个参数不能为空 否则会一直等下去
-			return demo, status.(string), err
-		},
-	}
-
+	return &resource.StateChangeConf{}
 }
 
 func (VolcengineScalingConfigurationService) WithResourceResponseHandlers(scalingConfiguration map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		scalingConfiguration["active"] = scalingConfiguration["LifecycleState"].(string) == "Active"
-		scalingConfiguration["enable"] = !(scalingConfiguration["ScalingGroupStatus"].(string) == "InActive" ||
-			scalingConfiguration["ScalingGroupStatus"].(string) == "Deleting")
-		scalingConfiguration["substitute"] = scalingConfiguration["ActiveScalingConfigurationId"]
 		return scalingConfiguration, nil, nil
 	}
 
@@ -187,45 +140,9 @@ func (s *VolcengineScalingConfigurationService) CreateResource(resourceData *sch
 				d.SetId(id.(string))
 				return nil
 			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"InActive", "Active"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			},
 		},
 	}
 	callbacks = append(callbacks, createConfigCallback)
-
-	// 启用伸缩组
-	if resourceData.Get("active") != nil && resourceData.Get("active").(bool) {
-		callbacks = append(callbacks, ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "EnableScalingConfiguration",
-				ConvertMode: ve.RequestConvertInConvert,
-				Convert: map[string]ve.RequestConvert{
-					"scaling_group_id": {
-						ConvertType: ve.ConvertDefault,
-					},
-				},
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					(*call.SdkParam)["ScalingConfigurationId"] = d.Id()
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-				Refresh: &ve.StateRefresh{
-					Target:  []string{"Active"},
-					Timeout: resourceData.Timeout(schema.TimeoutCreate),
-				},
-			},
-		})
-	}
-
-	// 使能伸缩组
-	if resourceData.Get("enable") != nil {
-		callbacks = append(callbacks, s.enableOrDisableGroupCallback(resourceData))
-	}
 
 	return callbacks
 
@@ -317,31 +234,6 @@ func (s *VolcengineScalingConfigurationService) ModifyResource(resourceData *sch
 	}
 	callbacks = append(callbacks, modifyConfigurationCallback)
 
-	// 使能伸缩配置
-	if resourceData.HasChange("active") && resourceData.Get("active").(bool) { // 使用当前伸缩配置
-		callbacks = append(callbacks, s.enableConfigurationCallback(resourceData.Id(), resourceData))
-	} else if resourceData.Get("active") != nil &&
-		!resourceData.Get("active").(bool) &&
-		(resourceData.HasChange("active") || resourceData.HasChange("substitute")) { // 使用其他伸缩配置
-		substituteId := resourceData.Get("substitute")
-		if substituteId == nil || len(substituteId.(string)) == 0 || substituteId.(string) == resourceData.Id() {
-			callbacks = append(callbacks, ve.Callback{
-				Call: ve.SdkCall{
-					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-						return nil, errors.New("scaling group need a substitute configuration rather than the current scaling configuration")
-					},
-				},
-			})
-		} else {
-			callbacks = append(callbacks, s.enableConfigurationCallback(substituteId.(string), resourceData))
-		}
-	}
-
-	// 使能伸缩组
-	if resourceData.HasChange("enable") {
-		callbacks = append(callbacks, s.enableOrDisableGroupCallback(resourceData))
-	}
-
 	return callbacks
 }
 
@@ -415,64 +307,6 @@ func (s *VolcengineScalingConfigurationService) DatasourceResources(*schema.Reso
 
 func (s *VolcengineScalingConfigurationService) ReadResourceId(id string) string {
 	return id
-}
-
-func (s *VolcengineScalingConfigurationService) enableConfigurationCallback(enableConfigId string, d *schema.ResourceData) ve.Callback {
-	status := "Active"
-	configId, groupId := d.Id(), d.Get("scaling_group_id").(string)
-	if configId != enableConfigId {
-		status = "InActive"
-	}
-	return ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "EnableScalingConfiguration",
-			ConvertMode: ve.RequestConvertIgnore,
-			SdkParam: &map[string]interface{}{
-				"ScalingConfigurationId": enableConfigId,
-				"ScalingGroupId":         groupId,
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{status},
-				Timeout: d.Timeout(schema.TimeoutCreate),
-			},
-		},
-	}
-}
-
-func (s *VolcengineScalingConfigurationService) enableOrDisableGroupCallback(resourceData *schema.ResourceData) ve.Callback {
-	groupId, enable := resourceData.Get("scaling_group_id").(string), resourceData.Get("enable").(bool)
-	param := &map[string]interface{}{
-		"ScalingGroupId": groupId,
-	}
-	if enable {
-		return ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "EnableScalingGroup",
-				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam:    param,
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-			},
-		}
-	} else {
-		return ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "DisableScalingGroup",
-				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam:    param,
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-			},
-		}
-	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
