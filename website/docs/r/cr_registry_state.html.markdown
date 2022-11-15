@@ -17,7 +17,7 @@ resource "volcengine_cr_registry_state" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `action` - (Required) Start cr instance action.
+* `action` - (Required) Start cr instance action,the value must be `Start`.
 * `name` - (Required) The cr instance id.
 
 ## Attributes Reference
