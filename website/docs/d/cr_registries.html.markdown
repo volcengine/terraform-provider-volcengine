@@ -21,10 +21,10 @@ data "volcengine_cr_registries" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `names` - (Optional) The list of registry names.
+* `names` - (Optional) The list of registry names to query.
 * `output_file` - (Optional) File name where to save data source results.
 * `statuses` - (Optional) The list of registry statuses.
-* `types` - (Optional) The list of registry types.
+* `types` - (Optional) The list of registry types to query.
 
 The `statuses` object supports the following:
 
