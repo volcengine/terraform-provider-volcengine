@@ -3,6 +3,7 @@ package cr_namespace
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"strings"
 	"time"
 
@@ -132,6 +133,10 @@ func (s *VolcengineCrNamespaceService) CreateResource(resourceData *schema.Resou
 				"name": {
 					TargetField: "Name",
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)

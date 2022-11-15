@@ -33,20 +33,15 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 				Description: "The name of registry.",
 			},
 			"delete_immediately": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Id() == ""
-				},
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 				Description: "Whether delete registry immediately.",
 			},
 			"password": {
-				Type:     schema.TypeString,
-				Optional: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Id() == ""
-				},
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
 				Description: "The password of registry user.",
 			},
 		},

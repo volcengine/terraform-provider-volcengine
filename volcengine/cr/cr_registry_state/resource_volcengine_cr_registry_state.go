@@ -41,10 +41,13 @@ func ResourceVolcengineCrRegistryState() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"action": {
-				Type:         schema.TypeString,
-				Required:     true,
+				Type:     schema.TypeString,
+				Required: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return false
+				},
 				ValidateFunc: validation.StringInSlice([]string{"Start"}, false),
-				Description:  "Start cr instance action.",
+				Description:  "Start cr instance action,the value must be `Start`.",
 			},
 			"name": {
 				Type:        schema.TypeString,
