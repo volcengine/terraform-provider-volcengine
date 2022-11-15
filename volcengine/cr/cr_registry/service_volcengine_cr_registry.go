@@ -153,6 +153,14 @@ func (s *VolcengineCrRegistryService) ReadResource(resourceData *schema.Resource
 	if len(data) == 0 {
 		return data, fmt.Errorf("CrRegistry %s is not exist", id)
 	}
+
+	deleteImmediately := resourceData.Get("delete_immediately")
+	if deleteImmediately == nil {
+		data["DeleteImmediately"] = false
+	} else {
+		data["DeleteImmediately"] = deleteImmediately
+	}
+
 	return data, err
 }
 
