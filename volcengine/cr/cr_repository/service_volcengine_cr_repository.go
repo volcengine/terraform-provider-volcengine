@@ -3,6 +3,7 @@ package cr_repository
 import (
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"strings"
 	"time"
 
@@ -127,6 +128,10 @@ func (s *VolcengineCrRepositoryService) CreateResource(resourceData *schema.Reso
 			Action:      "CreateRepository",
 			ContentType: ve.ContentTypeJson,
 			ConvertMode: ve.RequestConvertAll,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)

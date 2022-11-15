@@ -17,7 +17,7 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set:         schema.HashString,
-				Description: "The list of registry names.",
+				Description: "The list of registry names to query.",
 			},
 			"types": {
 				Type:     schema.TypeSet,
@@ -30,7 +30,7 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 					}, false),
 				},
 				Set:         schema.HashString,
-				Description: "The list of registry types.",
+				Description: "The list of registry types to query.",
 			},
 			"statuses": {
 				Type:        schema.TypeList,
