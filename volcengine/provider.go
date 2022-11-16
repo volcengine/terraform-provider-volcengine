@@ -10,6 +10,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool_batch_attach"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -293,11 +294,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpn_gateway_route": vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
 
 			// ================ VKE ================
-			"volcengine_vke_node":              node.ResourceVolcengineVkeNode(),
-			"volcengine_vke_cluster":           cluster.ResourceVolcengineVkeCluster(),
-			"volcengine_vke_node_pool":         node_pool.ResourceVolcengineNodePool(),
-			"volcengine_vke_addon":             addon.ResourceVolcengineVkeAddon(),
-			"volcengine_vke_default_node_pool": default_node_pool.ResourceVolcengineDefaultNodePool(),
+			"volcengine_vke_node":                           node.ResourceVolcengineVkeNode(),
+			"volcengine_vke_cluster":                        cluster.ResourceVolcengineVkeCluster(),
+			"volcengine_vke_node_pool":                      node_pool.ResourceVolcengineNodePool(),
+			"volcengine_vke_addon":                          addon.ResourceVolcengineVkeAddon(),
+			"volcengine_vke_default_node_pool":              default_node_pool.ResourceVolcengineDefaultNodePool(),
+			"volcengine_vke_default_node_pool_batch_attach": default_node_pool_batch_attach.ResourceVolcengineDefaultNodePoolBatchAttach(),
 
 			// ================ IAM ================
 			"volcengine_iam_policy":                 iam_policy.ResourceVolcengineIamPolicy(),
