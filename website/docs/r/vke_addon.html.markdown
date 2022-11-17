@@ -40,3 +40,10 @@ VkeAddon can be imported using the clusterId:Name, e.g.
 $ terraform import volcengine_vke_addon.default cc9l74mvqtofjnoj5****:nginx-ingress
 ```
 
+Notice
+Some kind of VKEAddon can not be removed from volcengine, and it will make a forbidden error when try to destroy.
+If you want to remove it from terraform state, please use command
+```
+$ terraform state rm volcengine_vke_addon.${name}
+```
+
