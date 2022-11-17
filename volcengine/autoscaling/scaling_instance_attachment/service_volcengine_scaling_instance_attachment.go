@@ -168,20 +168,19 @@ func (s *VolcengineScalingInstanceAttachmentService) attachInstances(groupId str
 	attachCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "AttachInstances",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"entrusted": {
-					ConvertType: ve.ConvertDefault,
-				},
-			},
+			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				logger.Debug(logger.RespFormat, call.Action, instanceId)
 				param := formatInstanceIdsRequest(instanceId)
 				param["ScalingGroupId"] = groupId
+				if entrusted, ok := d.GetOk("entrusted"); ok {
+					param["Entrusted"] = entrusted
+				}
 				*call.SdkParam = param
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				common, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				if err != nil {
 					return common, err
