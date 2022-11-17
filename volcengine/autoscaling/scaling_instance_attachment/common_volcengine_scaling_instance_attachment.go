@@ -1,4 +1,4 @@
-package scaling_instance_attach
+package scaling_instance_attachment
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
-func importScalingInstanceAttach(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
+func importScalingInstanceAttachment(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
 	var err error
 	items := strings.Split(data.Id(), ":")
 	if len(items) != 2 {

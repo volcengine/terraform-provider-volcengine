@@ -1,4 +1,4 @@
-package scaling_group_enable
+package scaling_group_enabler
 
 import (
 	"errors"
@@ -12,12 +12,12 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineScalingGroupEnableService struct {
+type VolcengineScalingGroupEnablerService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func (s *VolcengineScalingGroupEnableService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineScalingGroupEnablerService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -53,7 +53,7 @@ func (s *VolcengineScalingGroupEnableService) ReadResources(m map[string]interfa
 	})
 }
 
-func (s *VolcengineScalingGroupEnableService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineScalingGroupEnablerService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -86,18 +86,18 @@ func (s *VolcengineScalingGroupEnableService) ReadResource(resourceData *schema.
 	return data, err
 }
 
-func (s *VolcengineScalingGroupEnableService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineScalingGroupEnablerService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{}
 }
 
-func (s *VolcengineScalingGroupEnableService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
+func (s *VolcengineScalingGroupEnablerService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return m, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineScalingGroupEnableService) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingGroupEnablerService) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	param := &map[string]interface{}{
 		"ScalingGroupId": data.Get("scaling_group_id").(string),
 	}
@@ -120,11 +120,11 @@ func (s *VolcengineScalingGroupEnableService) CreateResource(data *schema.Resour
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineScalingGroupEnableService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingGroupEnablerService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineScalingGroupEnableService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingGroupEnablerService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	param := &map[string]interface{}{
 		"ScalingGroupId": data.Get("scaling_group_id").(string),
 	}
@@ -142,22 +142,22 @@ func (s *VolcengineScalingGroupEnableService) RemoveResource(data *schema.Resour
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineScalingGroupEnableService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineScalingGroupEnablerService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{}
 }
 
-func (s *VolcengineScalingGroupEnableService) ReadResourceId(id string) string {
+func (s *VolcengineScalingGroupEnablerService) ReadResourceId(id string) string {
 	return id
 }
 
-func NewScalingGroupEnableService(client *ve.SdkClient) *VolcengineScalingGroupEnableService {
-	return &VolcengineScalingGroupEnableService{
+func NewScalingGroupEnablerService(client *ve.SdkClient) *VolcengineScalingGroupEnablerService {
+	return &VolcengineScalingGroupEnablerService{
 		Client:     client,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineScalingGroupEnableService) GetClient() *ve.SdkClient {
+func (s *VolcengineScalingGroupEnablerService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 

@@ -42,14 +42,13 @@ resource "volcengine_scaling_configuration" "foo1" {
 }
 
 // 绑定伸缩配置
-resource "volcengine_scaling_configuration_enable" "foo2" {
+resource "volcengine_scaling_configuration_attachment" "foo2" {
   depends_on = [volcengine_scaling_configuration.foo1]
-  scaling_group_id = volcengine_scaling_group.foo.scaling_group_id
   scaling_configuration_id = volcengine_scaling_configuration.foo1.scaling_configuration_id
 }
 
 // 启用伸缩组
-resource "volcengine_scaling_group_enable" "foo3" {
-  depends_on = [volcengine_scaling_configuration_enable.foo2]
+resource "volcengine_scaling_group_enabler" "foo3" {
+  depends_on = [volcengine_scaling_configuration_attachment.foo2]
   scaling_group_id = volcengine_scaling_group.foo.scaling_group_id
 }

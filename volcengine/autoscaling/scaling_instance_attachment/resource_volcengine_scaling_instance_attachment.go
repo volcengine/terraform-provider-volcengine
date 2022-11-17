@@ -1,4 +1,4 @@
-package scaling_instance_attach
+package scaling_instance_attachment
 
 import (
 	"fmt"
@@ -13,19 +13,19 @@ import (
 Import
 Scaling instance attachment can be imported using the scaling_group_id and instance_id, e.g.
 ```
-$ terraform import volcengine_scaling_instance_attach.default scg-mizl7m1kqccg5smt1bdpijuj:i-l8u2ai4j0fauo6mrpgk8
+$ terraform import volcengine_scaling_instance_attachment.default scg-mizl7m1kqccg5smt1bdpijuj:i-l8u2ai4j0fauo6mrpgk8
 ```
 
 */
 
-func ResourceVolcengineScalingInstanceAttach() *schema.Resource {
+func ResourceVolcengineScalingInstanceAttachment() *schema.Resource {
 	resource := &schema.Resource{
-		Create: resourceVolcengineScalingInstanceAttachCreate,
-		Read:   resourceVolcengineScalingInstanceAttachRead,
-		Update: resourceVolcengineScalingInstanceAttachUpdate,
-		Delete: resourceVolcengineScalingInstanceAttachDelete,
+		Create: resourceVolcengineScalingInstanceAttachmentCreate,
+		Read:   resourceVolcengineScalingInstanceAttachmentRead,
+		Update: resourceVolcengineScalingInstanceAttachmentUpdate,
+		Delete: resourceVolcengineScalingInstanceAttachmentDelete,
 		Importer: &schema.ResourceImporter{
-			State: importScalingInstanceAttach,
+			State: importScalingInstanceAttachment,
 		},
 		Schema: map[string]*schema.Schema{
 			"scaling_group_id": {
@@ -68,36 +68,36 @@ func ResourceVolcengineScalingInstanceAttach() *schema.Resource {
 	return resource
 }
 
-func resourceVolcengineScalingInstanceAttachCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
-	err = scalingInstanceAttachService.Dispatcher.Create(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
+func resourceVolcengineScalingInstanceAttachmentCreate(d *schema.ResourceData, meta interface{}) (err error) {
+	scalingInstanceAttachService := NewScalingInstanceAttachmentService(meta.(*ve.SdkClient))
+	err = scalingInstanceAttachService.Dispatcher.Create(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttachment())
 	if err != nil {
 		return fmt.Errorf("error on creating ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
-	return resourceVolcengineScalingInstanceAttachRead(d, meta)
+	return resourceVolcengineScalingInstanceAttachmentRead(d, meta)
 }
 
-func resourceVolcengineScalingInstanceAttachRead(d *schema.ResourceData, meta interface{}) (err error) {
-	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
-	err = scalingInstanceAttachService.Dispatcher.Read(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
+func resourceVolcengineScalingInstanceAttachmentRead(d *schema.ResourceData, meta interface{}) (err error) {
+	scalingInstanceAttachService := NewScalingInstanceAttachmentService(meta.(*ve.SdkClient))
+	err = scalingInstanceAttachService.Dispatcher.Read(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttachment())
 	if err != nil {
 		return fmt.Errorf("error on reading ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
 	return err
 }
 
-func resourceVolcengineScalingInstanceAttachUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
-	err = scalingInstanceAttachService.Dispatcher.Update(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
+func resourceVolcengineScalingInstanceAttachmentUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	scalingInstanceAttachService := NewScalingInstanceAttachmentService(meta.(*ve.SdkClient))
+	err = scalingInstanceAttachService.Dispatcher.Update(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttachment())
 	if err != nil {
 		return fmt.Errorf("error on updating ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
-	return resourceVolcengineScalingInstanceAttachRead(d, meta)
+	return resourceVolcengineScalingInstanceAttachmentRead(d, meta)
 }
 
-func resourceVolcengineScalingInstanceAttachDelete(d *schema.ResourceData, meta interface{}) (err error) {
-	scalingInstanceAttachService := NewScalingInstanceAttachService(meta.(*ve.SdkClient))
-	err = scalingInstanceAttachService.Dispatcher.Delete(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttach())
+func resourceVolcengineScalingInstanceAttachmentDelete(d *schema.ResourceData, meta interface{}) (err error) {
+	scalingInstanceAttachService := NewScalingInstanceAttachmentService(meta.(*ve.SdkClient))
+	err = scalingInstanceAttachService.Dispatcher.Delete(scalingInstanceAttachService, d, ResourceVolcengineScalingInstanceAttachment())
 	if err != nil {
 		return fmt.Errorf("error on deleting ScalingInstanceAttach %q, %s", d.Id(), err)
 	}
