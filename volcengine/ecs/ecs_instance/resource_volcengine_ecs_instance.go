@@ -3,6 +3,7 @@ package ecs_instance
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -29,6 +30,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 		Exists: resourceVolcengineEcsInstanceExist,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {

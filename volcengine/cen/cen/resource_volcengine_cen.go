@@ -2,6 +2,7 @@ package cen
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -25,6 +26,11 @@ func ResourceVolcengineCen() *schema.Resource {
 		Delete: resourceVolcengineCenDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
 			"cen_name": {

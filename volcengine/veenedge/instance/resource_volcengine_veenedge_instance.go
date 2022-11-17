@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -26,6 +27,11 @@ func ResourceVolcengineInstance() *schema.Resource {
 		Update: resourceVolcengineInstanceUpdate,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {

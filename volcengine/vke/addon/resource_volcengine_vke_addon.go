@@ -3,6 +3,7 @@ package addon
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -45,6 +46,11 @@ func ResourceVolcengineVkeAddon() *schema.Resource {
 				}
 				return []*schema.ResourceData{data}, nil
 			},
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {
