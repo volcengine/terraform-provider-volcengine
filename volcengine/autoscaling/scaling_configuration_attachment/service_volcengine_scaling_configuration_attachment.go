@@ -1,4 +1,4 @@
-package scaling_configuration_enable
+package scaling_configuration_attachment
 
 import (
 	"errors"
@@ -12,12 +12,12 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineScalingConfigurationEnableService struct {
+type VolcengineScalingConfigurationAttachmentService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func (s *VolcengineScalingConfigurationEnableService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineScalingConfigurationAttachmentService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -54,7 +54,7 @@ func (s *VolcengineScalingConfigurationEnableService) ReadResources(m map[string
 		})
 }
 
-func (s *VolcengineScalingConfigurationEnableService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineScalingConfigurationAttachmentService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -63,8 +63,10 @@ func (s *VolcengineScalingConfigurationEnableService) ReadResource(resourceData 
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	ids := strings.Split(id, ":")
+	if len(ids) != 2 {
+		return data, errors.New("Invalid ScalingConfigurationAttachment Id ")
+	}
 	req := map[string]interface{}{
-		"ScalingGroupId":            ids[0],
 		"ScalingConfigurationIds.1": ids[1],
 	}
 	results, err = s.ReadResources(req)
@@ -77,22 +79,34 @@ func (s *VolcengineScalingConfigurationEnableService) ReadResource(resourceData 
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("The ScalingConfiguration %s bound to ScalingGroup %s does not exist ", ids[1], ids[0])
+		return data, fmt.Errorf("The ScalingConfiguration %s does not exist ", ids[1])
 	}
 	return data, err
 }
 
-func (s *VolcengineScalingConfigurationEnableService) RefreshResourceState(data *schema.ResourceData, strings []string, duration time.Duration, s2 string) *resource.StateChangeConf {
+func (s *VolcengineScalingConfigurationAttachmentService) RefreshResourceState(data *schema.ResourceData, strings []string, duration time.Duration, s2 string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{}
 }
 
-func (s *VolcengineScalingConfigurationEnableService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
+func (s *VolcengineScalingConfigurationAttachmentService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	return []ve.ResourceResponseHandler{}
 }
 
-func (s *VolcengineScalingConfigurationEnableService) CreateResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
-	groupId := data.Get("scaling_group_id").(string)
-	configId := data.Get("scaling_configuration_id").(string)
+func (s *VolcengineScalingConfigurationAttachmentService) CreateResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	var (
+		readData map[string]interface{}
+		err      error
+		configId string
+		groupId  string
+	)
+	configId = data.Get("scaling_configuration_id").(string)
+	readData, err = s.ReadResource(data, fmt.Sprintf("enable:%s", configId))
+	if err != nil {
+		logger.DebugInfo("Failed to read scaling configuration resource", false)
+		return []ve.Callback{}
+	}
+	groupId = readData["ScalingGroupId"].(string)
+	logger.Debug(logger.RespFormat, "Read ScalingGroupId", configId, groupId)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "EnableScalingConfiguration",
@@ -106,7 +120,7 @@ func (s *VolcengineScalingConfigurationEnableService) CreateResource(data *schem
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(fmt.Sprint((*call.SdkParam)["ScalingGroupId"], ":", (*call.SdkParam)["ScalingConfigurationId"]))
+				d.SetId(fmt.Sprintf("enable:%s", (*call.SdkParam)["ScalingConfigurationId"]))
 				return nil
 			},
 		},
@@ -114,30 +128,30 @@ func (s *VolcengineScalingConfigurationEnableService) CreateResource(data *schem
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineScalingConfigurationEnableService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingConfigurationAttachmentService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineScalingConfigurationEnableService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingConfigurationAttachmentService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineScalingConfigurationEnableService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineScalingConfigurationAttachmentService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{}
 }
 
-func (s *VolcengineScalingConfigurationEnableService) ReadResourceId(id string) string {
+func (s *VolcengineScalingConfigurationAttachmentService) ReadResourceId(id string) string {
 	return id
 }
 
-func NewScalingConfigurationEnableService(client *ve.SdkClient) *VolcengineScalingConfigurationEnableService {
-	return &VolcengineScalingConfigurationEnableService{
+func NewScalingConfigurationAttachmentService(client *ve.SdkClient) *VolcengineScalingConfigurationAttachmentService {
+	return &VolcengineScalingConfigurationAttachmentService{
 		Client:     client,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineScalingConfigurationEnableService) GetClient() *ve.SdkClient {
+func (s *VolcengineScalingConfigurationAttachmentService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 

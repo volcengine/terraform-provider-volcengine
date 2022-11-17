@@ -6,11 +6,11 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_activity"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_configuration"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_configuration_enable"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_configuration_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_group"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_group_enable"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_group_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance_attach"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_lifecycle_hook"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/acl"
@@ -160,13 +160,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
 
 			// ================ AutoScaling ================
-			"volcengine_scaling_group":                scaling_group.ResourceVolcengineScalingGroup(),
-			"volcengine_scaling_configuration":        scaling_configuration.ResourceVolcengineScalingConfiguration(),
-			"volcengine_scaling_policy":               scaling_policy.ResourceVolcengineScalingPolicy(),
-			"volcengine_scaling_instance_attach":      scaling_instance_attach.ResourceVolcengineScalingInstanceAttach(),
-			"volcengine_scaling_lifecycle_hook":       scaling_lifecycle_hook.ResourceVolcengineScalingLifecycleHook(),
-			"volcengine_scaling_group_enable":         scaling_group_enable.ResourceVolcengineScalingGroupEnable(),
-			"volcengine_scaling_configuration_enable": scaling_configuration_enable.ResourceVolcengineScalingConfigurationEnable(),
+			"volcengine_scaling_group":                    scaling_group.ResourceVolcengineScalingGroup(),
+			"volcengine_scaling_configuration":            scaling_configuration.ResourceVolcengineScalingConfiguration(),
+			"volcengine_scaling_policy":                   scaling_policy.ResourceVolcengineScalingPolicy(),
+			"volcengine_scaling_instance_attachment":      scaling_instance_attachment.ResourceVolcengineScalingInstanceAttachment(),
+			"volcengine_scaling_lifecycle_hook":           scaling_lifecycle_hook.ResourceVolcengineScalingLifecycleHook(),
+			"volcengine_scaling_group_enabler":            scaling_group_enabler.ResourceVolcengineScalingGroupEnabler(),
+			"volcengine_scaling_configuration_attachment": scaling_configuration_attachment.ResourceVolcengineScalingConfigurationAttachment(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

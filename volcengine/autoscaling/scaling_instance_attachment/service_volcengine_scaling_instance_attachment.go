@@ -1,4 +1,4 @@
-package scaling_instance_attach
+package scaling_instance_attachment
 
 import (
 	"errors"
@@ -12,23 +12,23 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineScalingInstanceAttachService struct {
+type VolcengineScalingInstanceAttachmentService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewScalingInstanceAttachService(c *ve.SdkClient) *VolcengineScalingInstanceAttachService {
-	return &VolcengineScalingInstanceAttachService{
+func NewScalingInstanceAttachmentService(c *ve.SdkClient) *VolcengineScalingInstanceAttachmentService {
+	return &VolcengineScalingInstanceAttachmentService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineScalingInstanceAttachService) GetClient() *ve.SdkClient {
+func (s *VolcengineScalingInstanceAttachmentService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineScalingInstanceAttachService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineScalingInstanceAttachmentService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -63,7 +63,7 @@ func (s *VolcengineScalingInstanceAttachService) ReadResources(m map[string]inte
 	})
 }
 
-func (s *VolcengineScalingInstanceAttachService) ReadResource(resourceData *schema.ResourceData, id string) (res map[string]interface{}, err error) {
+func (s *VolcengineScalingInstanceAttachmentService) ReadResource(resourceData *schema.ResourceData, id string) (res map[string]interface{}, err error) {
 	var (
 		results    []interface{}
 		data       = make(map[string]interface{})
@@ -97,7 +97,7 @@ func (s *VolcengineScalingInstanceAttachService) ReadResource(resourceData *sche
 	return data, nil
 }
 
-func (s *VolcengineScalingInstanceAttachService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineScalingInstanceAttachmentService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -131,7 +131,7 @@ func (s *VolcengineScalingInstanceAttachService) RefreshResourceState(resourceDa
 
 }
 
-func (VolcengineScalingInstanceAttachService) WithResourceResponseHandlers(scalingGroup map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineScalingInstanceAttachmentService) WithResourceResponseHandlers(scalingGroup map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return scalingGroup, nil, nil
 	}
@@ -139,36 +139,41 @@ func (VolcengineScalingInstanceAttachService) WithResourceResponseHandlers(scali
 
 }
 
-func (s *VolcengineScalingInstanceAttachService) CreateResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingInstanceAttachmentService) CreateResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	instanceId := d.Get("instance_id").(string)
 	return s.attachInstances(d.Get("scaling_group_id").(string), instanceId, d.Timeout(schema.TimeoutUpdate))
 }
 
-func (s *VolcengineScalingInstanceAttachService) ModifyResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingInstanceAttachmentService) ModifyResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineScalingInstanceAttachService) RemoveResource(d *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingInstanceAttachmentService) RemoveResource(d *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	instanceId := d.Get("instance_id").(string)
 	deleteType := d.Get("delete_type").(string)
 	detachOption := d.Get("detach_option").(string)
 	return s.removeInstances(d.Get("scaling_group_id").(string), instanceId, d.Timeout(schema.TimeoutDelete), deleteType, detachOption)
 }
 
-func (s *VolcengineScalingInstanceAttachService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineScalingInstanceAttachmentService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{}
 }
 
-func (s *VolcengineScalingInstanceAttachService) ReadResourceId(id string) string {
+func (s *VolcengineScalingInstanceAttachmentService) ReadResourceId(id string) string {
 	return id
 }
 
-func (s *VolcengineScalingInstanceAttachService) attachInstances(groupId string, instanceId string, timeout time.Duration) []ve.Callback {
+func (s *VolcengineScalingInstanceAttachmentService) attachInstances(groupId string, instanceId string, timeout time.Duration) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 	attachCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "AttachInstances",
-			ConvertMode: ve.RequestConvertIgnore,
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"entrusted": {
+					ConvertType: ve.ConvertDefault,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				logger.Debug(logger.RespFormat, call.Action, instanceId)
 				param := formatInstanceIdsRequest(instanceId)
@@ -198,13 +203,16 @@ func (s *VolcengineScalingInstanceAttachService) attachInstances(groupId string,
 	return callbacks
 }
 
-func (s *VolcengineScalingInstanceAttachService) removeInstances(groupId string, instanceId string, timeout time.Duration, deleteType, detachOption string) []ve.Callback {
+func (s *VolcengineScalingInstanceAttachmentService) removeInstances(groupId string, instanceId string, timeout time.Duration, deleteType, detachOption string) []ve.Callback {
 	var action string
 	if deleteType == "Detach" {
 		action = "DetachInstances"
 	} else {
 		// 默认remove
 		action = "RemoveInstances"
+	}
+	if detachOption != "none" {
+		detachOption = "both"
 	}
 	callbacks := make([]ve.Callback, 0)
 	removeCallback := ve.Callback{
