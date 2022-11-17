@@ -2,6 +2,7 @@ package iam_access_key
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -21,6 +22,11 @@ func ResourceVolcengineIamAccessKey() *schema.Resource {
 		Read:   resourceVolcengineIamAccessKeyRead,
 		Update: resourceVolcengineIamAccessKeyUpdate,
 		Delete: resourceVolcengineIamAccessKeyDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"user_name": {
 				Type:        schema.TypeString,

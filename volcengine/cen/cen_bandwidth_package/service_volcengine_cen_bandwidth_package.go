@@ -131,10 +131,21 @@ func (s *VolcengineCenBandwidthPackageService) RefreshResourceState(resourceData
 				failStates []string
 			)
 			failStates = append(failStates, "Error")
-			demo, err = s.ReadResource(resourceData, id)
-			if err != nil {
+
+			if err = resource.Retry(20*time.Minute, func() *resource.RetryError {
+				demo, err = s.ReadResource(resourceData, id)
+				if err != nil {
+					if ve.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
 				return nil, "", err
 			}
+
 			status, err = ve.ObtainSdkValue("Status", demo)
 			if err != nil {
 				return nil, "", err

@@ -10,7 +10,10 @@ description: |-
 Use this data source to query detailed information of cen bandwidth packages
 ## Example Usage
 ```hcl
-
+data "volcengine_cen_bandwidth_packages" "foo" {
+  ids    = ["cbp-2bzeew3s8p79c2dx0eeohej4x"]
+  cen_id = "cen-2bzrl3srxsv0g2dx0efyoojn3"
+}
 ```
 ## Argument Reference
 The following arguments are supported:
