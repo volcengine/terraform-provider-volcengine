@@ -24,6 +24,7 @@ func ResourceVolcengineDefaultNodePoolBatchAttach() *schema.Resource {
 			ForceNew:    true,
 			Description: "The default NodePool ID.",
 		},
+		"instances": default_node_pool.ResourceVolcengineDefaultNodePool().Schema["instances"],
 	}
 	ve.MergeDateSourceToResource(default_node_pool.ResourceVolcengineDefaultNodePool().Schema, &m)
 
