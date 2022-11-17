@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
 )
 
@@ -16,6 +17,7 @@ The resource not support import
 
 func ResourceVolcengineDefaultNodePoolBatchAttach() *schema.Resource {
 	m := map[string]*schema.Schema{
+		"cluster_id": default_node_pool.ResourceVolcengineDefaultNodePool().Schema["cluster_id"],
 		"default_node_pool_id": {
 			Type:        schema.TypeString,
 			Required:    true,
@@ -24,12 +26,8 @@ func ResourceVolcengineDefaultNodePoolBatchAttach() *schema.Resource {
 		},
 	}
 	ve.MergeDateSourceToResource(default_node_pool.ResourceVolcengineDefaultNodePool().Schema, &m)
-	m["kubernetes_config"].Optional = false
-	m["kubernetes_config"].Computed = true
 
-	m["node_config"].Optional = false
-	m["node_config"].Required = false
-	m["node_config"].Computed = true
+	logger.Debug(logger.RespFormat, "ATTACH_TEST", m)
 
 	return &schema.Resource{
 		Create: resourceVolcengineDefaultNodePoolBatchAttachCreate,
