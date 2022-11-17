@@ -15,6 +15,22 @@ The resource not support import
 */
 
 func ResourceVolcengineDefaultNodePoolBatchAttach() *schema.Resource {
+	m := map[string]*schema.Schema{
+		"default_node_pool_id": {
+			Type:        schema.TypeString,
+			Required:    true,
+			ForceNew:    true,
+			Description: "The default NodePool ID.",
+		},
+	}
+	ve.MergeDateSourceToResource(default_node_pool.ResourceVolcengineDefaultNodePool().Schema, &m)
+	m["kubernetes_config"].Optional = false
+	m["kubernetes_config"].Computed = true
+
+	m["node_config"].Optional = false
+	m["node_config"].Required = false
+	m["node_config"].Computed = true
+
 	return &schema.Resource{
 		Create: resourceVolcengineDefaultNodePoolBatchAttachCreate,
 		Update: resourceVolcengineDefaultNodePoolBatchAttachUpdate,
@@ -25,16 +41,7 @@ func ResourceVolcengineDefaultNodePoolBatchAttach() *schema.Resource {
 				return nil, fmt.Errorf("The resource not support import ")
 			},
 		},
-		Schema: map[string]*schema.Schema{
-			"cluster_id": default_node_pool.ResourceVolcengineDefaultNodePool().Schema["cluster_id"],
-			"default_node_pool_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The default NodePool ID.",
-			},
-			"instances": default_node_pool.ResourceVolcengineDefaultNodePool().Schema["instances"],
-		},
+		Schema: m,
 	}
 }
 

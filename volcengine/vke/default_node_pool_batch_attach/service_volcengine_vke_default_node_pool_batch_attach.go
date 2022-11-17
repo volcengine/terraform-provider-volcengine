@@ -46,7 +46,7 @@ func (s *VolcengineVkeDefaultNodePoolBatchAttachService) RefreshResourceState(da
 }
 
 func (s *VolcengineVkeDefaultNodePoolBatchAttachService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
-	return s.WithResourceResponseHandlers(m)
+	return s.defaultNodePoolService.WithResourceResponseHandlers(m)
 }
 
 func (s *VolcengineVkeDefaultNodePoolBatchAttachService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
