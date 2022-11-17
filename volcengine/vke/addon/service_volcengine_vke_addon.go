@@ -236,7 +236,11 @@ func (s *VolcengineVkeAddonService) RemoveResource(resourceData *schema.Resource
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				if strings.Contains(baseErr.Error(), "forbidden to delete required addon") { // 一些组件禁止删除，直接返回
-					return baseErr
+					msg := fmt.Sprintf("error: %s. msg: %s",
+						baseErr.Error(),
+						"If you want to remove it form terraform state, "+
+							"please use `terraform state rm volcengine_vke_addon.resource_name` command ")
+					return fmt.Errorf(msg)
 				}
 				//出现错误后重试
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {

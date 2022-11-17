@@ -2,6 +2,7 @@ package security_group_rule
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -26,6 +27,11 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 		Delete: resourceVolcengineSecurityGroupRuleDelete,
 		Importer: &schema.ResourceImporter{
 			State: importSecurityGroupRule,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"direction": {
