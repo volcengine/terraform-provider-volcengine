@@ -2,6 +2,8 @@ package iam_user_policy_attachment
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -24,6 +26,10 @@ func ResourceVolcengineIamUserPolicyAttachment() *schema.Resource {
 		Delete: resourceVolcengineIamUserPolicyAttachmentDelete,
 		Importer: &schema.ResourceImporter{
 			State: iamUserPolicyAttachmentImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"user_name": {

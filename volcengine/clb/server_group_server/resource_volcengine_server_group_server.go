@@ -2,6 +2,7 @@ package server_group_server
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -26,6 +27,11 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 		Delete: resourceVolcengineServerGroupServerDelete,
 		Importer: &schema.ResourceImporter{
 			State: serverGroupServerImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
 			"server_group_id": {

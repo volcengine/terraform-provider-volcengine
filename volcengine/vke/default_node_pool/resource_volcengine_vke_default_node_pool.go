@@ -2,6 +2,7 @@ package default_node_pool
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -25,6 +26,11 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 		Delete: resourceVolcengineNodePoolDelete,
 		Importer: &schema.ResourceImporter{
 			State: defaultNodePoolImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {

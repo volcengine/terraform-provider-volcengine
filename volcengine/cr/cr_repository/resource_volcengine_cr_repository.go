@@ -3,10 +3,10 @@ package cr_repository
 import (
 	"fmt"
 	"strings"
-
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -45,6 +45,11 @@ func ResourceVolcengineCrRepository() *schema.Resource {
 		Delete: resourceVolcengineCrRepositoryDelete,
 		Importer: &schema.ResourceImporter{
 			State: crRepositoryImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"registry": {

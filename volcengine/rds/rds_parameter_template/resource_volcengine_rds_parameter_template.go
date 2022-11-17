@@ -2,6 +2,7 @@ package rds_parameter_template
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
@@ -25,6 +26,11 @@ func ResourceVolcengineRdsParameterTemplate() *schema.Resource {
 		Delete: resourceVolcengineRdsParameterTemplateDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"template_name": {

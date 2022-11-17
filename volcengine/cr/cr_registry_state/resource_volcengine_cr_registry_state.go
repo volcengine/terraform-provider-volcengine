@@ -3,6 +3,7 @@ package cr_registry_state
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -38,6 +39,11 @@ func ResourceVolcengineCrRegistryState() *schema.Resource {
 		Update: resourceVolcengineCrRegistryStateUpdate,
 		Importer: &schema.ResourceImporter{
 			State: crRegistryStateImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
 			"action": {

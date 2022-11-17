@@ -2,6 +2,7 @@ package rds_account_privilege
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
@@ -25,6 +26,11 @@ func ResourceVolcengineRdsAccountPrivilege() *schema.Resource {
 		Delete: resourceVolcengineRdsAccountPrivilegeDelete,
 		Importer: &schema.ResourceImporter{
 			State: rdsAccountPrivilegeImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {

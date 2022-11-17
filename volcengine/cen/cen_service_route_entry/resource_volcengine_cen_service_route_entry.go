@@ -2,6 +2,7 @@ package cen_service_route_entry
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -25,6 +26,10 @@ func ResourceVolcengineCenServiceRouteEntry() *schema.Resource {
 		Delete: resourceVolcengineCenServiceRouteEntryDelete,
 		Importer: &schema.ResourceImporter{
 			State: cenServiceRouteEntryImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"cen_id": {
