@@ -451,9 +451,6 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 							}
 							break
 						default:
-							if t.NextLevelConvert[k2].Convert != nil {
-								v2 = t.NextLevelConvert[k2].Convert(d, v2)
-							}
 							k3 = k3 + GetFinalKey(t, k2, false)
 							(*req)[k3] = v2
 							break

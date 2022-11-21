@@ -200,14 +200,9 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 		logger.Debug(logger.RespFormat, "filteredSecurityGroupIds", tmpSecurityGroupIds, filteredSecurityGroupIds)
 	}
 
-	if tags, ok := result["NodeConfig"].(map[string]interface{})["Tags"]; ok {
-		tagsMap := ve.TagsListToMap(tags)
-		result["NodeConfig"].(map[string]interface{})["EcsTags"] = tagsMap
+	if ecsTags, ok := result["NodeConfig"].(map[string]interface{})["Tags"]; ok {
+		result["NodeConfig"].(map[string]interface{})["EcsTags"] = ecsTags
 		delete(result["NodeConfig"].(map[string]interface{}), "Tags")
-	}
-	if tagsResponse, ok := result["Tags"]; ok {
-		tagsResponseMap := ve.TagsListToMap(tagsResponse)
-		result["Tags"] = tagsResponseMap
 	}
 
 	logger.Debug(logger.RespFormat, "result of ReadResource ", result)
@@ -365,10 +360,7 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						},
 						"ecs_tags": {
 							TargetField: "Tags",
-							Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-								tags := ve.TagsMapToList(i)
-								return tags
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 					},
 				},
@@ -413,10 +405,7 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 				},
 				"tags": {
 					TargetField: "Tags",
-					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-						tags := ve.TagsMapToList(i)
-						return tags
-					},
+					ConvertType: ve.ConvertJsonObjectArray,
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -503,10 +492,7 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						},
 						"ecs_tags": {
 							TargetField: "Tags",
-							Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-								tags := ve.TagsMapToList(i)
-								return tags
-							},
+							ConvertType: ve.ConvertJsonObjectArray,
 						},
 					},
 				},
@@ -673,10 +659,7 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"tags": {
 				TargetField: "Tags",
-				Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-					tags := ve.TagsMapToList(i)
-					return tags
-				},
+				ConvertType: ve.ConvertJsonObjectArray,
 			},
 		},
 		NameField:    "Name",
@@ -856,8 +839,16 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			"NodeConfig.Tags": {
 				TargetField: "ecs_tags",
 				Convert: func(i interface{}) interface{} {
-					tags := ve.TagsListToMap(i)
-					return tags
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						for _, data := range dd {
+							tag := make(map[string]interface{}, 0)
+							tag["key"] = data.(map[string]interface{})["Key"].(string)
+							tag["value"] = data.(map[string]interface{})["Value"].(string)
+							results = append(results, tag)
+						}
+					}
+					return results
 				},
 			},
 			"NodeStatistics": {
@@ -885,19 +876,19 @@ func (s *VolcengineNodePoolService) ReadResourceId(id string) string {
 }
 
 func (s *VolcengineNodePoolService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
-	addedTags, removedTags := ve.GetTagsDifference("tags", resourceData)
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
 
 	removeCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UntagResources",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(removedTags) > 0 {
+				if removedTags != nil && len(removedTags.List()) > 0 {
 					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
 					(*call.SdkParam)["ResourceType"] = resourceType
 					(*call.SdkParam)["TagKeys"] = make([]string, 0)
-					for key, _ := range removedTags {
-						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), key)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
 					}
 					return true, nil
 				}
@@ -916,13 +907,12 @@ func (s *VolcengineNodePoolService) setResourceTags(resourceData *schema.Resourc
 			Action:      "TagResources",
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(addedTags) > 0 {
+				if addedTags != nil && len(addedTags.List()) > 0 {
 					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
 					(*call.SdkParam)["ResourceType"] = resourceType
 					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
-					addedTagsList := ve.TagsMapToList(addedTags)
-					for _, tag := range addedTagsList {
-						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag.(map[string]interface{}))
 					}
 					return true, nil
 				}

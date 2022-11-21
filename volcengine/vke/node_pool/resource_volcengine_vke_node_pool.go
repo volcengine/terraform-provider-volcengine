@@ -81,7 +81,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    true,
-							Description: "The DesiredReplicas of AutoScaling, default 0，range in min_replicas to max_replicas.",
+							Description: "The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.",
 						},
 						"priority": {
 							Type:         schema.TypeInt,
@@ -275,11 +275,23 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Description: "The NamePrefix of NodeConfig.",
 						},
 						"ecs_tags": {
-							Type:        schema.TypeMap,
+							Type:        schema.TypeSet,
 							Optional:    true,
 							Description: "Tags for Ecs.",
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
+							Set:         ve.TagsHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The Value of Tags.",
+									},
+								},
 							},
 						},
 					},

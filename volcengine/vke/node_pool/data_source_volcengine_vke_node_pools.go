@@ -405,11 +405,23 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Description: "The NamePrefix of NodeConfig.",
 						},
 						"ecs_tags": {
-							Type:        schema.TypeMap,
+							Type:        schema.TypeSet,
 							Computed:    true,
 							Description: "Tags for Ecs.",
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
+							Set:         ve.TagsHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Tags.",
+									},
+								},
 							},
 						},
 						"tags": {

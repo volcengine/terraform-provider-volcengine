@@ -9,8 +9,9 @@ resource "volcengine_vke_default_node_pool" "default" {
             security_strategies = ["Hids"]
         }
         initialize_script = "ISMvYmluL2Jhc2gKZWNobyAx"
-        ecs_tags = {
-            type = "ecs"
+        ecs_tags {
+            key = "ecs_k1"
+            value = "ecs_v1"
         }
     }
     kubernetes_config {
@@ -45,7 +46,8 @@ resource "volcengine_vke_default_node_pool" "default" {
         additional_container_storage_enabled = true
         container_storage_path = "/"
     }
-    tags = {
-        type = "DefaultNodePool"
+    tags {
+        key = "k1"
+        value = "v1"
     }
 }
