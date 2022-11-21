@@ -26,12 +26,18 @@ The following arguments are supported:
 * `name` - (Optional) The Name of NodePool.
 * `output_file` - (Optional) File name where to save data source results.
 * `statuses` - (Optional) The Status of NodePool.
+* `tags` - (Optional) Tags.
 * `update_client_token` - (Optional) The ClientToken when last update was successful.
 
 The `statuses` object supports the following:
 
 * `conditions_type` - (Optional) Indicates the status condition of the node pool in the active state. The value can be `Progressing` or `Ok` or `VersionPartlyUpgraded` or `StockOut` or `LimitedByQuota` or `Balance` or `Degraded` or `ClusterVersionUpgrading` or `Cluster` or `ResourceCleanupFailed` or `Unknown` or `ClusterNotRunning` or `SetByProvider`.
 * `phase` - (Optional) The Phase of Status. The value can be `Creating` or `Running` or `Updating` or `Deleting` or `Failed` or `Scaling`.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -49,6 +55,9 @@ In addition to all arguments above, the following attributes are exported:
         * `size` - The Size of DataVolume.
         * `type` - The Type of DataVolume.
     * `desired_replicas` - The DesiredReplicas of AutoScaling.
+    * `ecs_tags` - Tags for Ecs.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `enabled` - Is Enabled of AutoScaling.
     * `id` - The Id of NodePool.
     * `image_id` - The ImageId of NodeConfig.
@@ -62,6 +71,7 @@ In addition to all arguments above, the following attributes are exported:
     * `login_type` - The login type of NodeConfig.
     * `max_replicas` - The MaxReplicas of AutoScaling.
     * `min_replicas` - The MinReplicas of AutoScaling.
+    * `name_prefix` - The NamePrefix of NodeConfig.
     * `name` - The Name of NodePool.
     * `node_statistics` - The NodeStatistics of NodeConfig.
         * `creating_count` - The CreatingCount of Node.
@@ -83,6 +93,10 @@ In addition to all arguments above, the following attributes are exported:
     * `system_volume` - The SystemVolume of NodeConfig.
         * `size` - The Size of SystemVolume.
         * `type` - The Type of SystemVolume.
+    * `tags` - Tags of the NodePool.
+        * `key` - The Key of Tags.
+        * `type` - The Type of Tags.
+        * `value` - The Value of Tags.
     * `taint_content` - The TaintContent of NodeConfig.
         * `effect` - The Effect of Taint.
         * `key` - The Key of Taint.
