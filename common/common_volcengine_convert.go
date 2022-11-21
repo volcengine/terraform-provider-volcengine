@@ -577,3 +577,22 @@ func GetFinalKey(t RequestConvert, k string, isRoot bool) string {
 		}
 	}
 }
+
+func DefaultMapValue(source *map[string]interface{}, key string, defaultStruct map[string]interface{}) {
+	if def, ok := (*source)[key]; !ok {
+		(*source)[key] = defaultStruct
+	} else {
+		if ele, ok1 := def.(map[string]interface{}); ok1 {
+			for k, v := range defaultStruct {
+				if v1, ok3 := v.(map[string]interface{}); ok3 {
+					next := (*source)[key].(map[string]interface{})
+					DefaultMapValue(&next, k, v1)
+				}
+
+				if _, ok2 := ele[k]; !ok2 {
+					(*source)[key].(map[string]interface{})[k] = v
+				}
+			}
+		}
+	}
+}

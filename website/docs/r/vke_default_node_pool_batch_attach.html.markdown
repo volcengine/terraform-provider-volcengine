@@ -54,12 +54,19 @@ In addition to all arguments above, the following attributes are exported:
         * `key` - The Key of Taints.
         * `value` - The Value of Taints.
 * `node_config` - The Config of NodePool.
+    * `ecs_tags` - Tags for Ecs.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `initialize_script` - The initializeScript of NodeConfig.
+    * `name_prefix` - The NamePrefix of NodeConfig.
     * `security` - The Security of NodeConfig.
         * `login` - The Login of Security.
             * `password` - The Password of Security.
             * `ssh_key_pair_name` - The SshKeyPairName of Security.
         * `security_group_ids` - The SecurityGroupIds of Security.
         * `security_strategies` - The SecurityStrategies of Security.
+* `tags` - Tags.
+    * `key` - The Key of Tags.
+    * `value` - The Value of Tags.
 
 

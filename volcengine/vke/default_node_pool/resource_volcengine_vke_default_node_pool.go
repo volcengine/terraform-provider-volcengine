@@ -22,7 +22,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineDefaultNodePoolCreate,
 		Update: resourceVolcengineDefaultNodePoolUpdate,
-		Read:   resourceVolcengineDefaultNodePoolUpdate,
+		Read:   resourceVolcengineDefaultNodePoolRead,
 		Delete: resourceVolcengineNodePoolDelete,
 		Importer: &schema.ResourceImporter{
 			State: defaultNodePoolImporter,
@@ -39,6 +39,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 				ForceNew:    true,
 				Description: "The ClusterId of NodePool.",
 			},
+			"tags": ve.TagsSchema(),
 			"instances": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -93,8 +94,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 			"kubernetes_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				Optional: true,
-				Computed: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
@@ -135,6 +135,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 									"effect": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Default:     "NoSchedule",
 										Description: "The Effect of Taints.",
 									},
 								},
@@ -143,8 +144,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 						},
 						"cordon": {
 							Type:        schema.TypeBool,
-							Optional:    true,
-							Computed:    true,
+							Required:    true,
 							Description: "The Cordon of KubernetesConfig.",
 						},
 					},
@@ -208,6 +208,31 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The initializeScript of NodeConfig.",
+						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The NamePrefix of NodeConfig.",
+						},
+						"ecs_tags": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Description: "Tags for Ecs.",
+							Set:         ve.TagsHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The Value of Tags.",
+									},
+								},
+							},
 						},
 					},
 				},

@@ -88,6 +88,7 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 				Optional:    true,
 				Description: "Is enabled of AutoScaling.",
 			},
+			"tags": ve.TagsSchema(),
 			"node_pools": {
 				Description: "The collection of NodePools query.",
 				Type:        schema.TypeList,
@@ -397,6 +398,56 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: "The AutoRenewPeriod of the PrePaid instance of NodeConfig.",
+						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The NamePrefix of NodeConfig.",
+						},
+						"ecs_tags": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "Tags for Ecs.",
+							Set:         ve.TagsHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Tags.",
+									},
+								},
+							},
+						},
+						"tags": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "Tags of the NodePool.",
+							Set:         ve.VkeTagsResponseHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Tags.",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Type of Tags.",
+									},
+								},
+							},
 						},
 					},
 				},

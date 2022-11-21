@@ -29,6 +29,10 @@ resource "volcengine_vke_node_pool" "vke_test" {
     }
     instance_charge_type = "PrePaid"
     period               = 1
+    ecs_tags {
+      key   = "ecs_k1"
+      value = "ecs_v1"
+    }
   }
   kubernetes_config {
     labels {
@@ -39,21 +43,27 @@ resource "volcengine_vke_node_pool" "vke_test" {
       key   = "cccc"
       value = "dddd"
     }
+    cordon = false
+  }
+  tags {
+    key   = "k1"
+    value = "v1"
   }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
+* `kubernetes_config` - (Required) The KubernetesConfig of NodeConfig.
 * `node_config` - (Required) The Config of NodePool.
 * `auto_scaling` - (Optional) The node pool elastic scaling configuration information.
 * `client_token` - (Optional) The ClientToken of NodePool.
 * `cluster_id` - (Optional, ForceNew) The ClusterId of NodePool.
-* `kubernetes_config` - (Optional) The KubernetesConfig of NodeConfig.
 * `name` - (Optional) The Name of NodePool.
+* `tags` - (Optional) Tags.
 
 The `auto_scaling` object supports the following:
 
-* `desired_replicas` - (Optional) The DesiredReplicas of AutoScaling, default 0.
+* `desired_replicas` - (Optional) The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.
 * `enabled` - (Optional) Is Enabled of AutoScaling.
 * `max_replicas` - (Optional) The MaxReplicas of AutoScaling, default 10, range in 1~1000.
 * `min_replicas` - (Optional) The MinReplicas of AutoScaling, default 0.
@@ -65,9 +75,14 @@ The `data_volumes` object supports the following:
 * `size` - (Optional, ForceNew) The Size of DataVolumes, the value range in 20~32768.
 * `type` - (Optional, ForceNew) The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.
 
+The `ecs_tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
+
 The `kubernetes_config` object supports the following:
 
-* `cordon` - (Optional) The Cordon of KubernetesConfig.
+* `cordon` - (Required) The Cordon of KubernetesConfig.
 * `labels` - (Optional) The Labels of KubernetesConfig.
 * `taints` - (Optional) The Taints of KubernetesConfig.
 
@@ -85,15 +100,17 @@ The `node_config` object supports the following:
 
 * `instance_type_ids` - (Required, ForceNew) The InstanceTypeIds of NodeConfig.
 * `security` - (Required) The Security of NodeConfig.
-* `subnet_ids` - (Required, ForceNew) The SubnetIds of NodeConfig.
+* `subnet_ids` - (Required) The SubnetIds of NodeConfig.
 * `additional_container_storage_enabled` - (Optional, ForceNew) The AdditionalContainerStorageEnabled of NodeConfig.
-* `auto_renew_period` - (Optional, ForceNew) The AutoRenewPeriod of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 6, 12. Unit: month. when InstanceChargeType is PrePaid and AutoRenew enable, default value is 1.
-* `auto_renew` - (Optional, ForceNew) Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.
+* `auto_renew_period` - (Optional) The AutoRenewPeriod of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 6, 12. Unit: month. when InstanceChargeType is PrePaid and AutoRenew enable, default value is 1.
+* `auto_renew` - (Optional) Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.
 * `data_volumes` - (Optional, ForceNew) The DataVolumes of NodeConfig.
+* `ecs_tags` - (Optional) Tags for Ecs.
 * `image_id` - (Optional, ForceNew) The ImageId of NodeConfig.
 * `initialize_script` - (Optional) The initializeScript of NodeConfig.
 * `instance_charge_type` - (Optional, ForceNew) The InstanceChargeType of PrePaid instance of NodeConfig. Valid values: PostPaid, PrePaid. Default value: PostPaid.
-* `period` - (Optional, ForceNew) The Period of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Unit: month. when InstanceChargeType is PrePaid, default value is 12.
+* `name_prefix` - (Optional) The NamePrefix of NodeConfig.
+* `period` - (Optional) The Period of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Unit: month. when InstanceChargeType is PrePaid, default value is 12.
 * `system_volume` - (Optional, ForceNew) The SystemVolume of NodeConfig.
 
 The `security` object supports the following:
@@ -106,6 +123,11 @@ The `system_volume` object supports the following:
 
 * `size` - (Optional, ForceNew) The Size of SystemVolume, the value range in 20~2048.
 * `type` - (Optional, ForceNew) The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 The `taints` object supports the following:
 
@@ -122,6 +144,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 NodePool can be imported using the id, e.g.
 ```
-$ terraform import volcengine_node_pools.default pcabe57vqtofgrbln3dp0
+$ terraform import volcengine_vke_node_pool.default pcabe57vqtofgrbln3dp0
 ```
 
