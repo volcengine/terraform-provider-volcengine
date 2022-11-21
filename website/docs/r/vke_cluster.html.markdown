@@ -38,6 +38,10 @@ resource "volcengine_vke_cluster" "foo" {
   services_config {
     service_cidrsv4 = ["192.168.0.0/16"]
   }
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -50,6 +54,7 @@ The following arguments are supported:
 * `delete_protection_enabled` - (Optional) The delete protection of the cluster, the value is `true` or `false`.
 * `description` - (Optional) The description of the cluster.
 * `kubernetes_version` - (Optional, ForceNew) The version of Kubernetes specified when creating a VKE cluster (specified to patch version), if not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.
+* `tags` - (Optional) Tags.
 
 The `api_server_public_access_config` object supports the following:
 
@@ -81,6 +86,11 @@ The `public_access_network_config` object supports the following:
 The `services_config` object supports the following:
 
 * `service_cidrsv4` - (Required, ForceNew) The IPv4 private network address exposed by the service.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 The `vpc_cni_config` object supports the following:
 

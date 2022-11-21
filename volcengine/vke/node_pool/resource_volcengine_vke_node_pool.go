@@ -14,7 +14,7 @@ import (
 Import
 NodePool can be imported using the id, e.g.
 ```
-$ terraform import volcengine_node_pools.default pcabe57vqtofgrbln3dp0
+$ terraform import volcengine_vke_node_pool.default pcabe57vqtofgrbln3dp0
 ```
 
 */
@@ -50,6 +50,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Optional:    true,
 				Description: "The ClientToken of NodePool.",
 			},
+			"tags": ve.TagsSchema(),
 			"auto_scaling": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
@@ -66,7 +67,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"max_replicas": {
 							Type:         schema.TypeInt,
 							Optional:     true,
-							Computed:     true,
+							Default:      10,
 							ValidateFunc: validation.IntBetween(0, 1000),
 							Description:  "The MaxReplicas of AutoScaling, default 10, range in 1~1000.",
 						},
@@ -80,7 +81,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    true,
-							Description: "The DesiredReplicas of AutoScaling, default 0.",
+							Description: "The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.",
 						},
 						"priority": {
 							Type:         schema.TypeInt,
@@ -111,7 +112,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"subnet_ids": {
 							Type:     schema.TypeList,
 							Required: true,
-							ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -250,7 +250,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36}),
 							DiffSuppressFunc: prePaidDiffSuppressFunc,
 							Description:      "The Period of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Unit: month. when InstanceChargeType is PrePaid, default value is 12.",
@@ -259,7 +258,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: prePaidDiffSuppressFunc,
 							Description:      "Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.",
 						},
@@ -267,10 +265,34 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							ValidateFunc:     validation.IntInSlice([]int{1, 2, 3, 6, 12}),
 							DiffSuppressFunc: prePaidAndAutoNewDiffSuppressFunc,
 							Description:      "The AutoRenewPeriod of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 6, 12. Unit: month. when InstanceChargeType is PrePaid and AutoRenew enable, default value is 1.",
+						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The NamePrefix of NodeConfig.",
+						},
+						"ecs_tags": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Description: "Tags for Ecs.",
+							Set:         ve.TagsHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The Value of Tags.",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -279,7 +301,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 			"kubernetes_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
@@ -320,6 +342,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 									"effect": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Default:     "NoSchedule",
 										Description: "The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.",
 									},
 								},
@@ -328,7 +351,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						},
 						"cordon": {
 							Type:        schema.TypeBool,
-							Optional:    true,
+							Required:    true,
 							Description: "The Cordon of KubernetesConfig.",
 						},
 					},

@@ -30,12 +30,18 @@ The following arguments are supported:
 * `page_size` - (Optional) The page size of clusters query.
 * `pods_config_pod_network_mode` - (Optional) The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.
 * `statuses` - (Optional) Array of cluster states to filter. (The elements of the array are logically ORed. A maximum of 15 state array elements can be filled at a time).
+* `tags` - (Optional) Tags.
 * `update_client_token` - (Optional) The ClientToken when the last cluster update succeeded. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.
 
 The `statuses` object supports the following:
 
 * `conditions_type` - (Optional) The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Degraded`, `SetByProvider`, `Balance`, `Security`, `CreateError`, `ResourceCleanupFailed`, `LimitedByQuota`, `StockOut`,`Unknown`.
 * `phase` - (Optional) The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -88,6 +94,10 @@ In addition to all arguments above, the following attributes are exported:
         * `conditions` - The state condition in the current primary state of the cluster, that is, the reason for entering the primary state.
             * `type` - The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Balance`, `CreateError`, `ResourceCleanupFailed`, `Unknown`.
         * `phase` - The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.
+    * `tags` - Tags of the Cluster.
+        * `key` - The Key of Tags.
+        * `type` - The Type of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The last time a request was accepted by the cluster and executed or completed. UTC+0 time in standard RFC3339 format.
 * `total_count` - The total count of Cluster query.
 

@@ -21,6 +21,10 @@ resource "volcengine_vke_default_node_pool" "default" {
       security_strategies = ["Hids"]
     }
     initialize_script = "ISMvYmluL2Jhc2gKZWNobyAx"
+    ecs_tags {
+      key   = "ecs_k1"
+      value = "ecs_v1"
+    }
   }
   kubernetes_config {
     labels {
@@ -54,14 +58,24 @@ resource "volcengine_vke_default_node_pool" "default" {
     additional_container_storage_enabled = true
     container_storage_path               = "/"
   }
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `cluster_id` - (Required, ForceNew) The ClusterId of NodePool.
+* `kubernetes_config` - (Required) The KubernetesConfig of NodeConfig.
 * `node_config` - (Required) The Config of NodePool.
 * `instances` - (Optional) The ECS InstanceIds add to NodePool.
-* `kubernetes_config` - (Optional) The KubernetesConfig of NodeConfig.
+* `tags` - (Optional) Tags.
+
+The `ecs_tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 The `instances` object supports the following:
 
@@ -73,7 +87,7 @@ The `instances` object supports the following:
 
 The `kubernetes_config` object supports the following:
 
-* `cordon` - (Optional) The Cordon of KubernetesConfig.
+* `cordon` - (Required) The Cordon of KubernetesConfig.
 * `labels` - (Optional) The Labels of KubernetesConfig.
 * `taints` - (Optional) The Taints of KubernetesConfig.
 
@@ -90,13 +104,20 @@ The `login` object supports the following:
 The `node_config` object supports the following:
 
 * `security` - (Required) The Security of NodeConfig.
+* `ecs_tags` - (Optional) Tags for Ecs.
 * `initialize_script` - (Optional) The initializeScript of NodeConfig.
+* `name_prefix` - (Optional) The NamePrefix of NodeConfig.
 
 The `security` object supports the following:
 
 * `login` - (Required) The Login of Security.
 * `security_group_ids` - (Optional) The SecurityGroupIds of Security.
 * `security_strategies` - (Optional) The SecurityStrategies of Security.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 The `taints` object supports the following:
 

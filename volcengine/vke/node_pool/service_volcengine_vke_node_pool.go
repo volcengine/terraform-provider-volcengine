@@ -200,6 +200,11 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 		logger.Debug(logger.RespFormat, "filteredSecurityGroupIds", tmpSecurityGroupIds, filteredSecurityGroupIds)
 	}
 
+	if ecsTags, ok := result["NodeConfig"].(map[string]interface{})["Tags"]; ok {
+		result["NodeConfig"].(map[string]interface{})["EcsTags"] = ecsTags
+		delete(result["NodeConfig"].(map[string]interface{}), "Tags")
+	}
+
 	logger.Debug(logger.RespFormat, "result of ReadResource ", result)
 	return result, err
 }
@@ -350,6 +355,13 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						"auto_renew_period": {
 							ConvertType: ve.ConvertJsonObject,
 						},
+						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"ecs_tags": {
+							TargetField: "Tags",
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -391,6 +403,10 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						},
 					},
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -413,6 +429,8 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 }
 
 func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateNodePoolConfig",
@@ -456,6 +474,26 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
 						},
+						"subnet_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"period": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"auto_renew": {
+							ForceGet:    true,
+							TargetField: "AutoRenew",
+						},
+						"auto_renew_period": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"ecs_tags": {
+							TargetField: "Tags",
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -463,9 +501,11 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"labels": {
 							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
 						},
 						"taints": {
 							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
 						},
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
@@ -501,6 +541,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
+
+				// 删除UpdateClusterConfig中的Tags字段
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -516,60 +559,25 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					}
 				}
 
-				if d.HasChange("kubernetes_config") {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok { // 列表被删除
-						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{
-							"Labels": []interface{}{},
-							"Taints": []interface{}{},
+				instanceChargeType := d.Get("node_config").([]interface{})[0].(map[string]interface{})["instance_charge_type"].(string)
+				if instanceChargeType != "PrePaid" {
+					if nodeCfg, ok := (*call.SdkParam)["NodeConfig"]; ok {
+						if _, ok := nodeCfg.(map[string]interface{})["AutoRenew"]; ok {
+							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{}), "AutoRenew")
 						}
 					}
 				}
 
-				labelsChange := false
-				taintsChange := false
-				if d.HasChange("kubernetes_config.0.taints") {
-					taintsChange = true
-				}
-				if d.HasChange("kubernetes_config.0.labels") {
-					labelsChange = true
-				}
-				if labelsChange || taintsChange {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"]; !ok {
-						(*call.SdkParam)["KubernetesConfig"] = map[string]interface{}{}
-					}
-				}
-				if labelsChange {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"]; !ok { // 被清空了
-						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = []interface{}{}
-					}
-				}
-				if taintsChange {
-					if _, ok := (*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"]; !ok {
-						(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = []interface{}{}
-					}
-				}
+				// 当列表被删除时，入参添加空列表来置空
+				ve.DefaultMapValue(call.SdkParam, "KubernetesConfig", map[string]interface{}{
+					"Labels": []interface{}{},
+					"Taints": []interface{}{},
+				})
 
-				if labelsChange && (!taintsChange) {
-					var taints []interface{}
-					for _, taint := range d.Get("kubernetes_config.0.taints").([]interface{}) {
-						t := taint.(map[string]interface{})
-						taints = append(taints, map[string]interface{}{
-							"Key":    t["key"],
-							"Value":  t["value"],
-							"Effect": t["effect"],
-						})
-					}
-					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Taints"] = taints
-				} else if taintsChange && (!labelsChange) {
-					var labels []interface{}
-					for _, label := range d.Get("kubernetes_config.0.labels").(*schema.Set).List() { // for set
-						t := label.(map[string]interface{})
-						labels = append(labels, map[string]interface{}{
-							"Key":   t["key"],
-							"Value": t["value"],
-						})
-					}
-					(*call.SdkParam)["KubernetesConfig"].(map[string]interface{})["Labels"] = labels
+				if d.HasChange("node_config.0.ecs_tags") {
+					ve.DefaultMapValue(call.SdkParam, "NodeConfig", map[string]interface{}{
+						"Tags": []interface{}{},
+					})
 				}
 
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -583,7 +591,12 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, "NodePool", callbacks)
+
+	return callbacks
 }
 
 func (s *VolcengineNodePoolService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -643,6 +656,10 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"update_client_token": {
 				TargetField: "Filter.UpdateClientToken",
+			},
+			"tags": {
+				TargetField: "Tags",
+				ConvertType: ve.ConvertJsonObjectArray,
 			},
 		},
 		NameField:    "Name",
@@ -816,6 +833,24 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			"NodeConfig.AutoRenewPeriod": {
 				TargetField: "auto_renew_period",
 			},
+			"NodeConfig.NamePrefix": {
+				TargetField: "name_prefix",
+			},
+			"NodeConfig.Tags": {
+				TargetField: "ecs_tags",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						for _, data := range dd {
+							tag := make(map[string]interface{}, 0)
+							tag["key"] = data.(map[string]interface{})["Key"].(string)
+							tag["value"] = data.(map[string]interface{})["Value"].(string)
+							results = append(results, tag)
+						}
+					}
+					return results
+				},
+			},
 			"NodeStatistics": {
 				TargetField: "node_statistics",
 				Convert: func(i interface{}) interface{} {
@@ -838,6 +873,60 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 
 func (s *VolcengineNodePoolService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineNodePoolService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag.(map[string]interface{}))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
