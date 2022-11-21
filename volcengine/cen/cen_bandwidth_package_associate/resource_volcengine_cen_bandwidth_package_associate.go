@@ -2,6 +2,7 @@ package cen_bandwidth_package_associate
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -24,6 +25,10 @@ func ResourceVolcengineCenBandwidthPackageAssociate() *schema.Resource {
 		Delete: resourceVolcengineCenBandwidthPackageAssociateDelete,
 		Importer: &schema.ResourceImporter{
 			State: cenGrantInstanceImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"cen_bandwidth_package_id": {

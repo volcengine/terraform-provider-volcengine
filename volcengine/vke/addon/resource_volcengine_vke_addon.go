@@ -3,6 +3,7 @@ package addon
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -14,6 +15,13 @@ Import
 VkeAddon can be imported using the clusterId:Name, e.g.
 ```
 $ terraform import volcengine_vke_addon.default cc9l74mvqtofjnoj5****:nginx-ingress
+```
+
+Notice
+Some kind of VKEAddon can not be removed from volcengine, and it will make a forbidden error when try to destroy.
+If you want to remove it from terraform state, please use command
+```
+$ terraform state rm volcengine_vke_addon.${name}
 ```
 
 */
@@ -38,6 +46,11 @@ func ResourceVolcengineVkeAddon() *schema.Resource {
 				}
 				return []*schema.ResourceData{data}, nil
 			},
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"cluster_id": {

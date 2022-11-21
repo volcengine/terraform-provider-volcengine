@@ -2,6 +2,7 @@ package cr_registry
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -26,6 +27,11 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:        schema.TypeString,
@@ -33,20 +39,15 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 				Description: "The name of registry.",
 			},
 			"delete_immediately": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Id() == ""
-				},
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 				Description: "Whether delete registry immediately.",
 			},
 			"password": {
-				Type:     schema.TypeString,
-				Optional: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Id() == ""
-				},
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
 				Description: "The password of registry user.",
 			},
 		},

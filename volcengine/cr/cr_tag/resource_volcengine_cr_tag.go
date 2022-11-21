@@ -2,11 +2,12 @@ package cr_tag
 
 import (
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
 /*
@@ -48,6 +49,10 @@ func ResourceVolcengineCrTag() *schema.Resource {
 		Update: resourceVolcengineCrTagUpdate,
 		Importer: &schema.ResourceImporter{
 			State: CrTagImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"registry": {

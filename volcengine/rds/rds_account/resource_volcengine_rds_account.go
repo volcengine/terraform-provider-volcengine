@@ -2,6 +2,8 @@ package rds_account
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
@@ -24,6 +26,10 @@ func ResourceVolcengineRdsAccount() *schema.Resource {
 		Delete: resourceVolcengineRdsAccountDelete,
 		Importer: &schema.ResourceImporter{
 			State: rdsAccountImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {

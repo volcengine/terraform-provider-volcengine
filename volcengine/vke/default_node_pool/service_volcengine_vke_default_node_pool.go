@@ -274,7 +274,7 @@ func (s *VolcengineDefaultNodePoolService) CreateResource(resourceData *schema.R
 	calls = append(calls, callback)
 
 	if _, ok := resourceData.GetOk("instances"); ok {
-		calls = s.processNodeInstances(resourceData, calls)
+		calls = s.ProcessNodeInstances(resourceData, calls)
 	}
 
 	return calls
@@ -388,7 +388,7 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 
 	//修改实例
 	if resourceData.HasChange("instances") {
-		calls = s.processNodeInstances(resourceData, calls)
+		calls = s.ProcessNodeInstances(resourceData, calls)
 	}
 	return calls
 }
@@ -433,7 +433,7 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 	}
 }
 
-func (s *VolcengineDefaultNodePoolService) processNodeInstances(resourceData *schema.ResourceData, calls []ve.Callback) []ve.Callback {
+func (s *VolcengineDefaultNodePoolService) ProcessNodeInstances(resourceData *schema.ResourceData, calls []ve.Callback) []ve.Callback {
 	add, remove, _, _ := ve.GetSetDifference("instances", resourceData, defaultNodePoolNodeHash, false)
 	logger.Debug(logger.RespFormat, "processNodeInstancesAdd", add)
 	logger.Debug(logger.RespFormat, "processNodeInstancesRemove", remove)

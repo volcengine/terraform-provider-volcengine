@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"strings"
+	"time"
 )
 
 /*
@@ -35,6 +36,10 @@ func ResourceVolcengineCrEndpoint() *schema.Resource {
 		Delete: resourceVolcengineCrEndpointDelete,
 		Importer: &schema.ResourceImporter{
 			State: crEndpointImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"registry": {

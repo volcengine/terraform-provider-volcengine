@@ -2,6 +2,7 @@ package eip_associate
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -24,6 +25,10 @@ func ResourceVolcengineEipAssociate() *schema.Resource {
 		Read:   resourceVolcengineEipAssociateRead,
 		Importer: &schema.ResourceImporter{
 			State: eipAssociateImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"allocation_id": {

@@ -3,6 +3,7 @@ package cr_registry_state
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -39,12 +40,20 @@ func ResourceVolcengineCrRegistryState() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: crRegistryStateImporter,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
+		},
 		Schema: map[string]*schema.Schema{
 			"action": {
-				Type:         schema.TypeString,
-				Required:     true,
+				Type:     schema.TypeString,
+				Required: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return false
+				},
 				ValidateFunc: validation.StringInSlice([]string{"Start"}, false),
-				Description:  "Start cr instance action.",
+				Description:  "Start cr instance action,the value must be `Start`.",
 			},
 			"name": {
 				Type:        schema.TypeString,
