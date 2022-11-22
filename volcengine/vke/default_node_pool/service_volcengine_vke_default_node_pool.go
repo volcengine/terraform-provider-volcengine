@@ -333,7 +333,6 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 				(*call.SdkParam)["Id"] = d.Id()
 				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
 
-				// 删除UpdateClusterConfig中的Tags字段
 				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
