@@ -23,7 +23,14 @@ The following arguments are supported:
 * `isp` - (Optional) An ISP of EIP Address, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.
 * `name` - (Optional) A name of EIP.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The ProjectName of EIP.
 * `status` - (Optional) A status of EIP, the value can be `Attaching` or `Detaching` or `Attached` or `Available`.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -44,7 +51,11 @@ In addition to all arguments above, the following attributes are exported:
     * `lock_reason` - The lock reason of the EIP.
     * `name` - The name of the EIP.
     * `overdue_time` - The overdue time of the EIP.
+    * `project_name` - The ProjectName of the EIP.
     * `status` - The status of the EIP.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `updated_at` - The last update time of the EIP.
 * `total_count` - The total count of EIP addresses query.
 

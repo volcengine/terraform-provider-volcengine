@@ -50,6 +50,11 @@ func ResourceVolcengineRouteTable() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the route table.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the route table.",
+			},
 		},
 	}
 }

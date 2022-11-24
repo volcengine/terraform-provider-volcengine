@@ -173,6 +173,10 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 						return i
 					},
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if regionId, ok := (*call.SdkParam)["RegionId"]; !ok {
@@ -204,6 +208,8 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 }
 
 func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyLoadBalancerAttributes",
@@ -228,6 +234,7 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["LoadBalancerId"] = d.Id()
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -241,7 +248,13 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "CLB", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineClbService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -287,6 +300,15 @@ func (s *VolcengineClbService) DatasourceResources(*schema.ResourceData, *schema
 				TargetField: "LoadBalancerIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "LoadBalancerName",
 		IdField:      "LoadBalancerId",
@@ -324,4 +346,14 @@ func (s *VolcengineClbService) DatasourceResources(*schema.ResourceData, *schema
 
 func (s *VolcengineClbService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "clb",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

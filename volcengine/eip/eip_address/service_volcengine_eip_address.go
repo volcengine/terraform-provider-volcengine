@@ -167,6 +167,10 @@ func (s *VolcengineEipAddressService) CreateResource(resourceData *schema.Resour
 				"isp": {
 					TargetField: "ISP",
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 		},
 	}
@@ -183,6 +187,7 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) > 0 {
 					(*call.SdkParam)["AllocationId"] = d.Id()
+					delete(*call.SdkParam, "Tags")
 					return true, nil
 				}
 				return false, nil
@@ -237,6 +242,11 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 		}
 		callbacks = append(callbacks, chargeTypeCall)
 	}
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "eip", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -291,6 +301,15 @@ func (s *VolcengineEipAddressService) DatasourceResources(*schema.ResourceData, 
 			},
 			"isp": {
 				TargetField: "ISP",
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "Name",
