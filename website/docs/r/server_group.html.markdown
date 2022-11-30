@@ -30,8 +30,8 @@ In addition to all arguments above, the following attributes are exported:
 
 
 ## Import
-ServerGroupServer can be imported using the id, e.g.
+ServerGroup can be imported using the id, e.g.
 ```
-$ terraform import volcengine_server_group_server.default rs-3ciynux6i1x4w****rszh49sj
+$ terraform import volcengine_server_group.default rsp-273yv0kir1vk07fap8tt9jtwg
 ```
 

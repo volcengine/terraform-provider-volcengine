@@ -25,12 +25,12 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `groups` - The collection of ServerGroup query.
-  * `create_time` - The create time of the ServerGroup.
-  * `description` - The description of the ServerGroup.
-  * `id` - The ID of the ServerGroup.
-  * `server_group_id` - The ID of the ServerGroup.
-  * `server_group_name` - The name of the ServerGroup.
-  * `update_time` - The update time of the ServerGroup.
+    * `create_time` - The create time of the ServerGroup.
+    * `description` - The description of the ServerGroup.
+    * `id` - The ID of the ServerGroup.
+    * `server_group_id` - The ID of the ServerGroup.
+    * `server_group_name` - The name of the ServerGroup.
+    * `update_time` - The update time of the ServerGroup.
 * `total_count` - The total count of ServerGroup query.
 
 

@@ -2,6 +2,7 @@ package listener
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -26,6 +27,11 @@ func ResourceVolcengineListener() *schema.Resource {
 		Delete: resourceVolcengineListenerDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"listener_id": {
@@ -56,7 +62,7 @@ func ResourceVolcengineListener() *schema.Resource {
 				Type:        schema.TypeInt,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The port receiving request of the Listener.",
+				Description: "The port receiving request of the Listener, the value range in 1~65535.",
 			},
 			"scheduler": {
 				Type:         schema.TypeString,
@@ -139,31 +145,31 @@ func ResourceVolcengineListener() *schema.Resource {
 						"interval": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							Description:      "The interval executing health check.",
+							Description:      "The interval executing health check, default 2, range in 1~300.",
 							DiffSuppressFunc: HealthCheckFieldDiffSuppress,
 						},
 						"timeout": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							Description:      "The response timeout of health check.",
+							Description:      "The response timeout of health check, default 2, range in 1~60..",
 							DiffSuppressFunc: HealthCheckFieldDiffSuppress,
 						},
 						"healthy_threshold": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							Description:      "The healthy threshold of health check.",
+							Description:      "The healthy threshold of health check, default 3, range in 2~10.",
 							DiffSuppressFunc: HealthCheckFieldDiffSuppress,
 						},
 						"un_healthy_threshold": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							Description:      "The unhealthy threshold of health check.",
+							Description:      "The unhealthy threshold of health check, default 3, range in 2~10.",
 							DiffSuppressFunc: HealthCheckFieldDiffSuppress,
 						},
 						"method": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "The method of health check.",
+							Description:      "The method of health check, the value can be `GET` or `HEAD`.",
 							DiffSuppressFunc: HealthCheckHTTPOnlyFieldDiffSuppress,
 						},
 						"domain": {
@@ -181,7 +187,7 @@ func ResourceVolcengineListener() *schema.Resource {
 						"http_code": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "The normal http status code of health check.",
+							Description:      "The normal http status code of health check, the value can be `http_2xx` or `http_3xx` or `http_4xx` or `http_5xx`.",
 							DiffSuppressFunc: HealthCheckHTTPOnlyFieldDiffSuppress,
 						},
 					},

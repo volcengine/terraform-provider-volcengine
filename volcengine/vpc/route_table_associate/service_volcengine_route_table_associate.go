@@ -160,6 +160,9 @@ func (s *VolcengineRouteTableAssociateService) CreateResource(resourceData *sche
 		Call: ve.SdkCall{
 			Action:      "AssociateRouteTable",
 			ConvertMode: ve.RequestConvertAll,
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("route_table_id").(string)
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.VpcClient.AssociateRouteTableCommon(call.SdkParam)

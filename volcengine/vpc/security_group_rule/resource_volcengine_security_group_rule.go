@@ -2,6 +2,7 @@ package security_group_rule
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -27,6 +28,11 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: importSecurityGroupRule,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"direction": {
 				Type:     schema.TypeString,
@@ -48,7 +54,7 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 					"icmp",
 					"all",
 				}, false),
-				Description: "Protocol of the SecurityGroup.",
+				Description: "Protocol of the SecurityGroup, the value can be `tcp` or `udp` or `icmp` or `all`.",
 			},
 			"security_group_id": {
 				Type:        schema.TypeString,

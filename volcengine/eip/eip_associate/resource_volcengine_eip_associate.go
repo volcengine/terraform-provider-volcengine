@@ -2,6 +2,7 @@ package eip_associate
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -25,6 +26,10 @@ func ResourceVolcengineEipAssociate() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: eipAssociateImporter,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"allocation_id": {
 				Type:        schema.TypeString,
@@ -42,7 +47,7 @@ func ResourceVolcengineEipAssociate() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of the associated instance.",
+				Description: "The type of the associated instance,the value is `NAT` or `NetworkInterface` or `ClbInstance` or `EcsInstance` or `HaVip`.",
 			},
 			"private_ip_address": {
 				Type:        schema.TypeString,

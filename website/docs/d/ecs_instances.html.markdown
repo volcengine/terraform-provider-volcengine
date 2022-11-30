@@ -30,38 +30,44 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `instances` - The collection of ECS instance query.
-  * `cpus` - The number of ECS instance CPU cores.
-  * `created_at` - The create time of ECS instance.
-  * `description` - The description of ECS instance.
-  * `host_name` - The host name of ECS instance.
-  * `image_id` - The image ID of ECS instance.
-  * `instance_charge_type` - The charge type of ECS instance.
-  * `instance_id` - The ID of ECS instance.
-  * `instance_name` - The name of ECS instance.
-  * `instance_type` - The spec type of ECS instance.
-  * `key_pair_id` - The ssh key ID of ECS instance.
-  * `key_pair_name` - The ssh key name of ECS instance.
-  * `memory_size` - The memory size of ECS instance.
-  * `network_interfaces` - The networkInterface detail collection of ECS instance.
-    * `mac_address` - The mac address of networkInterface.
-    * `network_interface_id` - The ID of networkInterface.
-    * `primary_ip_address` - The private ip address of networkInterface.
-    * `subnet_id` - The subnet ID of networkInterface.
-    * `type` - The type of networkInterface.
-    * `vpc_id` - The ID of networkInterface.
-  * `os_name` - The os name of ECS instance.
-  * `os_type` - The os type of ECS instance.
-  * `status` - The status of ECS instance.
-  * `stopped_mode` - The stop mode of ECS instance.
-  * `updated_at` - The update time of ECS instance.
-  * `volumes` - The volume detail collection of volume.
-    * `delete_with_instance` - The delete with instance flag of volume.
-    * `size` - The size of volume.
-    * `volume_id` - The ID of volume.
-    * `volume_name` - The Name of volume.
-    * `volume_type` - The type of volume.
-  * `vpc_id` - The VPC ID of ECS instance.
-  * `zone_id` - The available zone ID of ECS instance.
+    * `cpus` - The number of ECS instance CPU cores.
+    * `created_at` - The create time of ECS instance.
+    * `description` - The description of ECS instance.
+    * `gpu_devices` - The GPU device info of Instance.
+        * `count` - The Count of GPU device.
+        * `encrypted_memory_size` - The Encrypted Memory Size of GPU device.
+        * `memory_size` - The Memory Size of GPU device.
+        * `product_name` - The Product Name of GPU device.
+    * `host_name` - The host name of ECS instance.
+    * `image_id` - The image ID of ECS instance.
+    * `instance_charge_type` - The charge type of ECS instance.
+    * `instance_id` - The ID of ECS instance.
+    * `instance_name` - The name of ECS instance.
+    * `instance_type` - The spec type of ECS instance.
+    * `is_gpu` - The Flag of GPU instance.If the instance is GPU,The flag is true.
+    * `key_pair_id` - The ssh key ID of ECS instance.
+    * `key_pair_name` - The ssh key name of ECS instance.
+    * `memory_size` - The memory size of ECS instance.
+    * `network_interfaces` - The networkInterface detail collection of ECS instance.
+        * `mac_address` - The mac address of networkInterface.
+        * `network_interface_id` - The ID of networkInterface.
+        * `primary_ip_address` - The private ip address of networkInterface.
+        * `subnet_id` - The subnet ID of networkInterface.
+        * `type` - The type of networkInterface.
+        * `vpc_id` - The ID of networkInterface.
+    * `os_name` - The os name of ECS instance.
+    * `os_type` - The os type of ECS instance.
+    * `status` - The status of ECS instance.
+    * `stopped_mode` - The stop mode of ECS instance.
+    * `updated_at` - The update time of ECS instance.
+    * `volumes` - The volume detail collection of volume.
+        * `delete_with_instance` - The delete with instance flag of volume.
+        * `size` - The size of volume.
+        * `volume_id` - The ID of volume.
+        * `volume_name` - The Name of volume.
+        * `volume_type` - The type of volume.
+    * `vpc_id` - The VPC ID of ECS instance.
+    * `zone_id` - The available zone ID of ECS instance.
 * `total_count` - The total count of ECS instance query.
 
 

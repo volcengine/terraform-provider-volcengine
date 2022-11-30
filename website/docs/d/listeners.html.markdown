@@ -25,29 +25,29 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `listeners` - The collection of Listener query.
-  * `acl_ids` - The acl ID list to which the Listener is bound.
-  * `acl_status` - The acl status of the Listener.
-  * `acl_type` - The acl type of the Listener.
-  * `certificate_id` - The ID of the certificate which is associated with the Listener.
-  * `create_time` - The create time of the Listener.
-  * `enabled` - The enable status of the Listener.
-  * `health_check_domain` - The domain of health check.
-  * `health_check_enabled` - The enable status of health check function.
-  * `health_check_healthy_threshold` - The healthy threshold of health check.
-  * `health_check_http_code` - The normal http status code of health check.
-  * `health_check_interval` - The interval executing health check.
-  * `health_check_method` - The method of health check.
-  * `health_check_timeout` - The response timeout of health check.
-  * `health_check_un_healthy_threshold` - The unhealthy threshold of health check.
-  * `health_check_uri` - The uri of health check.
-  * `id` - The ID of the Listener.
-  * `listener_id` - The ID of the Listener.
-  * `listener_name` - The name of the Listener.
-  * `port` - The port receiving request of the Listener.
-  * `protocol` - The protocol of the Listener.
-  * `server_group_id` - The ID of the backend server group which is associated with the Listener.
-  * `status` - The status of the Listener.
-  * `update_time` - The update time of the Listener.
+    * `acl_ids` - The acl ID list to which the Listener is bound.
+    * `acl_status` - The acl status of the Listener.
+    * `acl_type` - The acl type of the Listener.
+    * `certificate_id` - The ID of the certificate which is associated with the Listener.
+    * `create_time` - The create time of the Listener.
+    * `enabled` - The enable status of the Listener.
+    * `health_check_domain` - The domain of health check.
+    * `health_check_enabled` - The enable status of health check function.
+    * `health_check_healthy_threshold` - The healthy threshold of health check.
+    * `health_check_http_code` - The normal http status code of health check.
+    * `health_check_interval` - The interval executing health check.
+    * `health_check_method` - The method of health check.
+    * `health_check_timeout` - The response timeout of health check.
+    * `health_check_un_healthy_threshold` - The unhealthy threshold of health check.
+    * `health_check_uri` - The uri of health check.
+    * `id` - The ID of the Listener.
+    * `listener_id` - The ID of the Listener.
+    * `listener_name` - The name of the Listener.
+    * `port` - The port receiving request of the Listener.
+    * `protocol` - The protocol of the Listener.
+    * `server_group_id` - The ID of the backend server group which is associated with the Listener.
+    * `status` - The status of the Listener.
+    * `update_time` - The update time of the Listener.
 * `total_count` - The total count of Listener query.
 
 

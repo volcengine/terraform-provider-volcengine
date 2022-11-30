@@ -12,7 +12,7 @@ Provides a resource to manage volume
 ```hcl
 resource "volcengine_volume" "foo" {
   volume_name = "terraform-test"
-  zone_id     = "cn-lingqiu-a"
+  zone_id     = "cn-beijing-a"
   volume_type = "PTSSD"
   kind        = "data"
   size        = 40
@@ -20,14 +20,14 @@ resource "volcengine_volume" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `kind` - (Required, ForceNew) The kind of Volume.
+* `kind` - (Required, ForceNew) The kind of Volume, the value is `data`.
 * `size` - (Required) The size of Volume.
 * `volume_name` - (Required) The name of Volume.
-* `volume_type` - (Required, ForceNew) The type of Volume.
+* `volume_type` - (Required, ForceNew) The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `zone_id` - (Required, ForceNew) The id of the Zone.
 * `delete_with_instance` - (Optional) Delete Volume with Attached Instance.
 * `description` - (Optional) The description of the Volume.
-* `volume_charge_type` - (Optional, ForceNew) The charge type of the Volume.
+* `volume_charge_type` - (Optional, ForceNew) The charge type of the Volume, the value is `PostPaid`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

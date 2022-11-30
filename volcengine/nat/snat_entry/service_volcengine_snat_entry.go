@@ -135,6 +135,9 @@ func (s *VolcengineSnatEntryService) CreateResource(resourceData *schema.Resourc
 		Call: ve.SdkCall{
 			Action:      "CreateSnatEntry",
 			ConvertMode: ve.RequestConvertAll,
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("nat_gateway_id").(string)
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.NatClient.CreateSnatEntryCommon(call.SdkParam)

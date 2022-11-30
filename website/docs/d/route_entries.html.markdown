@@ -21,7 +21,7 @@ The following arguments are supported:
 * `destination_cidr_block` - (Optional) A destination CIDR block of route entry.
 * `ids` - (Optional) A list of route entry ids.
 * `next_hop_id` - (Optional) An id of next hop.
-* `next_hop_type` - (Optional) A type of next hop.
+* `next_hop_type` - (Optional) A type of next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`.
 * `output_file` - (Optional) File name where to save data source results.
 * `route_entry_name` - (Optional) A name of route entry.
 * `route_entry_type` - (Optional) A type of route entry.
@@ -29,18 +29,18 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `route_entries` - The collection of route tables.
-  * `description` - The description of the route entry.
-  * `destination_cidr_block` - The destination CIDR block of the route entry.
-  * `id` - The id of the route entry.
-  * `next_hop_id` - The id of the next hop.
-  * `next_hop_name` - The name of the next hop.
-  * `next_hop_type` - The type of the next hop.
-  * `route_entry_id` - The id of the route entry.
-  * `route_entry_name` - The name of the route entry.
-  * `route_table_id` - The id of the route table to which the route entry belongs.
-  * `status` - The status of the route entry.
-  * `type` - The type of the route entry.
-  * `vpc_id` - The id of the virtual private cloud (VPC) to which the route entry belongs.
+    * `description` - The description of the route entry.
+    * `destination_cidr_block` - The destination CIDR block of the route entry.
+    * `id` - The id of the route entry.
+    * `next_hop_id` - The id of the next hop.
+    * `next_hop_name` - The name of the next hop.
+    * `next_hop_type` - The type of the next hop.
+    * `route_entry_id` - The id of the route entry.
+    * `route_entry_name` - The name of the route entry.
+    * `route_table_id` - The id of the route table to which the route entry belongs.
+    * `status` - The status of the route entry.
+    * `type` - The type of the route entry.
+    * `vpc_id` - The id of the virtual private cloud (VPC) to which the route entry belongs.
 * `total_count` - The total count of route entry query.
 
 

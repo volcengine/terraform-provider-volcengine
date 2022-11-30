@@ -23,14 +23,14 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `security_groups` - The collection of SecurityGroup query.
-  * `creation_time` - The creation time of SecurityGroup.
-  * `description` - The description of SecurityGroup.
-  * `id` - The ID of SecurityGroup.
-  * `security_group_id` - The ID of SecurityGroup.
-  * `security_group_name` - The Name of SecurityGroup.
-  * `status` - The Status of SecurityGroup.
-  * `type` - A Name Regex of SecurityGroup.
-  * `vpc_id` - The ID of Vpc.
+    * `creation_time` - The creation time of SecurityGroup.
+    * `description` - The description of SecurityGroup.
+    * `id` - The ID of SecurityGroup.
+    * `security_group_id` - The ID of SecurityGroup.
+    * `security_group_name` - The Name of SecurityGroup.
+    * `status` - The Status of SecurityGroup.
+    * `type` - A Name Regex of SecurityGroup.
+    * `vpc_id` - The ID of Vpc.
 * `total_count` - The total count of SecurityGroup query.
 
 

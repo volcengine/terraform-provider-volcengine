@@ -2,6 +2,7 @@ package ecs_instance_state
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -27,12 +28,17 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: ecsInstanceStateImporter,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
+		},
 		Schema: map[string]*schema.Schema{
 			"action": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Start", "Stop"}, false),
-				Description:  "Start or Stop of Instance Action.",
+				Description:  "Start or Stop of Instance Action, the value can be `Start` or `Stop`.",
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
@@ -51,7 +57,7 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 					}
 					return false
 				},
-				Description: "Stop Mode of Instance.",
+				Description: "Stop Mode of Instance, the value can be `KeepCharging` or `StopCharging`, default `KeepCharging`.",
 			},
 			"status": {
 				Type:        schema.TypeString,

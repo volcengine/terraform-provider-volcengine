@@ -10,24 +10,17 @@ description: |-
 Provides a resource to manage certificate
 ## Example Usage
 ```hcl
-variable "certificate" {
-  type = object({
-    public_key  = string
-    private_key = string
-  })
-}
-
 resource "volcengine_certificate" "foo" {
   certificate_name = "demo-certificate"
   description      = "This is a clb certificate"
-  public_key       = var.certificate.public_key
-  private_key      = var.certificate.private_key
+  public_key       = "public-key"
+  private_key      = "private-key"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `private_key` - (Required, ForceNew) The private key of the Certificate.
-* `public_key` - (Required, ForceNew) The public key of the Certificate.
+* `private_key` - (Required, ForceNew) The private key of the Certificate. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `public_key` - (Required, ForceNew) The public key of the Certificate. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `certificate_name` - (Optional, ForceNew) The name of the Certificate.
 * `description` - (Optional, ForceNew) The description of the Certificate.
 

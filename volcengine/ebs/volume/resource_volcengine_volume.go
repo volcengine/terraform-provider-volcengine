@@ -2,6 +2,7 @@ package volume
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -27,6 +28,11 @@ func ResourceVolcengineVolume() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
@@ -43,15 +49,15 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "The type of Volume.",
-				ValidateFunc: validation.StringInSlice([]string{"ESSD_PL0", "ESSD_PL1", "ESSD_PL2", "PTSSD"}, false),
+				Description:  "The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
+				ValidateFunc: validation.StringInSlice([]string{"ESSD_PL0", "ESSD_PL1", "ESSD_PL2", "PTSSD", "ESSD_FlexPL"}, false),
 			},
 			"kind": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"data"}, false),
-				Description:  "The kind of Volume.",
+				Description:  "The kind of Volume, the value is `data`.",
 			},
 			"size": {
 				Type:         schema.TypeInt,
@@ -70,7 +76,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 				Default:      "PostPaid",
-				Description:  "The charge type of the Volume.",
+				Description:  "The charge type of the Volume, the value is `PostPaid`.",
 			},
 			"status": {
 				Type:        schema.TypeString,

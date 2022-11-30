@@ -2,6 +2,7 @@ package nat_gateway
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -26,6 +27,11 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 		Delete: resourceVolcengineNatGatewayDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"vpc_id": {
@@ -60,7 +66,7 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "PostPaid",
-				Description:  "The billing type of the NatGateway.",
+				Description:  "The billing type of the NatGateway, the value is `PostPaid`.",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 			},
 			//"period_unit": {

@@ -24,14 +24,14 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `acls` - The collection of Acl query.
-  * `acl_entry_count` - The count of acl entry.
-  * `acl_id` - The ID of Acl.
-  * `acl_name` - The Name of Acl.
-  * `create_time` - Creation time of Acl.
-  * `description` - The description of Acl.
-  * `id` - The ID of Acl.
-  * `listeners` - The listeners of Acl.
-  * `update_time` - Update time of Acl.
+    * `acl_entry_count` - The count of acl entry.
+    * `acl_id` - The ID of Acl.
+    * `acl_name` - The Name of Acl.
+    * `create_time` - Creation time of Acl.
+    * `description` - The description of Acl.
+    * `id` - The ID of Acl.
+    * `listeners` - The listeners of Acl.
+    * `update_time` - Update time of Acl.
 * `total_count` - The total count of Acl query.
 
 

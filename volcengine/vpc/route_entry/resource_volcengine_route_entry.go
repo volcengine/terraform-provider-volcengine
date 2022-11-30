@@ -2,6 +2,7 @@ package route_entry
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -27,6 +28,11 @@ func ResourceVolcengineRouteEntry() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: importRouteEntry,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
 		Schema: map[string]*schema.Schema{
 			"route_table_id": {
 				Type:        schema.TypeString,
@@ -49,7 +55,7 @@ func ResourceVolcengineRouteEntry() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "The type of the next hop.",
+				Description:  "The type of the next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`.",
 				ValidateFunc: validation.StringInSlice([]string{"Instance", "NetworkInterface", "NatGW", "VpnGW"}, false),
 			},
 			"next_hop_id": {

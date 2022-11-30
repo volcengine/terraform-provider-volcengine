@@ -2,6 +2,7 @@ package route_table_associate
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -24,6 +25,11 @@ func ResourceVolcengineRouteTableAssociate() *schema.Resource {
 		Read:   resourceVolcengineRouteTableAssociateRead,
 		Importer: &schema.ResourceImporter{
 			State: routeTableAssociateImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"route_table_id": {
