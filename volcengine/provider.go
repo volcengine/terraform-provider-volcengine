@@ -3,18 +3,18 @@ package volcengine
 import (
 	"strings"
 
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool_batch_attach"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_activity"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_configuration"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_configuration_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_group_enabler"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_lifecycle_hook"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_attach_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_bandwidth_package"
@@ -30,6 +30,13 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group_server"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
@@ -71,6 +78,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool_batch_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
@@ -176,6 +184,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
 			"volcengine_nat_gateways": nat_gateway.DataSourceVolcengineNatGateways(),
 
+			// ================ AutoScaling ================
+			"volcengine_scaling_groups":          scaling_group.DataSourceVolcengineScalingGroups(),
+			"volcengine_scaling_configurations":  scaling_configuration.DataSourceVolcengineScalingConfigurations(),
+			"volcengine_scaling_policies":        scaling_policy.DataSourceVolcengineScalingPolicies(),
+			"volcengine_scaling_activities":      scaling_activity.DataSourceVolcengineScalingActivities(),
+			"volcengine_scaling_lifecycle_hooks": scaling_lifecycle_hook.DataSourceVolcengineScalingLifecycleHooks(),
+			"volcengine_scaling_instances":       scaling_instance.DataSourceVolcengineScalingInstances(),
+
 			// ================ Cen ================
 			"volcengine_cens":                        cen.DataSourceVolcengineCens(),
 			"volcengine_cen_attach_instances":        cen_attach_instance.DataSourceVolcengineCenAttachInstances(),
@@ -276,6 +292,15 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
+
+			// ================ AutoScaling ================
+			"volcengine_scaling_group":                    scaling_group.ResourceVolcengineScalingGroup(),
+			"volcengine_scaling_configuration":            scaling_configuration.ResourceVolcengineScalingConfiguration(),
+			"volcengine_scaling_policy":                   scaling_policy.ResourceVolcengineScalingPolicy(),
+			"volcengine_scaling_instance_attachment":      scaling_instance_attachment.ResourceVolcengineScalingInstanceAttachment(),
+			"volcengine_scaling_lifecycle_hook":           scaling_lifecycle_hook.ResourceVolcengineScalingLifecycleHook(),
+			"volcengine_scaling_group_enabler":            scaling_group_enabler.ResourceVolcengineScalingGroupEnabler(),
+			"volcengine_scaling_configuration_attachment": scaling_configuration_attachment.ResourceVolcengineScalingConfigurationAttachment(),
 
 			// ================ Cen ================
 			"volcengine_cen":                             cen.ResourceVolcengineCen(),
