@@ -20,6 +20,7 @@ The following arguments are supported:
 * `categories` - (Optional) The categories of addons, the value is `Storage` or `Network` or `Monitor` or `Scheduler` or `Dns` or `Security` or `Gpu` or `Image`.
 * `deploy_modes` - (Optional) The deploy model, the value is `Managed` or `Unmanaged`.
 * `deploy_node_types` - (Optional) The deploy node types, the value is `Node` or `VirtualNode`. Only effected when deploy_mode is `Unmanaged`.
+* `kubernetes_versions` - (Optional) A list of Kubernetes Versions.
 * `name` - (Optional) The name of the addon.
 * `necessaries` - (Optional) The necessaries of addons, the value is `Required` or `Recommended` or `OnDemand`.
 * `output_file` - (Optional) File name where to save data source results.
@@ -33,6 +34,8 @@ In addition to all arguments above, the following attributes are exported:
     * `name` - The name of addon.
     * `pod_network_modes` - The network modes of pod.
     * `versions` - The version info of addon.
+        * `compatibilities` - The compatible version list.
+            * `kubernetes_version` - The Kubernetes Version of addon.
         * `compatible_versions` - The compatible version list.
         * `version` - The basic version info.
 * `total_count` - The total count of addons query.

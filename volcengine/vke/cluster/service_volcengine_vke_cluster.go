@@ -437,7 +437,6 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 				}
 				(*call.SdkParam)["Id"] = d.Id()
 
-				// 删除UpdateClusterConfig中的Tags字段
 				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},

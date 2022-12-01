@@ -51,6 +51,13 @@ func DataSourceVolcengineVkeVkeSupportedAddons() *schema.Resource {
 				Optional:    true,
 				Description: "The categories of addons, the value is `Storage` or `Network` or `Monitor` or `Scheduler` or `Dns` or `Security` or `Gpu` or `Image`.",
 			},
+			"kubernetes_versions": {
+				Type:        schema.TypeSet,
+				Set:         schema.HashString,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Optional:    true,
+				Description: "A list of Kubernetes Versions.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -89,6 +96,20 @@ func DataSourceVolcengineVkeVkeSupportedAddons() *schema.Resource {
 										Computed:    true,
 										Description: "The compatible version list.",
 										Elem:        &schema.Schema{Type: schema.TypeString},
+									},
+									"compatibilities": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "The compatible version list.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"kubernetes_version": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The Kubernetes Version of addon.",
+												},
+											},
+										},
 									},
 								},
 							},
