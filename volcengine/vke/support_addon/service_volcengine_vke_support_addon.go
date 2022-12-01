@@ -33,6 +33,13 @@ func (s *VolcengineVkeSupportAddonService) ReadResources(condition map[string]in
 		ok      bool
 	)
 
+	if _, ok := condition["Filter"]; ok {
+		if kubernetesVersions, ok := condition["Filter"].(map[string]interface{})["KubernetesVersions"]; ok {
+			condition["Filter"].(map[string]interface{})["Versions.Compatibilities.KubernetesVersions"] = kubernetesVersions
+			delete(condition["Filter"].(map[string]interface{}), "KubernetesVersions")
+		}
+	}
+
 	action := "ListSupportedAddons"
 	logger.Debug(logger.ReqFormat, action, condition)
 	if condition == nil {
@@ -109,6 +116,10 @@ func (s *VolcengineVkeSupportAddonService) DatasourceResources(*schema.ResourceD
 			},
 			"categories": {
 				TargetField: "Filter.Categories",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"kubernetes_versions": {
+				TargetField: "Filter.KubernetesVersions",
 				ConvertType: ve.ConvertJsonArray,
 			},
 		},
