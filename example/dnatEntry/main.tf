@@ -1,0 +1,1 @@
+resource "volcengine_dnat_entry" "foo" {}
