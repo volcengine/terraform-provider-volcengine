@@ -111,7 +111,21 @@ func (s *VolcengineAclService) RefreshResourceState(resourceData *schema.Resourc
 		MinTimeout: 1 * time.Second,
 		Target:     target,
 		Timeout:    timeout,
-		Refresh:    nil, // no need to refresh resources
+		Refresh: func() (result interface{}, state string, err error) {
+			var (
+				d      map[string]interface{}
+				status interface{}
+			)
+			d, err = s.ReadResource(resourceData, id)
+			if err != nil {
+				return nil, "", err
+			}
+			status, err = ve.ObtainSdkValue("Status", d)
+			if err != nil {
+				return nil, "", err
+			}
+			return d, status.(string), err
+		},
 	}
 
 }
@@ -145,6 +159,10 @@ func (s *VolcengineAclService) CreateResource(resourceData *schema.ResourceData,
 				d.SetId(id.(string))
 				return nil
 			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Active"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
 		},
 	}
 
@@ -170,6 +188,10 @@ func (s *VolcengineAclService) CreateResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.ClbClient.AddAclEntriesCommon(call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Active"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
 		},
 	}
@@ -197,6 +219,10 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.ClbClient.ModifyAclAttributesCommon(call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Active"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
 	}
@@ -228,6 +254,10 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 				time.Sleep(time.Duration(5) * time.Second)
 				return nil
 			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Active"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
 		},
 	}
 	callbacks = append(callbacks, entryRemoveCallback)
@@ -250,6 +280,10 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.ClbClient.AddAclEntriesCommon(call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Active"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
 	}

@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/acl"
 )
 
 type VolcengineAclEntryService struct {
@@ -162,6 +163,16 @@ func (s *VolcengineAclEntryService) CreateResource(resourceData *schema.Resource
 				d.SetId(id)
 				return nil
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("acl_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				acl.NewAclService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("acl_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -208,6 +219,16 @@ func (s *VolcengineAclEntryService) RemoveResource(resourceData *schema.Resource
 					}
 					return resource.RetryableError(callErr)
 				})
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("acl_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				acl.NewAclService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("acl_id").(string),
+				},
 			},
 		},
 	}
