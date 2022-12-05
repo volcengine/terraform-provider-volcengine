@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -60,9 +61,10 @@ func ResourceVolcengineDnatEntry() *schema.Resource {
 				Description: "Provides the internal port.",
 			},
 			"protocol": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The network protocol.",
+				Type:         schema.TypeString,
+				Required:     true,
+				ValidateFunc: validation.StringInSlice([]string{"tcp", "udp"}, false),
+				Description:  "The network protocol.",
 			},
 			"dnat_entry_name": {
 				Type:        schema.TypeString,

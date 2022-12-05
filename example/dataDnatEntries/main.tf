@@ -1,1 +1,2 @@
-data "volcengine_dnat_entries" "default" {}
+data "volcengine_dnat_entries" "default" {
+}
