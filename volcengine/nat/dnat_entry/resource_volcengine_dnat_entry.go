@@ -48,7 +48,7 @@ func ResourceVolcengineDnatEntry() *schema.Resource {
 			"external_port": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Provides the public port for public network access.",
+				Description: "The port or port segment that receives requests from the public network. If InternalPort is passed into the port segment, ExternalPort must also be passed into the port segment.",
 			},
 			"internal_ip": {
 				Type:        schema.TypeString,
@@ -58,7 +58,7 @@ func ResourceVolcengineDnatEntry() *schema.Resource {
 			"internal_port": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Provides the internal port.",
+				Description: "The port or port segment on which the cloud server instance provides services to the public network.",
 			},
 			"protocol": {
 				Type:         schema.TypeString,
