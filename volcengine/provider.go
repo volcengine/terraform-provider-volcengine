@@ -59,6 +59,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_policy_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/dnat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account"
@@ -183,6 +184,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
 			"volcengine_nat_gateways": nat_gateway.DataSourceVolcengineNatGateways(),
+			"volcengine_dnat_entries": dnat_entry.DataSourceVolcengineDnatEntries(),
 
 			// ================ AutoScaling ================
 			"volcengine_scaling_groups":          scaling_group.DataSourceVolcengineScalingGroups(),
@@ -292,6 +294,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
+			"volcengine_dnat_entry":  dnat_entry.ResourceVolcengineDnatEntry(),
 
 			// ================ AutoScaling ================
 			"volcengine_scaling_group":                    scaling_group.ResourceVolcengineScalingGroup(),
