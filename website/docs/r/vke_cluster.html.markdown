@@ -101,8 +101,8 @@ The `vpc_cni_config` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `eip_allocation_id` - Eip allocation Id.
-* `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding.
-* `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding.
+* `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
+* `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
 
 
 ## Import

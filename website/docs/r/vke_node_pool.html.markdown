@@ -98,7 +98,7 @@ The `login` object supports the following:
 
 The `node_config` object supports the following:
 
-* `instance_type_ids` - (Required, ForceNew) The InstanceTypeIds of NodeConfig.
+* `instance_type_ids` - (Required) The InstanceTypeIds of NodeConfig.
 * `security` - (Required) The Security of NodeConfig.
 * `subnet_ids` - (Required) The SubnetIds of NodeConfig.
 * `additional_container_storage_enabled` - (Optional, ForceNew) The AdditionalContainerStorageEnabled of NodeConfig.
@@ -106,6 +106,7 @@ The `node_config` object supports the following:
 * `auto_renew` - (Optional) Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.
 * `data_volumes` - (Optional, ForceNew) The DataVolumes of NodeConfig.
 * `ecs_tags` - (Optional) Tags for Ecs.
+* `hpc_cluster_ids` - (Optional) The IDs of HpcCluster, only one ID is supported currently.
 * `image_id` - (Optional, ForceNew) The ImageId of NodeConfig.
 * `initialize_script` - (Optional) The initializeScript of NodeConfig.
 * `instance_charge_type` - (Optional, ForceNew) The InstanceChargeType of PrePaid instance of NodeConfig. Valid values: PostPaid, PrePaid. Default value: PostPaid.

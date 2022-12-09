@@ -1,6 +1,7 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -214,6 +215,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_node_pools":     node_pool.DataSourceVolcengineNodePools(),
 			"volcengine_vke_addons":         addon.DataSourceVolcengineVkeAddons(),
 			"volcengine_vke_support_addons": support_addon.DataSourceVolcengineVkeVkeSupportedAddons(),
+			"volcengine_vke_kubeconfigs":    kubeconfig.DataSourceVolcengineVkeKubeconfigs(),
 
 			// ================ IAM ================
 			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
@@ -328,6 +330,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_addon":                          addon.ResourceVolcengineVkeAddon(),
 			"volcengine_vke_default_node_pool":              default_node_pool.ResourceVolcengineDefaultNodePool(),
 			"volcengine_vke_default_node_pool_batch_attach": default_node_pool_batch_attach.ResourceVolcengineDefaultNodePoolBatchAttach(),
+			"volcengine_vke_kubeconfig":                     kubeconfig.ResourceVolcengineVkeKubeconfig(),
 
 			// ================ IAM ================
 			"volcengine_iam_policy":                 iam_policy.ResourceVolcengineIamPolicy(),

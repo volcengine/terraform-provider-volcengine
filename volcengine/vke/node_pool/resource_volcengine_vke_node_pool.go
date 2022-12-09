@@ -103,7 +103,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"instance_type_ids": {
 							Type:     schema.TypeList,
 							Required: true,
-							ForceNew: true,
+							//ForceNew: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -293,6 +293,15 @@ func ResourceVolcengineNodePool() *schema.Resource {
 									},
 								},
 							},
+						},
+						"hpc_cluster_ids": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Description: "The IDs of HpcCluster, only one ID is supported currently.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Set: schema.HashString,
 						},
 					},
 				},

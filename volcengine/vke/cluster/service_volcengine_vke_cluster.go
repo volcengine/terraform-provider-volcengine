@@ -114,14 +114,18 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 			} else {
 				if publicAccess, ok := publicAccess.(bool); ok && publicAccess {
 					// a. get public kubeconfig
-					publicKubeconfigResp, err := s.getKubeconfig(clusterId, "UserExternal")
+					publicKubeconfigResp, err := s.getKubeconfig(clusterId, "Public")
 					if err != nil {
 						logger.Info("Get public kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
 						return data, err
 					}
 
-					if kubeconfig, ok := (*publicKubeconfigResp)["Result"].(map[string]interface{}); ok {
-						cluster["KubeconfigPublic"] = kubeconfig["Kubeconfig"]
+					kubeconfigs, err := ve.ObtainSdkValue("Result.Items", *publicKubeconfigResp)
+					if err != nil {
+						return data, err
+					}
+					if len(kubeconfigs.([]interface{})) > 0 {
+						cluster["KubeconfigPublic"] = kubeconfigs.([]interface{})[0].(map[string]interface{})["Kubeconfig"]
 					}
 
 					// b. get eip data
@@ -160,14 +164,18 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 				}
 			}
 
-			privateKubeconfigResp, err := s.getKubeconfig(clusterId, "UserInternal")
+			privateKubeconfigResp, err := s.getKubeconfig(clusterId, "Private")
 			if err != nil {
 				logger.Info("Get private kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
 				return data, err
 			}
 
-			if kubeconfig, ok := (*privateKubeconfigResp)["Result"].(map[string]interface{}); ok {
-				cluster["KubeconfigPrivate"] = kubeconfig["Kubeconfig"]
+			kubeconfigs, err := ve.ObtainSdkValue("Result.Items", *privateKubeconfigResp)
+			if err != nil {
+				return data, err
+			}
+			if len(kubeconfigs.([]interface{})) > 0 {
+				cluster["KubeconfigPrivate"] = kubeconfigs.([]interface{})[0].(map[string]interface{})["Kubeconfig"]
 			}
 		}
 	}
@@ -177,10 +185,13 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 
 func (s *VolcengineVkeClusterService) getKubeconfig(clusterId, accessType string) (*map[string]interface{}, error) {
 	kubeconfigReq := &map[string]interface{}{
-		"ClusterId": clusterId,
-		"Type":      accessType,
+		"Filter": map[string]interface{}{
+			"ClusterIds": []string{clusterId},
+			"Types":      []string{accessType},
+		},
 	}
-	return s.Client.UniversalClient.DoCall(getKubeconfigUniversalInfo("GetKubeconfig"), kubeconfigReq)
+	logger.Debug(logger.ReqFormat, "ListKubeconfigs", kubeconfigReq)
+	return s.Client.UniversalClient.DoCall(getUniversalInfo("ListKubeconfigs"), kubeconfigReq)
 }
 
 func (s *VolcengineVkeClusterService) ReadResource(resourceData *schema.ResourceData, clusterId string) (data map[string]interface{}, err error) {
@@ -668,16 +679,6 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "vke",
 		Version:     "2022-05-12",
-		HttpMethod:  ve.POST,
-		ContentType: ve.ApplicationJSON,
-		Action:      actionName,
-	}
-}
-
-func getKubeconfigUniversalInfo(actionName string) ve.UniversalInfo {
-	return ve.UniversalInfo{
-		ServiceName: "vke",
-		Version:     "2021-03-03",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
