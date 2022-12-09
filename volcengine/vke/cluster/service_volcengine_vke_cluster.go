@@ -114,7 +114,7 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 			} else {
 				if publicAccess, ok := publicAccess.(bool); ok && publicAccess {
 					// a. get public kubeconfig
-					publicKubeconfigResp, err := s.getKubeconfig(clusterId, "Public")
+					publicKubeconfigResp, err := s.getKubeconfig(clusterId, "UserExternal")
 					if err != nil {
 						logger.Info("Get public kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
 						return data, err
@@ -160,7 +160,7 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 				}
 			}
 
-			privateKubeconfigResp, err := s.getKubeconfig(clusterId, "Private")
+			privateKubeconfigResp, err := s.getKubeconfig(clusterId, "UserInternal")
 			if err != nil {
 				logger.Info("Get private kubeconfig error, cluster: %+v, err: %s", cluster, err.Error())
 				return data, err
@@ -180,7 +180,7 @@ func (s *VolcengineVkeClusterService) getKubeconfig(clusterId, accessType string
 		"ClusterId": clusterId,
 		"Type":      accessType,
 	}
-	return s.Client.UniversalClient.DoCall(getUniversalInfo("GetKubeconfig"), kubeconfigReq)
+	return s.Client.UniversalClient.DoCall(getKubeconfigUniversalInfo("GetKubeconfig"), kubeconfigReq)
 }
 
 func (s *VolcengineVkeClusterService) ReadResource(resourceData *schema.ResourceData, clusterId string) (data map[string]interface{}, err error) {
@@ -668,6 +668,16 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "vke",
 		Version:     "2022-05-12",
+		HttpMethod:  ve.POST,
+		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
+}
+
+func getKubeconfigUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vke",
+		Version:     "2021-03-03",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
