@@ -362,6 +362,9 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 							TargetField: "Tags",
 							ConvertType: ve.ConvertJsonObjectArray,
 						},
+						"hpc_cluster_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -494,6 +497,12 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 							TargetField: "Tags",
 							ConvertType: ve.ConvertJsonObjectArray,
 						},
+						"instance_type_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"hpc_cluster_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -555,6 +564,21 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						if login != nil && login.(map[string]interface{})["SshKeyPairName"] != nil && login.(map[string]interface{})["SshKeyPairName"].(string) == "" {
 							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{}), "SshKeyPairName")
 						}
+					}
+
+					if _, ok1 := nodeconfig.(map[string]interface{})["HpcClusterIds"]; ok1 {
+						if _, ok2 := nodeconfig.(map[string]interface{})["InstanceTypeIds"]; !ok2 {
+							(*call.SdkParam)["NodeConfig"].(map[string]interface{})["InstanceTypeIds"] = make([]interface{}, 0)
+							instanceTypeIds := d.Get("node_config.0.instance_type_ids")
+							for _, instanceTypeId := range instanceTypeIds.([]interface{}) {
+								(*call.SdkParam)["NodeConfig"].(map[string]interface{})["InstanceTypeIds"] = append((*call.SdkParam)["NodeConfig"].(map[string]interface{})["InstanceTypeIds"].([]interface{}), instanceTypeId.(string))
+							}
+						}
+					}
+					if d.HasChange("node_config.0.hpc_cluster_ids") {
+						ve.DefaultMapValue(call.SdkParam, "NodeConfig", map[string]interface{}{
+							"HpcClusterIds": []interface{}{},
+						})
 					}
 				}
 
@@ -834,6 +858,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"NodeConfig.NamePrefix": {
 				TargetField: "name_prefix",
+			},
+			"NodeConfig.HpcClusterIds": {
+				TargetField: "hpc_cluster_ids",
 			},
 			"NodeConfig.Tags": {
 				TargetField: "ecs_tags",
