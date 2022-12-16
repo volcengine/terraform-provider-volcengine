@@ -68,8 +68,8 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of the cluster.
     * `eip_allocation_id` - Eip allocation Id.
     * `id` - The ID of the Cluster.
-    * `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding.
-    * `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding.
+    * `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
+    * `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
     * `kubernetes_version` - The Kubernetes version information corresponding to the cluster, specific to the patch version.
     * `name` - The name of the cluster.
     * `node_statistics` - Statistics on the number of nodes corresponding to each master state in the cluster.

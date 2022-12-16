@@ -404,6 +404,15 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
 						},
+						"hpc_cluster_ids": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The IDs of HpcCluster.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Set: schema.HashString,
+						},
 						"ecs_tags": {
 							Type:        schema.TypeSet,
 							Computed:    true,

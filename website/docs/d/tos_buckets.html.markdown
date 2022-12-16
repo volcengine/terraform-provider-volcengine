@@ -23,11 +23,15 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `buckets` - The collection of TOS bucket query.
-    * `is_truncated` - The truncated the TOS bucket.
-    * `marker` - The marker the TOS bucket.
-    * `max_keys` - The max keys the TOS bucket.
+    * `creation_date` - The create date of the TOS bucket.
+    * `extranet_endpoint` - The extranet endpoint of the TOS bucket.
+    * `intranet_endpoint` - The intranet endpoint the TOS bucket.
+    * `is_truncated` - (**Deprecated**) The Field is Deprecated. The truncated the TOS bucket.
+    * `location` - The location of the TOS bucket.
+    * `marker` - (**Deprecated**) The Field is Deprecated. The marker the TOS bucket.
+    * `max_keys` - (**Deprecated**) The Field is Deprecated. The max keys the TOS bucket.
     * `name` - The name the TOS bucket.
-    * `prefix` - The prefix the TOS bucket.
+    * `prefix` - (**Deprecated**) The Field is Deprecated. The prefix the TOS bucket.
 * `total_count` - The total count of TOS bucket query.
 
 

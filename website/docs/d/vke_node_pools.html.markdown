@@ -59,6 +59,7 @@ In addition to all arguments above, the following attributes are exported:
         * `key` - The Key of Tags.
         * `value` - The Value of Tags.
     * `enabled` - Is Enabled of AutoScaling.
+    * `hpc_cluster_ids` - The IDs of HpcCluster.
     * `id` - The Id of NodePool.
     * `image_id` - The ImageId of NodeConfig.
     * `initialize_script` - The InitializeScript of NodeConfig.

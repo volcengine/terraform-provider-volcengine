@@ -224,12 +224,12 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 			"kubeconfig_public": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Kubeconfig data with public network access, returned in BASE64 encoding.",
+				Description: "Kubeconfig data with public network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.",
 			},
 			"kubeconfig_private": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "Kubeconfig data with private network access, returned in BASE64 encoding.",
+				Description: "Kubeconfig data with private network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.",
 			},
 			"eip_allocation_id": {
 				Type:        schema.TypeString,
