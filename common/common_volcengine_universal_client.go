@@ -1,6 +1,8 @@
 package common
 
 import (
+	"strings"
+
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client/metadata"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/corehandlers"
@@ -52,7 +54,7 @@ func (u *Universal) newTargetClient(info UniversalInfo) *client.Client {
 	endpoint := config.Endpoint
 	if len(u.endpoints) > 0 {
 		if end, ok := u.endpoints[info.ServiceName]; ok {
-			endpoint = end
+			endpoint = endpoint[0:strings.Index(config.Endpoint, "//")] + "//" + end
 		}
 	}
 	c := client.New(
