@@ -22,14 +22,15 @@ import (
 )
 
 type Config struct {
-	AccessKey       string
-	SecretKey       string
-	SessionToken    string
-	Region          string
-	Endpoint        string
-	DisableSSL      bool
-	CustomerHeaders map[string]string
-	ProxyUrl        string
+	AccessKey         string
+	SecretKey         string
+	SessionToken      string
+	Region            string
+	Endpoint          string
+	DisableSSL        bool
+	CustomerHeaders   map[string]string
+	CustomerEndpoints map[string]string
+	ProxyUrl          string
 }
 
 func (c *Config) Client() (*SdkClient, error) {
@@ -74,7 +75,7 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.AutoScalingClient = autoscaling.New(sess)
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
-	client.UniversalClient = NewUniversalClient(sess)
+	client.UniversalClient = NewUniversalClient(sess, c.CustomerEndpoints)
 	client.TosClient = NewTosClient(sess)
 
 	InitLocks()

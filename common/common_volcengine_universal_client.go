@@ -28,7 +28,8 @@ const (
 )
 
 type Universal struct {
-	Session *session.Session
+	Session   *session.Session
+	endpoints map[string]string
 }
 
 type UniversalInfo struct {
@@ -39,23 +40,30 @@ type UniversalInfo struct {
 	ContentType ContentType
 }
 
-func NewUniversalClient(session *session.Session) *Universal {
+func NewUniversalClient(session *session.Session, endpoints map[string]string) *Universal {
 	return &Universal{
-		Session: session,
+		Session:   session,
+		endpoints: endpoints,
 	}
 }
 
-func (u *Universal) newTargetClient(svc string, version string) *client.Client {
-	config := u.Session.ClientConfig(svc)
+func (u *Universal) newTargetClient(info UniversalInfo) *client.Client {
+	config := u.Session.ClientConfig(info.ServiceName)
+	endpoint := config.Endpoint
+	if len(u.endpoints) > 0 {
+		if end, ok := u.endpoints[info.ServiceName]; ok {
+			endpoint = end
+		}
+	}
 	c := client.New(
 		*config.Config,
 		metadata.ClientInfo{
 			SigningName:   config.SigningName,
 			SigningRegion: config.SigningRegion,
-			Endpoint:      config.Endpoint,
-			APIVersion:    version,
-			ServiceName:   svc,
-			ServiceID:     svc,
+			Endpoint:      endpoint,
+			APIVersion:    info.Version,
+			ServiceName:   info.ServiceName,
+			ServiceID:     info.ServiceName,
 		},
 		config.Handlers,
 	)
@@ -97,7 +105,7 @@ func getContentType(m ContentType) string {
 }
 
 func (u *Universal) DoCall(info UniversalInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
-	c := u.newTargetClient(info.ServiceName, info.Version)
+	c := u.newTargetClient(info)
 	op := &request.Operation{
 		HTTPMethod: u.getMethod(info.HttpMethod),
 		HTTPPath:   "/",
