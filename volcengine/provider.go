@@ -1,8 +1,9 @@
 package volcengine
 
 import (
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 	"strings"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -143,6 +144,12 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_HEADERS", nil),
 				Description: "CUSTOMER HEADERS for Volcengine Provider",
+			},
+			"customer_endpoints": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_ENDPOINTS", nil),
+				Description: "CUSTOMER ENDPOINTS for Volcengine Provider",
 			},
 			"proxy_url": {
 				Type:        schema.TypeString,
@@ -378,14 +385,15 @@ func Provider() terraform.ResourceProvider {
 
 func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := ve.Config{
-		AccessKey:       d.Get("access_key").(string),
-		SecretKey:       d.Get("secret_key").(string),
-		SessionToken:    d.Get("session_token").(string),
-		Region:          d.Get("region").(string),
-		Endpoint:        d.Get("endpoint").(string),
-		DisableSSL:      d.Get("disable_ssl").(bool),
-		CustomerHeaders: map[string]string{},
-		ProxyUrl:        d.Get("proxy_url").(string),
+		AccessKey:         d.Get("access_key").(string),
+		SecretKey:         d.Get("secret_key").(string),
+		SessionToken:      d.Get("session_token").(string),
+		Region:            d.Get("region").(string),
+		Endpoint:          d.Get("endpoint").(string),
+		DisableSSL:        d.Get("disable_ssl").(bool),
+		CustomerHeaders:   map[string]string{},
+		CustomerEndpoints: defaultCustomerEndPoints(),
+		ProxyUrl:          d.Get("proxy_url").(string),
 	}
 
 	headers := d.Get("customer_headers").(string)
@@ -399,6 +407,23 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 		}
 	}
 
+	endpoints := d.Get("customer_endpoints").(string)
+	if endpoints != "" {
+		ends := strings.Split(endpoints, ",")
+		for _, end := range ends {
+			point := strings.Split(end, ":")
+			if len(point) == 2 {
+				config.CustomerEndpoints[point[0]] = point[1]
+			}
+		}
+	}
+
 	client, err := config.Client()
 	return client, err
+}
+
+func defaultCustomerEndPoints() map[string]string {
+	return map[string]string{
+		"veenedge": "veenedge.volcengineapi.com",
+	}
 }
