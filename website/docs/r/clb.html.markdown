@@ -29,8 +29,15 @@ The following arguments are supported:
 * `load_balancer_name` - (Optional) The name of the CLB.
 * `modification_protection_reason` - (Optional) The reason of the console modification protection.
 * `modification_protection_status` - (Optional) The status of the console modification protection, the value can be `NonProtection` or `ConsoleProtection`.
+* `project_name` - (Optional, ForceNew) The ProjectName of the CLB.
 * `region_id` - (Optional, ForceNew) The region of the request.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional, ForceNew) The id of the VPC.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

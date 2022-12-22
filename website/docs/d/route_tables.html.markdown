@@ -19,6 +19,7 @@ data "volcengine_route_tables" "default" {
 The following arguments are supported:
 * `ids` - (Optional) A list of route table ids.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The ProjectName of the route table.
 * `route_table_name` - (Optional) A name of route table.
 * `vpc_id` - (Optional) An id of VPC.
 
@@ -29,6 +30,7 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - The create time of the route table.
     * `description` - The description of the route table.
     * `id` - The id of the route table.
+    * `project_name` - The ProjectName of the route table.
     * `route_table_id` - The id of the route table.
     * `route_table_name` - The name of the route table.
     * `route_table_type` - The type of the route table.

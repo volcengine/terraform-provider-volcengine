@@ -20,6 +20,7 @@ The following arguments are supported:
 * `ids` - (Optional) A list of Acl IDs.
 * `name_regex` - (Optional) A Name Regex of Acl.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The ProjectName of Acl.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -31,6 +32,7 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of Acl.
     * `id` - The ID of Acl.
     * `listeners` - The listeners of Acl.
+    * `project_name` - The ProjectName of Acl.
     * `update_time` - Update time of Acl.
 * `total_count` - The total count of Acl query.
 

@@ -21,7 +21,14 @@ The following arguments are supported:
 * `cidr_block` - (Required, ForceNew) A network address block which should be a subnet of the three internal network segments (10.0.0.0/16, 172.16.0.0/12 and 192.168.0.0/16).
 * `description` - (Optional) The description of the VPC.
 * `dns_servers` - (Optional) The DNS server list of the VPC. And you can specify 0 to 5 servers to this list.
+* `project_name` - (Optional, ForceNew) The ProjectName of the VPC.
+* `tags` - (Optional) Tags.
 * `vpc_name` - (Optional) The name of the VPC.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

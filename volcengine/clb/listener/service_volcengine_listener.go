@@ -3,6 +3,7 @@ package listener
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -10,6 +11,8 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/clb"
+	clbSDK "github.com/volcengine/volcengine-go-sdk/service/clb"
+	"github.com/volcengine/volcengine-go-sdk/volcengine"
 )
 
 type VolcengineListenerService struct {
@@ -163,6 +166,61 @@ func (*VolcengineListenerService) WithResourceResponseHandlers(listener map[stri
 
 }
 
+func (s *VolcengineListenerService) refreshAclStatus() ve.CallFunc {
+	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) error {
+		var aclIds []string
+		for k, v := range *call.SdkParam {
+			if strings.HasPrefix(k, "AclIds.") {
+				aclIds = append(aclIds, v.(string))
+			}
+		}
+		if len(aclIds) > 0 {
+			if err := s.checkAcl(aclIds); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+}
+
+func (s *VolcengineListenerService) checkAcl(aclIds []string) error {
+	return resource.Retry(20*time.Minute, func() *resource.RetryError {
+		logger.Debug(logger.ReqFormat, "DescribeAcls", aclIds)
+		// create 的时候上限为5个，无需翻页
+		resp, err := s.Client.ClbClient.DescribeAcls(&clbSDK.DescribeAclsInput{
+			AclIds:     volcengine.StringSlice(aclIds),
+			PageNumber: volcengine.Int64(1),
+			PageSize:   volcengine.Int64(100),
+		})
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		logger.Debug(logger.RespFormat, "DescribeAcls", aclIds, *resp)
+
+		statusOK := true
+		aclIdMap := make(map[string]bool)
+		for _, element := range resp.Acls {
+			aclIdMap[*element.AclId] = true
+			if *element.Status == "Deleting" {
+				return resource.NonRetryableError(fmt.Errorf("acl is in deleting status"))
+			} else if *element.Status != "Active" { // Creating / Configuring
+				statusOK = false
+				break
+			}
+		}
+		if !statusOK {
+			return resource.RetryableError(fmt.Errorf("acl still in waiting status"))
+		}
+
+		for _, aclId := range aclIds {
+			if _, exist := aclIdMap[aclId]; !exist {
+				return resource.NonRetryableError(errors.New(fmt.Sprintf("cannot find acl: %s", aclId)))
+			}
+		}
+		return nil
+	})
+}
+
 func (s *VolcengineListenerService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
@@ -193,6 +251,7 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 
 				return true, nil
 			},
+			AfterLocked: s.refreshAclStatus(),
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建listener
@@ -215,6 +274,7 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 					ResourceId: resourceData.Get("load_balancer_id").(string),
 				},
 			},
+			AfterRefresh: s.refreshAclStatus(),
 			LockId: func(d *schema.ResourceData) string {
 				return resourceData.Get("load_balancer_id").(string)
 			},
@@ -276,6 +336,7 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 				}
 				return true, nil
 			},
+			AfterLocked: s.refreshAclStatus(),
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改 listener 属性
@@ -292,6 +353,7 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 					ResourceId: clbId,
 				},
 			},
+			AfterRefresh: s.refreshAclStatus(),
 			LockId: func(d *schema.ResourceData) string {
 				return clbId
 			},

@@ -20,6 +20,7 @@ The following arguments are supported:
 * `ids` - (Optional) The list of Certificate IDs.
 * `name_regex` - (Optional) The Name Regex of Certificate.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The ProjectName of Certificate.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -32,6 +33,7 @@ In addition to all arguments above, the following attributes are exported:
     * `expired_at` - The expire time of the Certificate.
     * `id` - The ID of the Certificate.
     * `listeners` - The ID list of the Listener.
+    * `project_name` - The ProjectName of the Certificate.
 * `total_count` - The total count of Certificate query.
 
 

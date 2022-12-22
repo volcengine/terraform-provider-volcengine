@@ -28,8 +28,10 @@ type SdkCall struct {
 	RequestIdField  string
 	Refresh         *StateRefresh
 	ExtraRefresh    map[ResourceService]*StateRefresh
+	AfterRefresh    CallFunc
 	ContentType     RequestContentType
 	LockId          LockId
+	AfterLocked     CallFunc
 	ServiceCategory ServiceCategory
 }
 
@@ -44,6 +46,7 @@ type ExecuteCallFunc func(d *schema.ResourceData, client *SdkClient, call SdkCal
 type AfterCallFunc func(d *schema.ResourceData, client *SdkClient, resp *map[string]interface{}, call SdkCall) error
 type BeforeCallFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall) (bool, error)
 type ReadResourceFunc func(d *schema.ResourceData, resourceId string) (map[string]interface{}, error)
+type CallFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall) error
 
 type LockId func(d *schema.ResourceData) string
 
@@ -194,7 +197,12 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 							TryLock(key)
 						}
 					}
-					resp, err = fn.ExecuteCall(d, client, fn)
+					if fn.AfterLocked != nil {
+						err = fn.AfterLocked(d, client, fn)
+					}
+					if err == nil {
+						resp, err = fn.ExecuteCall(d, client, fn)
+					}
 				}
 				if err != nil {
 					if fn.CallError != nil {
@@ -219,6 +227,9 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 							_, err = stateConf.WaitForState()
 						}
 					}
+				}
+				if doExecute && fn.AfterRefresh != nil && err == nil {
+					err = fn.AfterRefresh(d, client, fn)
 				}
 
 				if doExecute && fn.LockId != nil {
