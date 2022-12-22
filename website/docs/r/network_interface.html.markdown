@@ -27,6 +27,13 @@ The following arguments are supported:
 * `network_interface_name` - (Optional) The name of the ENI.
 * `port_security_enabled` - (Optional) Set port security enable or disable.
 * `primary_ip_address` - (Optional, ForceNew) The primary IP address of the ENI.
+* `project_name` - (Optional, ForceNew) The ProjectName of the ENI.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

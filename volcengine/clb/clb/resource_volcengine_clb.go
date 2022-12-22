@@ -103,6 +103,13 @@ func ResourceVolcengineClb() *schema.Resource {
 				Description:  "The billing type of the CLB, the value can be `PostPaid`.",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The ProjectName of the CLB.",
+			},
+			"tags": ve.TagsSchema(),
 			//"period_unit": {
 			//	Type:         schema.TypeString,
 			//	Optional:     true,

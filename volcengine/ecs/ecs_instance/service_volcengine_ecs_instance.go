@@ -393,6 +393,10 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 						}
 					},
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -481,6 +485,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 					delete(*call.SdkParam, "Password")
 				}
 				if len(*call.SdkParam) > 1 {
+					delete(*call.SdkParam, "Tags")
 					return true, nil
 				}
 				return false, nil
@@ -799,6 +804,10 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 	startInstance := s.StartOrStopInstanceCallback(resourceData, false, &flag)
 	callbacks = append(callbacks, startInstance)
 
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "CreateTags", "DeleteTags", "instance", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -848,6 +857,15 @@ func (s *VolcengineEcsService) DatasourceResources(data *schema.ResourceData, re
 			"ids": {
 				TargetField: "InstanceIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:        "InstanceName",

@@ -25,6 +25,12 @@ func DataSourceVolcengineSecurityGroups() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of SecurityGroup.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of SecurityGroup.",
+			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -81,6 +87,12 @@ func DataSourceVolcengineSecurityGroups() *schema.Resource {
 							Computed:    true,
 							Description: "A Name Regex of SecurityGroup.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of SecurityGroup.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

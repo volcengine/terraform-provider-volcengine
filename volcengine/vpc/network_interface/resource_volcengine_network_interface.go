@@ -73,6 +73,13 @@ func ResourceVolcengineNetworkInterface() *schema.Resource {
 				Computed:    true,
 				Description: "Set port security enable or disable.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The ProjectName of the ENI.",
+			},
+			"tags": ve.TagsSchema(),
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,

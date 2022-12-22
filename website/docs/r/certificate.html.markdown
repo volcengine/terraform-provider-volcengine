@@ -23,6 +23,7 @@ The following arguments are supported:
 * `public_key` - (Required, ForceNew) The public key of the Certificate. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `certificate_name` - (Optional, ForceNew) The name of the Certificate.
 * `description` - (Optional, ForceNew) The description of the Certificate.
+* `project_name` - (Optional, ForceNew) The ProjectName of the Certificate.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

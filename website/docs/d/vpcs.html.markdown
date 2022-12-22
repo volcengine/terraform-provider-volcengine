@@ -19,6 +19,13 @@ The following arguments are supported:
 * `ids` - (Optional) A list of VPC IDs.
 * `name_regex` - (Optional) A Name Regex of Vpc.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The ProjectName of the VPC.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -35,10 +42,14 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of VPC.
     * `dns_servers` - The dns server list of VPC.
     * `nat_gateway_ids` - The nat gateway ID list of VPC.
+    * `project_name` - The ProjectName of the VPC.
     * `route_table_ids` - The route table ID list of VPC.
     * `security_group_ids` - The security group ID list of VPC.
     * `status` - The status of VPC.
     * `subnet_ids` - The subnet ID list of VPC.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of VPC.
     * `vpc_id` - The ID of VPC.
     * `vpc_name` - The name of VPC.

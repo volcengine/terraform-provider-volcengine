@@ -23,9 +23,16 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of ECS instance.
 * `output_file` - (Optional) File name where to save data source results.
 * `primary_ip_address` - (Optional) The primary ip address of ECS instance.
+* `project_name` - (Optional) The ProjectName of ECS instance.
 * `status` - (Optional) The status of ECS instance.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The VPC ID of ECS instance.
 * `zone_id` - (Optional) The available zone ID of ECS instance.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -57,8 +64,12 @@ In addition to all arguments above, the following attributes are exported:
         * `vpc_id` - The ID of networkInterface.
     * `os_name` - The os name of ECS instance.
     * `os_type` - The os type of ECS instance.
+    * `project_name` - The ProjectName of ECS instance.
     * `status` - The status of ECS instance.
     * `stopped_mode` - The stop mode of ECS instance.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `updated_at` - The update time of ECS instance.
     * `volumes` - The volume detail collection of volume.
         * `delete_with_instance` - The delete with instance flag of volume.

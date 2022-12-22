@@ -21,11 +21,18 @@ The following arguments are supported:
 * `network_interface_name` - (Optional) A name of ENI.
 * `output_file` - (Optional) File name where to save data source results.
 * `primary_ip_addresses` - (Optional) A list of primary IP address of ENI.
+* `project_name` - (Optional) The ProjectName of the ENI.
 * `security_group_id` - (Optional) An id of the security group to which the secondary ENI belongs.
 * `status` - (Optional) A status of ENI, Optional choice contains `Creating`, `Available`, `Attaching`, `InUse`, `Detaching`, `Deleting`.
 * `subnet_id` - (Optional) An id of the subnet to which the ENI is connected.
+* `tags` - (Optional) Tags.
 * `type` - (Optional) A type of ENI, Optional choice contains `primary`, `secondary`.
 * `vpc_id` - (Optional) An id of the virtual private cloud (VPC) to which the ENI belongs.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -42,9 +49,13 @@ In addition to all arguments above, the following attributes are exported:
     * `network_interface_name` - The name of the ENI.
     * `port_security_enabled` - The enable of port security.
     * `primary_ip_address` - The primary IP address of the ENI.
+    * `project_name` - The ProjectName of the ENI.
     * `security_group_ids` - The list of the security group id to which the secondary ENI belongs.
     * `status` - The status of the ENI.
     * `subnet_id` - The id of the subnet to which the ENI is connected.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `type` - The type of the ENI.
     * `updated_at` - The last update time of the ENI.
     * `vpc_id` - The id of the virtual private cloud (VPC) to which the ENI belongs.
