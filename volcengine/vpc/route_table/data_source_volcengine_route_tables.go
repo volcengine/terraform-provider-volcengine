@@ -27,6 +27,11 @@ func DataSourceVolcengineRouteTables() *schema.Resource {
 				Optional:    true,
 				Description: "A name of route table.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the route table.",
+			},
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -101,6 +106,11 @@ func DataSourceVolcengineRouteTables() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The description of the route table.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the route table.",
 						},
 					},
 				},

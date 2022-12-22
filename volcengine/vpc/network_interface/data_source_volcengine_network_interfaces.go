@@ -64,6 +64,12 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 				Optional:    true,
 				Description: "A name of ENI.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the ENI.",
+			},
+			"tags": ve.TagsSchema(),
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -184,6 +190,12 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 							Computed:    true,
 							Description: "The IP address of the EIP to which the ENI associates.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the ENI.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

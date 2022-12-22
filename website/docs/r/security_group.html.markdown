@@ -18,7 +18,14 @@ resource "volcengine_security_group" "g1test1" {
 The following arguments are supported:
 * `vpc_id` - (Required, ForceNew) Id of the VPC.
 * `description` - (Optional) Description of SecurityGroup.
+* `project_name` - (Optional, ForceNew) The ProjectName of SecurityGroup.
 * `security_group_name` - (Optional) Name of SecurityGroup.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

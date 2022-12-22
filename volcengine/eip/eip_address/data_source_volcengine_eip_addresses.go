@@ -56,6 +56,12 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 				Optional:    true,
 				Description: "An id of associated instance.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of EIP.",
+			},
+			"tags": ve.TagsSchema(),
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -163,6 +169,12 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 							Computed:    true,
 							Description: "The expired time of the EIP.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the EIP.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

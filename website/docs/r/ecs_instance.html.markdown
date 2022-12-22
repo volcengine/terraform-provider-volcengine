@@ -71,8 +71,10 @@ The following arguments are supported:
 * `key_pair_name` - (Optional, ForceNew) The ssh key name of ECS instance.
 * `password` - (Optional) The password of ECS instance.
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.
+* `project_name` - (Optional, ForceNew) The ProjectName of the VPC.
 * `secondary_network_interfaces` - (Optional) The secondary networkInterface detail collection of ECS instance.
 * `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `tags` - (Optional) Tags.
 * `user_data` - (Optional) The user data of ECS instance, this field must be encrypted with base64.
 * `zone_id` - (Optional, ForceNew) The available zone ID of ECS instance.
 
@@ -86,6 +88,11 @@ The `secondary_network_interfaces` object supports the following:
 
 * `security_group_ids` - (Required, ForceNew) The security group ID set of secondary networkInterface.
 * `subnet_id` - (Required, ForceNew) The subnet ID of secondary networkInterface.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

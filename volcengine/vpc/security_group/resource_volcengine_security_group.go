@@ -60,6 +60,13 @@ func ResourceVolcengineSecurityGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Name of SecurityGroup.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The ProjectName of SecurityGroup.",
+			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 }

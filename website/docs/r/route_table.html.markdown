@@ -20,6 +20,7 @@ resource "volcengine_route_table" "foo" {
 The following arguments are supported:
 * `vpc_id` - (Required, ForceNew) The id of the VPC.
 * `description` - (Optional) The description of the route table.
+* `project_name` - (Optional) The ProjectName of the route table.
 * `route_table_name` - (Optional) The name of the route table.
 
 ## Attributes Reference

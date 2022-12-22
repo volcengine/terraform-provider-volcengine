@@ -25,6 +25,11 @@ func DataSourceVolcengineCertificates() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "The Name Regex of Certificate.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of Certificate.",
+			},
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -82,6 +87,11 @@ func DataSourceVolcengineCertificates() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The domain name of the Certificate.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the Certificate.",
 						},
 						"listeners": {
 							Type: schema.TypeSet,

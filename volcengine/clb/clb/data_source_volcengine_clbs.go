@@ -25,6 +25,12 @@ func DataSourceVolcengineClbs() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of Clb.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of Clb.",
+			},
+			"tags": ve.TagsSchema(),
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -168,6 +174,12 @@ func DataSourceVolcengineClbs() *schema.Resource {
 							Computed:    true,
 							Description: "The billing type of the Clb.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the Clb.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

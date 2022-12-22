@@ -25,6 +25,12 @@ func DataSourceVolcengineVpcs() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of Vpc.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the VPC.",
+			},
+			"tags": ve.TagsSchema(),
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -164,6 +170,12 @@ func DataSourceVolcengineVpcs() *schema.Resource {
 							Set:         schema.HashString,
 							Description: "The auxiliary cidr block list of VPC.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the VPC.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

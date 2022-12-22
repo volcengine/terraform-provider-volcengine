@@ -60,6 +60,12 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of ECS instance.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of ECS instance.",
+			},
+			"tags": ve.TagsSchema(),
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -284,6 +290,12 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 								},
 							},
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of ECS instance.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},
