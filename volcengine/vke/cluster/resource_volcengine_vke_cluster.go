@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -55,10 +56,16 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 				Description: "The delete protection of the cluster, the value is `true` or `false`.",
 			},
 			"kubernetes_version": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if k == "kubernetes_version" && strings.Contains(old, new) {
+						return true
+					}
+					return false
+				},
 				Description: "The version of Kubernetes specified when creating a VKE cluster (specified to patch version), if not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.",
 			},
 			"tags": ve.TagsSchema(),
