@@ -122,6 +122,9 @@ func mergeDatasource(resource *schema.Resource, collectField string, item map[st
 			if extraMapping != nil {
 				if _, ok := extraMapping[k]; ok {
 					m = extraMapping[k]
+					if m.Ignore {
+						continue
+					}
 					if m.Chain == "" {
 						//if no chain to set auto check convert in elem.schema.if in and set new target
 						if _, ok1 := elem.Schema[m.TargetField]; ok1 {
