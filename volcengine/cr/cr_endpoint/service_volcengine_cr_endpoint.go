@@ -150,17 +150,54 @@ func (VolcengineCrEndpointService) WithResourceResponseHandlers(instance map[str
 }
 
 func (s *VolcengineCrEndpointService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
-}
-
-func (s *VolcengineCrEndpointService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	target := "Disabled"
+	enabled := resourceData.Get("enabled").(bool)
+	if enabled {
+		target = "Enabled"
+	}
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdatePublicEndpoint",
 			ContentType: ve.ContentTypeJson,
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Registry"] = d.Get("registry")
+				(*call.SdkParam)["Enabled"] = d.Get("enabled")
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				registry := d.Get("registry").(string)
+				id := "endpoint:" + registry
+				d.SetId(id)
+				return nil
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{target},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	return []ve.Callback{callback}
+}
+
+func (s *VolcengineCrEndpointService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	target := "Disabled"
+	enabled := resourceData.Get("enabled").(bool)
+	if enabled {
+		target = "Enabled"
+	}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UpdatePublicEndpoint",
+			ContentType: ve.ContentTypeJson,
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["Registry"] = d.Get("registry")
+				(*call.SdkParam)["Enabled"] = d.Get("enabled")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -168,7 +205,7 @@ func (s *VolcengineCrEndpointService) ModifyResource(resourceData *schema.Resour
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"Enabled", "Disabled"},
+				Target:  []string{target},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
@@ -177,7 +214,27 @@ func (s *VolcengineCrEndpointService) ModifyResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineCrEndpointService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UpdatePublicEndpoint",
+			ContentType: ve.ContentTypeJson,
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["Registry"] = d.Get("registry")
+				(*call.SdkParam)["Enabled"] = false
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Disabled"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineCrEndpointService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {

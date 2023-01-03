@@ -2,10 +2,11 @@ package cr_endpoint
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
 /*
@@ -32,12 +33,14 @@ func crEndpointImporter(d *schema.ResourceData, m interface{}) ([]*schema.Resour
 func ResourceVolcengineCrEndpoint() *schema.Resource {
 	resource := &schema.Resource{
 		Read:   resourceVolcengineCrEndpointRead,
+		Create: resourceVolcengineCrEndpointCreate,
 		Update: resourceVolcengineCrEndpointUpdate,
 		Delete: resourceVolcengineCrEndpointDelete,
 		Importer: &schema.ResourceImporter{
 			State: crEndpointImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
