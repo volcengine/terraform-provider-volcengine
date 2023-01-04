@@ -212,6 +212,11 @@ func DataSourceVolcengineVpnConnections() *schema.Resource {
 							Computed:    true,
 							Description: "The lifetime of the ike config of the VPN connection.",
 						},
+						"negotiate_instantly": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to initiate negotiation mode immediately.",
+						},
 					},
 				},
 			},
