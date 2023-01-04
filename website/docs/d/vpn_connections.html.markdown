@@ -49,6 +49,7 @@ In addition to all arguments above, the following attributes are exported:
     * `ipsec_config_lifetime` - The lifetime of the ike config of the VPN connection.
     * `local_subnet` - The local subnet of the VPN connection.
     * `nat_traversal` - The nat traversal of the VPN connection.
+    * `negotiate_instantly` - Whether to initiate negotiation mode immediately.
     * `remote_subnet` - The remote subnet of the VPN connection.
     * `status` - The status of the VPN connection.
     * `update_time` - The update time of VPN connection.
