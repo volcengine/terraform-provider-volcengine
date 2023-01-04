@@ -56,6 +56,7 @@ The following arguments are supported:
 * `ipsec_config_enc_alg` - (Optional) The enc alg of the ipsec config of the VPN connection.
 * `ipsec_config_lifetime` - (Optional) The ipsec config of the ike config of the VPN connection.
 * `nat_traversal` - (Optional) The nat traversal of the VPN connection.
+* `negotiate_instantly` - (Optional) Whether to initiate negotiation mode immediately.
 * `vpn_connection_name` - (Optional) The name of the VPN connection.
 
 ## Attributes Reference

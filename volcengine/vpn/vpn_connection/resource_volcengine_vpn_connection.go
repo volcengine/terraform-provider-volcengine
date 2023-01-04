@@ -186,6 +186,12 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				ValidateFunc: validation.IntBetween(0, 86400),
 				Description:  "The ipsec config of the ike config of the VPN connection.",
 			},
+			"negotiate_instantly": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to initiate negotiation mode immediately.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineVpnConnections().Schema["vpn_connections"].Elem.(*schema.Resource).Schema
