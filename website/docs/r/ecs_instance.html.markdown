@@ -74,6 +74,7 @@ The following arguments are supported:
 * `project_name` - (Optional, ForceNew) The ProjectName of the VPC.
 * `secondary_network_interfaces` - (Optional) The secondary networkInterface detail collection of ECS instance.
 * `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `spot_strategy` - (Optional, ForceNew) The spot strategy of ECS instance, the value can be `NoSpot` or `SpotAsPriceGo`.
 * `tags` - (Optional) Tags.
 * `user_data` - (Optional) The user data of ECS instance, this field must be encrypted with base64.
 * `zone_id` - (Optional, ForceNew) The available zone ID of ECS instance.

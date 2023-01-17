@@ -65,6 +65,7 @@ In addition to all arguments above, the following attributes are exported:
     * `os_name` - The os name of ECS instance.
     * `os_type` - The os type of ECS instance.
     * `project_name` - The ProjectName of ECS instance.
+    * `spot_strategy` - The spot strategy of ECS instance.
     * `status` - The status of ECS instance.
     * `stopped_mode` - The stop mode of ECS instance.
     * `tags` - Tags.
