@@ -120,14 +120,14 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "aes",
-				ValidateFunc: validation.StringInSlice([]string{"aes", "aes192", "aes256", "des", "3des"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"aes", "aes192", "aes256", "des", "3des", "sm4"}, false),
 				Description:  "The enc alg of the ike config of the VPN connection.",
 			},
 			"ike_config_auth_alg": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "sha1",
-				ValidateFunc: validation.StringInSlice([]string{"sha1", "md5", "sha256", "sha384", "sha512"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"sha1", "md5", "sha256", "sha384", "sha512", "sm3"}, false),
 				Description:  "The auth alg of the ike config of the VPN connection.",
 			},
 			"ike_config_dh_group": {
@@ -162,14 +162,14 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "aes",
-				ValidateFunc: validation.StringInSlice([]string{"aes", "aes192", "aes256", "des", "3des"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"aes", "aes192", "aes256", "des", "3des", "sm4"}, false),
 				Description:  "The enc alg of the ipsec config of the VPN connection.",
 			},
 			"ipsec_config_auth_alg": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "sha1",
-				ValidateFunc: validation.StringInSlice([]string{"sha1", "md5", "sha256", "sha384", "sha512"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"sha1", "md5", "sha256", "sha384", "sha512", "sm3"}, false),
 				Description:  "The auth alg of the ipsec config of the VPN connection.",
 			},
 			"ipsec_config_dh_group": {

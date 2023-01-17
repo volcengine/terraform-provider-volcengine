@@ -96,6 +96,19 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				}, false),
 				Description: "The charge type of ECS instance, the value can be `PrePaid` or `PostPaid`.",
 			},
+			"spot_strategy": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"NoSpot",
+					"SpotAsPriceGo",
+				}, false),
+				Description: "The spot strategy will auto" +
+					"remove instance in some conditions.Please make sure you can maintain instance lifecycle before " +
+					"auto remove.The spot strategy of ECS instance, the value can be `NoSpot` or `SpotAsPriceGo`.",
+			},
 			"user_data": {
 				Type:             schema.TypeString,
 				Optional:         true,
