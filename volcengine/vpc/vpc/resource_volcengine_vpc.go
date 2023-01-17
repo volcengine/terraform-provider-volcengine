@@ -65,7 +65,6 @@ func ResourceVolcengineVpc() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "The ProjectName of the VPC.",
 			},
 			"tags": ve.TagsSchema(),

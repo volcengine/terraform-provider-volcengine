@@ -91,6 +91,19 @@ func (s *VolcengineVpcService) ReadResource(resourceData *schema.ResourceData, v
 	if _, ok1 := data["AuxiliaryCidrBlocks"]; !ok1 {
 		data["AuxiliaryCidrBlocks"] = []string{}
 	}
+
+	err = ve.MergeProjectInfo(s.Client, resourceData, &ve.Project{
+		ProjectResultKey: "ProjectName",
+		ProjectSchemeKey: "project_name",
+		ResourceId:       vpcId,
+		ResourceType:     "vpc",
+		Service:          "vpc",
+	}, &data)
+
+	if err != nil {
+		return data, err
+	}
+
 	return data, err
 }
 
@@ -137,6 +150,7 @@ func (VolcengineVpcService) WithResourceResponseHandlers(vpc map[string]interfac
 }
 
 func (s *VolcengineVpcService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateVpc",
@@ -149,6 +163,9 @@ func (s *VolcengineVpcService) CreateResource(resourceData *schema.ResourceData,
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
+				},
+				"project_name": {
+					Ignore: true,
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -168,12 +185,35 @@ func (s *VolcengineVpcService) CreateResource(resourceData *schema.ResourceData,
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	//project
+	projectCallback := ve.UpdateProjectInfo(&ve.Project{
+		ProjectResultKey: "ProjectName",
+		ProjectSchemeKey: "project_name",
+		ResourceId:       resourceData.Id(),
+		ResourceType:     "vpc",
+		Service:          "vpc",
+	})
+
+	callbacks = append(callbacks, projectCallback)
+	return callbacks
 
 }
 
 func (s *VolcengineVpcService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
+
+	//project
+	projectCallback := ve.UpdateProjectInfo(&ve.Project{
+		ProjectResultKey: "ProjectName",
+		ProjectSchemeKey: "project_name",
+		ResourceId:       resourceData.Id(),
+		ResourceType:     "vpc",
+		Service:          "vpc",
+	})
+
+	callbacks = append(callbacks, projectCallback)
 
 	callback := ve.Callback{
 		Call: ve.SdkCall{
@@ -183,6 +223,9 @@ func (s *VolcengineVpcService) ModifyResource(resourceData *schema.ResourceData,
 				"dns_servers": {
 					TargetField: "DnsServers",
 					ConvertType: ve.ConvertWithN,
+				},
+				"project_name": {
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
