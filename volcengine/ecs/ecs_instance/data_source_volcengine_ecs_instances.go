@@ -157,6 +157,11 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The charge type of ECS instance.",
 						},
+						"spot_strategy": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The spot strategy of ECS instance.",
+						},
 						"instance_type": {
 							Type:        schema.TypeString,
 							Computed:    true,
