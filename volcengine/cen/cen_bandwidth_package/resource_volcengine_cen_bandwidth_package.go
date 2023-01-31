@@ -92,6 +92,7 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				DiffSuppressFunc: periodDiffSuppress,
 				Description:      "The period of the cen bandwidth package.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	s := DataSourceVolcengineCenBandwidthPackages().Schema["bandwidth_packages"].Elem.(*schema.Resource).Schema

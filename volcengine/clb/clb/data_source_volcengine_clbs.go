@@ -180,6 +180,21 @@ func DataSourceVolcengineClbs() *schema.Resource {
 							Description: "The ProjectName of the Clb.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"master_zone_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The master zone ID of the CLB.",
+						},
+						"slave_zone_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The slave zone ID of the CLB.",
+						},
+						"logic_topic_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The topic ID of the CLB.",
+						},
 					},
 				},
 			},

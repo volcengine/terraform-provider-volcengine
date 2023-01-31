@@ -45,6 +45,7 @@ func DataSourceVolcengineCens() *schema.Resource {
 				Computed:    true,
 				Description: "The total count of cen query.",
 			},
+			"tags": ve.TagsSchema(),
 			"cens": {
 				Description: "The collection of cen query.",
 				Type:        schema.TypeList,
@@ -99,6 +100,7 @@ func DataSourceVolcengineCens() *schema.Resource {
 							},
 							Description: "A list of bandwidth package IDs of the cen.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},
