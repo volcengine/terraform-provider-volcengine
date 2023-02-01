@@ -190,11 +190,6 @@ func DataSourceVolcengineClbs() *schema.Resource {
 							Computed:    true,
 							Description: "The slave zone ID of the CLB.",
 						},
-						"logic_topic_id": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The topic ID of the CLB.",
-						},
 					},
 				},
 			},

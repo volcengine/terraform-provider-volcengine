@@ -32,6 +32,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group_server"
+	clbZone "github.com/volcengine/terraform-provider-volcengine/volcengine/clb/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
@@ -178,6 +179,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_certificates":         certificate.DataSourceVolcengineCertificates(),
 			"volcengine_clb_rules":            rule.DataSourceVolcengineRules(),
 			"volcengine_server_group_servers": server_group_server.DataSourceVolcengineServerGroupServers(),
+			"volcengine_clb_zones":            clbZone.DataSourceVolcengineClbZones(),
 
 			// ================ EBS ================
 			"volcengine_volumes": volume.DataSourceVolcengineVolumes(),
