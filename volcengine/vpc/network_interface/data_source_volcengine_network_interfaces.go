@@ -59,10 +59,31 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 				Optional:    true,
 				Description: "An id of the security group to which the secondary ENI belongs.",
 			},
+			"network_interface_ids": {
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional:    true,
+				Description: "A list of network interface ids.",
+			},
 			"network_interface_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "A name of ENI.",
+			},
+			"private_ip_addresses": {
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Optional:    true,
+				Description: "A list of private IP addresses.",
+			},
+			"zone_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The zone ID.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
@@ -190,6 +211,59 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 							Computed:    true,
 							Description: "The IP address of the EIP to which the ENI associates.",
 						},
+						"service_managed": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether the network card has been authorized to be used by other account services.",
+						},
+						"private_ip_sets": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The IP address of secondary private network interface.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"private_ip_address": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The secondary private network IP address of the network interface card.",
+									},
+									"associated_elastic_ip": {
+										Type:        schema.TypeSet,
+										Computed:    true,
+										Description: "The public IP that secondary private network IP associated with.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"allocation_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The public IP ID.",
+												},
+												"eip_address": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The public IP address.",
+												},
+											},
+										},
+									},
+									"primary": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the network interface is primary IP address.",
+									},
+								},
+							},
+						},
+						//"associated_elastic_ip_id": {
+						//	Type:        schema.TypeString,
+						//	Computed:    true,
+						//	Description: "The allocation id of the EIP to which the ENI associates.",
+						//},
+						//"associated_elastic_ip_address": {
+						//	Type:        schema.TypeString,
+						//	Computed:    true,
+						//	Description: "The IP address of the EIP to which the ENI associates.",
+						//},
 						"project_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
