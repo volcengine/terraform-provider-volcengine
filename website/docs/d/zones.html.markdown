@@ -1,5 +1,5 @@
 ---
-subcategory: "ECS"
+subcategory: "ESCLOUD"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_zones"
 sidebar_current: "docs-volcengine-datasource-zones"
