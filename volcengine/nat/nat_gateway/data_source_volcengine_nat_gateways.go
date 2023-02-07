@@ -25,6 +25,7 @@ func DataSourceVolcengineNatGateways() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "The Name Regex of NatGateway.",
 			},
+			"tags": ve.TagsSchema(),
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -172,6 +173,7 @@ func DataSourceVolcengineNatGateways() *schema.Resource {
 							Computed:    true,
 							Description: "The update time of the NatGateway.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

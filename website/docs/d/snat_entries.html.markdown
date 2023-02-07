@@ -21,6 +21,7 @@ The following arguments are supported:
 * `nat_gateway_id` - (Optional) An id of the nat gateway to which the entry belongs.
 * `output_file` - (Optional) File name where to save data source results.
 * `snat_entry_name` - (Optional) A name of SNAT entry.
+* `source_cidr` - (Optional) The SourceCidr of SNAT entry.
 * `subnet_id` - (Optional) An id of the subnet that is required to access the Internet.
 
 ## Attributes Reference
@@ -32,6 +33,7 @@ In addition to all arguments above, the following attributes are exported:
     * `nat_gateway_id` - The id of the nat gateway to which the entry belongs.
     * `snat_entry_id` - The id of the SNAT entry.
     * `snat_entry_name` - The name of the SNAT entry.
+    * `source_cidr` - The SourceCidr of the SNAT entry.
     * `status` - The status of the SNAT entry.
     * `subnet_id` - The id of the subnet that is required to access the internet.
 * `total_count` - The total count of snat entries query.

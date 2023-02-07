@@ -23,7 +23,13 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `spec` - (Optional) The specification of the NatGateway.
 * `subnet_id` - (Optional) The id of the Subnet.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The id of the VPC.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -46,6 +52,9 @@ In addition to all arguments above, the following attributes are exported:
     * `spec` - The specification of the NatGateway.
     * `status` - The status of the NatGateway.
     * `subnet_id` - The ID of the Subnet.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `updated_at` - The update time of the NatGateway.
     * `vpc_id` - The ID of the VPC.
 * `total_count` - The total count of NatGateway query.
