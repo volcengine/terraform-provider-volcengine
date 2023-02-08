@@ -20,7 +20,9 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of SecurityGroup.
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The ProjectName of SecurityGroup.
+* `security_group_names` - (Optional) The list of security group name to query.
 * `tags` - (Optional) Tags.
+* `vpc_id` - (Optional) The ID of vpc where security group is located.
 
 The `tags` object supports the following:
 

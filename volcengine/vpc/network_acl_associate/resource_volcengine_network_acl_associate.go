@@ -2,9 +2,10 @@ package network_acl_associate
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
-	"time"
 )
 
 /*
