@@ -40,10 +40,11 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 				Description: "The id of the nat gateway to which the entry belongs.",
 			},
 			"subnet_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The id of the subnet that is required to access the internet.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"subnet_id", "source_cidr"},
+				Description:  "The id of the subnet that is required to access the internet. Only one of `subnet_id,source_cidr` can be specified.",
 			},
 			"eip_id": {
 				Type:        schema.TypeString,
@@ -60,6 +61,13 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The status of the SNAT entry.",
+			},
+			"source_cidr": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"subnet_id", "source_cidr"},
+				Description:  "The SourceCidr of the SNAT entry. Only one of `subnet_id,source_cidr` can be specified.",
 			},
 		},
 	}

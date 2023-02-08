@@ -66,6 +66,15 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 				Description: "The ProjectName of ECS instance.",
 			},
 			"tags": ve.TagsSchema(),
+			"deployment_set_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of DeploymentSet IDs.",
+			},
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -301,6 +310,11 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 							Description: "The ProjectName of ECS instance.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"deployment_set_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of DeploymentSet.",
+						},
 					},
 				},
 			},

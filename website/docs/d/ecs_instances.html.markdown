@@ -16,6 +16,7 @@ data "volcengine_ecs_instances" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
+* `deployment_set_ids` - (Optional) A list of DeploymentSet IDs.
 * `hpc_cluster_id` - (Optional) The hpc cluster ID of ECS instance.
 * `ids` - (Optional) A list of ECS instance IDs.
 * `instance_charge_type` - (Optional) The charge type of ECS instance.
@@ -39,6 +40,7 @@ In addition to all arguments above, the following attributes are exported:
 * `instances` - The collection of ECS instance query.
     * `cpus` - The number of ECS instance CPU cores.
     * `created_at` - The create time of ECS instance.
+    * `deployment_set_id` - The ID of DeploymentSet.
     * `description` - The description of ECS instance.
     * `gpu_devices` - The GPU device info of Instance.
         * `count` - The Count of GPU device.

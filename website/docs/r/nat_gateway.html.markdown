@@ -26,6 +26,12 @@ The following arguments are supported:
 * `description` - (Optional) The description of the NatGateway.
 * `nat_gateway_name` - (Optional) The name of the NatGateway.
 * `spec` - (Optional) The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large`.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
