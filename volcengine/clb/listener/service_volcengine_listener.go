@@ -458,6 +458,12 @@ func (s *VolcengineListenerService) DatasourceResources(*schema.ResourceData, *s
 			"HealthCheck.HttpCode": {
 				TargetField: "health_check_http_code",
 			},
+			"HealthCheck.UdpRequest": {
+				TargetField: "health_check_udp_request",
+			},
+			"HealthCheck.UdpExpect": {
+				TargetField: "health_check_udp_expect",
+			},
 		},
 	}
 }

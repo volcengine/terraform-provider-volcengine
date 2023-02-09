@@ -30,6 +30,11 @@ func DataSourceVolcengineVpcs() *schema.Resource {
 				Optional:    true,
 				Description: "The ProjectName of the VPC.",
 			},
+			"vpc_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The vpc name to query.",
+			},
 			"tags": ve.TagsSchema(),
 
 			"output_file": {

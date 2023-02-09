@@ -106,6 +106,16 @@ func DataSourceVolcengineSecurityGroupRules() *schema.Resource {
 							Computed:    true,
 							Description: "description of a group rule.",
 						},
+						"creation_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The creation time of security group rule.",
+						},
+						"update_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The update time of security group rule.",
+						},
 					},
 				},
 			},

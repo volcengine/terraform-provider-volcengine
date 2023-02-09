@@ -27,6 +27,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `security_group_rules` - The collection of SecurityGroup query.
     * `cidr_ip` - Cidr ip of egress/ingress Rule.
+    * `creation_time` - The creation time of security group rule.
     * `description` - description of a group rule.
     * `direction` - Direction of rule, ingress (inbound) or egress (outbound).
     * `policy` - Access strategy.
@@ -36,5 +37,6 @@ In addition to all arguments above, the following attributes are exported:
     * `protocol` - Protocol of the SecurityGroup, the value can be `tcp` or `udp` or `icmp` or `all`.
     * `security_group_id` - Id of SecurityGroup.
     * `source_group_id` - ID of the source security group whose access permission you want to set.
+    * `update_time` - The update time of security group rule.
 
 

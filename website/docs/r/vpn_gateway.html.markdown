@@ -27,7 +27,13 @@ The following arguments are supported:
 * `billing_type` - (Optional, ForceNew) The BillingType of the VPN gateway. Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.
 * `description` - (Optional) The description of the VPN gateway.
 * `period` - (Optional) The Period of the VPN gateway. This parameter is only useful when creating vpn gateway. Default period unit is Month.
+* `tags` - (Optional) Tags.
 * `vpn_gateway_name` - (Optional) The name of the VPN gateway.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

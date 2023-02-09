@@ -21,8 +21,14 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of VPN gateway.
 * `output_file` - (Optional) File name where to save data source results.
 * `subnet_id` - (Optional) A subnet ID of the VPN gateway.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) A VPC ID of the VPN gateway.
 * `vpn_gateway_names` - (Optional) A list of VPN gateway names.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -42,6 +48,9 @@ In addition to all arguments above, the following attributes are exported:
     * `lock_reason` - The lock reason of the VPN gateway.
     * `route_count` - The route count of the VPN gateway.
     * `status` - The status of the VPN gateway.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of VPN gateway.
     * `vpc_id` - The VPC ID of the VPN gateway.
     * `vpn_gateway_id` - The ID of the VPN gateway.

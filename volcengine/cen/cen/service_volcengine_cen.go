@@ -181,6 +181,12 @@ func (s *VolcengineCenService) CreateResource(resourceData *schema.ResourceData,
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -188,12 +194,14 @@ func (s *VolcengineCenService) CreateResource(resourceData *schema.ResourceData,
 }
 
 func (s *VolcengineCenService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyCenAttributes",
 			ConvertMode: ve.RequestConvertAll,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["CenId"] = d.Id()
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -202,7 +210,10 @@ func (s *VolcengineCenService) ModifyResource(resourceData *schema.ResourceData,
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	tagCallback := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "cen", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, tagCallback...)
+	return callbacks
 }
 
 func (s *VolcengineCenService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -250,6 +261,15 @@ func (s *VolcengineCenService) DatasourceResources(*schema.ResourceData, *schema
 			"cen_names": {
 				TargetField: "CenNames",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "CenName",

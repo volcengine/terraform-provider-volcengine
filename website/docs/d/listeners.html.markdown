@@ -38,6 +38,8 @@ In addition to all arguments above, the following attributes are exported:
     * `health_check_interval` - The interval executing health check.
     * `health_check_method` - The method of health check.
     * `health_check_timeout` - The response timeout of health check.
+    * `health_check_udp_expect` - The expected response string for the health check.
+    * `health_check_udp_request` - A request string to perform a health check.
     * `health_check_un_healthy_threshold` - The unhealthy threshold of health check.
     * `health_check_uri` - The uri of health check.
     * `id` - The ID of the Listener.

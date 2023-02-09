@@ -69,6 +69,7 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Description:  "The billing type of the NatGateway, the value is `PostPaid`.",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 			},
+			"tags": ve.TagsSchema(),
 			//"period_unit": {
 			//	Type:         schema.TypeString,
 			//	Optional:     true,

@@ -172,6 +172,16 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The normal http status code of health check.",
 						},
+						"health_check_udp_request": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "A request string to perform a health check.",
+						},
+						"health_check_udp_expect": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The expected response string for the health check.",
+						},
 					},
 				},
 			},
