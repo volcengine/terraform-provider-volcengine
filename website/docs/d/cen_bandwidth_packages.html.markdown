@@ -24,6 +24,12 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of cen bandwidth package.
 * `output_file` - (Optional) File name where to save data source results.
 * `peer_geographic_region_set_id` - (Optional) A peer geographic region set id.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -44,6 +50,9 @@ In addition to all arguments above, the following attributes are exported:
     * `peer_geographic_region_set_id` - The peer geographic region set id of the cen bandwidth package.
     * `remaining_bandwidth` - The remain bandwidth of the cen bandwidth package.
     * `status` - The status of the cen bandwidth package.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of the cen bandwidth package.
 * `total_count` - The total count of cen bandwidth package query.
 

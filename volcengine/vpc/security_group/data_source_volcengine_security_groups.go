@@ -19,6 +19,19 @@ func DataSourceVolcengineSecurityGroups() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of SecurityGroup IDs.",
 			},
+			"vpc_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of vpc where security group is located.",
+			},
+			"security_group_names": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The list of security group name to query.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,

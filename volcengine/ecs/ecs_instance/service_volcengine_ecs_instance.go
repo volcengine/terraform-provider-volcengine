@@ -867,6 +867,10 @@ func (s *VolcengineEcsService) DatasourceResources(data *schema.ResourceData, re
 					},
 				},
 			},
+			"deployment_set_ids": {
+				TargetField: "DeploymentSetIds",
+				ConvertType: ve.ConvertWithN,
+			},
 		},
 		NameField:        "InstanceName",
 		IdField:          "InstanceId",

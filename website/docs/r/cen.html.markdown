@@ -19,6 +19,12 @@ resource "volcengine_cen" "foo" {
 The following arguments are supported:
 * `cen_name` - (Optional) The name of the cen.
 * `description` - (Optional) The description of the cen.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

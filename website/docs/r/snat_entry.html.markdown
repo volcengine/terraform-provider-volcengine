@@ -21,8 +21,9 @@ resource "volcengine_snat_entry" "foo" {
 The following arguments are supported:
 * `eip_id` - (Required) The id of the public ip address used by the SNAT entry.
 * `nat_gateway_id` - (Required, ForceNew) The id of the nat gateway to which the entry belongs.
-* `subnet_id` - (Required, ForceNew) The id of the subnet that is required to access the internet.
 * `snat_entry_name` - (Optional) The name of the SNAT entry.
+* `source_cidr` - (Optional, ForceNew) The SourceCidr of the SNAT entry. Only one of `subnet_id,source_cidr` can be specified.
+* `subnet_id` - (Optional, ForceNew) The id of the subnet that is required to access the internet. Only one of `subnet_id,source_cidr` can be specified.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -31,6 +31,12 @@ The following arguments are supported:
 * `peer_geographic_region_set_id` - (Optional, ForceNew) The peer geographic region set id of the cen bandwidth package.
 * `period_unit` - (Optional) The period unit of the cen bandwidth package.
 * `period` - (Optional) The period of the cen bandwidth package.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

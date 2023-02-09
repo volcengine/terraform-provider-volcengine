@@ -20,6 +20,12 @@ The following arguments are supported:
 * `ids` - (Optional) A list of cen IDs.
 * `name_regex` - (Optional) A Name Regex of cen.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -32,6 +38,9 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of the cen.
     * `id` - The ID of the cen.
     * `status` - The status of the cen.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of the cen.
 * `total_count` - The total count of cen query.
 

@@ -44,6 +44,7 @@ func DataSourceVolcengineVpnGateways() *schema.Resource {
 				ValidateFunc: validation.IsIPAddress,
 				Description:  "A IP address of the VPN gateway.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -163,6 +164,7 @@ func DataSourceVolcengineVpnGateways() *schema.Resource {
 							Computed:    true,
 							Description: "The deleted time of the VPN gateway.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},
