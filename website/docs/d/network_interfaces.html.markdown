@@ -18,9 +18,11 @@ data "volcengine_network_interfaces" "default" {
 The following arguments are supported:
 * `ids` - (Optional) A list of ENI ids.
 * `instance_id` - (Optional) An id of the instance to which the ENI is bound.
+* `network_interface_ids` - (Optional) A list of network interface ids.
 * `network_interface_name` - (Optional) A name of ENI.
 * `output_file` - (Optional) File name where to save data source results.
 * `primary_ip_addresses` - (Optional) A list of primary IP address of ENI.
+* `private_ip_addresses` - (Optional) A list of private IP addresses.
 * `project_name` - (Optional) The ProjectName of the ENI.
 * `security_group_id` - (Optional) An id of the security group to which the secondary ENI belongs.
 * `status` - (Optional) A status of ENI, Optional choice contains `Creating`, `Available`, `Attaching`, `InUse`, `Detaching`, `Deleting`.
@@ -28,6 +30,7 @@ The following arguments are supported:
 * `tags` - (Optional) Tags.
 * `type` - (Optional) A type of ENI, Optional choice contains `primary`, `secondary`.
 * `vpc_id` - (Optional) An id of the virtual private cloud (VPC) to which the ENI belongs.
+* `zone_id` - (Optional) The zone ID.
 
 The `tags` object supports the following:
 
@@ -49,8 +52,15 @@ In addition to all arguments above, the following attributes are exported:
     * `network_interface_name` - The name of the ENI.
     * `port_security_enabled` - The enable of port security.
     * `primary_ip_address` - The primary IP address of the ENI.
+    * `private_ip_sets` - The IP address of secondary private network interface.
+        * `associated_elastic_ip` - The public IP that secondary private network IP associated with.
+            * `allocation_id` - The public IP ID.
+            * `eip_address` - The public IP address.
+        * `primary` - Whether the network interface is primary IP address.
+        * `private_ip_address` - The secondary private network IP address of the network interface card.
     * `project_name` - The ProjectName of the ENI.
     * `security_group_ids` - The list of the security group id to which the secondary ENI belongs.
+    * `service_managed` - Whether the network card has been authorized to be used by other account services.
     * `status` - The status of the ENI.
     * `subnet_id` - The id of the subnet to which the ENI is connected.
     * `tags` - Tags.

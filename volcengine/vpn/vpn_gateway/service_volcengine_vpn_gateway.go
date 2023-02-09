@@ -235,6 +235,10 @@ func (s *VolcengineVpnGatewayService) CreateResource(resourceData *schema.Resour
 					TargetField: "BillingType",
 					Convert:     billingTypeRequestConvert,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) < 1 {
@@ -390,6 +394,15 @@ func (s *VolcengineVpnGatewayService) DatasourceResources(*schema.ResourceData, 
 			"vpn_gateway_names": {
 				TargetField: "VpnGatewayNames",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "VpnGatewayName",

@@ -45,6 +45,7 @@ func ResourceVolcengineCen() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the cen.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	s := DataSourceVolcengineCens().Schema["cens"].Elem.(*schema.Resource).Schema

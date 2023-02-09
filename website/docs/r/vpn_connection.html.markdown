@@ -63,6 +63,8 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `account_id` - The account ID of the VPN connection.
+* `attach_status` - The IPsec attach status.
+* `attach_type` - The IPsec attach type.
 * `connect_status` - The connect status of the VPN connection.
 * `creation_time` - The create time of VPN connection.
 * `status` - The status of the VPN connection.

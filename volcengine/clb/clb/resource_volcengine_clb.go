@@ -110,6 +110,16 @@ func ResourceVolcengineClb() *schema.Resource {
 				Description: "The ProjectName of the CLB.",
 			},
 			"tags": ve.TagsSchema(),
+			"master_zone_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The master zone ID of the CLB.",
+			},
+			"slave_zone_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The slave zone ID of the CLB.",
+			},
 			//"period_unit": {
 			//	Type:         schema.TypeString,
 			//	Optional:     true,

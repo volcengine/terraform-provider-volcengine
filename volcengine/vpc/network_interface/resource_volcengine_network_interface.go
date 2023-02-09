@@ -73,6 +73,19 @@ func ResourceVolcengineNetworkInterface() *schema.Resource {
 				Computed:    true,
 				Description: "Set port security enable or disable.",
 			},
+			"secondary_private_ip_address_count": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The count of secondary private ip address.",
+			},
+			"private_ip_address": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The list of private ip address.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,

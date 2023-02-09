@@ -60,6 +60,7 @@ func DataSourceVolcengineCenBandwidthPackages() *schema.Resource {
 				Computed:    true,
 				Description: "The total count of cen bandwidth package query.",
 			},
+			"tags": ve.TagsSchema(),
 			"bandwidth_packages": {
 				Description: "The collection of cen bandwidth package query.",
 				Type:        schema.TypeList,
@@ -154,6 +155,7 @@ func DataSourceVolcengineCenBandwidthPackages() *schema.Resource {
 							Computed:    true,
 							Description: "The deleted time of the cen bandwidth package.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},
