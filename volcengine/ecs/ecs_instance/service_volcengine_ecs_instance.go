@@ -18,6 +18,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
+	"golang.org/x/time/rate"
 )
 
 type VolcengineEcsService struct {
@@ -28,8 +29,14 @@ type VolcengineEcsService struct {
 
 func NewEcsService(c *ve.SdkClient) *VolcengineEcsService {
 	return &VolcengineEcsService{
-		Client:        c,
-		Dispatcher:    &ve.Dispatcher{},
+		Client: c,
+		Dispatcher: ve.NewRateLimitDispatcher(&ve.RateInfo{
+			Create: rate.NewLimiter(8, 16),
+			Update: rate.NewLimiter(8, 16),
+			Read:   rate.NewLimiter(8, 16),
+			Delete: rate.NewLimiter(8, 16),
+			Data:   rate.NewLimiter(8, 16),
+		}),
 		SubnetService: subnet.NewSubnetService(c),
 	}
 }
