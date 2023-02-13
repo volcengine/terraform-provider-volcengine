@@ -1,13 +1,34 @@
 package common
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"golang.org/x/time/rate"
 )
 
 type Dispatcher struct {
+	rateInfo *RateInfo
+}
+
+type RateInfo struct {
+	Create *rate.Limiter
+	Read   *rate.Limiter
+	Update *rate.Limiter
+	Delete *rate.Limiter
+	Data   *rate.Limiter
+}
+
+func NewRateLimitDispatcher(r *RateInfo) *Dispatcher {
+	return &Dispatcher{
+		rateInfo: r,
+	}
 }
 
 func (d *Dispatcher) Create(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	if d.rateInfo != nil && d.rateInfo.Create != nil {
+		_ = d.rateInfo.Create.Wait(context.Background())
+	}
 	callbacks := resourceService.CreateResource(resourceDate, resource)
 	var calls []SdkCall
 	for _, callback := range callbacks {
@@ -24,6 +45,9 @@ func (d *Dispatcher) Create(resourceService ResourceService, resourceDate *schem
 }
 
 func (d *Dispatcher) Update(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	if d.rateInfo != nil && d.rateInfo.Update != nil {
+		_ = d.rateInfo.Update.Wait(context.Background())
+	}
 	callbacks := resourceService.ModifyResource(resourceDate, resource)
 	var calls []SdkCall
 	for _, callback := range callbacks {
@@ -40,6 +64,9 @@ func (d *Dispatcher) Update(resourceService ResourceService, resourceDate *schem
 }
 
 func (d *Dispatcher) Read(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	if d.rateInfo != nil && d.rateInfo.Read != nil {
+		_ = d.rateInfo.Read.Wait(context.Background())
+	}
 	instance, err := resourceService.ReadResource(resourceDate, resourceDate.Id())
 	if err != nil {
 		return err
@@ -67,6 +94,9 @@ func (d *Dispatcher) Read(resourceService ResourceService, resourceDate *schema.
 }
 
 func (d *Dispatcher) Delete(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	if d.rateInfo != nil && d.rateInfo.Delete != nil {
+		_ = d.rateInfo.Delete.Wait(context.Background())
+	}
 	callbacks := resourceService.RemoveResource(resourceDate, resource)
 	var calls []SdkCall
 	for _, callback := range callbacks {
@@ -88,6 +118,9 @@ func (d *Dispatcher) Data(resourceService ResourceService, resourceDate *schema.
 		condition  map[string]interface{}
 		collection []interface{}
 	)
+	if d.rateInfo != nil && d.rateInfo.Data != nil {
+		_ = d.rateInfo.Data.Wait(context.Background())
+	}
 	info = resourceService.DatasourceResources(resourceDate, resource)
 	condition, err = DataSourceToRequest(resourceDate, resource, info)
 	if err != nil {
