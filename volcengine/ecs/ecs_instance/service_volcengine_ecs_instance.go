@@ -21,6 +21,18 @@ import (
 	"golang.org/x/time/rate"
 )
 
+var rateInfo *ve.RateInfo
+
+func init() {
+	rateInfo = &ve.RateInfo{
+		Create: rate.NewLimiter(4, 10),
+		Update: rate.NewLimiter(4, 10),
+		Read:   rate.NewLimiter(4, 10),
+		Delete: rate.NewLimiter(4, 10),
+		Data:   rate.NewLimiter(4, 10),
+	}
+}
+
 type VolcengineEcsService struct {
 	Client        *ve.SdkClient
 	Dispatcher    *ve.Dispatcher
@@ -29,14 +41,8 @@ type VolcengineEcsService struct {
 
 func NewEcsService(c *ve.SdkClient) *VolcengineEcsService {
 	return &VolcengineEcsService{
-		Client: c,
-		Dispatcher: ve.NewRateLimitDispatcher(&ve.RateInfo{
-			Create: rate.NewLimiter(8, 16),
-			Update: rate.NewLimiter(8, 16),
-			Read:   rate.NewLimiter(8, 16),
-			Delete: rate.NewLimiter(8, 16),
-			Data:   rate.NewLimiter(8, 16),
-		}),
+		Client:        c,
+		Dispatcher:    ve.NewRateLimitDispatcher(rateInfo),
 		SubnetService: subnet.NewSubnetService(c),
 	}
 }
