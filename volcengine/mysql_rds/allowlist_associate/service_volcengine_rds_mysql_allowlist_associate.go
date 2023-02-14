@@ -56,7 +56,7 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) ReadResource(resourceData 
 		return resultsMap, errors.New("Value is not map ")
 	}
 	if len(resultsMap) == 0 {
-		return resultsMap, fmt.Errorf("Rds instance %s not exist ", id)
+		return resultsMap, fmt.Errorf("Rds allowlist %s not exist ", ids[1])
 	}
 	logger.Debug(logger.ReqFormat, action, resultsMap)
 	instances = resultsMap["AssociatedInstances"].([]interface{})
@@ -71,6 +71,9 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) ReadResource(resourceData 
 		if instanceMap["InstanceId"].(string) == ids[0] {
 			data = resultsMap
 		}
+	}
+	if len(data) == 0 {
+		return data, fmt.Errorf("Rds allowlist associate %s not exist ", id)
 	}
 	return data, err
 }

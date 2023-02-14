@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -51,24 +50,17 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 				Description: "The type of IP address in the whitelist. Currently only IPv4 addresses are supported.",
 			},
 			"allow_list": {
-				Type:        schema.TypeString,
-				Required:    true,
+				Type:     schema.TypeList,
+				Required: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 				Description: "Enter an IP address or a range of IP addresses in CIDR format.",
 			},
 			"allow_list_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The id of the allow list.",
-			},
-			"modify_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Cover",
-					"Append",
-					"Delete",
-				}, false),
-				Description: "The modify mode.",
 			},
 			"apply_instance_number": {
 				Type:        schema.TypeInt,
