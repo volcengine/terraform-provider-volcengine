@@ -1,7 +1,9 @@
 package allowlist_associate
 
 import (
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -24,7 +26,53 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) ReadResources(m map[string
 }
 
 func (s *VolcengineRdsMysqlAllowListAssociateService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
-	return nil, nil
+	var (
+		results     interface{}
+		resultsMap  = make(map[string]interface{})
+		instanceMap = make(map[string]interface{})
+		instances   = make([]interface{}, 0)
+		ok          bool
+	)
+	if id == "" {
+		id = s.ReadResourceId(resourceData.Id())
+	}
+	ids := strings.Split(id, ":")
+	if len(ids) != 2 {
+		return data, err
+	}
+	req := map[string]interface{}{
+		"AllowListId": ids[1],
+	}
+	action := "DescribeAllowListDetail"
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return data, err
+	}
+	results, err = volc.ObtainSdkValue("Result", *resp)
+	if err != nil {
+		return data, err
+	}
+	if resultsMap, ok = results.(map[string]interface{}); !ok {
+		return resultsMap, errors.New("Value is not map ")
+	}
+	if len(resultsMap) == 0 {
+		return resultsMap, fmt.Errorf("Rds instance %s not exist ", id)
+	}
+	logger.Debug(logger.ReqFormat, action, resultsMap)
+	instances = resultsMap["AssociatedInstances"].([]interface{})
+	logger.Debug(logger.ReqFormat, action, instances)
+	for _, instance := range instances {
+		if instanceMap, ok = instance.(map[string]interface{}); !ok {
+			return data, errors.New("instance is not map ")
+		}
+		if len(instanceMap) == 0 {
+			continue
+		}
+		if instanceMap["InstanceId"].(string) == ids[0] {
+			data = resultsMap
+		}
+	}
+	return data, err
 }
 
 func (s *VolcengineRdsMysqlAllowListAssociateService) RefreshResourceState(data *schema.ResourceData, strings []string, duration time.Duration, id string) *resource.StateChangeConf {
