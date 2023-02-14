@@ -79,6 +79,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance_parameter_log"
 	mongodbRegion "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/region"
 	mongodbZone "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/mysql_rds/allowlist"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/mysql_rds/allowlist_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/dnat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
@@ -261,6 +263,9 @@ func Provider() terraform.ResourceProvider {
 			// ================ RDS V2 ==============
 			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
 
+			// ================ RDS MySQL =============
+			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
+
 			// ================ ESCloud =============
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
 			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
@@ -399,6 +404,10 @@ func Provider() terraform.ResourceProvider {
 
 			// ================ RDS V2 ==============
 			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
+
+			// ================ RDS MySQL =============
+			"volcengine_rds_mysql_allowlist":           allowlist.ResourceVolcengineRdsMysqlAllowlist(),
+			"volcengine_rds_mysql_allowlist_associate": allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
 
 			// ================ ESCloud ================
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
