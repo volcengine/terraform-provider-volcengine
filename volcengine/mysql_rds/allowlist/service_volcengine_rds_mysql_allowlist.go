@@ -50,32 +50,50 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResources(condition map[string]
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.AllowLists is not slice ")
 		}
+		for index, ele := range data {
+			allowList := ele.(map[string]interface{})
+			query := map[string]interface{}{
+				"AllowListId": allowList["AllowListId"],
+			}
+			action = "DescribeAllowListDetail"
+			logger.Debug(logger.ReqFormat, action, query)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &query)
+			if err != nil {
+				return data, err
+			}
+			logger.Debug(logger.RespFormat, action, query, *resp)
+			instances, err := volc.ObtainSdkValue("Result.AssociatedInstances", *resp)
+			if err != nil {
+				return data, err
+			}
+			data[index].(map[string]interface{})["AssociatedInstances"] = instances
+		}
 		return data, err
 	})
 }
 
 func (s *VolcengineRdsMysqlAllowListService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		results interface{}
-		ok      bool
+		results []interface{}
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
-		"AllowListId": id,
+		"RegionId": s.Client.Region,
 	}
-	action := "DescribeAllowListDetail"
-	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
-	results, err = volc.ObtainSdkValue("Result", *resp)
-	if err != nil {
-		return data, err
-	}
-	if data, ok = results.(map[string]interface{}); !ok {
-		return data, errors.New("Value is not map ")
+	for _, v := range results {
+		result, ok := v.(map[string]interface{})
+		if !ok {
+			return data, errors.New("Value is not map ")
+		}
+		if result["AllowListId"].(string) == id {
+			data = result
+		}
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("Rds instance %s not exist ", id)
@@ -100,6 +118,26 @@ func (s *VolcengineRdsMysqlAllowListService) CreateResource(data *schema.Resourc
 			Action:      "CreateAllowList",
 			ConvertMode: volc.RequestConvertAll,
 			ContentType: volc.ContentTypeJson,
+			Convert: map[string]volc.RequestConvert{
+				"allow_list": {
+					Ignore: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+				allowLists := d.Get("allow_list").([]interface{})
+				if len(allowLists) == 1 {
+					(*call.SdkParam)["AllowList"] = allowLists[0]
+					return true, nil
+				}
+				lists := ""
+				for _, list := range allowLists {
+					lists += list.(string)
+					lists += ","
+				}
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
+				(*call.SdkParam)["AllowList"] = lists[0 : len(lists)-1]
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -120,6 +158,39 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 			Action:      "ModifyAllowList",
 			ConvertMode: volc.RequestConvertInConvert,
 			ContentType: volc.ContentTypeJson,
+			Convert: map[string]volc.RequestConvert{
+				"allow_list": {
+					Ignore: true,
+				},
+				"apply_instance_num": {
+					Ignore: true,
+				},
+				"allow_list_desc": {
+					ForceGet: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+				// 修改allowList必须传ApplyInstanceNum
+				resp, err := s.ReadResource(d, d.Id())
+				if err != nil {
+					return false, err
+				}
+				num := resp["AssociatedInstanceNum"].(float64)
+				(*call.SdkParam)["ApplyInstanceNum"] = int(num)
+				allowLists := d.Get("allow_list").([]interface{})
+				if len(allowLists) == 1 {
+					(*call.SdkParam)["AllowList"] = allowLists[0]
+					return true, nil
+				}
+				lists := ""
+				for _, list := range allowLists {
+					lists += list.(string)
+					lists += ","
+				}
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
+				(*call.SdkParam)["AllowList"] = lists[0 : len(lists)-1]
+				return true, nil
+			},
 			SdkParam: &map[string]interface{}{
 				"AllowListId":   data.Id(),
 				"AllowListName": data.Get("allow_list_name").(string),
@@ -160,6 +231,9 @@ func (s *VolcengineRdsMysqlAllowListService) DatasourceResources(data *schema.Re
 		ResponseConverts: map[string]volc.ResponseConvert{
 			"AllowListIPNum": {
 				TargetField: "allow_list_ip_num",
+			},
+			"VPC": {
+				TargetField: "vpc",
 			},
 		},
 	}

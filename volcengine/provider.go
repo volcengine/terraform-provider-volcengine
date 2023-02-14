@@ -81,8 +81,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance_parameter_log"
 	mongodbRegion "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/region"
 	mongodbZone "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/zone"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/mysql_rds/allowlist"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/mysql_rds/allowlist_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/dnat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"

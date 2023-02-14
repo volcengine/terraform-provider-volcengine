@@ -65,6 +65,30 @@ func DataSourceVolcengineRdsMysqlAllowLists() *schema.Resource {
 							Computed:    true,
 							Description: "The total number of instances bound under the whitelist.",
 						},
+						"associated_instances": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The list of instances.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"instance_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The id of the instance.",
+									},
+									"instance_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the instance.",
+									},
+									"vpc": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The id of the vpc.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
