@@ -342,6 +342,9 @@ func (s *VolcengineVkeClusterService) CreateResource(resourceData *schema.Resour
 								"subnet_ids": {
 									ConvertType: ve.ConvertJsonArray,
 								},
+								"vpc_id": {
+									Ignore: true,
+								},
 							},
 						},
 					},
@@ -427,6 +430,9 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 							NextLevelConvert: map[string]ve.RequestConvert{
 								"subnet_ids": {
 									ConvertType: ve.ConvertJsonArray,
+								},
+								"vpc_id": {
+									Ignore: true,
 								},
 							},
 						},
