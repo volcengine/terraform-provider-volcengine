@@ -33,14 +33,14 @@ func Debug(format string, action string, req interface{}, v ...interface{}) {
 	message := fmt.Sprintf("[DEBUG] {(t-%v):%v:%v}", GetGID(), file, line)
 	log.Printf(message+format, action, req, v)
 }
-func DebugInfo(format string, info interface{}) {
+func DebugInfo(format string, info ...interface{}) {
 	_, file, line, _ := runtime.Caller(skip)
 	start := strings.LastIndex(file, "/")
 	if start != -1 {
 		file = file[start+1:]
 	}
 	message := fmt.Sprintf("[DEBUG] {%v:%v}", file, line)
-	log.Printf(message+format, info)
+	log.Printf(message+format, info...)
 }
 
 func Info(format string, v ...interface{}) {
