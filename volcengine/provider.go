@@ -36,6 +36,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group_server"
+	clbZone "github.com/volcengine/terraform-provider-volcengine/volcengine/clb/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
@@ -98,6 +99,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/route_entry"
@@ -179,6 +182,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_security_groups":      security_group.DataSourceVolcengineSecurityGroups(),
 			"volcengine_security_group_rules": security_group_rule.DataSourceVolcengineSecurityGroupRules(),
 			"volcengine_network_interfaces":   network_interface.DataSourceVolcengineNetworkInterfaces(),
+			"volcengine_network_acls":         network_acl.DataSourceVolcengineNetworkAcls(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
@@ -191,6 +195,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_certificates":         certificate.DataSourceVolcengineCertificates(),
 			"volcengine_clb_rules":            rule.DataSourceVolcengineRules(),
 			"volcengine_server_group_servers": server_group_server.DataSourceVolcengineServerGroupServers(),
+			"volcengine_clb_zones":            clbZone.DataSourceVolcengineClbZones(),
 
 			// ================ EBS ================
 			"volcengine_volumes": volume.DataSourceVolcengineVolumes(),
@@ -297,6 +302,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_network_interface":        network_interface.ResourceVolcengineNetworkInterface(),
 			"volcengine_network_interface_attach": network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
 			"volcengine_security_group_rule":      security_group_rule.ResourceVolcengineSecurityGroupRule(),
+			"volcengine_network_acl":              network_acl.ResourceVolcengineNetworkAcl(),
+			"volcengine_network_acl_associate":    network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),

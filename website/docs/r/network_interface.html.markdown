@@ -27,7 +27,9 @@ The following arguments are supported:
 * `network_interface_name` - (Optional) The name of the ENI.
 * `port_security_enabled` - (Optional) Set port security enable or disable.
 * `primary_ip_address` - (Optional, ForceNew) The primary IP address of the ENI.
+* `private_ip_address` - (Optional) The list of private ip address.
 * `project_name` - (Optional, ForceNew) The ProjectName of the ENI.
+* `secondary_private_ip_address_count` - (Optional) The count of secondary private ip address.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:

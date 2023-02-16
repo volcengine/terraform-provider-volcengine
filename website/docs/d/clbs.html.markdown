@@ -47,10 +47,12 @@ In addition to all arguments above, the following attributes are exported:
     * `load_balancer_name` - The name of the Clb.
     * `load_balancer_spec` - The specifications of the Clb.
     * `lock_reason` - The reason why Clb is locked.
+    * `master_zone_id` - The master zone ID of the CLB.
     * `modification_protection_reason` - The modification protection reason of the Clb.
     * `modification_protection_status` - The modification protection status of the Clb.
     * `overdue_time` - The overdue time of the Clb.
     * `project_name` - The ProjectName of the Clb.
+    * `slave_zone_id` - The slave zone ID of the CLB.
     * `status` - The status of the Clb.
     * `subnet_id` - The subnet ID of the Clb.
     * `tags` - Tags.

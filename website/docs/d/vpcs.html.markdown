@@ -21,6 +21,7 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The ProjectName of the VPC.
 * `tags` - (Optional) Tags.
+* `vpc_name` - (Optional) The vpc name to query.
 
 The `tags` object supports the following:
 

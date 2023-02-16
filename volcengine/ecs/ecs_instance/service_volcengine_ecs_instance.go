@@ -18,7 +18,20 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
+	"golang.org/x/time/rate"
 )
+
+var rateInfo *ve.RateInfo
+
+func init() {
+	rateInfo = &ve.RateInfo{
+		Create: rate.NewLimiter(4, 10),
+		Update: rate.NewLimiter(4, 10),
+		Read:   rate.NewLimiter(4, 10),
+		Delete: rate.NewLimiter(4, 10),
+		Data:   rate.NewLimiter(4, 10),
+	}
+}
 
 type VolcengineEcsService struct {
 	Client        *ve.SdkClient
@@ -29,7 +42,7 @@ type VolcengineEcsService struct {
 func NewEcsService(c *ve.SdkClient) *VolcengineEcsService {
 	return &VolcengineEcsService{
 		Client:        c,
-		Dispatcher:    &ve.Dispatcher{},
+		Dispatcher:    ve.NewRateLimitDispatcher(rateInfo),
 		SubnetService: subnet.NewSubnetService(c),
 	}
 }
@@ -866,6 +879,10 @@ func (s *VolcengineEcsService) DatasourceResources(data *schema.ResourceData, re
 						TargetField: "Values.1",
 					},
 				},
+			},
+			"deployment_set_ids": {
+				TargetField: "DeploymentSetIds",
+				ConvertType: ve.ConvertWithN,
 			},
 		},
 		NameField:        "InstanceName",

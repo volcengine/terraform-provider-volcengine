@@ -186,9 +186,12 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"vpc_id": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										ForceNew:    true,
+										Type:     schema.TypeString,
+										Optional: true,
+										ForceNew: true,
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											return true
+										},
 										Description: "The private network where the cluster control plane network resides.",
 									},
 									"subnet_ids": {

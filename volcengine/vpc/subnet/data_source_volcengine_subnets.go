@@ -35,6 +35,26 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 				Computed:    true,
 				Description: "The total count of Subnet query.",
 			},
+			"zone_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of zone which subnet belongs to.",
+			},
+			"vpc_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of VPC which subnet belongs to.",
+			},
+			"subnet_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The subnet name to query.",
+			},
+			"route_table_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of route table which subnet associated with.",
+			},
 			"subnets": {
 				Description: "The collection of Subnet query.",
 				Type:        schema.TypeList,
@@ -45,6 +65,11 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The ID of Subnet.",
+						},
+						"account_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The account ID which the subnet belongs to.",
 						},
 						"subnet_name": {
 							Type:        schema.TypeString,
@@ -105,6 +130,31 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The type of route table.",
+						},
+						"network_acl_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of network acl which this subnet associate with.",
+						},
+						"route_table": {
+							Type:        schema.TypeSet,
+							MaxItems:    1,
+							Computed:    true,
+							Description: "The route table information.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"route_table_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The route table ID.",
+									},
+									"route_table_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The route table type.",
+									},
+								},
+							},
 						},
 					},
 				},

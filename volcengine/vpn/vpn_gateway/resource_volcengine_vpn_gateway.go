@@ -94,6 +94,7 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				Computed:    true,
 				Description: "The renew type of the VPN gateway.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	dataSource := DataSourceVolcengineVpnGateways().Schema["vpn_gateways"].Elem.(*schema.Resource).Schema

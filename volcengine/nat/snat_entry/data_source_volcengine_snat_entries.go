@@ -33,6 +33,11 @@ func DataSourceVolcengineSnatEntries() *schema.Resource {
 				Optional:    true,
 				Description: "An id of the subnet that is required to access the Internet.",
 			},
+			"source_cidr": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The SourceCidr of SNAT entry.",
+			},
 			"eip_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -79,6 +84,11 @@ func DataSourceVolcengineSnatEntries() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The id of the subnet that is required to access the internet.",
+						},
+						"source_cidr": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The SourceCidr of the SNAT entry.",
 						},
 						"eip_id": {
 							Type:        schema.TypeString,

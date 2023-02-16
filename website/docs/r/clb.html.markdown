@@ -27,10 +27,12 @@ The following arguments are supported:
 * `eni_address` - (Optional, ForceNew) The eni address of the CLB.
 * `load_balancer_billing_type` - (Optional, ForceNew) The billing type of the CLB, the value can be `PostPaid`.
 * `load_balancer_name` - (Optional) The name of the CLB.
+* `master_zone_id` - (Optional) The master zone ID of the CLB.
 * `modification_protection_reason` - (Optional) The reason of the console modification protection.
 * `modification_protection_status` - (Optional) The status of the console modification protection, the value can be `NonProtection` or `ConsoleProtection`.
 * `project_name` - (Optional, ForceNew) The ProjectName of the CLB.
 * `region_id` - (Optional, ForceNew) The region of the request.
+* `slave_zone_id` - (Optional) The slave zone ID of the CLB.
 * `tags` - (Optional) Tags.
 * `vpc_id` - (Optional, ForceNew) The id of the VPC.
 

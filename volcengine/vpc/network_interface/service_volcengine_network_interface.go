@@ -153,6 +153,10 @@ func (s *VolcengineNetworkInterfaceService) CreateResource(resourceData *schema.
 					TargetField: "SecurityGroupIds",
 					ConvertType: ve.ConvertWithN,
 				},
+				"private_ip_address": {
+					TargetField: "PrivateIpAddress",
+					ConvertType: ve.ConvertWithN,
+				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
@@ -243,6 +247,14 @@ func (s *VolcengineNetworkInterfaceService) DatasourceResources(*schema.Resource
 			},
 			"primary_ip_addresses": {
 				TargetField: "PrimaryIpAddresses",
+				ConvertType: ve.ConvertWithN,
+			},
+			"private_ip_addresses": {
+				TargetField: "PrivateIpAddresses",
+				ConvertType: ve.ConvertWithN,
+			},
+			"network_interface_ids": {
+				TargetField: "NetworkInterfaceIds",
 				ConvertType: ve.ConvertWithN,
 			},
 			"tags": {

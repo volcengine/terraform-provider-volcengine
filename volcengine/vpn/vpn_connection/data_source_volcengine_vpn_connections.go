@@ -217,6 +217,16 @@ func DataSourceVolcengineVpnConnections() *schema.Resource {
 							Computed:    true,
 							Description: "Whether to initiate negotiation mode immediately.",
 						},
+						"attach_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The IPsec attach status.",
+						},
+						"attach_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The IPsec attach type.",
+						},
 					},
 				},
 			},
