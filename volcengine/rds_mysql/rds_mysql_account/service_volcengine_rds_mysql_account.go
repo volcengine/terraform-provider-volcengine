@@ -199,6 +199,9 @@ func (s *VolcengineRdsMysqlAccountService) ModifyResource(resourceData *schema.R
 	}
 	if resourceData.HasChange("account_privileges") {
 		addPrivis, removePrivs, _, _ := common.GetSetDifference("account_privileges", resourceData, RdsMysqlAccountPrivilegeHash, false)
+		logger.DebugInfo("account_privileges %v", resourceData.Get("account_privileges"))
+		logger.DebugInfo("addPrivis %v len %d", addPrivis, addPrivis.Len())
+		logger.DebugInfo("removePrivs %v len %d", removePrivs, addPrivis.Len())
 
 		if addPrivis != nil && addPrivis.Len() != 0 {
 			callback := volc.Callback{
