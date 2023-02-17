@@ -7,6 +7,8 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -306,6 +308,10 @@ func Provider() terraform.ResourceProvider {
 			// ================ Bioos ==================
 			"volcengine_bioos_clusters":   bioosCluster.DataSourceVolcengineBioosClusters(),
 			"volcengine_bioos_workspaces": workspace.DataSourceVolcengineBioosWorkspaces(),
+
+			// ================ RdsMysql ================
+			"volcengine_rds_mysql_accounts":  rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
+			"volcengine_rds_mysql_databases": rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -442,6 +448,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_cluster":      bioosCluster.ResourceVolcengineBioosCluster(),
 			"volcengine_bioos_workspace":    workspace.ResourceVolcengineBioosWorkspace(),
 			"volcengine_bioos_cluster_bind": cluster_bind.ResourceVolcengineBioosClusterBind(),
+
+			// ================ RdsMysql ================
+			"volcengine_rds_mysql_account":  rds_mysql_account.ResourceVolcengineRdsMysqlAccount(),
+			"volcengine_rds_mysql_database": rds_mysql_database.ResourceVolcengineRdsMysqlDatabase(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
