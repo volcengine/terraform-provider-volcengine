@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"golang.org/x/sync/semaphore"
 	"golang.org/x/time/rate"
 )
 
@@ -12,11 +13,15 @@ type Dispatcher struct {
 }
 
 type RateInfo struct {
-	Create *rate.Limiter
-	Read   *rate.Limiter
-	Update *rate.Limiter
-	Delete *rate.Limiter
-	Data   *rate.Limiter
+	Create *Rate
+	Read   *Rate
+	Update *Rate
+	Delete *Rate
+	Data   *Rate
+}
+type Rate struct {
+	Limiter   *rate.Limiter
+	Semaphore *semaphore.Weighted
 }
 
 func NewRateLimitDispatcher(r *RateInfo) *Dispatcher {
@@ -26,8 +31,26 @@ func NewRateLimitDispatcher(r *RateInfo) *Dispatcher {
 }
 
 func (d *Dispatcher) Create(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	defer func() {
+		if d.rateInfo != nil && d.rateInfo.Create != nil && d.rateInfo.Create.Semaphore != nil {
+			d.rateInfo.Create.Semaphore.Release(1)
+		}
+	}()
 	if d.rateInfo != nil && d.rateInfo.Create != nil {
-		_ = d.rateInfo.Create.Wait(context.Background())
+		ctx := context.Background()
+		if d.rateInfo.Create.Limiter != nil {
+			err = d.rateInfo.Create.Limiter.Wait(ctx)
+			if err != nil {
+				return err
+			}
+		}
+		if d.rateInfo.Create.Semaphore != nil {
+			err = d.rateInfo.Create.Semaphore.Acquire(ctx, 1)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	callbacks := resourceService.CreateResource(resourceDate, resource)
 	var calls []SdkCall
@@ -45,8 +68,25 @@ func (d *Dispatcher) Create(resourceService ResourceService, resourceDate *schem
 }
 
 func (d *Dispatcher) Update(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	defer func() {
+		if d.rateInfo != nil && d.rateInfo.Update != nil && d.rateInfo.Update.Semaphore != nil {
+			d.rateInfo.Update.Semaphore.Release(1)
+		}
+	}()
 	if d.rateInfo != nil && d.rateInfo.Update != nil {
-		_ = d.rateInfo.Update.Wait(context.Background())
+		ctx := context.Background()
+		if d.rateInfo.Update.Limiter != nil {
+			err = d.rateInfo.Update.Limiter.Wait(ctx)
+			if err != nil {
+				return err
+			}
+		}
+		if d.rateInfo.Update.Semaphore != nil {
+			err = d.rateInfo.Update.Semaphore.Acquire(ctx, 1)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	callbacks := resourceService.ModifyResource(resourceDate, resource)
 	var calls []SdkCall
@@ -64,8 +104,25 @@ func (d *Dispatcher) Update(resourceService ResourceService, resourceDate *schem
 }
 
 func (d *Dispatcher) Read(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	defer func() {
+		if d.rateInfo != nil && d.rateInfo.Read != nil && d.rateInfo.Read.Semaphore != nil {
+			d.rateInfo.Read.Semaphore.Release(1)
+		}
+	}()
 	if d.rateInfo != nil && d.rateInfo.Read != nil {
-		_ = d.rateInfo.Read.Wait(context.Background())
+		ctx := context.Background()
+		if d.rateInfo.Read.Limiter != nil {
+			err = d.rateInfo.Read.Limiter.Wait(ctx)
+			if err != nil {
+				return err
+			}
+		}
+		if d.rateInfo.Read.Semaphore != nil {
+			err = d.rateInfo.Read.Semaphore.Acquire(ctx, 1)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	instance, err := resourceService.ReadResource(resourceDate, resourceDate.Id())
 	if err != nil {
@@ -94,8 +151,25 @@ func (d *Dispatcher) Read(resourceService ResourceService, resourceDate *schema.
 }
 
 func (d *Dispatcher) Delete(resourceService ResourceService, resourceDate *schema.ResourceData, resource *schema.Resource) (err error) {
+	defer func() {
+		if d.rateInfo != nil && d.rateInfo.Delete != nil && d.rateInfo.Delete.Semaphore != nil {
+			d.rateInfo.Delete.Semaphore.Release(1)
+		}
+	}()
 	if d.rateInfo != nil && d.rateInfo.Delete != nil {
-		_ = d.rateInfo.Delete.Wait(context.Background())
+		ctx := context.Background()
+		if d.rateInfo.Delete.Limiter != nil {
+			err = d.rateInfo.Delete.Limiter.Wait(ctx)
+			if err != nil {
+				return err
+			}
+		}
+		if d.rateInfo.Delete.Semaphore != nil {
+			err = d.rateInfo.Delete.Semaphore.Acquire(ctx, 1)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	callbacks := resourceService.RemoveResource(resourceDate, resource)
 	var calls []SdkCall
@@ -118,8 +192,25 @@ func (d *Dispatcher) Data(resourceService ResourceService, resourceDate *schema.
 		condition  map[string]interface{}
 		collection []interface{}
 	)
+	defer func() {
+		if d.rateInfo != nil && d.rateInfo.Data != nil && d.rateInfo.Data.Semaphore != nil {
+			d.rateInfo.Data.Semaphore.Release(1)
+		}
+	}()
 	if d.rateInfo != nil && d.rateInfo.Data != nil {
-		_ = d.rateInfo.Data.Wait(context.Background())
+		ctx := context.Background()
+		if d.rateInfo.Data.Limiter != nil {
+			err = d.rateInfo.Data.Limiter.Wait(ctx)
+			if err != nil {
+				return err
+			}
+		}
+		if d.rateInfo.Data.Semaphore != nil {
+			err = d.rateInfo.Data.Semaphore.Acquire(ctx, 1)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	info = resourceService.DatasourceResources(resourceDate, resource)
 	condition, err = DataSourceToRequest(resourceDate, resource, info)
