@@ -17,6 +17,18 @@ Volume can be imported using the id, e.g.
 $ terraform import volcengine_volume.default vol-mizl7m1kqccg5smt1bdpijuj
 ```
 
+
+Example for Create PrePaid Volume
+
+resource "volcengine_volume" "foo2" {
+  volume_name = "terraform-test3"
+  zone_id = "cn-beijing-b"
+  volume_type = "ESSD_PL0"
+  kind = "data"
+  size = 40
+  volume_charge_type = "PrePaid"
+  instance_id = "i-yc8pfhbafwijutv6s1fv"
+}
 */
 
 func ResourceVolcengineVolume() *schema.Resource {
@@ -70,13 +82,23 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the Volume.",
 			},
+			"instance_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				Description: "The ID of the instance to which the created volume is automatically attached. " +
+					"Please note this field needs to ask the system administrator to apply for a whitelist.",
+			},
 			"volume_charge_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
 				Default:      "PostPaid",
-				Description:  "The charge type of the Volume, the value is `PostPaid`.",
+				Description: "The charge type of the Volume, the value is `PostPaid` or `PrePaid`. " +
+					"The `PrePaid` volume cannot be detached. " +
+					"Cannot convert `PrePaid` volume to `PostPaid`." +
+					"Please note that `PrePaid` type needs to ask the system administrator to apply for a whitelist.",
 			},
 			"status": {
 				Type:        schema.TypeString,

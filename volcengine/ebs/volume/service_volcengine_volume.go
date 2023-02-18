@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -158,7 +159,7 @@ func (s *VolcengineVolumeService) CreateResource(resourceData *schema.ResourceDa
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"available"},
+				Target:  []string{"available", "attached"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
 		},
@@ -206,6 +207,44 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"available", "attached"},
 					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		})
+	}
+
+	if resourceData.HasChange("volume_charge_type") {
+		callbacks = append(callbacks, ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyVolumeChargeType",
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					oldV, newV := resourceData.GetChange("volume_charge_type")
+					if oldV == "PrePaid" && newV == "PostPaid" {
+						return false, errors.New("cannot convert PrePaid volume to PostPaid")
+					}
+					if d.Get("instance_id").(string) == "" {
+						return false, errors.New("instance id cannot be empty")
+					}
+
+					// get volume current info
+					data, err := s.ReadResource(resourceData, d.Id())
+					if err != nil {
+						return false, err
+					}
+					// PayType can be Pre or Post
+					if strings.Contains(resourceData.Get("volume_charge_type").(string), data["PayType"].(string)) {
+						return false, nil // 不再进行下去了
+					}
+
+					(*call.SdkParam)["VolumeIds.1"] = d.Id()
+					(*call.SdkParam)["DiskChargeType"] = "PrePaid"
+					(*call.SdkParam)["AutoPay"] = true
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 			},
 		})
@@ -287,4 +326,13 @@ var sizeConvertFunc = func(i interface{}) interface{} {
 
 func (s *VolcengineVolumeService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "storage_ebs",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
 }
