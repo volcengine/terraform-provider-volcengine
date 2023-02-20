@@ -4,7 +4,7 @@ resource "volcengine_volume" "foo" {
   volume_type = "ESSD_PL0"
   kind = "data"
   size = 40
-  volume_charge_type = "PrePaid"
+  volume_charge_type = "PostPaid"
 }
 
 resource "volcengine_volume_attach" "foo" {

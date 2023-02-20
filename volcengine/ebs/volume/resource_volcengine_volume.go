@@ -16,19 +16,6 @@ Volume can be imported using the id, e.g.
 ```
 $ terraform import volcengine_volume.default vol-mizl7m1kqccg5smt1bdpijuj
 ```
-
-
-Example for Create PrePaid Volume
-
-resource "volcengine_volume" "foo2" {
-  volume_name = "terraform-test3"
-  zone_id = "cn-beijing-b"
-  volume_type = "ESSD_PL0"
-  kind = "data"
-  size = 40
-  volume_charge_type = "PrePaid"
-  instance_id = "i-yc8pfhbafwijutv6s1fv"
-}
 */
 
 func ResourceVolcengineVolume() *schema.Resource {
