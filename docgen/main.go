@@ -129,6 +129,7 @@ var resourceKeys = map[string]string{
 	"vpn":         "VPN(BETA)",
 	"autoscaling": "AUTOSCALING",
 	"mongodb":     "MONGODB",
+	"bioos":       "BIOOS",
 }
 
 type Products struct {
