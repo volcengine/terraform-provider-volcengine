@@ -55,7 +55,7 @@ func DataSourceVolcengineBioosWorkspaces() *schema.Resource {
 			"items": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "A list of workspaces",
+				Description: "A list of workspaces.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"id": {

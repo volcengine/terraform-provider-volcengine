@@ -46,9 +46,10 @@ func ResourceVolcengineBioosClusterBind() *schema.Resource {
 				Description: "The id of the cluster.",
 			},
 			"type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The type of the cluster bind.",
 				ValidateFunc: validation.StringInSlice([]string{
 					"workflow",
 					"notebook",

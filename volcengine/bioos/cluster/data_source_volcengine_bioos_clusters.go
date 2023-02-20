@@ -16,7 +16,7 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set:         schema.HashString,
-				Description: "A list of cluster ids",
+				Description: "A list of cluster ids.",
 			},
 			"status": {
 				Type:     schema.TypeSet,
