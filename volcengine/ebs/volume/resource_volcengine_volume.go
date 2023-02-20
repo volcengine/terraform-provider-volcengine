@@ -102,16 +102,6 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Computed:    true,
 				Description: "Creation time of Volume.",
 			},
-			"billing_type": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "Billing type of Volume.",
-			},
-			"pay_type": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Pay type of Volume.",
-			},
 			"delete_with_instance": {
 				Type:        schema.TypeBool,
 				Optional:    true,
