@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	re "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
@@ -245,6 +246,32 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+					oldV, newV := resourceData.GetChange("volume_charge_type")
+					if oldV == "PrePaid" && newV == "PostPaid" {
+						return errors.New("cannot convert PrePaid volume to PostPaid")
+					}
+					if d.Get("instance_id").(string) == "" {
+						return errors.New("instance id cannot be empty")
+					}
+					// retry modifyVolumeChargeType
+					return re.Retry(15*time.Minute, func() *re.RetryError {
+						data, callErr := s.ReadResource(d, d.Id())
+						if callErr != nil {
+							return re.NonRetryableError(fmt.Errorf("error on reading volume %q: %w", d.Id(), callErr))
+						}
+						// 计费方式已经转变成功
+						if data["PayType"] == "Pre" {
+							return nil
+						}
+						// 计费方式还没有转换成功，尝试重新转换
+						_, callErr = call.ExecuteCall(d, client, call)
+						if callErr == nil {
+							return nil
+						}
+						return re.RetryableError(callErr)
+					})
 				},
 			},
 		})
