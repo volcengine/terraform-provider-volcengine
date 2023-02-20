@@ -21,6 +21,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_instance_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_lifecycle_hook"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_policy"
+	bioosCluster "github.com/volcengine/terraform-provider-volcengine/volcengine/bioos/cluster"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/bioos/cluster_bind"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/bioos/workspace"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_attach_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_bandwidth_package"
@@ -280,6 +283,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_veenedge_instance_types":      instance_types.DataSourceVolcengineInstanceTypes(),
 			"volcengine_veenedge_available_resources": available_resource.DataSourceVolcengineAvailableResources(),
 			"volcengine_veenedge_vpcs":                veVpc.DataSourceVolcengineVpcs(),
+
 			// ================ MongoDB =============
 			"volcengine_mongodb_instances":               mongodbInstance.DataSourceVolcengineMongoDBInstances(),
 			"volcengine_mongodb_endpoints":               endpoint.DataSourceVolcengineMongoDBEndpoints(),
@@ -291,6 +295,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_mongodb_accounts":                account.DataSourceVolcengineMongoDBAccounts(),
 			"volcengine_mongodb_specs":                   spec.DataSourceVolcengineMongoDBSpecs(),
 			"volcengine_mongodb_ssl_states":              ssl_state.DataSourceVolcengineMongoDBSSLStates(),
+
+			// ================ Bioos ==================
+			"volcengine_bioos_clusters":   bioosCluster.DataSourceVolcengineBioosClusters(),
+			"volcengine_bioos_workspaces": workspace.DataSourceVolcengineBioosWorkspaces(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -409,6 +417,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_veenedge_cloud_server": cloud_server.ResourceVolcengineCloudServer(),
 			"volcengine_veenedge_instance":     veInstance.ResourceVolcengineInstance(),
 			"volcengine_veenedge_vpc":          veVpc.ResourceVolcengineVpc(),
+
 			// ================ MongoDB ================
 			"volcengine_mongodb_instance":             mongodbInstance.ResourceVolcengineMongoDBInstance(),
 			"volcengine_mongodb_endpoint":             endpoint.ResourceVolcengineMongoDBEndpoint(),
@@ -416,6 +425,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_mongodb_instance_parameter":   instance_parameter.ResourceVolcengineMongoDBInstanceParameter(),
 			"volcengine_mongodb_allow_list_associate": allow_list_associate.ResourceVolcengineMongodbAllowListAssociate(),
 			"volcengine_mongodb_ssl_state":            ssl_state.ResourceVolcengineMongoDBSSLState(),
+
+			// ================ Bioos ================
+			"volcengine_bioos_cluster":      bioosCluster.ResourceVolcengineBioosCluster(),
+			"volcengine_bioos_workspace":    workspace.ResourceVolcengineBioosWorkspace(),
+			"volcengine_bioos_cluster_bind": cluster_bind.ResourceVolcengineBioosClusterBind(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
