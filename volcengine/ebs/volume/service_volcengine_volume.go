@@ -245,7 +245,10 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp)
+					logger.Debug(logger.RespFormat, call.Action, err)
+					return resp, err
 				},
 				CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 					oldV, newV := resourceData.GetChange("volume_charge_type")
@@ -269,6 +272,10 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 						_, callErr = call.ExecuteCall(d, client, call)
 						if callErr == nil {
 							return nil
+						}
+						// 按量实例下挂载的云盘不支持按量转包年操作
+						if strings.Contains(callErr.Error(), "ErrorInvalidEcsChargeType") {
+							return re.NonRetryableError(callErr)
 						}
 						return re.RetryableError(callErr)
 					})

@@ -49,9 +49,7 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `billing_type` - Billing type of Volume.
 * `created_at` - Creation time of Volume.
-* `pay_type` - Pay type of Volume.
 * `status` - Status of Volume.
 * `trade_status` - Status of Trade.
 
