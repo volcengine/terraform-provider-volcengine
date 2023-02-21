@@ -54,7 +54,7 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 			"items": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "The list of cluster.",
+				Description: "The list of clusters.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -70,7 +70,7 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 						"vke_config_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The id of the vke cluster id.",
+							Description: "The id of the vke cluster.",
 						},
 						"vke_config_storage_class": {
 							Type:        schema.TypeString,
