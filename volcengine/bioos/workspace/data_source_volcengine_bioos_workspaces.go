@@ -36,12 +36,12 @@ func DataSourceVolcengineBioosWorkspaces() *schema.Resource {
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The total count of Vpc query.",
+				Description: "The total count of Workspace query.",
 			},
 			"keyword": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of the workspace.",
+				Description: "Keyword to filter by workspace name or description.",
 			},
 			"ids": {
 				Type:     schema.TypeSet,

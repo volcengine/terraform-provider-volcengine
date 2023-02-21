@@ -17,7 +17,7 @@ data "volcengine_bioos_workspaces" "default" {
 ## Argument Reference
 The following arguments are supported:
 * `ids` - (Optional) A list of workspace ids.
-* `keyword` - (Optional) The name of the workspace.
+* `keyword` - (Optional) Keyword to filter by workspace name or description.
 * `output_file` - (Optional) File name where to save data source results.
 * `sort_by` - (Optional) Sort Field (Name CreateTime).
 * `sort_order` - (Optional) The sort order.
@@ -34,6 +34,6 @@ In addition to all arguments above, the following attributes are exported:
     * `role` - The role of the user.
     * `s3_bucket` - S3 bucket address.
     * `update_time` - The update time of the workspace.
-* `total_count` - The total count of Vpc query.
+* `total_count` - The total count of Workspace query.
 
 
