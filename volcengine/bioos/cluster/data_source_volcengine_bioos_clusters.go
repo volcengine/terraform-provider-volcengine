@@ -49,12 +49,12 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The total count of Vpc query.",
+				Description: "The total count of Cluster query.",
 			},
 			"items": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "The list of cluster.",
+				Description: "The list of clusters.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -70,37 +70,12 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 						"vke_config_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The id of the vke cluster id.",
+							Description: "The id of the vke cluster.",
 						},
 						"vke_config_storage_class": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The name of the StorageClass that the vke cluster has installed.",
-						},
-						"external_config_wes_endpoint": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The WES endpoint.",
-						},
-						"external_config_jupyterhub_endpoint": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The endpoint of jupyterhub.",
-						},
-						"external_config_jupyterhub_jwt_secret": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The jupyterhub jwt secret.",
-						},
-						"external_config_resource_scheduler": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "External Resource Scheduler.",
-						},
-						"external_config_filesystem": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Workflow computing engine file system (currently supports tos, local).",
 						},
 						"id": {
 							Type:        schema.TypeString,
