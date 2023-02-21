@@ -21,7 +21,6 @@ The following arguments are supported:
 * `description` - (Required) The description of the workspace.
 * `name` - (Required) The name of the workspace.
 * `cover_path` - (Optional) Cover path (relative path in tos bucket).
-* `s3_bucket` - (Optional) s3 bucket address.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

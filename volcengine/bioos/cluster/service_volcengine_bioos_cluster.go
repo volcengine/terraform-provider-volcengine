@@ -106,17 +106,6 @@ func (s *VolcengineBioosClusterService) CreateResource(data *schema.ResourceData
 					TargetField: "VKEConfig",
 					ConvertType: ve.ConvertJsonObject,
 				},
-				"external_config": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"wes_endpoint": {
-							TargetField: "ExternalConfig.WESEndpoint",
-						},
-						"jupyterhub_jwt_secret": {
-							TargetField: "ExternalConfig.JupyterhubJWTSecret",
-						},
-					},
-				},
 				"shared_config": {
 					ConvertType: ve.ConvertJsonObject,
 				},
@@ -210,21 +199,6 @@ func (s *VolcengineBioosClusterService) DatasourceResources(*schema.ResourceData
 			},
 			"VKEConfig.StorageClass": {
 				TargetField: "vke_config_storage_class",
-			},
-			"ExternalConfig.WESEndpoint": {
-				TargetField: "external_config_wes_endpoint",
-			},
-			"ExternalConfig.JupyterhubEndpoint": {
-				TargetField: "external_config_jupyterhub_endpoint",
-			},
-			"ExternalConfig.JupyterhubJWTSecret": {
-				TargetField: "external_config_jupyterhub_jwt_secret",
-			},
-			"ExternalConfig.ResourceScheduler": {
-				TargetField: "external_config_resource_scheduler",
-			},
-			"ExternalConfig.Filesystem": {
-				TargetField: "external_config_filesystem",
 			},
 		},
 	}

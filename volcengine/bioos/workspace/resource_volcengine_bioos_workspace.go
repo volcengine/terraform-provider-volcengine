@@ -43,12 +43,6 @@ func ResourceVolcengineBioosWorkspace() *schema.Resource {
 				Required:    true,
 				Description: "The description of the workspace.",
 			},
-			"s3_bucket": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "s3 bucket address.",
-			},
 			"cover_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
