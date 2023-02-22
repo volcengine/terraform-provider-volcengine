@@ -432,6 +432,12 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 				(*call.SdkParam)["Volumes.1.DeleteWithInstance"] = true
 				(*call.SdkParam)["Count"] = 1
 
+				if (*call.SdkParam)["InstanceChargeType"] != "PrePaid" {
+					delete(*call.SdkParam, "AutoRenew")
+					delete(*call.SdkParam, "AutoRenewPeriod")
+					delete(*call.SdkParam, "Period")
+				}
+
 				if _, ok := (*call.SdkParam)["ZoneId"]; !ok || (*call.SdkParam)["ZoneId"] == "" {
 					var (
 						vnet map[string]interface{}
