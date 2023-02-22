@@ -865,8 +865,13 @@ func (s *VolcengineEcsService) RemoveResource(resourceData *schema.ResourceData,
 						}
 					}
 
+					//if ecs["InstanceChargeType"] == "PrePaid" {
+					//	return resource.NonRetryableError(fmt.Errorf("PrePaid instance charge type not support remove,Please change instance charge type to PostPaid. "))
+					//}
+
 					if ecs["InstanceChargeType"] == "PrePaid" {
-						return resource.NonRetryableError(fmt.Errorf("PrePaid instance charge type not support remove,Please change instance charge type to PostPaid. "))
+						logger.Debug(logger.RespFormat, call.Action, "PrePaid instance charge type not support remove,Only Remove from State")
+						return nil
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
 					if callErr == nil {
