@@ -50,22 +50,18 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 				Description: "The type of IP address in the whitelist. Currently only IPv4 addresses are supported.",
 			},
 			"allow_list": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Required: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Set:         schema.HashString,
 				Description: "Enter an IP address or a range of IP addresses in CIDR format.",
 			},
 			"allow_list_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The id of the allow list.",
-			},
-			"apply_instance_number": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Description: "The number of instances bound to the current whitelist.",
 			},
 		},
 	}

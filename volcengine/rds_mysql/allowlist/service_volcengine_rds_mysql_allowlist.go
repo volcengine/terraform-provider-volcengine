@@ -124,7 +124,8 @@ func (s *VolcengineRdsMysqlAllowListService) CreateResource(data *schema.Resourc
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
-				allowLists := d.Get("allow_list").([]interface{})
+				allowListsSet := d.Get("allow_list").(*schema.Set)
+				allowLists := allowListsSet.List()
 				if len(allowLists) == 1 {
 					(*call.SdkParam)["AllowList"] = allowLists[0]
 					return true, nil
@@ -177,7 +178,8 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 				}
 				num := resp["AssociatedInstanceNum"].(float64)
 				(*call.SdkParam)["ApplyInstanceNum"] = int(num)
-				allowLists := d.Get("allow_list").([]interface{})
+				allowListsSet := d.Get("allow_list").(*schema.Set)
+				allowLists := allowListsSet.List()
 				if len(allowLists) == 1 {
 					(*call.SdkParam)["AllowList"] = allowLists[0]
 					return true, nil
