@@ -303,13 +303,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_clusters":   bioosCluster.DataSourceVolcengineBioosClusters(),
 			"volcengine_bioos_workspaces": workspace.DataSourceVolcengineBioosWorkspaces(),
 
+			// ================ RDS V2 ==============
+			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
+
 			// ================ RdsMysql ================
 			"volcengine_rds_mysql_accounts":   rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
 			"volcengine_rds_mysql_databases":  rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
 			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
-
-			// ================ RDS V2 ==============
-			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
