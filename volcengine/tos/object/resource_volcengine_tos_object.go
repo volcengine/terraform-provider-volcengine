@@ -67,6 +67,11 @@ func ResourceVolcengineTosObject() *schema.Resource {
 				//ForceNew:    true,
 				Description: "The file path for upload.",
 			},
+			"content_md5": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The file md5 sum (32-bit hexadecimal string) for upload.",
+			},
 			"encryption": {
 				Type:     schema.TypeString,
 				Optional: true,

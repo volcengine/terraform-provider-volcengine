@@ -1,6 +1,8 @@
 package object
 
 import (
+	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"net/http"
 	"strings"
@@ -91,6 +93,9 @@ func (s *VolcengineTosObjectService) ReadResource(resourceData *schema.ResourceD
 		}
 		if header.Get("X-Tos-Server-Side-Encryption") != "" {
 			data["Encryption"] = header.Get("X-Tos-Server-Side-Encryption")
+		}
+		if header.Get("x-tos-meta-content-md5") != "" {
+			data["ContentMd5"] = strings.Replace(header.Get("x-tos-meta-content-md5"), "\"", "", -1)
 		}
 
 		if header.Get("X-Tos-Version-Id") != "" {
@@ -233,7 +238,7 @@ func (s *VolcengineTosObjectService) CreateResource(resourceData *schema.Resourc
 func (s *VolcengineTosObjectService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
-	if data.HasChange("file_path") {
+	if data.HasChange("file_path") || data.HasChanges("content_md5") {
 		callbacks = append(callbacks, s.createOrReplaceObject(data, resource, true))
 		callbacks = append(callbacks, s.createOrUpdateObjectAcl(data, resource, true))
 	} else {
@@ -449,12 +454,13 @@ func (s *VolcengineTosObjectService) createOrUpdateObjectAcl(resourceData *schem
 			//},
 		},
 	}
-	if isUpdate {
-		callback.Call.Refresh = &ve.StateRefresh{
-			Target:  []string{"Success"},
-			Timeout: resourceData.Timeout(schema.TimeoutCreate),
-		}
-	}
+	//如果出现acl缓存的问题 这里再打开 暂时去掉 不再等待60s
+	//if isUpdate && !resourceData.HasChange("file_path") && !resourceData.HasChanges("content_md5") {
+	//	callback.Call.Refresh = &ve.StateRefresh{
+	//		Target:  []string{"Success"},
+	//		Timeout: resourceData.Timeout(schema.TimeoutCreate),
+	//	}
+	//}
 	return callback
 }
 
@@ -506,12 +512,25 @@ func (s *VolcengineTosObjectService) createOrReplaceObject(resourceData *schema.
 					},
 					ForceGet: isUpdate,
 				},
+				"content_md5": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "Content-MD5",
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						b, _ := hex.DecodeString(i.(string))
+						return base64.StdEncoding.EncodeToString(b)
+					},
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+					ForceGet: isUpdate,
+				},
 				"file_path": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "file-path",
 					SpecialParam: &ve.SpecialParam{
 						Type: ve.FilePathParam,
 					},
+					ForceGet: isUpdate,
 				},
 				"encryption": {
 					ConvertType: ve.ConvertDefault,
@@ -521,6 +540,12 @@ func (s *VolcengineTosObjectService) createOrReplaceObject(resourceData *schema.
 					},
 					ForceGet: isUpdate,
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if _, ok := (*call.SdkParam)[ve.TosHeader].(map[string]string)["Content-MD5"]; ok {
+					(*call.SdkParam)[ve.TosHeader].(map[string]string)["x-tos-meta-content-md5"] = d.Get("content_md5").(string)
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)

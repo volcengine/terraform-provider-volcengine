@@ -37,6 +37,7 @@ The following arguments are supported:
 * `file_path` - (Required) The file path for upload.
 * `object_name` - (Required, ForceNew) The name of the object.
 * `account_acl` - (Optional) The user set of grant full control.
+* `content_md5` - (Optional) The file md5 sum (32-bit hexadecimal string) for upload.
 * `content_type` - (Optional, ForceNew) The content type of the object.
 * `encryption` - (Optional, ForceNew) The encryption of the object.Valid value is AES256.
 * `public_acl` - (Optional) The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.
