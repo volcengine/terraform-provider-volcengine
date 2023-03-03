@@ -101,8 +101,11 @@ func (u *Tos) newTosClient(domain string) *client.Client {
 }
 
 func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
+	var content *os.File
 	defer func() {
-
+		if content != nil {
+			err = content.Close()
+		}
 	}()
 	c := u.newTosClient(info.Domain)
 	trueInput := make(map[string]interface{})
@@ -133,7 +136,7 @@ func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *ma
 	}
 
 	if info.ContentPath != "" && (op.HTTPMethod == "PUT" || op.HTTPMethod == "POST") {
-		content, _ := os.Open(info.ContentPath)
+		content, _ = os.Open(info.ContentPath)
 		req.Body = content
 		req.HTTPRequest.Header.Set("Content-Length", strconv.FormatInt(u.tryResolveLength(content), 10))
 	}
