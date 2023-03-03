@@ -119,7 +119,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 							Optional:    true,
 							Computed:    true,
 							ForceNew:    true,
-							Description: "Whether to automatically renew in prepaid scenarios.\nAutorenew_Enable\nAutorenew_Disable (default).",
+							Description: "Whether to automatically renew in prepaid scenarios.",
 						},
 						"period_unit": {
 							Type:        schema.TypeString,
