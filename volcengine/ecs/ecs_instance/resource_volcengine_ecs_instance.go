@@ -239,6 +239,13 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of Ecs Deployment Set.",
 			},
 
+			"ipv6_address_count": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The ipv6 address count of ECS instance. Valid values: 0, 1.",
+			},
+
 			"data_volumes": {
 				Type:        schema.TypeList,
 				Optional:    true,

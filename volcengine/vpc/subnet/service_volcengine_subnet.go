@@ -3,6 +3,9 @@ package subnet
 import (
 	"errors"
 	"fmt"
+	"net"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -87,6 +90,31 @@ func (s *VolcengineSubnetService) ReadResource(resourceData *schema.ResourceData
 	if len(data) == 0 {
 		return data, fmt.Errorf("Subnet %s not exist ", subnetId)
 	}
+
+	if ipv6CidrBlock, ok1 := data["Ipv6CidrBlock"]; ok1 && ipv6CidrBlock.(string) != "" {
+		data["EnableIpv6"] = true
+
+		ipv6Address, _, err := net.ParseCIDR(ipv6CidrBlock.(string))
+		if err != nil {
+			return data, err
+		}
+		bits := strings.Split(ipv6Address.String(), ":")
+		if len(bits) < 4 {
+			data["Ipv6CidrBlock"] = 0
+		} else {
+			temp := bits[3]
+			temp = strings.Repeat("0", 4-len(temp)) + temp
+			ipv6CidrValue, err := strconv.ParseInt(temp[2:], 16, 9)
+			if err != nil {
+				return data, err
+			}
+			data["Ipv6CidrBlock"] = int(ipv6CidrValue)
+		}
+	} else {
+		data["EnableIpv6"] = false
+		delete(data, "Ipv6CidrBlock")
+	}
+
 	return data, err
 }
 
