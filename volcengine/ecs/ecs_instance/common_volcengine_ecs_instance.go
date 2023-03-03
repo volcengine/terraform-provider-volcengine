@@ -34,7 +34,7 @@ func EcsInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) b
 		return true
 	}
 
-	if d.Get("instance_charge_type").(string) == "PostPaid" && (k == "period" || k == "period_unit" || k == "auto_renew" || k == "auto_renew_period") {
+	if d.Get("instance_charge_type").(string) == "PostPaid" && (k == "period" || k == "period_unit") {
 		return true
 	}
 
