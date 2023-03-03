@@ -1,8 +1,13 @@
 package common
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"net"
+	"os"
+	"strconv"
+	"strings"
 
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client/metadata"
@@ -96,6 +101,9 @@ func (u *Tos) newTosClient(domain string) *client.Client {
 }
 
 func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
+	defer func() {
+
+	}()
 	c := u.newTosClient(info.Domain)
 	trueInput := make(map[string]interface{})
 	var httpPath string
@@ -125,8 +133,9 @@ func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *ma
 	}
 
 	if info.ContentPath != "" && (op.HTTPMethod == "PUT" || op.HTTPMethod == "POST") {
-		content, _ := ioutil.ReadFile(info.ContentPath)
-		req.SetBufferBody(content)
+		content, _ := os.Open(info.ContentPath)
+		req.Body = content
+		req.HTTPRequest.Header.Set("Content-Length", strconv.FormatInt(u.tryResolveLength(content), 10))
 	}
 
 	if len(info.Header) > 0 {
@@ -137,4 +146,53 @@ func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *ma
 
 	err = req.Send()
 	return output, err
+}
+
+func (u *Tos) tryResolveLength(reader io.Reader) int64 {
+	switch v := reader.(type) {
+	case *bytes.Buffer:
+		return int64(v.Len())
+	case *bytes.Reader:
+		return int64(v.Len())
+	case *strings.Reader:
+		return int64(v.Len())
+	case *os.File:
+		length, err := fileUnreadLength(v)
+		if err != nil {
+			return -1
+		}
+		return length
+	case *io.LimitedReader:
+		return v.N
+	case *net.Buffers:
+		if v != nil {
+			length := int64(0)
+			for _, p := range *v {
+				length += int64(len(p))
+			}
+			return length
+		}
+		return 0
+	default:
+		return -1
+	}
+}
+
+func fileUnreadLength(file *os.File) (int64, error) {
+	offset, err := file.Seek(0, io.SeekCurrent)
+	if err != nil {
+		return 0, err
+	}
+
+	stat, err := file.Stat()
+	if err != nil {
+		return 0, err
+	}
+
+	size := stat.Size()
+	if offset > size || offset < 0 {
+		return 0, fmt.Errorf("unexpected file size and(or) offset")
+	}
+
+	return size - offset, nil
 }

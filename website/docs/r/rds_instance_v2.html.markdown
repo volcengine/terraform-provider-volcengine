@@ -74,8 +74,6 @@ The `charge_info` object supports the following:
 PostPaid - Pay-As-You-Go
 PrePaid - Yearly and monthly (default).
 * `auto_renew` - (Optional, ForceNew) Whether to automatically renew in prepaid scenarios.
-Autorenew_Enable
-Autorenew_Disable (default).
 * `period_unit` - (Optional, ForceNew) The purchase cycle in the prepaid scenario.
 Month - monthly subscription (default)
 Year - Package year.

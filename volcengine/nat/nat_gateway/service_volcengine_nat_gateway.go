@@ -175,6 +175,9 @@ func (s *VolcengineNatGatewayService) CreateResource(resourceData *schema.Resour
 		Call: ve.SdkCall{
 			Action:      "CreateNatGateway",
 			ConvertMode: ve.RequestConvertAll,
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
+			},
 			Convert: map[string]ve.RequestConvert{
 				"billing_type": {
 					TargetField: "BillingType",
