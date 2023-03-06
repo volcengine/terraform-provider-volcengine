@@ -144,8 +144,8 @@ func (s *VolcengineDefaultNodePoolService) RefreshResourceState(resourceData *sc
 				}
 			}
 			for _, v := range failStates {
-				for _, v1 := range statuses {
-					if v == v1 {
+				for _, status = range statuses {
+					if v == status {
 						return nil, "", fmt.Errorf("node status error, status:%s", status.(string))
 					}
 				}
