@@ -82,6 +82,7 @@ func ResourceVolcengineSubnet() *schema.Resource {
 			"ipv6_cidr_block": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if d.Id() == "" {
 						return false

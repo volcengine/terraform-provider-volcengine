@@ -147,6 +147,9 @@ func (s *VolcengineIpv6GatewayService) CreateResource(resourceData *schema.Resou
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
+			},
 		},
 	}
 	callbacks = append(callbacks, callback)
@@ -173,6 +176,9 @@ func (s *VolcengineIpv6GatewayService) ModifyResource(resourceData *schema.Resou
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
+			},
 		},
 	}
 	callbacks = append(callbacks, callback)
@@ -193,6 +199,9 @@ func (s *VolcengineIpv6GatewayService) RemoveResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

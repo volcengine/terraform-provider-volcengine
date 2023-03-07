@@ -25,7 +25,10 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-
+* `creation_time` - Creation time of the Ipv6Gateway.
+* `ipv6_gateway_id` - The ID of the Ipv6Gateway.
+* `status` - The Status of the Ipv6Gateway.
+* `update_time` - Update time of the Ipv6Gateway.
 
 
 ## Import

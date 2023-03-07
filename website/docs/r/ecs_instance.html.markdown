@@ -43,7 +43,8 @@ resource "volcengine_ecs_instance" "default" {
     size                 = 100
     delete_with_instance = true
   }
-  deployment_set_id = ""
+  deployment_set_id  = ""
+  ipv6_address_count = 1
   #  secondary_network_interfaces {
   #    subnet_id = volcengine_subnet.foo1.id
   #    security_group_ids = [volcengine_security_group.foo1.id]
@@ -68,7 +69,9 @@ The following arguments are supported:
 * `include_data_volumes` - (Optional) The include data volumes flag of ECS instance.Only effective when change instance charge type.include_data_volumes.
 * `instance_charge_type` - (Optional) The charge type of ECS instance, the value can be `PrePaid` or `PostPaid`.
 * `instance_name` - (Optional) The name of ECS instance.
-* `ipv6_address_count` - (Optional, ForceNew) The ipv6 address count of ECS instance. Valid values: 0, 1.
+* `ipv6_address_count` - (Optional, ForceNew) The number of IPv6 addresses to be automatically assigned from within the CIDR block of the subnet that hosts the ENI. Valid values: 1 to 10.
+* `ipv6_addresses` - (Optional, ForceNew) One or more IPv6 addresses selected from within the CIDR block of the subnet that hosts the ENI. Support up to 10.
+ You cannot specify both the ipv6_addresses and ipv6_address_count parameters.
 * `keep_image_credential` - (Optional) Whether to keep the mirror settings. Only custom images and shared images support this field.
  When the value of this field is true, the Password and KeyPairName cannot be specified.
  When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.

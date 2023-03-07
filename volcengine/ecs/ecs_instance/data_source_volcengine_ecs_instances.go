@@ -315,6 +315,19 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The ID of DeploymentSet.",
 						},
+						"ipv6_address_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of IPv6 addresses of the ECS instance.",
+						},
+						"ipv6_addresses": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The  IPv6 address list of the ECS instance.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					},
 				},
 			},

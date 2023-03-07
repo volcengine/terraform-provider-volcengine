@@ -90,31 +90,6 @@ func (s *VolcengineSubnetService) ReadResource(resourceData *schema.ResourceData
 	if len(data) == 0 {
 		return data, fmt.Errorf("Subnet %s not exist ", subnetId)
 	}
-
-	if ipv6CidrBlock, ok1 := data["Ipv6CidrBlock"]; ok1 && ipv6CidrBlock.(string) != "" {
-		data["EnableIpv6"] = true
-
-		ipv6Address, _, err := net.ParseCIDR(ipv6CidrBlock.(string))
-		if err != nil {
-			return data, err
-		}
-		bits := strings.Split(ipv6Address.String(), ":")
-		if len(bits) < 4 {
-			data["Ipv6CidrBlock"] = 0
-		} else {
-			temp := bits[3]
-			temp = strings.Repeat("0", 4-len(temp)) + temp
-			ipv6CidrValue, err := strconv.ParseInt(temp[2:], 16, 9)
-			if err != nil {
-				return data, err
-			}
-			data["Ipv6CidrBlock"] = int(ipv6CidrValue)
-		}
-	} else {
-		data["EnableIpv6"] = false
-		delete(data, "Ipv6CidrBlock")
-	}
-
 	return data, err
 }
 
@@ -154,6 +129,30 @@ func (s *VolcengineSubnetService) RefreshResourceState(resourceData *schema.Reso
 
 func (VolcengineSubnetService) WithResourceResponseHandlers(subnet map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		if ipv6CidrBlock, ok1 := subnet["Ipv6CidrBlock"]; ok1 && ipv6CidrBlock.(string) != "" {
+			subnet["EnableIpv6"] = true
+
+			ipv6Address, _, err := net.ParseCIDR(ipv6CidrBlock.(string))
+			if err != nil {
+				return subnet, nil, err
+			}
+			bits := strings.Split(ipv6Address.String(), ":")
+			if len(bits) < 4 {
+				subnet["Ipv6CidrBlock"] = 0
+			} else {
+				temp := bits[3]
+				temp = strings.Repeat("0", 4-len(temp)) + temp
+				ipv6CidrValue, err := strconv.ParseInt(temp[2:], 16, 9)
+				if err != nil {
+					return subnet, nil, err
+				}
+				subnet["Ipv6CidrBlock"] = int(ipv6CidrValue)
+			}
+
+		} else {
+			subnet["EnableIpv6"] = false
+			delete(subnet, "Ipv6CidrBlock")
+		}
 		return subnet, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}

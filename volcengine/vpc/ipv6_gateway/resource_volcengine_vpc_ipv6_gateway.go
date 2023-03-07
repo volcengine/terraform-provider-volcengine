@@ -19,7 +19,7 @@ $ terraform import volcengine_vpc_ipv6_gateway.default ipv6gw-12bcapllb5ukg17q7y
 */
 
 func ResourceVolcengineIpv6Gateway() *schema.Resource {
-	return &schema.Resource{
+	resource := &schema.Resource{
 		Create: resourceVolcengineIpv6GatewayCreate,
 		Read:   resourceVolcengineIpv6GatewayRead,
 		Update: resourceVolcengineIpv6GatewayUpdate,
@@ -48,10 +48,15 @@ func ResourceVolcengineIpv6Gateway() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The description of the Ipv6Gateway.",
 			},
 		},
 	}
+	dataSource := DataSourceVolcengineIpv6Gateways().Schema["ipv6_gateways"].Elem.(*schema.Resource).Schema
+	delete(dataSource, "id")
+	ve.MergeDateSourceToResource(dataSource, &resource.Schema)
+	return resource
 }
 
 func resourceVolcengineIpv6GatewayCreate(d *schema.ResourceData, meta interface{}) (err error) {
