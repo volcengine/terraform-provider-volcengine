@@ -35,7 +35,7 @@ In addition to all arguments above, the following attributes are exported:
 
 
 ## Import
-Database can be imported using the id, e.g.
+Database can be imported using the instanceId:dbName, e.g.
 ```
 $ terraform import volcengine_rds_database.default mysql-42b38c769c4b:dbname
 ```

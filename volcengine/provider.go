@@ -92,6 +92,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_readonly_node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
@@ -307,6 +309,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
 
 			// ================ RdsMysql ================
+			"volcengine_rds_mysql_instances":  rds_mysql_instance.DataSourceVolcengineRdsMysqlInstances(),
 			"volcengine_rds_mysql_accounts":   rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
 			"volcengine_rds_mysql_databases":  rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
 			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
@@ -444,10 +447,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
 
 			// ================ RdsMysql ================
-			"volcengine_rds_mysql_account":             rds_mysql_account.ResourceVolcengineRdsMysqlAccount(),
-			"volcengine_rds_mysql_database":            rds_mysql_database.ResourceVolcengineRdsMysqlDatabase(),
-			"volcengine_rds_mysql_allowlist":           allowlist.ResourceVolcengineRdsMysqlAllowlist(),
-			"volcengine_rds_mysql_allowlist_associate": allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
+			"volcengine_rds_mysql_instance":               rds_mysql_instance.ResourceVolcengineRdsMysqlInstance(),
+			"volcengine_rds_mysql_instance_readonly_node": rds_mysql_instance_readonly_node.ResourceVolcengineRdsMysqlInstanceReadonlyNode(),
+			"volcengine_rds_mysql_account":                rds_mysql_account.ResourceVolcengineRdsMysqlAccount(),
+			"volcengine_rds_mysql_database":               rds_mysql_database.ResourceVolcengineRdsMysqlDatabase(),
+			"volcengine_rds_mysql_allowlist":              allowlist.ResourceVolcengineRdsMysqlAllowlist(),
+			"volcengine_rds_mysql_allowlist_associate":    allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
