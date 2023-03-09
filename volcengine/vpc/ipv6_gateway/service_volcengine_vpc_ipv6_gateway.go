@@ -54,6 +54,9 @@ func (s *VolcengineIpv6GatewayService) ReadResources(condition map[string]interf
 		if err != nil {
 			return data, err
 		}
+		if results == nil {
+			results = []interface{}{}
+		}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Ipv6Gateways is not Slice")
 		}

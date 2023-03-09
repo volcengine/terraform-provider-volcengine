@@ -110,6 +110,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_address_bandwidth"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl"
@@ -198,6 +199,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_network_acls":                network_acl.DataSourceVolcengineNetworkAcls(),
 			"volcengine_vpc_ipv6_gateways":           ipv6_gateway.DataSourceVolcengineIpv6Gateways(),
 			"volcengine_vpc_ipv6_address_bandwidths": ipv6_address_bandwidth.DataSourceVolcengineIpv6AddressBandwidths(),
+			"volcengine_vpc_ipv6_addresses":          ipv6_address.DataSourceVolcengineIpv6Addresses(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),

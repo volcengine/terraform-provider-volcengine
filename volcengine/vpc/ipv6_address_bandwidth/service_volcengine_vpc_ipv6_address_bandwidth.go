@@ -54,6 +54,9 @@ func (s *VolcengineIpv6AddressBandwidthService) ReadResources(condition map[stri
 		if err != nil {
 			return data, err
 		}
+		if results == nil {
+			results = []interface{}{}
+		}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Ipv6AddressBandwidths is not Slice")
 		}
@@ -102,10 +105,21 @@ func (s *VolcengineIpv6AddressBandwidthService) RefreshResourceState(resourceDat
 				status interface{}
 			)
 			//no failed status.
-			demo, err = s.ReadResource(resourceData, id)
-			if err != nil {
+
+			if err = resource.Retry(20*time.Minute, func() *resource.RetryError {
+				demo, err = s.ReadResource(resourceData, id)
+				if err != nil {
+					if ve.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
 				return nil, "", err
 			}
+
 			status, err = ve.ObtainSdkValue("Status", demo)
 			if err != nil {
 				return nil, "", err

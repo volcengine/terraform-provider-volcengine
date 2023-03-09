@@ -255,6 +255,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
+				Set:         schema.HashString,
 				Description: "One or more IPv6 addresses selected from within the CIDR block of the subnet that hosts the ENI. Support up to 10.\n You cannot specify both the ipv6_addresses and ipv6_address_count parameters.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

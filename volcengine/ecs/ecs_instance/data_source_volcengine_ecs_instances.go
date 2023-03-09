@@ -323,6 +323,7 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 						"ipv6_addresses": {
 							Type:        schema.TypeSet,
 							Computed:    true,
+							Set:         schema.HashString,
 							Description: "The  IPv6 address list of the ECS instance.",
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
