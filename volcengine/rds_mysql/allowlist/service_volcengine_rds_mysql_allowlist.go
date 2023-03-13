@@ -3,6 +3,7 @@ package allowlist
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -124,19 +125,15 @@ func (s *VolcengineRdsMysqlAllowListService) CreateResource(data *schema.Resourc
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+				var allowStrings []string
 				allowListsSet := d.Get("allow_list").(*schema.Set)
 				allowLists := allowListsSet.List()
-				if len(allowLists) == 1 {
-					(*call.SdkParam)["AllowList"] = allowLists[0]
-					return true, nil
-				}
-				lists := ""
 				for _, list := range allowLists {
-					lists += list.(string)
-					lists += ","
+					allowStrings = append(allowStrings, list.(string))
 				}
+				lists := strings.Join(allowStrings, ",")
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
-				(*call.SdkParam)["AllowList"] = lists[0 : len(lists)-1]
+				(*call.SdkParam)["AllowList"] = lists
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
@@ -171,6 +168,7 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+				var allowStrings []string
 				// 修改allowList必须传ApplyInstanceNum
 				resp, err := s.ReadResource(d, d.Id())
 				if err != nil {
@@ -180,17 +178,12 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 				(*call.SdkParam)["ApplyInstanceNum"] = int(num)
 				allowListsSet := d.Get("allow_list").(*schema.Set)
 				allowLists := allowListsSet.List()
-				if len(allowLists) == 1 {
-					(*call.SdkParam)["AllowList"] = allowLists[0]
-					return true, nil
-				}
-				lists := ""
 				for _, list := range allowLists {
-					lists += list.(string)
-					lists += ","
+					allowStrings = append(allowStrings, list.(string))
 				}
+				lists := strings.Join(allowStrings, ",")
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
-				(*call.SdkParam)["AllowList"] = lists[0 : len(lists)-1]
+				(*call.SdkParam)["AllowList"] = lists
 				return true, nil
 			},
 			SdkParam: &map[string]interface{}{

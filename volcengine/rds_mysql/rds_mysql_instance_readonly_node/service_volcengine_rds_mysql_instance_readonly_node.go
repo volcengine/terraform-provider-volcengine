@@ -148,39 +148,21 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) CreateResource(resourceD
 				if err != nil {
 					return common, err
 				}
-				time.Sleep(10 * time.Second) // 新增只读节点后，需要等一下
 				return common, nil
 			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+			AfterRefresh: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) error {
 				var (
 					instance = make(map[string]interface{})
 					err      error
 				)
-				// 通过retry确保获取当前新建只读节点的Id
-				resource.Retry(15*time.Minute, func() *resource.RetryError {
-					instance, err = s.RdsInstanceService.ReadResource(d, d.Get("instance_id").(string))
-					if err != nil {
-						if ve.ResourceNotFoundError(err) {
-							return resource.RetryableError(err)
-						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on reading rds instance %q", d.Get("instance_id")))
-						}
-					}
-					status, err := ve.ObtainSdkValue("InstanceStatus", instance)
-					if err != nil {
-						return resource.RetryableError(err)
-					}
-					if status.(string) != "Running" {
-						return resource.RetryableError(fmt.Errorf("rds instance is still in updating"))
-					}
-					return nil
-				})
-				logger.Debug(logger.ReqFormat, "testReadonly", instance)
+				instance, err = s.RdsInstanceService.ReadResource(d, d.Get("instance_id").(string))
+				if err != nil {
+					return err
+				}
 				var newReadonlyNodeId string
 				if nodeArr, ok := instance["Nodes"].([]interface{}); ok {
 					for _, node := range nodeArr {
 						if nodeMap, ok1 := node.(map[string]interface{}); ok1 {
-							logger.Debug(logger.ReqFormat, "existingReadOnlyNodeIds", existingReadOnlyNodeIds)
 							if nodeMap["NodeType"] == "ReadOnly" {
 								if _, ok := existingReadOnlyNodeIds[nodeMap["NodeId"].(string)]; !ok {
 									newReadonlyNodeId = nodeMap["NodeId"].(string)
@@ -282,7 +264,6 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) ModifyResource(resourceD
 					if err != nil {
 						return common, err
 					}
-					time.Sleep(10 * time.Second) // 修改只读节点后，需要等一下
 					return common, nil
 				},
 				LockId: func(d *schema.ResourceData) string {
@@ -372,7 +353,6 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) RemoveResource(resourceD
 				if err != nil {
 					return common, err
 				}
-				time.Sleep(10 * time.Second) // 删除只读节点后，需要等一下
 				return common, nil
 			},
 			LockId: func(d *schema.ResourceData) string {

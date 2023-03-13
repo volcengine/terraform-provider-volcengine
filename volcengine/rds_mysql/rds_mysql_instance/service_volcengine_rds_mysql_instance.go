@@ -171,7 +171,7 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResource(resourceData *schema.Re
 func (s *VolcengineRdsMysqlInstanceService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
-		Delay:      1 * time.Second,
+		Delay:      10 * time.Second,
 		MinTimeout: 1 * time.Second,
 		Target:     target,
 		Timeout:    timeout,
@@ -462,7 +462,6 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 					if err != nil {
 						return common, err
 					}
-					time.Sleep(10 * time.Second) // modify后如果直接refresh，status不会变为Updating，导致refresh直接结束
 					return common, nil
 				},
 				Refresh: &ve.StateRefresh{
