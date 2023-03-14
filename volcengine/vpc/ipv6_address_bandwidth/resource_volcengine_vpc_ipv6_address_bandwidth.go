@@ -2,6 +2,7 @@ package ipv6_address_bandwidth
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -40,10 +41,14 @@ func ResourceVolcengineIpv6AddressBandwidth() *schema.Resource {
 				Description: "Ipv6 address.",
 			},
 			"billing_type": {
-				Type:        schema.TypeInt,
-				Required:    true,
-				ForceNew:    true,
-				Description: "BillingType of the Ipv6 bandwidth. Valid values: 3(Pay by Traffic).",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"PostPaidByBandwidth",
+					"PostPaidByTraffic",
+				}, false),
+				Description: "BillingType of the Ipv6 bandwidth. Valid values: `PostPaidByBandwidth`; `PostPaidByTraffic`.",
 			},
 			"bandwidth": {
 				Type:        schema.TypeInt,

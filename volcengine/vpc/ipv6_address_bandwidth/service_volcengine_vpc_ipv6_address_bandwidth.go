@@ -135,6 +135,10 @@ func (VolcengineIpv6AddressBandwidthService) WithResourceResponseHandlers(ipv6Ad
 			"ISP": {
 				TargetField: "isp",
 			},
+			"BillingType": {
+				TargetField: "billing_type",
+				Convert:     billingTypeResponseConvert,
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -148,6 +152,12 @@ func (s *VolcengineIpv6AddressBandwidthService) CreateResource(resourceData *sch
 		Call: ve.SdkCall{
 			Action:      "AllocateIpv6AddressBandwidth",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"billing_type": {
+					TargetField: "BillingType",
+					Convert:     billingTypeRequestConvert,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
@@ -261,6 +271,10 @@ func (s *VolcengineIpv6AddressBandwidthService) DatasourceResources(*schema.Reso
 			},
 			"ISP": {
 				TargetField: "isp",
+			},
+			"BillingType": {
+				TargetField: "billing_type",
+				Convert:     billingTypeResponseConvert,
 			},
 		},
 	}

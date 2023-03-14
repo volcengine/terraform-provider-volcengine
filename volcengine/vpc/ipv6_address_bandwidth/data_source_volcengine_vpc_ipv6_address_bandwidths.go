@@ -84,7 +84,7 @@ func DataSourceVolcengineIpv6AddressBandwidths() *schema.Resource {
 							Description: "Peek bandwidth of the Ipv6 address.",
 						},
 						"billing_type": {
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "BillingType of the Ipv6 bandwidth.",
 						},

@@ -11,7 +11,7 @@ Provides a resource to manage vpc ipv6 address bandwidth
 ## Example Usage
 ```hcl
 data "volcengine_ecs_instances" "dataEcs" {
-  ids = ["i-yca7nb3ozzl8izx5c64d"]
+  ids = ["i-ycal1mtpucl8j0hjiihy"]
 }
 
 data "volcengine_vpc_ipv6_addresses" "dataIpv6" {
@@ -20,13 +20,13 @@ data "volcengine_vpc_ipv6_addresses" "dataIpv6" {
 
 resource "volcengine_vpc_ipv6_address_bandwidth" "foo" {
   ipv6_address = data.volcengine_vpc_ipv6_addresses.dataIpv6.ipv6_addresses.0.ipv6_address
-  billing_type = 3
+  billing_type = "PostPaidByBandwidth"
   bandwidth    = 5
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `billing_type` - (Required, ForceNew) BillingType of the Ipv6 bandwidth. Valid values: 3(Pay by Traffic).
+* `billing_type` - (Required, ForceNew) BillingType of the Ipv6 bandwidth. Valid values: `PostPaidByBandwidth`; `PostPaidByTraffic`.
 * `ipv6_address` - (Required, ForceNew) Ipv6 address.
 * `bandwidth` - (Optional) Peek bandwidth of the Ipv6 address. Valid values: 1 to 200. Unit: Mbit/s.
 
