@@ -167,6 +167,19 @@ func (s *VolcengineSubnetService) CreateResource(resourceData *schema.ResourceDa
 				return d.Get("vpc_id").(string)
 			},
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"ipv6_cidr_block": {
+					Ignore: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				ipv6CidrBlock, exists := d.GetOkExists("ipv6_cidr_block")
+				if exists {
+					(*call.SdkParam)["Ipv6CidrBlock"] = ipv6CidrBlock
+				}
+
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.VpcClient.CreateSubnetCommon(call.SdkParam)
@@ -199,11 +212,22 @@ func (s *VolcengineSubnetService) ModifyResource(resourceData *schema.ResourceDa
 		Call: ve.SdkCall{
 			Action:      "ModifySubnetAttributes",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"ipv6_cidr_block": {
+					Ignore: true,
+				},
+			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("vpc_id").(string)
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["SubnetId"] = d.Id()
+
+				ipv6CidrBlock, exists := d.GetOkExists("ipv6_cidr_block")
+				if exists {
+					(*call.SdkParam)["Ipv6CidrBlock"] = ipv6CidrBlock
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
