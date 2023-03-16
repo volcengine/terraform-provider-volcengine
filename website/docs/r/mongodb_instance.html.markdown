@@ -52,8 +52,8 @@ In addition to all arguments above, the following attributes are exported:
 
 
 ## Import
-mongosdb instance can be imported using the id, e.g.
+mongodb instance can be imported using the id, e.g.
 ```
-$ terraform import volcengine_mongosdb_instance.default mongo-replica-e405f8e2****
+$ terraform import volcengine_mongodb_instance.default mongo-replica-e405f8e2****
 ```
 
