@@ -25,7 +25,7 @@ The following arguments are supported:
 * `description` - (Optional) The description of the EIP.
 * `isp` - (Optional, ForceNew) The ISP of the EIP, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.
 * `name` - (Optional) The name of the EIP Address.
-* `project_name` - (Optional, ForceNew) The ProjectName of the EIP.
+* `project_name` - (Optional) The ProjectName of the EIP.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:

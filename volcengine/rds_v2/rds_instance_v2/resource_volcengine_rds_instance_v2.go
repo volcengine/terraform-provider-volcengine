@@ -97,7 +97,6 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Subordinate to the project.",
 			},
 			"charge_info": {

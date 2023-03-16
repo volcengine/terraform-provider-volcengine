@@ -63,7 +63,7 @@ The length is limited between 1 ~ 128.
 Ranges:
 0: Table names are stored as fixed and table names are case-sensitive.
 1: Table names will be stored in lowercase and table names are not case sensitive.
-* `project_name` - (Optional, ForceNew) Subordinate to the project.
+* `project_name` - (Optional) Subordinate to the project.
 * `storage_space` - (Optional) Instance storage space.
 When the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, value range: [20, 3000], unit: GB, increments every 100GB.
 When the database type is veDB_MySQL/veDB_PostgreSQL, this parameter does not need to be passed.

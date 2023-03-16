@@ -119,6 +119,15 @@ func (s *VolcengineClbService) RefreshResourceState(resourceData *schema.Resourc
 					return nil, "", fmt.Errorf("Clb  status  error, status:%s", status.(string))
 				}
 			}
+			project, err := ve.ObtainSdkValue("ProjectName", demo)
+			if err != nil {
+				return nil, "", err
+			}
+			if resourceData.Get("project_name") != nil && resourceData.Get("project_name").(string) != "" {
+				if project != resourceData.Get("project_name") {
+					return demo, "", err
+				}
+			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
 			return demo, status.(string), err
 		},
@@ -209,6 +218,19 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 
 func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
+
+	//project
+	projectCallback := ve.NewProjectService(s.Client).ModifyProject(ve.ProjectTrn{
+		ResourceType: "clb",
+		ResourceID:   resourceData.Id(),
+		ServiceName:  "clb",
+	}, resourceData, resource, "project_name",
+		&ve.StateRefresh{
+			Target:  []string{"Active"},
+			Timeout: resourceData.Timeout(schema.TimeoutCreate),
+		})
+
+	callbacks = append(callbacks, projectCallback...)
 
 	callback := ve.Callback{
 		Call: ve.SdkCall{

@@ -30,7 +30,7 @@ The following arguments are supported:
 * `master_zone_id` - (Optional) The master zone ID of the CLB.
 * `modification_protection_reason` - (Optional) The reason of the console modification protection.
 * `modification_protection_status` - (Optional) The status of the console modification protection, the value can be `NonProtection` or `ConsoleProtection`.
-* `project_name` - (Optional, ForceNew) The ProjectName of the CLB.
+* `project_name` - (Optional) The ProjectName of the CLB.
 * `region_id` - (Optional, ForceNew) The region of the request.
 * `slave_zone_id` - (Optional) The slave zone ID of the CLB.
 * `tags` - (Optional) Tags.
