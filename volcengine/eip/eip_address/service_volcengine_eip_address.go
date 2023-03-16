@@ -119,6 +119,15 @@ func (s *VolcengineEipAddressService) RefreshResourceState(resourceData *schema.
 					return nil, "", fmt.Errorf("eip address status error, status:%s", status.(string))
 				}
 			}
+			project, err := ve.ObtainSdkValue("ProjectName", demo)
+			if err != nil {
+				return nil, "", err
+			}
+			if resourceData.Get("project_name") != nil && resourceData.Get("project_name").(string) != "" {
+				if project != resourceData.Get("project_name") {
+					return demo, "", err
+				}
+			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
 			return demo, status.(string), err
 		},
@@ -179,6 +188,19 @@ func (s *VolcengineEipAddressService) CreateResource(resourceData *schema.Resour
 
 func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
+
+	//project
+	projectCallback := ve.NewProjectService(s.Client).ModifyProject(ve.ProjectTrn{
+		ResourceType: "eip",
+		ResourceID:   resourceData.Id(),
+		ServiceName:  "vpc",
+	}, resourceData, resource, "project_name",
+		&ve.StateRefresh{
+			Target:  []string{"Available"},
+			Timeout: resourceData.Timeout(schema.TimeoutCreate),
+		})
+
+	callbacks = append(callbacks, projectCallback...)
 
 	callback := ve.Callback{
 		Call: ve.SdkCall{

@@ -181,6 +181,15 @@ func (s *VolcengineRdsInstanceService) RefreshResourceState(resourceData *schema
 					return nil, "", fmt.Errorf("Rds instance status error, status:%s ", status.(string))
 				}
 			}
+			project, err := volc.ObtainSdkValue("ProjectName", demo)
+			if err != nil {
+				return nil, "", err
+			}
+			if resourceData.Get("project_name") != nil && resourceData.Get("project_name").(string) != "" {
+				if project != resourceData.Get("project_name") {
+					return demo, "", err
+				}
+			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
 			return demo, status.(string), err
 		},
@@ -255,7 +264,7 @@ func (s *VolcengineRdsInstanceService) CreateResource(resourceData *schema.Resou
 }
 
 func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
-	if !resourceData.HasChanges("storage_type", "storage_space", "node_info") {
+	if !resourceData.HasChanges("storage_type", "storage_space", "node_info", "project_name") {
 		return []volc.Callback{}
 	}
 
@@ -402,6 +411,19 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 	}
 
 	callbacks := make([]volc.Callback, 0)
+
+	//project
+	projectCallback := volc.NewProjectService(s.Client).ModifyProject(volc.ProjectTrn{
+		ResourceType: "instance",
+		ResourceID:   resourceData.Id(),
+		ServiceName:  "rds_mysql",
+	}, resourceData, resource, "project_name",
+		&volc.StateRefresh{
+			Target:  []string{"Running"},
+			Timeout: resourceData.Timeout(schema.TimeoutCreate),
+		})
+	callbacks = append(callbacks, projectCallback...)
+
 	if hasNodeChange || resourceData.HasChanges("storage_space", "storage_type") {
 		modifySpecCallback := volc.Callback{
 			Call: volc.SdkCall{
