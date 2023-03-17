@@ -190,7 +190,7 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 	var callbacks []ve.Callback
 
 	//project
-	projectCallback := ve.NewProjectService(s.Client).ModifyProject(ve.ProjectTrn{
+	projectCallback := ve.NewProjectService(s.Client).ModifyProjectOld(ve.ProjectTrn{
 		ResourceType: "eip",
 		ResourceID:   resourceData.Id(),
 		ServiceName:  "vpc",

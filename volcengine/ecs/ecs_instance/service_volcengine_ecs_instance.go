@@ -495,7 +495,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 	)
 
 	//project
-	projectCallback := ve.NewProjectService(s.Client).ModifyProject(ve.ProjectTrn{
+	projectCallback := ve.NewProjectService(s.Client).ModifyProjectOld(ve.ProjectTrn{
 		ResourceType: "instance",
 		ResourceID:   resourceData.Id(),
 		ServiceName:  "ecs",
