@@ -63,6 +63,15 @@ func NewEcsService(c *ve.SdkClient) *VolcengineEcsService {
 	}
 }
 
+func (s *VolcengineEcsService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "instance",
+		ProjectSchemaField:   "project_name",
+		ProjectResponseField: "ProjectName",
+	}
+}
+
 func (s *VolcengineEcsService) GetClient() *ve.SdkClient {
 	return s.Client
 }
@@ -173,15 +182,6 @@ func (s *VolcengineEcsService) RefreshResourceState(resourceData *schema.Resourc
 			for _, v := range failStates {
 				if v == status.(string) {
 					return nil, "", fmt.Errorf("Ecs Instance  status  error, status:%s", status.(string))
-				}
-			}
-			project, err := ve.ObtainSdkValue("ProjectName", data)
-			if err != nil {
-				return nil, "", err
-			}
-			if resourceData.Get("project_name") != nil && resourceData.Get("project_name").(string) != "" {
-				if project != resourceData.Get("project_name") {
-					return data, "", err
 				}
 			}
 			return data, status.(string), err
@@ -493,18 +493,6 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 		passwordChange bool
 		flag           bool
 	)
-
-	//project
-	projectCallback := ve.NewProjectService(s.Client).ModifyProjectOld(ve.ProjectTrn{
-		ResourceType: "instance",
-		ResourceID:   resourceData.Id(),
-		ServiceName:  "ecs",
-	}, resourceData, resource, "project_name",
-		&ve.StateRefresh{
-			Target:  []string{"RUNNING", "STOPPED"},
-			Timeout: resourceData.Timeout(schema.TimeoutUpdate),
-		})
-	callbacks = append(callbacks, projectCallback...)
 
 	if resourceData.HasChange("password") && !resourceData.HasChange("image_id") {
 		passwordChange = true
