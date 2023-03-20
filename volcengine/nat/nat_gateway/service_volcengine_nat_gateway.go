@@ -380,3 +380,12 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Action:      actionName,
 	}
 }
+
+func (s *VolcengineNatGatewayService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "natgateway",
+		ResourceType:         "ngw",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}

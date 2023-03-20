@@ -402,3 +402,12 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Action:      actionName,
 	}
 }
+
+func (s *VolcengineNetworkAclService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "networkacl",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}

@@ -493,18 +493,6 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 		flag           bool
 	)
 
-	//project
-	projectCallback := ve.NewProjectService(s.Client).ModifyProjectOld(ve.ProjectTrn{
-		ResourceType: "instance",
-		ResourceID:   resourceData.Id(),
-		ServiceName:  "ecs",
-	}, resourceData, resource, "project_name",
-		&ve.StateRefresh{
-			Target:  []string{"RUNNING", "STOPPED"},
-			Timeout: resourceData.Timeout(schema.TimeoutUpdate),
-		})
-	callbacks = append(callbacks, projectCallback...)
-
 	if resourceData.HasChange("password") && !resourceData.HasChange("image_id") {
 		passwordChange = true
 	}
@@ -1298,4 +1286,13 @@ func (v *volumeInfo) Less(i, j int) bool {
 
 func (v *volumeInfo) Swap(i, j int) {
 	v.list[i], v.list[j] = v.list[j], v.list[i]
+}
+
+func (s *VolcengineEcsService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "instance",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }

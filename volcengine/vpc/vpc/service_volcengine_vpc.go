@@ -21,15 +21,6 @@ func NewVpcService(c *ve.SdkClient) *VolcengineVpcService {
 	}
 }
 
-//func (s *VolcengineVpcService) ProjectTrn() *ve.ProjectTrn {
-//	return &ve.ProjectTrn{
-//		ServiceName:          "vpc",
-//		ResourceType:         "vpc",
-//		ProjectSchemaField:   "project_name",
-//		ProjectResponseField: "ProjectName",
-//	}
-//}
-
 func (s *VolcengineVpcService) GetClient() *ve.SdkClient {
 	return s.Client
 }
@@ -293,5 +284,14 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 		Action:      actionName,
+	}
+}
+
+func (s *VolcengineVpcService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "vpc",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }

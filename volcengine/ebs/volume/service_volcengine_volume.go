@@ -368,3 +368,12 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Action:      actionName,
 	}
 }
+
+func (s *VolcengineVolumeService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "storage_ebs",
+		ResourceType:         "volume",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}

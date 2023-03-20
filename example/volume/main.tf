@@ -1,10 +1,11 @@
 resource "volcengine_volume" "foo" {
   volume_name = "terraform-test"
-  zone_id = "cn-beijing-b"
+  zone_id = "cn-xx-a"
   volume_type = "ESSD_PL0"
   kind = "data"
   size = 40
   volume_charge_type = "PostPaid"
+  project_name = "default"
 }
 
 resource "volcengine_volume_attach" "foo" {

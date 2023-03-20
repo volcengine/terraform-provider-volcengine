@@ -166,6 +166,11 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 					},
 				},
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the network acl.",
+			},
 		},
 	}
 }

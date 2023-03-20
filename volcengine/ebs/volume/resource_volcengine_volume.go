@@ -112,6 +112,11 @@ func ResourceVolcengineVolume() *schema.Resource {
 					return d.Id() == ""
 				},
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the Volume.",
+			},
 		},
 	}
 }

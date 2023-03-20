@@ -11,9 +11,10 @@ Provides a resource to manage route table
 ## Example Usage
 ```hcl
 resource "volcengine_route_table" "foo" {
-  vpc_id           = "vpc-2744hsjr475s07fap8t4jbl1c"
-  route_table_name = "tf-test1"
+  vpc_id           = "vpc-2feppmy1ugt1c59gp688n1fld"
+  route_table_name = "tf-project-1"
   description      = "tf-test1"
+  project_name     = "yuwao"
 }
 ```
 ## Argument Reference
