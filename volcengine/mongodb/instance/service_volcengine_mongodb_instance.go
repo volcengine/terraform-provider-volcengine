@@ -180,11 +180,11 @@ func (s *VolcengineMongoDBInstanceService) ReadResource(resourceData *schema.Res
 			nodes := temp.([]interface{})
 			data["NodeNumber"] = len(nodes)
 			data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
+			data["StorageSpaceGb"] = nodes[0].(map[string]interface{})["TotalStorageGB"]
 		} else {
 			data["NodeNumber"] = 0
 		}
-	}
-	if data["InstanceType"].(string) == "ShardedCluster" {
+	} else if data["InstanceType"].(string) == "ShardedCluster" {
 		if temp, ok := data["Mongos"]; ok && temp != nil {
 			mongos := temp.([]interface{})
 			data["MongosNodeNumber"] = len(mongos)
