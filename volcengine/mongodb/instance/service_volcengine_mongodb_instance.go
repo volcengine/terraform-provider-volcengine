@@ -73,8 +73,8 @@ func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]in
 		resp    *map[string]interface{}
 		results interface{}
 	)
-	withoutDetail, containWithoutDetail := condition["WithoutDetail"]
-	if !containWithoutDetail {
+	withoutDetail, ok := condition["WithoutDetail"]
+	if !ok {
 		withoutDetail = false
 	}
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
@@ -102,46 +102,76 @@ func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]in
 		}
 		instances, ok := results.([]interface{})
 		if !ok {
-			return data, fmt.Errorf("DescribeDBInstances responsed instances is not a slice")
+			return data, fmt.Errorf("DescribeDBInstances response instances is not a slice")
 		}
 
 		for _, ele := range instances {
 			ins := ele.(map[string]interface{})
-			instanceId := ins["InstanceId"].(string)
-
+			instanceId, err := ve.ObtainSdkValue("InstanceId", ele)
+			if err != nil {
+				return data, fmt.Errorf("obtain instance id failed")
+			}
 			// do not get detail when refresh status
 			if withoutDetail.(bool) {
 				data = append(data, ins)
 				continue
 			}
 
-			detail, err := s.ReadInstanceDetails(instanceId)
+			detail, err := s.ReadInstanceDetails(instanceId.(string))
 			if err != nil {
 				logger.DebugInfo("read instance %s detail failed,err:%v.", instanceId, err)
 				data = append(data, ele)
 				continue
 			}
-			ssl, err := s.readSSLDetails(instanceId)
+			ssl, err := s.readSSLDetails(instanceId.(string))
 			if err != nil {
 				logger.DebugInfo("read instance ssl information of %s failed,err:%v.", instanceId, err)
 				data = append(data, ele)
 				continue
 			}
-			ins["ConfigServers"] = detail.(map[string]interface{})["ConfigServers"]
-			ins["Nodes"] = detail.(map[string]interface{})["Nodes"]
-			ins["Mongos"] = detail.(map[string]interface{})["Mongos"]
-			ins["Shards"] = detail.(map[string]interface{})["Shards"]
+			ConfigServers, err := ve.ObtainSdkValue("ConfigServers", detail)
+			if err != nil {
+				return data, fmt.Errorf("obtain ConfigServers failed")
+			}
+			Nodes, err := ve.ObtainSdkValue("Nodes", detail)
+			if err != nil {
+				return data, fmt.Errorf("obtain Nodes failed")
+			}
+			Mongos, err := ve.ObtainSdkValue("Mongos", detail)
+			if err != nil {
+				return data, fmt.Errorf("obtain Mongos failed")
+			}
+			Shards, err := ve.ObtainSdkValue("Shards", detail)
+			if err != nil {
+				return data, fmt.Errorf("obtain Shards failed")
+			}
+			SSLEnable, err := ve.ObtainSdkValue("SSLEnable", ssl)
+			if err != nil {
+				return data, fmt.Errorf("obtain SSLEnable failed")
+			}
+			SSLIsValid, err := ve.ObtainSdkValue("SSLIsValid", ssl)
+			if err != nil {
+				return data, fmt.Errorf("obtain SSLIsValid failed")
+			}
+			SSLExpiredTime, err := ve.ObtainSdkValue("SSLExpiredTime", ssl)
+			if err != nil {
+				return data, fmt.Errorf("obtain SSLExpiredTime failed")
+			}
 
-			ins["SSLEnable"] = ssl.(map[string]interface{})["SSLEnable"]
-			ins["SSLIsValid"] = ssl.(map[string]interface{})["IsValid"]
-			ins["SSLExpiredTime"] = ssl.(map[string]interface{})["SSLExpiredTime"]
+			ins["ConfigServers"] = ConfigServers
+			ins["Nodes"] = Nodes
+			ins["Mongos"] = Mongos
+			ins["Shards"] = Shards
+			ins["SSLEnable"] = SSLEnable
+			ins["SSLIsValid"] = SSLIsValid
+			ins["SSLExpiredTime"] = SSLExpiredTime
 			data = append(data, ins)
 		}
 		return data, nil
 	})
 }
 
-func (s *VolcengineMongoDBInstanceService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineMongoDBInstanceService) readResource(resourceData *schema.ResourceData, id string, withoutDetail bool) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -152,7 +182,7 @@ func (s *VolcengineMongoDBInstanceService) ReadResource(resourceData *schema.Res
 
 	req := map[string]interface{}{
 		"InstanceId":    id,
-		"withoutDetail": true,
+		"WithoutDetail": withoutDetail,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -175,38 +205,50 @@ func (s *VolcengineMongoDBInstanceService) ReadResource(resourceData *schema.Res
 		data["RestartInstance"] = false
 	}
 
-	if data["InstanceType"].(string) == "ReplicaSet" {
-		if temp, ok := data["Nodes"]; ok && temp != nil {
-			nodes := temp.([]interface{})
+	instanceType, _ := ve.ObtainSdkValue("InstanceType", data)
+	if instanceType.(string) == "ReplicaSet" {
+		n, err := ve.ObtainSdkValue("Nodes", data)
+		if err != nil {
+			data["NodeNumber"] = 0
+		} else {
+			nodes := n.([]interface{})
 			data["NodeNumber"] = len(nodes)
 			data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
 			data["StorageSpaceGb"] = nodes[0].(map[string]interface{})["TotalStorageGB"]
-		} else {
-			data["NodeNumber"] = 0
 		}
-	} else if data["InstanceType"].(string) == "ShardedCluster" {
-		if temp, ok := data["Mongos"]; ok && temp != nil {
-			mongos := temp.([]interface{})
+	} else if instanceType.(string) == "ShardedCluster" {
+		m, err := ve.ObtainSdkValue("Mongos", data)
+		if err != nil {
+			data["MongosNodeNumber"] = 0
+		} else {
+			mongos := m.([]interface{})
 			data["MongosNodeNumber"] = len(mongos)
 			data["MongosNodeSpec"] = mongos[0].(map[string]interface{})["NodeSpec"]
-		} else {
-			data["MongosNodeNumber"] = 0
 		}
-		if temp, ok := data["Shards"]; ok && temp != nil {
-			shards := temp.([]interface{})
+		s, err := ve.ObtainSdkValue("Shards", data)
+		if err != nil {
+			data["ShardNumber"] = 0
+			data["StorageSpaceGB"] = 0
+		} else {
+			shards := s.([]interface{})
 			data["ShardNumber"] = len(shards)
 			if tmp, ok := shards[0].(map[string]interface{})["Nodes"]; ok {
 				nodes := tmp.([]interface{})
-				data["StorageSpaceGb"] = nodes[0].(map[string]interface{})["TotalStorageGB"]
+				data["StorageSpaceGB"] = nodes[0].(map[string]interface{})["TotalStorageGB"]
 				data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
 				data["NodeNumber"] = len(nodes)
 			}
-		} else {
-			data["ShardNumber"] = 0
-			data["StorageSpaceGb"] = 0
 		}
 	}
 	return data, err
+}
+
+func (s *VolcengineMongoDBInstanceService) ReadResourceWithoutDetail(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+	return s.readResource(resourceData, id, true)
+}
+
+func (s *VolcengineMongoDBInstanceService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+	return s.readResource(resourceData, id, false)
 }
 
 func (s *VolcengineMongoDBInstanceService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
@@ -226,7 +268,7 @@ func (s *VolcengineMongoDBInstanceService) RefreshResourceState(resourceData *sc
 			failStates = append(failStates, "CreateFailed", "Failed")
 
 			logger.DebugInfo("start refresh :%s", id)
-			instance, err = s.ReadResource(resourceData, id)
+			instance, err = s.ReadResourceWithoutDetail(resourceData, id)
 			if err != nil {
 				return nil, "", err
 			}

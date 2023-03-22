@@ -26,12 +26,12 @@ func DataSourceVolcengineMongoDBInstanceParameterLogs() *schema.Resource {
 			},
 			"start_time": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "The start time to query.",
 			},
 			"end_time": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "The end time to query.",
 			},
 			"parameter_change_logs": {

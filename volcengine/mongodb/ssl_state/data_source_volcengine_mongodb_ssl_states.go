@@ -11,7 +11,7 @@ func DataSourceVolcengineMongoDBSSLStates() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "The mongodb instance ID to query.",
 			},
 			"ssl_state": {

@@ -52,39 +52,19 @@ func ResourceVolcengineMongoDBInstanceParameter() *schema.Resource {
 			"parameter_role": {
 				Type:        schema.TypeString,
 				Required:    true,
+				Computed:    true,
 				Description: "The node type to which the parameter belongs.",
 			},
 			"parameter_value": {
 				Type:        schema.TypeString,
 				Required:    true,
+				Computed:    true,
 				Description: "The value of parameter.",
 			},
-			//"parameters_object": {
-			//	Type:        schema.TypeList,
-			//	Optional:    true,
-			//	Description: "The parameters to modify.",
-			//	Elem: &schema.Resource{
-			//		Schema: map[string]*schema.Schema{
-			//			"parameter_name": {
-			//				Type:        schema.TypeString,
-			//				Required:    true,
-			//				Description: "The name of parameter.",
-			//			},
-			//			"parameter_role": {
-			//				Type:        schema.TypeString,
-			//				Required:    true,
-			//				Description: "The node type to which the parameter belongs.",
-			//			},
-			//			"parameter_value": {
-			//				Type:        schema.TypeString,
-			//				Required:    true,
-			//				Description: "The value of parameter.",
-			//			},
-			//		},
-			//	},
-			//},
 		},
 	}
+	dataSource := DataSourceVolcengineMongoDBInstanceParameters().Schema["parameters"].Elem.(*schema.Resource).Schema
+	ve.MergeDateSourceToResource(dataSource, &resource.Schema)
 	return resource
 }
 

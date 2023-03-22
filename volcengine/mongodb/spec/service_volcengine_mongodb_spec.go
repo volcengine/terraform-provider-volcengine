@@ -59,7 +59,7 @@ func (s *VolcengineMongoSpecService) ReadResources(condition map[string]interfac
 		return nil, err
 	}
 	if results == nil {
-		results = make([]interface{}, 0)
+		results = map[string]interface{}{}
 	}
 	data = append(data, results)
 	return data, nil

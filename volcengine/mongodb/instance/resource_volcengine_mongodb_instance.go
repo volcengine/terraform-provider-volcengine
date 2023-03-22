@@ -35,6 +35,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed:    true,
 				Description: "The zone ID of instance.",
 			},
+			// 固定值，暂时不开放
 			// "db_engine": {
 			// 	Type:         schema.TypeString,
 			// 	Optional:     true,
@@ -54,6 +55,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Required:    true,
 				Description: "The spec of node.",
 			},
+			// 固定值，暂时不开放
 			// "node_number": {
 			// 	Type:        schema.TypeInt,
 			// 	Optional:    true,

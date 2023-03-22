@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -39,6 +40,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"object_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The object ID corresponding to the endpoint.",
 			},
 			"network_type": {
@@ -51,6 +53,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"mongos_node_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: "A list of the Mongos node that needs to apply for the endpoint.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -59,6 +62,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"eip_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: "A list of EIP IDs that need to be bound when applying for endpoint.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

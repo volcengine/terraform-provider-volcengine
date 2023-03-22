@@ -3,9 +3,10 @@ package instance_parameter
 import (
 	"errors"
 	"fmt"
-	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 	"strings"
 	"time"
+
+	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -54,6 +55,9 @@ func (s *VolcengineMongoDBInstanceParameterService) ReadResources(condition map[
 	if err != nil {
 		return data, err
 	}
+	if results == nil {
+		results = map[string]interface{}{}
+	}
 	data = []interface{}{results}
 	return data, err
 }
@@ -68,7 +72,7 @@ func (s *VolcengineMongoDBInstanceParameterService) ReadResource(resourceData *s
 	}
 	parts := strings.Split(id, ":")
 	if len(parts) != 3 {
-		return data, fmt.Errorf("the format of import id must be 'endpoint:instanceId:parameterName'")
+		return data, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName'")
 	}
 	req := map[string]interface{}{
 		"InstanceId":     parts[1],
@@ -165,9 +169,6 @@ func (s *VolcengineMongoDBInstanceParameterService) DatasourceResources(data *sc
 			},
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
-			},
-			"ParameterNames": {
-				TargetField: "parameter_name",
 			},
 		},
 	}

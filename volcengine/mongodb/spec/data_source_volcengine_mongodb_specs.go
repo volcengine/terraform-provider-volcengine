@@ -21,7 +21,7 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 			},
 			"region_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The region ID to query.",
 			},
 			"specs": {
