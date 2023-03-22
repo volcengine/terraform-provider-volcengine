@@ -11,9 +11,8 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 		Read: dataSourceVolcengineAccountsRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				// ForceNew:    true,
+				Type:        schema.TypeString,
+				Required:    true,
 				Description: "Target query mongo instance id.",
 			},
 			"account_name": {
