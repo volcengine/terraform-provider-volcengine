@@ -227,5 +227,5 @@ func DataSourceVolcengineRdsInstances() *schema.Resource {
 
 func dataSourceVolcengineRdsInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	rdsInstanceService := NewRdsInstanceService(meta.(*volc.SdkClient))
-	return rdsInstanceService.Dispatcher.Data(rdsInstanceService, d, DataSourceVolcengineRdsInstances())
+	return volc.DefaultDispatcher().Data(rdsInstanceService, d, DataSourceVolcengineRdsInstances())
 }

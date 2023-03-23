@@ -49,5 +49,5 @@ func DataSourceVolcengineMongoDBSSLStates() *schema.Resource {
 
 func dataSourceVolcengineMongoDBSSLStatesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBSSLStates())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBSSLStates())
 }

@@ -13,13 +13,11 @@ import (
 
 type VolcengineIamLoginProfileService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewIamLoginProfileService(c *ve.SdkClient) *VolcengineIamLoginProfileService {
 	return &VolcengineIamLoginProfileService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

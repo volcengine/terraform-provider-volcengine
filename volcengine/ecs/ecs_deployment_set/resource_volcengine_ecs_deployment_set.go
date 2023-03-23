@@ -78,7 +78,7 @@ func ResourceVolcengineEcsDeploymentSet() *schema.Resource {
 
 func resourceVolcengineEcsDeploymentSetCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	deploymentSetService := NewEcsDeploymentSetService(meta.(*ve.SdkClient))
-	err = deploymentSetService.Dispatcher.Create(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
+	err = ve.DefaultDispatcher().Create(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
 	if err != nil {
 		return fmt.Errorf("error on creating ecs deployment set  %q, %s", d.Id(), err)
 	}
@@ -87,7 +87,7 @@ func resourceVolcengineEcsDeploymentSetCreate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineEcsDeploymentSetRead(d *schema.ResourceData, meta interface{}) (err error) {
 	deploymentSetService := NewEcsDeploymentSetService(meta.(*ve.SdkClient))
-	err = deploymentSetService.Dispatcher.Read(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
+	err = ve.DefaultDispatcher().Read(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
 	if err != nil {
 		return fmt.Errorf("error on reading ecs deployment set %q, %s", d.Id(), err)
 	}
@@ -96,7 +96,7 @@ func resourceVolcengineEcsDeploymentSetRead(d *schema.ResourceData, meta interfa
 
 func resourceVolcengineEcsDeploymentSetUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	deploymentSetService := NewEcsDeploymentSetService(meta.(*ve.SdkClient))
-	err = deploymentSetService.Dispatcher.Update(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
+	err = ve.DefaultDispatcher().Update(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
 	if err != nil {
 		return fmt.Errorf("error on updating ecs deployment set  %q, %s", d.Id(), err)
 	}
@@ -105,7 +105,7 @@ func resourceVolcengineEcsDeploymentSetUpdate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineEcsDeploymentSetDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	deploymentSetService := NewEcsDeploymentSetService(meta.(*ve.SdkClient))
-	err = deploymentSetService.Dispatcher.Delete(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
+	err = ve.DefaultDispatcher().Delete(deploymentSetService, d, ResourceVolcengineEcsDeploymentSet())
 	if err != nil {
 		return fmt.Errorf("error on deleting ecs deployment set %q, %s", d.Id(), err)
 	}

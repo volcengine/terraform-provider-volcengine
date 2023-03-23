@@ -13,13 +13,11 @@ import (
 
 type VolcengineVpnGatewayRouteService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewVpnGatewayRouteService(c *ve.SdkClient) *VolcengineVpnGatewayRouteService {
 	return &VolcengineVpnGatewayRouteService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

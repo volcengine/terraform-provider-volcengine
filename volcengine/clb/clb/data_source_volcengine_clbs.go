@@ -199,5 +199,5 @@ func DataSourceVolcengineClbs() *schema.Resource {
 
 func dataSourceVolcengineClbsRead(d *schema.ResourceData, meta interface{}) error {
 	clbService := NewClbService(meta.(*ve.SdkClient))
-	return clbService.Dispatcher.Data(clbService, d, DataSourceVolcengineClbs())
+	return ve.DefaultDispatcher().Data(clbService, d, DataSourceVolcengineClbs())
 }

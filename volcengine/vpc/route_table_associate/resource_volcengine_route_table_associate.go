@@ -50,7 +50,7 @@ func ResourceVolcengineRouteTableAssociate() *schema.Resource {
 
 func resourceVolcengineRouteTableAssociateCreate(d *schema.ResourceData, meta interface{}) error {
 	routeTableAssociateService := NewRouteTableAssociateService(meta.(*ve.SdkClient))
-	if err := routeTableAssociateService.Dispatcher.Create(routeTableAssociateService, d, ResourceVolcengineRouteTableAssociate()); err != nil {
+	if err := ve.DefaultDispatcher().Create(routeTableAssociateService, d, ResourceVolcengineRouteTableAssociate()); err != nil {
 		return fmt.Errorf("error on creating route table associate %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineRouteTableAssociateRead(d, meta)
@@ -58,7 +58,7 @@ func resourceVolcengineRouteTableAssociateCreate(d *schema.ResourceData, meta in
 
 func resourceVolcengineRouteTableAssociateRead(d *schema.ResourceData, meta interface{}) error {
 	routeTableAssociateService := NewRouteTableAssociateService(meta.(*ve.SdkClient))
-	if err := routeTableAssociateService.Dispatcher.Read(routeTableAssociateService, d, ResourceVolcengineRouteTableAssociate()); err != nil {
+	if err := ve.DefaultDispatcher().Read(routeTableAssociateService, d, ResourceVolcengineRouteTableAssociate()); err != nil {
 		return fmt.Errorf("error on reading  route table associate %q, %w", d.Id(), err)
 	}
 	return nil
@@ -66,7 +66,7 @@ func resourceVolcengineRouteTableAssociateRead(d *schema.ResourceData, meta inte
 
 func resourceVolcengineRouteTableAssociateDelete(d *schema.ResourceData, meta interface{}) error {
 	routeTableAssociateService := NewRouteTableAssociateService(meta.(*ve.SdkClient))
-	if err := routeTableAssociateService.Dispatcher.Delete(routeTableAssociateService, d, ResourceVolcengineRouteTableAssociate()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(routeTableAssociateService, d, ResourceVolcengineRouteTableAssociate()); err != nil {
 		return fmt.Errorf("error on deleting  route table associate %q, %w", d.Id(), err)
 	}
 	return nil

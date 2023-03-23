@@ -15,13 +15,11 @@ import (
 
 type VolcengineCrNamespaceService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewCrNamespaceService(c *ve.SdkClient) *VolcengineCrNamespaceService {
 	return &VolcengineCrNamespaceService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

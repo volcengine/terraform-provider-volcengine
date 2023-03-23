@@ -80,7 +80,7 @@ func ResourceVolcengineSubnet() *schema.Resource {
 
 func resourceVolcengineSubnetCreate(d *schema.ResourceData, meta interface{}) error {
 	subnetService := NewSubnetService(meta.(*ve.SdkClient))
-	if err := subnetService.Dispatcher.Create(subnetService, d, ResourceVolcengineSubnet()); err != nil {
+	if err := ve.DefaultDispatcher().Create(subnetService, d, ResourceVolcengineSubnet()); err != nil {
 		return fmt.Errorf("error on creating subnet  %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineSubnetRead(d, meta)
@@ -88,7 +88,7 @@ func resourceVolcengineSubnetCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceVolcengineSubnetRead(d *schema.ResourceData, meta interface{}) error {
 	subnetService := NewSubnetService(meta.(*ve.SdkClient))
-	if err := subnetService.Dispatcher.Read(subnetService, d, ResourceVolcengineSubnet()); err != nil {
+	if err := ve.DefaultDispatcher().Read(subnetService, d, ResourceVolcengineSubnet()); err != nil {
 		return fmt.Errorf("error on reading subnet %q, %w", d.Id(), err)
 	}
 	return nil
@@ -96,7 +96,7 @@ func resourceVolcengineSubnetRead(d *schema.ResourceData, meta interface{}) erro
 
 func resourceVolcengineSubnetUpdate(d *schema.ResourceData, meta interface{}) error {
 	subnetService := NewSubnetService(meta.(*ve.SdkClient))
-	if err := subnetService.Dispatcher.Update(subnetService, d, ResourceVolcengineSubnet()); err != nil {
+	if err := ve.DefaultDispatcher().Update(subnetService, d, ResourceVolcengineSubnet()); err != nil {
 		return fmt.Errorf("error on updating subnet %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineSubnetRead(d, meta)
@@ -104,7 +104,7 @@ func resourceVolcengineSubnetUpdate(d *schema.ResourceData, meta interface{}) er
 
 func resourceVolcengineSubnetDelete(d *schema.ResourceData, meta interface{}) error {
 	subnetService := NewSubnetService(meta.(*ve.SdkClient))
-	if err := subnetService.Dispatcher.Delete(subnetService, d, ResourceVolcengineSubnet()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(subnetService, d, ResourceVolcengineSubnet()); err != nil {
 		return fmt.Errorf("error on deleting subnet %q, %w", d.Id(), err)
 	}
 	return nil

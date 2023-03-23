@@ -114,5 +114,5 @@ func DataSourceVolcengineSnatEntries() *schema.Resource {
 
 func dataSourceVolcengineSnatEntriesRead(d *schema.ResourceData, meta interface{}) error {
 	snatEntryService := NewSnatEntryService(meta.(*ve.SdkClient))
-	return snatEntryService.Dispatcher.Data(snatEntryService, d, DataSourceVolcengineSnatEntries())
+	return ve.DefaultDispatcher().Data(snatEntryService, d, DataSourceVolcengineSnatEntries())
 }

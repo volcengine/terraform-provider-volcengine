@@ -112,5 +112,5 @@ func DataSourceVolcengineBioosWorkspaces() *schema.Resource {
 
 func dataSourceVolcengineBioosWorkspacesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewVolcengineBioosWorkspaceService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineBioosWorkspaces())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineBioosWorkspaces())
 }

@@ -75,7 +75,7 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 
 func resourceVolcengineSnatEntryCreate(d *schema.ResourceData, meta interface{}) error {
 	snatEntryService := NewSnatEntryService(meta.(*ve.SdkClient))
-	if err := snatEntryService.Dispatcher.Create(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Create(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
 		return fmt.Errorf("error on creating snat entry  %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineSnatEntryRead(d, meta)
@@ -83,7 +83,7 @@ func resourceVolcengineSnatEntryCreate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineSnatEntryRead(d *schema.ResourceData, meta interface{}) error {
 	snatEntryService := NewSnatEntryService(meta.(*ve.SdkClient))
-	if err := snatEntryService.Dispatcher.Read(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Read(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
 		return fmt.Errorf("error on reading snat entry %q, %w", d.Id(), err)
 	}
 	return nil
@@ -91,7 +91,7 @@ func resourceVolcengineSnatEntryRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceVolcengineSnatEntryUpdate(d *schema.ResourceData, meta interface{}) error {
 	snatEntryService := NewSnatEntryService(meta.(*ve.SdkClient))
-	if err := snatEntryService.Dispatcher.Update(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Update(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
 		return fmt.Errorf("error on updating snat entry %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineSnatEntryRead(d, meta)
@@ -99,7 +99,7 @@ func resourceVolcengineSnatEntryUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineSnatEntryDelete(d *schema.ResourceData, meta interface{}) error {
 	snatEntryService := NewSnatEntryService(meta.(*ve.SdkClient))
-	if err := snatEntryService.Dispatcher.Delete(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(snatEntryService, d, ResourceVolcengineSnatEntry()); err != nil {
 		return fmt.Errorf("error on deleting snat entry %q, %w", d.Id(), err)
 	}
 	return nil

@@ -66,7 +66,7 @@ func ResourceVolcengineCrEndpoint() *schema.Resource {
 
 func resourceVolcengineCrEndpointCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCrEndpoint())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrEndpoint())
 	if err != nil {
 		return fmt.Errorf("Error on creating CrEndpoint %q,%s", d.Id(), err)
 	}
@@ -75,7 +75,7 @@ func resourceVolcengineCrEndpointCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineCrEndpointUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCrEndpoint())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrEndpoint())
 	if err != nil {
 		return fmt.Errorf("error on updating CrEndpoint  %q, %s", d.Id(), err)
 	}
@@ -84,7 +84,7 @@ func resourceVolcengineCrEndpointUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineCrEndpointDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCrEndpoint())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCrEndpoint())
 	if err != nil {
 		return fmt.Errorf("error on deleting CrEndpoint %q, %s", d.Id(), err)
 	}
@@ -93,7 +93,7 @@ func resourceVolcengineCrEndpointDelete(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineCrEndpointRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCrEndpoint())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrEndpoint())
 	if err != nil {
 		return fmt.Errorf("Error on reading CrEndpoint %q,%s", d.Id(), err)
 	}

@@ -73,7 +73,7 @@ func ResourceVolcengineCenAttachInstance() *schema.Resource {
 
 func resourceVolcengineCenAttachInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	cenAttachInstanceService := NewCenAttachInstanceService(meta.(*ve.SdkClient))
-	err = cenAttachInstanceService.Dispatcher.Create(cenAttachInstanceService, d, ResourceVolcengineCenAttachInstance())
+	err = ve.DefaultDispatcher().Create(cenAttachInstanceService, d, ResourceVolcengineCenAttachInstance())
 	if err != nil {
 		return fmt.Errorf("error on creating cen attach instance  %q, %s", d.Id(), err)
 	}
@@ -82,7 +82,7 @@ func resourceVolcengineCenAttachInstanceCreate(d *schema.ResourceData, meta inte
 
 func resourceVolcengineCenAttachInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	cenAttachInstanceService := NewCenAttachInstanceService(meta.(*ve.SdkClient))
-	err = cenAttachInstanceService.Dispatcher.Read(cenAttachInstanceService, d, ResourceVolcengineCenAttachInstance())
+	err = ve.DefaultDispatcher().Read(cenAttachInstanceService, d, ResourceVolcengineCenAttachInstance())
 	if err != nil {
 		return fmt.Errorf("error on reading cen attach instance %q, %s", d.Id(), err)
 	}
@@ -91,7 +91,7 @@ func resourceVolcengineCenAttachInstanceRead(d *schema.ResourceData, meta interf
 
 func resourceVolcengineCenAttachInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	cenAttachInstanceService := NewCenAttachInstanceService(meta.(*ve.SdkClient))
-	err = cenAttachInstanceService.Dispatcher.Delete(cenAttachInstanceService, d, ResourceVolcengineCenAttachInstance())
+	err = ve.DefaultDispatcher().Delete(cenAttachInstanceService, d, ResourceVolcengineCenAttachInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting cen attach instance %q, %s", d.Id(), err)
 	}

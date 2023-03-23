@@ -17,7 +17,6 @@ import (
 
 type VolcengineDefaultNodePoolService struct {
 	Client          *ve.SdkClient
-	Dispatcher      *ve.Dispatcher
 	nodePoolService *node_pool.VolcengineNodePoolService
 	nodeService     *node.VolcengineVkeNodeService
 }
@@ -25,7 +24,6 @@ type VolcengineDefaultNodePoolService struct {
 func NewDefaultNodePoolService(c *ve.SdkClient) *VolcengineDefaultNodePoolService {
 	return &VolcengineDefaultNodePoolService{
 		Client:          c,
-		Dispatcher:      &ve.Dispatcher{},
 		nodePoolService: node_pool.NewNodePoolService(c),
 		nodeService:     node.NewVolcengineVkeNodeService(c),
 	}

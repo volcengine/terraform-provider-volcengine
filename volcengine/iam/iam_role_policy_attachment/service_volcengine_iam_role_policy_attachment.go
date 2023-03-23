@@ -13,13 +13,11 @@ import (
 
 type VolcengineIamRolePolicyAttachmentService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewIamRolePolicyAttachmentService(c *ve.SdkClient) *VolcengineIamRolePolicyAttachmentService {
 	return &VolcengineIamRolePolicyAttachmentService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

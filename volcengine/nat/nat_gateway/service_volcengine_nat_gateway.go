@@ -13,13 +13,11 @@ import (
 
 type VolcengineNatGatewayService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewNatGatewayService(c *ve.SdkClient) *VolcengineNatGatewayService {
 	return &VolcengineNatGatewayService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

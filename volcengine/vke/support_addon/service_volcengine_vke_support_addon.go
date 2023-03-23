@@ -12,13 +12,11 @@ import (
 
 type VolcengineVkeSupportAddonService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewVkeSupportAddonService(c *ve.SdkClient) *VolcengineVkeSupportAddonService {
 	return &VolcengineVkeSupportAddonService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

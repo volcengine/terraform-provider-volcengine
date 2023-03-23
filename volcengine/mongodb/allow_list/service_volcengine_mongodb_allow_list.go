@@ -13,13 +13,11 @@ import (
 
 type VolcengineMongoDBAllowListService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewMongoDBAllowListService(c *ve.SdkClient) *VolcengineMongoDBAllowListService {
 	return &VolcengineMongoDBAllowListService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

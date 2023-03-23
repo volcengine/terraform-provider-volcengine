@@ -44,5 +44,5 @@ func DataSourceVolcengineESCloudRegions() *schema.Resource {
 
 func dataSourceVolcengineRegionsRead(d *schema.ResourceData, meta interface{}) error {
 	regionService := NewRegionService(meta.(*ve.SdkClient))
-	return regionService.Dispatcher.Data(regionService, d, DataSourceVolcengineESCloudRegions())
+	return ve.DefaultDispatcher().Data(regionService, d, DataSourceVolcengineESCloudRegions())
 }

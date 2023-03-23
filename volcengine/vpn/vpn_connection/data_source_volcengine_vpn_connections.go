@@ -236,5 +236,5 @@ func DataSourceVolcengineVpnConnections() *schema.Resource {
 
 func dataSourceVolcengineVpnConnectionsRead(d *schema.ResourceData, meta interface{}) error {
 	vpnConnectionService := NewVpnConnectionService(meta.(*ve.SdkClient))
-	return vpnConnectionService.Dispatcher.Data(vpnConnectionService, d, DataSourceVolcengineVpnConnections())
+	return ve.DefaultDispatcher().Data(vpnConnectionService, d, DataSourceVolcengineVpnConnections())
 }

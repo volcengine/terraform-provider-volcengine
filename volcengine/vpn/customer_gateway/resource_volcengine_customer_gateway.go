@@ -63,7 +63,7 @@ func ResourceVolcengineCustomerGateway() *schema.Resource {
 
 func resourceVolcengineCustomerGatewayCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	customerGatewayService := NewCustomerGatewayService(meta.(*ve.SdkClient))
-	err = customerGatewayService.Dispatcher.Create(customerGatewayService, d, ResourceVolcengineCustomerGateway())
+	err = ve.DefaultDispatcher().Create(customerGatewayService, d, ResourceVolcengineCustomerGateway())
 	if err != nil {
 		return fmt.Errorf("error on creating Customer Gateway %q, %s", d.Id(), err)
 	}
@@ -72,7 +72,7 @@ func resourceVolcengineCustomerGatewayCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineCustomerGatewayRead(d *schema.ResourceData, meta interface{}) (err error) {
 	customerGatewayService := NewCustomerGatewayService(meta.(*ve.SdkClient))
-	err = customerGatewayService.Dispatcher.Read(customerGatewayService, d, ResourceVolcengineCustomerGateway())
+	err = ve.DefaultDispatcher().Read(customerGatewayService, d, ResourceVolcengineCustomerGateway())
 	if err != nil {
 		return fmt.Errorf("error on reading Customer Gateway %q, %s", d.Id(), err)
 	}
@@ -81,7 +81,7 @@ func resourceVolcengineCustomerGatewayRead(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineCustomerGatewayUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	customerGatewayService := NewCustomerGatewayService(meta.(*ve.SdkClient))
-	err = customerGatewayService.Dispatcher.Update(customerGatewayService, d, ResourceVolcengineCustomerGateway())
+	err = ve.DefaultDispatcher().Update(customerGatewayService, d, ResourceVolcengineCustomerGateway())
 	if err != nil {
 		return fmt.Errorf("error on updating Customer Gateway %q, %s", d.Id(), err)
 	}
@@ -90,7 +90,7 @@ func resourceVolcengineCustomerGatewayUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineCustomerGatewayDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	customerGatewayService := NewCustomerGatewayService(meta.(*ve.SdkClient))
-	err = customerGatewayService.Dispatcher.Delete(customerGatewayService, d, ResourceVolcengineCustomerGateway())
+	err = ve.DefaultDispatcher().Delete(customerGatewayService, d, ResourceVolcengineCustomerGateway())
 	if err != nil {
 		return fmt.Errorf("error on deleting Customer Gateway %q, %s", d.Id(), err)
 	}

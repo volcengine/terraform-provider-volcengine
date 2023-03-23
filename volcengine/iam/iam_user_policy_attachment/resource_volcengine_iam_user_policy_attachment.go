@@ -57,7 +57,7 @@ func ResourceVolcengineIamUserPolicyAttachment() *schema.Resource {
 
 func resourceVolcengineIamUserPolicyAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	iamUserPolicyAttachmentService := NewIamUserPolicyAttachmentService(meta.(*ve.SdkClient))
-	if err := iamUserPolicyAttachmentService.Dispatcher.Create(iamUserPolicyAttachmentService, d, ResourceVolcengineIamUserPolicyAttachment()); err != nil {
+	if err := ve.DefaultDispatcher().Create(iamUserPolicyAttachmentService, d, ResourceVolcengineIamUserPolicyAttachment()); err != nil {
 		return fmt.Errorf("error on creating iam user policy attachment %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineIamUserPolicyAttachmentRead(d, meta)
@@ -65,7 +65,7 @@ func resourceVolcengineIamUserPolicyAttachmentCreate(d *schema.ResourceData, met
 
 func resourceVolcengineIamUserPolicyAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	iamUserPolicyAttachmentService := NewIamUserPolicyAttachmentService(meta.(*ve.SdkClient))
-	if err := iamUserPolicyAttachmentService.Dispatcher.Read(iamUserPolicyAttachmentService, d, ResourceVolcengineIamUserPolicyAttachment()); err != nil {
+	if err := ve.DefaultDispatcher().Read(iamUserPolicyAttachmentService, d, ResourceVolcengineIamUserPolicyAttachment()); err != nil {
 		return fmt.Errorf("error on reading iam user policy attachment %q, %w", d.Id(), err)
 	}
 	return nil
@@ -73,7 +73,7 @@ func resourceVolcengineIamUserPolicyAttachmentRead(d *schema.ResourceData, meta 
 
 func resourceVolcengineIamUserPolicyAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	iamUserPolicyAttachmentService := NewIamUserPolicyAttachmentService(meta.(*ve.SdkClient))
-	if err := iamUserPolicyAttachmentService.Dispatcher.Delete(iamUserPolicyAttachmentService, d, ResourceVolcengineIamUserPolicyAttachment()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(iamUserPolicyAttachmentService, d, ResourceVolcengineIamUserPolicyAttachment()); err != nil {
 		return fmt.Errorf("error on deleting iam user policy attachment %q, %w", d.Id(), err)
 	}
 	return nil

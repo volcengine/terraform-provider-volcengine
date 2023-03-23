@@ -78,7 +78,7 @@ func ResourceVolcengineRdsAccountPrivilege() *schema.Resource {
 
 func resourceVolcengineRdsAccountPrivilegeCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsAccountPrivilegeService := NewRdsAccountPrivilegeService(meta.(*volc.SdkClient))
-	err = rdsAccountPrivilegeService.Dispatcher.Create(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
+	err = volc.DefaultDispatcher().Create(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
 	if err != nil {
 		return fmt.Errorf("error on creating rds account privilege %q, %w", d.Id(), err)
 	}
@@ -87,7 +87,7 @@ func resourceVolcengineRdsAccountPrivilegeCreate(d *schema.ResourceData, meta in
 
 func resourceVolcengineRdsAccountPrivilegeRead(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsAccountPrivilegeService := NewRdsAccountPrivilegeService(meta.(*volc.SdkClient))
-	err = rdsAccountPrivilegeService.Dispatcher.Read(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
+	err = volc.DefaultDispatcher().Read(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
 	if err != nil {
 		return fmt.Errorf("error on reading rds account privilege %q, %w", d.Id(), err)
 	}
@@ -96,7 +96,7 @@ func resourceVolcengineRdsAccountPrivilegeRead(d *schema.ResourceData, meta inte
 
 func resourceVolcengineRdsAccountPrivilegeUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsAccountPrivilegeService := NewRdsAccountPrivilegeService(meta.(*volc.SdkClient))
-	err = rdsAccountPrivilegeService.Dispatcher.Update(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
+	err = volc.DefaultDispatcher().Update(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
 	if err != nil {
 		return fmt.Errorf("error on updating rds account privilege %q, %w", d.Id(), err)
 	}
@@ -105,7 +105,7 @@ func resourceVolcengineRdsAccountPrivilegeUpdate(d *schema.ResourceData, meta in
 
 func resourceVolcengineRdsAccountPrivilegeDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsAccountPrivilegeService := NewRdsAccountPrivilegeService(meta.(*volc.SdkClient))
-	err = rdsAccountPrivilegeService.Dispatcher.Delete(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
+	err = volc.DefaultDispatcher().Delete(rdsAccountPrivilegeService, d, ResourceVolcengineRdsAccountPrivilege())
 	if err != nil {
 		return fmt.Errorf("error on deleting rds account privilege %q, %w", d.Id(), err)
 	}

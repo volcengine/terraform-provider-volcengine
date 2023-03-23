@@ -40,7 +40,7 @@ func ResourceVolcengineScalingGroupEnabler() *schema.Resource {
 
 func resourceVolcengineScalingGroupEnablerCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewScalingGroupEnablerService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineScalingGroupEnabler())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineScalingGroupEnabler())
 	if err != nil {
 		return fmt.Errorf("error on creating ScalingGroupEnable: %q, %s", d.Id(), err)
 	}
@@ -49,7 +49,7 @@ func resourceVolcengineScalingGroupEnablerCreate(d *schema.ResourceData, meta in
 
 func resourceVolcengineScalingGroupEnablerRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewScalingGroupEnablerService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineScalingGroupEnabler())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineScalingGroupEnabler())
 	if err != nil {
 		return fmt.Errorf("error on reading ScalingGroupEnable: %q, %s", d.Id(), err)
 	}
@@ -58,7 +58,7 @@ func resourceVolcengineScalingGroupEnablerRead(d *schema.ResourceData, meta inte
 
 func resourceVolcengineScalingGroupEnablerDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewScalingGroupEnablerService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineScalingGroupEnabler())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineScalingGroupEnabler())
 	if err != nil {
 		return fmt.Errorf("erron on deleting ScalingGroupEnabler: %q, %s", d.Id(), err)
 	}

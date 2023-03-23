@@ -190,5 +190,5 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 
 func dataSourceVolcengineScalingGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	scalingGroupService := NewScalingGroupService(meta.(*ve.SdkClient))
-	return scalingGroupService.Dispatcher.Data(scalingGroupService, d, DataSourceVolcengineScalingGroups())
+	return ve.DefaultDispatcher().Data(scalingGroupService, d, DataSourceVolcengineScalingGroups())
 }

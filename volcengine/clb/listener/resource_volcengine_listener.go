@@ -199,7 +199,7 @@ func ResourceVolcengineListener() *schema.Resource {
 
 func resourceVolcengineListenerCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	listenerService := NewListenerService(meta.(*ve.SdkClient))
-	err = listenerService.Dispatcher.Create(listenerService, d, ResourceVolcengineListener())
+	err = ve.DefaultDispatcher().Create(listenerService, d, ResourceVolcengineListener())
 	if err != nil {
 		return fmt.Errorf("error on creating listener  %q, %w", d.Id(), err)
 	}
@@ -208,7 +208,7 @@ func resourceVolcengineListenerCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineListenerRead(d *schema.ResourceData, meta interface{}) (err error) {
 	listenerService := NewListenerService(meta.(*ve.SdkClient))
-	err = listenerService.Dispatcher.Read(listenerService, d, ResourceVolcengineListener())
+	err = ve.DefaultDispatcher().Read(listenerService, d, ResourceVolcengineListener())
 	if err != nil {
 		return fmt.Errorf("error on reading listener %q, %w", d.Id(), err)
 	}
@@ -217,7 +217,7 @@ func resourceVolcengineListenerRead(d *schema.ResourceData, meta interface{}) (e
 
 func resourceVolcengineListenerUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	listenerService := NewListenerService(meta.(*ve.SdkClient))
-	err = listenerService.Dispatcher.Update(listenerService, d, ResourceVolcengineListener())
+	err = ve.DefaultDispatcher().Update(listenerService, d, ResourceVolcengineListener())
 	if err != nil {
 		return fmt.Errorf("error on updating listener  %q, %w", d.Id(), err)
 	}
@@ -226,7 +226,7 @@ func resourceVolcengineListenerUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineListenerDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	listenerService := NewListenerService(meta.(*ve.SdkClient))
-	err = listenerService.Dispatcher.Delete(listenerService, d, ResourceVolcengineListener())
+	err = ve.DefaultDispatcher().Delete(listenerService, d, ResourceVolcengineListener())
 	if err != nil {
 		return fmt.Errorf("error on deleting listener %q, %w", d.Id(), err)
 	}

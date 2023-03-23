@@ -450,5 +450,5 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 
 func dataSourceVolcengineMongoDBInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBInstances())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBInstances())
 }

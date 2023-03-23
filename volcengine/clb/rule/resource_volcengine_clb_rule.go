@@ -91,7 +91,7 @@ func ResourceVolcengineRule() *schema.Resource {
 
 func resourceVolcengineRuleCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	ruleService := NewRuleService(meta.(*ve.SdkClient))
-	err = ruleService.Dispatcher.Create(ruleService, d, ResourceVolcengineRule())
+	err = ve.DefaultDispatcher().Create(ruleService, d, ResourceVolcengineRule())
 	if err != nil {
 		return fmt.Errorf("error on creating rule %q, %w", d.Id(), err)
 	}
@@ -100,7 +100,7 @@ func resourceVolcengineRuleCreate(d *schema.ResourceData, meta interface{}) (err
 
 func resourceVolcengineRuleRead(d *schema.ResourceData, meta interface{}) (err error) {
 	ruleService := NewRuleService(meta.(*ve.SdkClient))
-	err = ruleService.Dispatcher.Read(ruleService, d, ResourceVolcengineRule())
+	err = ve.DefaultDispatcher().Read(ruleService, d, ResourceVolcengineRule())
 	if err != nil {
 		return fmt.Errorf("error on reading rule %q, %w", d.Id(), err)
 	}
@@ -109,7 +109,7 @@ func resourceVolcengineRuleRead(d *schema.ResourceData, meta interface{}) (err e
 
 func resourceVolcengineRuleUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	ruleService := NewRuleService(meta.(*ve.SdkClient))
-	err = ruleService.Dispatcher.Update(ruleService, d, ResourceVolcengineRule())
+	err = ve.DefaultDispatcher().Update(ruleService, d, ResourceVolcengineRule())
 	if err != nil {
 		return fmt.Errorf("error on updating rule %q, %w", d.Id(), err)
 	}
@@ -118,7 +118,7 @@ func resourceVolcengineRuleUpdate(d *schema.ResourceData, meta interface{}) (err
 
 func resourceVolcengineRuleDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	ruleService := NewRuleService(meta.(*ve.SdkClient))
-	err = ruleService.Dispatcher.Delete(ruleService, d, ResourceVolcengineRule())
+	err = ve.DefaultDispatcher().Delete(ruleService, d, ResourceVolcengineRule())
 	if err != nil {
 		return fmt.Errorf("error on deleting rule %q, %w", d.Id(), err)
 	}

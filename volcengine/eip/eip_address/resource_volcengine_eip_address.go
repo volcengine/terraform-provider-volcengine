@@ -87,7 +87,7 @@ func ResourceVolcengineEipAddress() *schema.Resource {
 
 func resourceVolcengineEipAddressCreate(d *schema.ResourceData, meta interface{}) error {
 	eipAddressService := NewEipAddressService(meta.(*ve.SdkClient))
-	if err := eipAddressService.Dispatcher.Create(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
+	if err := ve.DefaultDispatcher().Create(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
 		return fmt.Errorf("error on creating eip address  %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineEipAddressRead(d, meta)
@@ -95,7 +95,7 @@ func resourceVolcengineEipAddressCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineEipAddressRead(d *schema.ResourceData, meta interface{}) error {
 	eipAddressService := NewEipAddressService(meta.(*ve.SdkClient))
-	if err := eipAddressService.Dispatcher.Read(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
+	if err := ve.DefaultDispatcher().Read(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
 		return fmt.Errorf("error on reading  eip address %q, %w", d.Id(), err)
 	}
 	return nil
@@ -103,7 +103,7 @@ func resourceVolcengineEipAddressRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineEipAddressUpdate(d *schema.ResourceData, meta interface{}) error {
 	eipAddressService := NewEipAddressService(meta.(*ve.SdkClient))
-	if err := eipAddressService.Dispatcher.Update(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
+	if err := ve.DefaultDispatcher().Update(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
 		return fmt.Errorf("error on updating  eip address %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineEipAddressRead(d, meta)
@@ -111,7 +111,7 @@ func resourceVolcengineEipAddressUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineEipAddressDelete(d *schema.ResourceData, meta interface{}) error {
 	eipAddressService := NewEipAddressService(meta.(*ve.SdkClient))
-	if err := eipAddressService.Dispatcher.Delete(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(eipAddressService, d, ResourceVolcengineEipAddress()); err != nil {
 		return fmt.Errorf("error on deleting  eip address %q, %w", d.Id(), err)
 	}
 	return nil

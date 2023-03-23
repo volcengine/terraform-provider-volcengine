@@ -178,5 +178,5 @@ func DataSourceVolcengineScalingActivities() *schema.Resource {
 
 func dataSourceVolcengineScalingActivitiesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewScalingActivityService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineScalingActivities())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineScalingActivities())
 }

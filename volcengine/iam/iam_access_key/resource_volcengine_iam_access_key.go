@@ -82,7 +82,7 @@ func ResourceVolcengineIamAccessKey() *schema.Resource {
 
 func resourceVolcengineIamAccessKeyCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineIamAccessKey())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on creating access key  %q, %s", d.Id(), err)
 	}
@@ -91,7 +91,7 @@ func resourceVolcengineIamAccessKeyCreate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineIamAccessKeyRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineIamAccessKey())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on reading access key %q, %s", d.Id(), err)
 	}
@@ -100,7 +100,7 @@ func resourceVolcengineIamAccessKeyRead(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineIamAccessKeyUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineIamAccessKey())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on updating access key %q, %s", d.Id(), err)
 	}
@@ -109,7 +109,7 @@ func resourceVolcengineIamAccessKeyUpdate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineIamAccessKeyDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamAccessKeyService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineIamAccessKey())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineIamAccessKey())
 	if err != nil {
 		return fmt.Errorf("error on deleting access key %q, %s", d.Id(), err)
 	}

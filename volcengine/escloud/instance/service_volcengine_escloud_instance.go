@@ -17,13 +17,11 @@ import (
 
 type VolcengineESCloudInstanceService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewESCloudInstanceService(c *ve.SdkClient) *VolcengineESCloudInstanceService {
 	return &VolcengineESCloudInstanceService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

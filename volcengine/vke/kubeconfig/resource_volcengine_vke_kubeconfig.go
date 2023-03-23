@@ -55,7 +55,7 @@ func ResourceVolcengineVkeKubeconfig() *schema.Resource {
 
 func resourceVolcengineVkeKubeconfigCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	kubeconfigService := NewVkeKubeconfigService(meta.(*ve.SdkClient))
-	err = kubeconfigService.Dispatcher.Create(kubeconfigService, d, ResourceVolcengineVkeKubeconfig())
+	err = ve.DefaultDispatcher().Create(kubeconfigService, d, ResourceVolcengineVkeKubeconfig())
 	if err != nil {
 		return fmt.Errorf("error on creating cluster  %q, %w", d.Id(), err)
 	}
@@ -64,7 +64,7 @@ func resourceVolcengineVkeKubeconfigCreate(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineVkeKubeconfigRead(d *schema.ResourceData, meta interface{}) (err error) {
 	kubeconfigService := NewVkeKubeconfigService(meta.(*ve.SdkClient))
-	err = kubeconfigService.Dispatcher.Read(kubeconfigService, d, ResourceVolcengineVkeKubeconfig())
+	err = ve.DefaultDispatcher().Read(kubeconfigService, d, ResourceVolcengineVkeKubeconfig())
 	if err != nil {
 		return fmt.Errorf("error on reading cluster %q, %w", d.Id(), err)
 	}
@@ -73,7 +73,7 @@ func resourceVolcengineVkeKubeconfigRead(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineVkeKubeconfigDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	kubeconfigService := NewVkeKubeconfigService(meta.(*ve.SdkClient))
-	err = kubeconfigService.Dispatcher.Delete(kubeconfigService, d, ResourceVolcengineVkeKubeconfig())
+	err = ve.DefaultDispatcher().Delete(kubeconfigService, d, ResourceVolcengineVkeKubeconfig())
 	if err != nil {
 		return fmt.Errorf("error on deleting cluster %q, %w", d.Id(), err)
 	}

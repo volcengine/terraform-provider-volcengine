@@ -14,7 +14,6 @@ import (
 
 type VolcengineMongodbAllowListAssociateService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 const (
@@ -26,7 +25,6 @@ const (
 func NewMongodbAllowListAssociateService(c *ve.SdkClient) *VolcengineMongodbAllowListAssociateService {
 	return &VolcengineMongodbAllowListAssociateService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

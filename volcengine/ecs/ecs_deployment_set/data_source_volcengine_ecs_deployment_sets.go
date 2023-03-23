@@ -88,5 +88,5 @@ func DataSourceVolcengineEcsDeploymentSets() *schema.Resource {
 
 func dataSourceVolcengineEcsDeploymentSetsRead(d *schema.ResourceData, meta interface{}) error {
 	deploymentSetService := NewEcsDeploymentSetService(meta.(*ve.SdkClient))
-	return deploymentSetService.Dispatcher.Data(deploymentSetService, d, DataSourceVolcengineEcsDeploymentSets())
+	return ve.DefaultDispatcher().Data(deploymentSetService, d, DataSourceVolcengineEcsDeploymentSets())
 }

@@ -14,13 +14,11 @@ import (
 
 type VolcengineRouteTableService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewRouteTableService(c *ve.SdkClient) *VolcengineRouteTableService {
 	return &VolcengineRouteTableService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

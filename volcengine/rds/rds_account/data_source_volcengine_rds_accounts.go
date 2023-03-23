@@ -96,5 +96,5 @@ func DataSourceVolcengineRdsAccounts() *schema.Resource {
 
 func dataSourceVolcengineRdsAccountsRead(d *schema.ResourceData, meta interface{}) error {
 	rdsAccountService := NewRdsAccountService(meta.(*volc.SdkClient))
-	return rdsAccountService.Dispatcher.Data(rdsAccountService, d, DataSourceVolcengineRdsAccounts())
+	return volc.DefaultDispatcher().Data(rdsAccountService, d, DataSourceVolcengineRdsAccounts())
 }

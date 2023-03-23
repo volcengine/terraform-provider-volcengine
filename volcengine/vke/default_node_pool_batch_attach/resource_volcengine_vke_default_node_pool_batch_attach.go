@@ -46,7 +46,7 @@ func ResourceVolcengineDefaultNodePoolBatchAttach() *schema.Resource {
 
 func resourceVolcengineDefaultNodePoolBatchAttachCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewVolcengineVkeDefaultNodePoolBatchAttachService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Create(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
+	err = ve.DefaultDispatcher().Create(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
 	if err != nil {
 		return fmt.Errorf("error on creating DefaultNodePoolBatchAttach  %q, %w", d.Id(), err)
 	}
@@ -55,7 +55,7 @@ func resourceVolcengineDefaultNodePoolBatchAttachCreate(d *schema.ResourceData, 
 
 func resourceVolcengineDefaultNodePoolBatchAttachRead(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewVolcengineVkeDefaultNodePoolBatchAttachService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Read(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
+	err = ve.DefaultDispatcher().Read(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
 	if err != nil {
 		return fmt.Errorf("error on reading DefaultNodePoolBatchAttach %q, %w", d.Id(), err)
 	}
@@ -64,7 +64,7 @@ func resourceVolcengineDefaultNodePoolBatchAttachRead(d *schema.ResourceData, me
 
 func resourceVolcengineDefaultNodePoolBatchAttachUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewVolcengineVkeDefaultNodePoolBatchAttachService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Update(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
+	err = ve.DefaultDispatcher().Update(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
 	if err != nil {
 		return fmt.Errorf("error on updating DefaultNodePoolBatchAttach  %q, %w", d.Id(), err)
 	}
@@ -73,7 +73,7 @@ func resourceVolcengineDefaultNodePoolBatchAttachUpdate(d *schema.ResourceData, 
 
 func resourceVolcengineNodePoolBatchAttachDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewVolcengineVkeDefaultNodePoolBatchAttachService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Delete(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
+	err = ve.DefaultDispatcher().Delete(nodePoolService, d, ResourceVolcengineDefaultNodePoolBatchAttach())
 	if err != nil {
 		return fmt.Errorf("error on deleting DefaultNodePoolBatchAttach %q, %w", d.Id(), err)
 	}

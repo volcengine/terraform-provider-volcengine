@@ -74,7 +74,7 @@ func resourceVolcengineMongoDBInstanceParameterCreate(d *schema.ResourceData, me
 
 func resourceVolcengineMongoDBInstanceParameterUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceParameterService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineMongoDBInstanceParameter())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBInstanceParameter())
 	if err != nil {
 		return fmt.Errorf("error on updating instance  %q, %s", d.Id(), err)
 	}
@@ -87,7 +87,7 @@ func resourceVolcengineMongoDBInstanceParameterDelete(d *schema.ResourceData, me
 
 func resourceVolcengineMongoDBInstanceParameterRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceParameterService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBInstanceParameter())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBInstanceParameter())
 	if err != nil {
 		return fmt.Errorf("Error on reading instance %q,%s", d.Id(), err)
 	}

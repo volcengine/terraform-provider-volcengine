@@ -167,7 +167,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 
 func resourceVolcengineMongoDBInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("Error on creating instance %q,%s", d.Id(), err)
 	}
@@ -176,7 +176,7 @@ func resourceVolcengineMongoDBInstanceCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBInstanceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("error on updating instance  %q, %s", d.Id(), err)
 	}
@@ -185,7 +185,7 @@ func resourceVolcengineMongoDBInstanceUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting instance %q, %s", d.Id(), err)
 	}
@@ -194,7 +194,7 @@ func resourceVolcengineMongoDBInstanceDelete(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("Error on reading instance %q,%s", d.Id(), err)
 	}

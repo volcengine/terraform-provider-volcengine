@@ -467,5 +467,5 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 
 func dataSourceVolcengineNodePoolsRead(d *schema.ResourceData, meta interface{}) error {
 	nodePoolsService := NewNodePoolService(meta.(*ve.SdkClient))
-	return nodePoolsService.Dispatcher.Data(nodePoolsService, d, DataSourceVolcengineNodePools())
+	return ve.DefaultDispatcher().Data(nodePoolsService, d, DataSourceVolcengineNodePools())
 }

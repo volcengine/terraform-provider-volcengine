@@ -54,5 +54,5 @@ func DataSourceVolcengineCrEndpoints() *schema.Resource {
 
 func dataSourceVolcengineCrEndpointsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrEndpointService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCrEndpoints())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineCrEndpoints())
 }

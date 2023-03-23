@@ -59,7 +59,7 @@ func ResourceVolcengineRdsIpList() *schema.Resource {
 
 func resourceVolcengineRdsIpListCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsIpListService := NewRdsIpListService(meta.(*volc.SdkClient))
-	err = rdsIpListService.Dispatcher.Create(rdsIpListService, d, ResourceVolcengineRdsIpList())
+	err = volc.DefaultDispatcher().Create(rdsIpListService, d, ResourceVolcengineRdsIpList())
 	if err != nil {
 		return fmt.Errorf("error on creating RDS ip list %q, %w", d.Id(), err)
 	}
@@ -68,7 +68,7 @@ func resourceVolcengineRdsIpListCreate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineRdsIpListRead(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsIpListService := NewRdsIpListService(meta.(*volc.SdkClient))
-	err = rdsIpListService.Dispatcher.Read(rdsIpListService, d, ResourceVolcengineRdsIpList())
+	err = volc.DefaultDispatcher().Read(rdsIpListService, d, ResourceVolcengineRdsIpList())
 	if err != nil {
 		return fmt.Errorf("error on reading RDS ip list %q, %w", d.Id(), err)
 	}
@@ -77,7 +77,7 @@ func resourceVolcengineRdsIpListRead(d *schema.ResourceData, meta interface{}) (
 
 func resourceVolcengineRdsIpListUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsIpListService := NewRdsIpListService(meta.(*volc.SdkClient))
-	err = rdsIpListService.Dispatcher.Update(rdsIpListService, d, ResourceVolcengineRdsIpList())
+	err = volc.DefaultDispatcher().Update(rdsIpListService, d, ResourceVolcengineRdsIpList())
 	if err != nil {
 		return fmt.Errorf("error on reading RDS ip list %q, %w", d.Id(), err)
 	}
@@ -86,7 +86,7 @@ func resourceVolcengineRdsIpListUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineRdsIpListDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsIpListService := NewRdsIpListService(meta.(*volc.SdkClient))
-	err = rdsIpListService.Dispatcher.Delete(rdsIpListService, d, ResourceVolcengineRdsIpList())
+	err = volc.DefaultDispatcher().Delete(rdsIpListService, d, ResourceVolcengineRdsIpList())
 	if err != nil {
 		return fmt.Errorf("error on deleting RDS ip list %q, %w", d.Id(), err)
 	}

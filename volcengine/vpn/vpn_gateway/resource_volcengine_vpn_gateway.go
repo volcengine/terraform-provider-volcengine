@@ -105,7 +105,7 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 
 func resourceVolcengineVpnGatewayCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	vpnGatewayService := NewVpnGatewayService(meta.(*ve.SdkClient))
-	err = vpnGatewayService.Dispatcher.Create(vpnGatewayService, d, ResourceVolcengineVpnGateway())
+	err = ve.DefaultDispatcher().Create(vpnGatewayService, d, ResourceVolcengineVpnGateway())
 	if err != nil {
 		return fmt.Errorf("error on creating Vpn Gateway %q, %s", d.Id(), err)
 	}
@@ -114,7 +114,7 @@ func resourceVolcengineVpnGatewayCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineVpnGatewayRead(d *schema.ResourceData, meta interface{}) (err error) {
 	vpnGatewayService := NewVpnGatewayService(meta.(*ve.SdkClient))
-	err = vpnGatewayService.Dispatcher.Read(vpnGatewayService, d, ResourceVolcengineVpnGateway())
+	err = ve.DefaultDispatcher().Read(vpnGatewayService, d, ResourceVolcengineVpnGateway())
 	if err != nil {
 		return fmt.Errorf("error on reading Vpn Gateway %q, %s", d.Id(), err)
 	}
@@ -123,7 +123,7 @@ func resourceVolcengineVpnGatewayRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineVpnGatewayUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	vpnGatewayService := NewVpnGatewayService(meta.(*ve.SdkClient))
-	err = vpnGatewayService.Dispatcher.Update(vpnGatewayService, d, ResourceVolcengineVpnGateway())
+	err = ve.DefaultDispatcher().Update(vpnGatewayService, d, ResourceVolcengineVpnGateway())
 	if err != nil {
 		return fmt.Errorf("error on updating Vpn Gateway %q, %s", d.Id(), err)
 	}
@@ -132,7 +132,7 @@ func resourceVolcengineVpnGatewayUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineVpnGatewayDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	vpnGatewayService := NewVpnGatewayService(meta.(*ve.SdkClient))
-	err = vpnGatewayService.Dispatcher.Delete(vpnGatewayService, d, ResourceVolcengineVpnGateway())
+	err = ve.DefaultDispatcher().Delete(vpnGatewayService, d, ResourceVolcengineVpnGateway())
 	if err != nil {
 		return fmt.Errorf("error on deleting Vpn Gateway %q, %s", d.Id(), err)
 	}

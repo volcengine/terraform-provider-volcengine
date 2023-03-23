@@ -477,5 +477,5 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 
 func dataSourceVolcengineVkeClustersRead(d *schema.ResourceData, meta interface{}) error {
 	clusterService := NewVkeClusterService(meta.(*ve.SdkClient))
-	return clusterService.Dispatcher.Data(clusterService, d, DataSourceVolcengineVkeVkeClusters())
+	return ve.DefaultDispatcher().Data(clusterService, d, DataSourceVolcengineVkeVkeClusters())
 }

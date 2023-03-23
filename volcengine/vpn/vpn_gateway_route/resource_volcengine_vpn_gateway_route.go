@@ -61,7 +61,7 @@ func ResourceVolcengineVpnGatewayRoute() *schema.Resource {
 
 func resourceVolcengineVpnGatewayRouteCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	routeService := NewVpnGatewayRouteService(meta.(*ve.SdkClient))
-	err = routeService.Dispatcher.Create(routeService, d, ResourceVolcengineVpnGatewayRoute())
+	err = ve.DefaultDispatcher().Create(routeService, d, ResourceVolcengineVpnGatewayRoute())
 	if err != nil {
 		return fmt.Errorf("error on creating Vpn Gateway route %q, %s", d.Id(), err)
 	}
@@ -70,7 +70,7 @@ func resourceVolcengineVpnGatewayRouteCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineVpnGatewayRouteRead(d *schema.ResourceData, meta interface{}) (err error) {
 	routeService := NewVpnGatewayRouteService(meta.(*ve.SdkClient))
-	err = routeService.Dispatcher.Read(routeService, d, ResourceVolcengineVpnGatewayRoute())
+	err = ve.DefaultDispatcher().Read(routeService, d, ResourceVolcengineVpnGatewayRoute())
 	if err != nil {
 		return fmt.Errorf("error on reading Vpn Gateway route %q, %s", d.Id(), err)
 	}
@@ -79,7 +79,7 @@ func resourceVolcengineVpnGatewayRouteRead(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineVpnGatewayRouteDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	routeService := NewVpnGatewayRouteService(meta.(*ve.SdkClient))
-	err = routeService.Dispatcher.Delete(routeService, d, ResourceVolcengineVpnGatewayRoute())
+	err = ve.DefaultDispatcher().Delete(routeService, d, ResourceVolcengineVpnGatewayRoute())
 	if err != nil {
 		return fmt.Errorf("error on deleting Vpn Gateway route %q, %s", d.Id(), err)
 	}

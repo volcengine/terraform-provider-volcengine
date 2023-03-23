@@ -45,7 +45,7 @@ func ResourceVolcengineMongodbAllowListAssociate() *schema.Resource {
 
 func resourceVolcengineMongodbAllowListAssociateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongodbAllowListAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongodbAllowListAssociate())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongodbAllowListAssociate())
 	if err != nil {
 		return fmt.Errorf("error on reading association %v, %v", d.Id(), err)
 	}
@@ -54,7 +54,7 @@ func resourceVolcengineMongodbAllowListAssociateRead(d *schema.ResourceData, met
 
 func resourceVolcengineMongodbAllowListAssociateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongodbAllowListAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongodbAllowListAssociate())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongodbAllowListAssociate())
 	if err != nil {
 		return fmt.Errorf("error on creating mongodb allow list association %v, %v", d.Id(), err)
 	}
@@ -63,7 +63,7 @@ func resourceVolcengineMongodbAllowListAssociateCreate(d *schema.ResourceData, m
 
 func resourceVolcengineMongodbAllowListAssociateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongodbAllowListAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineMongodbAllowListAssociate())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongodbAllowListAssociate())
 	if err != nil {
 		return fmt.Errorf("error on deleting mongodb allow list association %v, %v", d.Id(), err)
 	}

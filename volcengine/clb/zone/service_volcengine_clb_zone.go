@@ -12,7 +12,6 @@ import (
 
 type VolcengineClbZoneService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func (s *VolcengineClbZoneService) ReadResources(condition map[string]interface{}) ([]interface{}, error) {
@@ -95,7 +94,6 @@ func (s *VolcengineClbZoneService) ReadResourceId(id string) string {
 func NewClbZoneService(c *ve.SdkClient) *VolcengineClbZoneService {
 	return &VolcengineClbZoneService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

@@ -13,13 +13,11 @@ import (
 
 type VolcengineImageService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewImageService(c *ve.SdkClient) *VolcengineImageService {
 	return &VolcengineImageService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

@@ -150,5 +150,5 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 
 func dataSourceVolcengineCrRegistriesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRegistryService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCrRegistries())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineCrRegistries())
 }

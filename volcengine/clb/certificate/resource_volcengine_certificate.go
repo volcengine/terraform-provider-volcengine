@@ -67,7 +67,7 @@ func ResourceVolcengineCertificate() *schema.Resource {
 
 func resourceVolcengineCertificateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	certificateService := NewCertificateService(meta.(*ve.SdkClient))
-	err = certificateService.Dispatcher.Create(certificateService, d, ResourceVolcengineCertificate())
+	err = ve.DefaultDispatcher().Create(certificateService, d, ResourceVolcengineCertificate())
 	if err != nil {
 		return fmt.Errorf("error on creating certificate  %q, %w", d.Id(), err)
 	}
@@ -76,7 +76,7 @@ func resourceVolcengineCertificateCreate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineCertificateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	certificateService := NewCertificateService(meta.(*ve.SdkClient))
-	err = certificateService.Dispatcher.Read(certificateService, d, ResourceVolcengineCertificate())
+	err = ve.DefaultDispatcher().Read(certificateService, d, ResourceVolcengineCertificate())
 	if err != nil {
 		return fmt.Errorf("error on reading certificate %q, %w", d.Id(), err)
 	}
@@ -85,7 +85,7 @@ func resourceVolcengineCertificateRead(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineCertificateUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	certificateService := NewCertificateService(meta.(*ve.SdkClient))
-	err = certificateService.Dispatcher.Update(certificateService, d, ResourceVolcengineCertificate())
+	err = ve.DefaultDispatcher().Update(certificateService, d, ResourceVolcengineCertificate())
 	if err != nil {
 		return fmt.Errorf("error on updating certificate  %q, %w", d.Id(), err)
 	}
@@ -94,7 +94,7 @@ func resourceVolcengineCertificateUpdate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineCertificateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	certificateService := NewCertificateService(meta.(*ve.SdkClient))
-	err = certificateService.Dispatcher.Delete(certificateService, d, ResourceVolcengineCertificate())
+	err = ve.DefaultDispatcher().Delete(certificateService, d, ResourceVolcengineCertificate())
 	if err != nil {
 		return fmt.Errorf("error on deleting certificate %q, %w", d.Id(), err)
 	}

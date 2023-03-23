@@ -101,5 +101,5 @@ func DataSourceVolcengineScalingLifecycleHooks() *schema.Resource {
 
 func dataSourceVolcengineScalingLifecycleHooksRead(d *schema.ResourceData, meta interface{}) error {
 	lifecycleHookService := NewScalingLifecycleHookService(meta.(*ve.SdkClient))
-	return lifecycleHookService.Dispatcher.Data(lifecycleHookService, d, DataSourceVolcengineScalingLifecycleHooks())
+	return ve.DefaultDispatcher().Data(lifecycleHookService, d, DataSourceVolcengineScalingLifecycleHooks())
 }

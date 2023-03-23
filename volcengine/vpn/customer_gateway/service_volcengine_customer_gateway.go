@@ -14,13 +14,11 @@ import (
 
 type VolcengineCustomerGatewayService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewCustomerGatewayService(c *ve.SdkClient) *VolcengineCustomerGatewayService {
 	return &VolcengineCustomerGatewayService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

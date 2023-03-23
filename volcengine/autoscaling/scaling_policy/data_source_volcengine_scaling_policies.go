@@ -171,5 +171,5 @@ func DataSourceVolcengineScalingPolicies() *schema.Resource {
 
 func dataSourceVolcengineScalingPoliciesRead(d *schema.ResourceData, meta interface{}) error {
 	scalingPolicyService := NewScalingPolicyService(meta.(*ve.SdkClient))
-	return scalingPolicyService.Dispatcher.Data(scalingPolicyService, d, DataSourceVolcengineScalingPolicies())
+	return ve.DefaultDispatcher().Data(scalingPolicyService, d, DataSourceVolcengineScalingPolicies())
 }

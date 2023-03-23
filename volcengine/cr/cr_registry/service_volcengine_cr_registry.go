@@ -15,13 +15,11 @@ import (
 
 type VolcengineCrRegistryService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewCrRegistryService(c *ve.SdkClient) *VolcengineCrRegistryService {
 	return &VolcengineCrRegistryService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

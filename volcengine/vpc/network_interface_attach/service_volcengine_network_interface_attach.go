@@ -14,13 +14,11 @@ import (
 
 type VolcengineNetworkInterfaceAttachService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewNetworkInterfaceAttachService(c *ve.SdkClient) *VolcengineNetworkInterfaceAttachService {
 	return &VolcengineNetworkInterfaceAttachService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

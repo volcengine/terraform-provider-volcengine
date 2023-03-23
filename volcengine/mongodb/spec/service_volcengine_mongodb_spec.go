@@ -11,13 +11,11 @@ import (
 
 type VolcengineMongoSpecService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewSpecService(c *ve.SdkClient) *VolcengineMongoSpecService {
 	return &VolcengineMongoSpecService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

@@ -67,7 +67,7 @@ func ResourceVolcengineCrNamespace() *schema.Resource {
 
 func resourceVolcengineCrNamespaceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrNamespaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCrNamespace())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrNamespace())
 	if err != nil {
 		return fmt.Errorf("error on creating CrNamespace %q,%s", d.Id(), err)
 	}
@@ -76,7 +76,7 @@ func resourceVolcengineCrNamespaceCreate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineCrNamespaceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrNamespaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCrNamespace())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrNamespace())
 	if err != nil {
 		return fmt.Errorf("error on updating CrNamespace  %q, %s", d.Id(), err)
 	}
@@ -85,7 +85,7 @@ func resourceVolcengineCrNamespaceUpdate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineCrNamespaceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrNamespaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCrNamespace())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCrNamespace())
 	if err != nil {
 		return fmt.Errorf("error on deleting CrNamespace %q, %s", d.Id(), err)
 	}
@@ -94,7 +94,7 @@ func resourceVolcengineCrNamespaceDelete(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineCrNamespaceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrNamespaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCrNamespace())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrNamespace())
 	if err != nil {
 		return fmt.Errorf("error on reading CrNamespace %q,%s", d.Id(), err)
 	}

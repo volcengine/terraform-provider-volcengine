@@ -142,7 +142,7 @@ func ResourceVolcengineClb() *schema.Resource {
 
 func resourceVolcengineClbCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	clbService := NewClbService(meta.(*ve.SdkClient))
-	err = clbService.Dispatcher.Create(clbService, d, ResourceVolcengineClb())
+	err = ve.DefaultDispatcher().Create(clbService, d, ResourceVolcengineClb())
 	if err != nil {
 		return fmt.Errorf("error on creating clb  %q, %w", d.Id(), err)
 	}
@@ -151,7 +151,7 @@ func resourceVolcengineClbCreate(d *schema.ResourceData, meta interface{}) (err 
 
 func resourceVolcengineClbRead(d *schema.ResourceData, meta interface{}) (err error) {
 	clbService := NewClbService(meta.(*ve.SdkClient))
-	err = clbService.Dispatcher.Read(clbService, d, ResourceVolcengineClb())
+	err = ve.DefaultDispatcher().Read(clbService, d, ResourceVolcengineClb())
 	if err != nil {
 		return fmt.Errorf("error on reading clb %q, %w", d.Id(), err)
 	}
@@ -160,7 +160,7 @@ func resourceVolcengineClbRead(d *schema.ResourceData, meta interface{}) (err er
 
 func resourceVolcengineClbUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	clbService := NewClbService(meta.(*ve.SdkClient))
-	err = clbService.Dispatcher.Update(clbService, d, ResourceVolcengineClb())
+	err = ve.DefaultDispatcher().Update(clbService, d, ResourceVolcengineClb())
 	if err != nil {
 		return fmt.Errorf("error on updating clb  %q, %w", d.Id(), err)
 	}
@@ -169,7 +169,7 @@ func resourceVolcengineClbUpdate(d *schema.ResourceData, meta interface{}) (err 
 
 func resourceVolcengineClbDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	clbService := NewClbService(meta.(*ve.SdkClient))
-	err = clbService.Dispatcher.Delete(clbService, d, ResourceVolcengineClb())
+	err = ve.DefaultDispatcher().Delete(clbService, d, ResourceVolcengineClb())
 	if err != nil {
 		return fmt.Errorf("error on deleting clb %q, %w", d.Id(), err)
 	}

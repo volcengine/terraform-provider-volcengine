@@ -13,13 +13,11 @@ import (
 
 type VolcengineEipAddressService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewEipAddressService(c *ve.SdkClient) *VolcengineEipAddressService {
 	return &VolcengineEipAddressService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

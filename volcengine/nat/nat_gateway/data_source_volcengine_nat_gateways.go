@@ -183,5 +183,5 @@ func DataSourceVolcengineNatGateways() *schema.Resource {
 
 func dataSourceVolcengineNatGatewaysRead(d *schema.ResourceData, meta interface{}) error {
 	natGatewayService := NewNatGatewayService(meta.(*ve.SdkClient))
-	return natGatewayService.Dispatcher.Data(natGatewayService, d, DataSourceVolcengineNatGateways())
+	return ve.DefaultDispatcher().Data(natGatewayService, d, DataSourceVolcengineNatGateways())
 }

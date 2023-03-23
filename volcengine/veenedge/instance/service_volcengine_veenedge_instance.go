@@ -15,13 +15,11 @@ import (
 
 type VolcengineInstanceService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewInstanceService(c *ve.SdkClient) *VolcengineInstanceService {
 	return &VolcengineInstanceService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

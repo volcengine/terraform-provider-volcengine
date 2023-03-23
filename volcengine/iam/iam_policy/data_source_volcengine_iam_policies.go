@@ -96,5 +96,5 @@ func DataSourceVolcengineIamPolicies() *schema.Resource {
 
 func dataSourceVolcengineIamPoliciesRead(d *schema.ResourceData, meta interface{}) error {
 	iamPolicyService := NewIamPolicyService(meta.(*ve.SdkClient))
-	return iamPolicyService.Dispatcher.Data(iamPolicyService, d, DataSourceVolcengineIamPolicies())
+	return ve.DefaultDispatcher().Data(iamPolicyService, d, DataSourceVolcengineIamPolicies())
 }

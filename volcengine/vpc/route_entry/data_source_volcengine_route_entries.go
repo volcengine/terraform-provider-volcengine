@@ -133,5 +133,5 @@ func DataSourceVolcengineRouteEntries() *schema.Resource {
 
 func dataSourceVolcengineRouteEntriesRead(d *schema.ResourceData, meta interface{}) error {
 	routeEntryService := NewRouteEntryService(meta.(*ve.SdkClient))
-	return routeEntryService.Dispatcher.Data(routeEntryService, d, DataSourceVolcengineRouteEntries())
+	return ve.DefaultDispatcher().Data(routeEntryService, d, DataSourceVolcengineRouteEntries())
 }

@@ -252,7 +252,7 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 
 func resourceVolcengineVkeClusterCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeClusterService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Create(clusterService, d, ResourceVolcengineVkeCluster())
+	err = ve.DefaultDispatcher().Create(clusterService, d, ResourceVolcengineVkeCluster())
 	if err != nil {
 		return fmt.Errorf("error on creating cluster  %q, %w", d.Id(), err)
 	}
@@ -261,7 +261,7 @@ func resourceVolcengineVkeClusterCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineVkeClusterRead(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeClusterService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Read(clusterService, d, ResourceVolcengineVkeCluster())
+	err = ve.DefaultDispatcher().Read(clusterService, d, ResourceVolcengineVkeCluster())
 	if err != nil {
 		return fmt.Errorf("error on reading cluster %q, %w", d.Id(), err)
 	}
@@ -270,7 +270,7 @@ func resourceVolcengineVkeClusterRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineVkeClusterUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeClusterService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Update(clusterService, d, ResourceVolcengineVkeCluster())
+	err = ve.DefaultDispatcher().Update(clusterService, d, ResourceVolcengineVkeCluster())
 	if err != nil {
 		return fmt.Errorf("error on updating cluster  %q, %w", d.Id(), err)
 	}
@@ -279,7 +279,7 @@ func resourceVolcengineVkeClusterUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineVkeClusterDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeClusterService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Delete(clusterService, d, ResourceVolcengineVkeCluster())
+	err = ve.DefaultDispatcher().Delete(clusterService, d, ResourceVolcengineVkeCluster())
 	if err != nil {
 		return fmt.Errorf("error on deleting cluster %q, %w", d.Id(), err)
 	}

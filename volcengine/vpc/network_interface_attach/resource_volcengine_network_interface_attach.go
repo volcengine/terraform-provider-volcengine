@@ -50,7 +50,7 @@ func ResourceVolcengineNetworkInterfaceAttach() *schema.Resource {
 
 func resourceVolcengineNetworkInterfaceAttachCreate(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceAttachService := NewNetworkInterfaceAttachService(meta.(*ve.SdkClient))
-	if err := networkInterfaceAttachService.Dispatcher.Create(networkInterfaceAttachService, d, ResourceVolcengineNetworkInterfaceAttach()); err != nil {
+	if err := ve.DefaultDispatcher().Create(networkInterfaceAttachService, d, ResourceVolcengineNetworkInterfaceAttach()); err != nil {
 		return fmt.Errorf("error on creating network interface attach %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineNetworkInterfaceAttachRead(d, meta)
@@ -58,7 +58,7 @@ func resourceVolcengineNetworkInterfaceAttachCreate(d *schema.ResourceData, meta
 
 func resourceVolcengineNetworkInterfaceAttachRead(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceAttachService := NewNetworkInterfaceAttachService(meta.(*ve.SdkClient))
-	if err := networkInterfaceAttachService.Dispatcher.Read(networkInterfaceAttachService, d, ResourceVolcengineNetworkInterfaceAttach()); err != nil {
+	if err := ve.DefaultDispatcher().Read(networkInterfaceAttachService, d, ResourceVolcengineNetworkInterfaceAttach()); err != nil {
 		return fmt.Errorf("error on reading network interface attach %q, %w", d.Id(), err)
 	}
 	return nil
@@ -66,7 +66,7 @@ func resourceVolcengineNetworkInterfaceAttachRead(d *schema.ResourceData, meta i
 
 func resourceVolcengineNetworkInterfaceAttachDelete(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceAttachService := NewNetworkInterfaceAttachService(meta.(*ve.SdkClient))
-	if err := networkInterfaceAttachService.Dispatcher.Delete(networkInterfaceAttachService, d, ResourceVolcengineNetworkInterfaceAttach()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(networkInterfaceAttachService, d, ResourceVolcengineNetworkInterfaceAttach()); err != nil {
 		return fmt.Errorf("error on deleting network interface attach %q, %w", d.Id(), err)
 	}
 	return nil

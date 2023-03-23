@@ -162,7 +162,7 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 
 func resourceVolcengineVkeNodeCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodeService := NewVolcengineVkeNodeService(meta.(*ve.SdkClient))
-	err = nodeService.Dispatcher.Create(nodeService, d, ResourceVolcengineVkeNode())
+	err = ve.DefaultDispatcher().Create(nodeService, d, ResourceVolcengineVkeNode())
 	if err != nil {
 		return fmt.Errorf("error on creating vke node  %q, %s", d.Id(), err)
 	}
@@ -171,7 +171,7 @@ func resourceVolcengineVkeNodeCreate(d *schema.ResourceData, meta interface{}) (
 
 func resourceVolcengineVkeNodeRead(d *schema.ResourceData, meta interface{}) (err error) {
 	nodeService := NewVolcengineVkeNodeService(meta.(*ve.SdkClient))
-	err = nodeService.Dispatcher.Read(nodeService, d, ResourceVolcengineVkeNode())
+	err = ve.DefaultDispatcher().Read(nodeService, d, ResourceVolcengineVkeNode())
 	if err != nil {
 		return fmt.Errorf("error on reading vke node %q, %s", d.Id(), err)
 	}
@@ -180,7 +180,7 @@ func resourceVolcengineVkeNodeRead(d *schema.ResourceData, meta interface{}) (er
 
 func resourceVolcengineVkeNodeUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodeService := NewVolcengineVkeNodeService(meta.(*ve.SdkClient))
-	err = nodeService.Dispatcher.Update(nodeService, d, ResourceVolcengineVkeNode())
+	err = ve.DefaultDispatcher().Update(nodeService, d, ResourceVolcengineVkeNode())
 	if err != nil {
 		return fmt.Errorf("error on updating vke node  %q, %s", d.Id(), err)
 	}
@@ -189,7 +189,7 @@ func resourceVolcengineVkeNodeUpdate(d *schema.ResourceData, meta interface{}) (
 
 func resourceVolcengineVkeNodeDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	nodeService := NewVolcengineVkeNodeService(meta.(*ve.SdkClient))
-	err = nodeService.Dispatcher.Delete(nodeService, d, ResourceVolcengineVkeNode())
+	err = ve.DefaultDispatcher().Delete(nodeService, d, ResourceVolcengineVkeNode())
 	if err != nil {
 		return fmt.Errorf("error on deleting vke node %q, %s", d.Id(), err)
 	}

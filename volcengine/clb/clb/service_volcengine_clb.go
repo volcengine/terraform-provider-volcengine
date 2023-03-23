@@ -13,13 +13,11 @@ import (
 
 type VolcengineClbService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewClbService(c *ve.SdkClient) *VolcengineClbService {
 	return &VolcengineClbService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

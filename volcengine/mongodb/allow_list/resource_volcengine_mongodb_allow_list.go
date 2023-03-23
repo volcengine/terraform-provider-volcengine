@@ -74,7 +74,7 @@ func ResourceVolcengineMongoDBAllowList() *schema.Resource {
 
 func resourceVolcengineMongoDBAllowListCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongoDBAllowList())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
 		return fmt.Errorf("Error on creating instance %q,%s", d.Id(), err)
 	}
@@ -83,7 +83,7 @@ func resourceVolcengineMongoDBAllowListCreate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineMongoDBAllowListUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineMongoDBAllowList())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
 		return fmt.Errorf("error on updating instance  %q, %s", d.Id(), err)
 	}
@@ -92,7 +92,7 @@ func resourceVolcengineMongoDBAllowListUpdate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineMongoDBAllowListDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineMongoDBAllowList())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
 		return fmt.Errorf("error on deleting instance %q, %s", d.Id(), err)
 	}
@@ -101,7 +101,7 @@ func resourceVolcengineMongoDBAllowListDelete(d *schema.ResourceData, meta inter
 
 func resourceVolcengineMongoDBAllowListRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBAllowList())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
 		return fmt.Errorf("Error on reading instance %q,%s", d.Id(), err)
 	}

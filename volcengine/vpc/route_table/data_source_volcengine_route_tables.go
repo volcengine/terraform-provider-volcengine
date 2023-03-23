@@ -121,5 +121,5 @@ func DataSourceVolcengineRouteTables() *schema.Resource {
 
 func dataSourceVolcengineRouteTablesRead(d *schema.ResourceData, meta interface{}) error {
 	routeTableService := NewRouteTableService(meta.(*ve.SdkClient))
-	return routeTableService.Dispatcher.Data(routeTableService, d, DataSourceVolcengineRouteTables())
+	return ve.DefaultDispatcher().Data(routeTableService, d, DataSourceVolcengineRouteTables())
 }

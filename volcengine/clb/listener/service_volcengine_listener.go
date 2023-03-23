@@ -17,13 +17,11 @@ import (
 
 type VolcengineListenerService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewListenerService(c *ve.SdkClient) *VolcengineListenerService {
 	return &VolcengineListenerService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

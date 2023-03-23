@@ -185,5 +185,5 @@ func DataSourceVolcengineVkeAddons() *schema.Resource {
 
 func dataSourceVolcengineVkeAddonsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewVkeAddonService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineVkeAddons())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineVkeAddons())
 }

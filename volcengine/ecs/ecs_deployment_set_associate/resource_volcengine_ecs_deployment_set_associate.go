@@ -63,7 +63,7 @@ func ResourceVolcengineEcsDeploymentSetAssociate() *schema.Resource {
 
 func resourceVolcengineEcsDeploymentSetAssociateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	deploymentSetService := NewEcsDeploymentSetAssociateService(meta.(*ve.SdkClient))
-	err = deploymentSetService.Dispatcher.Create(deploymentSetService, d, ResourceVolcengineEcsDeploymentSetAssociate())
+	err = ve.DefaultDispatcher().Create(deploymentSetService, d, ResourceVolcengineEcsDeploymentSetAssociate())
 	if err != nil {
 		return fmt.Errorf("error on creating ecs deployment set Associate %q, %s", d.Id(), err)
 	}
@@ -72,7 +72,7 @@ func resourceVolcengineEcsDeploymentSetAssociateCreate(d *schema.ResourceData, m
 
 func resourceVolcengineEcsDeploymentSetAssociateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	deploymentSetService := NewEcsDeploymentSetAssociateService(meta.(*ve.SdkClient))
-	err = deploymentSetService.Dispatcher.Read(deploymentSetService, d, ResourceVolcengineEcsDeploymentSetAssociate())
+	err = ve.DefaultDispatcher().Read(deploymentSetService, d, ResourceVolcengineEcsDeploymentSetAssociate())
 	if err != nil {
 		return fmt.Errorf("error on reading ecs deployment set Associate %q, %s", d.Id(), err)
 	}
@@ -81,7 +81,7 @@ func resourceVolcengineEcsDeploymentSetAssociateRead(d *schema.ResourceData, met
 
 func resourceVolcengineEcsDeploymentSetAssociateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	deploymentSetService := NewEcsDeploymentSetAssociateService(meta.(*ve.SdkClient))
-	err = deploymentSetService.Dispatcher.Delete(deploymentSetService, d, ResourceVolcengineEcsDeploymentSetAssociate())
+	err = ve.DefaultDispatcher().Delete(deploymentSetService, d, ResourceVolcengineEcsDeploymentSetAssociate())
 	if err != nil {
 		return fmt.Errorf("error on deleting ecs deployment set Associate %q, %s", d.Id(), err)
 	}

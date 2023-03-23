@@ -101,5 +101,5 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 
 func dataSourceVolcengineMongoDBAllowListsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBAllowLists())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBAllowLists())
 }

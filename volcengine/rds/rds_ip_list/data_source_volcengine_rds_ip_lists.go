@@ -66,5 +66,5 @@ func DataSourceVolcengineRdsIpLists() *schema.Resource {
 
 func dataSourceVolcengineRdsIpListsRead(d *schema.ResourceData, meta interface{}) error {
 	rdsIpListService := NewRdsIpListService(meta.(*volc.SdkClient))
-	return rdsIpListService.Dispatcher.Data(rdsIpListService, d, DataSourceVolcengineRdsIpLists())
+	return volc.DefaultDispatcher().Data(rdsIpListService, d, DataSourceVolcengineRdsIpLists())
 }

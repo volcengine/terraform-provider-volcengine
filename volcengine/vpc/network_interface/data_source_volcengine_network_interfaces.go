@@ -279,5 +279,5 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 
 func dataSourceVolcengineNetworkInterfacesRead(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceService := NewNetworkInterfaceService(meta.(*ve.SdkClient))
-	return networkInterfaceService.Dispatcher.Data(networkInterfaceService, d, DataSourceVolcengineNetworkInterfaces())
+	return ve.DefaultDispatcher().Data(networkInterfaceService, d, DataSourceVolcengineNetworkInterfaces())
 }

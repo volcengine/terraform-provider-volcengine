@@ -104,7 +104,7 @@ func ResourceVolcengineNetworkInterface() *schema.Resource {
 
 func resourceVolcengineNetworkInterfaceCreate(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceService := NewNetworkInterfaceService(meta.(*ve.SdkClient))
-	if err := networkInterfaceService.Dispatcher.Create(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
+	if err := ve.DefaultDispatcher().Create(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
 		return fmt.Errorf("error on creating network interface  %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineNetworkInterfaceRead(d, meta)
@@ -112,7 +112,7 @@ func resourceVolcengineNetworkInterfaceCreate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineNetworkInterfaceRead(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceService := NewNetworkInterfaceService(meta.(*ve.SdkClient))
-	if err := networkInterfaceService.Dispatcher.Read(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
+	if err := ve.DefaultDispatcher().Read(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
 		return fmt.Errorf("error on reading network interface %q, %w", d.Id(), err)
 	}
 	return nil
@@ -120,7 +120,7 @@ func resourceVolcengineNetworkInterfaceRead(d *schema.ResourceData, meta interfa
 
 func resourceVolcengineNetworkInterfaceUpdate(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceService := NewNetworkInterfaceService(meta.(*ve.SdkClient))
-	if err := networkInterfaceService.Dispatcher.Update(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
+	if err := ve.DefaultDispatcher().Update(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
 		return fmt.Errorf("error on updating network interface %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineNetworkInterfaceRead(d, meta)
@@ -128,7 +128,7 @@ func resourceVolcengineNetworkInterfaceUpdate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineNetworkInterfaceDelete(d *schema.ResourceData, meta interface{}) error {
 	networkInterfaceService := NewNetworkInterfaceService(meta.(*ve.SdkClient))
-	if err := networkInterfaceService.Dispatcher.Delete(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(networkInterfaceService, d, ResourceVolcengineNetworkInterface()); err != nil {
 		return fmt.Errorf("error on deleting network interface %q, %w", d.Id(), err)
 	}
 	return nil

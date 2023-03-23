@@ -184,5 +184,5 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 
 func dataSourceVolcengineEipAddressesRead(d *schema.ResourceData, meta interface{}) error {
 	eipAddressService := NewEipAddressService(meta.(*ve.SdkClient))
-	return eipAddressService.Dispatcher.Data(eipAddressService, d, DataSourceVolcengineEipAddresses())
+	return ve.DefaultDispatcher().Data(eipAddressService, d, DataSourceVolcengineEipAddresses())
 }

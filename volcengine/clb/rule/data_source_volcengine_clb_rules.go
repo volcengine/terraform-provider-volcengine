@@ -73,5 +73,5 @@ func DataSourceVolcengineRules() *schema.Resource {
 
 func dataSourceVolcengineRulesRead(d *schema.ResourceData, meta interface{}) error {
 	ruleService := NewRuleService(meta.(*ve.SdkClient))
-	return ruleService.Dispatcher.Data(ruleService, d, DataSourceVolcengineRules())
+	return ve.DefaultDispatcher().Data(ruleService, d, DataSourceVolcengineRules())
 }

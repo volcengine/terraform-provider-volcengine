@@ -58,7 +58,7 @@ func ResourceVolcengineIamRolePolicyAttachment() *schema.Resource {
 
 func resourceVolcengineIamRolePolicyAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	iamRolePolicyAttachmentService := NewIamRolePolicyAttachmentService(meta.(*ve.SdkClient))
-	if err := iamRolePolicyAttachmentService.Dispatcher.Create(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
+	if err := ve.DefaultDispatcher().Create(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
 		return fmt.Errorf("error on creating iam role policy attachment %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineIamRolePolicyAttachmentRead(d, meta)
@@ -66,7 +66,7 @@ func resourceVolcengineIamRolePolicyAttachmentCreate(d *schema.ResourceData, met
 
 func resourceVolcengineIamRolePolicyAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	iamRolePolicyAttachmentService := NewIamRolePolicyAttachmentService(meta.(*ve.SdkClient))
-	if err := iamRolePolicyAttachmentService.Dispatcher.Read(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
+	if err := ve.DefaultDispatcher().Read(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
 		return fmt.Errorf("error on reading iam role policy attachment %q, %w", d.Id(), err)
 	}
 	return nil
@@ -74,7 +74,7 @@ func resourceVolcengineIamRolePolicyAttachmentRead(d *schema.ResourceData, meta 
 
 func resourceVolcengineIamRolePolicyAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
 	iamRolePolicyAttachmentService := NewIamRolePolicyAttachmentService(meta.(*ve.SdkClient))
-	if err := iamRolePolicyAttachmentService.Dispatcher.Delete(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
 		return fmt.Errorf("error on deleting iam role policy attachment %q, %w", d.Id(), err)
 	}
 	return nil

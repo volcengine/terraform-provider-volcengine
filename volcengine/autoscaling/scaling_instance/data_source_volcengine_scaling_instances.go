@@ -124,5 +124,5 @@ func DataSourceVolcengineScalingInstances() *schema.Resource {
 
 func dataSourceVolcengineScalingInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	scalingInstanceService := NewScalingInstanceService(meta.(*ve.SdkClient))
-	return scalingInstanceService.Dispatcher.Data(scalingInstanceService, d, DataSourceVolcengineScalingInstances())
+	return ve.DefaultDispatcher().Data(scalingInstanceService, d, DataSourceVolcengineScalingInstances())
 }

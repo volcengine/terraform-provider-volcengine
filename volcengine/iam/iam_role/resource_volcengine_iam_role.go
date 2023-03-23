@@ -70,7 +70,7 @@ func ResourceVolcengineIamRole() *schema.Resource {
 
 func resourceVolcengineIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	iamRoleService := NewIamRoleService(meta.(*ve.SdkClient))
-	if err := iamRoleService.Dispatcher.Create(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
+	if err := ve.DefaultDispatcher().Create(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
 		return fmt.Errorf("error on creating iam role %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineIamRoleRead(d, meta)
@@ -78,7 +78,7 @@ func resourceVolcengineIamRoleCreate(d *schema.ResourceData, meta interface{}) e
 
 func resourceVolcengineIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	iamRoleService := NewIamRoleService(meta.(*ve.SdkClient))
-	if err := iamRoleService.Dispatcher.Read(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
+	if err := ve.DefaultDispatcher().Read(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
 		return fmt.Errorf("error on reading iam role %q, %w", d.Id(), err)
 	}
 	return nil
@@ -86,7 +86,7 @@ func resourceVolcengineIamRoleRead(d *schema.ResourceData, meta interface{}) err
 
 func resourceVolcengineIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	iamRoleService := NewIamRoleService(meta.(*ve.SdkClient))
-	if err := iamRoleService.Dispatcher.Update(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
+	if err := ve.DefaultDispatcher().Update(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
 		return fmt.Errorf("error on updating iam role %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineIamRoleRead(d, meta)
@@ -94,7 +94,7 @@ func resourceVolcengineIamRoleUpdate(d *schema.ResourceData, meta interface{}) e
 
 func resourceVolcengineIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	iamRoleService := NewIamRoleService(meta.(*ve.SdkClient))
-	if err := iamRoleService.Dispatcher.Delete(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(iamRoleService, d, ResourceVolcengineIamRole()); err != nil {
 		return fmt.Errorf("error on deleting iam role %q, %w", d.Id(), err)
 	}
 	return nil

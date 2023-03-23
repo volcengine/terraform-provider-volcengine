@@ -14,13 +14,11 @@ import (
 
 type VolcengineEipAssociateService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewEipAssociateService(c *ve.SdkClient) *VolcengineEipAssociateService {
 	return &VolcengineEipAssociateService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

@@ -150,5 +150,5 @@ func DataSourceVolcengineRdsParameterTemplates() *schema.Resource {
 
 func dataSourceVolcengineRdsParameterTemplatesRead(d *schema.ResourceData, meta interface{}) error {
 	rdsParameterTemplateService := NewRdsParameterTemplateService(meta.(*volc.SdkClient))
-	return rdsParameterTemplateService.Dispatcher.Data(rdsParameterTemplateService, d, DataSourceVolcengineRdsParameterTemplates())
+	return volc.DefaultDispatcher().Data(rdsParameterTemplateService, d, DataSourceVolcengineRdsParameterTemplates())
 }

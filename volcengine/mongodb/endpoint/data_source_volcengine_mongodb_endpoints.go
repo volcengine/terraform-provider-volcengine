@@ -113,5 +113,5 @@ func DataSourceVolcengineMongoDBEndpoints() *schema.Resource {
 
 func dataSourceVolcengineMongoDBEndpointsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewMongoDBEndpointService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBEndpoints())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBEndpoints())
 }

@@ -55,7 +55,7 @@ func ResourceVolcengineRdsDatabase() *schema.Resource {
 
 func resourceVolcengineRdsDatabaseCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	databaseService := NewRdsDatabaseService(meta.(*volc.SdkClient))
-	err = databaseService.Dispatcher.Create(databaseService, d, ResourceVolcengineRdsDatabase())
+	err = volc.DefaultDispatcher().Create(databaseService, d, ResourceVolcengineRdsDatabase())
 	if err != nil {
 		return fmt.Errorf("error on creating database %q, %w", d.Id(), err)
 	}
@@ -64,7 +64,7 @@ func resourceVolcengineRdsDatabaseCreate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineRdsDatabaseRead(d *schema.ResourceData, meta interface{}) (err error) {
 	databaseService := NewRdsDatabaseService(meta.(*volc.SdkClient))
-	err = databaseService.Dispatcher.Read(databaseService, d, ResourceVolcengineRdsDatabase())
+	err = volc.DefaultDispatcher().Read(databaseService, d, ResourceVolcengineRdsDatabase())
 	if err != nil {
 		return fmt.Errorf("error on reading database %q, %w", d.Id(), err)
 	}
@@ -73,7 +73,7 @@ func resourceVolcengineRdsDatabaseRead(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineRdsDatabaseDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	databaseService := NewRdsDatabaseService(meta.(*volc.SdkClient))
-	err = databaseService.Dispatcher.Delete(databaseService, d, ResourceVolcengineRdsDatabase())
+	err = volc.DefaultDispatcher().Delete(databaseService, d, ResourceVolcengineRdsDatabase())
 	if err != nil {
 		return fmt.Errorf("error on deleting database %q, %w", d.Id(), err)
 	}

@@ -38,7 +38,7 @@ func ResourceVolcengineMongoDBSSLState() *schema.Resource {
 
 func resourceVolcengineMongoDBSSLStateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongoDBSSLState())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBSSLState())
 	if err != nil {
 		return fmt.Errorf("Error on open ssl %q,%s", d.Id(), err)
 	}
@@ -47,7 +47,7 @@ func resourceVolcengineMongoDBSSLStateCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBSSLStateUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineMongoDBSSLState())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBSSLState())
 	if err != nil {
 		return fmt.Errorf("error on updating ssl  %q, %s", d.Id(), err)
 	}
@@ -56,7 +56,7 @@ func resourceVolcengineMongoDBSSLStateUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBSSLStateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBSSLState())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBSSLState())
 	if err != nil {
 		return fmt.Errorf("Error on reading ssl state %q,%s", d.Id(), err)
 	}

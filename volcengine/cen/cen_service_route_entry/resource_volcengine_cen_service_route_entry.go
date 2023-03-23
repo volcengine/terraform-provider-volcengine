@@ -73,7 +73,7 @@ func ResourceVolcengineCenServiceRouteEntry() *schema.Resource {
 
 func resourceVolcengineCenServiceRouteEntryCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenServiceRouteEntryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCenServiceRouteEntry())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCenServiceRouteEntry())
 	if err != nil {
 		return fmt.Errorf("error on creating cen service route entry %q, %s", d.Id(), err)
 	}
@@ -82,7 +82,7 @@ func resourceVolcengineCenServiceRouteEntryCreate(d *schema.ResourceData, meta i
 
 func resourceVolcengineCenServiceRouteEntryRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenServiceRouteEntryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCenServiceRouteEntry())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCenServiceRouteEntry())
 	if err != nil {
 		return fmt.Errorf("error on reading cen service route entry %q, %s", d.Id(), err)
 	}
@@ -91,7 +91,7 @@ func resourceVolcengineCenServiceRouteEntryRead(d *schema.ResourceData, meta int
 
 func resourceVolcengineCenServiceRouteEntryDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenServiceRouteEntryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCenServiceRouteEntry())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCenServiceRouteEntry())
 	if err != nil {
 		return fmt.Errorf("error on deleting cen service route entry %q, %s", d.Id(), err)
 	}

@@ -12,13 +12,11 @@ import (
 
 type VolcengineZoneService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewZoneService(c *ve.SdkClient) *VolcengineZoneService {
 	return &VolcengineZoneService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

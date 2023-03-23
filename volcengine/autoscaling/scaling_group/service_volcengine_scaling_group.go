@@ -14,13 +14,11 @@ import (
 
 type VolcengineScalingGroupService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewScalingGroupService(c *ve.SdkClient) *VolcengineScalingGroupService {
 	return &VolcengineScalingGroupService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

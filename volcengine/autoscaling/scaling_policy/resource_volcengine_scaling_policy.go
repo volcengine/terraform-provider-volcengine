@@ -151,7 +151,7 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 
 func resourceVolcengineScalingPolicyCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingPolicyService := NewScalingPolicyService(meta.(*ve.SdkClient))
-	err = scalingPolicyService.Dispatcher.Create(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
+	err = ve.DefaultDispatcher().Create(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
 	if err != nil {
 		return fmt.Errorf("error on creating ScalingPolicy %q, %s", d.Id(), err)
 	}
@@ -160,7 +160,7 @@ func resourceVolcengineScalingPolicyCreate(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineScalingPolicyRead(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingPolicyService := NewScalingPolicyService(meta.(*ve.SdkClient))
-	err = scalingPolicyService.Dispatcher.Read(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
+	err = ve.DefaultDispatcher().Read(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
 	if err != nil {
 		return fmt.Errorf("error on reading ScalingPolicy %q, %s", d.Id(), err)
 	}
@@ -169,7 +169,7 @@ func resourceVolcengineScalingPolicyRead(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineScalingPolicyUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingPolicyService := NewScalingPolicyService(meta.(*ve.SdkClient))
-	err = scalingPolicyService.Dispatcher.Update(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
+	err = ve.DefaultDispatcher().Update(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
 	if err != nil {
 		return fmt.Errorf("error on updating ScalingPolicy %q, %s", d.Id(), err)
 	}
@@ -178,7 +178,7 @@ func resourceVolcengineScalingPolicyUpdate(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineScalingPolicyDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingPolicyService := NewScalingPolicyService(meta.(*ve.SdkClient))
-	err = scalingPolicyService.Dispatcher.Delete(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
+	err = ve.DefaultDispatcher().Delete(scalingPolicyService, d, ResourceVolcengineScalingPolicy())
 	if err != nil {
 		return fmt.Errorf("error on deleting ScalingPolicy %q, %s", d.Id(), err)
 	}

@@ -98,5 +98,5 @@ func DataSourceVolcengineInstanceTypes() *schema.Resource {
 
 func dataSourceVolcengineInstanceTypesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewInstanceTypeService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineInstanceTypes())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineInstanceTypes())
 }

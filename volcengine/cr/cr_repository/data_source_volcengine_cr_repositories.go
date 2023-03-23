@@ -96,5 +96,5 @@ func DataSourceVolcengineCrRepositories() *schema.Resource {
 
 func dataSourceVolcengineCrRepositoriesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRepositoryService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCrRepositories())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineCrRepositories())
 }

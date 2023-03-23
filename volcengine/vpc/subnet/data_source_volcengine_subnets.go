@@ -165,5 +165,5 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 
 func dataSourceVolcengineSubnetsRead(d *schema.ResourceData, meta interface{}) error {
 	subnetService := NewSubnetService(meta.(*ve.SdkClient))
-	return subnetService.Dispatcher.Data(subnetService, d, DataSourceVolcengineSubnets())
+	return ve.DefaultDispatcher().Data(subnetService, d, DataSourceVolcengineSubnets())
 }

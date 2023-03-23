@@ -16,13 +16,11 @@ import (
 
 type VolcengineMongoDBEndpointService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewMongoDBEndpointService(c *ve.SdkClient) *VolcengineMongoDBEndpointService {
 	return &VolcengineMongoDBEndpointService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

@@ -82,7 +82,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 
 func resourceVolcengineMongoDBEndpointCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongoDBEndpoint())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBEndpoint())
 	if err != nil {
 		return fmt.Errorf("Error on creating endpoint %q,%s", d.Id(), err)
 	}
@@ -91,7 +91,7 @@ func resourceVolcengineMongoDBEndpointCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBEndpointDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineMongoDBEndpoint())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongoDBEndpoint())
 	if err != nil {
 		return fmt.Errorf("error on deleting endpoint %q, %s", d.Id(), err)
 	}
@@ -100,7 +100,7 @@ func resourceVolcengineMongoDBEndpointDelete(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBEndpointRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBEndpoint())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBEndpoint())
 	if err != nil {
 		return fmt.Errorf("Error on reading endpoint %q,%s", d.Id(), err)
 	}

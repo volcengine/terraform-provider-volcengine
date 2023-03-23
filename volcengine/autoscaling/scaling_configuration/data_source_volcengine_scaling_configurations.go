@@ -190,5 +190,5 @@ func DataSourceVolcengineScalingConfigurations() *schema.Resource {
 
 func dataSourceVolcengineScalingConfigurationsRead(d *schema.ResourceData, meta interface{}) error {
 	configurationService := NewScalingConfigurationService(meta.(*ve.SdkClient))
-	return configurationService.Dispatcher.Data(configurationService, d, DataSourceVolcengineScalingConfigurations())
+	return ve.DefaultDispatcher().Data(configurationService, d, DataSourceVolcengineScalingConfigurations())
 }

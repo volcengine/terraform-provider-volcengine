@@ -116,5 +116,5 @@ func DataSourceVolcengineCustomerGateways() *schema.Resource {
 
 func dataSourceVolcengineCustomerGatewaysRead(d *schema.ResourceData, meta interface{}) error {
 	customerGatewayService := NewCustomerGatewayService(meta.(*ve.SdkClient))
-	return customerGatewayService.Dispatcher.Data(customerGatewayService, d, DataSourceVolcengineCustomerGateways())
+	return ve.DefaultDispatcher().Data(customerGatewayService, d, DataSourceVolcengineCustomerGateways())
 }

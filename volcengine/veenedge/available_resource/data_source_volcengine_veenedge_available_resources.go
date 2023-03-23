@@ -106,5 +106,5 @@ var geoInfo = &schema.Resource{
 
 func dataSourceVolcengineAvailableResourcesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewResourceService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineAvailableResources())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineAvailableResources())
 }

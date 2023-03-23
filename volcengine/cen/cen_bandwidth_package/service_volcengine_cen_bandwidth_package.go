@@ -15,13 +15,11 @@ import (
 
 type VolcengineCenBandwidthPackageService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewCenBandwidthPackageService(c *ve.SdkClient) *VolcengineCenBandwidthPackageService {
 	return &VolcengineCenBandwidthPackageService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

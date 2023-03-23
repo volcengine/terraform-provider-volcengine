@@ -61,7 +61,7 @@ func ResourceVolcengineRouteTable() *schema.Resource {
 
 func resourceVolcengineRouteTableCreate(d *schema.ResourceData, meta interface{}) error {
 	routeTableService := NewRouteTableService(meta.(*ve.SdkClient))
-	if err := routeTableService.Dispatcher.Create(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
+	if err := ve.DefaultDispatcher().Create(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
 		return fmt.Errorf("error on creating route table  %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineRouteTableRead(d, meta)
@@ -69,7 +69,7 @@ func resourceVolcengineRouteTableCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineRouteTableRead(d *schema.ResourceData, meta interface{}) error {
 	routeTableService := NewRouteTableService(meta.(*ve.SdkClient))
-	if err := routeTableService.Dispatcher.Read(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
+	if err := ve.DefaultDispatcher().Read(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
 		return fmt.Errorf("error on reading route table %q, %w", d.Id(), err)
 	}
 	return nil
@@ -77,7 +77,7 @@ func resourceVolcengineRouteTableRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineRouteTableUpdate(d *schema.ResourceData, meta interface{}) error {
 	routeTableService := NewRouteTableService(meta.(*ve.SdkClient))
-	if err := routeTableService.Dispatcher.Update(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
+	if err := ve.DefaultDispatcher().Update(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
 		return fmt.Errorf("error on updating route table %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineRouteTableRead(d, meta)
@@ -85,7 +85,7 @@ func resourceVolcengineRouteTableUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineRouteTableDelete(d *schema.ResourceData, meta interface{}) error {
 	routeTableService := NewRouteTableService(meta.(*ve.SdkClient))
-	if err := routeTableService.Dispatcher.Delete(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(routeTableService, d, ResourceVolcengineRouteTable()); err != nil {
 		return fmt.Errorf("error on deleting route table %q, %w", d.Id(), err)
 	}
 	return nil

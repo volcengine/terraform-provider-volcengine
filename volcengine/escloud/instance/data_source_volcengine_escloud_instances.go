@@ -726,5 +726,5 @@ func DataSourceVolcengineESCloudInstances() *schema.Resource {
 
 func dataSourceVolcengineESCloudInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewESCloudInstanceService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineESCloudInstances())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineESCloudInstances())
 }

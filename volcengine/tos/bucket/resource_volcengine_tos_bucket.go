@@ -122,7 +122,7 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 
 func resourceVolcengineTosBucketCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Create(tosBucketService, d, ResourceVolcengineTosBucket())
+	err = ve.DefaultDispatcher().Create(tosBucketService, d, ResourceVolcengineTosBucket())
 	if err != nil {
 		return fmt.Errorf("error on creating tos bucket  %q, %s", d.Id(), err)
 	}
@@ -131,7 +131,7 @@ func resourceVolcengineTosBucketCreate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineTosBucketRead(d *schema.ResourceData, meta interface{}) (err error) {
 	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Read(tosBucketService, d, ResourceVolcengineTosBucket())
+	err = ve.DefaultDispatcher().Read(tosBucketService, d, ResourceVolcengineTosBucket())
 	if err != nil {
 		return fmt.Errorf("error on reading tos bucket %q, %s", d.Id(), err)
 	}
@@ -140,7 +140,7 @@ func resourceVolcengineTosBucketRead(d *schema.ResourceData, meta interface{}) (
 
 func resourceVolcengineTosBucketUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Update(tosBucketService, d, ResourceVolcengineTosBucket())
+	err = ve.DefaultDispatcher().Update(tosBucketService, d, ResourceVolcengineTosBucket())
 	if err != nil {
 		return fmt.Errorf("error on updating tos bucket  %q, %s", d.Id(), err)
 	}
@@ -149,7 +149,7 @@ func resourceVolcengineTosBucketUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineTosBucketDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	err = tosBucketService.Dispatcher.Delete(tosBucketService, d, ResourceVolcengineTosBucket())
+	err = ve.DefaultDispatcher().Delete(tosBucketService, d, ResourceVolcengineTosBucket())
 	if err != nil {
 		return fmt.Errorf("error on deleting tos bucket %q, %s", d.Id(), err)
 	}

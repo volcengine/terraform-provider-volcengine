@@ -71,7 +71,7 @@ func ResourceVolcengineVolumeAttach() *schema.Resource {
 
 func resourceVolcengineVolumeAttachCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	volumeAttachService := NewVolumeAttachService(meta.(*ve.SdkClient))
-	err = volumeAttachService.Dispatcher.Create(volumeAttachService, d, ResourceVolcengineVolumeAttach())
+	err = ve.DefaultDispatcher().Create(volumeAttachService, d, ResourceVolcengineVolumeAttach())
 	if err != nil {
 		return fmt.Errorf("error on attach volume %q, %w", d.Id(), err)
 	}
@@ -80,7 +80,7 @@ func resourceVolcengineVolumeAttachCreate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineVolumeAttachRead(d *schema.ResourceData, meta interface{}) (err error) {
 	volumeAttachService := NewVolumeAttachService(meta.(*ve.SdkClient))
-	err = volumeAttachService.Dispatcher.Read(volumeAttachService, d, ResourceVolcengineVolumeAttach())
+	err = ve.DefaultDispatcher().Read(volumeAttachService, d, ResourceVolcengineVolumeAttach())
 	if err != nil {
 		return fmt.Errorf("error on reading volume %q, %w", d.Id(), err)
 	}
@@ -93,7 +93,7 @@ func resourceVolcengineVolumeAttachUpdate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineVolumeAttachDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	volumeAttachService := NewVolumeAttachService(meta.(*ve.SdkClient))
-	err = volumeAttachService.Dispatcher.Delete(volumeAttachService, d, ResourceVolcengineVolumeAttach())
+	err = ve.DefaultDispatcher().Delete(volumeAttachService, d, ResourceVolcengineVolumeAttach())
 	if err != nil {
 		return fmt.Errorf("error on detach volume %q, %w", d.Id(), err)
 	}

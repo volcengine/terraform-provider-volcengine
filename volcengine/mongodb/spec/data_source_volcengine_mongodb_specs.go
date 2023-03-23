@@ -138,5 +138,5 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 
 func dataSourceVolcengineSpecsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewSpecService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBSpecs())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBSpecs())
 }

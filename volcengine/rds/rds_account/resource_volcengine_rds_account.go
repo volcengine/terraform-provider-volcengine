@@ -63,7 +63,7 @@ func ResourceVolcengineRdsAccount() *schema.Resource {
 
 func resourceVolcengineRdsAccountCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsAccountService := NewRdsAccountService(meta.(*volc.SdkClient))
-	err = rdsAccountService.Dispatcher.Create(rdsAccountService, d, ResourceVolcengineRdsAccount())
+	err = volc.DefaultDispatcher().Create(rdsAccountService, d, ResourceVolcengineRdsAccount())
 	if err != nil {
 		return fmt.Errorf("error on creating rds account %q, %w", d.Id(), err)
 	}
@@ -72,7 +72,7 @@ func resourceVolcengineRdsAccountCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineRdsAccountRead(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsAccountService := NewRdsAccountService(meta.(*volc.SdkClient))
-	err = rdsAccountService.Dispatcher.Read(rdsAccountService, d, ResourceVolcengineRdsAccount())
+	err = volc.DefaultDispatcher().Read(rdsAccountService, d, ResourceVolcengineRdsAccount())
 	if err != nil {
 		return fmt.Errorf("error on reading rds account %q, %w", d.Id(), err)
 	}
@@ -81,7 +81,7 @@ func resourceVolcengineRdsAccountRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineRdsAccountDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsAccountService := NewRdsAccountService(meta.(*volc.SdkClient))
-	err = rdsAccountService.Dispatcher.Delete(rdsAccountService, d, ResourceVolcengineRdsAccount())
+	err = volc.DefaultDispatcher().Delete(rdsAccountService, d, ResourceVolcengineRdsAccount())
 	if err != nil {
 		return fmt.Errorf("error on deleting rds account %q, %w", d.Id(), err)
 	}

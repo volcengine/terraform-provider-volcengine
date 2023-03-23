@@ -13,13 +13,11 @@ import (
 
 type VolcengineCenInterRegionBandwidthService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewCenInterRegionBandwidthService(c *ve.SdkClient) *VolcengineCenInterRegionBandwidthService {
 	return &VolcengineCenInterRegionBandwidthService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 

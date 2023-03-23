@@ -16,13 +16,11 @@ import (
 
 type VolcengineMongoDBInstanceParameterService struct {
 	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
 }
 
 func NewMongoDBInstanceParameterService(c *ve.SdkClient) *VolcengineMongoDBInstanceParameterService {
 	return &VolcengineMongoDBInstanceParameterService{
 		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
