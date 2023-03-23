@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineSubnetService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewSubnetService(c *ve.SdkClient) *VolcengineSubnetService {
 	return &VolcengineSubnetService{
-		Client:     c,
+		Client: c,
 	}
 }
 

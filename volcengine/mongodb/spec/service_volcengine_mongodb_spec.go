@@ -10,12 +10,12 @@ import (
 )
 
 type VolcengineMongoSpecService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewSpecService(c *ve.SdkClient) *VolcengineMongoSpecService {
 	return &VolcengineMongoSpecService{
-		Client:     c,
+		Client: c,
 	}
 }
 

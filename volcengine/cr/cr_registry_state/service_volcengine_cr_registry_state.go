@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineCrRegistryStateService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCrRegistryStateService(c *ve.SdkClient) *VolcengineCrRegistryStateService {
 	return &VolcengineCrRegistryStateService{
-		Client:     c,
+		Client: c,
 	}
 }
 

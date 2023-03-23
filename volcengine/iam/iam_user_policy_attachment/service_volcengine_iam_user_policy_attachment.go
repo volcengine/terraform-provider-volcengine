@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineIamUserPolicyAttachmentService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewIamUserPolicyAttachmentService(c *ve.SdkClient) *VolcengineIamUserPolicyAttachmentService {
 	return &VolcengineIamUserPolicyAttachmentService{
-		Client:     c,
+		Client: c,
 	}
 }
 

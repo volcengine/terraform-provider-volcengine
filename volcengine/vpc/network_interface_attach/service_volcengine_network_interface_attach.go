@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineNetworkInterfaceAttachService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewNetworkInterfaceAttachService(c *ve.SdkClient) *VolcengineNetworkInterfaceAttachService {
 	return &VolcengineNetworkInterfaceAttachService{
-		Client:     c,
+		Client: c,
 	}
 }
 

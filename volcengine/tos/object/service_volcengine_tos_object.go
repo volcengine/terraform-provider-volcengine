@@ -15,12 +15,12 @@ import (
 )
 
 type VolcengineTosObjectService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewTosObjectService(c *ve.SdkClient) *VolcengineTosObjectService {
 	return &VolcengineTosObjectService{
-		Client:     c,
+		Client: c,
 	}
 }
 

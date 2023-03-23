@@ -11,12 +11,12 @@ import (
 )
 
 type VolcengineMongoDBAccountService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewMongoDBAccountService(c *ve.SdkClient) *VolcengineMongoDBAccountService {
 	return &VolcengineMongoDBAccountService{
-		Client:     c,
+		Client: c,
 	}
 }
 

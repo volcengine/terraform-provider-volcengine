@@ -15,12 +15,12 @@ import (
 )
 
 type VolcengineMongoDBSSLStateService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewMongoDBSSLStateService(c *ve.SdkClient) *VolcengineMongoDBSSLStateService {
 	return &VolcengineMongoDBSSLStateService{
-		Client:     c,
+		Client: c,
 	}
 }
 

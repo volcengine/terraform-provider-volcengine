@@ -13,7 +13,7 @@ import (
 )
 
 type VolcengineMongodbAllowListAssociateService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 const (
@@ -24,7 +24,7 @@ const (
 
 func NewMongodbAllowListAssociateService(c *ve.SdkClient) *VolcengineMongodbAllowListAssociateService {
 	return &VolcengineMongodbAllowListAssociateService{
-		Client:     c,
+		Client: c,
 	}
 }
 

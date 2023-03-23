@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineCloudServerService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCloudServerService(c *ve.SdkClient) *VolcengineCloudServerService {
 	return &VolcengineCloudServerService{
-		Client:     c,
+		Client: c,
 	}
 }
 

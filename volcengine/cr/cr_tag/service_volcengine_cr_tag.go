@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineCrTagService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCrTagService(c *ve.SdkClient) *VolcengineCrTagService {
 	return &VolcengineCrTagService{
-		Client:     c,
+		Client: c,
 	}
 }
 

@@ -28,13 +28,13 @@ func DataSourceVolcengineMongoDBInstanceParameters() *schema.Resource {
 			"parameter_role": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "The node type of instance parameter,valid value contains `Node`,`Shard`,`ConfigServer`,`Mongos`.",
+				Description:  "The node type of instance parameter, valid value contains `Node`, `Shard`, `ConfigServer`, `Mongos`.",
 				ValidateFunc: validation.StringInSlice([]string{"Node", "Shard", "ConfigServer", "Mongos"}, false),
 			},
 			"parameter_names": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The parameter names,support fuzzy query, case insensitive.",
+				Description: "The parameter names, support fuzzy query, case insensitive.",
 			},
 			"parameters": {
 				Type:        schema.TypeList,

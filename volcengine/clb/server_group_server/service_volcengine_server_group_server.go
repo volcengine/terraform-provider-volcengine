@@ -14,12 +14,12 @@ import (
 )
 
 type VolcengineServerGroupServerService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewServerGroupServerService(c *ve.SdkClient) *VolcengineServerGroupServerService {
 	return &VolcengineServerGroupServerService{
-		Client:     c,
+		Client: c,
 	}
 }
 

@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineMongoDBAllowListService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewMongoDBAllowListService(c *ve.SdkClient) *VolcengineMongoDBAllowListService {
 	return &VolcengineMongoDBAllowListService{
-		Client:     c,
+		Client: c,
 	}
 }
 

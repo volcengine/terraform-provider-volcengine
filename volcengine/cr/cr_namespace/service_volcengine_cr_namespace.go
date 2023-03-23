@@ -14,12 +14,12 @@ import (
 )
 
 type VolcengineCrNamespaceService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCrNamespaceService(c *ve.SdkClient) *VolcengineCrNamespaceService {
 	return &VolcengineCrNamespaceService{
-		Client:     c,
+		Client: c,
 	}
 }
 

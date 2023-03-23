@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineInstanceStateService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewInstanceStateService(c *ve.SdkClient) *VolcengineInstanceStateService {
 	return &VolcengineInstanceStateService{
-		Client:     c,
+		Client: c,
 	}
 }
 

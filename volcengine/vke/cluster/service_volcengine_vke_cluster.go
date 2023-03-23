@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineVkeClusterService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewVkeClusterService(c *ve.SdkClient) *VolcengineVkeClusterService {
 	return &VolcengineVkeClusterService{
-		Client:     c,
+		Client: c,
 	}
 }
 

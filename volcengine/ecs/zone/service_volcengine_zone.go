@@ -11,12 +11,12 @@ import (
 )
 
 type VolcengineZoneService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewZoneService(c *ve.SdkClient) *VolcengineZoneService {
 	return &VolcengineZoneService{
-		Client:     c,
+		Client: c,
 	}
 }
 

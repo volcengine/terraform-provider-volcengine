@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineEipAddressService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewEipAddressService(c *ve.SdkClient) *VolcengineEipAddressService {
 	return &VolcengineEipAddressService{
-		Client:     c,
+		Client: c,
 	}
 }
 

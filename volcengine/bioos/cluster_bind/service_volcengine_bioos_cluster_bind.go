@@ -14,7 +14,7 @@ import (
 )
 
 type VolcengineBioosClusterBindService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func (s *VolcengineBioosClusterBindService) GetClient() *ve.SdkClient {
@@ -168,7 +168,7 @@ func (s *VolcengineBioosClusterBindService) ReadResourceId(id string) string {
 
 func NewVolcengineBioosClusterBindService(c *ve.SdkClient) *VolcengineBioosClusterBindService {
 	return &VolcengineBioosClusterBindService{
-		Client:     c,
+		Client: c,
 	}
 }
 

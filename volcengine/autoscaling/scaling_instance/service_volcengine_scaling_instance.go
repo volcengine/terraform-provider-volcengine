@@ -10,7 +10,7 @@ import (
 )
 
 type VolcengineScalingInstanceService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func (s *VolcengineScalingInstanceService) ReadResource(data *schema.ResourceData, s2 string) (map[string]interface{}, error) {
@@ -23,7 +23,7 @@ func (s *VolcengineScalingInstanceService) RefreshResourceState(data *schema.Res
 
 func NewScalingInstanceService(c *ve.SdkClient) *VolcengineScalingInstanceService {
 	return &VolcengineScalingInstanceService{
-		Client:     c,
+		Client: c,
 	}
 }
 

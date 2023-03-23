@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineTosBucketService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewTosBucketService(c *ve.SdkClient) *VolcengineTosBucketService {
 	return &VolcengineTosBucketService{
-		Client:     c,
+		Client: c,
 	}
 }
 

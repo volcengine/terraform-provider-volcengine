@@ -11,12 +11,12 @@ import (
 )
 
 type VolcengineVkeKubeconfigService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewVkeKubeconfigService(c *ve.SdkClient) *VolcengineVkeKubeconfigService {
 	return &VolcengineVkeKubeconfigService{
-		Client:     c,
+		Client: c,
 	}
 }
 

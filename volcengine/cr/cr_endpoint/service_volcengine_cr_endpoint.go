@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineCrEndpointService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCrEndpointService(c *ve.SdkClient) *VolcengineCrEndpointService {
 	return &VolcengineCrEndpointService{
-		Client:     c,
+		Client: c,
 	}
 }
 

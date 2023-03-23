@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineCenGrantInstanceService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCenGrantInstanceService(c *ve.SdkClient) *VolcengineCenGrantInstanceService {
 	return &VolcengineCenGrantInstanceService{
-		Client:     c,
+		Client: c,
 	}
 }
 

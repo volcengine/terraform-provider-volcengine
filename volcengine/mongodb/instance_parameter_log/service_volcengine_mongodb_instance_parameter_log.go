@@ -11,12 +11,12 @@ import (
 )
 
 type VolcengineMongoDBInstanceParameterLogService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewMongoDBInstanceParameterLogService(c *ve.SdkClient) *VolcengineMongoDBInstanceParameterLogService {
 	return &VolcengineMongoDBInstanceParameterLogService{
-		Client:     c,
+		Client: c,
 	}
 }
 

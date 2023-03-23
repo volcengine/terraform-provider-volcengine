@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineScalingLifecycleHookService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewScalingLifecycleHookService(c *ve.SdkClient) *VolcengineScalingLifecycleHookService {
 	return &VolcengineScalingLifecycleHookService{
-		Client:     c,
+		Client: c,
 	}
 }
 

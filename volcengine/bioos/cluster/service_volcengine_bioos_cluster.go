@@ -14,7 +14,7 @@ import (
 )
 
 type VolcengineBioosClusterService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func (s *VolcengineBioosClusterService) GetClient() *ve.SdkClient {
@@ -209,7 +209,7 @@ func (s *VolcengineBioosClusterService) ReadResourceId(id string) string {
 
 func NewVolcengineBioosClusterService(c *ve.SdkClient) *VolcengineBioosClusterService {
 	return &VolcengineBioosClusterService{
-		Client:     c,
+		Client: c,
 	}
 }
 

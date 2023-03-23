@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineRdsIpListService struct {
-	Client     *volc.SdkClient
+	Client *volc.SdkClient
 }
 
 func NewRdsIpListService(c *volc.SdkClient) *VolcengineRdsIpListService {
 	return &VolcengineRdsIpListService{
-		Client:     c,
+		Client: c,
 	}
 }
 

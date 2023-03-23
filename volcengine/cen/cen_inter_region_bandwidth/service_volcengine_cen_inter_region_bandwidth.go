@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineCenInterRegionBandwidthService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCenInterRegionBandwidthService(c *ve.SdkClient) *VolcengineCenInterRegionBandwidthService {
 	return &VolcengineCenInterRegionBandwidthService{
-		Client:     c,
+		Client: c,
 	}
 }
 

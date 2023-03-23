@@ -25,7 +25,7 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 				Description: "The region ID to query.",
 			},
 			"specs": {
-				Description: "The collection of mongos spec query.",
+				Description: "A list of supported node specification information for MongoDB instances.",
 				Type:        schema.TypeList,
 				Computed:    true,
 				MaxItems:    1,

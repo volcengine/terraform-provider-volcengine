@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineCenServiceRouteEntryService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewCenServiceRouteEntryService(c *ve.SdkClient) *VolcengineCenServiceRouteEntryService {
 	return &VolcengineCenServiceRouteEntryService{
-		Client:     c,
+		Client: c,
 	}
 }
 

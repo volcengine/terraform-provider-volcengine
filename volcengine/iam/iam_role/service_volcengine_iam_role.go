@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineIamRoleService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewIamRoleService(c *ve.SdkClient) *VolcengineIamRoleService {
 	return &VolcengineIamRoleService{
-		Client:     c,
+		Client: c,
 	}
 }
 

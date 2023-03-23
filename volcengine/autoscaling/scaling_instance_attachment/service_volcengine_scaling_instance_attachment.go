@@ -13,12 +13,12 @@ import (
 )
 
 type VolcengineScalingInstanceAttachmentService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewScalingInstanceAttachmentService(c *ve.SdkClient) *VolcengineScalingInstanceAttachmentService {
 	return &VolcengineScalingInstanceAttachmentService{
-		Client:     c,
+		Client: c,
 	}
 }
 

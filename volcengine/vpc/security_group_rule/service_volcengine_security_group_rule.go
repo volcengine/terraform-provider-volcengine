@@ -14,7 +14,7 @@ import (
 )
 
 type VolcengineSecurityGroupRuleService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 type Direction string
@@ -26,7 +26,7 @@ const (
 
 func NewSecurityGroupRuleService(c *ve.SdkClient) *VolcengineSecurityGroupRuleService {
 	return &VolcengineSecurityGroupRuleService{
-		Client:     c,
+		Client: c,
 	}
 }
 

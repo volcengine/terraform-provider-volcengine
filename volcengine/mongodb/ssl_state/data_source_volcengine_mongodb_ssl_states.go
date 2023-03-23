@@ -14,6 +14,16 @@ func DataSourceVolcengineMongoDBSSLStates() *schema.Resource {
 				Required:    true,
 				Description: "The mongodb instance ID to query.",
 			},
+			"output_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "File name where to save data source results.",
+			},
+			"total_count": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The total count of mongodb ssl state query.",
+			},
 			"ssl_state": {
 				Description: "The collection of mongodb ssl state query.",
 				Type:        schema.TypeList,

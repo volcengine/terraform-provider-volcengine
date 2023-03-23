@@ -16,12 +16,12 @@ import (
 )
 
 type VolcengineListenerService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewListenerService(c *ve.SdkClient) *VolcengineListenerService {
 	return &VolcengineListenerService{
-		Client:     c,
+		Client: c,
 	}
 }
 

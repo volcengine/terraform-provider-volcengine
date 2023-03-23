@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineVpcService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewVpcService(c *ve.SdkClient) *VolcengineVpcService {
 	return &VolcengineVpcService{
-		Client:     c,
+		Client: c,
 	}
 }
 

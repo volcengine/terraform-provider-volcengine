@@ -12,12 +12,12 @@ import (
 )
 
 type VolcengineMongoDBInstanceService struct {
-	Client     *ve.SdkClient
+	Client *ve.SdkClient
 }
 
 func NewMongoDBInstanceService(c *ve.SdkClient) *VolcengineMongoDBInstanceService {
 	return &VolcengineMongoDBInstanceService{
-		Client:     c,
+		Client: c,
 	}
 }
 
@@ -209,6 +209,9 @@ func (s *VolcengineMongoDBInstanceService) readResource(resourceData *schema.Res
 		if err != nil {
 			data["NodeNumber"] = 0
 		} else {
+			if n == nil {
+				return data, err
+			}
 			nodes := n.([]interface{})
 			data["NodeNumber"] = len(nodes)
 			data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
