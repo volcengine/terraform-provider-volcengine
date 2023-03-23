@@ -51,14 +51,12 @@ func init() {
 
 type VolcengineEcsService struct {
 	Client        *ve.SdkClient
-	Dispatcher    *ve.Dispatcher
 	SubnetService *subnet.VolcengineSubnetService
 }
 
 func NewEcsService(c *ve.SdkClient) *VolcengineEcsService {
 	return &VolcengineEcsService{
 		Client:        c,
-		Dispatcher:    ve.NewRateLimitDispatcher(rateInfo),
 		SubnetService: subnet.NewSubnetService(c),
 	}
 }
