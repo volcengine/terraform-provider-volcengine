@@ -74,6 +74,6 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 }
 
 func dataSourceVolcengineAccountsRead(d *schema.ResourceData, meta interface{}) error {
-	regionService := NewMongoDBAccountService(meta.(*ve.SdkClient))
-	return regionService.Dispatcher.Data(regionService, d, DataSourceVolcengineMongoDBAccounts())
+	service := NewMongoDBAccountService(meta.(*ve.SdkClient))
+	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBAccounts())
 }
