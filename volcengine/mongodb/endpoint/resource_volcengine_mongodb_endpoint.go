@@ -25,7 +25,6 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineMongoDBEndpointCreate,
 		Read:   resourceVolcengineMongoDBEndpointRead,
-		Update: resourceVolcengineMongoDBEndpointUpdate,
 		Delete: resourceVolcengineMongoDBEndpointDelete,
 		Importer: &schema.ResourceImporter{
 			State: mongoDBEndpointImporter,
@@ -40,29 +39,31 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"object_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
+				ForceNew:    true,
 				Description: "The object ID corresponding to the endpoint.",
 			},
 			"network_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "Private",
+				ForceNew:     true,
 				Description:  "The network type of endpoint.",
 				ValidateFunc: validation.StringInSlice([]string{"Private", "Public"}, false),
 			},
 			"mongos_node_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Computed:    true,
+				ForceNew:    true,
 				Description: "A list of the Mongos node that needs to apply for the endpoint.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Set: schema.HashString,
 			},
 			"eip_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				Computed:    true,
+				ForceNew:    true,
 				Description: "A list of EIP IDs that need to be bound when applying for endpoint.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -86,10 +87,6 @@ func resourceVolcengineMongoDBEndpointCreate(d *schema.ResourceData, meta interf
 		return fmt.Errorf("Error on creating endpoint %q,%s", d.Id(), err)
 	}
 	return resourceVolcengineMongoDBEndpointRead(d, meta)
-}
-
-func resourceVolcengineMongoDBEndpointUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	return fmt.Errorf("mongodb endpoint does not support update")
 }
 
 func resourceVolcengineMongoDBEndpointDelete(d *schema.ResourceData, meta interface{}) (err error) {
