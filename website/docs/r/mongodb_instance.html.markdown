@@ -37,7 +37,6 @@ The following arguments are supported:
 * `node_spec` - (Required) The spec of node.
 * `storage_space_gb` - (Required) The total storage space of a replica set instance, or the storage space of a single shard in a sharded cluster, in GiB.
 * `subnet_id` - (Required, ForceNew) The subnet id of instance.
-* `super_account_password` - (Required) The password of database account.
 * `auto_renew` - (Optional) Whether to enable automatic renewal.
 * `charge_type` - (Optional) The charge type of instance,valid value contains `Prepaid` or `PostPaid`.
 * `instance_name` - (Optional) The instance name.
@@ -48,6 +47,7 @@ The following arguments are supported:
 * `period` - (Optional) The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`,the value range is `1~9` when `PeriodUtil` is `Month`,this parameter is required when `ChargeType` is `Prepaid`.
 * `project_name` - (Optional) The project name to which the instance belongs.
 * `shard_number` - (Optional) The number of shards in shard cluster,value range is `2~23`,this parameter is required when `InstanceType` is `ShardedCluster`.
+* `super_account_password` - (Optional) The password of database account.
 * `vpc_id` - (Optional) The vpc ID.
 * `zone_id` - (Optional) The zone ID of instance.
 
