@@ -77,7 +77,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 			"mongos_node_number": {
 				Type:        schema.TypeInt,
 				Optional:    true,
-				Computed:    true,
+				Default:     2,
 				Description: "The mongos node number of shard cluster,value range is `2~23`,this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"shard_number": {
@@ -106,15 +106,16 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				},
 				Description: "The subnet id of instance.",
 			},
-			// "super_account_name": {
-			// 	Type:         schema.TypeString,
-			// 	Required:     true,
-			// 	ValidateFunc: validation.StringInSlice([]string{"root"}, false),
-			// 	Description:  "The name of database account,must be `root`.",
-			// },
+			//"super_account_name": {
+			//	Type:         schema.TypeString,
+			//	ValidateFunc: validation.StringInSlice([]string{"root"}, false),
+			//	Default:      "root",
+			//	Optional:     true,
+			//	Description:  "The name of database account,must be `root`.",
+			//},
 			"super_account_password": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "The password of database account.",
 			},
