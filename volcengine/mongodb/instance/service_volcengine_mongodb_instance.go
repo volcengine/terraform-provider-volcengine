@@ -460,8 +460,9 @@ func (s *VolcengineMongoDBInstanceService) ModifyResource(resourceData *schema.R
 				ConvertMode: ve.RequestConvertIgnore,
 				ContentType: ve.ContentTypeJson,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
-					(*call.SdkParam)["AccountName"] = d.Get("super_account_name")
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					//暂时写死 当前不支持这个字段 只能是root
+					(*call.SdkParam)["AccountName"] = "root"
 					(*call.SdkParam)["AccountPassword"] = d.Get("super_account_password")
 					return true, nil
 				},
@@ -481,21 +482,36 @@ func (s *VolcengineMongoDBInstanceService) ModifyResource(resourceData *schema.R
 	return callbacks
 }
 
-func (s *VolcengineMongoDBInstanceService) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineMongoDBInstanceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteDBInstance",
 			ConvertMode: ve.RequestConvertIgnore,
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["InstanceId"] = d.Id()
-				return true, nil
+			SdkParam: &map[string]interface{}{
+				"InstanceId": resourceData.Id(),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on  reading mongodb on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
 			},
 		},
 	}
