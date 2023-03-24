@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
@@ -28,11 +29,17 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
+		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "The zone ID of instance.",
 			},
 			// 固定值，暂时不开放
@@ -66,6 +73,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 				//Default:      "ReplicaSet",
 				Description:  "The type of instance,the valid value contains `ReplicaSet` or `ShardedCluster`.",
 				ValidateFunc: validation.StringInSlice([]string{"ReplicaSet", "ShardedCluster"}, false),
@@ -86,7 +94,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
-				Description: "The number of shards in shard cluster,value range is `2~23`,this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Description: "The number of shards in shard cluster,value range is `2~32`,this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"storage_space_gb": {
 				Type:        schema.TypeInt,
@@ -97,6 +105,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "The vpc ID.",
 			},
 			"subnet_id": {
@@ -136,23 +145,26 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Description:  "The charge type of instance,valid value contains `Prepaid` or `PostPaid`.",
 			},
 			"auto_renew": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: "Whether to enable automatic renewal.",
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
+				Description:      "Whether to enable automatic renewal.",
 			},
 			"period_unit": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Description:  "The period unit,valid value contains `Year` or `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
-				ValidateFunc: validation.StringInSlice([]string{"Year", "Month"}, false),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateFunc:     validation.StringInSlice([]string{"Year", "Month"}, false),
+				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
+				Description:      "The period unit,valid value contains `Year` or `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
 			},
 			"period": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Computed:    true,
-				Description: "The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`,the value range is `1~9` when `PeriodUtil` is `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
+				Description:      "The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`,the value range is `1~9` when `PeriodUtil` is `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
@@ -160,6 +172,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed:    true,
 				Description: "The project name to which the instance belongs.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	return resource

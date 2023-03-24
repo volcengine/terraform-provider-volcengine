@@ -45,6 +45,9 @@ func (s *VolcengineMongoDBAllowListService) readAllowListDetails(allowListId str
 	if err != nil {
 		return allowList, err
 	}
+	if allowList == nil {
+		allowList = map[string]interface{}{}
+	}
 	return allowList, err
 }
 
@@ -72,26 +75,28 @@ func (s *VolcengineMongoDBAllowListService) DatasourceResources(data *schema.Res
 
 func (s *VolcengineMongoDBAllowListService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
+		resp            *map[string]interface{}
+		results         interface{}
+		allowListIdsMap = make(map[string]bool)
+		exists          bool
 	)
 
-	if allowListIds, ok := condition["AllowListIds"]; ok {
-		for _, allowListId := range allowListIds.([]interface{}) {
-			detail, err := s.readAllowListDetails(allowListId.(string))
-			if err != nil {
-				logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
-				continue
-			}
-			data = append(data, detail)
-		}
-		//detail, err := s.readAllowListDetails(allowListId.(string))
-		//if err != nil {
-		//	logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
-		//	return nil, err
-		//}
-		return data, nil
-	}
+	//if allowListIds, ok := condition["AllowListIds"]; ok {
+	//	for _, allowListId := range allowListIds.([]interface{}) {
+	//		detail, err := s.readAllowListDetails(allowListId.(string))
+	//		if err != nil {
+	//			logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
+	//			continue
+	//		}
+	//		data = append(data, detail)
+	//	}
+	//	//detail, err := s.readAllowListDetails(allowListId.(string))
+	//	//if err != nil {
+	//	//	logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
+	//	//	return nil, err
+	//	//}
+	//	return data, nil
+	//}
 
 	action := "DescribeAllowLists"
 	logger.Debug(logger.ReqFormat, action, condition)
@@ -120,9 +125,22 @@ func (s *VolcengineMongoDBAllowListService) ReadResources(condition map[string]i
 		return data, fmt.Errorf("DescribeAllowLists responsed instances is not a slice")
 	}
 
+	if _, exists = condition["AllowListIds"]; exists {
+		if allowListIds, ok := condition["AllowListIds"].([]interface{}); ok {
+			for _, id := range allowListIds {
+				allowListIdsMap[id.(string)] = true
+			}
+		}
+	}
+
 	for _, ele := range allowLists {
 		allowList := ele.(map[string]interface{})
 		id := allowList["AllowListId"].(string)
+
+		// 如果存在 allow_list_ids，过滤掉 allow_list_ids 中未包含的 id
+		if _, ok := allowListIdsMap[id]; exists && !ok {
+			continue
+		}
 
 		detail, err := s.readAllowListDetails(id)
 		if err != nil {

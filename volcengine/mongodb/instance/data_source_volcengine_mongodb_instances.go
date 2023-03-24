@@ -28,7 +28,7 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 			"instance_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				Description:  "The type of instance to query,the valid value contains `ReplicaSet` or `ShardedCluster`.",
+				Description:  "The type of instance to query, the valid value contains `ReplicaSet` or `ShardedCluster`.",
 				ValidateFunc: validation.StringInSlice([]string{"ReplicaSet", "ShardedCluster"}, false),
 			},
 			"instance_status": {
@@ -40,13 +40,13 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"MongoDB"}, false),
-				Description:  "The db engine to query,valid value contains `MongoDB`.",
+				Description:  "The db engine to query, valid value contains `MongoDB`.",
 			},
 			"db_engine_version": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"MongoDB_4_0"}, false),
-				Description:  "The version of db engine to query,valid value contains `MongoDB_4_0`.",
+				Description:  "The version of db engine to query, valid value contains `MongoDB_4_0`.",
 			},
 			"create_start_time": {
 				Type:        schema.TypeString,
@@ -72,6 +72,14 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The vpc id of instance to query.",
+			},
+			"tags": ve.TagsSchema(),
+
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of DB instance.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -150,6 +158,11 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 										Computed:    true,
 										Description: "The used vCPU.",
 									},
+									"zone_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The zone ID of node.",
+									},
 								},
 							},
 						},
@@ -162,6 +175,11 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The creation time of instance.",
+						},
+						"update_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The update time of instance.",
 						},
 						"db_engine": {
 							Type:        schema.TypeString,
@@ -264,6 +282,11 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 										Computed:    true,
 										Description: "The used vCPU.",
 									},
+									"zone_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The zone ID of node.",
+									},
 								},
 							},
 						},
@@ -307,6 +330,11 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 										Type:        schema.TypeFloat,
 										Computed:    true,
 										Description: "The used vCPU.",
+									},
+									"zone_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The zone ID of node.",
 									},
 								},
 							},
@@ -394,6 +422,11 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 													Computed:    true,
 													Description: "The used vCPU.",
 												},
+												"zone_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The zone ID of node.",
+												},
 											},
 										},
 									},
@@ -415,15 +448,9 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The subnet id of instance.",
 						},
-						"update_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The update time of instance.",
-						},
 						"zone_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							ForceNew:    true,
 							Description: "The zone ID of instance.",
 						},
 						"ssl_enable": {
@@ -441,6 +468,12 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The ssl expire time.",
 						},
+						"storage_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The storage type of instance.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

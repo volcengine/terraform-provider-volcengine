@@ -25,7 +25,7 @@ func (s *VolcengineMongoDBInstanceService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineMongoDBInstanceService) ReadInstanceDetails(id string) (instance interface{}, err error) {
+func (s *VolcengineMongoDBInstanceService) readInstanceDetails(id string) (instance interface{}, err error) {
 	var (
 		resp *map[string]interface{}
 	)
@@ -107,7 +107,7 @@ func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]in
 			ins := ele.(map[string]interface{})
 			instanceId, err := ve.ObtainSdkValue("InstanceId", ele)
 			if err != nil {
-				return data, fmt.Errorf("obtain instance id failed")
+				return data, err
 			}
 			// do not get detail when refresh status
 			if withoutDetail.(bool) {
@@ -115,7 +115,7 @@ func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]in
 				continue
 			}
 
-			detail, err := s.ReadInstanceDetails(instanceId.(string))
+			detail, err := s.readInstanceDetails(instanceId.(string))
 			if err != nil {
 				logger.DebugInfo("read instance %s detail failed,err:%v.", instanceId, err)
 				data = append(data, ele)
@@ -129,31 +129,31 @@ func (s *VolcengineMongoDBInstanceService) ReadResources(condition map[string]in
 			}
 			ConfigServers, err := ve.ObtainSdkValue("ConfigServers", detail)
 			if err != nil {
-				return data, fmt.Errorf("obtain ConfigServers failed")
+				return data, err
 			}
 			Nodes, err := ve.ObtainSdkValue("Nodes", detail)
 			if err != nil {
-				return data, fmt.Errorf("obtain Nodes failed")
+				return data, err
 			}
 			Mongos, err := ve.ObtainSdkValue("Mongos", detail)
 			if err != nil {
-				return data, fmt.Errorf("obtain Mongos failed")
+				return data, err
 			}
 			Shards, err := ve.ObtainSdkValue("Shards", detail)
 			if err != nil {
-				return data, fmt.Errorf("obtain Shards failed")
+				return data, err
 			}
 			SSLEnable, err := ve.ObtainSdkValue("SSLEnable", ssl)
 			if err != nil {
-				return data, fmt.Errorf("obtain SSLEnable failed")
+				return data, err
 			}
 			SSLIsValid, err := ve.ObtainSdkValue("SSLIsValid", ssl)
 			if err != nil {
-				return data, fmt.Errorf("obtain SSLIsValid failed")
+				return data, err
 			}
 			SSLExpiredTime, err := ve.ObtainSdkValue("SSLExpiredTime", ssl)
 			if err != nil {
-				return data, fmt.Errorf("obtain SSLExpiredTime failed")
+				return data, err
 			}
 
 			ins["ConfigServers"] = ConfigServers
@@ -195,23 +195,15 @@ func (s *VolcengineMongoDBInstanceService) readResource(resourceData *schema.Res
 		return data, fmt.Errorf("instance %s is not exist", id)
 	}
 
-	// import时设置默认值
-	if _, ok := resourceData.GetOkExists("ssl_action"); !ok {
-		data["SslAction"] = "-"
+	if withoutDetail {
+		return data, nil
 	}
-	if _, ok := resourceData.GetOkExists("restart_instance"); !ok {
-		data["RestartInstance"] = false
-	}
-
 	instanceType, _ := ve.ObtainSdkValue("InstanceType", data)
 	if instanceType.(string) == "ReplicaSet" {
 		n, err := ve.ObtainSdkValue("Nodes", data)
-		if err != nil {
+		if err != nil || n == nil {
 			data["NodeNumber"] = 0
 		} else {
-			if n == nil {
-				return data, err
-			}
 			nodes := n.([]interface{})
 			data["NodeNumber"] = len(nodes)
 			data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
@@ -219,7 +211,7 @@ func (s *VolcengineMongoDBInstanceService) readResource(resourceData *schema.Res
 		}
 	} else if instanceType.(string) == "ShardedCluster" {
 		m, err := ve.ObtainSdkValue("Mongos", data)
-		if err != nil {
+		if err != nil || m == nil {
 			data["MongosNodeNumber"] = 0
 		} else {
 			mongos := m.([]interface{})
@@ -227,15 +219,15 @@ func (s *VolcengineMongoDBInstanceService) readResource(resourceData *schema.Res
 			data["MongosNodeSpec"] = mongos[0].(map[string]interface{})["NodeSpec"]
 		}
 		s, err := ve.ObtainSdkValue("Shards", data)
-		if err != nil {
+		if err != nil || s == nil {
 			data["ShardNumber"] = 0
-			data["StorageSpaceGB"] = 0
+			data["StorageSpaceGb"] = 0
 		} else {
 			shards := s.([]interface{})
 			data["ShardNumber"] = len(shards)
 			if tmp, ok := shards[0].(map[string]interface{})["Nodes"]; ok {
 				nodes := tmp.([]interface{})
-				data["StorageSpaceGB"] = nodes[0].(map[string]interface{})["TotalStorageGB"]
+				data["StorageSpaceGb"] = nodes[0].(map[string]interface{})["TotalStorageGB"]
 				data["NodeSpec"] = nodes[0].(map[string]interface{})["NodeSpec"]
 				data["NodeNumber"] = len(nodes)
 			}
@@ -244,7 +236,7 @@ func (s *VolcengineMongoDBInstanceService) readResource(resourceData *schema.Res
 	return data, err
 }
 
-func (s *VolcengineMongoDBInstanceService) ReadResourceWithoutDetail(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineMongoDBInstanceService) readResourceWithoutDetail(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	return s.readResource(resourceData, id, true)
 }
 
@@ -269,7 +261,7 @@ func (s *VolcengineMongoDBInstanceService) RefreshResourceState(resourceData *sc
 			failStates = append(failStates, "CreateFailed", "Failed")
 
 			logger.DebugInfo("start refresh :%s", id)
-			instance, err = s.ReadResourceWithoutDetail(resourceData, id)
+			instance, err = s.readResourceWithoutDetail(resourceData, id)
 			if err != nil {
 				return nil, "", err
 			}
@@ -284,6 +276,15 @@ func (s *VolcengineMongoDBInstanceService) RefreshResourceState(resourceData *sc
 					return nil, "", fmt.Errorf("instance status error,status %s", status.(string))
 				}
 			}
+
+			// 判断下实例的计费类型
+			if chargeType, ok := resourceData.GetOk("charge_type"); ok && chargeType == "Prepaid" {
+				dataChargeType, err := ve.ObtainSdkValue("ChargeType", instance)
+				if err != nil || dataChargeType != "Prepaid" {
+					return nil, "", err
+				}
+			}
+
 			logger.DebugInfo("refresh status:%v", status)
 			return instance, status.(string), err
 		},
@@ -352,6 +353,10 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 				// },
 				"storage_space_gb": {
 					TargetField: "StorageSpaceGB",
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -522,6 +527,9 @@ func (s *VolcengineMongoDBInstanceService) ModifyResource(resourceData *schema.R
 		callbacks = append(callbacks, callback)
 	}
 
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, callbacks)
+
 	return callbacks
 }
 
@@ -569,6 +577,10 @@ func (s *VolcengineMongoDBInstanceService) DatasourceResources(data *schema.Reso
 			},
 			"db_engine_version": {
 				TargetField: "DBEngineVersion",
+			},
+			"tags": {
+				TargetField: "Tags",
+				ConvertType: ve.ConvertJsonObjectArray,
 			},
 		},
 		IdField:      "InstanceId",
@@ -618,6 +630,58 @@ func (s *VolcengineMongoDBInstanceService) DatasourceResources(data *schema.Reso
 
 func (s *VolcengineMongoDBInstanceService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineMongoDBInstanceService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "RemoveTagsFromResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddTagsToResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag.(map[string]interface{}))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

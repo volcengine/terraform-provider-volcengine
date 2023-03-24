@@ -27,6 +27,18 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+
+			"output_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "File name where to save data source results.",
+			},
+			"total_count": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The total count of mongodb allow lists query.",
+			},
+
 			"allow_lists": {
 				Description: "The collection of mongodb allow list query.",
 				Type:        schema.TypeList,
