@@ -94,7 +94,7 @@ func DataSourceVolcengineMongoDBInstanceParameters() *schema.Resource {
 										Computed:    true,
 										Description: "The description of parameter.",
 									},
-									"parameter_names": {
+									"parameter_name": {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The name of parameter.",

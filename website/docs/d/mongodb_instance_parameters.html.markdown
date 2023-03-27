@@ -35,7 +35,7 @@ In addition to all arguments above, the following attributes are exported:
         * `force_restart` - Does the new parameter value need to restart the instance to take effect after modification.
         * `parameter_default_value` - The default value of parameter.
         * `parameter_description` - The description of parameter.
-        * `parameter_names` - The name of parameter.
+        * `parameter_name` - The name of parameter.
         * `parameter_role` - The node type to which the parameter belongs.
         * `parameter_type` - The type of parameter value.
         * `parameter_value` - The value of parameter.

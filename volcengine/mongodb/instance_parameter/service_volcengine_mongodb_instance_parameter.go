@@ -169,6 +169,9 @@ func (s *VolcengineMongoDBInstanceParameterService) DatasourceResources(data *sc
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
 			},
+			"ParameterNames": {
+				TargetField: "parameter_name",
+			},
 		},
 	}
 }
