@@ -82,19 +82,19 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The mongos node spec of shard cluster,this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Description: "The mongos node spec of shard cluster, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"mongos_node_number": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Default:     2,
-				Description: "The mongos node number of shard cluster,value range is `2~23`,this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Description: "The mongos node number of shard cluster,value range is `2~23`, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"shard_number": {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
-				Description: "The number of shards in shard cluster,value range is `2~32`,this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Description: "The number of shards in shard cluster,value range is `2~32`, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"storage_space_gb": {
 				Type:        schema.TypeInt,
@@ -142,7 +142,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed: true,
 				//Default:      "PostPaid",
 				ValidateFunc: validation.StringInSlice([]string{"Prepaid", "PostPaid"}, false),
-				Description:  "The charge type of instance,valid value contains `Prepaid` or `PostPaid`.",
+				Description:  "The charge type of instance, valid value contains `Prepaid` or `PostPaid`.",
 			},
 			"auto_renew": {
 				Type:             schema.TypeBool,
@@ -157,14 +157,14 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed:         true,
 				ValidateFunc:     validation.StringInSlice([]string{"Year", "Month"}, false),
 				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
-				Description:      "The period unit,valid value contains `Year` or `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
+				Description:      "The period unit,valid value contains `Year` or `Month`, this parameter is required when `ChargeType` is `Prepaid`.",
 			},
 			"period": {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
-				Description:      "The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`,the value range is `1~9` when `PeriodUtil` is `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
+				Description:      "The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`, the value range is `1~9` when `PeriodUtil` is `Month`, this parameter is required when `ChargeType` is `Prepaid`.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,

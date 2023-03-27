@@ -17,9 +17,9 @@ type VolcengineMongodbAllowListAssociateService struct {
 }
 
 const (
-	ActionAssociateAllowList       = "AssociateAllowList"
-	ActionDisassociateAllowList    = "DisassociateAllowList"
-	ActionDescribeDBInstanceDetail = "DescribeDBInstanceDetail"
+	ActionAssociateAllowList      = "AssociateAllowList"
+	ActionDisassociateAllowList   = "DisassociateAllowList"
+	ActionDescribeAllowListDetail = "DescribeAllowListDetail"
 )
 
 func NewMongodbAllowListAssociateService(c *ve.SdkClient) *VolcengineMongodbAllowListAssociateService {
@@ -36,82 +36,77 @@ func (s *VolcengineMongodbAllowListAssociateService) ReadResources(m map[string]
 	return nil, nil
 }
 
-func (s *VolcengineMongodbAllowListAssociateService) ReadResource(resourceData *schema.ResourceData, tmpId string) (data map[string]interface{}, err error) {
+func (s *VolcengineMongodbAllowListAssociateService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		ids        []string
-		instanceId string
-		req        map[string]interface{}
-		output     *map[string]interface{}
-		results    interface{}
-		ok         bool
+		targetInstanceId string
+		allowListId      string
+		output           *map[string]interface{}
+		resultsMap       = make(map[string]interface{})
+		instanceMap      = make(map[string]interface{})
+		results          interface{}
+		ok               bool
 	)
-	if tmpId == "" {
-		tmpId = s.ReadResourceId(resourceData.Id())
+	if id == "" {
+		id = s.ReadResourceId(resourceData.Id())
 	}
-	ids = strings.Split(tmpId, ":")
+	ids := strings.Split(id, ":")
 	if len(ids) != 2 {
 		return data, fmt.Errorf("invalid id")
 	}
-	instanceId = ids[0]
-	req = map[string]interface{}{
-		"InstanceId": instanceId,
+	targetInstanceId = ids[0]
+	allowListId = ids[1]
+	req := map[string]interface{}{
+		"AllowListId": allowListId,
 	}
-
-	logger.Debug(logger.ReqFormat, ActionDescribeDBInstanceDetail, req)
-	output, err = s.Client.UniversalClient.DoCall(getUniversalInfo(ActionDescribeDBInstanceDetail), &req)
-	logger.Debug(logger.RespFormat, ActionDescribeDBInstanceDetail, req, *output)
-
+	logger.Debug(logger.ReqFormat, ActionDescribeAllowListDetail, req)
+	output, err = s.Client.UniversalClient.DoCall(getUniversalInfo(ActionDescribeAllowListDetail), &req)
 	if err != nil {
 		return data, err
 	}
-	results, err = ve.ObtainSdkValue("Result.DBInstance", *output)
+	logger.Debug(logger.RespFormat, ActionDescribeAllowListDetail, req, *output)
+	results, err = ve.ObtainSdkValue("Result", *output)
 	if err != nil {
 		return data, err
 	}
-	if data, ok = results.(map[string]interface{}); !ok {
-		return data, errors.New("value is not map")
+	if resultsMap, ok = results.(map[string]interface{}); !ok {
+		return resultsMap, errors.New("Value is not map ")
+	}
+	if len(resultsMap) == 0 {
+		return resultsMap, fmt.Errorf("MongoDB allowlist %s not exist ", allowListId)
+	}
+	instances := resultsMap["AssociatedInstances"].([]interface{})
+	for _, instance := range instances {
+		if instanceMap, ok = instance.(map[string]interface{}); !ok {
+			return data, errors.New("instance is not map ")
+		}
+		if instanceMap["InstanceId"].(string) == targetInstanceId {
+			data = resultsMap
+		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("instance(%v) is not existed", instanceId)
+		return data, fmt.Errorf("MongoDB allowlist associate %s not associate ", id)
 	}
-	return data, nil
+	return data, err
 }
 
 func (s *VolcengineMongodbAllowListAssociateService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
-		Delay:      time.Second,
+		Delay:      1 * time.Second,
 		Pending:    []string{},
 		Target:     target,
 		Timeout:    timeout,
-		MinTimeout: time.Second,
+		MinTimeout: 1 * time.Second,
 
 		Refresh: func() (result interface{}, state string, err error) {
-			logger.DebugInfo("Refresh status", 0)
-			var failStatus []string
-			failStatus = append(failStatus, "CreateFailed")
-
+			logger.DebugInfo("Refreshing")
 			output, err := s.ReadResource(resourceData, id)
 			if err != nil {
-				logger.DebugInfo("ActionDescribeDBInstanceDetail failed", 0)
-				return nil, "", err
-			}
-			var status interface{}
-			status, err = ve.ObtainSdkValue("InstanceStatus", output)
-			if err != nil {
-				logger.DebugInfo("ObtainSdkValue InstanceStatus failed", 0)
-				return nil, "", err
-			}
-			statusStr, ok := status.(string)
-			if !ok {
-				logger.DebugInfo("Type of InstanceStatus is not string", 0)
-				return nil, "", fmt.Errorf("type of status if not string")
-			}
-			for _, v := range failStatus {
-				if v == statusStr {
-					return nil, "", fmt.Errorf("instance status error,status %s", status.(string))
+				if strings.Contains(err.Error(), "not associate") {
+					return output, "UnAttached", nil
 				}
+				return nil, "", err
 			}
-			return output, statusStr, nil
+			return output, "Attached", nil
 		},
 	}
 }
@@ -169,7 +164,7 @@ func (s *VolcengineMongodbAllowListAssociateService) CreateResource(resourceData
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
+				Target:  []string{"Attached"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
 		},
@@ -201,7 +196,7 @@ func (s *VolcengineMongodbAllowListAssociateService) RemoveResource(resourceData
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
+				Target:  []string{"UnAttached"},
 				Timeout: resourceData.Timeout(schema.TimeoutDelete),
 			},
 		},

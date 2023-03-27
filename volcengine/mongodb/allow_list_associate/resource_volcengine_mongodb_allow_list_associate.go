@@ -2,6 +2,7 @@ package allow_list_associate
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -10,9 +11,9 @@ import (
 /*
 
 Import
-mongosdb allow list associate can be imported using the instanceId:allowListId, e.g.
+mongodb allow list associate can be imported using the instanceId:allowListId, e.g.
 ```
-$ terraform import volcengine_mongosdb_allow_list_associate.default mongo-replica-e405f8e2****:acl-d1fd76693bd54e658912e7337d5b****
+$ terraform import volcengine_mongodb_allow_list_associate.default mongo-replica-e405f8e2****:acl-d1fd76693bd54e658912e7337d5b****
 ```
 
 */
@@ -24,6 +25,10 @@ func ResourceVolcengineMongodbAllowListAssociate() *schema.Resource {
 		Delete: resourceVolcengineMongodbAllowListAssociateDelete,
 		Importer: &schema.ResourceImporter{
 			State: mongodbAllowListAssociateImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
@@ -47,7 +52,7 @@ func resourceVolcengineMongodbAllowListAssociateRead(d *schema.ResourceData, met
 	service := NewMongodbAllowListAssociateService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongodbAllowListAssociate())
 	if err != nil {
-		return fmt.Errorf("error on reading association %v, %v", d.Id(), err)
+		return fmt.Errorf("error on reading mongodb allow list association %v, %v", d.Id(), err)
 	}
 	return err
 }

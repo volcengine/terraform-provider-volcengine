@@ -80,24 +80,6 @@ func (s *VolcengineMongoDBAllowListService) ReadResources(condition map[string]i
 		allowListIdsMap = make(map[string]bool)
 		exists          bool
 	)
-
-	//if allowListIds, ok := condition["AllowListIds"]; ok {
-	//	for _, allowListId := range allowListIds.([]interface{}) {
-	//		detail, err := s.readAllowListDetails(allowListId.(string))
-	//		if err != nil {
-	//			logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
-	//			continue
-	//		}
-	//		data = append(data, detail)
-	//	}
-	//	//detail, err := s.readAllowListDetails(allowListId.(string))
-	//	//if err != nil {
-	//	//	logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
-	//	//	return nil, err
-	//	//}
-	//	return data, nil
-	//}
-
 	action := "DescribeAllowLists"
 	logger.Debug(logger.ReqFormat, action, condition)
 	if condition == nil {
@@ -165,6 +147,7 @@ func (s *VolcengineMongoDBAllowListService) ReadResource(resourceData *schema.Re
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
+		"RegionId":     s.Client.Region,
 		"AllowListIds": []interface{}{id},
 	}
 	results, err = s.ReadResources(req)
@@ -218,11 +201,28 @@ func (s *VolcengineMongoDBAllowListService) ModifyResource(resourceData *schema.
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyAllowList",
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"allow_list_desc": {
+					TargetField: "AllowListDesc",
+				},
+				"allow_list": {
+					Ignore: true,
+				},
+				"modify_mode": {
+					Ignore: true,
+				},
+				"allow_list_id": {
+					Ignore: true,
+				},
+				"allow_list_name": {
+					Ignore: true,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["AllowListId"] = d.Id()
 				(*call.SdkParam)["AllowListName"] = resourceData.Get("allow_list_name")
-
 				if resourceData.HasChange("allow_list") {
 					//describe allow list, get instance num
 					var applyInstanceNum int
@@ -235,12 +235,17 @@ func (s *VolcengineMongoDBAllowListService) ModifyResource(resourceData *schema.
 					} else {
 						applyInstanceNum = len(associatedInstances.([]interface{}))
 					}
-
-					//num, ok := resourceData.GetOkExists("apply_instance_num")
-					//if !ok {
-					//	return false, fmt.Errorf("apply_instance_num is required if you need to modify allow_list")
-					//}
 					(*call.SdkParam)["ApplyInstanceNum"] = applyInstanceNum
+					allowList, ok := resourceData.GetOk("allow_list")
+					if !ok || len(allowList.(string)) == 0 {
+						// 对于置空allow list做特殊处理
+						old, _ := resourceData.GetChange("allow_list")
+						(*call.SdkParam)["AllowList"] = old.(string)
+						(*call.SdkParam)["ModifyMode"] = "Delete"
+						return true, nil
+					}
+					(*call.SdkParam)["AllowList"] = resourceData.Get("allow_list")
+					(*call.SdkParam)["ModifyMode"] = "Cover"
 				}
 				return true, nil
 			},
