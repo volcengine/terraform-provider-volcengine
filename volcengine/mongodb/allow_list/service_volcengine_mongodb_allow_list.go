@@ -206,18 +206,7 @@ func (s *VolcengineMongoDBAllowListService) ModifyResource(resourceData *schema.
 			Convert: map[string]ve.RequestConvert{
 				"allow_list_desc": {
 					TargetField: "AllowListDesc",
-				},
-				"allow_list": {
-					Ignore: true,
-				},
-				"modify_mode": {
-					Ignore: true,
-				},
-				"allow_list_id": {
-					Ignore: true,
-				},
-				"allow_list_name": {
-					Ignore: true,
+					ForceGet:    true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {

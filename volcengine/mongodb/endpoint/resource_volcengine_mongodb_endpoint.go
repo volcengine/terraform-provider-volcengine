@@ -39,6 +39,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"object_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The object ID corresponding to the endpoint.",
 			},
@@ -63,6 +64,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"eip_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "A list of EIP IDs that need to be bound when applying for endpoint.",
 				Elem: &schema.Schema{

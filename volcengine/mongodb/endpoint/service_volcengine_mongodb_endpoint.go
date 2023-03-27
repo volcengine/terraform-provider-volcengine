@@ -65,10 +65,11 @@ func (s *VolcengineMongoDBEndpointService) ReadResources(condition map[string]in
 
 func (s *VolcengineMongoDBEndpointService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		instanceId  = ""
-		endpointId  = ""
-		objectId    = ""
-		networkType = ""
+		instanceId   = ""
+		endpointId   = ""
+		objectId     = ""
+		tempObjectId = ""
+		networkType  = ""
 	)
 
 	if id == "" {
@@ -103,7 +104,7 @@ func (s *VolcengineMongoDBEndpointService) ReadResource(resourceData *schema.Res
 		}
 		eId, err := ve.ObtainSdkValue("EndpointId", dbEndpoint)
 		if err != nil {
-			return nil, fmt.Errorf("query mongodb endpoint not contain EndpointId")
+			return nil, err
 		}
 		logger.DebugInfo("---- endpointId:%s,eid:%s", endpointId, eId)
 		if endpointId != "" { // check by EndpointId
@@ -115,15 +116,17 @@ func (s *VolcengineMongoDBEndpointService) ReadResource(resourceData *schema.Res
 		} else { // check by NetworkType and ObjectId
 			nType, err := ve.ObtainSdkValue("NetworkType", dbEndpoint)
 			if err != nil {
-				return data, fmt.Errorf("query mongodb endpoint not contain NetworkType")
+				return data, err
 			}
 			oId, err := ve.ObtainSdkValue("ObjectId", dbEndpoint)
 			if err != nil {
-				return data, fmt.Errorf("query mongodb endpoint not contain ObjectId")
+				return data, err
 			}
-			logger.DebugInfo("network type:%s -- %s,object id:%s -- %s", networkType, nType.(string), objectId, oId.(string))
+			if oId != nil {
+				tempObjectId = oId.(string)
+			}
 			if networkType == nType.(string) { // Private or Public
-				if objectId == "" || objectId == oId.(string) { //endpointType is ReplicaSet if objectId is empty
+				if objectId == "" || objectId == tempObjectId { //endpointType is ReplicaSet if objectId is empty
 					logger.DebugInfo("get mongodb endpoint by  network type and object id %s", networkType, objectId)
 					targetEndpoint = dbEndpoint
 					break
@@ -140,11 +143,20 @@ func (s *VolcengineMongoDBEndpointService) ReadResource(resourceData *schema.Res
 	eipIds := make([]string, 0)
 	addresses, err := ve.ObtainSdkValue("DBAddresses", targetEndpoint)
 	if err != nil {
-		return data, fmt.Errorf("query mongodb endpoint not contain DBAddresses")
+		return data, err
+	}
+	endpointType, err := ve.ObtainSdkValue("EndpointType", targetEndpoint)
+	if err != nil {
+		return data, err
+	}
+	nType, err := ve.ObtainSdkValue("NetworkType", targetEndpoint)
+	if err != nil {
+		return data, err
 	}
 	for _, address := range addresses.([]interface{}) {
 		logger.DebugInfo("address %v :", address)
-		if nodeId, ok := address.(map[string]interface{})["NodeId"]; ok && nodeId.(string) != "" {
+		if nodeId, ok := address.(map[string]interface{})["NodeId"]; ok && nodeId.(string) != "" &&
+			endpointType == "Mongos" && nType == "Public" {
 			nodeIds = append(nodeIds, nodeId.(string))
 		}
 		if eipId, ok := address.(map[string]interface{})["EipId"]; ok && eipId.(string) != "" {
@@ -163,7 +175,6 @@ func (s *VolcengineMongoDBEndpointService) RefreshResourceState(resourceData *sc
 
 func (s *VolcengineMongoDBEndpointService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-
 		return instance, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -195,6 +206,14 @@ func (s *VolcengineMongoDBEndpointService) CreateResource(resourceData *schema.R
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				// 在 LockId 执行后再进行已有 Endpoint 信息的查询
+				endpoint, err := s.ReadResource(d, fmt.Sprintf("%s:", instanceId))
+				if err != nil && !strings.Contains(err.Error(), "mongodb endpoint not found") {
+					return nil, err
+				} else if len(endpoint) != 0 {
+					return nil, fmt.Errorf("the instance already contains this endpoint, and duplicate creation is not allowed")
+				}
+
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -271,14 +290,6 @@ func (s *VolcengineMongoDBEndpointService) RemoveResource(resourceData *schema.R
 
 func (s *VolcengineMongoDBEndpointService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		RequestConverts: map[string]ve.RequestConvert{
-			"db_engine": {
-				TargetField: "DBEngine",
-			},
-			"db_engine_version": {
-				TargetField: "DBEngineVersion",
-			},
-		},
 		IdField:      "EndpointId",
 		CollectField: "endpoints",
 		ContentType:  ve.ContentTypeJson,
