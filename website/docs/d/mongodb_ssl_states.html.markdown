@@ -11,12 +11,13 @@ Use this data source to query detailed information of mongodb ssl states
 ## Example Usage
 ```hcl
 data "volcengine_mongodb_ssl_states" "foo" {
-  instance_id = "mongo-shard-xxx"
+  instance_id = "mongo-replica-f16e9298b121" // 必填
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `instance_id` - (Optional) The mongodb instance ID to query.
+* `instance_id` - (Required) The mongodb instance ID to query.
+* `output_file` - (Optional) File name where to save data source results.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -25,5 +26,6 @@ In addition to all arguments above, the following attributes are exported:
     * `is_valid` - Whetehr SSL is valid.
     * `ssl_enable` - Whether SSL is enabled.
     * `ssl_expired_time` - The expire time of SSL.
+* `total_count` - The total count of mongodb ssl state query.
 
 
