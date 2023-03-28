@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineIamPolicyService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewIamPolicyService(c *ve.SdkClient) *VolcengineIamPolicyService {
 	return &VolcengineIamPolicyService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

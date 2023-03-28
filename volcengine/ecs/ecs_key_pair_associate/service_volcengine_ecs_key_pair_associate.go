@@ -13,14 +13,12 @@ import (
 )
 
 type VolcengineEcsKeyPairAssociateService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewEcsKeyPairAssociateService(c *ve.SdkClient) *VolcengineEcsKeyPairAssociateService {
 	return &VolcengineEcsKeyPairAssociateService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

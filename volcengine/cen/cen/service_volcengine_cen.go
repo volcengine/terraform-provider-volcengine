@@ -13,14 +13,12 @@ import (
 )
 
 type VolcengineCenService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewCenService(c *ve.SdkClient) *VolcengineCenService {
 	return &VolcengineCenService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

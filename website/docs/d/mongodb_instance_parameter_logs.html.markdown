@@ -11,17 +11,17 @@ Use this data source to query detailed information of mongodb instance parameter
 ## Example Usage
 ```hcl
 data "volcengine_mongodb_instance_parameter_logs" "foo" {
-  instance_id = "mongo-replica-xxx"
-  start_time  = "2022-11-14 00:00Z"
-  end_time    = "2022-11-14 18:15Z"
+  instance_id = "mongo-replica-f16e9298b121" // 必填
+  start_time  = "2022-11-14 00:00Z"          // 必填
+  end_time    = "2023-11-14 18:15Z"          // 必填
 }
 ```
 ## Argument Reference
 The following arguments are supported:
+* `end_time` - (Required) The end time to query.
 * `instance_id` - (Required) The instance ID to query.
-* `end_time` - (Optional) The end time to query.
+* `start_time` - (Required) The start time to query.
 * `output_file` - (Optional) File name where to save data source results.
-* `start_time` - (Optional) The start time to query.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

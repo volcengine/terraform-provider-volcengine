@@ -63,7 +63,7 @@ func ResourceVolcengineServerGroup() *schema.Resource {
 
 func resourceVolcengineServerGroupCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupService := NewServerGroupService(meta.(*ve.SdkClient))
-	err = serverGroupService.Dispatcher.Create(serverGroupService, d, ResourceVolcengineServerGroup())
+	err = ve.DefaultDispatcher().Create(serverGroupService, d, ResourceVolcengineServerGroup())
 	if err != nil {
 		return fmt.Errorf("error on creating serverGroup  %q, %w", d.Id(), err)
 	}
@@ -72,7 +72,7 @@ func resourceVolcengineServerGroupCreate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineServerGroupRead(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupService := NewServerGroupService(meta.(*ve.SdkClient))
-	err = serverGroupService.Dispatcher.Read(serverGroupService, d, ResourceVolcengineServerGroup())
+	err = ve.DefaultDispatcher().Read(serverGroupService, d, ResourceVolcengineServerGroup())
 	if err != nil {
 		return fmt.Errorf("error on reading serverGroup %q, %w", d.Id(), err)
 	}
@@ -81,7 +81,7 @@ func resourceVolcengineServerGroupRead(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineServerGroupUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupService := NewServerGroupService(meta.(*ve.SdkClient))
-	err = serverGroupService.Dispatcher.Update(serverGroupService, d, ResourceVolcengineServerGroup())
+	err = ve.DefaultDispatcher().Update(serverGroupService, d, ResourceVolcengineServerGroup())
 	if err != nil {
 		return fmt.Errorf("error on updating serverGroup  %q, %w", d.Id(), err)
 	}
@@ -90,7 +90,7 @@ func resourceVolcengineServerGroupUpdate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineServerGroupDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupService := NewServerGroupService(meta.(*ve.SdkClient))
-	err = serverGroupService.Dispatcher.Delete(serverGroupService, d, ResourceVolcengineServerGroup())
+	err = ve.DefaultDispatcher().Delete(serverGroupService, d, ResourceVolcengineServerGroup())
 	if err != nil {
 		return fmt.Errorf("error on deleting serverGroup %q, %w", d.Id(), err)
 	}

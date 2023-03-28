@@ -438,5 +438,5 @@ var networkDataSource = &schema.Resource{
 
 func dataSourceVolcengineInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewInstanceService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineInstances())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineInstances())
 }

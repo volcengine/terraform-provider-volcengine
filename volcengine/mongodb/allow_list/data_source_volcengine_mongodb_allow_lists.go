@@ -27,6 +27,18 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+
+			"output_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "File name where to save data source results.",
+			},
+			"total_count": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The total count of mongodb allow lists query.",
+			},
+
 			"allow_lists": {
 				Description: "The collection of mongodb allow list query.",
 				Type:        schema.TypeList,
@@ -101,5 +113,5 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 
 func dataSourceVolcengineMongoDBAllowListsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBAllowLists())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBAllowLists())
 }

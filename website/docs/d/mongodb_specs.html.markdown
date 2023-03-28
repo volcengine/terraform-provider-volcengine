@@ -11,17 +11,17 @@ Use this data source to query detailed information of mongodb specs
 ## Example Usage
 ```hcl
 data "volcengine_mongodb_specs" "foo" {
-  region_id = "cn-xxx"
+  #region_id="cn-xxx" //选填
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `region_id` - (Required) The region ID to query.
 * `output_file` - (Optional) File name where to save data source results.
+* `region_id` - (Optional) The region ID to query.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
-* `specs` - The collection of mongos spec query.
+* `specs` - A list of supported node specification information for MongoDB instances.
     * `mongos_node_specs` - The collection of mongos node specs.
         * `cpu_num` - The max cpu cores.
         * `max_conn` - The max connections.

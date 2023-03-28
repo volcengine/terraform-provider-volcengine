@@ -103,7 +103,7 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 
 func resourceVolcengineCenBandwidthPackageCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenBandwidthPackageService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCenBandwidthPackage())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCenBandwidthPackage())
 	if err != nil {
 		return fmt.Errorf("error on creating cen bandwidth package %q, %s", d.Id(), err)
 	}
@@ -112,7 +112,7 @@ func resourceVolcengineCenBandwidthPackageCreate(d *schema.ResourceData, meta in
 
 func resourceVolcengineCenBandwidthPackageRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenBandwidthPackageService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCenBandwidthPackage())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCenBandwidthPackage())
 	if err != nil {
 		return fmt.Errorf("error on reading cen bandwidth package %q, %s", d.Id(), err)
 	}
@@ -121,7 +121,7 @@ func resourceVolcengineCenBandwidthPackageRead(d *schema.ResourceData, meta inte
 
 func resourceVolcengineCenBandwidthPackageUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenBandwidthPackageService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCenBandwidthPackage())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCenBandwidthPackage())
 	if err != nil {
 		return fmt.Errorf("error on updating cen bandwidth package %q, %s", d.Id(), err)
 	}
@@ -130,7 +130,7 @@ func resourceVolcengineCenBandwidthPackageUpdate(d *schema.ResourceData, meta in
 
 func resourceVolcengineCenBandwidthPackageDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenBandwidthPackageService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCenBandwidthPackage())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCenBandwidthPackage())
 	if err != nil {
 		return fmt.Errorf("error on deleting cen bandwidth package %q, %s", d.Id(), err)
 	}

@@ -95,7 +95,7 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 
 func resourceVolcengineNatGatewayCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	natGatewayService := NewNatGatewayService(meta.(*ve.SdkClient))
-	err = natGatewayService.Dispatcher.Create(natGatewayService, d, ResourceVolcengineNatGateway())
+	err = ve.DefaultDispatcher().Create(natGatewayService, d, ResourceVolcengineNatGateway())
 	if err != nil {
 		return fmt.Errorf("error on creating nat gateway  %q, %w", d.Id(), err)
 	}
@@ -104,7 +104,7 @@ func resourceVolcengineNatGatewayCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineNatGatewayRead(d *schema.ResourceData, meta interface{}) (err error) {
 	natGatewayService := NewNatGatewayService(meta.(*ve.SdkClient))
-	err = natGatewayService.Dispatcher.Read(natGatewayService, d, ResourceVolcengineNatGateway())
+	err = ve.DefaultDispatcher().Read(natGatewayService, d, ResourceVolcengineNatGateway())
 	if err != nil {
 		return fmt.Errorf("error on reading nat gateway %q, %w", d.Id(), err)
 	}
@@ -113,7 +113,7 @@ func resourceVolcengineNatGatewayRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineNatGatewayUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	natGatewayService := NewNatGatewayService(meta.(*ve.SdkClient))
-	err = natGatewayService.Dispatcher.Update(natGatewayService, d, ResourceVolcengineNatGateway())
+	err = ve.DefaultDispatcher().Update(natGatewayService, d, ResourceVolcengineNatGateway())
 	if err != nil {
 		return fmt.Errorf("error on updating nat gateway  %q, %w", d.Id(), err)
 	}
@@ -122,7 +122,7 @@ func resourceVolcengineNatGatewayUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineNatGatewayDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	natGatewayService := NewNatGatewayService(meta.(*ve.SdkClient))
-	err = natGatewayService.Dispatcher.Delete(natGatewayService, d, ResourceVolcengineNatGateway())
+	err = ve.DefaultDispatcher().Delete(natGatewayService, d, ResourceVolcengineNatGateway())
 	if err != nil {
 		return fmt.Errorf("error on deleting nat gateway %q, %w", d.Id(), err)
 	}

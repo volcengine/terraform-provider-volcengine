@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineCertificateService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewCertificateService(c *ve.SdkClient) *VolcengineCertificateService {
 	return &VolcengineCertificateService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

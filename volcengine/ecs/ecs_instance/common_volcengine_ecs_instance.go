@@ -2,8 +2,10 @@ package ecs_instance
 
 import (
 	"encoding/base64"
+	"errors"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
 func EcsInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
@@ -54,4 +56,25 @@ func UserDateImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool
 
 	}
 	return false
+}
+
+func RemoveSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }

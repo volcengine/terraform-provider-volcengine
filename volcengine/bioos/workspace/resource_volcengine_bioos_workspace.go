@@ -64,7 +64,7 @@ func ResourceVolcengineBioosWorkspace() *schema.Resource {
 
 func resourceVolcengineBioosWorkspaceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewVolcengineBioosWorkspaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineBioosWorkspace())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineBioosWorkspace())
 	if err != nil {
 		return fmt.Errorf("error on creating volcengine bioos Workspace: %q, %w", d.Id(), err)
 	}
@@ -73,7 +73,7 @@ func resourceVolcengineBioosWorkspaceCreate(d *schema.ResourceData, meta interfa
 
 func resourceVolcengineBioosWorkspaceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewVolcengineBioosWorkspaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineBioosWorkspace())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineBioosWorkspace())
 	if err != nil {
 		return fmt.Errorf("error on reading volcengine bioos Workspace: %q, %w", d.Id(), err)
 	}
@@ -82,7 +82,7 @@ func resourceVolcengineBioosWorkspaceRead(d *schema.ResourceData, meta interface
 
 func resourceVolcengineBioosWorkspaceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewVolcengineBioosWorkspaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineBioosWorkspace())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineBioosWorkspace())
 	if err != nil {
 		return fmt.Errorf("error on updating volcengine bioos Workspace: %q, %w", d.Id(), err)
 	}
@@ -91,7 +91,7 @@ func resourceVolcengineBioosWorkspaceUpdate(d *schema.ResourceData, meta interfa
 
 func resourceVolcengineBioosWorkspaceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewVolcengineBioosWorkspaceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineBioosWorkspace())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineBioosWorkspace())
 	if err != nil {
 		return fmt.Errorf("error on deleting volcengine bioos Workspace: %q, %w", d.Id(), err)
 	}

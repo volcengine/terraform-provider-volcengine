@@ -87,7 +87,7 @@ func ResourceVolcengineVpc() *schema.Resource {
 
 func resourceVolcengineVpcCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	vpcService := NewVpcService(meta.(*ve.SdkClient))
-	err = vpcService.Dispatcher.Create(vpcService, d, ResourceVolcengineVpc())
+	err = ve.DefaultDispatcher().Create(vpcService, d, ResourceVolcengineVpc())
 	if err != nil {
 		return fmt.Errorf("error on creating vpc  %q, %s", d.Id(), err)
 	}
@@ -96,7 +96,7 @@ func resourceVolcengineVpcCreate(d *schema.ResourceData, meta interface{}) (err 
 
 func resourceVolcengineVpcRead(d *schema.ResourceData, meta interface{}) (err error) {
 	vpcService := NewVpcService(meta.(*ve.SdkClient))
-	err = vpcService.Dispatcher.Read(vpcService, d, ResourceVolcengineVpc())
+	err = ve.DefaultDispatcher().Read(vpcService, d, ResourceVolcengineVpc())
 	if err != nil {
 		return fmt.Errorf("error on reading vpc %q, %s", d.Id(), err)
 	}
@@ -105,7 +105,7 @@ func resourceVolcengineVpcRead(d *schema.ResourceData, meta interface{}) (err er
 
 func resourceVolcengineVpcUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	vpcService := NewVpcService(meta.(*ve.SdkClient))
-	err = vpcService.Dispatcher.Update(vpcService, d, ResourceVolcengineVpc())
+	err = ve.DefaultDispatcher().Update(vpcService, d, ResourceVolcengineVpc())
 	if err != nil {
 		return fmt.Errorf("error on updating vpc  %q, %s", d.Id(), err)
 	}
@@ -114,7 +114,7 @@ func resourceVolcengineVpcUpdate(d *schema.ResourceData, meta interface{}) (err 
 
 func resourceVolcengineVpcDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	vpcService := NewVpcService(meta.(*ve.SdkClient))
-	err = vpcService.Dispatcher.Delete(vpcService, d, ResourceVolcengineVpc())
+	err = ve.DefaultDispatcher().Delete(vpcService, d, ResourceVolcengineVpc())
 	if err != nil {
 		return fmt.Errorf("error on deleting vpc %q, %s", d.Id(), err)
 	}

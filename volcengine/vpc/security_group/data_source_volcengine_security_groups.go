@@ -115,5 +115,5 @@ func DataSourceVolcengineSecurityGroups() *schema.Resource {
 
 func dataSourceVolcengineSecurityGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	securityGroupService := NewSecurityGroupService(meta.(*ve.SdkClient))
-	return securityGroupService.Dispatcher.Data(securityGroupService, d, DataSourceVolcengineSecurityGroups())
+	return ve.DefaultDispatcher().Data(securityGroupService, d, DataSourceVolcengineSecurityGroups())
 }

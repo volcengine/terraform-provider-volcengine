@@ -87,7 +87,7 @@ func ResourceVolcengineCrTag() *schema.Resource {
 
 func resourceVolcengineCrTagCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrTagService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCrTag())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrTag())
 	if err != nil {
 		return fmt.Errorf("Error on creating cr tag %q,%s", d.Id(), err)
 	}
@@ -96,7 +96,7 @@ func resourceVolcengineCrTagCreate(d *schema.ResourceData, meta interface{}) (er
 
 func resourceVolcengineCrTagUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrTagService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCrTag())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrTag())
 	if err != nil {
 		return fmt.Errorf("error on updating cr tag  %q, %s", d.Id(), err)
 	}
@@ -105,7 +105,7 @@ func resourceVolcengineCrTagUpdate(d *schema.ResourceData, meta interface{}) (er
 
 func resourceVolcengineCrTagDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrTagService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCrTag())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCrTag())
 	if err != nil {
 		return fmt.Errorf("error on deleting cr tag %q, %s", d.Id(), err)
 	}
@@ -115,7 +115,7 @@ func resourceVolcengineCrTagDelete(d *schema.ResourceData, meta interface{}) (er
 func resourceVolcengineCrTagRead(d *schema.ResourceData, meta interface{}) (err error) {
 	logger.DebugInfo("++++++ resourceVolcengineCrTagRead", d)
 	service := NewCrTagService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCrTag())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrTag())
 	if err != nil {
 		return fmt.Errorf("Error on reading cr tag %q,%s", d.Id(), err)
 	}

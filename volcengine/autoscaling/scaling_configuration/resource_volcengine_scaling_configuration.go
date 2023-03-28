@@ -161,7 +161,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 
 func resourceVolcengineScalingConfigurationCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingConfigurationService := NewScalingConfigurationService(meta.(*ve.SdkClient))
-	err = scalingConfigurationService.Dispatcher.Create(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
+	err = ve.DefaultDispatcher().Create(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
 	if err != nil {
 		return fmt.Errorf("error on creating ScalingConfiguration %q, %s", d.Id(), err)
 	}
@@ -170,7 +170,7 @@ func resourceVolcengineScalingConfigurationCreate(d *schema.ResourceData, meta i
 
 func resourceVolcengineScalingConfigurationRead(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingConfigurationService := NewScalingConfigurationService(meta.(*ve.SdkClient))
-	err = scalingConfigurationService.Dispatcher.Read(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
+	err = ve.DefaultDispatcher().Read(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
 	if err != nil {
 		return fmt.Errorf("error on reading ScalingConfiguration %q, %s", d.Id(), err)
 	}
@@ -179,7 +179,7 @@ func resourceVolcengineScalingConfigurationRead(d *schema.ResourceData, meta int
 
 func resourceVolcengineScalingConfigurationUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingConfigurationService := NewScalingConfigurationService(meta.(*ve.SdkClient))
-	err = scalingConfigurationService.Dispatcher.Update(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
+	err = ve.DefaultDispatcher().Update(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
 	if err != nil {
 		return fmt.Errorf("error on updating ScalingConfiguration %q, %s", d.Id(), err)
 	}
@@ -188,7 +188,7 @@ func resourceVolcengineScalingConfigurationUpdate(d *schema.ResourceData, meta i
 
 func resourceVolcengineScalingConfigurationDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingConfigurationService := NewScalingConfigurationService(meta.(*ve.SdkClient))
-	err = scalingConfigurationService.Dispatcher.Delete(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
+	err = ve.DefaultDispatcher().Delete(scalingConfigurationService, d, ResourceVolcengineScalingConfiguration())
 	if err != nil {
 		return fmt.Errorf("error on deleting ScalingConfiguration %q, %s", d.Id(), err)
 	}

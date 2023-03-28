@@ -9,7 +9,7 @@ func DataSourceVolcengineCrAuthorizationTokens() *schema.Resource {
 	return &schema.Resource{
 		Read: func(data *schema.ResourceData, meta interface{}) error {
 			service := NewCrAuthorizationTokenService(meta.(*ve.SdkClient))
-			return service.Dispatcher.Data(service, data, DataSourceVolcengineCrAuthorizationTokens())
+			return ve.DefaultDispatcher().Data(service, data, DataSourceVolcengineCrAuthorizationTokens())
 		},
 		Schema: map[string]*schema.Schema{
 			"registry": {

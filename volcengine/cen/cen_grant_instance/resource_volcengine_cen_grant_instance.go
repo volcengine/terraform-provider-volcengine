@@ -70,7 +70,7 @@ func ResourceVolcengineCenGrantInstance() *schema.Resource {
 
 func resourceVolcengineCenGrantInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	grantInstanceService := NewCenGrantInstanceService(meta.(*ve.SdkClient))
-	err = grantInstanceService.Dispatcher.Create(grantInstanceService, d, ResourceVolcengineCenGrantInstance())
+	err = ve.DefaultDispatcher().Create(grantInstanceService, d, ResourceVolcengineCenGrantInstance())
 	if err != nil {
 		return fmt.Errorf("error on creating cen grant instance  %q, %s", d.Id(), err)
 	}
@@ -79,7 +79,7 @@ func resourceVolcengineCenGrantInstanceCreate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineCenGrantInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	grantInstanceService := NewCenGrantInstanceService(meta.(*ve.SdkClient))
-	err = grantInstanceService.Dispatcher.Read(grantInstanceService, d, ResourceVolcengineCenGrantInstance())
+	err = ve.DefaultDispatcher().Read(grantInstanceService, d, ResourceVolcengineCenGrantInstance())
 	if err != nil {
 		return fmt.Errorf("error on reading cen grant instance %q, %s", d.Id(), err)
 	}
@@ -88,7 +88,7 @@ func resourceVolcengineCenGrantInstanceRead(d *schema.ResourceData, meta interfa
 
 func resourceVolcengineCenGrantInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	grantInstanceService := NewCenGrantInstanceService(meta.(*ve.SdkClient))
-	err = grantInstanceService.Dispatcher.Delete(grantInstanceService, d, ResourceVolcengineCenGrantInstance())
+	err = ve.DefaultDispatcher().Delete(grantInstanceService, d, ResourceVolcengineCenGrantInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting cen grant instance %q, %s", d.Id(), err)
 	}

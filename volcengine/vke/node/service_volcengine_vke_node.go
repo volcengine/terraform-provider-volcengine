@@ -16,14 +16,12 @@ import (
 
 type VolcengineVkeNodeService struct {
 	Client          *ve.SdkClient
-	Dispatcher      *ve.Dispatcher
 	nodePoolService *node_pool.VolcengineNodePoolService
 }
 
 func NewVolcengineVkeNodeService(c *ve.SdkClient) *VolcengineVkeNodeService {
 	return &VolcengineVkeNodeService{
 		Client:          c,
-		Dispatcher:      &ve.Dispatcher{},
 		nodePoolService: node_pool.NewNodePoolService(c),
 	}
 }

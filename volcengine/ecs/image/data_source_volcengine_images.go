@@ -156,5 +156,5 @@ func DataSourceVolcengineImages() *schema.Resource {
 
 func dataSourceVolcengineImagesRead(d *schema.ResourceData, meta interface{}) error {
 	imageService := NewImageService(meta.(*ve.SdkClient))
-	return imageService.Dispatcher.Data(imageService, d, DataSourceVolcengineImages())
+	return ve.DefaultDispatcher().Data(imageService, d, DataSourceVolcengineImages())
 }

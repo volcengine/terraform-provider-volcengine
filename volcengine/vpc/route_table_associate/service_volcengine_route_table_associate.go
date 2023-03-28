@@ -13,14 +13,12 @@ import (
 )
 
 type VolcengineRouteTableAssociateService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewRouteTableAssociateService(c *ve.SdkClient) *VolcengineRouteTableAssociateService {
 	return &VolcengineRouteTableAssociateService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

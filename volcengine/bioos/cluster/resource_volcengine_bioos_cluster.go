@@ -96,7 +96,7 @@ func ResourceVolcengineBioosCluster() *schema.Resource {
 
 func resourceVolcengineBioosClusterCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewVolcengineBioosClusterService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineBioosCluster())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineBioosCluster())
 	if err != nil {
 		return fmt.Errorf("error on creating volcengine bioos cluster: %q, %w", d.Id(), err)
 	}
@@ -105,7 +105,7 @@ func resourceVolcengineBioosClusterCreate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineBioosClusterRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewVolcengineBioosClusterService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineBioosCluster())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineBioosCluster())
 	if err != nil {
 		return fmt.Errorf("error on reading volcengine bioos cluster: %q, %w", d.Id(), err)
 	}
@@ -114,7 +114,7 @@ func resourceVolcengineBioosClusterRead(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineBioosClusterDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewVolcengineBioosClusterService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineBioosCluster())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineBioosCluster())
 	if err != nil {
 		return fmt.Errorf("error on deleting volcengine bioos cluster: %q, %w", d.Id(), err)
 	}

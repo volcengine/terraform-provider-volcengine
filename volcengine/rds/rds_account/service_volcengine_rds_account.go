@@ -13,14 +13,12 @@ import (
 )
 
 type VolcengineRdsAccountService struct {
-	Client     *volc.SdkClient
-	Dispatcher *volc.Dispatcher
+	Client *volc.SdkClient
 }
 
 func NewRdsAccountService(c *volc.SdkClient) *VolcengineRdsAccountService {
 	return &VolcengineRdsAccountService{
-		Client:     c,
-		Dispatcher: &volc.Dispatcher{},
+		Client: c,
 	}
 }
 

@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineNetworkInterfaceService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewNetworkInterfaceService(c *ve.SdkClient) *VolcengineNetworkInterfaceService {
 	return &VolcengineNetworkInterfaceService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

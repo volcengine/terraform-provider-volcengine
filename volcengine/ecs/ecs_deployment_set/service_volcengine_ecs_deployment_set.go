@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineEcsDeploymentSetService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewEcsDeploymentSetService(c *ve.SdkClient) *VolcengineEcsDeploymentSetService {
 	return &VolcengineEcsDeploymentSetService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

@@ -51,14 +51,12 @@ func init() {
 
 type VolcengineEcsService struct {
 	Client        *ve.SdkClient
-	Dispatcher    *ve.Dispatcher
 	SubnetService *subnet.VolcengineSubnetService
 }
 
 func NewEcsService(c *ve.SdkClient) *VolcengineEcsService {
 	return &VolcengineEcsService{
 		Client:        c,
-		Dispatcher:    ve.NewRateLimitDispatcher(rateInfo),
 		SubnetService: subnet.NewSubnetService(c),
 	}
 }
@@ -106,6 +104,7 @@ func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (
 		if data, ok = results.([]interface{}); !ok {
 			return data, next, errors.New("Result.Instances is not Slice")
 		}
+		data, err = RemoveSystemTags(data)
 		return data, next, err
 	})
 }

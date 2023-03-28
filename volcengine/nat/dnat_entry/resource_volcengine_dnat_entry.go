@@ -82,7 +82,7 @@ func ResourceVolcengineDnatEntry() *schema.Resource {
 
 func resourceVolcengineDnatEntryCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewDnatEntryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineDnatEntry())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineDnatEntry())
 	if err != nil {
 		return fmt.Errorf("error on creating dnat entry: %q, %w", d.Id(), err)
 	}
@@ -91,7 +91,7 @@ func resourceVolcengineDnatEntryCreate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineDnatEntryRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewDnatEntryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineDnatEntry())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineDnatEntry())
 	if err != nil {
 		return fmt.Errorf("error on reading dnat entry: %q, %w", d.Id(), err)
 	}
@@ -100,7 +100,7 @@ func resourceVolcengineDnatEntryRead(d *schema.ResourceData, meta interface{}) (
 
 func resourceVolcengineDnatEntryUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewDnatEntryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineDnatEntry())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineDnatEntry())
 	if err != nil {
 		return fmt.Errorf("error on updating dnat entry: %q, %w", d.Id(), err)
 	}
@@ -109,7 +109,7 @@ func resourceVolcengineDnatEntryUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineDnatEntryDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewDnatEntryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineDnatEntry())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineDnatEntry())
 	if err != nil {
 		return fmt.Errorf("error on deleting dnat entry: %q, %w", d.Id(), err)
 	}

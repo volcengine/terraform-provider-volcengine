@@ -11,14 +11,12 @@ import (
 )
 
 type VolcengineMongoRegionService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewRegionService(c *ve.SdkClient) *VolcengineMongoRegionService {
 	return &VolcengineMongoRegionService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

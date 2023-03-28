@@ -67,7 +67,7 @@ func ResourceVolcengineIamUser() *schema.Resource {
 
 func resourceVolcengineIamUserCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamUserService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineIamUser())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineIamUser())
 	if err != nil {
 		return fmt.Errorf("error on creating iam user  %q, %s", d.Id(), err)
 	}
@@ -76,7 +76,7 @@ func resourceVolcengineIamUserCreate(d *schema.ResourceData, meta interface{}) (
 
 func resourceVolcengineIamUserRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamUserService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineIamUser())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineIamUser())
 	if err != nil {
 		return fmt.Errorf("error on reading iam user %q, %s", d.Id(), err)
 	}
@@ -85,7 +85,7 @@ func resourceVolcengineIamUserRead(d *schema.ResourceData, meta interface{}) (er
 
 func resourceVolcengineIamUserUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamUserService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineIamUser())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineIamUser())
 	if err != nil {
 		return fmt.Errorf("error on updating iam user %q, %s", d.Id(), err)
 	}
@@ -94,7 +94,7 @@ func resourceVolcengineIamUserUpdate(d *schema.ResourceData, meta interface{}) (
 
 func resourceVolcengineIamUserDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamUserService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineIamUser())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineIamUser())
 	if err != nil {
 		return fmt.Errorf("error on deleting iam user %q, %s", d.Id(), err)
 	}

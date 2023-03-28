@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineSnatEntryService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewSnatEntryService(c *ve.SdkClient) *VolcengineSnatEntryService {
 	return &VolcengineSnatEntryService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

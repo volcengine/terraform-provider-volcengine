@@ -13,14 +13,12 @@ import (
 )
 
 type VolcengineAclService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewAclService(c *ve.SdkClient) *VolcengineAclService {
 	return &VolcengineAclService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

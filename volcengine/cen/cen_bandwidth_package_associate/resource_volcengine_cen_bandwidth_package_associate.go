@@ -50,7 +50,7 @@ func ResourceVolcengineCenBandwidthPackageAssociate() *schema.Resource {
 
 func resourceVolcengineCenBandwidthPackageAssociateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenBandwidthPackageAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCenBandwidthPackageAssociate())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCenBandwidthPackageAssociate())
 	if err != nil {
 		return fmt.Errorf("error on creating cen bandwidth package associate %q, %s", d.Id(), err)
 	}
@@ -59,7 +59,7 @@ func resourceVolcengineCenBandwidthPackageAssociateCreate(d *schema.ResourceData
 
 func resourceVolcengineCenBandwidthPackageAssociateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenBandwidthPackageAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCenBandwidthPackageAssociate())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCenBandwidthPackageAssociate())
 	if err != nil {
 		return fmt.Errorf("error on reading cen bandwidth package associate %q, %s", d.Id(), err)
 	}
@@ -68,7 +68,7 @@ func resourceVolcengineCenBandwidthPackageAssociateRead(d *schema.ResourceData, 
 
 func resourceVolcengineCenBandwidthPackageAssociateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenBandwidthPackageAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCenBandwidthPackageAssociate())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCenBandwidthPackageAssociate())
 	if err != nil {
 		return fmt.Errorf("error on deleting cen bandwidth package associate %q, %s", d.Id(), err)
 	}

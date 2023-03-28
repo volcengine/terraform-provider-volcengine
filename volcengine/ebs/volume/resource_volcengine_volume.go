@@ -118,7 +118,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 
 func resourceVolcengineVolumeCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	volumeService := NewVolumeService(meta.(*ve.SdkClient))
-	err = volumeService.Dispatcher.Create(volumeService, d, ResourceVolcengineVolume())
+	err = ve.DefaultDispatcher().Create(volumeService, d, ResourceVolcengineVolume())
 	if err != nil {
 		return fmt.Errorf("error on creating volume %q, %w", d.Id(), err)
 	}
@@ -127,7 +127,7 @@ func resourceVolcengineVolumeCreate(d *schema.ResourceData, meta interface{}) (e
 
 func resourceVolcengineVolumeRead(d *schema.ResourceData, meta interface{}) (err error) {
 	volumeService := NewVolumeService(meta.(*ve.SdkClient))
-	err = volumeService.Dispatcher.Read(volumeService, d, ResourceVolcengineVolume())
+	err = ve.DefaultDispatcher().Read(volumeService, d, ResourceVolcengineVolume())
 	if err != nil {
 		return fmt.Errorf("error on reading volume %q, %w", d.Id(), err)
 	}
@@ -136,7 +136,7 @@ func resourceVolcengineVolumeRead(d *schema.ResourceData, meta interface{}) (err
 
 func resourceVolcengineVolumeUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	volumeService := NewVolumeService(meta.(*ve.SdkClient))
-	err = volumeService.Dispatcher.Update(volumeService, d, ResourceVolcengineVolume())
+	err = ve.DefaultDispatcher().Update(volumeService, d, ResourceVolcengineVolume())
 	if err != nil {
 		return fmt.Errorf("error on updating volume %q, %w", d.Id(), err)
 	}
@@ -145,7 +145,7 @@ func resourceVolcengineVolumeUpdate(d *schema.ResourceData, meta interface{}) (e
 
 func resourceVolcengineVolumeDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	volumeService := NewVolumeService(meta.(*ve.SdkClient))
-	err = volumeService.Dispatcher.Delete(volumeService, d, ResourceVolcengineVolume())
+	err = ve.DefaultDispatcher().Delete(volumeService, d, ResourceVolcengineVolume())
 	if err != nil {
 		return fmt.Errorf("error on deleting volume %q, %w", d.Id(), err)
 	}

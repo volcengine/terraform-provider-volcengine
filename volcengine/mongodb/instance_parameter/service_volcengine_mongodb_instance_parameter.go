@@ -3,9 +3,10 @@ package instance_parameter
 import (
 	"errors"
 	"fmt"
-	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 	"strings"
 	"time"
+
+	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -14,14 +15,12 @@ import (
 )
 
 type VolcengineMongoDBInstanceParameterService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewMongoDBInstanceParameterService(c *ve.SdkClient) *VolcengineMongoDBInstanceParameterService {
 	return &VolcengineMongoDBInstanceParameterService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 
@@ -54,6 +53,9 @@ func (s *VolcengineMongoDBInstanceParameterService) ReadResources(condition map[
 	if err != nil {
 		return data, err
 	}
+	if results == nil {
+		results = map[string]interface{}{}
+	}
 	data = []interface{}{results}
 	return data, err
 }
@@ -68,7 +70,7 @@ func (s *VolcengineMongoDBInstanceParameterService) ReadResource(resourceData *s
 	}
 	parts := strings.Split(id, ":")
 	if len(parts) != 3 {
-		return data, fmt.Errorf("the format of import id must be 'endpoint:instanceId:parameterName'")
+		return data, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName'")
 	}
 	req := map[string]interface{}{
 		"InstanceId":     parts[1],
@@ -121,7 +123,8 @@ func (s *VolcengineMongoDBInstanceParameterService) ModifyResource(resourceData 
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyDBInstanceParameters",
-			ConvertMode: ve.RequestConvertIgnore,
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["InstanceId"] = instanceId
 				(*call.SdkParam)["ParametersObject"] = map[string]interface{}{

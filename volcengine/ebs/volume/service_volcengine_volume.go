@@ -15,14 +15,12 @@ import (
 )
 
 type VolcengineVolumeService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewVolumeService(c *ve.SdkClient) *VolcengineVolumeService {
 	return &VolcengineVolumeService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

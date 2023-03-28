@@ -11,8 +11,18 @@ func DataSourceVolcengineMongoDBSSLStates() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "The mongodb instance ID to query.",
+			},
+			"output_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "File name where to save data source results.",
+			},
+			"total_count": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The total count of mongodb ssl state query.",
 			},
 			"ssl_state": {
 				Description: "The collection of mongodb ssl state query.",
@@ -49,5 +59,5 @@ func DataSourceVolcengineMongoDBSSLStates() *schema.Resource {
 
 func dataSourceVolcengineMongoDBSSLStatesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBSSLStates())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBSSLStates())
 }

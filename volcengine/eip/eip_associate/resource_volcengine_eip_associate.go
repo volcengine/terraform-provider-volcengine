@@ -62,7 +62,7 @@ func ResourceVolcengineEipAssociate() *schema.Resource {
 
 func resourceVolcengineEipAssociateCreate(d *schema.ResourceData, meta interface{}) error {
 	eipAssociateService := NewEipAssociateService(meta.(*ve.SdkClient))
-	if err := eipAssociateService.Dispatcher.Create(eipAssociateService, d, ResourceVolcengineEipAssociate()); err != nil {
+	if err := ve.DefaultDispatcher().Create(eipAssociateService, d, ResourceVolcengineEipAssociate()); err != nil {
 		return fmt.Errorf("error on creating eip associate %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineEipAssociateRead(d, meta)
@@ -70,7 +70,7 @@ func resourceVolcengineEipAssociateCreate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineEipAssociateRead(d *schema.ResourceData, meta interface{}) error {
 	eipAssociateService := NewEipAssociateService(meta.(*ve.SdkClient))
-	if err := eipAssociateService.Dispatcher.Read(eipAssociateService, d, ResourceVolcengineEipAssociate()); err != nil {
+	if err := ve.DefaultDispatcher().Read(eipAssociateService, d, ResourceVolcengineEipAssociate()); err != nil {
 		return fmt.Errorf("error on reading  eip associate %q, %w", d.Id(), err)
 	}
 	return nil
@@ -78,7 +78,7 @@ func resourceVolcengineEipAssociateRead(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineEipAssociateDelete(d *schema.ResourceData, meta interface{}) error {
 	eipAssociateService := NewEipAssociateService(meta.(*ve.SdkClient))
-	if err := eipAssociateService.Dispatcher.Delete(eipAssociateService, d, ResourceVolcengineEipAssociate()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(eipAssociateService, d, ResourceVolcengineEipAssociate()); err != nil {
 		return fmt.Errorf("error on deleting  eip associate %q, %w", d.Id(), err)
 	}
 	return nil

@@ -85,7 +85,7 @@ func ResourceVolcengineRouteEntry() *schema.Resource {
 
 func resourceVolcengineRouteEntryCreate(d *schema.ResourceData, meta interface{}) error {
 	routeEntryService := NewRouteEntryService(meta.(*ve.SdkClient))
-	if err := routeEntryService.Dispatcher.Create(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Create(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
 		return fmt.Errorf("error on creating route entry  %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineRouteEntryRead(d, meta)
@@ -93,7 +93,7 @@ func resourceVolcengineRouteEntryCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineRouteEntryRead(d *schema.ResourceData, meta interface{}) error {
 	routeEntryService := NewRouteEntryService(meta.(*ve.SdkClient))
-	if err := routeEntryService.Dispatcher.Read(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Read(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
 		return fmt.Errorf("error on reading route entry %q, %w", d.Id(), err)
 	}
 	return nil
@@ -101,7 +101,7 @@ func resourceVolcengineRouteEntryRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineRouteEntryUpdate(d *schema.ResourceData, meta interface{}) error {
 	routeEntryService := NewRouteEntryService(meta.(*ve.SdkClient))
-	if err := routeEntryService.Dispatcher.Update(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Update(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
 		return fmt.Errorf("error on updating route entry %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineRouteEntryRead(d, meta)
@@ -109,7 +109,7 @@ func resourceVolcengineRouteEntryUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineRouteEntryDelete(d *schema.ResourceData, meta interface{}) error {
 	routeEntryService := NewRouteEntryService(meta.(*ve.SdkClient))
-	if err := routeEntryService.Dispatcher.Delete(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(routeEntryService, d, ResourceVolcengineRouteEntry()); err != nil {
 		return fmt.Errorf("error on deleting route entry %q, %w", d.Id(), err)
 	}
 	return nil

@@ -55,7 +55,7 @@ func ResourceVolcengineAclEntry() *schema.Resource {
 
 func resourceVolcengineAclEntryCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	aclEntryService := NewAclEntryService(meta.(*ve.SdkClient))
-	err = aclEntryService.Dispatcher.Create(aclEntryService, d, ResourceVolcengineAclEntry())
+	err = ve.DefaultDispatcher().Create(aclEntryService, d, ResourceVolcengineAclEntry())
 	if err != nil {
 		return fmt.Errorf("error on creating acl entry %q, %w", d.Id(), err)
 	}
@@ -64,7 +64,7 @@ func resourceVolcengineAclEntryCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineAclEntryRead(d *schema.ResourceData, meta interface{}) (err error) {
 	aclEntryService := NewAclEntryService(meta.(*ve.SdkClient))
-	err = aclEntryService.Dispatcher.Read(aclEntryService, d, ResourceVolcengineAclEntry())
+	err = ve.DefaultDispatcher().Read(aclEntryService, d, ResourceVolcengineAclEntry())
 	if err != nil {
 		return fmt.Errorf("error on reading acl entry %q, %w", d.Id(), err)
 	}
@@ -73,7 +73,7 @@ func resourceVolcengineAclEntryRead(d *schema.ResourceData, meta interface{}) (e
 
 func resourceVolcengineAclEntryDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	aclEntryService := NewAclEntryService(meta.(*ve.SdkClient))
-	err = aclEntryService.Dispatcher.Delete(aclEntryService, d, ResourceVolcengineAclEntry())
+	err = ve.DefaultDispatcher().Delete(aclEntryService, d, ResourceVolcengineAclEntry())
 	if err != nil {
 		return fmt.Errorf("error on deleting acl entry %q, %w", d.Id(), err)
 	}

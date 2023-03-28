@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineRdsParameterTemplateService struct {
-	Client     *volc.SdkClient
-	Dispatcher *volc.Dispatcher
+	Client *volc.SdkClient
 }
 
 func NewRdsParameterTemplateService(c *volc.SdkClient) *VolcengineRdsParameterTemplateService {
 	return &VolcengineRdsParameterTemplateService{
-		Client:     c,
-		Dispatcher: &volc.Dispatcher{},
+		Client: c,
 	}
 }
 

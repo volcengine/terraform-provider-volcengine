@@ -110,5 +110,5 @@ func DataSourceVolcengineCenRouteEntries() *schema.Resource {
 
 func dataSourceVolcengineCenRouteEntriesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCenRouteEntryService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCenRouteEntries())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineCenRouteEntries())
 }

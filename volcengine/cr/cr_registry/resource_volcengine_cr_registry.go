@@ -59,7 +59,7 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 
 func resourceVolcengineCrRegistryCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRegistryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCrRegistry())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrRegistry())
 	if err != nil {
 		return fmt.Errorf("error on creating CrRegistry %q,%s", d.Id(), err)
 	}
@@ -68,7 +68,7 @@ func resourceVolcengineCrRegistryCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineCrRegistryUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRegistryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCrRegistry())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrRegistry())
 	if err != nil {
 		return fmt.Errorf("error on updating CrRegistry  %q, %s", d.Id(), err)
 	}
@@ -77,7 +77,7 @@ func resourceVolcengineCrRegistryUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineCrRegistryDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRegistryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCrRegistry())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCrRegistry())
 	if err != nil {
 		return fmt.Errorf("error on deleting CrRegistry %q, %s", d.Id(), err)
 	}
@@ -86,7 +86,7 @@ func resourceVolcengineCrRegistryDelete(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineCrRegistryRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRegistryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCrRegistry())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrRegistry())
 	if err != nil {
 		return fmt.Errorf("Error on reading CrRegistry %q,%s", d.Id(), err)
 	}

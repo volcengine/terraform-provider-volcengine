@@ -2,6 +2,7 @@ package instance
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
@@ -28,13 +29,20 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(1 * time.Hour),
+			Update: schema.DefaultTimeout(1 * time.Hour),
+			Delete: schema.DefaultTimeout(1 * time.Hour),
+		},
 		Schema: map[string]*schema.Schema{
 			"zone_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "The zone ID of instance.",
 			},
+			// 固定值，暂时不开放
 			// "db_engine": {
 			// 	Type:         schema.TypeString,
 			// 	Optional:     true,
@@ -54,6 +62,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Required:    true,
 				Description: "The spec of node.",
 			},
+			// 固定值，暂时不开放
 			// "node_number": {
 			// 	Type:        schema.TypeInt,
 			// 	Optional:    true,
@@ -64,27 +73,44 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+				ForceNew: true,
 				//Default:      "ReplicaSet",
 				Description:  "The type of instance,the valid value contains `ReplicaSet` or `ShardedCluster`.",
 				ValidateFunc: validation.StringInSlice([]string{"ReplicaSet", "ShardedCluster"}, false),
 			},
 			"mongos_node_spec": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				Description: "The mongos node spec of shard cluster,this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// 当实例类型为分片集群（即InstanceType取值为ShardedCluster）时，该参数必填。
+					if d.Get("instance_type") == "ReplicaSet" {
+						return true
+					}
+					return false
+				},
+				Description: "The mongos node spec of shard cluster, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"mongos_node_number": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     2,
-				Description: "The mongos node number of shard cluster,value range is `2~23`,this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Type:     schema.TypeInt,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("instance_type") == "ReplicaSet" {
+						return true
+					}
+					return false
+				},
+				Description: "The mongos node number of shard cluster,value range is `2~23`, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"shard_number": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Computed:    true,
-				Description: "The number of shards in shard cluster,value range is `2~23`,this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Type:     schema.TypeInt,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("instance_type") == "ReplicaSet" {
+						return true
+					}
+					return false
+				},
+				Description: "The number of shards in shard cluster,value range is `2~32`, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
 			"storage_space_gb": {
 				Type:        schema.TypeInt,
@@ -95,6 +121,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "The vpc ID.",
 			},
 			"subnet_id": {
@@ -131,26 +158,29 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed: true,
 				//Default:      "PostPaid",
 				ValidateFunc: validation.StringInSlice([]string{"Prepaid", "PostPaid"}, false),
-				Description:  "The charge type of instance,valid value contains `Prepaid` or `PostPaid`.",
+				Description:  "The charge type of instance, valid value contains `Prepaid` or `PostPaid`.",
 			},
 			"auto_renew": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: "Whether to enable automatic renewal.",
+				Type:             schema.TypeBool,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
+				Description:      "Whether to enable automatic renewal.",
 			},
 			"period_unit": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Description:  "The period unit,valid value contains `Year` or `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
-				ValidateFunc: validation.StringInSlice([]string{"Year", "Month"}, false),
+				Type:             schema.TypeString,
+				Optional:         true,
+				Computed:         true,
+				ValidateFunc:     validation.StringInSlice([]string{"Year", "Month"}, false),
+				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
+				Description:      "The period unit,valid value contains `Year` or `Month`, this parameter is required when `ChargeType` is `Prepaid`.",
 			},
 			"period": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Computed:    true,
-				Description: "The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`,the value range is `1~9` when `PeriodUtil` is `Month`,this parameter is required when `ChargeType` is `Prepaid`.",
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Computed:         true,
+				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
+				Description:      "The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`, the value range is `1~9` when `PeriodUtil` is `Month`, this parameter is required when `ChargeType` is `Prepaid`.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
@@ -158,6 +188,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed:    true,
 				Description: "The project name to which the instance belongs.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	return resource
@@ -165,7 +196,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 
 func resourceVolcengineMongoDBInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("Error on creating instance %q,%s", d.Id(), err)
 	}
@@ -174,7 +205,7 @@ func resourceVolcengineMongoDBInstanceCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBInstanceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("error on updating instance  %q, %s", d.Id(), err)
 	}
@@ -183,7 +214,7 @@ func resourceVolcengineMongoDBInstanceUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting instance %q, %s", d.Id(), err)
 	}
@@ -192,7 +223,7 @@ func resourceVolcengineMongoDBInstanceDelete(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBInstance())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBInstance())
 	if err != nil {
 		return fmt.Errorf("Error on reading instance %q,%s", d.Id(), err)
 	}

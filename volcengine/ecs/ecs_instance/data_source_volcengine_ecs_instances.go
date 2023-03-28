@@ -324,5 +324,5 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 
 func dataSourceVolcengineInstancesRead(d *schema.ResourceData, meta interface{}) error {
 	ecsService := NewEcsService(meta.(*ve.SdkClient))
-	return ecsService.Dispatcher.Data(ecsService, d, DataSourceVolcengineEcsInstances())
+	return ve.NewRateLimitDispatcher(rateInfo).Data(ecsService, d, DataSourceVolcengineEcsInstances())
 }
