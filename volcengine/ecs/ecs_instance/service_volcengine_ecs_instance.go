@@ -104,6 +104,7 @@ func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (
 		if data, ok = results.([]interface{}); !ok {
 			return data, next, errors.New("Result.Instances is not Slice")
 		}
+		data, err = RemoveSystemTags(data)
 		return data, next, err
 	})
 }

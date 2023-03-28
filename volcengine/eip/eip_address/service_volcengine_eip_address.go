@@ -57,6 +57,7 @@ func (s *VolcengineEipAddressService) ReadResources(m map[string]interface{}) (d
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.EipAddresses is not Slice")
 		}
+		data, err = RemoveSystemTags(data)
 		return data, err
 	})
 }
