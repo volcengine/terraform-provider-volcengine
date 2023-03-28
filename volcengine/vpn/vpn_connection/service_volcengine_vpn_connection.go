@@ -13,14 +13,12 @@ import (
 )
 
 type VolcengineVpnConnectionService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewVpnConnectionService(c *ve.SdkClient) *VolcengineVpnConnectionService {
 	return &VolcengineVpnConnectionService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

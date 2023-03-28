@@ -11,14 +11,12 @@ import (
 )
 
 type VolcengineMongoDBInstanceParameterLogService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewMongoDBInstanceParameterLogService(c *ve.SdkClient) *VolcengineMongoDBInstanceParameterLogService {
 	return &VolcengineMongoDBInstanceParameterLogService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 
@@ -56,7 +54,7 @@ func (s *VolcengineMongoDBInstanceParameterLogService) ReadResources(condition m
 		}
 		data, ok = results.([]interface{})
 		if !ok {
-			return data, fmt.Errorf("DescribeDBInstanceParametersLog responsed is not a slice")
+			return data, fmt.Errorf("DescribeDBInstanceParametersLog response is not a slice")
 		}
 		return data, nil
 	})

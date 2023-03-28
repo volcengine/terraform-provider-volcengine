@@ -74,7 +74,7 @@ func ResourceVolcengineIamPolicy() *schema.Resource {
 
 func resourceVolcengineIamPolicyCreate(d *schema.ResourceData, meta interface{}) error {
 	iamPolicyService := NewIamPolicyService(meta.(*ve.SdkClient))
-	if err := iamPolicyService.Dispatcher.Create(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
+	if err := ve.DefaultDispatcher().Create(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
 		return fmt.Errorf("error on creating iam policy %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineIamPolicyRead(d, meta)
@@ -82,7 +82,7 @@ func resourceVolcengineIamPolicyCreate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineIamPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	iamPolicyService := NewIamPolicyService(meta.(*ve.SdkClient))
-	if err := iamPolicyService.Dispatcher.Read(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
+	if err := ve.DefaultDispatcher().Read(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
 		return fmt.Errorf("error on reading iam policy %q, %w", d.Id(), err)
 	}
 	return nil
@@ -90,7 +90,7 @@ func resourceVolcengineIamPolicyRead(d *schema.ResourceData, meta interface{}) e
 
 func resourceVolcengineIamPolicyUpdate(d *schema.ResourceData, meta interface{}) error {
 	iamPolicyService := NewIamPolicyService(meta.(*ve.SdkClient))
-	if err := iamPolicyService.Dispatcher.Update(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
+	if err := ve.DefaultDispatcher().Update(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
 		return fmt.Errorf("error on updating iam policy %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineIamPolicyRead(d, meta)
@@ -98,7 +98,7 @@ func resourceVolcengineIamPolicyUpdate(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineIamPolicyDelete(d *schema.ResourceData, meta interface{}) error {
 	iamPolicyService := NewIamPolicyService(meta.(*ve.SdkClient))
-	if err := iamPolicyService.Dispatcher.Delete(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(iamPolicyService, d, ResourceVolcengineIamPolicy()); err != nil {
 		return fmt.Errorf("error on deleting iam policy %q, %w", d.Id(), err)
 	}
 	return nil

@@ -89,5 +89,5 @@ func DataSourceVolcengineCenInterRegionBandwidths() *schema.Resource {
 
 func dataSourceVolcengineCenInterRegionBandwidthsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCenInterRegionBandwidthService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCenInterRegionBandwidths())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineCenInterRegionBandwidths())
 }

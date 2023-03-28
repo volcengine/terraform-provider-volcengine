@@ -388,5 +388,5 @@ var diskSpec = &schema.Resource{
 
 func dataSourceVolcengineVeenedgeCloudServersRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCloudServerService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineVeenedgeCloudServers())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineVeenedgeCloudServers())
 }

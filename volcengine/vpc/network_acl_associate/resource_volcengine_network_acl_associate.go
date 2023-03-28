@@ -49,7 +49,7 @@ func ResourceVolcengineNetworkAclAssociate() *schema.Resource {
 
 func resourceVolcengineAclAssociateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	aclAssociateService := NewNetworkAclAssociateService(meta.(*ve.SdkClient))
-	err = aclAssociateService.Dispatcher.Create(aclAssociateService, d, ResourceVolcengineNetworkAclAssociate())
+	err = ve.DefaultDispatcher().Create(aclAssociateService, d, ResourceVolcengineNetworkAclAssociate())
 	if err != nil {
 		return fmt.Errorf("error on creating acl Associate %q, %w", d.Id(), err)
 	}
@@ -58,7 +58,7 @@ func resourceVolcengineAclAssociateCreate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineAclAssociateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	aclAssociateService := NewNetworkAclAssociateService(meta.(*ve.SdkClient))
-	err = aclAssociateService.Dispatcher.Read(aclAssociateService, d, ResourceVolcengineNetworkAclAssociate())
+	err = ve.DefaultDispatcher().Read(aclAssociateService, d, ResourceVolcengineNetworkAclAssociate())
 	if err != nil {
 		return fmt.Errorf("error on reading acl Associate %q, %w", d.Id(), err)
 	}
@@ -67,7 +67,7 @@ func resourceVolcengineAclAssociateRead(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineAclAssociateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	aclAssociateService := NewNetworkAclAssociateService(meta.(*ve.SdkClient))
-	err = aclAssociateService.Dispatcher.Delete(aclAssociateService, d, ResourceVolcengineNetworkAclAssociate())
+	err = ve.DefaultDispatcher().Delete(aclAssociateService, d, ResourceVolcengineNetworkAclAssociate())
 	if err != nil {
 		return fmt.Errorf("error on deleting acl Associate %q, %w", d.Id(), err)
 	}

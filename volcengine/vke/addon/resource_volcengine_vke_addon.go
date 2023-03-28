@@ -99,7 +99,7 @@ func ResourceVolcengineVkeAddon() *schema.Resource {
 
 func resourceVolcengineVkeAddonCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeAddonService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Create(clusterService, d, ResourceVolcengineVkeAddon())
+	err = ve.DefaultDispatcher().Create(clusterService, d, ResourceVolcengineVkeAddon())
 	if err != nil {
 		return fmt.Errorf("error on creating addon  %q, %w", d.Id(), err)
 	}
@@ -108,7 +108,7 @@ func resourceVolcengineVkeAddonCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineVkeAddonRead(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeAddonService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Read(clusterService, d, ResourceVolcengineVkeAddon())
+	err = ve.DefaultDispatcher().Read(clusterService, d, ResourceVolcengineVkeAddon())
 	if err != nil {
 		return fmt.Errorf("error on reading addon %q, %w", d.Id(), err)
 	}
@@ -117,7 +117,7 @@ func resourceVolcengineVkeAddonRead(d *schema.ResourceData, meta interface{}) (e
 
 func resourceVolcengineVkeAddonUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeAddonService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Update(clusterService, d, ResourceVolcengineVkeAddon())
+	err = ve.DefaultDispatcher().Update(clusterService, d, ResourceVolcengineVkeAddon())
 	if err != nil {
 		return fmt.Errorf("error on updating addon  %q, %w", d.Id(), err)
 	}
@@ -126,7 +126,7 @@ func resourceVolcengineVkeAddonUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineVkeAddonDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	clusterService := NewVkeAddonService(meta.(*ve.SdkClient))
-	err = clusterService.Dispatcher.Delete(clusterService, d, ResourceVolcengineVkeAddon())
+	err = ve.DefaultDispatcher().Delete(clusterService, d, ResourceVolcengineVkeAddon())
 	if err != nil {
 		return fmt.Errorf("error on deleting addon %q, %w", d.Id(), err)
 	}

@@ -68,7 +68,7 @@ func ResourceVolcengineScalingLifecycleHook() *schema.Resource {
 
 func resourceVolcengineScalingLifecycleHookCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	lifecycleHookService := NewScalingLifecycleHookService(meta.(*ve.SdkClient))
-	err = lifecycleHookService.Dispatcher.Create(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
+	err = ve.DefaultDispatcher().Create(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
 	if err != nil {
 		return fmt.Errorf("error on creating ScalingLifecycleHook %q, %s", d.Id(), err)
 	}
@@ -77,7 +77,7 @@ func resourceVolcengineScalingLifecycleHookCreate(d *schema.ResourceData, meta i
 
 func resourceVolcengineScalingLifecycleHookRead(d *schema.ResourceData, meta interface{}) (err error) {
 	lifecycleHookService := NewScalingLifecycleHookService(meta.(*ve.SdkClient))
-	err = lifecycleHookService.Dispatcher.Read(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
+	err = ve.DefaultDispatcher().Read(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
 	if err != nil {
 		return fmt.Errorf("error on reading ScalingLifecycleHook %q, %s", d.Id(), err)
 	}
@@ -86,7 +86,7 @@ func resourceVolcengineScalingLifecycleHookRead(d *schema.ResourceData, meta int
 
 func resourceVetackScalingLifecycleHookUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	lifecycleHookService := NewScalingLifecycleHookService(meta.(*ve.SdkClient))
-	err = lifecycleHookService.Dispatcher.Update(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
+	err = ve.DefaultDispatcher().Update(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
 	if err != nil {
 		return fmt.Errorf("error on updating ScalingLifecycleHook %q, %s", d.Id(), err)
 	}
@@ -95,7 +95,7 @@ func resourceVetackScalingLifecycleHookUpdate(d *schema.ResourceData, meta inter
 
 func resourceVetackScalingLifecycleHookDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	lifecycleHookService := NewScalingLifecycleHookService(meta.(*ve.SdkClient))
-	err = lifecycleHookService.Dispatcher.Delete(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
+	err = ve.DefaultDispatcher().Delete(lifecycleHookService, d, ResourceVolcengineScalingLifecycleHook())
 	if err != nil {
 		return fmt.Errorf("error on deleting ScalingLifecycleHook %q, %s", d.Id(), err)
 	}

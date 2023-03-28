@@ -91,7 +91,7 @@ func ResourceVolcengineCrRepository() *schema.Resource {
 
 func resourceVolcengineCrRepositoryCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRepositoryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCrRepository())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrRepository())
 	if err != nil {
 		return fmt.Errorf("error on creating CrRepository %q,%s", d.Id(), err)
 	}
@@ -100,7 +100,7 @@ func resourceVolcengineCrRepositoryCreate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineCrRepositoryUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRepositoryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCrRepository())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrRepository())
 	if err != nil {
 		return fmt.Errorf("error on updating CrRepository  %q, %s", d.Id(), err)
 	}
@@ -109,7 +109,7 @@ func resourceVolcengineCrRepositoryUpdate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineCrRepositoryDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRepositoryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCrRepository())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCrRepository())
 	if err != nil {
 		return fmt.Errorf("error on deleting CrRepository %q, %s", d.Id(), err)
 	}
@@ -118,7 +118,7 @@ func resourceVolcengineCrRepositoryDelete(d *schema.ResourceData, meta interface
 
 func resourceVolcengineCrRepositoryRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCrRepositoryService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCrRepository())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrRepository())
 	if err != nil {
 		return fmt.Errorf("Error on reading CrRepository %q,%s", d.Id(), err)
 	}

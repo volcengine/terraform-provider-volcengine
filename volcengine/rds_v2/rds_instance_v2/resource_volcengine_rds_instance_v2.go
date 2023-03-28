@@ -283,7 +283,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 
 func resourceVolcengineRdsInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsInstanceService := NewRdsInstanceService(meta.(*volc.SdkClient))
-	err = rdsInstanceService.Dispatcher.Create(rdsInstanceService, d, ResourceVolcengineRdsInstance())
+	err = volc.DefaultDispatcher().Create(rdsInstanceService, d, ResourceVolcengineRdsInstance())
 	if err != nil {
 		return fmt.Errorf("error on creating RDS instance %q, %w", d.Id(), err)
 	}
@@ -292,7 +292,7 @@ func resourceVolcengineRdsInstanceCreate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineRdsInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsInstanceService := NewRdsInstanceService(meta.(*volc.SdkClient))
-	err = rdsInstanceService.Dispatcher.Read(rdsInstanceService, d, ResourceVolcengineRdsInstance())
+	err = volc.DefaultDispatcher().Read(rdsInstanceService, d, ResourceVolcengineRdsInstance())
 	if err != nil {
 		return fmt.Errorf("error on reading RDS instance %q, %w", d.Id(), err)
 	}
@@ -301,7 +301,7 @@ func resourceVolcengineRdsInstanceRead(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineRdsInstanceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsInstanceService := NewRdsInstanceService(meta.(*volc.SdkClient))
-	err = rdsInstanceService.Dispatcher.Update(rdsInstanceService, d, ResourceVolcengineRdsInstance())
+	err = volc.DefaultDispatcher().Update(rdsInstanceService, d, ResourceVolcengineRdsInstance())
 	if err != nil {
 		return fmt.Errorf("error on updating RDS instance %q, %w", d.Id(), err)
 	}
@@ -310,7 +310,7 @@ func resourceVolcengineRdsInstanceUpdate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineRdsInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsInstanceService := NewRdsInstanceService(meta.(*volc.SdkClient))
-	err = rdsInstanceService.Dispatcher.Delete(rdsInstanceService, d, ResourceVolcengineRdsInstance())
+	err = volc.DefaultDispatcher().Delete(rdsInstanceService, d, ResourceVolcengineRdsInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting RDS instance %q, %w", d.Id(), err)
 	}

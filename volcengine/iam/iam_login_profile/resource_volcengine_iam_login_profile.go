@@ -62,7 +62,7 @@ func ResourceVolcengineIamLoginProfile() *schema.Resource {
 
 func resourceVolcengineIamLoginProfileCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamLoginProfileService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineIamLoginProfile())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineIamLoginProfile())
 	if err != nil {
 		return fmt.Errorf("error on creating login profile %q, %s", d.Id(), err)
 	}
@@ -71,7 +71,7 @@ func resourceVolcengineIamLoginProfileCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineIamLoginProfileRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamLoginProfileService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineIamLoginProfile())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineIamLoginProfile())
 	if err != nil {
 		return fmt.Errorf("error on reading login profile %q, %s", d.Id(), err)
 	}
@@ -80,7 +80,7 @@ func resourceVolcengineIamLoginProfileRead(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineIamLoginProfileUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamLoginProfileService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineIamLoginProfile())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineIamLoginProfile())
 	if err != nil {
 		return fmt.Errorf("error on updating login profile %q, %s", d.Id(), err)
 	}
@@ -89,7 +89,7 @@ func resourceVolcengineIamLoginProfileUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineIamLoginProfileDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewIamLoginProfileService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineIamLoginProfile())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineIamLoginProfile())
 	if err != nil {
 		return fmt.Errorf("error on deleting login profile %q, %s", d.Id(), err)
 	}

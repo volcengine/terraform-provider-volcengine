@@ -78,5 +78,5 @@ func DataSourceVolcengineRdsDatabases() *schema.Resource {
 
 func dataSourceVolcengineRdsDatabasesRead(d *schema.ResourceData, meta interface{}) error {
 	databaseService := NewRdsDatabaseService(meta.(*volc.SdkClient))
-	return databaseService.Dispatcher.Data(databaseService, d, DataSourceVolcengineRdsDatabases())
+	return volc.DefaultDispatcher().Data(databaseService, d, DataSourceVolcengineRdsDatabases())
 }

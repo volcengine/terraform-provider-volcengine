@@ -92,5 +92,5 @@ func DataSourceVolcengineCenAttachInstances() *schema.Resource {
 
 func dataSourceVolcengineCenInstanceAttachInstances(d *schema.ResourceData, meta interface{}) error {
 	cenAttachInstanceService := NewCenAttachInstanceService(meta.(*ve.SdkClient))
-	return cenAttachInstanceService.Dispatcher.Data(cenAttachInstanceService, d, DataSourceVolcengineCenAttachInstances())
+	return ve.DefaultDispatcher().Data(cenAttachInstanceService, d, DataSourceVolcengineCenAttachInstances())
 }

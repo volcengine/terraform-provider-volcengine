@@ -92,5 +92,5 @@ func DataSourceVolcengineServerGroups() *schema.Resource {
 
 func dataSourceVolcengineServerGroupsRead(d *schema.ResourceData, meta interface{}) error {
 	serverGroupService := NewServerGroupService(meta.(*ve.SdkClient))
-	return serverGroupService.Dispatcher.Data(serverGroupService, d, DataSourceVolcengineServerGroups())
+	return ve.DefaultDispatcher().Data(serverGroupService, d, DataSourceVolcengineServerGroups())
 }

@@ -247,5 +247,5 @@ func DataSourceVolcengineVkeNodes() *schema.Resource {
 
 func dataSourceVolcengineVkeNodesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewVolcengineVkeNodeService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineVkeNodes())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineVkeNodes())
 }

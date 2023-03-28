@@ -110,5 +110,5 @@ func DataSourceVolcengineCens() *schema.Resource {
 
 func dataSourceVolcengineCensRead(d *schema.ResourceData, meta interface{}) error {
 	cenService := NewCenService(meta.(*ve.SdkClient))
-	return cenService.Dispatcher.Data(cenService, d, DataSourceVolcengineCens())
+	return ve.DefaultDispatcher().Data(cenService, d, DataSourceVolcengineCens())
 }

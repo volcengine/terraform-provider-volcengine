@@ -70,7 +70,7 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 
 func resourceVolcengineEcsInstanceStateCreate(d *schema.ResourceData, meta interface{}) error {
 	instanceStateService := NewInstanceStateService(meta.(*ve.SdkClient))
-	if err := instanceStateService.Dispatcher.Create(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
+	if err := ve.DefaultDispatcher().Create(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
 		return fmt.Errorf("error on creating instance state %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineEcsInstanceStateRead(d, meta)
@@ -78,7 +78,7 @@ func resourceVolcengineEcsInstanceStateCreate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineEcsInstanceStateRead(d *schema.ResourceData, meta interface{}) error {
 	instanceStateService := NewInstanceStateService(meta.(*ve.SdkClient))
-	if err := instanceStateService.Dispatcher.Read(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
+	if err := ve.DefaultDispatcher().Read(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
 		return fmt.Errorf("error on reading instance state %q, %w", d.Id(), err)
 	}
 	return nil
@@ -86,7 +86,7 @@ func resourceVolcengineEcsInstanceStateRead(d *schema.ResourceData, meta interfa
 
 func resourceVolcengineEcsInstanceStateUpdate(d *schema.ResourceData, meta interface{}) error {
 	instanceStateService := NewInstanceStateService(meta.(*ve.SdkClient))
-	if err := instanceStateService.Dispatcher.Update(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
+	if err := ve.DefaultDispatcher().Update(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
 		return fmt.Errorf("error on updating instance state %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineEcsInstanceStateRead(d, meta)
@@ -94,7 +94,7 @@ func resourceVolcengineEcsInstanceStateUpdate(d *schema.ResourceData, meta inter
 
 func resourceVolcengineEcsInstanceStateDelete(d *schema.ResourceData, meta interface{}) error {
 	instanceStateService := NewInstanceStateService(meta.(*ve.SdkClient))
-	if err := instanceStateService.Dispatcher.Delete(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(instanceStateService, d, ResourceVolcengineEcsInstanceState()); err != nil {
 		return fmt.Errorf("error on deleting instance state %q, %w", d.Id(), err)
 	}
 	return nil

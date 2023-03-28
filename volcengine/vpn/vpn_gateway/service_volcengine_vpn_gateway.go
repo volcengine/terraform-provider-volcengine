@@ -14,14 +14,12 @@ import (
 )
 
 type VolcengineVpnGatewayService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewVpnGatewayService(c *ve.SdkClient) *VolcengineVpnGatewayService {
 	return &VolcengineVpnGatewayService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

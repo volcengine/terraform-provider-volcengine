@@ -100,7 +100,7 @@ func ResourceVolcengineInstance() *schema.Resource {
 
 func resourceVolcengineInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineInstance())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineInstance())
 	if err != nil {
 		return fmt.Errorf(" Error on creating instance %q,%s", d.Id(), err)
 	}
@@ -109,7 +109,7 @@ func resourceVolcengineInstanceCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineInstance())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting instance %q, %s", d.Id(), err)
 	}
@@ -118,7 +118,7 @@ func resourceVolcengineInstanceDelete(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineInstance())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineInstance())
 	if err != nil {
 		return fmt.Errorf("error on reading instance %q,%s", d.Id(), err)
 	}
@@ -127,7 +127,7 @@ func resourceVolcengineInstanceRead(d *schema.ResourceData, meta interface{}) (e
 
 func resourceVolcengineInstanceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineInstance())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineInstance())
 	if err != nil {
 		return fmt.Errorf("error on updating instance %q, %s", d.Id(), err)
 	}

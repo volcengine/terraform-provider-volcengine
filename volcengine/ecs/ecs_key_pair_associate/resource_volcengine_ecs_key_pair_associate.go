@@ -63,7 +63,7 @@ func ResourceVolcengineEcsKeyPairAssociate() *schema.Resource {
 
 func resourceVolcengineEcsKeyPairAssociateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewEcsKeyPairAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineEcsKeyPairAssociate())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineEcsKeyPairAssociate())
 	if err != nil {
 		return fmt.Errorf("error on creating ecs key pair Associate %q, %s", d.Id(), err)
 	}
@@ -72,7 +72,7 @@ func resourceVolcengineEcsKeyPairAssociateCreate(d *schema.ResourceData, meta in
 
 func resourceVolcengineEcsKeyPairAssociateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewEcsKeyPairAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineEcsKeyPairAssociate())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineEcsKeyPairAssociate())
 	if err != nil {
 		return fmt.Errorf("error on reading ecs key pair Associate %q, %s", d.Id(), err)
 	}
@@ -81,7 +81,7 @@ func resourceVolcengineEcsKeyPairAssociateRead(d *schema.ResourceData, meta inte
 
 func resourceVolcengineEcsKeyPairAssociateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewEcsKeyPairAssociateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineEcsKeyPairAssociate())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineEcsKeyPairAssociate())
 	if err != nil {
 		return fmt.Errorf("error on deleting ecs key pair Associate %q, %s", d.Id(), err)
 	}

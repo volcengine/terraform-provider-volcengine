@@ -10,14 +10,12 @@ import (
 )
 
 type VolcengineMongoSpecService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewSpecService(c *ve.SdkClient) *VolcengineMongoSpecService {
 	return &VolcengineMongoSpecService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 
@@ -59,7 +57,7 @@ func (s *VolcengineMongoSpecService) ReadResources(condition map[string]interfac
 		return nil, err
 	}
 	if results == nil {
-		results = make([]interface{}, 0)
+		results = map[string]interface{}{}
 	}
 	data = append(data, results)
 	return data, nil

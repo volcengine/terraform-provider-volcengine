@@ -162,5 +162,5 @@ func DataSourceVolcengineVolumes() *schema.Resource {
 
 func dataSourceVolcengineVolumesRead(d *schema.ResourceData, meta interface{}) error {
 	volumeService := NewVolumeService(meta.(*ve.SdkClient))
-	return volumeService.Dispatcher.Data(volumeService, d, DataSourceVolcengineVolumes())
+	return ve.DefaultDispatcher().Data(volumeService, d, DataSourceVolcengineVolumes())
 }

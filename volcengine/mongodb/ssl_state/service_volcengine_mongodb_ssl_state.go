@@ -3,9 +3,10 @@ package ssl_state
 import (
 	"errors"
 	"fmt"
-	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 	"strings"
 	"time"
+
+	mongodbInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/instance"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -14,14 +15,12 @@ import (
 )
 
 type VolcengineMongoDBSSLStateService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewMongoDBSSLStateService(c *ve.SdkClient) *VolcengineMongoDBSSLStateService {
 	return &VolcengineMongoDBSSLStateService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 
@@ -70,7 +69,7 @@ func (s *VolcengineMongoDBSSLStateService) ReadResources(condition map[string]in
 		return data, err
 	}
 	if results == nil {
-		results = []interface{}{}
+		results = map[string]interface{}{}
 	}
 	return []interface{}{results}, nil
 }
@@ -166,7 +165,6 @@ func (s *VolcengineMongoDBSSLStateService) ModifyResource(resourceData *schema.R
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
-				d.SetId(fmt.Sprintf("ssl:%s", d.Get("instance_id")))
 				d.Set("ssl_action", "noupdate")
 				return nil
 			},
@@ -200,11 +198,6 @@ func (s *VolcengineMongoDBSSLStateService) RemoveResource(resourceData *schema.R
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
-				d.SetId(fmt.Sprintf("ssl:%s", d.Get("instance_id")))
-				return nil
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				mongodbInstance.NewMongoDBInstanceService(s.Client): {

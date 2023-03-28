@@ -312,7 +312,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 
 func resourceVolcengineEcsInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	instanceService := NewEcsService(meta.(*ve.SdkClient))
-	err = instanceService.Dispatcher.Create(instanceService, d, ResourceVolcengineEcsInstance())
+	err = ve.NewRateLimitDispatcher(rateInfo).Create(instanceService, d, ResourceVolcengineEcsInstance())
 	if err != nil {
 		return fmt.Errorf("error on creating ecs instance  %q, %s", d.Id(), err)
 	}
@@ -321,7 +321,7 @@ func resourceVolcengineEcsInstanceCreate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineEcsInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	instanceService := NewEcsService(meta.(*ve.SdkClient))
-	err = instanceService.Dispatcher.Read(instanceService, d, ResourceVolcengineEcsInstance())
+	err = ve.NewRateLimitDispatcher(rateInfo).Read(instanceService, d, ResourceVolcengineEcsInstance())
 	if err != nil {
 		return fmt.Errorf("error on reading ecs instance %q, %s", d.Id(), err)
 	}
@@ -330,7 +330,7 @@ func resourceVolcengineEcsInstanceRead(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineEcsInstanceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	instanceService := NewEcsService(meta.(*ve.SdkClient))
-	err = instanceService.Dispatcher.Update(instanceService, d, ResourceVolcengineEcsInstance())
+	err = ve.NewRateLimitDispatcher(rateInfo).Update(instanceService, d, ResourceVolcengineEcsInstance())
 	if err != nil {
 		return fmt.Errorf("error on updating ecs instance  %q, %s", d.Id(), err)
 	}
@@ -339,7 +339,7 @@ func resourceVolcengineEcsInstanceUpdate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineEcsInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	instanceService := NewEcsService(meta.(*ve.SdkClient))
-	err = instanceService.Dispatcher.Delete(instanceService, d, ResourceVolcengineEcsInstance())
+	err = ve.NewRateLimitDispatcher(rateInfo).Delete(instanceService, d, ResourceVolcengineEcsInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting ecs instance %q, %s", d.Id(), err)
 	}

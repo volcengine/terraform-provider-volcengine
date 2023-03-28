@@ -89,7 +89,7 @@ func ResourceVolcengineCrRegistryState() *schema.Resource {
 
 func resourceVolcengineCrRegistryStateCreate(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRegistryStateService(meta.(*ve.SdkClient))
-	if err := service.Dispatcher.Create(service, d, ResourceVolcengineCrRegistryState()); err != nil {
+	if err := ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrRegistryState()); err != nil {
 		return fmt.Errorf("error on creating instance state %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineCrRegistryStateRead(d, meta)
@@ -97,7 +97,7 @@ func resourceVolcengineCrRegistryStateCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineCrRegistryStateRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRegistryStateService(meta.(*ve.SdkClient))
-	if err := service.Dispatcher.Read(service, d, ResourceVolcengineCrRegistryState()); err != nil {
+	if err := ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrRegistryState()); err != nil {
 		return fmt.Errorf("error on reading instance state %q, %w", d.Id(), err)
 	}
 	return nil
@@ -105,7 +105,7 @@ func resourceVolcengineCrRegistryStateRead(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineCrRegistryStateUpdate(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRegistryStateService(meta.(*ve.SdkClient))
-	if err := service.Dispatcher.Update(service, d, ResourceVolcengineCrRegistryState()); err != nil {
+	if err := ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrRegistryState()); err != nil {
 		return fmt.Errorf("error on updating instance state %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineCrRegistryStateRead(d, meta)
@@ -113,7 +113,7 @@ func resourceVolcengineCrRegistryStateUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineCrRegistryStateDelete(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRegistryStateService(meta.(*ve.SdkClient))
-	if err := service.Dispatcher.Delete(service, d, ResourceVolcengineCrRegistryState()); err != nil {
+	if err := ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCrRegistryState()); err != nil {
 		return fmt.Errorf("error on deleting instance state %q, %w", d.Id(), err)
 	}
 	return nil

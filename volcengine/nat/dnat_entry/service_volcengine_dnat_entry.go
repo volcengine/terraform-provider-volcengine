@@ -12,8 +12,7 @@ import (
 )
 
 type VolcengineDnatEntryService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func (s *VolcengineDnatEntryService) GetClient() *ve.SdkClient {
@@ -228,8 +227,7 @@ func (s *VolcengineDnatEntryService) ReadResourceId(id string) string {
 
 func NewDnatEntryService(c *ve.SdkClient) *VolcengineDnatEntryService {
 	return &VolcengineDnatEntryService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

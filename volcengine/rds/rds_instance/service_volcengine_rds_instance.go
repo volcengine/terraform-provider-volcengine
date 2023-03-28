@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineRdsInstanceService struct {
-	Client     *volc.SdkClient
-	Dispatcher *volc.Dispatcher
+	Client *volc.SdkClient
 }
 
 func NewRdsInstanceService(c *volc.SdkClient) *VolcengineRdsInstanceService {
 	return &VolcengineRdsInstanceService{
-		Client:     c,
-		Dispatcher: &volc.Dispatcher{},
+		Client: c,
 	}
 }
 

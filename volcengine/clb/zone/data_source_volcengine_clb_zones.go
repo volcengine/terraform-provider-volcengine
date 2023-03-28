@@ -53,5 +53,5 @@ func DataSourceVolcengineClbZones() *schema.Resource {
 
 func dataSourceVolcengineClbZonesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewClbZoneService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineClbZones())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineClbZones())
 }

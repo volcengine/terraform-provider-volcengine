@@ -13,8 +13,7 @@ import (
 )
 
 type VolcengineScalingConfigurationAttachmentService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func (s *VolcengineScalingConfigurationAttachmentService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
@@ -146,8 +145,7 @@ func (s *VolcengineScalingConfigurationAttachmentService) ReadResourceId(id stri
 
 func NewScalingConfigurationAttachmentService(client *ve.SdkClient) *VolcengineScalingConfigurationAttachmentService {
 	return &VolcengineScalingConfigurationAttachmentService{
-		Client:     client,
-		Dispatcher: &ve.Dispatcher{},
+		Client: client,
 	}
 }
 

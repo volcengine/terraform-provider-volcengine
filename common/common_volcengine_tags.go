@@ -3,9 +3,11 @@ package common
 import (
 	"bytes"
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/volcengine/terraform-provider-volcengine/logger"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -138,4 +140,35 @@ func SetResourceTags(serviceClient *SdkClient, addAction, RemoveAction, resource
 	callbacks = append(callbacks, addCallback)
 
 	return callbacks
+}
+
+func FilterSystemTags(tags []interface{}) []interface{} {
+	var res []interface{}
+	if len(tags) == 0 {
+		return res
+	}
+	for _, tag := range tags {
+		t := tag.(map[string]interface{})
+		var tagKey string
+		var tagValue interface{}
+		if v, ok := t["Key"]; ok {
+			tagKey = v.(string)
+			tagValue = t["Value"]
+		}
+		if !tagIgnored(tagKey, tagValue) {
+			res = append(res, tag)
+		}
+	}
+	return res
+}
+
+func tagIgnored(tagKey string, tagValue interface{}) bool {
+	filter := []string{"^volc:"}
+	for _, v := range filter {
+		ok, _ := regexp.MatchString(v, tagKey)
+		if ok {
+			return true
+		}
+	}
+	return false
 }

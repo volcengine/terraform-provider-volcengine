@@ -73,7 +73,7 @@ func ResourceVolcengineSecurityGroup() *schema.Resource {
 
 func resourceVolcengineSecurityGroupCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupService := NewSecurityGroupService(meta.(*ve.SdkClient))
-	err = securityGroupService.Dispatcher.Create(securityGroupService, d, ResourceVolcengineSecurityGroup())
+	err = ve.DefaultDispatcher().Create(securityGroupService, d, ResourceVolcengineSecurityGroup())
 	if err != nil {
 		return fmt.Errorf("error on creating securityGroupService  %q, %w", d.Id(), err)
 	}
@@ -82,7 +82,7 @@ func resourceVolcengineSecurityGroupCreate(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineSecurityGroupRead(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupService := NewSecurityGroupService(meta.(*ve.SdkClient))
-	err = securityGroupService.Dispatcher.Read(securityGroupService, d, ResourceVolcengineSecurityGroup())
+	err = ve.DefaultDispatcher().Read(securityGroupService, d, ResourceVolcengineSecurityGroup())
 	if err != nil {
 		return fmt.Errorf("error on reading securityGroupService %q, %w", d.Id(), err)
 	}
@@ -91,7 +91,7 @@ func resourceVolcengineSecurityGroupRead(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineSecurityGroupUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupService := NewSecurityGroupService(meta.(*ve.SdkClient))
-	err = securityGroupService.Dispatcher.Update(securityGroupService, d, ResourceVolcengineSecurityGroup())
+	err = ve.DefaultDispatcher().Update(securityGroupService, d, ResourceVolcengineSecurityGroup())
 	if err != nil {
 		return fmt.Errorf("error on updating securityGroupService  %q, %w", d.Id(), err)
 	}
@@ -100,7 +100,7 @@ func resourceVolcengineSecurityGroupUpdate(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineSecurityGroupDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupService := NewSecurityGroupService(meta.(*ve.SdkClient))
-	err = securityGroupService.Dispatcher.Delete(securityGroupService, d, ResourceVolcengineSecurityGroup())
+	err = ve.DefaultDispatcher().Delete(securityGroupService, d, ResourceVolcengineSecurityGroup())
 	if err != nil {
 		return fmt.Errorf("error on deleting securityGroupService %q, %w", d.Id(), err)
 	}

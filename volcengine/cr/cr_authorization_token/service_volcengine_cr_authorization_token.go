@@ -11,14 +11,12 @@ import (
 )
 
 type VolcengineCrAuthorizationTokenService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewCrAuthorizationTokenService(c *ve.SdkClient) *VolcengineCrAuthorizationTokenService {
 	return &VolcengineCrAuthorizationTokenService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

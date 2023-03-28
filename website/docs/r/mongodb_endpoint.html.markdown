@@ -11,19 +11,20 @@ Provides a resource to manage mongodb endpoint
 ## Example Usage
 ```hcl
 resource "volcengine_mongodb_endpoint" "foo" {
-  instance_id  = "mongo-shard-xxx"
-  object_id    = "mongo-shard-xxx-s1"
+  instance_id = "mongo-replica-38cf5badeb9e"
+  # object_id="mongo-shard-8ad9f45e173e"
   network_type = "Public"
-  eip_ids      = ["eip-xx", "eip-xx"]
+  eip_ids      = ["eip-3rfe12dvmz8qo5zsk2h91q05p"]
+  # mongos_node_ids=["mongo-shard-8ad9f45e173e-0"]
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `instance_id` - (Required, ForceNew) The instance where the endpoint resides.
-* `eip_ids` - (Optional) A list of EIP IDs that need to be bound when applying for endpoint.
-* `mongos_node_ids` - (Optional) A list of the Mongos node that needs to apply for the endpoint.
-* `network_type` - (Optional) The network type of endpoint.
-* `object_id` - (Optional) The object ID corresponding to the endpoint.
+* `eip_ids` - (Optional, ForceNew) A list of EIP IDs that need to be bound when applying for endpoint.
+* `mongos_node_ids` - (Optional, ForceNew) A list of the Mongos node that needs to apply for the endpoint.
+* `network_type` - (Optional, ForceNew) The network type of endpoint.
+* `object_id` - (Optional, ForceNew) The object ID corresponding to the endpoint.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

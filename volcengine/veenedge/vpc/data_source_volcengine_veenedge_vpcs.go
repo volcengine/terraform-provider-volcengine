@@ -228,5 +228,5 @@ func DataSourceVolcengineVpcs() *schema.Resource {
 
 func dataSourceVolcengineVpcsRead(d *schema.ResourceData, meta interface{}) error {
 	vpcService := NewVpcService(meta.(*ve.SdkClient))
-	return vpcService.Dispatcher.Data(vpcService, d, DataSourceVolcengineVpcs())
+	return ve.DefaultDispatcher().Data(vpcService, d, DataSourceVolcengineVpcs())
 }

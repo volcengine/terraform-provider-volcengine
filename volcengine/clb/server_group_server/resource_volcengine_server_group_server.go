@@ -86,7 +86,7 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 
 func resourceVolcengineServerGroupServerCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupServerService := NewServerGroupServerService(meta.(*ve.SdkClient))
-	err = serverGroupServerService.Dispatcher.Create(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
+	err = ve.DefaultDispatcher().Create(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
 	if err != nil {
 		return fmt.Errorf("error on creating serverGroupServer  %q, %w", d.Id(), err)
 	}
@@ -95,7 +95,7 @@ func resourceVolcengineServerGroupServerCreate(d *schema.ResourceData, meta inte
 
 func resourceVolcengineServerGroupServerRead(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupServerService := NewServerGroupServerService(meta.(*ve.SdkClient))
-	err = serverGroupServerService.Dispatcher.Read(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
+	err = ve.DefaultDispatcher().Read(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
 	if err != nil {
 		return fmt.Errorf("error on reading serverGroupServer %q, %w", d.Id(), err)
 	}
@@ -104,7 +104,7 @@ func resourceVolcengineServerGroupServerRead(d *schema.ResourceData, meta interf
 
 func resourceVolcengineServerGroupServerUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupServerService := NewServerGroupServerService(meta.(*ve.SdkClient))
-	err = serverGroupServerService.Dispatcher.Update(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
+	err = ve.DefaultDispatcher().Update(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
 	if err != nil {
 		return fmt.Errorf("error on updating serverGroupServer  %q, %w", d.Id(), err)
 	}
@@ -113,7 +113,7 @@ func resourceVolcengineServerGroupServerUpdate(d *schema.ResourceData, meta inte
 
 func resourceVolcengineServerGroupServerDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	serverGroupServerService := NewServerGroupServerService(meta.(*ve.SdkClient))
-	err = serverGroupServerService.Dispatcher.Delete(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
+	err = ve.DefaultDispatcher().Delete(serverGroupServerService, d, ResourceVolcengineServerGroupServer())
 	if err != nil {
 		return fmt.Errorf("error on deleting serverGroupServer %q, %w", d.Id(), err)
 	}

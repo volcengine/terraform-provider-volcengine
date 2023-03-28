@@ -80,7 +80,7 @@ func ResourceVolcengineRdsParameterTemplate() *schema.Resource {
 
 func resourceVolcengineRdsParameterTemplateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsParameterTemplateService := NewRdsParameterTemplateService(meta.(*volc.SdkClient))
-	err = rdsParameterTemplateService.Dispatcher.Create(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
+	err = volc.DefaultDispatcher().Create(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
 	if err != nil {
 		return fmt.Errorf("error on creating RDS parameter template %q, %w", d.Id(), err)
 	}
@@ -89,7 +89,7 @@ func resourceVolcengineRdsParameterTemplateCreate(d *schema.ResourceData, meta i
 
 func resourceVolcengineRdsParameterTemplateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsParameterTemplateService := NewRdsParameterTemplateService(meta.(*volc.SdkClient))
-	err = rdsParameterTemplateService.Dispatcher.Read(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
+	err = volc.DefaultDispatcher().Read(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
 	if err != nil {
 		return fmt.Errorf("error on reading RDS parameter template %q, %w", d.Id(), err)
 	}
@@ -98,7 +98,7 @@ func resourceVolcengineRdsParameterTemplateRead(d *schema.ResourceData, meta int
 
 func resourceVolcengineRdsParameterTemplateUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsParameterTemplateService := NewRdsParameterTemplateService(meta.(*volc.SdkClient))
-	err = rdsParameterTemplateService.Dispatcher.Update(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
+	err = volc.DefaultDispatcher().Update(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
 	if err != nil {
 		return fmt.Errorf("error on updating RDS parameter template %q, %w", d.Id(), err)
 	}
@@ -107,7 +107,7 @@ func resourceVolcengineRdsParameterTemplateUpdate(d *schema.ResourceData, meta i
 
 func resourceVolcengineRdsParameterTemplateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	rdsParameterTemplateService := NewRdsParameterTemplateService(meta.(*volc.SdkClient))
-	err = rdsParameterTemplateService.Dispatcher.Delete(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
+	err = volc.DefaultDispatcher().Delete(rdsParameterTemplateService, d, ResourceVolcengineRdsParameterTemplate())
 	if err != nil {
 		return fmt.Errorf("error on deleting RDS parameter template %q, %w", d.Id(), err)
 	}

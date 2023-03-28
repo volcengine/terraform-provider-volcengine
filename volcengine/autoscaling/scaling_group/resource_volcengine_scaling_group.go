@@ -148,7 +148,7 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 
 func resourceVolcengineScalingGroupCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingGroupService := NewScalingGroupService(meta.(*ve.SdkClient))
-	err = scalingGroupService.Dispatcher.Create(scalingGroupService, d, ResourceVolcengineScalingGroup())
+	err = ve.DefaultDispatcher().Create(scalingGroupService, d, ResourceVolcengineScalingGroup())
 	if err != nil {
 		return fmt.Errorf("error on creating ScalingGroup %q, %s", d.Id(), err)
 	}
@@ -157,7 +157,7 @@ func resourceVolcengineScalingGroupCreate(d *schema.ResourceData, meta interface
 
 func resourceVolcengineScalingGroupRead(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingGroupService := NewScalingGroupService(meta.(*ve.SdkClient))
-	err = scalingGroupService.Dispatcher.Read(scalingGroupService, d, ResourceVolcengineScalingGroup())
+	err = ve.DefaultDispatcher().Read(scalingGroupService, d, ResourceVolcengineScalingGroup())
 	if err != nil {
 		return fmt.Errorf("error on reading ScalingGroup %q, %s", d.Id(), err)
 	}
@@ -166,7 +166,7 @@ func resourceVolcengineScalingGroupRead(d *schema.ResourceData, meta interface{}
 
 func resourceVetackScalingGroupUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingGroupService := NewScalingGroupService(meta.(*ve.SdkClient))
-	err = scalingGroupService.Dispatcher.Update(scalingGroupService, d, ResourceVolcengineScalingGroup())
+	err = ve.DefaultDispatcher().Update(scalingGroupService, d, ResourceVolcengineScalingGroup())
 	if err != nil {
 		return fmt.Errorf("error on updating ScalingGroup %q, %s", d.Id(), err)
 	}
@@ -175,7 +175,7 @@ func resourceVetackScalingGroupUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVetackScalingGroupDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	scalingGroupService := NewScalingGroupService(meta.(*ve.SdkClient))
-	err = scalingGroupService.Dispatcher.Delete(scalingGroupService, d, ResourceVolcengineScalingGroup())
+	err = ve.DefaultDispatcher().Delete(scalingGroupService, d, ResourceVolcengineScalingGroup())
 	if err != nil {
 		return fmt.Errorf("error on deleting ScalingGroup %q, %s", d.Id(), err)
 	}

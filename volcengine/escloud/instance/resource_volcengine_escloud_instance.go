@@ -207,7 +207,7 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 
 func resourceVolcengineESCloudInstanceCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewESCloudInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineESCloudInstance())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineESCloudInstance())
 	if err != nil {
 		return fmt.Errorf("Error on creating ESCloud instance %q,%s", d.Id(), err)
 	}
@@ -216,7 +216,7 @@ func resourceVolcengineESCloudInstanceCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineESCloudInstanceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewESCloudInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineESCloudInstance())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineESCloudInstance())
 	if err != nil {
 		return fmt.Errorf("error on updating ESCloud instance  %q, %s", d.Id(), err)
 	}
@@ -225,7 +225,7 @@ func resourceVolcengineESCloudInstanceUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineESCloudInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewESCloudInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineESCloudInstance())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineESCloudInstance())
 	if err != nil {
 		return fmt.Errorf("error on deleting ecs instance %q, %s", d.Id(), err)
 	}
@@ -234,7 +234,7 @@ func resourceVolcengineESCloudInstanceDelete(d *schema.ResourceData, meta interf
 
 func resourceVolcengineESCloudInstanceRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewESCloudInstanceService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineESCloudInstance())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineESCloudInstance())
 	if err != nil {
 		return fmt.Errorf("Error on reading ESCloud instance %q,%s", d.Id(), err)
 	}

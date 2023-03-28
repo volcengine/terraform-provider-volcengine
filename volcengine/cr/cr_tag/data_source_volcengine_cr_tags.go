@@ -148,5 +148,5 @@ func DataSourceVolcengineCrTags() *schema.Resource {
 
 func dataSourceVolcengineCrTagsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrTagService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCrTags())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineCrTags())
 }
