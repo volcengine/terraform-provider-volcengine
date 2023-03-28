@@ -383,6 +383,18 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 				// (*call.SdkParam)["DBEngineVersion"] = "MongoDB_4_0"
 				// (*call.SdkParam)["NodeNumber"] = 3
 				// (*call.SdkParam)["SuperAccountName"] = "root"
+
+				if (*call.SdkParam)["InstanceType"] == "ShardedCluster" {
+					if _, ok := (*call.SdkParam)["MongosNodeSpec"]; !ok {
+						return false, fmt.Errorf("mongos_node_spec must exist for ShardedCluster")
+					}
+					if _, ok := (*call.SdkParam)["MongosNodeNumber"]; !ok {
+						return false, fmt.Errorf("mongos_node_number must exist for ShardedCluster")
+					}
+					if _, ok := (*call.SdkParam)["ShardNumber"]; !ok {
+						return false, fmt.Errorf("shard_number must exist for ShardedCluster")
+					}
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
