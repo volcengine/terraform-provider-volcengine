@@ -223,9 +223,11 @@ func (s *VolcengineSubnetService) ModifyResource(resourceData *schema.ResourceDa
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["SubnetId"] = d.Id()
 
-				ipv6CidrBlock, exists := d.GetOkExists("ipv6_cidr_block")
-				if exists {
-					(*call.SdkParam)["Ipv6CidrBlock"] = ipv6CidrBlock
+				if d.HasChange("enable_ipv6") && d.Get("enable_ipv6").(bool) {
+					ipv6CidrBlock, exists := d.GetOkExists("ipv6_cidr_block")
+					if exists {
+						(*call.SdkParam)["Ipv6CidrBlock"] = ipv6CidrBlock
+					}
 				}
 
 				return true, nil
