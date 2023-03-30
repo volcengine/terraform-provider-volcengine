@@ -44,14 +44,14 @@ func ResourceVolcengineCrVpcEndpoint() *schema.Resource {
 			},
 			"vpcs": {
 				Type:        schema.TypeSet,
-				Optional:    true,
-				Description: "List of vpc meta.",
+				Required:    true,
+				Description: "List of vpc meta. When apply is executed for the first time, the vpcs in the tf file will be added to the existing vpcs, and subsequent apply will overwrite the existing vpcs with the vpcs in the tf file.",
 				Set:         vpcHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"vpc_id": {
 							Type:        schema.TypeString,
-							Required:    true,
+							Optional:    true,
 							Description: "The id of the vpc.",
 						},
 						"subnet_id": {

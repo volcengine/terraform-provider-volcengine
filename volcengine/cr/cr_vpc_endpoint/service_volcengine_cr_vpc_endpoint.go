@@ -108,6 +108,11 @@ func (v *VolcengineCrVpcEndpointService) CreateResource(data *schema.ResourceDat
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				var err error
+				call.SdkParam, err = v.integrateVpcParams(d, call)
+				if err != nil {
+					return nil, err
+				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return v.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -163,12 +168,25 @@ func (v *VolcengineCrVpcEndpointService) ModifyResource(data *schema.ResourceDat
 						if len(value.(string)) == 0 {
 							delete(paramMap, key)
 						}
+					} else if strings.Contains(key, "VpcId") {
+						value, ok = value.(string)
+						if !ok {
+							return false, fmt.Errorf("sdk param vpcId is not a string")
+						}
+						// 删除force get导致的vpcId为空
+						if len(value.(string)) == 0 {
+							delete(paramMap, key)
+						}
 					}
 				}
 				*call.SdkParam = paramMap
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				vpcs := (*call.SdkParam)["Vpcs"]
+				if vpcs == nil || len(vpcs.([]interface{})) == 0 {
+					(*call.SdkParam)["Vpcs"] = []interface{}{}
+				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return v.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -274,6 +292,83 @@ func (v *VolcengineCrVpcEndpointService) checkVpcStatus(d *schema.ResourceData) 
 		}
 		return nil
 	})
+}
+
+func (v *VolcengineCrVpcEndpointService) integrateVpcParams(d *schema.ResourceData, call ve.SdkCall) (*map[string]interface{}, error) {
+	var (
+		vpcIdsMap = make(map[string]interface{})
+		vpcs      []interface{}
+		newVpc    []interface{}
+		oldVpc    []interface{}
+		ok        bool
+	)
+	logger.DebugInfo("sdk param : ", *call.SdkParam)
+	/*
+		0. 预备传入的参数 vpcs
+		1. 读取用户已有信息，如空直接返回，拿到用户已有vpc信息，加入去重map，加入vpcs
+		2. 取现有tf内定义的vpc信息，如存在VpcId，则比较是否跟map中重复，如不重复，加入vpcs
+		3. 覆盖原sdk param vpcs
+	*/
+	resp, err := v.ReadResource(d, d.Get("registry").(string))
+	if err != nil {
+		return nil, fmt.Errorf("read resource err")
+	}
+
+	old := resp["Vpcs"]
+	if old == nil {
+		return call.SdkParam, nil
+	}
+	oldVpc, ok = old.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("vpcs is not a slice")
+	}
+	for _, o := range oldVpc {
+		oldVpcMap, ok := o.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("vpc is not a map")
+		}
+		vpcId, ok := oldVpcMap["VpcId"].(string)
+		if !ok {
+			return nil, fmt.Errorf("get vpc id err")
+		}
+		vpcIdsMap[vpcId] = o
+		vpcs = append(vpcs, map[string]interface{}{
+			"VpcId":     vpcId,
+			"SubnetId":  oldVpcMap["SubnetId"].(string),
+			"AccountId": (int)(oldVpcMap["AccountId"].(float64)),
+		})
+	}
+	logger.DebugInfo("old vpc map : ", vpcs)
+
+	newVpcInterface := (*call.SdkParam)["Vpcs"]
+	if newVpcInterface == nil {
+		(*call.SdkParam)["Vpcs"] = vpcs
+		return call.SdkParam, nil
+	}
+	newVpc, ok = newVpcInterface.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("vpcs is not a slice")
+	}
+	for _, n := range newVpc {
+		newVpcMap, ok := n.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("vpc is not a map")
+		}
+		vpcId, ok := newVpcMap["VpcId"].(string)
+		if !ok {
+			return nil, fmt.Errorf("vpc id is missing")
+		}
+		// 跟用户已有的重复
+		if _, ok := vpcIdsMap[vpcId]; ok {
+			continue
+		}
+		vpcIdsMap[vpcId] = n
+		vpcs = append(vpcs, n)
+	}
+
+	logger.DebugInfo("sdk param vpcs change : ", vpcs)
+	(*call.SdkParam)["Vpcs"] = vpcs
+	return call.SdkParam, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
