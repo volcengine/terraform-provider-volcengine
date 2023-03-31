@@ -65,7 +65,7 @@ The `auto_scaling` object supports the following:
 
 * `desired_replicas` - (Optional) The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.
 * `enabled` - (Optional) Is Enabled of AutoScaling.
-* `max_replicas` - (Optional) The MaxReplicas of AutoScaling, default 10, range in 1~1000.
+* `max_replicas` - (Optional) The MaxReplicas of AutoScaling, default 10, range in 1~2000.
 * `min_replicas` - (Optional) The MinReplicas of AutoScaling, default 0.
 * `priority` - (Optional) The Priority of AutoScaling, default 10, rang in 0~100.
 

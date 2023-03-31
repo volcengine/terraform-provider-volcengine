@@ -4,8 +4,9 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -151,14 +152,6 @@ func (s *VolcengineCrRegistryService) ReadResource(resourceData *schema.Resource
 	if len(data) == 0 {
 		return data, fmt.Errorf("CrRegistry %s is not exist", id)
 	}
-
-	deleteImmediately := resourceData.Get("delete_immediately")
-	if deleteImmediately == nil {
-		data["DeleteImmediately"] = false
-	} else {
-		data["DeleteImmediately"] = deleteImmediately
-	}
-
 	return data, err
 }
 
@@ -238,20 +231,10 @@ func (s *VolcengineCrRegistryService) CreateResource(resourceData *schema.Resour
 		callback := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      action,
-				ConvertMode: ve.RequestConvertAll,
+				ConvertMode: ve.RequestConvertIgnore,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					registry := resourceData.Id()
-					password := password.(string)
-
-					if password == "" {
-						return false, nil
-					}
-
-					bytes := []byte(password)
-					passwdBase64 := base64.StdEncoding.EncodeToString(bytes)
-
-					(*call.SdkParam)["Registry"] = registry
-					(*call.SdkParam)["Password"] = passwdBase64
+					(*call.SdkParam)["Registry"] = resourceData.Get("name")
+					(*call.SdkParam)["Password"] = base64.StdEncoding.EncodeToString([]byte(password.(string)))
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -274,18 +257,9 @@ func (s *VolcengineCrRegistryService) ModifyResource(resourceData *schema.Resour
 				Action:      action,
 				ConvertMode: ve.RequestConvertIgnore,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					registry := resourceData.Id()
-					password := resourceData.Get("password").(string)
-
-					if password == "" {
-						return false, nil
-					}
-
-					bytes := []byte(password)
-					passwdBase64 := base64.StdEncoding.EncodeToString(bytes)
-
-					(*call.SdkParam)["Registry"] = registry
-					(*call.SdkParam)["Password"] = passwdBase64
+					bytes := []byte(resourceData.Get("password").(string))
+					(*call.SdkParam)["Registry"] = resourceData.Get("name")
+					(*call.SdkParam)["Password"] = base64.StdEncoding.EncodeToString(bytes)
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -295,9 +269,6 @@ func (s *VolcengineCrRegistryService) ModifyResource(resourceData *schema.Resour
 			},
 		}
 		callbacks = append(callbacks, callback)
-	}
-	if resourceData.HasChange("delete_immediately") {
-		resourceData.Set("delete_immediately", resourceData.Get("delete_immediately"))
 	}
 	return callbacks
 }

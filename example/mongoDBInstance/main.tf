@@ -10,6 +10,11 @@ resource "volcengine_mongodb_instance" "foo"{
     instance_name="mongo-replica-be9995d32e4a"
     charge_type="PostPaid"
     super_account_password = "******"
+    project_name = "default"
+    tags {
+        key = "k1"
+        value = "v1"
+    }
     # period_unit="Month"
     # period=1
     # auto_renew=false

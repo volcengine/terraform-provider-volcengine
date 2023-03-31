@@ -33,6 +33,9 @@ type SdkCall struct {
 	LockId          LockId
 	AfterLocked     CallFunc
 	ServiceCategory ServiceCategory
+
+	//common inner use
+	refreshState func(*schema.ResourceData, []string, time.Duration, string) *resource.StateChangeConf
 }
 
 type StateRefresh struct {
@@ -215,7 +218,12 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 
 				// WaitForState
 				if doExecute && fn.Refresh != nil && err == nil {
-					stateConf := service.RefreshResourceState(d, fn.Refresh.Target, fn.Refresh.Timeout, d.Id())
+					var stateConf *resource.StateChangeConf
+					if fn.refreshState != nil {
+						stateConf = fn.refreshState(d, fn.Refresh.Target, fn.Refresh.Timeout, d.Id())
+					} else {
+						stateConf = service.RefreshResourceState(d, fn.Refresh.Target, fn.Refresh.Timeout, d.Id())
+					}
 					if stateConf != nil {
 						_, err = stateConf.WaitForState()
 					}

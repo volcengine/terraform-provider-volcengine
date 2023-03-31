@@ -411,7 +411,7 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 	callbacks := make([]volc.Callback, 0)
 
 	//project
-	projectCallback := volc.NewProjectService(s.Client).ModifyProject(volc.ProjectTrn{
+	projectCallback := volc.NewProjectService(s.Client).ModifyProjectOld(volc.ProjectTrn{
 		ResourceType: "instance",
 		ResourceID:   resourceData.Id(),
 		ServiceName:  "rds_mysql",

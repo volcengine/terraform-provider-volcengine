@@ -98,7 +98,14 @@ func (d *Dispatcher) Update(resourceService ResourceService, resourceDate *schem
 			}
 		}
 	}
-	callbacks := resourceService.ModifyResource(resourceDate, resource)
+	var callbacks []Callback
+	if projectUpdateEnabled, ok := resourceService.(ProjectUpdateEnabled); ok {
+		projectUpdateCallback := NewProjectService(resourceService.GetClient()).ModifyProject(projectUpdateEnabled.ProjectTrn(),
+			resourceDate, resource, resourceService)
+		callbacks = append(callbacks, projectUpdateCallback...)
+	}
+	callbacks = append(callbacks, resourceService.ModifyResource(resourceDate, resource)...)
+
 	var calls []SdkCall
 	for _, callback := range callbacks {
 		if callback.Err != nil {

@@ -168,7 +168,7 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							Description: "The maintainable time period for the instance.",
+							Description: "The maintainable time period for the instance. Works only on modified scenes.",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								// 创建时不存在这个参数，修改时存在这个参数
 								return d.Id() == ""
@@ -178,7 +178,7 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Computed:    true,
-							Description: "The maintainable date for the instance.",
+							Description: "The maintainable date for the instance. Works only on modified scenes.",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								// 创建时不存在这个参数，修改时存在这个参数
 								return d.Id() == ""

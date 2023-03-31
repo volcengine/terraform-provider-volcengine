@@ -11,13 +11,16 @@ Provides a resource to manage cr tag
 ## Example Usage
 ```hcl
 # Tag cannot be created,please import by command `terraform import volcengine_cr_tag.default registry:namespace:repository:tag`
-resource "volcengine_cr_tags" "default" {
-
+resource "volcengine_cr_tag" "default" {
+  registry   = "enterprise-1"
+  namespace  = "langyu"
+  repository = "repo"
+  name       = "v2"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `name` - (Required) The name of OCI product.
+* `name` - (Required, ForceNew) The name of OCI product.
 * `namespace` - (Required, ForceNew) The target namespace name.
 * `registry` - (Required, ForceNew) The CrRegistry name.
 * `repository` - (Required, ForceNew) The name of repository.

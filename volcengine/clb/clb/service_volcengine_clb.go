@@ -218,7 +218,7 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 	var callbacks []ve.Callback
 
 	//project
-	projectCallback := ve.NewProjectService(s.Client).ModifyProject(ve.ProjectTrn{
+	projectCallback := ve.NewProjectService(s.Client).ModifyProjectOld(ve.ProjectTrn{
 		ResourceType: "clb",
 		ResourceID:   resourceData.Id(),
 		ServiceName:  "clb",
