@@ -33,16 +33,15 @@ func crRegistryStateImporter(d *schema.ResourceData, m interface{}) ([]*schema.R
 
 func ResourceVolcengineCrRegistryState() *schema.Resource {
 	return &schema.Resource{
-		Delete: resourceVolcengineCrRegistryStateDelete,
 		Create: resourceVolcengineCrRegistryStateCreate,
-		Read:   resourceVolcengineCrRegistryStateRead,
 		Update: resourceVolcengineCrRegistryStateUpdate,
+		Read:   resourceVolcengineCrRegistryStateRead,
+		Delete: resourceVolcengineCrRegistryStateDelete,
 		Importer: &schema.ResourceImporter{
 			State: crRegistryStateImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Hour),
-			Update: schema.DefaultTimeout(1 * time.Hour),
 			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
@@ -58,6 +57,7 @@ func ResourceVolcengineCrRegistryState() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The cr instance id.",
 			},
 			"status": {
@@ -95,20 +95,16 @@ func resourceVolcengineCrRegistryStateCreate(d *schema.ResourceData, meta interf
 	return resourceVolcengineCrRegistryStateRead(d, meta)
 }
 
+func resourceVolcengineCrRegistryStateUpdate(d *schema.ResourceData, meta interface{}) error {
+	return fmt.Errorf("this resource does not allow update operation")
+}
+
 func resourceVolcengineCrRegistryStateRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCrRegistryStateService(meta.(*ve.SdkClient))
 	if err := ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrRegistryState()); err != nil {
 		return fmt.Errorf("error on reading instance state %q, %w", d.Id(), err)
 	}
 	return nil
-}
-
-func resourceVolcengineCrRegistryStateUpdate(d *schema.ResourceData, meta interface{}) error {
-	service := NewCrRegistryStateService(meta.(*ve.SdkClient))
-	if err := ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrRegistryState()); err != nil {
-		return fmt.Errorf("error on updating instance state %q, %w", d.Id(), err)
-	}
-	return resourceVolcengineCrRegistryStateRead(d, meta)
 }
 
 func resourceVolcengineCrRegistryStateDelete(d *schema.ResourceData, meta interface{}) error {

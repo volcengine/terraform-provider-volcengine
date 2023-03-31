@@ -696,6 +696,15 @@ func (s *VolcengineMongoDBInstanceService) setResourceTags(resourceData *schema.
 	return callbacks
 }
 
+func (s *VolcengineMongoDBInstanceService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "mongodb",
+		ResourceType:         "instance",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}
+
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "mongodb",

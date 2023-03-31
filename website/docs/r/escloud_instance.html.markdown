@@ -64,8 +64,8 @@ The `instance_configuration` object supports the following:
 * `zone_number` - (Required, ForceNew) The zone count of the ESCloud instance used.
 * `force_restart_after_scale` - (Optional) Whether to force restart when changes are made. If true, it means that the cluster will be forced to restart without paying attention to instance availability.
 * `instance_name` - (Optional) The name of ESCloud instance.
-* `maintenance_day` - (Optional) The maintainable date for the instance.
-* `maintenance_time` - (Optional) The maintainable time period for the instance.
+* `maintenance_day` - (Optional) The maintainable date for the instance. Works only on modified scenes.
+* `maintenance_time` - (Optional) The maintainable time period for the instance. Works only on modified scenes.
 * `project_name` - (Optional) The project name  to which the ESCloud instance belongs.
 * `region_id` - (Optional) The region ID of ESCloud instance.
 * `zone_id` - (Optional) The available zone ID of ESCloud instance.
