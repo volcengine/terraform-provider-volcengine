@@ -49,7 +49,7 @@ func (s *VolcengineCrTagService) ReadResources(m map[string]interface{}) (data [
 			}
 		}
 
-		logger.Debug(logger.RespFormat, action, condition, resp)
+		logger.Debug(logger.RespFormat, action, condition, *resp)
 		results, err = ve.ObtainSdkValue("Result.Items", *resp)
 		if err != nil {
 			return data, err
@@ -113,38 +113,17 @@ func (s *VolcengineCrTagService) ReadResource(resourceData *schema.ResourceData,
 }
 
 func (s *VolcengineCrTagService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, name string) *resource.StateChangeConf {
-	return &resource.StateChangeConf{
-		Pending:    []string{},
-		Delay:      1 * time.Second,
-		MinTimeout: 1 * time.Second,
-		Target:     target,
-		Timeout:    timeout,
-
-		Refresh: func() (result interface{}, state string, err error) {
-			var (
-				demo   map[string]interface{}
-				status interface{}
-			)
-			demo, err = s.ReadResource(resourceData, name)
-			if err != nil {
-				return nil, "", err
-			}
-			logger.DebugInfo("Refresh cr tag resp:%v", demo)
-
-			status, err = ve.ObtainSdkValue("Name", demo)
-			if err != nil {
-				return nil, "", err
-			}
-			return demo, status.(string), err
-		},
-	}
+	return nil
 }
 
 func (s *VolcengineCrTagService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
-	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+	if _, ok := instance["ImageAttributes"]; !ok {
+		instance["ImageAttributes"] = []interface{}{}
 	}
-	return []ve.ResourceResponseHandler{handler}
+	if _, ok := instance["ChartAttribute"]; !ok {
+		instance["ChartAttribute"] = map[string]interface{}{}
+	}
+	return []ve.ResourceResponseHandler{}
 }
 
 func (s *VolcengineCrTagService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
