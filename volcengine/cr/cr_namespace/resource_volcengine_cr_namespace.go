@@ -37,25 +37,25 @@ func ResourceVolcengineCrNamespace() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineCrNamespaceCreate,
 		Read:   resourceVolcengineCrNamespaceRead,
-		Update: resourceVolcengineCrNamespaceUpdate,
 		Delete: resourceVolcengineCrNamespaceDelete,
 		Importer: &schema.ResourceImporter{
 			State: crNamespaceImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"registry": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The registry name.",
 			},
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The name of CrNamespace.",
 			},
 		},
@@ -70,15 +70,6 @@ func resourceVolcengineCrNamespaceCreate(d *schema.ResourceData, meta interface{
 	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrNamespace())
 	if err != nil {
 		return fmt.Errorf("error on creating CrNamespace %q,%s", d.Id(), err)
-	}
-	return resourceVolcengineCrNamespaceRead(d, meta)
-}
-
-func resourceVolcengineCrNamespaceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewCrNamespaceService(meta.(*ve.SdkClient))
-	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrNamespace())
-	if err != nil {
-		return fmt.Errorf("error on updating CrNamespace  %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineCrNamespaceRead(d, meta)
 }
