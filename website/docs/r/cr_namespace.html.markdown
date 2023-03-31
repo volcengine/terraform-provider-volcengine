@@ -22,8 +22,8 @@ resource "volcengine_cr_namespace" "foo1" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `name` - (Required) The name of CrNamespace.
-* `registry` - (Required) The registry name.
+* `name` - (Required, ForceNew) The name of CrNamespace.
+* `registry` - (Required, ForceNew) The registry name.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
