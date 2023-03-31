@@ -68,7 +68,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Default:      10,
-							ValidateFunc: validation.IntBetween(0, 1000),
+							ValidateFunc: validation.IntBetween(0, 2000),
 							Description:  "The MaxReplicas of AutoScaling, default 10, range in 1~2000.",
 						},
 						"min_replicas": {
