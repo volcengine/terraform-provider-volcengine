@@ -4,10 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -145,21 +146,21 @@ func (s *VolcengineESCloudInstanceService) ReadResource(resourceData *schema.Res
 		return data, fmt.Errorf("Instance %s not exist ", id)
 	}
 	// Fixme: 临时解决方案
-	if data["MaintenanceTime"] != "" {
-		data["InstanceConfiguration"].(map[string]interface{})["MaintenanceTime"] = data["MaintenanceTime"]
+	if val := data["MaintenanceTime"]; val != "" {
+		data["InstanceConfiguration"].(map[string]interface{})["MaintenanceTime"] = val
 	}
-	if data["MaintenanceDay"] != nil {
-		data["InstanceConfiguration"].(map[string]interface{})["MaintenanceDay"] = data["MaintenanceDay"]
+	if val := data["MaintenanceDay"]; val != nil {
+		data["InstanceConfiguration"].(map[string]interface{})["MaintenanceDay"] = val
 	}
-	if resourceData.Get("instance_configuration.0.admin_password") != "" {
-		data["InstanceConfiguration"].(map[string]interface{})["AdminPassword"] = resourceData.Get("instance_configuration.0.admin_password")
+	if val := resourceData.Get("instance_configuration.0.admin_password"); val != "" {
+		data["InstanceConfiguration"].(map[string]interface{})["AdminPassword"] = val
 	}
-	if resourceData.Get("instance_configuration.0.configuration_code") != "" {
-		data["InstanceConfiguration"].(map[string]interface{})["ConfigurationCode"] = resourceData.Get("instance_configuration.0.configuration_code")
+	if val := resourceData.Get("instance_configuration.0.configuration_code"); val != "" {
+		data["InstanceConfiguration"].(map[string]interface{})["ConfigurationCode"] = val
 	}
 	assigns := resourceData.Get("instance_configuration.0.node_specs_assigns")
 	if assigns != nil && len(assigns.([]interface{})) > 0 {
-		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = resourceData.Get("instance_configuration.0.node_specs_assigns")
+		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = assigns
 	}
 	if subnet, ok := data["InstanceConfiguration"].(map[string]interface{})["Subnet"]; ok {
 		data["InstanceConfiguration"].(map[string]interface{})["SubnetId"] = subnet.(map[string]interface{})["SubnetId"]

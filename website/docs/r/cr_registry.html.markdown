@@ -18,8 +18,8 @@ resource "volcengine_cr_registry" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `name` - (Required) The name of registry.
-* `delete_immediately` - (Optional) Whether delete registry immediately.
+* `name` - (Required, ForceNew) The name of registry.
+* `delete_immediately` - (Optional) Whether delete registry immediately. Only effected in delete action.
 * `password` - (Optional) The password of registry user.
 
 ## Attributes Reference

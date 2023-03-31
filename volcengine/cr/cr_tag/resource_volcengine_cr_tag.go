@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
-	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
 /*
@@ -21,7 +20,6 @@ $ terraform import volcengine_cr_tag.default cr-basic:namespace-1:repo-1:v1
 */
 
 func CrTagImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	logger.DebugInfo("import id:%v", d.Id())
 	items := strings.Split(d.Id(), ":")
 	if len(items) != 4 {
 		return []*schema.ResourceData{d}, fmt.Errorf("the format of import id must be 'registry:namespace:repository:tag'")
@@ -38,20 +36,18 @@ func CrTagImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceDat
 	if err := d.Set("name", items[3]); err != nil {
 		return []*schema.ResourceData{d}, err
 	}
-	logger.DebugInfo("-------------------resourceData:%v", *d)
 	return []*schema.ResourceData{d}, nil
 }
 
 func ResourceVolcengineCrTag() *schema.Resource {
 	resource := &schema.Resource{
 		Read:   resourceVolcengineCrTagRead,
+		Create: resourceVolcengineCrTagCreate,
 		Delete: resourceVolcengineCrTagDelete,
-		Update: resourceVolcengineCrTagUpdate,
 		Importer: &schema.ResourceImporter{
 			State: CrTagImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -76,6 +72,7 @@ func ResourceVolcengineCrTag() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The name of OCI product.",
 			},
 		},
@@ -86,21 +83,7 @@ func ResourceVolcengineCrTag() *schema.Resource {
 }
 
 func resourceVolcengineCrTagCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewCrTagService(meta.(*ve.SdkClient))
-	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrTag())
-	if err != nil {
-		return fmt.Errorf("Error on creating cr tag %q,%s", d.Id(), err)
-	}
-	return resourceVolcengineCrTagRead(d, meta)
-}
-
-func resourceVolcengineCrTagUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewCrTagService(meta.(*ve.SdkClient))
-	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrTag())
-	if err != nil {
-		return fmt.Errorf("error on updating cr tag  %q, %s", d.Id(), err)
-	}
-	return resourceVolcengineCrTagRead(d, meta)
+	return fmt.Errorf("cr tag only support import")
 }
 
 func resourceVolcengineCrTagDelete(d *schema.ResourceData, meta interface{}) (err error) {
@@ -113,7 +96,6 @@ func resourceVolcengineCrTagDelete(d *schema.ResourceData, meta interface{}) (er
 }
 
 func resourceVolcengineCrTagRead(d *schema.ResourceData, meta interface{}) (err error) {
-	logger.DebugInfo("++++++ resourceVolcengineCrTagRead", d)
 	service := NewCrTagService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCrTag())
 	if err != nil {

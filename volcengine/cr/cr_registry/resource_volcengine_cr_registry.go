@@ -36,13 +36,14 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 			"name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The name of registry.",
 			},
 			"delete_immediately": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "Whether delete registry immediately.",
+				Description: "Whether delete registry immediately. Only effected in delete action.",
 			},
 			"password": {
 				Type:        schema.TypeString,
