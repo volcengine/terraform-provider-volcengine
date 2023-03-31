@@ -81,5 +81,5 @@ func DataSourceVolcengineIamRoles() *schema.Resource {
 
 func dataSourceVolcengineIamRolesRead(d *schema.ResourceData, meta interface{}) error {
 	iamRoleService := NewIamRoleService(meta.(*ve.SdkClient))
-	return iamRoleService.Dispatcher.Data(iamRoleService, d, DataSourceVolcengineIamRoles())
+	return ve.DefaultDispatcher().Data(iamRoleService, d, DataSourceVolcengineIamRoles())
 }

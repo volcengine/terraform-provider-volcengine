@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineScalingConfigurationService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewScalingConfigurationService(c *ve.SdkClient) *VolcengineScalingConfigurationService {
 	return &VolcengineScalingConfigurationService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

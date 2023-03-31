@@ -97,5 +97,5 @@ func DataSourceVolcengineTosBuckets() *schema.Resource {
 
 func dataSourceVolcengineTosBucketsRead(d *schema.ResourceData, meta interface{}) error {
 	tosBucketService := NewTosBucketService(meta.(*ve.SdkClient))
-	return tosBucketService.Dispatcher.Data(tosBucketService, d, DataSourceVolcengineTosBuckets())
+	return ve.DefaultDispatcher().Data(tosBucketService, d, DataSourceVolcengineTosBuckets())
 }

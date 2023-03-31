@@ -76,5 +76,5 @@ func DataSourceVolcengineIamUsers() *schema.Resource {
 
 func dataSourceVolcengineIamUsersRead(d *schema.ResourceData, meta interface{}) error {
 	eipAddressService := NewIamUserService(meta.(*ve.SdkClient))
-	return eipAddressService.Dispatcher.Data(eipAddressService, d, DataSourceVolcengineIamUsers())
+	return ve.DefaultDispatcher().Data(eipAddressService, d, DataSourceVolcengineIamUsers())
 }

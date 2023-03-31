@@ -98,5 +98,5 @@ func DataSourceVolcengineEcsKeyPairs() *schema.Resource {
 
 func dataSourceVolcengineEcsKeyPairsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewEcsKeyPairService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineEcsKeyPairs())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineEcsKeyPairs())
 }

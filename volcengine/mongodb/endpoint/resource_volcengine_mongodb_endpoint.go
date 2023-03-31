@@ -2,6 +2,7 @@ package endpoint
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -24,7 +25,6 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineMongoDBEndpointCreate,
 		Read:   resourceVolcengineMongoDBEndpointRead,
-		Update: resourceVolcengineMongoDBEndpointUpdate,
 		Delete: resourceVolcengineMongoDBEndpointDelete,
 		Importer: &schema.ResourceImporter{
 			State: mongoDBEndpointImporter,
@@ -39,26 +39,33 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 			"object_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
 				Description: "The object ID corresponding to the endpoint.",
 			},
 			"network_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Default:      "Private",
+				ForceNew:     true,
 				Description:  "The network type of endpoint.",
 				ValidateFunc: validation.StringInSlice([]string{"Private", "Public"}, false),
 			},
 			"mongos_node_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "A list of the Mongos node that needs to apply for the endpoint.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Set: schema.HashString,
 			},
 			"eip_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
 				Description: "A list of EIP IDs that need to be bound when applying for endpoint.",
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -77,20 +84,16 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 
 func resourceVolcengineMongoDBEndpointCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongoDBEndpoint())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBEndpoint())
 	if err != nil {
 		return fmt.Errorf("Error on creating endpoint %q,%s", d.Id(), err)
 	}
 	return resourceVolcengineMongoDBEndpointRead(d, meta)
 }
 
-func resourceVolcengineMongoDBEndpointUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	return fmt.Errorf("mongodb endpoint does not support update")
-}
-
 func resourceVolcengineMongoDBEndpointDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineMongoDBEndpoint())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongoDBEndpoint())
 	if err != nil {
 		return fmt.Errorf("error on deleting endpoint %q, %s", d.Id(), err)
 	}
@@ -99,7 +102,7 @@ func resourceVolcengineMongoDBEndpointDelete(d *schema.ResourceData, meta interf
 
 func resourceVolcengineMongoDBEndpointRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBEndpointService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBEndpoint())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBEndpoint())
 	if err != nil {
 		return fmt.Errorf("Error on reading endpoint %q,%s", d.Id(), err)
 	}

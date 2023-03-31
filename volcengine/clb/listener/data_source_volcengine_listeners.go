@@ -191,5 +191,5 @@ func DataSourceVolcengineListeners() *schema.Resource {
 
 func dataSourceVolcengineListenersRead(d *schema.ResourceData, meta interface{}) error {
 	listenerService := NewListenerService(meta.(*ve.SdkClient))
-	return listenerService.Dispatcher.Data(listenerService, d, DataSourceVolcengineListeners())
+	return ve.DefaultDispatcher().Data(listenerService, d, DataSourceVolcengineListeners())
 }

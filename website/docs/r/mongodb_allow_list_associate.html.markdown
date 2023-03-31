@@ -11,8 +11,8 @@ Provides a resource to manage mongodb allow list associate
 ## Example Usage
 ```hcl
 resource "volcengine_mongodb_allow_list_associate" "foo" {
-  instance_id   = "mongo-replica-b2xxx"
-  allow_list_id = "acl-4d66bec945d14fa48xxx"
+  instance_id   = "mongo-replica-f16e9298b121"
+  allow_list_id = "acl-9e307ce4efe843fb9ffd8cb6a6cb225f"
 }
 ```
 ## Argument Reference
@@ -27,8 +27,8 @@ In addition to all arguments above, the following attributes are exported:
 
 
 ## Import
-mongosdb allow list associate can be imported using the instanceId:allowListId, e.g.
+mongodb allow list associate can be imported using the instanceId:allowListId, e.g.
 ```
-$ terraform import volcengine_mongosdb_allow_list_associate.default mongo-replica-e405f8e2****:acl-d1fd76693bd54e658912e7337d5b****
+$ terraform import volcengine_mongodb_allow_list_associate.default mongo-replica-e405f8e2****:acl-d1fd76693bd54e658912e7337d5b****
 ```
 

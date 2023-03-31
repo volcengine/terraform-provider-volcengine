@@ -40,7 +40,7 @@ func ResourceVolcengineScalingConfigurationAttachment() *schema.Resource {
 
 func resourceVolcengineScalingConfigurationAttachmentCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewScalingConfigurationAttachmentService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineScalingConfigurationAttachment())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineScalingConfigurationAttachment())
 	if err != nil {
 		return fmt.Errorf("error on creating ScalingConfigurationEnable: %q, %s", d.Id(), err)
 	}
@@ -49,7 +49,7 @@ func resourceVolcengineScalingConfigurationAttachmentCreate(d *schema.ResourceDa
 
 func resourceVolcengineScalingConfigurationAttachmentRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewScalingConfigurationAttachmentService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineScalingConfigurationAttachment())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineScalingConfigurationAttachment())
 	if err != nil {
 		return fmt.Errorf("error on reading ScalingConfigurationEnable: %q, %s", d.Id(), err)
 	}
@@ -58,7 +58,7 @@ func resourceVolcengineScalingConfigurationAttachmentRead(d *schema.ResourceData
 
 func resourceVolcengineScalingConfigurationAttachmentDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewScalingConfigurationAttachmentService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineScalingConfigurationAttachment())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineScalingConfigurationAttachment())
 	if err != nil {
 		return fmt.Errorf("error on deleting ScalingConfigurationEnable: %q, %s", d.Id(), err)
 	}

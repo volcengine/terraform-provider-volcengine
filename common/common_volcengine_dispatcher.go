@@ -12,6 +12,16 @@ type Dispatcher struct {
 	rateInfo *RateInfo
 }
 
+var defaultDispatcher *Dispatcher
+
+func init() {
+	defaultDispatcher = &Dispatcher{}
+}
+
+func DefaultDispatcher() *Dispatcher {
+	return defaultDispatcher
+}
+
 type RateInfo struct {
 	Create *Rate
 	Read   *Rate

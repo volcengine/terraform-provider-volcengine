@@ -277,7 +277,7 @@ var diskResSpec = &schema.Resource{
 
 func resourceVolcengineCloudServerCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCloudServerService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCloudServer())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCloudServer())
 	if err != nil {
 		return fmt.Errorf(" Error on creating cloud server %q,%s", d.Id(), err)
 	}
@@ -286,7 +286,7 @@ func resourceVolcengineCloudServerCreate(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineCloudServerDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCloudServerService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCloudServer())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCloudServer())
 	if err != nil {
 		return fmt.Errorf("error on deleting cloud server %q, %s", d.Id(), err)
 	}
@@ -295,7 +295,7 @@ func resourceVolcengineCloudServerDelete(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineCloudServerRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCloudServerService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCloudServer())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCloudServer())
 	if err != nil {
 		return fmt.Errorf("error on reading cloud server %q,%s", d.Id(), err)
 	}
@@ -304,7 +304,7 @@ func resourceVolcengineCloudServerRead(d *schema.ResourceData, meta interface{})
 
 func resourceVolcengineCloudServerUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCloudServerService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCloudServer())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCloudServer())
 	if err != nil {
 		return fmt.Errorf("error on updating CloudServer  %q, %s", d.Id(), err)
 	}

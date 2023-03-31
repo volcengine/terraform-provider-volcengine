@@ -14,14 +14,12 @@ import (
 
 type VolcengineVkeDefaultNodePoolBatchAttachService struct {
 	Client                 *ve.SdkClient
-	Dispatcher             *ve.Dispatcher
 	defaultNodePoolService *default_node_pool.VolcengineDefaultNodePoolService
 }
 
 func NewVolcengineVkeDefaultNodePoolBatchAttachService(c *ve.SdkClient) *VolcengineVkeDefaultNodePoolBatchAttachService {
 	return &VolcengineVkeDefaultNodePoolBatchAttachService{
 		Client:                 c,
-		Dispatcher:             &ve.Dispatcher{},
 		defaultNodePoolService: default_node_pool.NewDefaultNodePoolService(c),
 	}
 }

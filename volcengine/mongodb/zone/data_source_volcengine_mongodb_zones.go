@@ -54,5 +54,5 @@ func DataSourceVolcengineMongoDBZones() *schema.Resource {
 
 func dataSourceVolcengineMongoDBZonesRead(d *schema.ResourceData, meta interface{}) error {
 	zoneService := NewZoneService(meta.(*ve.SdkClient))
-	return zoneService.Dispatcher.Data(zoneService, d, DataSourceVolcengineMongoDBZones())
+	return ve.DefaultDispatcher().Data(zoneService, d, DataSourceVolcengineMongoDBZones())
 }

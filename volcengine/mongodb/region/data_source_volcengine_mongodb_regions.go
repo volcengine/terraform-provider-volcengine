@@ -44,5 +44,5 @@ func DataSourceVolcengineMongoDBRegions() *schema.Resource {
 
 func dataSourceVolcengineRegionsRead(d *schema.ResourceData, meta interface{}) error {
 	regionService := NewRegionService(meta.(*ve.SdkClient))
-	return regionService.Dispatcher.Data(regionService, d, DataSourceVolcengineMongoDBRegions())
+	return ve.DefaultDispatcher().Data(regionService, d, DataSourceVolcengineMongoDBRegions())
 }

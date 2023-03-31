@@ -111,5 +111,5 @@ func DataSourceVolcengineCertificates() *schema.Resource {
 
 func dataSourceVolcengineCertificatesRead(d *schema.ResourceData, meta interface{}) error {
 	certificateService := NewCertificateService(meta.(*ve.SdkClient))
-	return certificateService.Dispatcher.Data(certificateService, d, DataSourceVolcengineCertificates())
+	return ve.DefaultDispatcher().Data(certificateService, d, DataSourceVolcengineCertificates())
 }

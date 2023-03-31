@@ -172,7 +172,7 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 
 func resourceVolcengineNetworkAclCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	aclService := NewNetworkAclService(meta.(*ve.SdkClient))
-	err = aclService.Dispatcher.Create(aclService, d, ResourceVolcengineNetworkAcl())
+	err = ve.DefaultDispatcher().Create(aclService, d, ResourceVolcengineNetworkAcl())
 	if err != nil {
 		return fmt.Errorf("error on creating network acl %q, %w", d.Id(), err)
 	}
@@ -181,7 +181,7 @@ func resourceVolcengineNetworkAclCreate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineNetworkAclRead(d *schema.ResourceData, meta interface{}) (err error) {
 	aclService := NewNetworkAclService(meta.(*ve.SdkClient))
-	err = aclService.Dispatcher.Read(aclService, d, ResourceVolcengineNetworkAcl())
+	err = ve.DefaultDispatcher().Read(aclService, d, ResourceVolcengineNetworkAcl())
 	if err != nil {
 		return fmt.Errorf("error on reading network acl %q, %w", d.Id(), err)
 	}
@@ -190,7 +190,7 @@ func resourceVolcengineNetworkAclRead(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineNetworkAclUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	aclService := NewNetworkAclService(meta.(*ve.SdkClient))
-	err = aclService.Dispatcher.Update(aclService, d, ResourceVolcengineNetworkAcl())
+	err = ve.DefaultDispatcher().Update(aclService, d, ResourceVolcengineNetworkAcl())
 	if err != nil {
 		return fmt.Errorf("error on updating network acl %q, %w", d.Id(), err)
 	}
@@ -199,7 +199,7 @@ func resourceVolcengineNetworkAclUpdate(d *schema.ResourceData, meta interface{}
 
 func resourceVolcengineNetworkAclDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	aclService := NewNetworkAclService(meta.(*ve.SdkClient))
-	err = aclService.Dispatcher.Delete(aclService, d, ResourceVolcengineNetworkAcl())
+	err = ve.DefaultDispatcher().Delete(aclService, d, ResourceVolcengineNetworkAcl())
 	if err != nil {
 		return fmt.Errorf("error on deleting network acl %q, %w", d.Id(), err)
 	}

@@ -18,17 +18,24 @@ data "volcengine_mongodb_instances" "foo" {
 The following arguments are supported:
 * `create_end_time` - (Optional) The end time of creation to query.
 * `create_start_time` - (Optional) The start time of creation to query.
-* `db_engine_version` - (Optional) The version of db engine to query,valid value contains `MongoDB_4_0`.
-* `db_engine` - (Optional) The db engine to query,valid value contains `MongoDB`.
+* `db_engine_version` - (Optional) The version of db engine to query, valid value contains `MongoDB_4_0`.
+* `db_engine` - (Optional) The db engine to query, valid value contains `MongoDB`.
 * `instance_id` - (Optional) The instance ID to query.
 * `instance_name` - (Optional) The instance name to query.
 * `instance_status` - (Optional) The instance status to query.
-* `instance_type` - (Optional) The type of instance to query,the valid value contains `ReplicaSet` or `ShardedCluster`.
+* `instance_type` - (Optional) The type of instance to query, the valid value contains `ReplicaSet` or `ShardedCluster`.
+* `name_regex` - (Optional) A Name Regex of DB instance.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
 * `update_end_time` - (Optional) The end time of update to query.
 * `update_start_time` - (Optional) The start time of update to query.
 * `vpc_id` - (Optional) The vpc id of instance to query.
 * `zone_id` - (Optional) The zone ID to query.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -46,6 +53,7 @@ In addition to all arguments above, the following attributes are exported:
         * `total_vcpu` - The total vCPU.
         * `used_memory_gb` - The used memory in GB.
         * `used_vcpu` - The used vCPU.
+        * `zone_id` - The zone ID of node.
     * `create_time` - The creation time of instance.
     * `db_engine_version_str` - The version string of database engine.
     * `db_engine_version` - The version of database engine.
@@ -64,6 +72,7 @@ In addition to all arguments above, the following attributes are exported:
         * `total_vcpu` - The total vCPU.
         * `used_memory_gb` - The used memory in GB.
         * `used_vcpu` - The used vCPU.
+        * `zone_id` - The zone ID of node.
     * `nodes` - The node information.
         * `node_delay_time` - The master-slave delay time.
         * `node_id` - The node ID.
@@ -76,6 +85,7 @@ In addition to all arguments above, the following attributes are exported:
         * `used_memory_gb` - The used memory in GB.
         * `used_storage_gb` - The used storage in GB.
         * `used_vcpu` - The used vCPU.
+        * `zone_id` - The zone ID of node.
     * `project_name` - The project name to which the instance belongs.
     * `reclaim_time` - The planned reclaim time of instance.
     * `shards` - The list of shards.
@@ -91,11 +101,16 @@ In addition to all arguments above, the following attributes are exported:
             * `used_memory_gb` - The used memory in GB.
             * `used_storage_gb` - The used storage in GB.
             * `used_vcpu` - The used vCPU.
+            * `zone_id` - The zone ID of node.
         * `shard_id` - The shard ID.
     * `ssl_enable` - Whether ssl enabled.
     * `ssl_expire_time` - The ssl expire time.
     * `ssl_is_valid` - Whether ssl is valid.
+    * `storage_type` - The storage type of instance.
     * `subnet_id` - The subnet id of instance.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of instance.
     * `vpc_id` - The vpc ID.
     * `zone_id` - The zone ID of instance.

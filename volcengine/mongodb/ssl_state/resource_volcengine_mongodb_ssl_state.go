@@ -2,19 +2,21 @@ package ssl_state
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
 /*
 
 Import
-mongosdb ssl state can be imported using the ssl:instanceId, e.g.
-set `ssl_action` to `Update` will update ssl always when terraform apply.
+mongodb ssl state can be imported using the ssl:instanceId, e.g.
 ```
-$ terraform import volcengine_mongosdb_ssl_state.default ssl:mongo-shard-d050db19xxx
+$ terraform import volcengine_mongodb_ssl_state.default ssl:mongo-shard-d050db19xxx
 ```
+Set `ssl_action` to `Update` will update ssl always when terraform apply.
 
 */
 
@@ -25,12 +27,18 @@ func ResourceVolcengineMongoDBSSLState() *schema.Resource {
 		Update: resourceVolcengineMongoDBSSLStateUpdate,
 		Delete: resourceVolcengineMongoDBSSLStateDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: mongoDBSSLStateImporter,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The ID of mongodb instance.",
 			},
 			"ssl_action": {
@@ -39,45 +47,50 @@ func ResourceVolcengineMongoDBSSLState() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},
-				Description: "The action of ssl,valid value contains `Update`.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Update",
+				}, false),
+				Description: "The action of ssl, valid value contains `Update`. Set `ssl_action` to `Update` will update ssl always when terraform apply.",
 			},
 		},
 	}
+	dataSource := DataSourceVolcengineMongoDBSSLStates().Schema["ssl_state"].Elem.(*schema.Resource).Schema
+	ve.MergeDateSourceToResource(dataSource, &resource.Schema)
 	return resource
 }
 
 func resourceVolcengineMongoDBSSLStateCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineMongoDBSSLState())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBSSLState())
 	if err != nil {
-		return fmt.Errorf("Error on open ssl %q,%s", d.Id(), err)
+		return fmt.Errorf("Error on opening ssl %q, %s ", d.Id(), err)
 	}
 	return resourceVolcengineMongoDBSSLStateRead(d, meta)
 }
 
 func resourceVolcengineMongoDBSSLStateUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineMongoDBSSLState())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBSSLState())
 	if err != nil {
-		return fmt.Errorf("error on updating ssl  %q, %s", d.Id(), err)
+		return fmt.Errorf("Error on updating ssl %q, %s ", d.Id(), err)
 	}
 	return resourceVolcengineMongoDBSSLStateRead(d, meta)
 }
 
-func resourceVolcengineMongoDBSSLStateDelete(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceVolcengineMongoDBSSLStateRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineMongoDBSSLState())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBSSLState())
 	if err != nil {
-		return fmt.Errorf("error on close ssl %q, %s", d.Id(), err)
+		return fmt.Errorf("Error on reading ssl state %q, %s ", d.Id(), err)
 	}
 	return err
 }
 
-func resourceVolcengineMongoDBSSLStateRead(d *schema.ResourceData, meta interface{}) (err error) {
+func resourceVolcengineMongoDBSSLStateDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBSSLStateService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineMongoDBSSLState())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongoDBSSLState())
 	if err != nil {
-		return fmt.Errorf("Error on reading ssl state %q,%s", d.Id(), err)
+		return fmt.Errorf("Error on deleting ssl state %q, %s ", d.Id(), err)
 	}
 	return err
 }

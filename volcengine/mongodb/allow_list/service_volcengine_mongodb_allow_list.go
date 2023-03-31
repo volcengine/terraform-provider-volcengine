@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineMongoDBAllowListService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewMongoDBAllowListService(c *ve.SdkClient) *VolcengineMongoDBAllowListService {
 	return &VolcengineMongoDBAllowListService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 
@@ -46,6 +44,9 @@ func (s *VolcengineMongoDBAllowListService) readAllowListDetails(allowListId str
 	allowList, err = ve.ObtainSdkValue("Result", *resp)
 	if err != nil {
 		return allowList, err
+	}
+	if allowList == nil {
+		allowList = map[string]interface{}{}
 	}
 	return allowList, err
 }
@@ -74,27 +75,11 @@ func (s *VolcengineMongoDBAllowListService) DatasourceResources(data *schema.Res
 
 func (s *VolcengineMongoDBAllowListService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
+		resp            *map[string]interface{}
+		results         interface{}
+		allowListIdsMap = make(map[string]bool)
+		exists          bool
 	)
-
-	if allowListIds, ok := condition["AllowListIds"]; ok {
-		for _, allowListId := range allowListIds.([]interface{}) {
-			detail, err := s.readAllowListDetails(allowListId.(string))
-			if err != nil {
-				logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
-				continue
-			}
-			data = append(data, detail)
-		}
-		//detail, err := s.readAllowListDetails(allowListId.(string))
-		//if err != nil {
-		//	logger.DebugInfo("read allow list %s detail failed,err:%v.", allowListId, err)
-		//	return nil, err
-		//}
-		return data, nil
-	}
-
 	action := "DescribeAllowLists"
 	logger.Debug(logger.ReqFormat, action, condition)
 	if condition == nil {
@@ -122,9 +107,22 @@ func (s *VolcengineMongoDBAllowListService) ReadResources(condition map[string]i
 		return data, fmt.Errorf("DescribeAllowLists responsed instances is not a slice")
 	}
 
+	if _, exists = condition["AllowListIds"]; exists {
+		if allowListIds, ok := condition["AllowListIds"].([]interface{}); ok {
+			for _, id := range allowListIds {
+				allowListIdsMap[id.(string)] = true
+			}
+		}
+	}
+
 	for _, ele := range allowLists {
 		allowList := ele.(map[string]interface{})
 		id := allowList["AllowListId"].(string)
+
+		// 如果存在 allow_list_ids，过滤掉 allow_list_ids 中未包含的 id
+		if _, ok := allowListIdsMap[id]; exists && !ok {
+			continue
+		}
 
 		detail, err := s.readAllowListDetails(id)
 		if err != nil {
@@ -149,6 +147,7 @@ func (s *VolcengineMongoDBAllowListService) ReadResource(resourceData *schema.Re
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
+		"RegionId":     s.Client.Region,
 		"AllowListIds": []interface{}{id},
 	}
 	results, err = s.ReadResources(req)
@@ -202,11 +201,17 @@ func (s *VolcengineMongoDBAllowListService) ModifyResource(resourceData *schema.
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyAllowList",
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"allow_list_desc": {
+					TargetField: "AllowListDesc",
+					ForceGet:    true,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["AllowListId"] = d.Id()
 				(*call.SdkParam)["AllowListName"] = resourceData.Get("allow_list_name")
-
 				if resourceData.HasChange("allow_list") {
 					//describe allow list, get instance num
 					var applyInstanceNum int
@@ -219,12 +224,17 @@ func (s *VolcengineMongoDBAllowListService) ModifyResource(resourceData *schema.
 					} else {
 						applyInstanceNum = len(associatedInstances.([]interface{}))
 					}
-
-					//num, ok := resourceData.GetOkExists("apply_instance_num")
-					//if !ok {
-					//	return false, fmt.Errorf("apply_instance_num is required if you need to modify allow_list")
-					//}
 					(*call.SdkParam)["ApplyInstanceNum"] = applyInstanceNum
+					allowList, ok := resourceData.GetOk("allow_list")
+					if !ok || len(allowList.(string)) == 0 {
+						// 对于置空allow list做特殊处理
+						old, _ := resourceData.GetChange("allow_list")
+						(*call.SdkParam)["AllowList"] = old.(string)
+						(*call.SdkParam)["ModifyMode"] = "Delete"
+						return true, nil
+					}
+					(*call.SdkParam)["AllowList"] = resourceData.Get("allow_list")
+					(*call.SdkParam)["ModifyMode"] = "Cover"
 				}
 				return true, nil
 			},

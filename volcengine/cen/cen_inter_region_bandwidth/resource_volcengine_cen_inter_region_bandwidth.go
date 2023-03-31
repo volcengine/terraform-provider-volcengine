@@ -68,7 +68,7 @@ func ResourceVolcengineCenInterRegionBandwidth() *schema.Resource {
 
 func resourceVolcengineCenInterRegionBandwidthCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenInterRegionBandwidthService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Create(service, d, ResourceVolcengineCenInterRegionBandwidth())
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCenInterRegionBandwidth())
 	if err != nil {
 		return fmt.Errorf("error on creating cen inter region bandwidth %q, %s", d.Id(), err)
 	}
@@ -77,7 +77,7 @@ func resourceVolcengineCenInterRegionBandwidthCreate(d *schema.ResourceData, met
 
 func resourceVolcengineCenInterRegionBandwidthRead(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenInterRegionBandwidthService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Read(service, d, ResourceVolcengineCenInterRegionBandwidth())
+	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineCenInterRegionBandwidth())
 	if err != nil {
 		return fmt.Errorf("error on reading cen inter region bandwidth %q, %s", d.Id(), err)
 	}
@@ -86,7 +86,7 @@ func resourceVolcengineCenInterRegionBandwidthRead(d *schema.ResourceData, meta 
 
 func resourceVolcengineCenInterRegionBandwidthUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenInterRegionBandwidthService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineCenInterRegionBandwidth())
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCenInterRegionBandwidth())
 	if err != nil {
 		return fmt.Errorf("error on updating cen inter region bandwidth %q, %s", d.Id(), err)
 	}
@@ -95,7 +95,7 @@ func resourceVolcengineCenInterRegionBandwidthUpdate(d *schema.ResourceData, met
 
 func resourceVolcengineCenInterRegionBandwidthDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewCenInterRegionBandwidthService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCenInterRegionBandwidth())
+	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineCenInterRegionBandwidth())
 	if err != nil {
 		return fmt.Errorf("error on deleting cen inter region bandwidth %q, %s", d.Id(), err)
 	}

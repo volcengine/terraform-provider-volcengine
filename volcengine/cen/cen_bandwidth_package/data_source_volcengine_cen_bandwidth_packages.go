@@ -165,5 +165,5 @@ func DataSourceVolcengineCenBandwidthPackages() *schema.Resource {
 
 func dataSourceVolcengineCenBandwidthPackagesRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewCenBandwidthPackageService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineCenBandwidthPackages())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineCenBandwidthPackages())
 }

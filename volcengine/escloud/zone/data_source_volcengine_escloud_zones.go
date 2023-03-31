@@ -54,5 +54,5 @@ func DataSourceVolcengineESCloudZones() *schema.Resource {
 
 func dataSourceVolcengineESCloudZonesRead(d *schema.ResourceData, meta interface{}) error {
 	zoneService := NewZoneService(meta.(*ve.SdkClient))
-	return zoneService.Dispatcher.Data(zoneService, d, DataSourceVolcengineESCloudZones())
+	return ve.DefaultDispatcher().Data(zoneService, d, DataSourceVolcengineESCloudZones())
 }

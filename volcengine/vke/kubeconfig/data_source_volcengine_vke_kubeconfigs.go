@@ -122,5 +122,5 @@ func DataSourceVolcengineVkeKubeconfigs() *schema.Resource {
 
 func dataSourceVolcengineVkeKubeconfigsRead(d *schema.ResourceData, meta interface{}) (err error) {
 	kubeconfigService := NewVkeKubeconfigService(meta.(*ve.SdkClient))
-	return kubeconfigService.Dispatcher.Data(kubeconfigService, d, DataSourceVolcengineVkeKubeconfigs())
+	return ve.DefaultDispatcher().Data(kubeconfigService, d, DataSourceVolcengineVkeKubeconfigs())
 }

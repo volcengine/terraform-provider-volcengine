@@ -227,5 +227,5 @@ func DataSourceVolcengineNetworkAcls() *schema.Resource {
 
 func dataSourceVolcengineNetworkAclsRead(d *schema.ResourceData, meta interface{}) error {
 	aclService := NewNetworkAclService(meta.(*ve.SdkClient))
-	return aclService.Dispatcher.Data(aclService, d, DataSourceVolcengineNetworkAcls())
+	return ve.DefaultDispatcher().Data(aclService, d, DataSourceVolcengineNetworkAcls())
 }

@@ -101,5 +101,5 @@ func DataSourceVolcengineVpnGatewayRoutes() *schema.Resource {
 
 func dataSourceVolcengineVpnGatewayRoutesRead(d *schema.ResourceData, meta interface{}) error {
 	routeService := NewVpnGatewayRouteService(meta.(*ve.SdkClient))
-	return routeService.Dispatcher.Data(routeService, d, DataSourceVolcengineVpnGatewayRoutes())
+	return ve.DefaultDispatcher().Data(routeService, d, DataSourceVolcengineVpnGatewayRoutes())
 }

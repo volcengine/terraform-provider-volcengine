@@ -21,11 +21,11 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 			},
 			"region_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The region ID to query.",
 			},
 			"specs": {
-				Description: "The collection of mongos spec query.",
+				Description: "A list of supported node specification information for MongoDB instances.",
 				Type:        schema.TypeList,
 				Computed:    true,
 				MaxItems:    1,
@@ -138,5 +138,5 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 
 func dataSourceVolcengineSpecsRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewSpecService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineMongoDBSpecs())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBSpecs())
 }

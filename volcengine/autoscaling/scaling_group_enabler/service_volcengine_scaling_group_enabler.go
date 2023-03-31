@@ -13,8 +13,7 @@ import (
 )
 
 type VolcengineScalingGroupEnablerService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func (s *VolcengineScalingGroupEnablerService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
@@ -152,8 +151,7 @@ func (s *VolcengineScalingGroupEnablerService) ReadResourceId(id string) string 
 
 func NewScalingGroupEnablerService(client *ve.SdkClient) *VolcengineScalingGroupEnablerService {
 	return &VolcengineScalingGroupEnablerService{
-		Client:     client,
-		Dispatcher: &ve.Dispatcher{},
+		Client: client,
 	}
 }
 

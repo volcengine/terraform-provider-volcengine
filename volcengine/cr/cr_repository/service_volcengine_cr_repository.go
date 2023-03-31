@@ -14,14 +14,12 @@ import (
 )
 
 type VolcengineCrRepositoryService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewCrRepositoryService(c *ve.SdkClient) *VolcengineCrRepositoryService {
 	return &VolcengineCrRepositoryService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 

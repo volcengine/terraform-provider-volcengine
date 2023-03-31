@@ -120,7 +120,7 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 
 func resourceVolcengineSecurityGroupRuleCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupRuleService := NewSecurityGroupRuleService(meta.(*ve.SdkClient))
-	err = securityGroupRuleService.Dispatcher.Create(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
+	err = ve.DefaultDispatcher().Create(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
 	if err != nil {
 		return fmt.Errorf("error on creating securityGroupRuleService  %q, %w", d.Id(), err)
 	}
@@ -129,7 +129,7 @@ func resourceVolcengineSecurityGroupRuleCreate(d *schema.ResourceData, meta inte
 
 func resourceVolcengineSecurityGroupRuleRead(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupRuleService := NewSecurityGroupRuleService(meta.(*ve.SdkClient))
-	err = securityGroupRuleService.Dispatcher.Read(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
+	err = ve.DefaultDispatcher().Read(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
 	if err != nil {
 		return fmt.Errorf("error on reading securityGroupRuleService %q, %w", d.Id(), err)
 	}
@@ -138,7 +138,7 @@ func resourceVolcengineSecurityGroupRuleRead(d *schema.ResourceData, meta interf
 
 func resourceVolcengineSecurityGroupRuleUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupRuleService := NewSecurityGroupRuleService(meta.(*ve.SdkClient))
-	err = securityGroupRuleService.Dispatcher.Update(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
+	err = ve.DefaultDispatcher().Update(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
 	if err != nil {
 		return fmt.Errorf("error on updating securityGroupRuleService  %q, %w", d.Id(), err)
 	}
@@ -147,7 +147,7 @@ func resourceVolcengineSecurityGroupRuleUpdate(d *schema.ResourceData, meta inte
 
 func resourceVolcengineSecurityGroupRuleDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	securityGroupRuleService := NewSecurityGroupRuleService(meta.(*ve.SdkClient))
-	err = securityGroupRuleService.Dispatcher.Delete(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
+	err = ve.DefaultDispatcher().Delete(securityGroupRuleService, d, ResourceVolcengineSecurityGroupRule())
 	if err != nil {
 		return fmt.Errorf("error on deleting securityGroupRuleService %q, %w", d.Id(), err)
 	}

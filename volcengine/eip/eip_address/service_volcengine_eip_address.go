@@ -12,14 +12,12 @@ import (
 )
 
 type VolcengineEipAddressService struct {
-	Client     *ve.SdkClient
-	Dispatcher *ve.Dispatcher
+	Client *ve.SdkClient
 }
 
 func NewEipAddressService(c *ve.SdkClient) *VolcengineEipAddressService {
 	return &VolcengineEipAddressService{
-		Client:     c,
-		Dispatcher: &ve.Dispatcher{},
+		Client: c,
 	}
 }
 
@@ -59,6 +57,7 @@ func (s *VolcengineEipAddressService) ReadResources(m map[string]interface{}) (d
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.EipAddresses is not Slice")
 		}
+		data, err = RemoveSystemTags(data)
 		return data, err
 	})
 }

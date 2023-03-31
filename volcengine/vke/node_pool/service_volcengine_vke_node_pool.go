@@ -16,14 +16,12 @@ import (
 
 type VolcengineNodePoolService struct {
 	Client               *ve.SdkClient
-	Dispatcher           *ve.Dispatcher
 	securityGroupService *security_group.VolcengineSecurityGroupService
 }
 
 func NewNodePoolService(c *ve.SdkClient) *VolcengineNodePoolService {
 	return &VolcengineNodePoolService{
 		Client:               c,
-		Dispatcher:           &ve.Dispatcher{},
 		securityGroupService: security_group.NewSecurityGroupService(c),
 	}
 }

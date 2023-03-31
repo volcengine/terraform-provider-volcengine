@@ -111,5 +111,5 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 
 func dataSourceVolcengineBioosClustersRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewVolcengineBioosClusterService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineBioosClusters())
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineBioosClusters())
 }

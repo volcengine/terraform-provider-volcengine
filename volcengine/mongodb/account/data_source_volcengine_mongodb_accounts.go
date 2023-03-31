@@ -11,9 +11,8 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 		Read: dataSourceVolcengineAccountsRead,
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				// ForceNew:    true,
+				Type:        schema.TypeString,
+				Required:    true,
 				Description: "Target query mongo instance id.",
 			},
 			"account_name": {
@@ -75,6 +74,6 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 }
 
 func dataSourceVolcengineAccountsRead(d *schema.ResourceData, meta interface{}) error {
-	regionService := NewMongoDBAccountService(meta.(*ve.SdkClient))
-	return regionService.Dispatcher.Data(regionService, d, DataSourceVolcengineMongoDBAccounts())
+	service := NewMongoDBAccountService(meta.(*ve.SdkClient))
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineMongoDBAccounts())
 }

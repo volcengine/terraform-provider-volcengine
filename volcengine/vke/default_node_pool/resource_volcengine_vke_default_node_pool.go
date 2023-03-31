@@ -249,7 +249,7 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 
 func resourceVolcengineDefaultNodePoolCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewDefaultNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Create(nodePoolService, d, ResourceVolcengineDefaultNodePool())
+	err = ve.DefaultDispatcher().Create(nodePoolService, d, ResourceVolcengineDefaultNodePool())
 	if err != nil {
 		return fmt.Errorf("error on creating DefaultNodePool  %q, %w", d.Id(), err)
 	}
@@ -258,7 +258,7 @@ func resourceVolcengineDefaultNodePoolCreate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineDefaultNodePoolRead(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewDefaultNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Read(nodePoolService, d, ResourceVolcengineDefaultNodePool())
+	err = ve.DefaultDispatcher().Read(nodePoolService, d, ResourceVolcengineDefaultNodePool())
 	if err != nil {
 		return fmt.Errorf("error on reading DefaultNodePool %q, %w", d.Id(), err)
 	}
@@ -267,7 +267,7 @@ func resourceVolcengineDefaultNodePoolRead(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineDefaultNodePoolUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewDefaultNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Update(nodePoolService, d, ResourceVolcengineDefaultNodePool())
+	err = ve.DefaultDispatcher().Update(nodePoolService, d, ResourceVolcengineDefaultNodePool())
 	if err != nil {
 		return fmt.Errorf("error on updating DefaultNodePool  %q, %w", d.Id(), err)
 	}
@@ -276,7 +276,7 @@ func resourceVolcengineDefaultNodePoolUpdate(d *schema.ResourceData, meta interf
 
 func resourceVolcengineNodePoolDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewDefaultNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Delete(nodePoolService, d, ResourceVolcengineDefaultNodePool())
+	err = ve.DefaultDispatcher().Delete(nodePoolService, d, ResourceVolcengineDefaultNodePool())
 	if err != nil {
 		return fmt.Errorf("error on deleting DefaultNodePool %q, %w", d.Id(), err)
 	}

@@ -202,7 +202,7 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 
 func resourceVolcengineVpnConnectionCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	connectionService := NewVpnConnectionService(meta.(*ve.SdkClient))
-	err = connectionService.Dispatcher.Create(connectionService, d, ResourceVolcengineVpnConnection())
+	err = ve.DefaultDispatcher().Create(connectionService, d, ResourceVolcengineVpnConnection())
 	if err != nil {
 		return fmt.Errorf("error on creating Vpn Connections %q, %s", d.Id(), err)
 	}
@@ -211,7 +211,7 @@ func resourceVolcengineVpnConnectionCreate(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineVpnConnectionRead(d *schema.ResourceData, meta interface{}) (err error) {
 	connectionService := NewVpnConnectionService(meta.(*ve.SdkClient))
-	err = connectionService.Dispatcher.Read(connectionService, d, ResourceVolcengineVpnConnection())
+	err = ve.DefaultDispatcher().Read(connectionService, d, ResourceVolcengineVpnConnection())
 	if err != nil {
 		return fmt.Errorf("error on reading Vpn Connection %q, %s", d.Id(), err)
 	}
@@ -220,7 +220,7 @@ func resourceVolcengineVpnConnectionRead(d *schema.ResourceData, meta interface{
 
 func resourceVolcengineVpnConnectionUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	connectionService := NewVpnConnectionService(meta.(*ve.SdkClient))
-	err = connectionService.Dispatcher.Update(connectionService, d, ResourceVolcengineVpnConnection())
+	err = ve.DefaultDispatcher().Update(connectionService, d, ResourceVolcengineVpnConnection())
 	if err != nil {
 		return fmt.Errorf("error on updating Vpn Connection %q, %s", d.Id(), err)
 	}
@@ -229,7 +229,7 @@ func resourceVolcengineVpnConnectionUpdate(d *schema.ResourceData, meta interfac
 
 func resourceVolcengineVpnConnectionDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	connectionService := NewVpnConnectionService(meta.(*ve.SdkClient))
-	err = connectionService.Dispatcher.Delete(connectionService, d, ResourceVolcengineVpnConnection())
+	err = ve.DefaultDispatcher().Delete(connectionService, d, ResourceVolcengineVpnConnection())
 	if err != nil {
 		return fmt.Errorf("error on deleting Vpn Connection %q, %s", d.Id(), err)
 	}

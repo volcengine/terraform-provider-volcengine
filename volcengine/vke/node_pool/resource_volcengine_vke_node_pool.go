@@ -373,7 +373,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 
 func resourceVolcengineNodePoolCreate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Create(nodePoolService, d, ResourceVolcengineNodePool())
+	err = ve.DefaultDispatcher().Create(nodePoolService, d, ResourceVolcengineNodePool())
 	if err != nil {
 		return fmt.Errorf("error on creating nodePoolService  %q, %w", d.Id(), err)
 	}
@@ -382,7 +382,7 @@ func resourceVolcengineNodePoolCreate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineNodePoolRead(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Read(nodePoolService, d, ResourceVolcengineNodePool())
+	err = ve.DefaultDispatcher().Read(nodePoolService, d, ResourceVolcengineNodePool())
 	if err != nil {
 		return fmt.Errorf("error on reading nodePoolService %q, %w", d.Id(), err)
 	}
@@ -391,7 +391,7 @@ func resourceVolcengineNodePoolRead(d *schema.ResourceData, meta interface{}) (e
 
 func resourceVolcengineNodePoolUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Update(nodePoolService, d, ResourceVolcengineNodePool())
+	err = ve.DefaultDispatcher().Update(nodePoolService, d, ResourceVolcengineNodePool())
 	if err != nil {
 		return fmt.Errorf("error on updating nodePoolService  %q, %w", d.Id(), err)
 	}
@@ -400,7 +400,7 @@ func resourceVolcengineNodePoolUpdate(d *schema.ResourceData, meta interface{}) 
 
 func resourceVolcengineNodePoolDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	nodePoolService := NewNodePoolService(meta.(*ve.SdkClient))
-	err = nodePoolService.Dispatcher.Delete(nodePoolService, d, ResourceVolcengineNodePool())
+	err = ve.DefaultDispatcher().Delete(nodePoolService, d, ResourceVolcengineNodePool())
 	if err != nil {
 		return fmt.Errorf("error on deleting nodePoolService %q, %w", d.Id(), err)
 	}
