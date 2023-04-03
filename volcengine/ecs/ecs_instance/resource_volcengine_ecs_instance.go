@@ -86,6 +86,14 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Computed:    true,
 				Description: "The ssh key name of ECS instance.",
 			},
+			"keep_image_credential": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return !d.HasChange("image_id")
+				},
+				Description: "Whether to keep the mirror settings. Only custom images and shared images support this field.\n When the value of this field is true, the Password and KeyPairName cannot be specified.\n When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
 			"instance_charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,
