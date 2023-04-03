@@ -1,4 +1,6 @@
 resource "volcengine_ecs_instance_state" "foo" {
-  instance_id = "i-l8u2ai4j0fauo6mrpgk8"
-  action = "Start"
+  instance_id = "i-ycc01lmwecgh9z3sqqfl"
+  action = "ForceStop"
+  stopped_mode = "KeepCharging"
+  //stopped_mode = "StopCharging"
 }

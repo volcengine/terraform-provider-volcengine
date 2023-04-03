@@ -10,8 +10,9 @@ import (
 type InstanceStateAction string
 
 const (
-	StartAction = InstanceStateAction("Start")
-	StopAction  = InstanceStateAction("Stop")
+	StartAction     = InstanceStateAction("Start")
+	StopAction      = InstanceStateAction("Stop")
+	ForceStopAction = InstanceStateAction("ForceStop")
 )
 
 var ecsInstanceStateImporter = func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
