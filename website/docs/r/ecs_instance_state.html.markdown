@@ -11,13 +11,15 @@ Provides a resource to manage ecs instance state
 ## Example Usage
 ```hcl
 resource "volcengine_ecs_instance_state" "foo" {
-  instance_id = "i-l8u2ai4j0fauo6mrpgk8"
-  action      = "Start"
+  instance_id  = "i-ycc01lmwecgh9z3sqqfl"
+  action       = "ForceStop"
+  stopped_mode = "KeepCharging"
+  //stopped_mode = "StopCharging"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `action` - (Required) Start or Stop of Instance Action, the value can be `Start` or `Stop`.
+* `action` - (Required) Start or Stop of Instance Action, the value can be `Start`, `Stop` or `ForceStop`.
 * `instance_id` - (Required, ForceNew) Id of Instance.
 * `stopped_mode` - (Optional) Stop Mode of Instance, the value can be `KeepCharging` or `StopCharging`, default `KeepCharging`.
 
