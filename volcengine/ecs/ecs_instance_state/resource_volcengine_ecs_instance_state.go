@@ -37,8 +37,8 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 			"action": {
 				Type:         schema.TypeString,
 				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"Start", "Stop"}, false),
-				Description:  "Start or Stop of Instance Action, the value can be `Start` or `Stop`.",
+				ValidateFunc: validation.StringInSlice([]string{"Start", "Stop", "ForceStop"}, false),
+				Description:  "Start or Stop of Instance Action, the value can be `Start`, `Stop` or `ForceStop`.",
 			},
 			"instance_id": {
 				Type:        schema.TypeString,
@@ -52,7 +52,8 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 				Default:      "KeepCharging",
 				ValidateFunc: validation.StringInSlice([]string{"KeepCharging", "StopCharging"}, false),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("action").(string) == "Stop" {
+					// 如开机行为，该字段修改忽略
+					if d.Get("action").(string) == "Start" {
 						return true
 					}
 					return false

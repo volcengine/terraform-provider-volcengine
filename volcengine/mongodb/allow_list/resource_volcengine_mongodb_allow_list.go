@@ -78,7 +78,7 @@ func resourceVolcengineMongoDBAllowListCreate(d *schema.ResourceData, meta inter
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
-		return fmt.Errorf("Error on creating instance %q,%s", d.Id(), err)
+		return fmt.Errorf("Error on creating mongodb allow list %q, %s ", d.Id(), err)
 	}
 	return resourceVolcengineMongoDBAllowListRead(d, meta)
 }
@@ -87,7 +87,7 @@ func resourceVolcengineMongoDBAllowListUpdate(d *schema.ResourceData, meta inter
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
-		return fmt.Errorf("error on updating instance  %q, %s", d.Id(), err)
+		return fmt.Errorf("Error on updating mongodb allow list %q, %s ", d.Id(), err)
 	}
 	return resourceVolcengineMongoDBAllowListRead(d, meta)
 }
@@ -96,7 +96,7 @@ func resourceVolcengineMongoDBAllowListDelete(d *schema.ResourceData, meta inter
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
-		return fmt.Errorf("error on deleting instance %q, %s", d.Id(), err)
+		return fmt.Errorf("Error on deleting mongodb allow list %q, %s ", d.Id(), err)
 	}
 	return err
 }
@@ -105,7 +105,7 @@ func resourceVolcengineMongoDBAllowListRead(d *schema.ResourceData, meta interfa
 	service := NewMongoDBAllowListService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBAllowList())
 	if err != nil {
-		return fmt.Errorf("Error on reading instance %q,%s", d.Id(), err)
+		return fmt.Errorf("Error on reading mongodb allow list %q, %s ", d.Id(), err)
 	}
 	return err
 }

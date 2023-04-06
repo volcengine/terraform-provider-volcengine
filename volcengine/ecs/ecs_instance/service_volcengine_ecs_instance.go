@@ -796,6 +796,10 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 						ConvertType: ve.ConvertDefault,
 						ForceGet:    true,
 					},
+					"keep_image_credential": {
+						ConvertType: ve.ConvertDefault,
+						ForceGet:    true,
+					},
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
