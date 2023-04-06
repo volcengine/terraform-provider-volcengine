@@ -68,6 +68,9 @@ The following arguments are supported:
 * `include_data_volumes` - (Optional) The include data volumes flag of ECS instance.Only effective when change instance charge type.include_data_volumes.
 * `instance_charge_type` - (Optional) The charge type of ECS instance, the value can be `PrePaid` or `PostPaid`.
 * `instance_name` - (Optional) The name of ECS instance.
+* `keep_image_credential` - (Optional) Whether to keep the mirror settings. Only custom images and shared images support this field.
+ When the value of this field is true, the Password and KeyPairName cannot be specified.
+ When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `key_pair_name` - (Optional, ForceNew) The ssh key name of ECS instance.
 * `password` - (Optional) The password of ECS instance.
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.

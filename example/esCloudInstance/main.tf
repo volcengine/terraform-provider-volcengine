@@ -1,4 +1,3 @@
-
 resource "volcengine_escloud_instance" "foo" {
   instance_configuration {
     version            = "V7_10"
@@ -28,9 +27,9 @@ resource "volcengine_escloud_instance" "foo" {
       type               = "Kibana"
       number             = 1
       resource_spec_name = "kibana.x2.small"
-      storage_spec_name  = "es.volume.essd.pl0"
-      storage_size       = 0
     }
     subnet_id = "subnet-2bz9vxrixqigw2dx0eextz50p"
+    project_name = "default"
+    force_restart_after_scale = false
   }
 }
