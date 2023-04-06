@@ -54,6 +54,12 @@ func (s *VolcengineInstanceStateService) CreateResource(resourceData *schema.Res
 					Ignore: true,
 				},
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if instanceAction == string(ForceStopAction) {
+					(*call.SdkParam)["ForceStop"] = true
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				var (
 					resp *map[string]interface{}
@@ -222,8 +228,11 @@ func (s *VolcengineInstanceStateService) ModifyResource(resourceData *schema.Res
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["InstanceId"] = strs[1]
-				if instanceAction == string(StopAction) {
+				if instanceAction == string(StopAction) || instanceAction == string(ForceStopAction) {
 					(*call.SdkParam)["StoppedMode"] = d.Get("stopped_mode")
+				}
+				if instanceAction == string(ForceStopAction) {
+					(*call.SdkParam)["ForceStop"] = true
 				}
 				return true, nil
 			},

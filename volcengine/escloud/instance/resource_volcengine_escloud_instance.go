@@ -90,7 +90,7 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Sensitive:   true,
-							Description: "The password of administrator account.",
+							Description: "The password of administrator account. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 						},
 						"charge_type": {
 							Type:     schema.TypeString,
@@ -105,6 +105,7 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 						"configuration_code": {
 							Type:        schema.TypeString,
 							Required:    true,
+							ForceNew:    true,
 							Description: "Configuration code used for billing.",
 						},
 						"enable_pure_master": {
@@ -114,9 +115,10 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							Description: "Whether the Master node is independent.",
 						},
 						"node_specs_assigns": {
-							Type:        schema.TypeList,
-							Required:    true,
-							Description: "The number and configuration of various ESCloud instance node.",
+							Type:             schema.TypeList,
+							Required:         true,
+							Description:      "The number and configuration of various ESCloud instance node. Kibana NodeSpecsAssign should not be modified.",
+							DiffSuppressFunc: nodeSpecsAssignsDiffSuppressFunc,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
@@ -137,13 +139,13 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 									},
 									"storage_spec_name": {
 										Type:        schema.TypeString,
-										Required:    true,
-										Description: "The name of storage spec.",
+										Optional:    true,
+										Description: "The name of storage spec. Kibana NodeSpecsAssign should not specify this field.",
 									},
 									"storage_size": {
 										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "The size of storage.",
+										Optional:    true,
+										Description: "The size of storage. Kibana NodeSpecsAssign should not specify this field.",
 									},
 								},
 							},
@@ -175,9 +177,10 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							},
 						},
 						"maintenance_day": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Optional:    true,
 							Computed:    true,
+							Set:         schema.HashString,
 							Description: "The maintainable date for the instance. Works only on modified scenes.",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								// 创建时不存在这个参数，修改时存在这个参数
@@ -188,13 +191,11 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 							},
 						},
 						"force_restart_after_scale": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return d.Id() == ""
-							},
-							Description: "Whether to force restart when changes are made. If true, it means that the cluster will be forced to restart without paying attention to instance availability.",
+							Type:             schema.TypeBool,
+							Optional:         true,
+							DiffSuppressFunc: forceRestartAfterScaleDiffSuppressFunc,
+							Description: "Whether to force restart when changes are made. " +
+								"If true, it means that the cluster will be forced to restart without paying attention to instance availability. Works only on modified the node_specs_assigns field.",
 						},
 					},
 				},

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -155,15 +156,47 @@ func (s *VolcengineESCloudInstanceService) ReadResource(resourceData *schema.Res
 	if val := resourceData.Get("instance_configuration.0.admin_password"); val != "" {
 		data["InstanceConfiguration"].(map[string]interface{})["AdminPassword"] = val
 	}
-	if val := resourceData.Get("instance_configuration.0.configuration_code"); val != "" {
-		data["InstanceConfiguration"].(map[string]interface{})["ConfigurationCode"] = val
-	}
-	assigns := resourceData.Get("instance_configuration.0.node_specs_assigns")
-	if assigns != nil && len(assigns.([]interface{})) > 0 {
-		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = assigns
+	if val, ok := resourceData.GetOkExists("instance_configuration.0.force_restart_after_scale"); ok {
+		data["InstanceConfiguration"].(map[string]interface{})["ForceRestartAfterScale"] = val
 	}
 	if subnet, ok := data["InstanceConfiguration"].(map[string]interface{})["Subnet"]; ok {
 		data["InstanceConfiguration"].(map[string]interface{})["SubnetId"] = subnet.(map[string]interface{})["SubnetId"]
+	}
+
+	if nodeAssigns, ok := data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"]; ok {
+		finalAssigns := make([]interface{}, 0)
+		for _, nodeAssign := range nodeAssigns.([]interface{}) {
+			if nodeType := nodeAssign.(map[string]interface{})["Type"]; nodeType == "Master" || nodeType == "Hot" || nodeType == "Kibana" {
+				finalAssigns = append(finalAssigns, nodeAssign)
+			}
+		}
+		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = finalAssigns
+	}
+
+	// 查询 configuration_code
+	action := "DescribeNodeAvailableSpecs"
+	con := &map[string]interface{}{
+		"InstanceId": id,
+	}
+	logger.Debug(logger.ReqFormat, action, con)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), con)
+	if err != nil {
+		return data, err
+	}
+	logger.Debug(logger.RespFormat, action, resp)
+	configurationCode, err := ve.ObtainSdkValue("Result.ConfigurationCode", *resp)
+	if err != nil {
+		return data, err
+	}
+	if configurationCode == nil {
+		configurationCode = ""
+	}
+	data["InstanceConfiguration"].(map[string]interface{})["ConfigurationCode"] = configurationCode
+
+	// 确保查询后 state 文件里的顺序和用户填写的顺序一致
+	assigns := resourceData.Get("instance_configuration.0.node_specs_assigns")
+	if assigns != nil && len(assigns.([]interface{})) > 0 {
+		data["InstanceConfiguration"].(map[string]interface{})["NodeSpecsAssigns"] = assigns
 	}
 
 	return data, err
@@ -298,11 +331,22 @@ func preCheckNodeSpec(call ve.SdkCall) error {
 	return nil
 }
 
+func diffCheckNodeSpec(d *schema.ResourceData) error {
+	oldVal, newVal := d.GetChange("instance_configuration.0.node_specs_assigns")
+	oldNodeConfigs := transListToMap(oldVal.([]interface{}))
+	newNodeConfigs := transListToMap(newVal.([]interface{}))
+	if !reflect.DeepEqual(oldNodeConfigs["Kibana"], newNodeConfigs["Kibana"]) {
+		return fmt.Errorf(" Kibana NodeSpecsAssign should not be modified.")
+	}
+	return nil
+}
+
 func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateInstance",
 			ContentType: ve.ContentTypeJson,
+			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
 				"instance_configuration": {
 					ConvertType: ve.ConvertJsonObject,
@@ -419,6 +463,7 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 				}
 				(*call.SdkParam)["InstanceConfiguration.RegionId"] = regionId
 				(*call.SdkParam)["InstanceConfiguration.ZoneId"] = zoneId
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 
 				logger.DebugInfo("sdk param:%v", *call.SdkParam)
 				return true, nil
@@ -473,7 +518,7 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 	if resourceData.HasChange("instance_configuration.0.maintenance_day") || resourceData.HasChange("instance_configuration.0.maintenance_time") {
 		id := resourceData.Id()
 		maintenanceTime := resourceData.Get("instance_configuration.0.maintenance_time")
-		maintenanceDay := resourceData.Get("instance_configuration.0.maintenance_day")
+		maintenanceDay := resourceData.Get("instance_configuration.0.maintenance_day").(*schema.Set).List()
 
 		logger.DebugInfo("maintenance changed:%v", maintenanceTime)
 		logger.DebugInfo("maintenance changed:%v", maintenanceDay)
@@ -501,7 +546,7 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 	if resourceData.HasChange("instance_configuration.0.admin_password") {
 		id := resourceData.Id()
 		password := resourceData.Get("instance_configuration.0.admin_password")
-		userName := resourceData.Get("instance_configuration.0.instance_name")
+		userName := resourceData.Get("instance_configuration.0.admin_user_name")
 
 		logger.DebugInfo("Modify admin password of instance %s.", id)
 
@@ -523,7 +568,7 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"Running"},
-					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		}
@@ -544,6 +589,9 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 							"node_specs_assigns": {
 								ConvertType: ve.ConvertJsonObjectArray,
 							},
+							"force_restart_after_scale": {
+								Ignore: true,
+							},
 						},
 					},
 				},
@@ -551,6 +599,11 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 					totalNodeNumber := 0
 					var nodeSpecsAssigns []map[string]interface{}
 					nodeSpecs := d.Get("instance_configuration.0.node_specs_assigns").([]interface{})
+					// 不允许修改 Kibana，如果修改了 Kibana 就给用户报错
+					err := diffCheckNodeSpec(d)
+					if err != nil {
+						return false, err
+					}
 					for i, node := range nodeSpecs {
 						if node.(map[string]interface{})["type"].(string) == "Master" {
 							if d.HasChange("instance_configuration.0.node_specs_assigns." + strconv.Itoa(i) + ".number") {
@@ -560,6 +613,10 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 						if node.(map[string]interface{})["type"].(string) == "Master" || node.(map[string]interface{})["type"].(string) == "Hot" {
 							nodeNumber := d.Get("instance_configuration.0.node_specs_assigns." + strconv.Itoa(i) + ".number")
 							totalNodeNumber += nodeNumber.(int)
+						}
+						// 不能传递 Kibana 的信息
+						if node.(map[string]interface{})["type"].(string) == "Kibana" {
+							continue
 						}
 						nodeSpecsAssigns = append(nodeSpecsAssigns, map[string]interface{}{
 							"Type":             node.(map[string]interface{})["type"],
@@ -574,7 +631,7 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 					}
 					// check node specs
 					(*call.SdkParam)["InstanceConfiguration.EnablePureMaster"] = d.Get("instance_configuration.0.enable_pure_master")
-					err := preCheckNodeSpec(call)
+					err = preCheckNodeSpec(call)
 					if err != nil {
 						return false, err
 					}
@@ -587,20 +644,25 @@ func (s *VolcengineESCloudInstanceService) ModifyResource(resourceData *schema.R
 					(*call.SdkParam)["InstanceId"] = d.Id()
 					(*call.SdkParam)["NodeSpecsAssigns"] = nodeSpecsAssigns
 					(*call.SdkParam)["ConfigurationCode"] = d.Get("instance_configuration.0.configuration_code")
-					(*call.SdkParam)["Force"] = false
+					(*call.SdkParam)["Force"] = d.Get("instance_configuration.0.force_restart_after_scale")
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					delete(*call.SdkParam, "InstanceConfiguration")
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"Running"},
-					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		}
 		callbacks = append(callbacks, scaleCallback)
+	}
+
+	if resourceData.HasChange("instance_configuration.0.project_name") {
+		callbacks = s.modifyProject(resourceData, callbacks)
 	}
 
 	return callbacks
@@ -619,6 +681,24 @@ func (s *VolcengineESCloudInstanceService) RemoveResource(resourceData *schema.R
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo("ReleaseInstance"), call.SdkParam)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading ESCloud instance on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
 			},
 		},
 	}
@@ -696,12 +776,85 @@ func (s *VolcengineESCloudInstanceService) ReadResourceId(id string) string {
 	return id
 }
 
+func (s *VolcengineESCloudInstanceService) modifyProject(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	modifyProjectCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "MoveProjectResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["TargetProjectName"] = d.Get("instance_configuration.0.project_name")
+				if (*call.SdkParam)["TargetProjectName"] == nil || (*call.SdkParam)["TargetProjectName"] == "" {
+					return false, fmt.Errorf("Could set ProjectName to empty ")
+				}
+				//获取用户ID
+				input := map[string]interface{}{
+					"ProjectName": (*call.SdkParam)["TargetProjectName"],
+				}
+				logger.Debug(logger.ReqFormat, "GetProject", input)
+				out, err := s.Client.UniversalClient.DoCall(getIamUniversalInfo("GetProject"), &input)
+				if err != nil {
+					return false, err
+				}
+				accountId, err := ve.ObtainSdkValue("Result.AccountID", *out)
+				if err != nil {
+					return false, err
+				}
+				trnStr := fmt.Sprintf("trn:ESCloud:%s:%d:instance/%s", s.Client.Region, int(accountId.(float64)), resourceData.Id())
+				(*call.SdkParam)["ResourceTrn.1"] = trnStr
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getIamUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				var (
+					instance = make(map[string]interface{})
+					err      error
+				)
+				// 通过 retry 确保 project_name 已成功修改
+				resource.Retry(15*time.Minute, func() *resource.RetryError {
+					instance, err = s.ReadResource(d, d.Id())
+					if err != nil {
+						if ve.ResourceNotFoundError(err) {
+							return resource.RetryableError(err)
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading ESCloud instance %q", d.Id()))
+						}
+					}
+					projectName, err := ve.ObtainSdkValue("InstanceConfiguration.ProjectName", instance)
+					if err != nil {
+						return resource.RetryableError(err)
+					}
+					if projectName.(string) != d.Get("instance_configuration.0.project_name").(string) {
+						return resource.RetryableError(fmt.Errorf("ESCloud instance is still in updating project name"))
+					}
+					return nil
+				})
+				return nil
+			},
+		},
+	}
+	callbacks = append(callbacks, modifyProjectCallback)
+
+	return callbacks
+}
+
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "ESCloud",
 		Version:     "2018-01-01",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
+}
+
+func getIamUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "iam",
+		Version:     "2021-08-01",
+		HttpMethod:  ve.GET,
 		Action:      actionName,
 	}
 }

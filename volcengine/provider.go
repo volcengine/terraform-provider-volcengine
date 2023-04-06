@@ -47,6 +47,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_vpc_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
@@ -276,6 +277,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cr_tags":                 cr_tag.DataSourceVolcengineCrTags(),
 			"volcengine_cr_authorization_tokens": cr_authorization_token.DataSourceVolcengineCrAuthorizationTokens(),
 			"volcengine_cr_endpoints":            cr_endpoint.DataSourceVolcengineCrEndpoints(),
+			"volcengine_cr_vpc_endpoints":        cr_vpc_endpoint.DataSourceVolcengineCrVpcEndpoints(),
 
 			// ================ Veenedge ================
 			"volcengine_veenedge_cloud_servers":       cloud_server.DataSourceVolcengineVeenedgeCloudServers(),
@@ -412,6 +414,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cr_repository":     cr_repository.ResourceVolcengineCrRepository(),
 			"volcengine_cr_tag":            cr_tag.ResourceVolcengineCrTag(),
 			"volcengine_cr_endpoint":       cr_endpoint.ResourceVolcengineCrEndpoint(),
+			"volcengine_cr_vpc_endpoint":   cr_vpc_endpoint.ResourceVolcengineCrVpcEndpoint(),
 
 			// ================ Veenedge ================
 			"volcengine_veenedge_cloud_server": cloud_server.ResourceVolcengineCloudServer(),
