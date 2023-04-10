@@ -64,6 +64,9 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) ReadResource(resourceDat
 			}
 		}
 	}
+	if len(data) == 0 {
+		return data, fmt.Errorf("Rds instance readonly node %s is not exist ", nodeId)
+	}
 	data["NodeId"] = nodeId
 
 	return data, err
@@ -173,6 +176,9 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) CreateResource(resourceD
 				}
 				// ResourceData中，rds_mysql_instance_readonly_node的Id形式为'instance_id:node_id'
 				logger.Debug(logger.ReqFormat, "newReadonlyNodeId", newReadonlyNodeId)
+				if newReadonlyNodeId == "" {
+					return fmt.Errorf(" Failed to create readonly node ")
+				}
 				id := fmt.Sprintf("%s:%s", d.Get("instance_id"), newReadonlyNodeId)
 				d.SetId(id)
 				return nil
