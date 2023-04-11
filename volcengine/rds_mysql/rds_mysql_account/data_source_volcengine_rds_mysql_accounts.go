@@ -35,7 +35,7 @@ func DataSourceVolcengineRdsMysqlAccounts() *schema.Resource {
 			"account_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of the database account.",
+				Description: "The name of the database account. This field supports fuzzy query.",
 			},
 			"accounts": {
 				Description: "The collection of RDS instance account query.",
@@ -43,11 +43,6 @@ func DataSourceVolcengineRdsMysqlAccounts() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:        schema.TypeString,
-							Computed:    true, // tf中不支持写值
-							Description: "The ID of the RDS instance account.",
-						},
 						"account_name": {
 							Type:        schema.TypeString,
 							Computed:    true,

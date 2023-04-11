@@ -2,6 +2,9 @@ package rds_mysql_account
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -14,7 +17,7 @@ import (
 Import
 RDS mysql account can be imported using the instance_id:account_name, e.g.
 ```
-$ terraform import volcengine_rds_account.default mysql-42b38c769c4b:test
+$ terraform import volcengine_rds_mysql_account.default mysql-42b38c769c4b:test
 ```
 
 */
@@ -50,7 +53,7 @@ func ResourceVolcengineRdsMysqlAccount() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
-				Description: "The password of the database account.\nillustrate\nCannot start with `!` or `@`.\nThe length is 8~32 characters.\nIt consists of any three of uppercase letters, lowercase letters, numbers, and special characters.\nThe special characters are `!@#$%^*()_+-=`. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+				Description: "The password of the database account.\nIllustrate:\nCannot start with `!` or `@`.\nThe length is 8~32 characters.\nIt consists of any three of uppercase letters, lowercase letters, numbers, and special characters.\nThe special characters are `!@#$%^*()_+-=`. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"account_type": {
 				Type:         schema.TypeString,
@@ -77,8 +80,18 @@ func ResourceVolcengineRdsMysqlAccount() *schema.Resource {
 							Description: "The privilege type of the account.",
 						},
 						"account_privilege_detail": {
-							Type:        schema.TypeString,
-							Optional:    true,
+							Type:     schema.TypeString,
+							Optional: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								if len(old) != len(new) {
+									return false
+								}
+								oldArr := strings.Split(old, ",")
+								newArr := strings.Split(new, ",")
+								sort.Strings(oldArr)
+								sort.Strings(newArr)
+								return reflect.DeepEqual(oldArr, newArr)
+							},
 							Description: "The privilege detail of the account.",
 						},
 					},
