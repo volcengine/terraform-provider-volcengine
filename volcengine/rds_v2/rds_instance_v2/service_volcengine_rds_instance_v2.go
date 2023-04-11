@@ -410,18 +410,6 @@ func (s *VolcengineRdsInstanceService) ModifyResource(resourceData *schema.Resou
 
 	callbacks := make([]volc.Callback, 0)
 
-	//project
-	projectCallback := volc.NewProjectService(s.Client).ModifyProjectOld(volc.ProjectTrn{
-		ResourceType: "instance",
-		ResourceID:   resourceData.Id(),
-		ServiceName:  "rds_mysql",
-	}, resourceData, resource, "project_name",
-		&volc.StateRefresh{
-			Target:  []string{"Running"},
-			Timeout: resourceData.Timeout(schema.TimeoutCreate),
-		})
-	callbacks = append(callbacks, projectCallback...)
-
 	if hasNodeChange || resourceData.HasChanges("storage_space", "storage_type") {
 		modifySpecCallback := volc.Callback{
 			Call: volc.SdkCall{
@@ -571,5 +559,14 @@ func getV1UniversalInfo(actionName string) volc.UniversalInfo {
 		HttpMethod:  volc.POST,
 		ContentType: volc.ApplicationJSON,
 		Action:      actionName,
+	}
+}
+
+func (s *VolcengineRdsInstanceService) ProjectTrn() *volc.ProjectTrn {
+	return &volc.ProjectTrn{
+		ServiceName:          "rds_mysql",
+		ResourceType:         "instance",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }

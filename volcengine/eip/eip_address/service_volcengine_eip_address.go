@@ -188,19 +188,6 @@ func (s *VolcengineEipAddressService) CreateResource(resourceData *schema.Resour
 func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
-	//project
-	projectCallback := ve.NewProjectService(s.Client).ModifyProjectOld(ve.ProjectTrn{
-		ResourceType: "eip",
-		ResourceID:   resourceData.Id(),
-		ServiceName:  "vpc",
-	}, resourceData, resource, "project_name",
-		&ve.StateRefresh{
-			Target:  []string{"Available"},
-			Timeout: resourceData.Timeout(schema.TimeoutCreate),
-		})
-
-	callbacks = append(callbacks, projectCallback...)
-
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyEipAddressAttributes",
@@ -362,5 +349,14 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,
 		Action:      actionName,
+	}
+}
+
+func (s *VolcengineEipAddressService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "eip",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }

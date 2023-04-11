@@ -94,6 +94,11 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				Computed:    true,
 				Description: "The renew type of the VPN gateway.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the VPN gateway.",
+			},
 			"tags": ve.TagsSchema(),
 		},
 	}

@@ -249,3 +249,12 @@ func (s *VolcengineRouteTableService) DatasourceResources(*schema.ResourceData, 
 func (s *VolcengineRouteTableService) ReadResourceId(id string) string {
 	return id
 }
+
+func (s *VolcengineRouteTableService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "routetable",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}

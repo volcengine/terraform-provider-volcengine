@@ -192,6 +192,11 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				Default:     false,
 				Description: "Whether to initiate negotiation mode immediately.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the VPN connection.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineVpnConnections().Schema["vpn_connections"].Elem.(*schema.Resource).Schema

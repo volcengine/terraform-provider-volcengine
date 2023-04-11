@@ -1,8 +1,8 @@
 resource "volcengine_vpn_connection" "foo" {
   vpn_connection_name = "tf-test"
   description = "tf-test"
-  vpn_gateway_id = "vgw-2c012ea9fm5mo2dx0efxg46qi"
-  customer_gateway_id = "cgw-2d68c4zglycjk58ozfe96norh"
+  vpn_gateway_id = "vgw-2feq19gnyc9hc59gp68914u6o"
+  customer_gateway_id = "cgw-12ayj1s157gn417q7y29bixqy"
   local_subnet = ["192.168.0.0/22"]
   remote_subnet = ["192.161.0.0/20"]
   dpd_action = "none"
@@ -20,4 +20,5 @@ resource "volcengine_vpn_connection" "foo" {
   ipsec_config_auth_alg = "sha256"
   ipsec_config_dh_group = "group2"
   ipsec_config_lifetime = 100
+  project_name = "default"
 }

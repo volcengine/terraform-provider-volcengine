@@ -70,6 +70,11 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
 			},
 			"tags": ve.TagsSchema(),
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the NatGateway.",
+			},
 			//"period_unit": {
 			//	Type:         schema.TypeString,
 			//	Optional:     true,

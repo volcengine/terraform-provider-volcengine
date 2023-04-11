@@ -300,3 +300,12 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.Default,
 	}
 }
+
+func (s *VolcengineCustomerGatewayService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpn",
+		ResourceType:         "customergateway",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}
