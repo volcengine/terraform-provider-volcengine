@@ -4,6 +4,9 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_permission"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_resource"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
 
@@ -301,6 +304,10 @@ func Provider() terraform.ResourceProvider {
 			// ================ Bioos ==================
 			"volcengine_bioos_clusters":   bioosCluster.DataSourceVolcengineBioosClusters(),
 			"volcengine_bioos_workspaces": workspace.DataSourceVolcengineBioosWorkspaces(),
+
+			// ================ PrivateLink ==================
+			"volcengine_privatelink_vpc_endpoint_services":            vpc_endpoint_service.DataSourceVolcenginePrivatelinkVpcEndpointServices(),
+			"volcengine_privatelink_vpc_endpoint_service_permissions": vpc_endpoint_service_permission.DataSourceVolcenginePrivatelinkVpcEndpointServicePermissions(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -433,6 +440,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_cluster":      bioosCluster.ResourceVolcengineBioosCluster(),
 			"volcengine_bioos_workspace":    workspace.ResourceVolcengineBioosWorkspace(),
 			"volcengine_bioos_cluster_bind": cluster_bind.ResourceVolcengineBioosClusterBind(),
+
+			// ================ PrivateLink ==================
+			"volcengine_privatelink_vpc_endpoint_service":            vpc_endpoint_service.ResourceVolcenginePrivatelinkVpcEndpointService(),
+			"volcengine_privatelink_vpc_endpoint_service_resource":   vpc_endpoint_service_resource.ResourceVolcenginePrivatelinkVpcEndpointServiceResource(),
+			"volcengine_privatelink_vpc_endpoint_service_permission": vpc_endpoint_service_permission.ResourceVolcenginePrivatelinkVpcEndpointServicePermission(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
