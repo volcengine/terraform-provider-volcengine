@@ -237,11 +237,11 @@ func (s *VolcengineService) ModifyResource(resourceData *schema.ResourceData, re
 
 	if resourceData.HasChange("resources") {
 		add, remove, _, _ := ve.GetSetDifference("resources", resourceData, resourceHash, false)
-		for _, element := range remove.List() {
-			callbacks = append(callbacks, s.resourceActionCallback(resourceData, "DetachResourceFromVpcEndpointService", element))
-		}
 		for _, element := range add.List() {
 			callbacks = append(callbacks, s.resourceActionCallback(resourceData, "AttachResourceToVpcEndpointService", element))
+		}
+		for _, element := range remove.List() {
+			callbacks = append(callbacks, s.resourceActionCallback(resourceData, "DetachResourceFromVpcEndpointService", element))
 		}
 	}
 	return callbacks
