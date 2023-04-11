@@ -98,6 +98,7 @@ func (s *VolcengineRdsMysqlDatabaseService) ReadResource(resourceData *schema.Re
 		}
 		if dbName == dbMap["DBName"].(string) {
 			data = dbMap
+			break
 		}
 	}
 	if len(data) == 0 {

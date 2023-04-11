@@ -11,18 +11,18 @@ Provides a resource to manage rds mysql account
 ## Example Usage
 ```hcl
 resource "volcengine_rds_mysql_account" "default" {
-  instance_id      = "mysql-xxx"
-  account_name     = "xxx"
-  account_password = "xxx"
+  instance_id      = "mysql-e9293705eed6"
+  account_name     = "test"
+  account_password = "x"
   account_type     = "Normal"
   account_privileges {
-    db_name                  = "xxx"
-    account_privilege        = "Custom"
+    db_name                  = "tf-test-db"
+    account_privilege        = "ReadOnly"
     account_privilege_detail = "SELECT,UPDATE,INSERT"
   }
   account_privileges {
-    db_name                  = "xx"
-    account_privilege        = "Custom"
+    db_name                  = "test-xx"
+    account_privilege        = "ReadOnly"
     account_privilege_detail = "SELECT,UPDATE,INSERT"
   }
 }
@@ -36,7 +36,7 @@ Consists of lowercase letters, numbers, or underscores (_).
 The length is 2~32 characters.
 The [keyword list](https://www.volcengine.com/docs/6313/66162) is disabled for database accounts, and certain reserved words, including root, admin, etc., cannot be used.
 * `account_password` - (Required) The password of the database account.
-illustrate
+Illustrate:
 Cannot start with `!` or `@`.
 The length is 8~32 characters.
 It consists of any three of uppercase letters, lowercase letters, numbers, and special characters.
@@ -62,6 +62,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 RDS mysql account can be imported using the instance_id:account_name, e.g.
 ```
-$ terraform import volcengine_rds_account.default mysql-42b38c769c4b:test
+$ terraform import volcengine_rds_mysql_account.default mysql-42b38c769c4b:test
 ```
 

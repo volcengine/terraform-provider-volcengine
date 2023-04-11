@@ -11,14 +11,14 @@ Use this data source to query detailed information of rds mysql accounts
 ## Example Usage
 ```hcl
 data "volcengine_rds_mysql_accounts" "default" {
-  instance_id  = ""
+  instance_id  = "mysql-47d6bc58762b"
   account_name = ""
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `instance_id` - (Required) The id of the RDS instance.
-* `account_name` - (Optional) The name of the database account.
+* `account_name` - (Optional) The name of the database account. This field supports fuzzy query.
 * `name_regex` - (Optional) A Name Regex of database account.
 * `output_file` - (Optional) File name where to save data source results.
 
@@ -32,7 +32,6 @@ In addition to all arguments above, the following attributes are exported:
         * `db_name` - The name of database.
     * `account_status` - The status of the database account.
     * `account_type` - The type of the database account.
-    * `id` - The ID of the RDS instance account.
 * `total_count` - The total count of database account query.
 
 

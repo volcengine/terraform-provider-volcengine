@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	database "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_database"
 )
 
 type VolcengineRdsMysqlAccountService struct {
@@ -143,6 +144,27 @@ func (s *VolcengineRdsMysqlAccountService) CreateResource(resourceData *schema.R
 				},
 			},
 			ContentType: volc.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+				privileges, ok := d.GetOk("account_privileges")
+				if !ok {
+					return false, fmt.Errorf("account_privileges get error")
+				}
+				if privileges == nil || privileges.(*schema.Set).Len() == 0 {
+					return true, nil
+				}
+				for _, privilege := range privileges.(*schema.Set).List() {
+					privilegeMap, ok := privilege.(map[string]interface{})
+					if !ok {
+						return false, fmt.Errorf("account_privilege is not map")
+					}
+					id := fmt.Sprintf("%s:%s", d.Get("instance_id"), privilegeMap["db_name"])
+					_, err := database.NewRdsMysqlDatabaseService(client).ReadResource(d, id)
+					if err != nil {
+						return false, err
+					}
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//创建RdsMysqlAccount
