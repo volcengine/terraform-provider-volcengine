@@ -44,15 +44,10 @@ func DataSourceVolcengineRdsMysqlDatabases() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"id": {
-							Type:        schema.TypeString,
-							Computed:    true, // tf中不支持写值
-							Description: "The ID of the RDS database.",
-						},
 						"db_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The name of the RDS database.",
+							Description: "The name of the RDS database. This field supports fuzzy queries.",
 						},
 						"character_set_name": {
 							Type:        schema.TypeString,

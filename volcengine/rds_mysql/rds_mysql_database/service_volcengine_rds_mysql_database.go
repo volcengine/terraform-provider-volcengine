@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/volcengine/terraform-provider-volcengine/common"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
@@ -31,7 +30,7 @@ func (s *VolcengineRdsMysqlDatabaseService) GetClient() *volc.SdkClient {
 }
 
 func (s *VolcengineRdsMysqlDatabaseService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
-	list, err := volc.WithPageOffsetQuery(m, "PageSize", "PageNumber", 20, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
+	return volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 10, 1, func(condition map[string]interface{}) (data []interface{}, err error) {
 		var (
 			resp    *map[string]interface{}
 			results interface{}
@@ -65,26 +64,6 @@ func (s *VolcengineRdsMysqlDatabaseService) ReadResources(m map[string]interface
 		}
 		return data, err
 	})
-	if err != nil {
-		return list, err
-	}
-
-	dbName := m["DBName"]
-	res := make([]interface{}, 0)
-	for _, d := range list {
-		db, ok := d.(map[string]interface{})
-		if !ok {
-			continue
-		}
-		// DBName是模糊搜索，需要过滤一下
-		if dbName != "" && dbName != db["DBName"].(string) {
-			continue
-		}
-		// 拼接id
-		db["Id"] = fmt.Sprintf("%s:%s", m["InstanceId"], db["DBName"])
-		res = append(res, db)
-	}
-	return res, nil
 }
 
 func (s *VolcengineRdsMysqlDatabaseService) ReadResource(resourceData *schema.ResourceData, rdsDatabaseId string) (data map[string]interface{}, err error) {
@@ -113,8 +92,12 @@ func (s *VolcengineRdsMysqlDatabaseService) ReadResource(resourceData *schema.Re
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		dbMap := make(map[string]interface{})
+		if dbMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
+		}
+		if dbName == dbMap["DBName"].(string) {
+			data = dbMap
 		}
 	}
 	if len(data) == 0 {
@@ -166,95 +149,8 @@ func (s *VolcengineRdsMysqlDatabaseService) CreateResource(resourceData *schema.
 	return []volc.Callback{callback}
 }
 
-func hasAccountNameInSet(account string, set *schema.Set) bool {
-	for _, item := range set.List() {
-		if m, ok := item.(map[string]interface{}); ok {
-			if v, ok := m["account_name"]; ok && v.(string) == account {
-				return true
-			}
-		}
-	}
-	return false
-}
-
 func (s *VolcengineRdsMysqlDatabaseService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
-	callbacks := make([]volc.Callback, 0)
-	if resourceData.HasChange("database_privileges") {
-		addPrivis, removePrivs, _, _ := common.GetSetDifference("database_privileges", resourceData, RdsMysqlDatabasePrivilegeHash, false)
-		if addPrivis.Len() != 0 {
-			callback := volc.Callback{
-				Call: volc.SdkCall{
-					Action:      "GrantDatabasePrivilege",
-					ConvertMode: volc.RequestConvertIgnore,
-					BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
-						(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
-						(*call.SdkParam)["DBName"] = d.Get("db_name")
-						dbPrivileges := make([]map[string]interface{}, 0)
-						for _, item := range addPrivis.List() {
-							m, _ := item.(map[string]interface{})
-							privi := make(map[string]interface{})
-							if v, ok := m["account_name"]; ok {
-								privi["AccountName"] = v
-							}
-							if v, ok := m["account_privilege"]; ok {
-								privi["AccountPrivilege"] = v
-							}
-							if v, ok := m["account_privilege_detail"]; ok {
-								privi["AccountPrivilegeDetail"] = v
-							}
-							dbPrivileges = append(dbPrivileges, privi)
-						}
-						(*call.SdkParam)["DatabasePrivileges"] = dbPrivileges
-						return true, nil
-					},
-					ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-					},
-				},
-			}
-
-			callbacks = append(callbacks, callback)
-
-		}
-		if removePrivs.Len() != 0 {
-			callback := volc.Callback{
-				Call: volc.SdkCall{
-					Action:      "RevokeDatabasePrivilege",
-					ConvertMode: volc.RequestConvertIgnore,
-					BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
-						(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
-						(*call.SdkParam)["DBName"] = d.Get("db_name")
-						accountNames := make([]string, 0)
-						for _, item := range addPrivis.List() {
-							m, ok := item.(map[string]interface{})
-							if !ok {
-								continue
-							}
-							account := m["account_name"].(string)
-							// 过滤掉有Grant操作的account,Grant权限方式为覆盖，先取消原有权限，再赋新权限，此处无需再取消一次。
-							if addPrivis != nil && addPrivis.Len() != 0 && hasAccountNameInSet(account, addPrivis) {
-								continue
-							}
-							accountNames = append(accountNames, account)
-						}
-						(*call.SdkParam)["AccountNames"] = accountNames
-						if len(accountNames) == 0 {
-							return false, nil
-						}
-						return true, nil
-					},
-					ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-					},
-				},
-			}
-			callbacks = append(callbacks, callback)
-		}
-	}
-
-	return callbacks
+	return []volc.Callback{}
 }
 
 func (s *VolcengineRdsMysqlDatabaseService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {
