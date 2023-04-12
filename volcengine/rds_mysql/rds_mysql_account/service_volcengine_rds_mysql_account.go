@@ -145,10 +145,7 @@ func (s *VolcengineRdsMysqlAccountService) CreateResource(resourceData *schema.R
 			},
 			ContentType: volc.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
-				privileges, ok := d.GetOk("account_privileges")
-				if !ok {
-					return false, fmt.Errorf("account_privileges get error")
-				}
+				privileges := d.Get("account_privileges")
 				if privileges == nil || privileges.(*schema.Set).Len() == 0 {
 					return true, nil
 				}
