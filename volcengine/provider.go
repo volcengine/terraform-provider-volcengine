@@ -1,6 +1,7 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint"
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
@@ -309,6 +310,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_workspaces": workspace.DataSourceVolcengineBioosWorkspaces(),
 
 			// ================ PrivateLink ==================
+			"volcengine_privatelink_vpc_endpoints":                    vpc_endpoint.DataSourceVolcenginePrivatelinkVpcEndpoints(),
 			"volcengine_privatelink_vpc_endpoint_services":            vpc_endpoint_service.DataSourceVolcenginePrivatelinkVpcEndpointServices(),
 			"volcengine_privatelink_vpc_endpoint_service_permissions": vpc_endpoint_service_permission.DataSourceVolcenginePrivatelinkVpcEndpointServicePermissions(),
 			"volcengine_privatelink_vpc_endpoint_connections":         vpc_endpoint_connection.DataSourceVolcenginePrivatelinkVpcEndpointConnections(),
@@ -446,6 +448,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_cluster_bind": cluster_bind.ResourceVolcengineBioosClusterBind(),
 
 			// ================ PrivateLink ==================
+			"volcengine_privatelink_vpc_endpoint":                    vpc_endpoint.ResourceVolcenginePrivatelinkVpcEndpoint(),
 			"volcengine_privatelink_vpc_endpoint_service":            vpc_endpoint_service.ResourceVolcenginePrivatelinkVpcEndpointService(),
 			"volcengine_privatelink_vpc_endpoint_service_resource":   vpc_endpoint_service_resource.ResourceVolcenginePrivatelinkVpcEndpointServiceResource(),
 			"volcengine_privatelink_vpc_endpoint_service_permission": vpc_endpoint_service_permission.ResourceVolcenginePrivatelinkVpcEndpointServicePermission(),

@@ -24,11 +24,6 @@ func DataSourceVolcenginePrivatelinkVpcEndpointServices() *schema.Resource {
 				Optional:    true,
 				Description: "The name of vpc endpoint service.",
 			},
-			"project_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The project name of vpc endpoint service.",
-			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
