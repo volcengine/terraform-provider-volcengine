@@ -162,6 +162,34 @@ func (s *VolcengineVpcEndpointService) CreateResource(resourceData *schema.Resou
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				// 通过安全组查询 vpc
+				securityGroupId := d.Get("security_group_ids").(*schema.Set).List()[0].(string)
+				action := "DescribeSecurityGroups"
+				req := map[string]interface{}{
+					"SecurityGroupIds.1": securityGroupId,
+				}
+				resp, err := s.Client.VpcClient.DescribeSecurityGroupsCommon(&req)
+				if err != nil {
+					return false, err
+				}
+				logger.Debug(logger.RespFormat, action, req, *resp)
+				results, err := ve.ObtainSdkValue("Result.SecurityGroups", *resp)
+				if err != nil {
+					return false, err
+				}
+				if results == nil {
+					results = []interface{}{}
+				}
+				securityGroups, ok := results.([]interface{})
+				if !ok {
+					return false, errors.New("Result.SecurityGroups is not Slice")
+				}
+				if len(securityGroups) == 0 {
+					return false, fmt.Errorf("securityGroup %s not exist", securityGroupId)
+				}
+				vpcId := securityGroups[0].(map[string]interface{})["VpcId"].(string)
+
+				(*call.SdkParam)["VpcId"] = vpcId
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
 			},
@@ -179,6 +207,9 @@ func (s *VolcengineVpcEndpointService) CreateResource(resourceData *schema.Resou
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("service_id").(string)
 			},
 		},
 	}
@@ -256,6 +287,9 @@ func (s *VolcengineVpcEndpointService) RemoveResource(resourceData *schema.Resou
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("service_id").(string)
 			},
 		},
 	}

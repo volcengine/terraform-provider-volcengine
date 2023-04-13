@@ -1,5 +1,4 @@
 resource "volcengine_privatelink_vpc_endpoint" "endpoint" {
-  vpc_id = "vpc-2d5z8cl807y8058ozfds8****"
   security_group_ids = ["sg-2d5z8cr53k45c58ozfdum****"]
   service_id = "epsvc-2byz5nzgiansw2dx0eehh****"
   endpoint_name = "tf-test-ep"

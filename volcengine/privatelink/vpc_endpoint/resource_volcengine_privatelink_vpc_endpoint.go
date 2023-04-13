@@ -33,12 +33,6 @@ func ResourceVolcenginePrivatelinkVpcEndpoint() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			"vpc_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The vpc id of vpc endpoint.",
-			},
 			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Required: true,
@@ -49,22 +43,6 @@ func ResourceVolcenginePrivatelinkVpcEndpoint() *schema.Resource {
 				},
 				Description: "the security group ids of vpc endpoint",
 			},
-			//"zone_info": {
-			//	Type:        schema.TypeSet,
-			//	Optional:    true,
-			//	ForceNew:    true,
-			//	Set:         schema.HashString,
-			//	Description: "the security group ids of vpc endpoint",
-			//	Elem: schema.Resource{
-			//		Schema: map[string]*schema.Schema{
-			//			"vpc_id": {
-			//				Type:        schema.TypeString,
-			//				Required:    true,
-			//				Description: "The vpc id of vpc endpoint.",
-			//			},
-			//		},
-			//	},
-			//},
 			"service_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -91,6 +69,11 @@ func ResourceVolcenginePrivatelinkVpcEndpoint() *schema.Resource {
 				Description: "The description of vpc endpoint.",
 			},
 
+			"vpc_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The vpc id of vpc endpoint.",
+			},
 			"endpoint_type": {
 				Type:        schema.TypeString,
 				Computed:    true,
