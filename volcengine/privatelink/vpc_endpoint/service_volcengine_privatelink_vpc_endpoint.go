@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -54,7 +55,7 @@ func (s *VolcengineVpcEndpointService) ReadResources(m map[string]interface{}) (
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.VpcEndpointServices is not Slice")
+			return data, errors.New("Result.Endpoints is not Slice")
 		}
 		return data, err
 	})
@@ -107,10 +108,6 @@ func (s *VolcengineVpcEndpointService) ReadResource(resourceData *schema.Resourc
 	return data, err
 }
 
-func (s *VolcengineVpcEndpointService) WithResourceResponseHandlers(nodePool map[string]interface{}) []ve.ResourceResponseHandler {
-	return nil
-}
-
 func (s *VolcengineVpcEndpointService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
@@ -146,6 +143,13 @@ func (s *VolcengineVpcEndpointService) RefreshResourceState(resourceData *schema
 	}
 }
 
+func (s *VolcengineVpcEndpointService) WithResourceResponseHandlers(data map[string]interface{}) []ve.ResourceResponseHandler {
+	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		return data, nil, nil
+	}
+	return []ve.ResourceResponseHandler{handler}
+}
+
 func (s *VolcengineVpcEndpointService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
@@ -156,6 +160,10 @@ func (s *VolcengineVpcEndpointService) CreateResource(resourceData *schema.Resou
 					TargetField: "SecurityGroupIds",
 					ConvertType: ve.ConvertWithN,
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
