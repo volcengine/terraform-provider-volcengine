@@ -130,6 +130,16 @@ func (v *VolcenginePrivateLinkSecurityGroupService) RemoveResource(resourceData 
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, v.ReadResource, 5*time.Minute)
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc_endpoint.NewVpcEndpointService(v.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("endpoint_id").(string),
+				},
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return resourceData.Get("endpoint_id").(string)
+			},
 		},
 	}
 	return []ve.Callback{callback}
