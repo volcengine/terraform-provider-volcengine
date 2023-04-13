@@ -46,6 +46,8 @@ func ResourceVolcenginePrivatelinkVpcEndpointConnectionService() *schema.Resourc
 			},
 		},
 	}
+	dataSource := DataSourceVolcenginePrivatelinkVpcEndpointConnections().Schema["connections"].Elem.(*schema.Resource).Schema
+	ve.MergeDateSourceToResource(dataSource, &resource.Schema)
 	return resource
 }
 

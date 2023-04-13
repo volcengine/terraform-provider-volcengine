@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint"
 )
 
 type VolcenginePrivateLinkSecurityGroupService struct {
@@ -96,7 +96,7 @@ func (v *VolcenginePrivateLinkSecurityGroupService) CreateResource(resourceData 
 				return nil
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				vpc_endpoint_service.NewService(v.Client): {
+				vpc_endpoint.NewVpcEndpointService(v.Client): {
 					Target:     []string{"Available"},
 					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
 					ResourceId: endpointId,
