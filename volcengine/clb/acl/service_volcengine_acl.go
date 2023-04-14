@@ -348,3 +348,12 @@ func (s *VolcengineAclService) DatasourceResources(*schema.ResourceData, *schema
 func (s *VolcengineAclService) ReadResourceId(id string) string {
 	return id
 }
+
+func (s *VolcengineAclService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "clb",
+		ResourceType:         "acl",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}

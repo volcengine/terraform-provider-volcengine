@@ -74,7 +74,7 @@ The following arguments are supported:
 * `key_pair_name` - (Optional, ForceNew) The ssh key name of ECS instance.
 * `password` - (Optional) The password of ECS instance.
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.
-* `project_name` - (Optional) The ProjectName of the VPC.
+* `project_name` - (Optional) The ProjectName of the ecs instance.
 * `secondary_network_interfaces` - (Optional) The secondary networkInterface detail collection of ECS instance.
 * `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `spot_strategy` - (Optional, ForceNew) The spot strategy will autoremove instance in some conditions.Please make sure you can maintain instance lifecycle before auto remove.The spot strategy of ECS instance, the value can be `NoSpot` or `SpotAsPriceGo`.

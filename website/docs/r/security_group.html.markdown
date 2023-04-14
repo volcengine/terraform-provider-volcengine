@@ -11,14 +11,15 @@ Provides a resource to manage security group
 ## Example Usage
 ```hcl
 resource "volcengine_security_group" "g1test1" {
-  vpc_id = "sg-273ycgql3ig3k7fap8t3dyvqx"
+  vpc_id       = "vpc-2feppmy1ugt1c59gp688n1fld"
+  project_name = "yuwenhao"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `vpc_id` - (Required, ForceNew) Id of the VPC.
 * `description` - (Optional) Description of SecurityGroup.
-* `project_name` - (Optional, ForceNew) The ProjectName of SecurityGroup.
+* `project_name` - (Optional) The ProjectName of SecurityGroup.
 * `security_group_name` - (Optional) Name of SecurityGroup.
 * `tags` - (Optional) Tags.
 

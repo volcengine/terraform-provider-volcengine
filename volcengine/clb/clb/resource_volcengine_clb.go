@@ -112,11 +112,13 @@ func ResourceVolcengineClb() *schema.Resource {
 			"master_zone_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The master zone ID of the CLB.",
 			},
 			"slave_zone_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The slave zone ID of the CLB.",
 			},
 			//"period_unit": {

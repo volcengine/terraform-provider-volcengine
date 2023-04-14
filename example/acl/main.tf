@@ -9,4 +9,5 @@ resource "volcengine_acl" "foo" {
     entry = "172.20.3.0/24"
     description = "e3"
   }
+  project_name = "default"
 }

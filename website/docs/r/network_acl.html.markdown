@@ -11,7 +11,7 @@ Provides a resource to manage network acl
 ## Example Usage
 ```hcl
 resource "volcengine_network_acl" "foo" {
-  vpc_id           = "vpc-ru0wv9alfoxsu3nuld85rpp"
+  vpc_id           = "vpc-12bk4qjc69reo17q7y36shv6z"
   network_acl_name = "tf-test-acl"
   ingress_acl_entries {
     network_acl_entry_name = "ingress1"
@@ -25,6 +25,7 @@ resource "volcengine_network_acl" "foo" {
     protocol               = "all"
     destination_cidr_ip    = "192.168.0.0/16"
   }
+  project_name = "default"
 }
 ```
 ## Argument Reference
@@ -34,6 +35,7 @@ The following arguments are supported:
 * `egress_acl_entries` - (Optional) The egress entries of Network Acl.
 * `ingress_acl_entries` - (Optional) The ingress entries of Network Acl.
 * `network_acl_name` - (Optional) The name of Network Acl.
+* `project_name` - (Optional) The project name of the network acl.
 
 The `egress_acl_entries` object supports the following:
 

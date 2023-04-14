@@ -63,9 +63,9 @@ func ResourceVolcengineVpc() *schema.Resource {
 				Description: "The DNS server list of the VPC. And you can specify 0 to 5 servers to this list.",
 			},
 			"project_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				//ForceNew:    true,
 				Description: "The ProjectName of the VPC.",
 			},
 			"tags": ve.TagsSchema(),

@@ -237,6 +237,9 @@ func (s *VolcengineVpnGatewayService) CreateResource(resourceData *schema.Resour
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
 				},
+				"project_name": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) < 1 {
@@ -430,5 +433,14 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
+	}
+}
+
+func (s *VolcengineVpnGatewayService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpn",
+		ResourceType:         "vpngateway",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }
