@@ -4,9 +4,12 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -88,6 +91,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_readonly_node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
@@ -258,9 +265,6 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_ip_lists":            rds_ip_list.DataSourceVolcengineRdsIpLists(),
 			"volcengine_rds_parameter_templates": rds_parameter_template.DataSourceVolcengineRdsParameterTemplates(),
 
-			// ================ RDS V2 ==============
-			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
-
 			// ================ ESCloud =============
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
 			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
@@ -301,6 +305,15 @@ func Provider() terraform.ResourceProvider {
 			// ================ Bioos ==================
 			"volcengine_bioos_clusters":   bioosCluster.DataSourceVolcengineBioosClusters(),
 			"volcengine_bioos_workspaces": workspace.DataSourceVolcengineBioosWorkspaces(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
+
+			// ================ RdsMysql ================
+			"volcengine_rds_mysql_instances":  rds_mysql_instance.DataSourceVolcengineRdsMysqlInstances(),
+			"volcengine_rds_mysql_accounts":   rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
+			"volcengine_rds_mysql_databases":  rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
+			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
@@ -397,15 +410,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_account_privilege":  rds_account_privilege.ResourceVolcengineRdsAccountPrivilege(),
 			"volcengine_rds_parameter_template": rds_parameter_template.ResourceVolcengineRdsParameterTemplate(),
 
-			// ================ RDS V2 ==============
-			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
-
 			// ================ ESCloud ================
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 
 			//================= TOS =================
-			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
-			"volcengine_tos_object": object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket":        bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object":        object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket_policy": bucket_policy.ResourceVolcengineTosBucketPolicy(),
 
 			// ================ CR ================
 			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
@@ -433,6 +444,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_cluster":      bioosCluster.ResourceVolcengineBioosCluster(),
 			"volcengine_bioos_workspace":    workspace.ResourceVolcengineBioosWorkspace(),
 			"volcengine_bioos_cluster_bind": cluster_bind.ResourceVolcengineBioosClusterBind(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
+
+			// ================ RdsMysql ================
+			"volcengine_rds_mysql_instance":               rds_mysql_instance.ResourceVolcengineRdsMysqlInstance(),
+			"volcengine_rds_mysql_instance_readonly_node": rds_mysql_instance_readonly_node.ResourceVolcengineRdsMysqlInstanceReadonlyNode(),
+			"volcengine_rds_mysql_account":                rds_mysql_account.ResourceVolcengineRdsMysqlAccount(),
+			"volcengine_rds_mysql_database":               rds_mysql_database.ResourceVolcengineRdsMysqlDatabase(),
+			"volcengine_rds_mysql_allowlist":              allowlist.ResourceVolcengineRdsMysqlAllowlist(),
+			"volcengine_rds_mysql_allowlist_associate":    allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

@@ -166,10 +166,21 @@ func (s *VolcengineRdsInstanceService) RefreshResourceState(resourceData *schema
 				failStates []string
 			)
 			failStates = append(failStates, "Error")
-			demo, err = s.ReadResource(resourceData, id)
-			if err != nil {
+
+			if err = resource.Retry(20*time.Minute, func() *resource.RetryError {
+				demo, err = s.ReadResource(resourceData, id)
+				if err != nil {
+					if volc.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
 				return nil, "", err
 			}
+
 			status, err = volc.ObtainSdkValue("InstanceStatus", demo)
 			if err != nil {
 				return nil, "", err
