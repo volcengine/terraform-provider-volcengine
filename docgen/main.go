@@ -130,6 +130,7 @@ var resourceKeys = map[string]string{
 	"autoscaling": "AUTOSCALING",
 	"mongodb":     "MONGODB",
 	"bioos":       "BIOOS",
+	"rds_mysql":   "RDS_MYSQL",
 }
 
 type Products struct {
