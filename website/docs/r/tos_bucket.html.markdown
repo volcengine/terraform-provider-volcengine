@@ -48,6 +48,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Tos Bucket can be imported using the id, e.g.
 ```
-$ terraform import volcengine_tos_bucket.default region:bucketName
+$ terraform import volcengine_tos_bucket.default bucketName
 ```
 
