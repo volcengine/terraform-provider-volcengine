@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
 
@@ -404,8 +405,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 
 			//================= TOS =================
-			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
-			"volcengine_tos_object": object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket":        bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object":        object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket_policy": bucket_policy.ResourceVolcengineTosBucketPolicy(),
 
 			// ================ CR ================
 			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
