@@ -3,6 +3,9 @@ package subnet
 import (
 	"errors"
 	"fmt"
+	"net"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -126,6 +129,30 @@ func (s *VolcengineSubnetService) RefreshResourceState(resourceData *schema.Reso
 
 func (VolcengineSubnetService) WithResourceResponseHandlers(subnet map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		if ipv6CidrBlock, ok1 := subnet["Ipv6CidrBlock"]; ok1 && ipv6CidrBlock.(string) != "" {
+			subnet["EnableIpv6"] = true
+
+			ipv6Address, _, err := net.ParseCIDR(ipv6CidrBlock.(string))
+			if err != nil {
+				return subnet, nil, err
+			}
+			bits := strings.Split(ipv6Address.String(), ":")
+			if len(bits) < 4 {
+				subnet["Ipv6CidrBlock"] = 0
+			} else {
+				temp := bits[3]
+				temp = strings.Repeat("0", 4-len(temp)) + temp
+				ipv6CidrValue, err := strconv.ParseInt(temp[2:], 16, 9)
+				if err != nil {
+					return subnet, nil, err
+				}
+				subnet["Ipv6CidrBlock"] = int(ipv6CidrValue)
+			}
+
+		} else {
+			subnet["EnableIpv6"] = false
+			delete(subnet, "Ipv6CidrBlock")
+		}
 		return subnet, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -140,6 +167,19 @@ func (s *VolcengineSubnetService) CreateResource(resourceData *schema.ResourceDa
 				return d.Get("vpc_id").(string)
 			},
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"ipv6_cidr_block": {
+					Ignore: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				ipv6CidrBlock, exists := d.GetOkExists("ipv6_cidr_block")
+				if exists {
+					(*call.SdkParam)["Ipv6CidrBlock"] = ipv6CidrBlock
+				}
+
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.VpcClient.CreateSubnetCommon(call.SdkParam)
@@ -172,11 +212,24 @@ func (s *VolcengineSubnetService) ModifyResource(resourceData *schema.ResourceDa
 		Call: ve.SdkCall{
 			Action:      "ModifySubnetAttributes",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"ipv6_cidr_block": {
+					Ignore: true,
+				},
+			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("vpc_id").(string)
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["SubnetId"] = d.Id()
+
+				if d.HasChange("enable_ipv6") && d.Get("enable_ipv6").(bool) {
+					ipv6CidrBlock, exists := d.GetOkExists("ipv6_cidr_block")
+					if exists {
+						(*call.SdkParam)["Ipv6CidrBlock"] = ipv6CidrBlock
+					}
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

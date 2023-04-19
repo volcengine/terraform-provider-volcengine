@@ -53,6 +53,8 @@ In addition to all arguments above, the following attributes are exported:
     * `instance_id` - The ID of ECS instance.
     * `instance_name` - The name of ECS instance.
     * `instance_type` - The spec type of ECS instance.
+    * `ipv6_address_count` - The number of IPv6 addresses of the ECS instance.
+    * `ipv6_addresses` - The  IPv6 address list of the ECS instance.
     * `is_gpu` - The Flag of GPU instance.If the instance is GPU,The flag is true.
     * `key_pair_id` - The ssh key ID of ECS instance.
     * `key_pair_name` - The ssh key name of ECS instance.

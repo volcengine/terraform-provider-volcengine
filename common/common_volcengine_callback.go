@@ -126,7 +126,16 @@ func getAndSetSlice(pattern string, index int, value interface{}, top *map[strin
 	if exist != nil {
 		exist1, _ := ObtainSdkValue(pattern+"."+strconv.Itoa(index), *top)
 		if exist1 == nil {
-			return append(exist.([]interface{}), value)
+			if len(exist.([]interface{})) < index+1 {
+				n := make([]interface{}, index+1)
+				n[index] = value
+				for i, v := range exist.([]interface{}) {
+					n[i] = v
+				}
+				return n
+			} else {
+				exist.([]interface{})[index] = value
+			}
 		}
 		return exist.([]interface{})
 	}

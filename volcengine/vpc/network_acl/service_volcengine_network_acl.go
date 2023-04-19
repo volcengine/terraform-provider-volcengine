@@ -52,6 +52,9 @@ func (s *VolcengineNetworkAclService) ReadResources(condition map[string]interfa
 		if err != nil {
 			return data, err
 		}
+		if results == nil {
+			results = []interface{}{}
+		}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.NetworkAcls is not Slice")
 		}

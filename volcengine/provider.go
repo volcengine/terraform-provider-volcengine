@@ -110,6 +110,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_address_bandwidth"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
@@ -186,14 +189,17 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"volcengine_vpcs":                 vpc.DataSourceVolcengineVpcs(),
-			"volcengine_subnets":              subnet.DataSourceVolcengineSubnets(),
-			"volcengine_route_tables":         route_table.DataSourceVolcengineRouteTables(),
-			"volcengine_route_entries":        route_entry.DataSourceVolcengineRouteEntries(),
-			"volcengine_security_groups":      security_group.DataSourceVolcengineSecurityGroups(),
-			"volcengine_security_group_rules": security_group_rule.DataSourceVolcengineSecurityGroupRules(),
-			"volcengine_network_interfaces":   network_interface.DataSourceVolcengineNetworkInterfaces(),
-			"volcengine_network_acls":         network_acl.DataSourceVolcengineNetworkAcls(),
+			"volcengine_vpcs":                        vpc.DataSourceVolcengineVpcs(),
+			"volcengine_subnets":                     subnet.DataSourceVolcengineSubnets(),
+			"volcengine_route_tables":                route_table.DataSourceVolcengineRouteTables(),
+			"volcengine_route_entries":               route_entry.DataSourceVolcengineRouteEntries(),
+			"volcengine_security_groups":             security_group.DataSourceVolcengineSecurityGroups(),
+			"volcengine_security_group_rules":        security_group_rule.DataSourceVolcengineSecurityGroupRules(),
+			"volcengine_network_interfaces":          network_interface.DataSourceVolcengineNetworkInterfaces(),
+			"volcengine_network_acls":                network_acl.DataSourceVolcengineNetworkAcls(),
+			"volcengine_vpc_ipv6_gateways":           ipv6_gateway.DataSourceVolcengineIpv6Gateways(),
+			"volcengine_vpc_ipv6_address_bandwidths": ipv6_address_bandwidth.DataSourceVolcengineIpv6AddressBandwidths(),
+			"volcengine_vpc_ipv6_addresses":          ipv6_address.DataSourceVolcengineIpv6Addresses(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
@@ -316,17 +322,19 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
-			"volcengine_subnet":                   subnet.ResourceVolcengineSubnet(),
-			"volcengine_route_table":              route_table.ResourceVolcengineRouteTable(),
-			"volcengine_route_entry":              route_entry.ResourceVolcengineRouteEntry(),
-			"volcengine_route_table_associate":    route_table_associate.ResourceVolcengineRouteTableAssociate(),
-			"volcengine_security_group":           security_group.ResourceVolcengineSecurityGroup(),
-			"volcengine_network_interface":        network_interface.ResourceVolcengineNetworkInterface(),
-			"volcengine_network_interface_attach": network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
-			"volcengine_security_group_rule":      security_group_rule.ResourceVolcengineSecurityGroupRule(),
-			"volcengine_network_acl":              network_acl.ResourceVolcengineNetworkAcl(),
-			"volcengine_network_acl_associate":    network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
+			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
+			"volcengine_subnet":                     subnet.ResourceVolcengineSubnet(),
+			"volcengine_route_table":                route_table.ResourceVolcengineRouteTable(),
+			"volcengine_route_entry":                route_entry.ResourceVolcengineRouteEntry(),
+			"volcengine_route_table_associate":      route_table_associate.ResourceVolcengineRouteTableAssociate(),
+			"volcengine_security_group":             security_group.ResourceVolcengineSecurityGroup(),
+			"volcengine_network_interface":          network_interface.ResourceVolcengineNetworkInterface(),
+			"volcengine_network_interface_attach":   network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
+			"volcengine_security_group_rule":        security_group_rule.ResourceVolcengineSecurityGroupRule(),
+			"volcengine_network_acl":                network_acl.ResourceVolcengineNetworkAcl(),
+			"volcengine_network_acl_associate":      network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
+			"volcengine_vpc_ipv6_gateway":           ipv6_gateway.ResourceVolcengineIpv6Gateway(),
+			"volcengine_vpc_ipv6_address_bandwidth": ipv6_address_bandwidth.ResourceVolcengineIpv6AddressBandwidth(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),
