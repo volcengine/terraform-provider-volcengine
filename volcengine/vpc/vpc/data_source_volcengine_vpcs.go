@@ -175,6 +175,11 @@ func DataSourceVolcengineVpcs() *schema.Resource {
 							Set:         schema.HashString,
 							Description: "The auxiliary cidr block list of VPC.",
 						},
+						"ipv6_cidr_block": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The IPv6 CIDR block of the VPC.",
+						},
 						"project_name": {
 							Type:        schema.TypeString,
 							Computed:    true,

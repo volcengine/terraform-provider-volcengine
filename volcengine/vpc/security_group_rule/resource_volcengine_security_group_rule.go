@@ -53,8 +53,9 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 					"udp",
 					"icmp",
 					"all",
+					"icmpv6",
 				}, false),
-				Description: "Protocol of the SecurityGroup, the value can be `tcp` or `udp` or `icmp` or `all`.",
+				Description: "Protocol of the SecurityGroup, the value can be `tcp` or `udp` or `icmp` or `all` or `icmpv6`.",
 			},
 			"security_group_id": {
 				Type:        schema.TypeString,

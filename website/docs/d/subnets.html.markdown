@@ -33,6 +33,7 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - Creation time of Subnet.
     * `description` - The description of Subnet.
     * `id` - The ID of Subnet.
+    * `ipv6_cidr_block` - The IPv6 CIDR block of the VPC.
     * `network_acl_id` - The ID of network acl which this subnet associate with.
     * `route_table_id` - The ID of route table.
     * `route_table_type` - The type of route table.

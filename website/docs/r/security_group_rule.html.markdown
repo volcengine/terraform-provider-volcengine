@@ -24,7 +24,7 @@ The following arguments are supported:
 * `direction` - (Required, ForceNew) Direction of rule, ingress (inbound) or egress (outbound).
 * `port_end` - (Required, ForceNew) Port end of egress/ingress Rule.
 * `port_start` - (Required, ForceNew) Port start of egress/ingress Rule.
-* `protocol` - (Required, ForceNew) Protocol of the SecurityGroup, the value can be `tcp` or `udp` or `icmp` or `all`.
+* `protocol` - (Required, ForceNew) Protocol of the SecurityGroup, the value can be `tcp` or `udp` or `icmp` or `all` or `icmpv6`.
 * `security_group_id` - (Required) Id of SecurityGroup.
 * `cidr_ip` - (Optional, ForceNew) Cidr ip of egress/ingress Rule.
 * `description` - (Optional) description of a egress rule.

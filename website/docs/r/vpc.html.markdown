@@ -22,6 +22,8 @@ The following arguments are supported:
 * `cidr_block` - (Required, ForceNew) A network address block which should be a subnet of the three internal network segments (10.0.0.0/16, 172.16.0.0/12 and 192.168.0.0/16).
 * `description` - (Optional) The description of the VPC.
 * `dns_servers` - (Optional) The DNS server list of the VPC. And you can specify 0 to 5 servers to this list.
+* `enable_ipv6` - (Optional) Specifies whether to enable the IPv6 CIDR block of the VPC.
+* `ipv6_cidr_block` - (Optional) The IPv6 CIDR block of the VPC.
 * `project_name` - (Optional) The ProjectName of the VPC.
 * `tags` - (Optional) Tags.
 * `vpc_name` - (Optional) The name of the VPC.
