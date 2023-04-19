@@ -89,6 +89,13 @@ func (s *VolcengineVpcService) ReadResource(resourceData *schema.ResourceData, v
 	if _, ok1 := data["AuxiliaryCidrBlocks"]; !ok1 {
 		data["AuxiliaryCidrBlocks"] = []string{}
 	}
+
+	if ipv6CidrBlock, ok2 := data["Ipv6CidrBlock"]; ok2 && ipv6CidrBlock != "" {
+		data["EnableIpv6"] = true
+	} else {
+		data["EnableIpv6"] = false
+	}
+
 	return data, err
 }
 

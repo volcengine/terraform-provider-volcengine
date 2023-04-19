@@ -136,6 +136,11 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 							Computed:    true,
 							Description: "The ID of network acl which this subnet associate with.",
 						},
+						"ipv6_cidr_block": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The IPv6 CIDR block of the VPC.",
+						},
 						"route_table": {
 							Type:        schema.TypeSet,
 							MaxItems:    1,
