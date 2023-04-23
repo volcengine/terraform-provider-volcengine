@@ -277,9 +277,9 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 				doExecute := true
 
 				switch fn.ServiceCategory {
-				case ServiceTos:
+				case ServiceBypass:
 					var trans map[string]interface{}
-					trans, err = convertToTosParams(fn.Convert, *fn.SdkParam)
+					trans, err = convertToBypassParams(fn.Convert, *fn.SdkParam)
 					if err != nil {
 						return err
 					}

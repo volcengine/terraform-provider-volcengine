@@ -76,7 +76,7 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
 	client.UniversalClient = NewUniversalClient(sess, c.CustomerEndpoints)
-	client.TosClient = NewTosClient(sess)
+	client.BypassSvcClient = NewBypassClient(sess)
 
 	InitLocks()
 	InitSyncLimit()

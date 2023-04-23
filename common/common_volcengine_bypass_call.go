@@ -10,22 +10,21 @@ import (
 	"strings"
 
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client"
-	"github.com/volcengine/volcengine-go-sdk/volcengine/client/metadata"
-	"github.com/volcengine/volcengine-go-sdk/volcengine/corehandlers"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/request"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/session"
 )
 
 const (
-	TosInfoUrlParam = "TOS_URL_PARAM"
-	TosInfoInput    = "TOS_INPUT"
+	BypassInfoUrlParam = "BYPASS_URL_PARAM"
+	BypassInfoInput    = "BYPASS_INPUT"
 )
 
-type Tos struct {
+type BypassSvc struct {
 	Session *session.Session
+	info    *BypassSvcInfo
 }
 
-type TosInfo struct {
+type BypassSvcInfo struct {
 	ContentType ContentType
 	HttpMethod  HttpMethod
 	Path        []string
@@ -33,15 +32,16 @@ type TosInfo struct {
 	Header      map[string]string
 	Domain      string
 	ContentPath string
+	Client      *client.Client
 }
 
-func NewTosClient(session *session.Session) *Tos {
-	return &Tos{
+func NewBypassClient(session *session.Session) *BypassSvc {
+	return &BypassSvc{
 		Session: session,
 	}
 }
 
-func (u *Tos) getMethod(m HttpMethod) string {
+func (u *BypassSvc) getMethod(m HttpMethod) string {
 	switch m {
 	case GET:
 		return "GET"
@@ -58,56 +58,20 @@ func (u *Tos) getMethod(m HttpMethod) string {
 	}
 }
 
-func (u *Tos) newTosClient(domain string) *client.Client {
-	svc := "tos"
-	config := u.Session.ClientConfig(svc)
-	var (
-		endpoint string
-	)
-	if domain == "" {
-		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
-			endpoint = fmt.Sprintf("%s://tos-%s.volces.com", "http", config.SigningRegion)
-		} else {
-			endpoint = fmt.Sprintf("%s://tos-%s.volces.com", "https", config.SigningRegion)
-		}
-	} else {
-		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
-			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "http", domain, config.SigningRegion)
-		} else {
-			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "https", domain, config.SigningRegion)
-		}
-
-	}
-
-	c := client.New(
-		*config.Config,
-		metadata.ClientInfo{
-			SigningName:   config.SigningName,
-			SigningRegion: config.SigningRegion,
-			Endpoint:      endpoint,
-			ServiceName:   svc,
-			ServiceID:     svc,
-		},
-		config.Handlers,
-	)
-	c.Handlers.Build.PushBackNamed(corehandlers.SDKVersionUserAgentHandler)
-	c.Handlers.Build.PushBackNamed(corehandlers.AddHostExecEnvUserAgentHandler)
-	c.Handlers.Sign.PushBackNamed(tosSignRequestHandler)
-	c.Handlers.Build.PushBackNamed(tosBuildHandler)
-	c.Handlers.Unmarshal.PushBackNamed(tosUnmarshalHandler)
-	c.Handlers.UnmarshalError.PushBackNamed(tosUnmarshalErrorHandler)
-
-	return c
-}
-
-func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
+func (u *BypassSvc) DoBypassSvcCall(info BypassSvcInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
 	var content *os.File
 	defer func() {
 		if content != nil {
 			err = content.Close()
 		}
 	}()
-	c := u.newTosClient(info.Domain)
+	u.info = &info
+	var c *client.Client
+	if info.Client == nil {
+		c = u.NewTosClient()
+	} else {
+		c = info.Client
+	}
 	trueInput := make(map[string]interface{})
 	var httpPath string
 
@@ -124,9 +88,9 @@ func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *ma
 	if input == nil {
 		input = &map[string]interface{}{}
 	}
-	trueInput[TosInfoInput] = input
+	trueInput[BypassInfoInput] = input
 	if len(info.UrlParam) > 0 {
-		trueInput[TosInfoUrlParam] = info.UrlParam
+		trueInput[BypassInfoUrlParam] = info.UrlParam
 	}
 	output = &map[string]interface{}{}
 	req := c.NewRequest(op, &trueInput, output)
@@ -151,7 +115,7 @@ func (u *Tos) DoTosCall(info TosInfo, input *map[string]interface{}) (output *ma
 	return output, err
 }
 
-func (u *Tos) tryResolveLength(reader io.Reader) int64 {
+func (u *BypassSvc) tryResolveLength(reader io.Reader) int64 {
 	switch v := reader.(type) {
 	case *bytes.Buffer:
 		return int64(v.Len())
@@ -160,7 +124,7 @@ func (u *Tos) tryResolveLength(reader io.Reader) int64 {
 	case *strings.Reader:
 		return int64(v.Len())
 	case *os.File:
-		length, err := fileUnreadLength(v)
+		length, err := u.fileUnreadLength(v)
 		if err != nil {
 			return -1
 		}
@@ -181,7 +145,7 @@ func (u *Tos) tryResolveLength(reader io.Reader) int64 {
 	}
 }
 
-func fileUnreadLength(file *os.File) (int64, error) {
+func (u *BypassSvc) fileUnreadLength(file *os.File) (int64, error) {
 	offset, err := file.Seek(0, io.SeekCurrent)
 	if err != nil {
 		return 0, err

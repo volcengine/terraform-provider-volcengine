@@ -14,7 +14,7 @@ import (
 /*
 
 Import
-Tos Bucket can be imported using the id, e.g.
+BypassSvc Bucket can be imported using the id, e.g.
 ```
 $ terraform import volcengine_tos_bucket_policy.default bucketName:policy
 ```
