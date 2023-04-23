@@ -230,6 +230,11 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 				},
 				"health_check": {
 					ConvertType: ve.ConvertListUnique,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"un_healthy_threshold": {
+							TargetField: "UnhealthyThreshold",
+						},
+					},
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -300,6 +305,11 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 				},
 				"health_check": {
 					ConvertType: ve.ConvertListUnique,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"un_healthy_threshold": {
+							TargetField: "UnhealthyThreshold",
+						},
+					},
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
