@@ -51,6 +51,7 @@ func (u *BypassSvc) NewTlsClient() *client.Client {
 type tlsError struct {
 	ErrorCode    string
 	ErrorMessage string
+	RequestId    string
 }
 
 func tlsUnmarshalError(r *request.Request) {
@@ -71,7 +72,7 @@ func tlsUnmarshalError(r *request.Request) {
 		r.Error = volcengineerr.NewRequestFailure(
 			volcengineerr.New(tos.ErrorCode, tos.ErrorMessage, nil),
 			r.HTTPResponse.StatusCode,
-			"",
+			r.HTTPResponse.Header.Get("X-Tls-Requestid"),
 		)
 
 		return
