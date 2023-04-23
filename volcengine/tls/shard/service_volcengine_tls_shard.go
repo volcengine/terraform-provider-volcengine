@@ -2,6 +2,7 @@ package shard
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -87,7 +88,15 @@ func (s *Service) RemoveResource(resourceData *schema.ResourceData, r *schema.Re
 
 func (s *Service) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		IdField:      "TlsShardId",
 		CollectField: "shards",
+		ExtraData: func(i []interface{}) ([]interface{}, error) {
+			for index, ele := range i {
+				element := ele.(map[string]interface{})
+				i[index].(map[string]interface{})["TlsShardId"] = fmt.Sprintf("%s-%d", element["TopicId"], element["ShardId"])
+			}
+			return i, nil
+		},
 	}
 }
 
