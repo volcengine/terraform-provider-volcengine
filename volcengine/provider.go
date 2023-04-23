@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
@@ -320,6 +321,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_accounts":   rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
 			"volcengine_rds_mysql_databases":  rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
 			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
+
+			// ================ TLS ================
+			"volcengine_tls_shards": shard.DataSourceVolcengineTlsShards(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),

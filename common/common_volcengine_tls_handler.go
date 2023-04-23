@@ -16,7 +16,7 @@ import (
 var tlsUnmarshalErrorHandler = request.NamedHandler{Name: "TlsUnmarshalErrorHandler", Fn: tlsUnmarshalError}
 
 func (u *BypassSvc) NewTlsClient() *client.Client {
-	svc := "tls"
+	svc := "TLS"
 	config := u.Session.ClientConfig(svc)
 	var (
 		endpoint string
