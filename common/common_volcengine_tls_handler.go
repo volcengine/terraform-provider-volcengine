@@ -13,7 +13,7 @@ import (
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineerr"
 )
 
-var tlsUnmarshalErrorHandler = request.NamedHandler{Name: "TosUnmarshalErrorHandler", Fn: tlsUnmarshalError}
+var tlsUnmarshalErrorHandler = request.NamedHandler{Name: "TlsUnmarshalErrorHandler", Fn: tlsUnmarshalError}
 
 func (u *BypassSvc) NewTlsClient() *client.Client {
 	svc := "tls"
