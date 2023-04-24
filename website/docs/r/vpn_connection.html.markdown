@@ -42,6 +42,7 @@ The following arguments are supported:
 * `local_subnet` - (Required) The local subnet of the VPN connection.
 * `remote_subnet` - (Required) The remote subnet of the VPN connection.
 * `vpn_gateway_id` - (Required, ForceNew) The ID of the vpn gateway.
+* `attach_type` - (Optional, ForceNew) The attach type of the VPN connection, the value can be VpnGateway or TransitRouter.
 * `description` - (Optional) The description of the VPN connection.
 * `dpd_action` - (Optional) The dpd action of the VPN connection.
 * `ike_config_auth_alg` - (Optional) The auth alg of the ike config of the VPN connection.
@@ -66,7 +67,6 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `account_id` - The account ID of the VPN connection.
 * `attach_status` - The IPsec attach status.
-* `attach_type` - The IPsec attach type.
 * `connect_status` - The connect status of the VPN connection.
 * `creation_time` - The create time of VPN connection.
 * `status` - The status of the VPN connection.

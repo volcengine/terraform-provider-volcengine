@@ -197,6 +197,13 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of the VPN connection.",
 			},
+			"attach_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "VpnGateway",
+				Description: "The attach type of the VPN connection, the value can be VpnGateway or TransitRouter.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineVpnConnections().Schema["vpn_connections"].Elem.(*schema.Resource).Schema
