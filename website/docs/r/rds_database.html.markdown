@@ -7,7 +7,7 @@ description: |-
   Provides a resource to manage rds database
 ---
 # volcengine_rds_database
-Provides a resource to manage rds database
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds database
 ## Example Usage
 ```hcl
 resource "volcengine_rds_database" "foo" {

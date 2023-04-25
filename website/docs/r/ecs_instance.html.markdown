@@ -8,6 +8,10 @@ description: |-
 ---
 # volcengine_ecs_instance
 Provides a resource to manage ecs instance
+## Notice
+When Destroy this resource,If the resource charge type is PrePaid,Please unsubscribe the resource 
+in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),when complete console operation,yon can
+use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
 resource "volcengine_vpc" "foo" {

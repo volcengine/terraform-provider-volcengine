@@ -7,7 +7,7 @@ description: |-
   Use this data source to query detailed information of rds ip lists
 ---
 # volcengine_rds_ip_lists
-Use this data source to query detailed information of rds ip lists
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Use this data source to query detailed information of rds ip lists
 ## Example Usage
 ```hcl
 data "volcengine_rds_ip_lists" "default" {
