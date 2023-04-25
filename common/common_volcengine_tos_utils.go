@@ -172,8 +172,11 @@ func BeforeTosPutAcl(d *schema.ResourceData, call SdkCall, data *map[string]inte
 	if err != nil {
 		return false, err
 	}
-
-	sourceAclParam := SortAndStartTransJson((*call.SdkParam)[TosParam].(map[string]interface{}))
+	var sourceAclParam map[string]interface{}
+	sourceAclParam, err = SortAndStartTransJson((*call.SdkParam)[TosParam].(map[string]interface{}))
+	if err != nil {
+		return false, err
+	}
 	ownerId, _ := ObtainSdkValue("Owner.ID", (*data)[TosResponse])
 
 	grants, _ := ObtainSdkValue("Grants", sourceAclParam)

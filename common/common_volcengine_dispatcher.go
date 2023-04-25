@@ -235,7 +235,10 @@ func (d *Dispatcher) Data(resourceService ResourceService, resourceDate *schema.
 		return err
 	}
 	if info.ContentType == ContentTypeJson {
-		condition = SortAndStartTransJson(condition)
+		condition, err = SortAndStartTransJson(condition)
+		if err != nil {
+			return err
+		}
 	}
 	switch info.ServiceCategory {
 	case ServiceTos:
