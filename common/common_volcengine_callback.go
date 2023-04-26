@@ -76,7 +76,96 @@ func (c *SdkCall) InitWriteCall(resourceData *schema.ResourceData, resource *sch
 	return err
 }
 
-func SortAndStartTransJson(source map[string]interface{}) map[string]interface{} {
+func volcengineSort(source []string) (result []string) {
+	mapping := make(map[string]int)
+	for _, k := range source {
+		if strings.Contains(k, ".") {
+			keys := strings.Split(k, ".")
+			var key string
+			for _, v1 := range keys {
+				if n, err := strconv.Atoi(v1); err != nil {
+					key = key + v1 + "."
+				} else {
+					if _n, ok := mapping[key]; !ok {
+						mapping[key] = len(strconv.Itoa(n))
+					} else {
+						if len(strconv.Itoa(n)) > _n {
+							mapping[key] = len(strconv.Itoa(n))
+						}
+					}
+				}
+			}
+
+		}
+	}
+	for _, k := range source {
+		if strings.Contains(k, ".") {
+			keys := strings.Split(k, ".")
+			var (
+				key    string
+				newKey string
+			)
+			for _, v1 := range keys {
+				if n, err := strconv.Atoi(v1); err != nil {
+					key = key + v1 + "."
+					newKey = newKey + v1 + "."
+				} else {
+					if len(strconv.Itoa(n)) < mapping[key] {
+						var zero string
+						for i := 0; i < mapping[key]-len(strconv.Itoa(n)); i++ {
+							zero = zero + "0"
+						}
+						newKey = newKey + zero + strconv.Itoa(n) + "."
+					} else {
+						newKey = newKey + strconv.Itoa(n) + "."
+					}
+				}
+			}
+			result = append(result, newKey[0:len(newKey)-1])
+		} else {
+			result = append(result, k)
+		}
+	}
+
+	sort.Strings(result)
+
+	//去除补位
+	for i, k := range result {
+		if strings.Contains(k, ".") {
+			keys := strings.Split(k, ".")
+			var (
+				newKey string
+			)
+			for _, v1 := range keys {
+				if strings.HasPrefix(v1, "0") {
+					b := []byte(v1)
+					var (
+						newB      []byte
+						hasNoZero bool
+					)
+
+					for _, v2 := range b {
+						if v2 != '0' && !hasNoZero {
+							hasNoZero = true
+							newB = append(newB, v2)
+						} else if hasNoZero {
+							newB = append(newB, v2)
+						}
+					}
+					newKey = newKey + string(newB) + "."
+
+				} else {
+					newKey = newKey + v1 + "."
+				}
+			}
+			result[i] = newKey[0 : len(newKey)-1]
+		}
+	}
+
+	return result
+}
+
+func SortAndStartTransJson(source map[string]interface{}) (map[string]interface{}, error) {
 	target := make(map[string]interface{})
 	var a []string
 	for k := range source {
@@ -84,17 +173,26 @@ func SortAndStartTransJson(source map[string]interface{}) map[string]interface{}
 	}
 	sort.Strings(a)
 
+	a = volcengineSort(a)
+
 	for _, k := range a {
-		k1, v1 := transToJson(k, source[k], "", &target)
+		k1, v1, err := transToJson(k, source[k], "", &target)
+		if err != nil {
+			return target, err
+		}
 		target[k1] = v1
 	}
-	return target
+	return target, nil
 }
 
-func transToJson(key string, value interface{}, chain string, top *map[string]interface{}) (string, interface{}) {
+func transToJson(key string, value interface{}, chain string, top *map[string]interface{}) (string, interface{}, error) {
 	var (
 		index int
 		err   error
+		k     string
+		v     interface{}
+		v1    []interface{}
+		v2    map[string]interface{}
 	)
 	if strings.Contains(key, ".") {
 		keys := strings.Split(key, ".")
@@ -109,49 +207,48 @@ func transToJson(key string, value interface{}, chain string, top *map[string]in
 				chain = chain + "." + strconv.Itoa(index-1)
 			}
 		}
-		k, v := transToJson(nextKey, value, chain, top)
+		k, v, err = transToJson(nextKey, value, chain, top)
+		if err != nil {
+			return k, v, err
+		}
 		index, err = strconv.Atoi(k)
 		if err == nil {
-			return keys[0], getAndSetSlice(chain, index-1, v, top)
+			v1, err = getAndSetSlice(chain, index-1, v, top)
+			return keys[0], v1, err
 		} else {
-			return keys[0], getAndSetMap(chain, k, v, top)
+			v2, err = getAndSetMap(chain, k, v, top)
+			return keys[0], v2, err
 		}
 	} else {
-		return key, value
+		return key, value, nil
 	}
 }
 
-func getAndSetSlice(pattern string, index int, value interface{}, top *map[string]interface{}) []interface{} {
+func getAndSetSlice(pattern string, index int, value interface{}, top *map[string]interface{}) ([]interface{}, error) {
 	exist, _ := ObtainSdkValue(pattern, *top)
 	if exist != nil {
 		exist1, _ := ObtainSdkValue(pattern+"."+strconv.Itoa(index), *top)
 		if exist1 == nil {
-			if len(exist.([]interface{})) < index+1 {
-				n := make([]interface{}, index+1)
-				n[index] = value
-				for i, v := range exist.([]interface{}) {
-					n[i] = v
-				}
-				return n
-			} else {
-				exist.([]interface{})[index] = value
+			if index > len(exist.([]interface{})) {
+				return exist.([]interface{}), fmt.Errorf("%s index is not serial", pattern+"."+strconv.Itoa(index+1))
 			}
+			return append(exist.([]interface{}), value), nil
 		}
-		return exist.([]interface{})
+		return exist.([]interface{}), nil
 	}
-	return []interface{}{value}
+	return []interface{}{value}, nil
 }
 
-func getAndSetMap(pattern string, key string, value interface{}, top *map[string]interface{}) map[string]interface{} {
+func getAndSetMap(pattern string, key string, value interface{}, top *map[string]interface{}) (map[string]interface{}, error) {
 	exist, _ := ObtainSdkValue(pattern, *top)
 	if exist != nil {
 		next := exist.(map[string]interface{})
 		next[key] = value
-		return next
+		return next, nil
 	}
 	return map[string]interface{}{
 		key: value,
-	}
+	}, nil
 }
 
 func (c *SdkCall) InitReadCall(resourceData *schema.ResourceData, resource *schema.Resource) (err error) {
@@ -199,7 +296,11 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 					case ContentTypeDefault:
 						break
 					case ContentTypeJson:
-						jsonParam := SortAndStartTransJson(*fn.SdkParam)
+						var jsonParam map[string]interface{}
+						jsonParam, err = SortAndStartTransJson(*fn.SdkParam)
+						if err != nil {
+							return err
+						}
 						fn.SdkParam = &jsonParam
 						break
 					}
