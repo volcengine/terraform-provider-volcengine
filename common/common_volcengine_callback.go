@@ -89,7 +89,7 @@ func volcengineSort(source []string) (result []string) {
 					if _n, ok := mapping[key]; !ok {
 						mapping[key] = len(strconv.Itoa(n))
 					} else {
-						if n > _n {
+						if len(strconv.Itoa(n)) > _n {
 							mapping[key] = len(strconv.Itoa(n))
 						}
 					}
