@@ -7,7 +7,7 @@ description: |-
   Provides a resource to manage rds instance v2
 ---
 # volcengine_rds_instance_v2
-Provides a resource to manage rds instance v2
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds instance v2
 ## Example Usage
 ```hcl
 resource "volcengine_rds_instance_v2" "foo" {

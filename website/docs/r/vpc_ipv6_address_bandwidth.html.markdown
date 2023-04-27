@@ -8,6 +8,10 @@ description: |-
 ---
 # volcengine_vpc_ipv6_address_bandwidth
 Provides a resource to manage vpc ipv6 address bandwidth
+## Notice
+When Destroy this resource,If the resource charge type is PrePaid,Please unsubscribe the resource 
+in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),when complete console operation,yon can
+use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
 data "volcengine_ecs_instances" "dataEcs" {

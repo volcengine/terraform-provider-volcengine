@@ -41,7 +41,6 @@ The following arguments are supported:
 * `ike_config_psk` - (Required) The psk of the ike config of the VPN connection.
 * `local_subnet` - (Required) The local subnet of the VPN connection.
 * `remote_subnet` - (Required) The remote subnet of the VPN connection.
-* `vpn_gateway_id` - (Required, ForceNew) The ID of the vpn gateway.
 * `attach_type` - (Optional, ForceNew) The attach type of the VPN connection, the value can be VpnGateway or TransitRouter.
 * `description` - (Optional) The description of the VPN connection.
 * `dpd_action` - (Optional) The dpd action of the VPN connection.
@@ -61,17 +60,25 @@ The following arguments are supported:
 * `negotiate_instantly` - (Optional) Whether to initiate negotiation mode immediately.
 * `project_name` - (Optional) The project name of the VPN connection.
 * `vpn_connection_name` - (Optional) The name of the VPN connection.
+* `vpn_gateway_id` - (Optional, ForceNew) The ID of the vpn gateway.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `account_id` - The account ID of the VPN connection.
 * `attach_status` - The IPsec attach status.
+* `business_status` - The business status of IPsec connection, valid when the attach type is 'TransitRouter'.
 * `connect_status` - The connect status of the VPN connection.
 * `creation_time` - The create time of VPN connection.
+* `deleted_time` - The delete time of resource, valid when the attach type is 'TransitRouter'.
+* `ip_address` - The ip address of transit router, valid when the attach type is 'TransitRouter'.
+* `log_enabled` - Whether to enable the connection log.
+* `overdue_time` - The overdue time of resource, valid when the attach type is 'TransitRouter'.
 * `status` - The status of the VPN connection.
+* `transit_router_id` - The id of transit router, valid when the attach type is 'TransitRouter'.
 * `update_time` - The update time of VPN connection.
 * `vpn_connection_id` - The ID of the VPN connection.
+* `zone_id` - The zone id of transit router, valid when the attach type is 'TransitRouter'.
 
 
 ## Import

@@ -7,7 +7,7 @@ description: |-
   Use this data source to query detailed information of rds parameter templates
 ---
 # volcengine_rds_parameter_templates
-Use this data source to query detailed information of rds parameter templates
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Use this data source to query detailed information of rds parameter templates
 ## Example Usage
 ```hcl
 data "volcengine_rds_parameter_templates" "default" {

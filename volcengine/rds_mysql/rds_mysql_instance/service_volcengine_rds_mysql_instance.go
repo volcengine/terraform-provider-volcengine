@@ -612,6 +612,13 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 func (s *VolcengineRdsMysqlInstanceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
+	// 删除包年包月实例时报错
+	if chargeType := resourceData.Get("charge_info.0.charge_type"); chargeType.(string) == "PrePaid" {
+		return []ve.Callback{{
+			Err: fmt.Errorf("can not delete PrePaid mysql instance"),
+		}}
+	}
+
 	// 1. Disassociate Allow List
 	allowListCallback := ve.Callback{
 		Call: ve.SdkCall{

@@ -7,7 +7,7 @@ description: |-
   Provides a resource to manage rds account privilege
 ---
 # volcengine_rds_account_privilege
-Provides a resource to manage rds account privilege
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds account privilege
 ## Example Usage
 ```hcl
 resource "volcengine_rds_account" "app_name" {
