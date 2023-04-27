@@ -7,7 +7,7 @@ description: |-
   Provides a resource to manage rds ip list
 ---
 # volcengine_rds_ip_list
-Provides a resource to manage rds ip list
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds ip list
 ## Example Usage
 ```hcl
 resource "volcengine_rds_ip_list" "foo" {

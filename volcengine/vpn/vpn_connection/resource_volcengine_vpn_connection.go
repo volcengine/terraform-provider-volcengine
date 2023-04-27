@@ -48,7 +48,7 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 			},
 			"vpn_gateway_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The ID of the vpn gateway.",
 			},

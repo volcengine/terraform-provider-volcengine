@@ -7,7 +7,7 @@ description: |-
   Use this data source to query detailed information of rds instances
 ---
 # volcengine_rds_instances
-Use this data source to query detailed information of rds instances
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Use this data source to query detailed information of rds instances
 ## Example Usage
 ```hcl
 data "volcengine_rds_instances" "default" {

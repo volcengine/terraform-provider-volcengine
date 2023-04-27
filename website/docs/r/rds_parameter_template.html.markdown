@@ -7,7 +7,7 @@ description: |-
   Provides a resource to manage rds parameter template
 ---
 # volcengine_rds_parameter_template
-Provides a resource to manage rds parameter template
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds parameter template
 ## Example Usage
 ```hcl
 resource "volcengine_rds_parameter_template" "foo" {

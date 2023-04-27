@@ -30,6 +30,12 @@ description: |-
 ---
 # {{.name}}
 {{.description}}
+{{- if eq .hasPaid "true" }}
+## Notice
+When Destroy this resource,If the resource charge type is PrePaid,Please unsubscribe the resource 
+in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),when complete console operation,yon can
+use 'terraform state rm ${resourceId}' to remove.
+{{- end }}
 ## Example Usage
 {{.example}}
 ## Argument Reference
@@ -108,6 +114,12 @@ type Product struct {
 	ResourcePath      string
 	DataSourceExample string
 	ResourceExample   string
+	ResourceName      string
+}
+
+var deprecatedMapping = map[string]string{
+	"rds":    "Recommend use volcengine_rds_mysql_*** replace",
+	"rds_v2": "Recommend use volcengine_rds_mysql_*** replace",
 }
 
 var resourceKeys = map[string]string{
@@ -162,12 +174,12 @@ func main() {
 		// document for DataSources
 		if product.DataSource != "" {
 			_dataSource := cloudMark + "_" + product.DataSource
-			genDoc(pwd, product.Name, "data_source", product.DataSourcePath, _dataSource, provider.DataSourcesMap[_dataSource], product.DataSourceExample)
+			genDoc(pwd, product.ResourceName, product.Name, "data_source", product.DataSourcePath, _dataSource, provider.DataSourcesMap[_dataSource], product.DataSourceExample)
 		}
 
 		// document for Resources
 		_resource := cloudMark + "_" + product.Resource
-		genDoc(pwd, product.Name, "resource", product.ResourcePath, _resource, provider.ResourcesMap[_resource], product.ResourceExample)
+		genDoc(pwd, product.ResourceName, product.Name, "resource", product.ResourcePath, _resource, provider.ResourcesMap[_resource], product.ResourceExample)
 	}
 }
 
@@ -185,7 +197,10 @@ func genIndex(pwd string) (prods []Product) {
 				fs1, _ := ioutil.ReadDir(p1)
 				for _, f1 := range fs1 {
 					if f1.IsDir() {
-						product := Product{Name: name}
+						product := Product{
+							Name:         name,
+							ResourceName: file.Name(),
+						}
 						p2 := p1 + "/" + f1.Name()
 						fs2, _ := ioutil.ReadDir(p2)
 						for _, f2 := range fs2 {
@@ -284,7 +299,7 @@ func genIndex(pwd string) (prods []Product) {
 }
 
 // genDoc generating doc for data source and resource
-func genDoc(pwd string, product, docType, filename, name string, resource *schema.Resource, example string) {
+func genDoc(pwd string, resourceName, product, docType, filename, name string, resource *schema.Resource, example string) {
 	if resource == nil {
 		return
 	}
@@ -299,6 +314,7 @@ func genDoc(pwd string, product, docType, filename, name string, resource *schem
 		"description":       "",
 		"description_short": "",
 		"import":            "",
+		"hasPaid":           "",
 	}
 
 	//filename := fmt.Sprintf("%s_%s_%s.go", docType, cloudMarkShort, data["resource"])
@@ -336,9 +352,16 @@ func genDoc(pwd string, product, docType, filename, name string, resource *schem
 	if docType == "resource" {
 		data["description"] = "Provides a resource to manage " + common.DownLineToSpace(data["resource"])
 		data["description_short"] = data["description"]
+		if s, ok := deprecatedMapping[resourceName]; ok {
+			data["description"] = "(Deprecated! " + s + ") " + data["description"]
+		}
+
 	} else {
 		data["description"] = "Use this data source to query detailed information of " + common.DownLineToSpace(data["resource"])
 		data["description_short"] = data["description"]
+		if s, ok := deprecatedMapping[resourceName]; ok {
+			data["description"] = "(Deprecated! " + s + ") " + data["description"]
+		}
 	}
 
 	var (
@@ -362,6 +385,9 @@ func genDoc(pwd string, product, docType, filename, name string, resource *schem
 		if v.Required && v.Optional {
 			message("[FAIL!]Don't set Required and Optional at the same time: '%s'", k)
 			os.Exit(1)
+		}
+		if docType == "resource" && (strings.Contains(v.Description, "PostPaid") || strings.Contains(v.Description, "PrePaid")) {
+			data["hasPaid"] = "true"
 		}
 		if v.Required {
 			opt := "Required"

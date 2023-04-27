@@ -7,7 +7,7 @@ description: |-
   Use this data source to query detailed information of rds databases
 ---
 # volcengine_rds_databases
-Use this data source to query detailed information of rds databases
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Use this data source to query detailed information of rds databases
 ## Example Usage
 ```hcl
 data "volcengine_rds_databases" "default" {
