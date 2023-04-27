@@ -104,7 +104,8 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 								"PostPaid",
 								"PrePaid",
 							}, false),
-							Description: "Payment type. Value:\nPostPaid - Pay-As-You-Go\nPrePaid - Yearly and monthly (default).",
+							Description: "Payment type. Value:\nPostPaid - Pay-As-You-Go\nPrePaid - Yearly and monthly (default). \n" +
+								"When the value of this field is `PrePaid`, the mysql instance cannot be deleted through terraform. Please unsubscribe the instance from the Volcengine console first, and then use `terraform state rm volcengine_rds_mysql_instance.resource_name` command to remove it from terraform state file and management.",
 						},
 						"auto_renew": {
 							Type:             schema.TypeBool,
@@ -119,6 +120,7 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 							Optional:         true,
 							Computed:         true,
 							ForceNew:         true,
+							ValidateFunc:     validation.StringInSlice([]string{"Month", "Year"}, false),
 							DiffSuppressFunc: RdsMysqlInstanceImportDiffSuppress,
 							Description:      "The purchase cycle in the prepaid scenario.\nMonth - monthly subscription (default)\nYear - Package year.",
 						},

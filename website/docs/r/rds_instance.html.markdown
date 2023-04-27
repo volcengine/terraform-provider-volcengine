@@ -7,7 +7,11 @@ description: |-
   Provides a resource to manage rds instance
 ---
 # volcengine_rds_instance
-Provides a resource to manage rds instance
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds instance
+## Notice
+When Destroy this resource,If the resource charge type is PrePaid,Please unsubscribe the resource 
+in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),when complete console operation,yon can
+use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
 resource "volcengine_rds_instance" "foo" {

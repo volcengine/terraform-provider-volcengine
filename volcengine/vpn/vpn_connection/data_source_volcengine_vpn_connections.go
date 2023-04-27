@@ -227,6 +227,41 @@ func DataSourceVolcengineVpnConnections() *schema.Resource {
 							Computed:    true,
 							Description: "The IPsec attach type.",
 						},
+						"ip_address": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ip address of transit router, valid when the attach type is 'TransitRouter'.",
+						},
+						"transit_router_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of transit router, valid when the attach type is 'TransitRouter'.",
+						},
+						"zone_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The zone id of transit router, valid when the attach type is 'TransitRouter'.",
+						},
+						"business_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The business status of IPsec connection, valid when the attach type is 'TransitRouter'.",
+						},
+						"deleted_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The delete time of resource, valid when the attach type is 'TransitRouter'.",
+						},
+						"overdue_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The overdue time of resource, valid when the attach type is 'TransitRouter'.",
+						},
+						"log_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable the connection log.",
+						},
 					},
 				},
 			},
