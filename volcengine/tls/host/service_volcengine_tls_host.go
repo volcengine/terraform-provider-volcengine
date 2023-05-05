@@ -3,6 +3,7 @@ package host
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -61,8 +62,33 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 	})
 }
 
-func (s *Service) ReadResource(resourceData *schema.ResourceData, vpcId string) (data map[string]interface{}, err error) {
-	return data, err
+func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+	var (
+		results []interface{}
+		ok      bool
+	)
+	if id == "" {
+		id = s.ReadResourceId(resourceData.Id())
+	}
+	ids := strings.Split(id, ":")
+
+	req := map[string]interface{}{
+		"HostGroupId": ids[0],
+		"Ip":          ids[1],
+	}
+	results, err = s.ReadResources(req)
+	if err != nil {
+		return data, err
+	}
+	for _, v := range results {
+		if data, ok = v.(map[string]interface{}); !ok {
+			return data, errors.New("Value is not map ")
+		}
+	}
+	if len(data) == 0 {
+		return data, fmt.Errorf("Host %s not exist ", id)
+	}
+	return data, nil
 }
 
 func (s *Service) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
@@ -88,7 +114,31 @@ func (s *Service) ModifyResource(resourceData *schema.ResourceData, resource *sc
 }
 
 func (s *Service) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DeleteHost",
+			ConvertMode: ve.RequestConvertIgnore,
+			SdkParam: &map[string]interface{}{
+				"HostGroupId": resourceData.Get("host_group_id"),
+				"Ip":          resourceData.Get("ip"),
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+					ContentType: ve.ApplicationJSON,
+					HttpMethod:  ve.DELETE,
+					Path:        []string{call.Action},
+					Client:      s.Client.BypassSvcClient.NewTlsClient(),
+				}, call.SdkParam)
+				if err != nil {
+					return nil, err
+				}
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, *resp)
+				return resp, nil
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *Service) DatasourceResources(d *schema.ResourceData, r *schema.Resource) ve.DataSourceInfo {

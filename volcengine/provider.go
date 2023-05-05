@@ -477,6 +477,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ TLS ================
 			"volcengine_tls_kafka_consumer": kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
 			"volcengine_tls_host_group":     host_group.ResourceVolcengineTlsHostGroup(),
+			"volcengine_tls_host":           host.ResourceVolcengineTlsHost(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
