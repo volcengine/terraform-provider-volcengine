@@ -100,6 +100,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_readonly_node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
+	tlsIndex "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/index"
+	tlsProject "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/project"
+	tlsTopic "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/available_resource"
@@ -330,6 +333,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_kafka_consumers": kafka_consumer.DataSourceVolcengineTlsKafkaConsumers(),
 			"volcengine_tls_host_groups":     host_group.DataSourceVolcengineTlsHostGroups(),
 			"volcengine_tls_hosts":           host.DataSourceVolcengineTlsHosts(),
+			"volcengine_tls_projects":        tlsProject.DataSourceVolcengineTlsProjects(),
+			"volcengine_tls_topics":          tlsTopic.DataSourceVolcengineTlsTopics(),
+			"volcengine_tls_indexes":         tlsIndex.DataSourceVolcengineTlsIndexes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -478,6 +484,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_kafka_consumer": kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
 			"volcengine_tls_host_group":     host_group.ResourceVolcengineTlsHostGroup(),
 			"volcengine_tls_host":           host.ResourceVolcengineTlsHost(),
+			"volcengine_tls_project":        tlsProject.ResourceVolcengineTlsProject(),
+			"volcengine_tls_topic":          tlsTopic.ResourceVolcengineTlsTopic(),
+			"volcengine_tls_index":          tlsIndex.ResourceVolcengineTlsIndex(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
