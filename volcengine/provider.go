@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/kafka_consumer"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
@@ -323,7 +324,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
 
 			// ================ TLS ================
-			"volcengine_tls_shards": shard.DataSourceVolcengineTlsShards(),
+			"volcengine_tls_shards":          shard.DataSourceVolcengineTlsShards(),
+			"volcengine_tls_kafka_consumers": kafka_consumer.DataSourceVolcengineTlsKafkaConsumers(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -467,6 +469,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_database":               rds_mysql_database.ResourceVolcengineRdsMysqlDatabase(),
 			"volcengine_rds_mysql_allowlist":              allowlist.ResourceVolcengineRdsMysqlAllowlist(),
 			"volcengine_rds_mysql_allowlist_associate":    allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
+
+			// ================ TLS ================
+			"volcengine_tls_kafka_consumer": kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

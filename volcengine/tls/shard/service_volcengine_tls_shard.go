@@ -39,7 +39,7 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 			HttpMethod:  ve.GET,
 			Path:        []string{action},
 			Client:      s.Client.BypassSvcClient.NewTlsClient(),
-		}, &m)
+		}, &condition)
 		logger.Debug(logger.RespFormat, action, resp)
 		results, err = ve.ObtainSdkValue("RESPONSE.Shards", *resp)
 		if err != nil {
