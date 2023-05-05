@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/kafka_consumer"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
@@ -328,6 +329,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_shards":          shard.DataSourceVolcengineTlsShards(),
 			"volcengine_tls_kafka_consumers": kafka_consumer.DataSourceVolcengineTlsKafkaConsumers(),
 			"volcengine_tls_host_groups":     host_group.DataSourceVolcengineTlsHostGroups(),
+			"volcengine_tls_hosts":           host.DataSourceVolcengineTlsHosts(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
