@@ -11,7 +11,7 @@ import (
 /*
 
 Import
-TlsProject can be imported using the id, e.g.
+Tls Project can be imported using the id, e.g.
 ```
 $ terraform import volcengine_tls_project.default e020c978-4f05-40e1-9167-0113d3ef****
 ```
@@ -44,6 +44,14 @@ func ResourceVolcengineTlsProject() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the tls project.",
 			},
+			"iam_project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The IAM project name of the tls project.",
+			},
+			"tags": ve.TagsSchema(),
 
 			"create_time": {
 				Type:        schema.TypeString,

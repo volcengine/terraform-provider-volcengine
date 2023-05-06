@@ -1,6 +1,7 @@
 package topic
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -27,11 +28,23 @@ func (s *VolcengineTlsTopicService) GetClient() *ve.SdkClient {
 
 func (s *VolcengineTlsTopicService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp     *map[string]interface{}
-		results  interface{}
-		tlsTopic map[string]interface{}
-		ok       bool
+		resp    *map[string]interface{}
+		results interface{}
+		ok      bool
 	)
+
+	if tags, exist := condition["Tags"]; exist {
+		tagsArr, ok := tags.([]interface{})
+		if !ok {
+			return data, fmt.Errorf(" Tags in condition is not slice ")
+		}
+		tagsBytes, err := json.Marshal(tagsArr)
+		if err != nil {
+			return data, fmt.Errorf(" json marshal tags error: %v", err)
+		}
+		condition["Tags"] = string(tagsBytes)
+	}
+
 	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeTopics"
 		logger.Debug(logger.ReqFormat, action, condition)
@@ -59,78 +72,6 @@ func (s *VolcengineTlsTopicService) ReadResources(condition map[string]interface
 		return nil, err
 	}
 
-	for _, v := range data {
-		if tlsTopic, ok = v.(map[string]interface{}); !ok {
-			return data, fmt.Errorf(" Topic Value is not map ")
-		} else {
-			action := "DescribeIndex"
-			req := map[string]interface{}{
-				"TopicId": tlsTopic["TopicId"],
-			}
-			logger.Debug(logger.ReqFormat, action, req)
-			resp, err = s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
-				ContentType: ve.Default,
-				HttpMethod:  ve.GET,
-				Path:        []string{action},
-				Client:      s.Client.BypassSvcClient.NewTlsClient(),
-			}, &req)
-			logger.Debug(logger.RespFormat, action, req, *resp)
-			if err != nil {
-				logger.DebugInfo("DescribeIndex error", "err", err, "TopicId", tlsTopic["TopicId"])
-				if ve.ResourceNotFoundError(err) {
-					err = nil
-					continue
-				} else {
-					return data, err
-				}
-			}
-
-			index, err := ve.ObtainSdkValue("RESPONSE", *resp)
-			if err != nil {
-				logger.DebugInfo("ObtainSdkValue RESPONSE error", err)
-				continue
-			}
-			indexMap, ok := index.(map[string]interface{})
-			if !ok {
-				logger.Info("Index is not map")
-				continue
-			}
-			tlsTopic["IndexCreateTime"] = indexMap["CreateTime"]
-			tlsTopic["IndexModifyTime"] = indexMap["ModifyTime"]
-			tlsTopic["FullText"] = indexMap["FullText"]
-			tlsTopic["KeyValue"] = indexMap["KeyValue"]
-
-			//keyValueArray, ok := tlsTopic["KeyValue"].([]interface{})
-			//if !ok {
-			//	logger.Info("Index KeyValues is not slice")
-			//	continue
-			//}
-			//for _, keyValue := range keyValueArray {
-			//	keyValueMap, ok := keyValue.(map[string]interface{})
-			//	if !ok {
-			//		logger.Info("Index KeyValue is not map")
-			//		continue
-			//	}
-			//	valueMap, ok := keyValueMap["Value"].(map[string]interface{})
-			//	if !ok {
-			//		logger.Info("Index KeyValue Value is not map")
-			//		continue
-			//	}
-			//	jsonKeys := valueMap["JsonKeys"]
-			//	if jsonKeys == nil {
-			//		continue
-			//	}
-			//	temp, err := json.Marshal(jsonKeys)
-			//	if err != nil {
-			//		logger.Debug("Marshal JsonKeys error", "err", err, "JsonKeys", jsonKeys)
-			//		delete(valueMap, "JsonKeys")
-			//		continue
-			//	}
-			//	valueMap["JsonKeys"] = string(temp)
-			//}
-		}
-	}
-
 	return data, err
 }
 
@@ -142,8 +83,31 @@ func (s *VolcengineTlsTopicService) ReadResource(resourceData *schema.ResourceDa
 	if topicId == "" {
 		topicId = s.ReadResourceId(resourceData.Id())
 	}
+	projectId, exist := resourceData.GetOkExists("project_id")
+	if !exist {
+		// import topic 时需要先查询 ProjectId
+		action := "DescribeTopic"
+		condition := map[string]interface{}{
+			"TopicId": topicId,
+		}
+		logger.Debug(logger.ReqFormat, action, condition)
+		resp, err := s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+			ContentType: ve.Default,
+			HttpMethod:  ve.GET,
+			Path:        []string{action},
+			Client:      s.Client.BypassSvcClient.NewTlsClient(),
+		}, &condition)
+		logger.Debug(logger.RespFormat, action, condition, resp)
+		if err != nil {
+			return data, fmt.Errorf(" DescribeTopic Error: %v", err)
+		}
+		projectId, err = ve.ObtainSdkValue("RESPONSE.ProjectId", *resp)
+		if err != nil || projectId == "" {
+			return data, fmt.Errorf(" ObtainSdkValue RESPONSE.ProjectId Error")
+		}
+	}
 	req := map[string]interface{}{
-		"ProjectId": resourceData.Get("project_id"),
+		"ProjectId": projectId,
 		"TopicId":   topicId,
 	}
 	results, err = s.ReadResources(req)
@@ -164,22 +128,6 @@ func (s *VolcengineTlsTopicService) ReadResource(resourceData *schema.ResourceDa
 		return data, fmt.Errorf("tls topic %s is not exist ", topicId)
 	}
 
-	//keyValueArray, ok := data["KeyValue"].([]interface{})
-	//if !ok {
-	//	return data, fmt.Errorf(" Index KeyValues is not slice ")
-	//}
-	//for _, keyValue := range keyValueArray {
-	//	keyValueMap, ok := keyValue.(map[string]interface{})
-	//	if !ok {
-	//		return data, fmt.Errorf(" Index KeyValue is not map ")
-	//	}
-	//	valueMap, ok := keyValueMap["Value"].(map[string]interface{})
-	//	if !ok {
-	//		return data, fmt.Errorf(" Index KeyValue Value is not map ")
-	//	}
-	//	keyValueMap["Value"] = []interface{}{valueMap}
-	//}
-
 	return data, err
 }
 
@@ -189,47 +137,6 @@ func (s *VolcengineTlsTopicService) RefreshResourceState(resourceData *schema.Re
 
 func (VolcengineTlsTopicService) WithResourceResponseHandlers(topic map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		if _, existIndex := topic["KeyValue"]; !existIndex {
-			return topic, nil, nil
-		}
-		keyValueArray, ok := topic["KeyValue"].([]interface{})
-		if !ok {
-			return topic, nil, fmt.Errorf(" Index KeyValues is not slice ")
-		}
-		for _, keyValue := range keyValueArray {
-			valueArray := make([]interface{}, 0)
-			keyValueMap, ok := keyValue.(map[string]interface{})
-			if !ok {
-				return topic, nil, fmt.Errorf(" Index KeyValue is not map ")
-			}
-			valueMap, ok := keyValueMap["Value"].(map[string]interface{})
-			if !ok {
-				return topic, nil, fmt.Errorf(" Index KeyValue Value is not map ")
-			}
-
-			if jsonKeys, ok := valueMap["JsonKeys"]; ok {
-				subKeyValueArray, ok := jsonKeys.([]interface{})
-				if !ok {
-					return topic, nil, fmt.Errorf(" Index JsonKeys KeyValues is not slice ")
-				}
-				for _, subKeyValue := range subKeyValueArray {
-					subValueArray := make([]interface{}, 0)
-					subKeyValueMap, ok := subKeyValue.(map[string]interface{})
-					if !ok {
-						return topic, nil, fmt.Errorf(" Index JsonKeys KeyValue is not map ")
-					}
-					subValueMap, ok := subKeyValueMap["Value"].(map[string]interface{})
-					if !ok {
-						return topic, nil, fmt.Errorf(" Index JsonKeys KeyValue Value is not map ")
-					}
-					subValueArray = append(subValueArray, subValueMap)
-					subKeyValueMap["Value"] = subValueArray
-				}
-			}
-
-			valueArray = append(valueArray, valueMap)
-			keyValueMap["Value"] = valueArray
-		}
 		return topic, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -245,11 +152,9 @@ func (s *VolcengineTlsTopicService) CreateResource(resourceData *schema.Resource
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-				"full_text": {
-					Ignore: true,
-				},
-				"key_value": {
-					Ignore: true,
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -269,54 +174,6 @@ func (s *VolcengineTlsTopicService) CreateResource(resourceData *schema.Resource
 		},
 	}
 	callbacks = append(callbacks, topicCallback)
-
-	indexCallback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "CreateIndex",
-			ConvertMode: ve.RequestConvertInConvert,
-			ContentType: ve.ContentTypeJson,
-			Convert: map[string]ve.RequestConvert{
-				"full_text": {
-					ConvertType: ve.ConvertJsonObject,
-				},
-				"key_value": {
-					ConvertType: ve.ConvertJsonObjectArray,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"value": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"json_keys": {
-									ConvertType: ve.ConvertJsonObjectArray,
-									NextLevelConvert: map[string]ve.RequestConvert{
-										"value": {
-											ConvertType: ve.ConvertJsonObject,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) > 0 {
-					(*call.SdkParam)["TopicId"] = d.Id()
-					return true, nil
-				}
-				return false, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
-					ContentType: ve.ApplicationJSON,
-					HttpMethod:  ve.POST,
-					Path:        []string{call.Action},
-					Client:      s.Client.BypassSvcClient.NewTlsClient(),
-				}, call.SdkParam)
-			},
-		},
-	}
-	callbacks = append(callbacks, indexCallback)
 
 	return callbacks
 }
@@ -375,104 +232,8 @@ func (s *VolcengineTlsTopicService) ModifyResource(resourceData *schema.Resource
 	}
 	callbacks = append(callbacks, topicCallback)
 
-	logger.DebugInfo("testModifyIndex", resourceData.HasChange("full_text"), resourceData.HasChange("key_value"))
-	if resourceData.HasChanges("full_text", "key_value") {
-		var (
-			createIndex bool
-			deleteIndex bool
-		)
-		indexCallback := ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "ModifyIndex",
-				ConvertMode: ve.RequestConvertInConvert,
-				ContentType: ve.ContentTypeJson,
-				Convert: map[string]ve.RequestConvert{
-					"full_text": {
-						ConvertType: ve.ConvertJsonObject,
-						ForceGet:    true,
-					},
-					"key_value": {
-						ConvertType: ve.ConvertJsonObjectArray,
-						ForceGet:    true,
-						//NextLevelConvert: map[string]ve.RequestConvert{
-						//	"value": {
-						//		ConvertType: ve.ConvertJsonObject,
-						//		NextLevelConvert: map[string]ve.RequestConvert{
-						//			"json_keys": {
-						//				ConvertType: ve.ConvertJsonObjectArray,
-						//				NextLevelConvert: map[string]ve.RequestConvert{
-						//					"value": {
-						//						ConvertType: ve.ConvertJsonObject,
-						//						NextLevelConvert: map[string]ve.RequestConvert{
-						//							"case_sensitive": {
-						//								Ignore: true,
-						//							},
-						//							"delimiter": {
-						//								Ignore: true,
-						//							},
-						//							"include_chinese": {
-						//								Ignore: true,
-						//							},
-						//							"sql_flag": {
-						//								Ignore: true,
-						//							},
-						//						},
-						//					},
-						//				},
-						//			},
-						//		},
-						//	},
-						//},
-					},
-				},
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					oldFullText, _ := d.GetChange("full_text")
-					oldKeyValue, _ := d.GetChange("key_value")
-					logger.DebugInfo("testCreateIndex", oldFullText, oldFullText, len(oldFullText.([]interface{})) == 0, len(oldKeyValue.([]interface{})) == 0)
-					if len(oldFullText.([]interface{})) == 0 && len(oldKeyValue.([]interface{})) == 0 {
-						// 当 Index 从无到有时，调用 CreateIndex 来新建该 Topic 的索引
-						createIndex = true
-					}
-					if len(*call.SdkParam) == 0 {
-						// 当 Index 相关的参数被清空时，调用 DeleteIndex 来删除该 Topic 的索引
-						deleteIndex = true
-					}
-					(*call.SdkParam)["TopicId"] = d.Id()
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					if createIndex {
-						call.Action = "CreateIndex"
-						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-						return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
-							ContentType: ve.ApplicationJSON,
-							HttpMethod:  ve.POST,
-							Path:        []string{call.Action},
-							Client:      s.Client.BypassSvcClient.NewTlsClient(),
-						}, call.SdkParam)
-					} else if deleteIndex {
-						call.Action = "DeleteIndex"
-						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-						return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
-							ContentType: ve.ApplicationJSON,
-							HttpMethod:  ve.DELETE,
-							Path:        []string{call.Action},
-							Client:      s.Client.BypassSvcClient.NewTlsClient(),
-						}, call.SdkParam)
-					} else {
-						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-						return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
-							ContentType: ve.ApplicationJSON,
-							HttpMethod:  ve.PUT,
-							Path:        []string{call.Action},
-							Client:      s.Client.BypassSvcClient.NewTlsClient(),
-						}, call.SdkParam)
-					}
-				},
-			},
-		}
-		callbacks = append(callbacks, indexCallback)
-	}
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, callbacks)
 
 	return callbacks
 }
@@ -523,9 +284,16 @@ func (s *VolcengineTlsTopicService) RemoveResource(resourceData *schema.Resource
 
 func (s *VolcengineTlsTopicService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"tags": {
+				TargetField: "Tags",
+				ConvertType: ve.ConvertJsonObjectArray,
+			},
+		},
 		NameField:    "TopicName",
 		IdField:      "TopicId",
 		CollectField: "tls_topics",
+		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"TopicId": {
 				TargetField: "id",
@@ -537,4 +305,71 @@ func (s *VolcengineTlsTopicService) DatasourceResources(*schema.ResourceData, *s
 
 func (s *VolcengineTlsTopicService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineTlsTopicService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "RemoveTagsFromResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceType"] = "topic"
+					(*call.SdkParam)["ResourcesList"] = []string{resourceData.Id()}
+					(*call.SdkParam)["TagKeyList"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeyList"] = append((*call.SdkParam)["TagKeyList"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+					ContentType: ve.ApplicationJSON,
+					HttpMethod:  ve.POST,
+					Path:        []string{call.Action},
+					Client:      s.Client.BypassSvcClient.NewTlsClient(),
+				}, call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddTagsToResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceType"] = "topic"
+					(*call.SdkParam)["ResourcesList"] = []string{resourceData.Id()}
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), map[string]interface{}{
+							"Key":   tag.(map[string]interface{})["key"],
+							"Value": tag.(map[string]interface{})["value"],
+						})
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+					ContentType: ve.ApplicationJSON,
+					HttpMethod:  ve.POST,
+					Path:        []string{call.Action},
+					Client:      s.Client.BypassSvcClient.NewTlsClient(),
+				}, call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }

@@ -114,9 +114,9 @@ func (s *VolcengineTlsIndexService) RefreshResourceState(resourceData *schema.Re
 	return nil
 }
 
-func (VolcengineTlsIndexService) WithResourceResponseHandlers(project map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineTlsIndexService) WithResourceResponseHandlers(index map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return project, nil, nil
+		return index, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 
@@ -150,7 +150,6 @@ func (s *VolcengineTlsIndexService) CreateResource(resourceData *schema.Resource
 				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.DebugInfo("testKeyValue", *call.SdkParam)
 				if keyValue, exist := (*call.SdkParam)["KeyValue"]; exist {
 					newKeyValue, err := transKeyValueToRequest(keyValue)
 					if err != nil {
@@ -211,10 +210,6 @@ func (s *VolcengineTlsIndexService) ModifyResource(resourceData *schema.Resource
 				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.DebugInfo("testKeyValue", *call.SdkParam)
-				logger.DebugInfo("testKeyValue1", d.Get("key_value"))
-				oldV, newV := d.GetChange("key_value")
-				logger.DebugInfo("testKeyValue2", "old: ", oldV, "new: ", newV)
 				if keyValue, exist := (*call.SdkParam)["KeyValue"]; exist {
 					newKeyValue, err := transKeyValueToRequest(keyValue)
 					if err != nil {
@@ -318,6 +313,10 @@ func transKeyValueToRequest(keyValue interface{}) ([]interface{}, error) {
 			return []interface{}{}, fmt.Errorf(" Index KeyValue is not map ")
 		}
 		valueMap := make(map[string]interface{})
+		sqlFlag, exist := keyValueMap["SqlFlag"]
+		if !exist {
+			sqlFlag = false
+		}
 		for k1, v1 := range keyValueMap {
 			if k1 == "Key" {
 				continue
@@ -340,6 +339,7 @@ func transKeyValueToRequest(keyValue interface{}) ([]interface{}, error) {
 							delete(jsonMap, k3)
 						}
 					}
+					jsonValueMap["SqlFlag"] = sqlFlag
 					jsonMap["Value"] = jsonValueMap
 				}
 			}

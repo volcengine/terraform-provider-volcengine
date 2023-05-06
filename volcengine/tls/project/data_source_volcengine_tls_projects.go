@@ -31,6 +31,12 @@ func DataSourceVolcengineTlsProjects() *schema.Resource {
 					return d.Get("project_name").(string) == ""
 				},
 			},
+			"iam_project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The IAM project name of the tls project.",
+			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -88,6 +94,12 @@ func DataSourceVolcengineTlsProjects() *schema.Resource {
 							Computed:    true,
 							Description: "The count of topics in the tls project.",
 						},
+						"iam_project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The IAM project name of the tls project.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

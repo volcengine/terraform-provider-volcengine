@@ -2,14 +2,22 @@ package index
 
 import (
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
+
+/*
+
+Import
+Tls Index can be imported using the topic id, e.g.
+```
+$ terraform import volcengine_tls_index.default index:edf051ed-3c46-49ba-9339-bea628fe****
+```
+
+*/
 
 func ResourceVolcengineTlsIndex() *schema.Resource {
 	resource := &schema.Resource{
@@ -29,6 +37,7 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 			"topic_id": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The topic id of the tls index.",
 			},
 			"full_text": {
@@ -72,9 +81,8 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 							Description: "The key of the KeyValueInfo.",
 						},
 						"value_type": {
-							Type:     schema.TypeString,
-							Required: true,
-							//ForceNew:     true,
+							Type:         schema.TypeString,
+							Required:     true,
 							ValidateFunc: validation.StringInSlice([]string{"long", "double", "text", "json"}, false),
 							Description:  "The type of value. Valid values: `long`, `double`, `text`, `json`.",
 						},
@@ -105,19 +113,18 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 						"json_keys": {
 							Type:     schema.TypeList,
 							Optional: true,
-							//Computed: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								logger.DebugInfo("testValueType1", k)
-								items := strings.Split(k, ".")
-								if len(items) > 2 {
-									key := strings.Join(items[:2], ".")
-									logger.DebugInfo("testValueType2", key, d.Get(key+".value_type"))
-									if valueType := d.Get(key + ".value_type"); valueType != nil && valueType.(string) != "json" {
-										return true
-									}
-								}
-								return false
-							},
+							//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+							//	logger.DebugInfo("testValueType1", k)
+							//	items := strings.Split(k, ".")
+							//	if len(items) > 2 {
+							//		key := strings.Join(items[:2], ".")
+							//		logger.DebugInfo("testValueType2", key, d.Get(key+".value_type"))
+							//		if valueType := d.Get(key + ".value_type"); valueType != nil && valueType.(string) != "json" {
+							//			return true
+							//		}
+							//	}
+							//	return false
+							//},
 							Description: "The JSON subfield key value index.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{

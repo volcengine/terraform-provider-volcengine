@@ -12,7 +12,7 @@ func DataSourceVolcengineTlsTopics() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: "The project id of tls topic.",
 			},
 			"topic_id": {
@@ -34,6 +34,7 @@ func DataSourceVolcengineTlsTopics() *schema.Resource {
 					return d.Get("topic_name").(string) == ""
 				},
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -126,139 +127,7 @@ func DataSourceVolcengineTlsTopics() *schema.Resource {
 							Computed:    true,
 							Description: "The format of the time field.",
 						},
-						"index_create_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The create time of index in the tls topic.",
-						},
-						"index_modify_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The modify time of index in the tls topic.",
-						},
-						"full_text": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							MaxItems:    1,
-							Description: "The FullText index of the tls topic.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"case_sensitive": {
-										Type:        schema.TypeBool,
-										Computed:    true,
-										Description: "Whether the FullText index is case sensitive.",
-									},
-									"delimiter": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The delimiter of the FullText index.",
-									},
-									"include_chinese": {
-										Type:        schema.TypeBool,
-										Computed:    true,
-										Description: "Whether the FullText index include chinese.",
-									},
-								},
-							},
-						},
-						"key_value": {
-							Type:        schema.TypeList,
-							Computed:    true,
-							Description: "The KeyValue index of the tls topic.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"key": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The key of the KeyValue index.",
-									},
-									"value": {
-										Type:        schema.TypeList,
-										Computed:    true,
-										MaxItems:    1,
-										Description: "The value info of the KeyValue index",
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"value_type": {
-													Type:        schema.TypeString,
-													Computed:    true,
-													Description: "The type of value. Valid values: `long`, `double`, `text`, `json`.",
-												},
-												"case_sensitive": {
-													Type:        schema.TypeBool,
-													Computed:    true,
-													Description: "Whether the value is case sensitive.",
-												},
-												"delimiter": {
-													Type:        schema.TypeString,
-													Computed:    true,
-													Description: "The delimiter of the value.",
-												},
-												"include_chinese": {
-													Type:        schema.TypeBool,
-													Computed:    true,
-													Description: "Whether the value include chinese.",
-												},
-												"sql_flag": {
-													Type:        schema.TypeBool,
-													Computed:    true,
-													Description: "Whether the filed is enabled for analysis.",
-												},
-												"json_keys": {
-													Type:        schema.TypeList,
-													Computed:    true,
-													Description: "The JSON subfield key value index.",
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"key": {
-																Type:        schema.TypeString,
-																Computed:    true,
-																Description: "The key of the subfield key value index.",
-															},
-															"value": {
-																Type:        schema.TypeList,
-																Computed:    true,
-																MaxItems:    1,
-																Description: "The value info of the subfield key value index.",
-																Elem: &schema.Resource{
-																	Schema: map[string]*schema.Schema{
-																		"value_type": {
-																			Type:        schema.TypeString,
-																			Computed:    true,
-																			Description: "The type of value.",
-																		},
-																		"case_sensitive": {
-																			Type:        schema.TypeBool,
-																			Computed:    true,
-																			Description: "Whether the value is case sensitive.",
-																		},
-																		"delimiter": {
-																			Type:        schema.TypeString,
-																			Computed:    true,
-																			Description: "The delimiter of the value.",
-																		},
-																		"include_chinese": {
-																			Type:        schema.TypeBool,
-																			Computed:    true,
-																			Description: "Whether the value include chinese.",
-																		},
-																		"sql_flag": {
-																			Type:        schema.TypeBool,
-																			Computed:    true,
-																			Description: "Whether the filed is enabled for analysis.",
-																		},
-																	},
-																},
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

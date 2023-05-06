@@ -2,13 +2,22 @@ package topic
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
+
+/*
+
+Import
+Tls Topic can be imported using the id, e.g.
+```
+$ terraform import volcengine_tls_topic.default edf051ed-3c46-49ba-9339-bea628fe****
+```
+
+*/
 
 func ResourceVolcengineTlsTopic() *schema.Resource {
 	resource := &schema.Resource{
@@ -60,7 +69,10 @@ func ResourceVolcengineTlsTopic() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.IntBetween(1, 10),
-				Description:  "The max count of shards in the tls topic.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return !d.Get("auto_split").(bool)
+				},
+				Description: "The max count of shards in the tls topic.",
 			},
 			"enable_tracking": {
 				Type:        schema.TypeBool,
@@ -86,149 +98,7 @@ func ResourceVolcengineTlsTopic() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the tls project.",
 			},
-			"full_text": {
-				Type:     schema.TypeList,
-				Optional: true,
-				//Computed:    true,
-				MaxItems:    1,
-				Description: "The FullText index of the tls topic.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"case_sensitive": {
-							Type:        schema.TypeBool,
-							Required:    true,
-							Description: "Whether the FullText index is case sensitive.",
-						},
-						"delimiter": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The delimiter of the FullText index.",
-						},
-						"include_chinese": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Default:     false,
-							Description: "Whether the FullText index include chinese.",
-						},
-					},
-				},
-			},
-			"key_value": {
-				Type:     schema.TypeList,
-				Optional: true,
-				//Computed:    true,
-				Description: "The KeyValue index of the tls topic.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The key of the KeyValue index.",
-						},
-						"value": {
-							Type:        schema.TypeList,
-							Required:    true,
-							MaxItems:    1,
-							Description: "The value info of the KeyValue index",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"value_type": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"long", "double", "text", "json"}, false),
-										Description:  "The type of value. Valid values: `long`, `double`, `text`, `json`.",
-									},
-									"case_sensitive": {
-										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
-										Description: "Whether the value is case sensitive.",
-									},
-									"delimiter": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "",
-										Description: "The delimiter of the value.",
-									},
-									"include_chinese": {
-										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
-										Description: "Whether the value include chinese.",
-									},
-									"sql_flag": {
-										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
-										Description: "Whether the filed is enabled for analysis.",
-									},
-									"json_keys": {
-										Type:     schema.TypeList,
-										Optional: true,
-										Computed: true,
-										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-											items := strings.Split(k, ".")
-											if len(items) > 4 {
-												key := strings.Join(items[:4], ".")
-												if valueType := d.Get(key + ".value_type"); valueType != nil && valueType.(string) != "json" {
-													return true
-												}
-											}
-											return false
-										},
-										Description: "The JSON subfield key value index.",
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"key": {
-													Type:        schema.TypeString,
-													Required:    true,
-													Description: "The key of the subfield key value index.",
-												},
-												"value": {
-													Type:        schema.TypeList,
-													Required:    true,
-													MaxItems:    1,
-													Description: "The value info of the subfield key value index.",
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															"value_type": {
-																Type:         schema.TypeString,
-																Required:     true,
-																ValidateFunc: validation.StringInSlice([]string{"long", "double", "text"}, false),
-																Description:  "The type of value. Valid values: `long`, `double`, `text`.",
-															},
-															"case_sensitive": {
-																Type:        schema.TypeBool,
-																Computed:    true,
-																Description: "Whether the value is case sensitive.",
-															},
-															"delimiter": {
-																Type:        schema.TypeString,
-																Computed:    true,
-																Description: "The delimiter of the value.",
-															},
-															"include_chinese": {
-																Type:        schema.TypeBool,
-																Computed:    true,
-																Description: "Whether the value include chinese.",
-															},
-															"sql_flag": {
-																Type:        schema.TypeBool,
-																Computed:    true,
-																Description: "Whether the filed is enabled for analysis.",
-															},
-														},
-													},
-												},
-											},
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			},
+			"tags": ve.TagsSchema(),
 
 			"create_time": {
 				Type:        schema.TypeString,
@@ -239,16 +109,6 @@ func ResourceVolcengineTlsTopic() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The modify time of the tls topic.",
-			},
-			"index_create_time": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The create time of index in the tls topic.",
-			},
-			"index_modify_time": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The modify time of index in the tls topic.",
 			},
 		},
 	}
