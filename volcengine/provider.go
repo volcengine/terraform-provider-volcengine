@@ -4,9 +4,13 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_notify_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/kafka_consumer"
+	tlsRule "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_applier"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
@@ -329,13 +333,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
 
 			// ================ TLS ================
-			"volcengine_tls_shards":          shard.DataSourceVolcengineTlsShards(),
-			"volcengine_tls_kafka_consumers": kafka_consumer.DataSourceVolcengineTlsKafkaConsumers(),
-			"volcengine_tls_host_groups":     host_group.DataSourceVolcengineTlsHostGroups(),
-			"volcengine_tls_hosts":           host.DataSourceVolcengineTlsHosts(),
-			"volcengine_tls_projects":        tlsProject.DataSourceVolcengineTlsProjects(),
-			"volcengine_tls_topics":          tlsTopic.DataSourceVolcengineTlsTopics(),
-			"volcengine_tls_indexes":         tlsIndex.DataSourceVolcengineTlsIndexes(),
+			"volcengine_tls_rules":               tlsRule.DataSourceVolcengineTlsRules(),
+			"volcengine_tls_alarms":              alarm.DataSourceVolcengineTlsAlarms(),
+			"volcengine_tls_alarm_notify_groups": alarm_notify_group.DataSourceVolcengineTlsAlarmNotifyGroups(),
+			"volcengine_tls_rule_appliers":       rule_applier.DataSourceVolcengineTlsRuleAppliers(),
+			"volcengine_tls_shards":              shard.DataSourceVolcengineTlsShards(),
+			"volcengine_tls_kafka_consumers":     kafka_consumer.DataSourceVolcengineTlsKafkaConsumers(),
+			"volcengine_tls_host_groups":         host_group.DataSourceVolcengineTlsHostGroups(),
+			"volcengine_tls_hosts":               host.DataSourceVolcengineTlsHosts(),
+			"volcengine_tls_projects":            tlsProject.DataSourceVolcengineTlsProjects(),
+			"volcengine_tls_topics":              tlsTopic.DataSourceVolcengineTlsTopics(),
+			"volcengine_tls_indexes":             tlsIndex.DataSourceVolcengineTlsIndexes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -481,12 +489,16 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_allowlist_associate":    allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
 
 			// ================ TLS ================
-			"volcengine_tls_kafka_consumer": kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
-			"volcengine_tls_host_group":     host_group.ResourceVolcengineTlsHostGroup(),
-			"volcengine_tls_host":           host.ResourceVolcengineTlsHost(),
-			"volcengine_tls_project":        tlsProject.ResourceVolcengineTlsProject(),
-			"volcengine_tls_topic":          tlsTopic.ResourceVolcengineTlsTopic(),
-			"volcengine_tls_index":          tlsIndex.ResourceVolcengineTlsIndex(),
+			"volcengine_tls_kafka_consumer":     kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
+			"volcengine_tls_host_group":         host_group.ResourceVolcengineTlsHostGroup(),
+			"volcengine_tls_rule":               tlsRule.ResourceVolcengineTlsRule(),
+			"volcengine_tls_rule_applier":       rule_applier.ResourceVolcengineTlsRuleApplier(),
+			"volcengine_tls_alarm":              alarm.ResourceVolcengineTlsAlarm(),
+			"volcengine_tls_alarm_notify_group": alarm_notify_group.ResourceVolcengineTlsAlarmNotifyGroup(),
+			"volcengine_tls_host":               host.ResourceVolcengineTlsHost(),
+			"volcengine_tls_project":            tlsProject.ResourceVolcengineTlsProject(),
+			"volcengine_tls_topic":              tlsTopic.ResourceVolcengineTlsTopic(),
+			"volcengine_tls_index":              tlsIndex.ResourceVolcengineTlsIndex(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
