@@ -45,7 +45,7 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 				Optional:     true,
 				MaxItems:     1,
 				AtLeastOneOf: []string{"full_text", "key_value"},
-				Description:  "The full text info of the tls index",
+				Description:  "The full text info of the tls index.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"case_sensitive": {
@@ -72,7 +72,7 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 				Type:         schema.TypeList,
 				Optional:     true,
 				AtLeastOneOf: []string{"full_text", "key_value"},
-				Description:  "The key value info of the tls index",
+				Description:  "The key value info of the tls index.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {

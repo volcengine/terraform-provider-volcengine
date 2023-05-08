@@ -286,7 +286,7 @@ func (s *VolcengineTlsIndexService) DatasourceResources(*schema.ResourceData, *s
 				ConvertType: ve.ConvertJsonArray,
 			},
 		},
-		IdField:      "TopicId",
+		IdField:      "IndexId",
 		CollectField: "tls_indexes",
 		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
@@ -294,6 +294,13 @@ func (s *VolcengineTlsIndexService) DatasourceResources(*schema.ResourceData, *s
 				TargetField: "id",
 				KeepDefault: true,
 			},
+		},
+		ExtraData: func(i []interface{}) ([]interface{}, error) {
+			for index, ele := range i {
+				element := ele.(map[string]interface{})
+				i[index].(map[string]interface{})["IndexId"] = fmt.Sprintf("%s-%d", "index", element["TopicId"])
+			}
+			return i, nil
 		},
 	}
 }
