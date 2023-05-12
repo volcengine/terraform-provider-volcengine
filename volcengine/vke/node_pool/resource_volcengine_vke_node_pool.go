@@ -68,7 +68,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Default:      10,
-							ValidateFunc: validation.IntBetween(0, 2000),
+							ValidateFunc: validation.IntBetween(1, 2000),
 							Description:  "The MaxReplicas of AutoScaling, default 10, range in 1~2000.",
 						},
 						"min_replicas": {
@@ -89,6 +89,16 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
 							Description:  "The Priority of AutoScaling, default 10, rang in 0~100.",
+						},
+						"subnet_policy": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Computed: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"ZoneBalance",
+								"Priority",
+							}, false),
+							Description: "Multi-subnet scheduling strategy for nodes. The value can be `ZoneBalance` or `Priority`.",
 						},
 					},
 				},

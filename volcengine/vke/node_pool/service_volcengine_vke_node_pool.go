@@ -402,12 +402,26 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 							ForceGet:    true,
 							TargetField: "Priority",
 						},
+						"subnet_policy": {
+							ForceGet:    true,
+							TargetField: "SubnetPolicy",
+						},
 					},
 				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if chargeType, ok := (*call.SdkParam)["NodeConfig.InstanceChargeType"]; ok {
+					if autoScalingEnabled, ok := (*call.SdkParam)["AutoScaling.Enabled"]; ok {
+						if chargeType.(string) == "PrePaid" && autoScalingEnabled.(bool) {
+							return false, fmt.Errorf("PrePaid charge type cannot support auto scaling")
+						}
+					}
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -541,6 +555,10 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						"priority": {
 							ForceGet:    true,
 							TargetField: "Priority",
+						},
+						"subnet_policy": {
+							ForceGet:    true,
+							TargetField: "SubnetPolicy",
 						},
 					},
 				},
@@ -717,6 +735,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"AutoScaling.Priority": {
 				TargetField: "priority",
+			},
+			"AutoScaling.SubnetPolicy": {
+				TargetField: "subnet_policy",
 			},
 			"KubernetesConfig.Cordon": {
 				TargetField: "cordon",

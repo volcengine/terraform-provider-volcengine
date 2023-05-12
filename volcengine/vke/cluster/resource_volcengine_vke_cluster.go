@@ -1,10 +1,12 @@
 package cluster
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -137,7 +139,6 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Required:    true,
-				ForceNew:    true,
 				Description: "The config of the pods.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -151,8 +152,8 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 						"flannel_config": {
 							Type:             schema.TypeList,
 							MaxItems:         1,
-							Optional:         true,
 							ForceNew:         true,
+							Optional:         true,
 							Description:      "Flannel network configuration.",
 							DiffSuppressFunc: FlannelFieldDiffSuppress,
 							Elem: &schema.Resource{
@@ -180,7 +181,6 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 							Type:             schema.TypeList,
 							MaxItems:         1,
 							Optional:         true,
-							ForceNew:         true,
 							Description:      "VPC-CNI network configuration.",
 							DiffSuppressFunc: VpcCniConfigFieldDiffSuppress,
 							Elem: &schema.Resource{
@@ -197,7 +197,6 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 									"subnet_ids": {
 										Type:     schema.TypeSet,
 										Optional: true,
-										ForceNew: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
@@ -246,6 +245,50 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 				Computed:    true,
 				Description: "Eip allocation Id.",
 			},
+			"logging_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Cluster log configuration information.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"log_project_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The TLS log item ID of the collection target.",
+						},
+						"log_setups": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Set:         logSetupsHash,
+							Description: "Cluster logging options. This structure can only be modified and added, and cannot be deleted.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"log_type": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The currently enabled log type.",
+									},
+									"log_ttl": {
+										Type:         schema.TypeInt,
+										Optional:     true,
+										Default:      30,
+										ValidateFunc: validation.IntBetween(1, 3650),
+										Description:  "The storage time of logs in Log Service. After the specified log storage time is exceeded, the expired logs in this log topic will be automatically cleared. The unit is days, and the default is 30 days. The value range is 1 to 3650, specifying 3650 days means permanent storage.",
+									},
+									"enabled": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "Whether to enable the log option, true means enable, false means not enable, the default is false. When Enabled is changed from false to true, a new Topic will be created.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -284,4 +327,16 @@ func resourceVolcengineVkeClusterDelete(d *schema.ResourceData, meta interface{}
 		return fmt.Errorf("error on deleting cluster %q, %w", d.Id(), err)
 	}
 	return err
+}
+
+func logSetupsHash(i interface{}) int {
+	if i == nil {
+		return hashcode.String("")
+	}
+	m := i.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v#%v", m["log_type"], m["log_ttl"], m["enabled"]))
+	return hashcode.String(buf.String())
 }
