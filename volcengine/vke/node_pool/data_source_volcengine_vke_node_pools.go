@@ -168,6 +168,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The Priority of AutoScaling.",
 						},
+						"subnet_policy": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Multi-subnet scheduling strategy for nodes. The value can be `ZoneBalance` or `Priority`.",
+						},
 						"subnet_ids": {
 							Type:     schema.TypeList,
 							Computed: true,

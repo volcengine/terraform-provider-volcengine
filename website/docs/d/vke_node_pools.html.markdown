@@ -91,6 +91,7 @@ In addition to all arguments above, the following attributes are exported:
     * `security_strategies` - The SecurityStrategies of NodeConfig.
     * `security_strategy_enabled` - The SecurityStrategyEnabled of NodeConfig.
     * `subnet_ids` - The SubnetId of NodeConfig.
+    * `subnet_policy` - Multi-subnet scheduling strategy for nodes. The value can be `ZoneBalance` or `Priority`.
     * `system_volume` - The SystemVolume of NodeConfig.
         * `size` - The Size of SystemVolume.
         * `type` - The Type of SystemVolume.
