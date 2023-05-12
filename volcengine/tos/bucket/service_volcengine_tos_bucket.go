@@ -79,6 +79,9 @@ func (s *VolcengineTosBucketService) ReadResource(resourceData *schema.ResourceD
 	}
 
 	buckets, err = s.ReadResources(nil)
+	if err != nil {
+		return data, err
+	}
 	var (
 		local interface{}
 		name  interface{}
