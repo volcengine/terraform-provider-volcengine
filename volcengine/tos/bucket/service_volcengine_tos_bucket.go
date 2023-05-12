@@ -57,6 +57,7 @@ func (s *VolcengineTosBucketService) ReadResource(resourceData *schema.ResourceD
 		header  http.Header
 		acl     map[string]interface{}
 		version map[string]interface{}
+		buckets []interface{}
 	)
 
 	if instanceId == "" {
@@ -76,7 +77,28 @@ func (s *VolcengineTosBucketService) ReadResource(resourceData *schema.ResourceD
 	if err != nil {
 		return data, err
 	}
-	data = make(map[string]interface{})
+
+	buckets, err = s.ReadResources(nil)
+	var (
+		local interface{}
+		name  interface{}
+	)
+	for _, bucket := range buckets {
+		local, err = ve.ObtainSdkValue("Location", bucket)
+		if err != nil {
+			return data, err
+		}
+		name, err = ve.ObtainSdkValue("Name", bucket)
+		if err != nil {
+			return data, err
+		}
+		if local.(string) == s.Client.Region && name.(string) == instanceId {
+			data = bucket.(map[string]interface{})
+		}
+	}
+	if data == nil {
+		data = make(map[string]interface{})
+	}
 
 	if header, ok = (*resp)[ve.TosHeader].(http.Header); ok {
 		if header.Get("X-Tos-Storage-Class") != "" {
