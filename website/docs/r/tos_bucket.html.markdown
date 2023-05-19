@@ -42,12 +42,15 @@ The `account_acl` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-
+* `creation_date` - The create date of the TOS bucket.
+* `extranet_endpoint` - The extranet endpoint of the TOS bucket.
+* `intranet_endpoint` - The intranet endpoint the TOS bucket.
+* `location` - The location of the TOS bucket.
 
 
 ## Import
 Tos Bucket can be imported using the id, e.g.
 ```
-$ terraform import volcengine_tos_bucket.default region:bucketName
+$ terraform import volcengine_tos_bucket.default bucketName
 ```
 

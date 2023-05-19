@@ -299,3 +299,12 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Action:      actionName,
 	}
 }
+
+func (s *VolcengineSecurityGroupService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "securitygroup",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}

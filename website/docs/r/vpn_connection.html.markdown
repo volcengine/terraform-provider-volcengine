@@ -13,8 +13,8 @@ Provides a resource to manage vpn connection
 resource "volcengine_vpn_connection" "foo" {
   vpn_connection_name   = "tf-test"
   description           = "tf-test"
-  vpn_gateway_id        = "vgw-2c012ea9fm5mo2dx0efxg46qi"
-  customer_gateway_id   = "cgw-2d68c4zglycjk58ozfe96norh"
+  vpn_gateway_id        = "vgw-2feq19gnyc9hc59gp68914u6o"
+  customer_gateway_id   = "cgw-12ayj1s157gn417q7y29bixqy"
   local_subnet          = ["192.168.0.0/22"]
   remote_subnet         = ["192.161.0.0/20"]
   dpd_action            = "none"
@@ -32,6 +32,7 @@ resource "volcengine_vpn_connection" "foo" {
   ipsec_config_auth_alg = "sha256"
   ipsec_config_dh_group = "group2"
   ipsec_config_lifetime = 100
+  project_name          = "default"
 }
 ```
 ## Argument Reference
@@ -40,7 +41,7 @@ The following arguments are supported:
 * `ike_config_psk` - (Required) The psk of the ike config of the VPN connection.
 * `local_subnet` - (Required) The local subnet of the VPN connection.
 * `remote_subnet` - (Required) The remote subnet of the VPN connection.
-* `vpn_gateway_id` - (Required, ForceNew) The ID of the vpn gateway.
+* `attach_type` - (Optional, ForceNew) The attach type of the VPN connection, the value can be VpnGateway or TransitRouter.
 * `description` - (Optional) The description of the VPN connection.
 * `dpd_action` - (Optional) The dpd action of the VPN connection.
 * `ike_config_auth_alg` - (Optional) The auth alg of the ike config of the VPN connection.
@@ -57,19 +58,27 @@ The following arguments are supported:
 * `ipsec_config_lifetime` - (Optional) The ipsec config of the ike config of the VPN connection.
 * `nat_traversal` - (Optional) The nat traversal of the VPN connection.
 * `negotiate_instantly` - (Optional) Whether to initiate negotiation mode immediately.
+* `project_name` - (Optional) The project name of the VPN connection.
 * `vpn_connection_name` - (Optional) The name of the VPN connection.
+* `vpn_gateway_id` - (Optional, ForceNew) The ID of the vpn gateway.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `account_id` - The account ID of the VPN connection.
 * `attach_status` - The IPsec attach status.
-* `attach_type` - The IPsec attach type.
+* `business_status` - The business status of IPsec connection, valid when the attach type is 'TransitRouter'.
 * `connect_status` - The connect status of the VPN connection.
 * `creation_time` - The create time of VPN connection.
+* `deleted_time` - The delete time of resource, valid when the attach type is 'TransitRouter'.
+* `ip_address` - The ip address of transit router, valid when the attach type is 'TransitRouter'.
+* `log_enabled` - Whether to enable the connection log.
+* `overdue_time` - The overdue time of resource, valid when the attach type is 'TransitRouter'.
 * `status` - The status of the VPN connection.
+* `transit_router_id` - The id of transit router, valid when the attach type is 'TransitRouter'.
 * `update_time` - The update time of VPN connection.
 * `vpn_connection_id` - The ID of the VPN connection.
+* `zone_id` - The zone id of transit router, valid when the attach type is 'TransitRouter'.
 
 
 ## Import

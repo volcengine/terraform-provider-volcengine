@@ -15,7 +15,7 @@ import (
 Import
 Tos Bucket can be imported using the id, e.g.
 ```
-$ terraform import volcengine_tos_bucket.default region:bucketName
+$ terraform import volcengine_tos_bucket.default bucketName
 ```
 
 */
@@ -114,6 +114,26 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 					},
 				},
 				Set: ve.TosAccountAclHash,
+			},
+			"creation_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The create date of the TOS bucket.",
+			},
+			"location": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The location of the TOS bucket.",
+			},
+			"extranet_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The extranet endpoint of the TOS bucket.",
+			},
+			"intranet_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The intranet endpoint the TOS bucket.",
 			},
 		},
 	}

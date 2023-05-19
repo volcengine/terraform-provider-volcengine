@@ -30,9 +30,11 @@ In addition to all arguments above, the following attributes are exported:
     * `account_id` - The account ID of the VPN connection.
     * `attach_status` - The IPsec attach status.
     * `attach_type` - The IPsec attach type.
+    * `business_status` - The business status of IPsec connection, valid when the attach type is 'TransitRouter'.
     * `connect_status` - The connect status of the VPN connection.
     * `creation_time` - The create time of VPN connection.
     * `customer_gateway_id` - The ID of the customer gateway.
+    * `deleted_time` - The delete time of resource, valid when the attach type is 'TransitRouter'.
     * `description` - The description of the VPN connection.
     * `dpd_action` - The dpd action of the VPN connection.
     * `id` - The ID of the VPN connection.
@@ -45,18 +47,23 @@ In addition to all arguments above, the following attributes are exported:
     * `ike_config_psk` - The psk of the ike config of the VPN connection.
     * `ike_config_remote_id` - The remote id of the ike config of the VPN connection.
     * `ike_config_version` - The version of the ike config of the VPN connection.
+    * `ip_address` - The ip address of transit router, valid when the attach type is 'TransitRouter'.
     * `ipsec_config_auth_alg` - The auth alg of the ipsec config of the VPN connection.
     * `ipsec_config_dh_group` - The dh group of the ipsec config of the VPN connection.
     * `ipsec_config_enc_alg` - The enc alg of the ipsec config of the VPN connection.
     * `ipsec_config_lifetime` - The lifetime of the ike config of the VPN connection.
     * `local_subnet` - The local subnet of the VPN connection.
+    * `log_enabled` - Whether to enable the connection log.
     * `nat_traversal` - The nat traversal of the VPN connection.
     * `negotiate_instantly` - Whether to initiate negotiation mode immediately.
+    * `overdue_time` - The overdue time of resource, valid when the attach type is 'TransitRouter'.
     * `remote_subnet` - The remote subnet of the VPN connection.
     * `status` - The status of the VPN connection.
+    * `transit_router_id` - The id of transit router, valid when the attach type is 'TransitRouter'.
     * `update_time` - The update time of VPN connection.
     * `vpn_connection_id` - The ID of the VPN connection.
     * `vpn_connection_name` - The name of the VPN connection.
     * `vpn_gateway_id` - The ID of the vpn gateway.
+    * `zone_id` - The zone id of transit router, valid when the attach type is 'TransitRouter'.
 
 

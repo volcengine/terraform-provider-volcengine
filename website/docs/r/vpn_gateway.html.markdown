@@ -8,15 +8,20 @@ description: |-
 ---
 # volcengine_vpn_gateway
 Provides a resource to manage vpn gateway
+## Notice
+When Destroy this resource,If the resource charge type is PrePaid,Please unsubscribe the resource 
+in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),when complete console operation,yon can
+use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
 resource "volcengine_vpn_gateway" "foo" {
-  vpc_id           = "vpc-2bysvq1xx543k2dx0eeulpeiv"
-  subnet_id        = "subnet-2d68bh74345q858ozfekrm8fj"
+  vpc_id           = "vpc-2fe19q1dn2g3k59gp68n7w3rr"
+  subnet_id        = "subnet-2fe19qp20f3sw59gp67w8om25"
   bandwidth        = 20
   vpn_gateway_name = "tf-test"
   description      = "tf-test"
   period           = 2
+  project_name     = "yuwenhao"
 }
 ```
 ## Argument Reference
@@ -27,6 +32,7 @@ The following arguments are supported:
 * `billing_type` - (Optional, ForceNew) The BillingType of the VPN gateway. Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.
 * `description` - (Optional) The description of the VPN gateway.
 * `period` - (Optional) The Period of the VPN gateway. This parameter is only useful when creating vpn gateway. Default period unit is Month.
+* `project_name` - (Optional) The project name of the VPN gateway.
 * `tags` - (Optional) Tags.
 * `vpn_gateway_name` - (Optional) The name of the VPN gateway.
 

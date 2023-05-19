@@ -48,7 +48,7 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 			},
 			"vpn_gateway_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The ID of the vpn gateway.",
 			},
@@ -191,6 +191,18 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 				Description: "Whether to initiate negotiation mode immediately.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the VPN connection.",
+			},
+			"attach_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "VpnGateway",
+				Description: "The attach type of the VPN connection, the value can be VpnGateway or TransitRouter.",
 			},
 		},
 	}

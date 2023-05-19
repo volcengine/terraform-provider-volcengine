@@ -87,9 +87,9 @@ func ResourceVolcengineNetworkInterface() *schema.Resource {
 				},
 			},
 			"project_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				//ForceNew:    true,
 				Description: "The ProjectName of the ENI.",
 			},
 			"tags": ve.TagsSchema(),

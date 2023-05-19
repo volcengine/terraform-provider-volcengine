@@ -14,6 +14,7 @@ resource "volcengine_customer_gateway" "foo" {
   ip_address            = "192.0.1.3"
   customer_gateway_name = "tf-test"
   description           = "tf-test"
+  project_name          = "default"
 }
 ```
 ## Argument Reference
@@ -21,6 +22,7 @@ The following arguments are supported:
 * `ip_address` - (Required, ForceNew) The IP address of the customer gateway.
 * `customer_gateway_name` - (Optional) The name of the customer gateway.
 * `description` - (Optional) The description of the customer gateway.
+* `project_name` - (Optional) The project name of the VPN customer gateway.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

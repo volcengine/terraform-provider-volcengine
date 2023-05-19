@@ -7,7 +7,7 @@ description: |-
   Provides a resource to manage rds account
 ---
 # volcengine_rds_account
-Provides a resource to manage rds account
+(Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds account
 ## Example Usage
 ```hcl
 resource "volcengine_rds_account" "foo" {

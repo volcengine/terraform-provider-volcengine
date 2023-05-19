@@ -11,9 +11,10 @@ Provides a resource to manage vpc
 ## Example Usage
 ```hcl
 resource "volcengine_vpc" "foo" {
-  vpc_name    = "tf-test-2"
-  cidr_block  = "172.16.0.0/16"
-  dns_servers = ["8.8.8.8", "114.114.114.114"]
+  vpc_name     = "tf-project-1"
+  cidr_block   = "172.16.0.0/16"
+  dns_servers  = ["8.8.8.8", "114.114.114.114"]
+  project_name = "AS_test"
 }
 ```
 ## Argument Reference
@@ -21,7 +22,9 @@ The following arguments are supported:
 * `cidr_block` - (Required, ForceNew) A network address block which should be a subnet of the three internal network segments (10.0.0.0/16, 172.16.0.0/12 and 192.168.0.0/16).
 * `description` - (Optional) The description of the VPC.
 * `dns_servers` - (Optional) The DNS server list of the VPC. And you can specify 0 to 5 servers to this list.
-* `project_name` - (Optional, ForceNew) The ProjectName of the VPC.
+* `enable_ipv6` - (Optional) Specifies whether to enable the IPv6 CIDR block of the VPC.
+* `ipv6_cidr_block` - (Optional) The IPv6 CIDR block of the VPC.
+* `project_name` - (Optional) The ProjectName of the VPC.
 * `tags` - (Optional) Tags.
 * `vpc_name` - (Optional) The name of the VPC.
 

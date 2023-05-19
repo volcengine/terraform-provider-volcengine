@@ -239,6 +239,30 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The ID of Ecs Deployment Set.",
 			},
 
+			"ipv6_address_count": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				Description:   "The number of IPv6 addresses to be automatically assigned from within the CIDR block of the subnet that hosts the ENI. Valid values: 1 to 10.",
+				ValidateFunc:  validation.IntBetween(1, 10),
+				ConflictsWith: []string{"ipv6_addresses"},
+			},
+
+			"ipv6_addresses": {
+				Type:        schema.TypeSet,
+				MaxItems:    10,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Set:         schema.HashString,
+				Description: "One or more IPv6 addresses selected from within the CIDR block of the subnet that hosts the ENI. Support up to 10.\n You cannot specify both the ipv6_addresses and ipv6_address_count parameters.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				ConflictsWith: []string{"ipv6_address_count"},
+			},
+
 			"data_volumes": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -306,7 +330,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The ProjectName of the VPC.",
+				Description: "The ProjectName of the ecs instance.",
 			},
 			"tags": ve.TagsSchema(),
 		},

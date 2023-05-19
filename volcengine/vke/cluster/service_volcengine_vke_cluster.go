@@ -3,6 +3,8 @@ package cluster
 import (
 	"errors"
 	"fmt"
+	"reflect"
+	"sort"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -359,6 +361,14 @@ func (s *VolcengineVkeClusterService) CreateResource(resourceData *schema.Resour
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"logging_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"log_setups": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
@@ -444,6 +454,28 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 						},
 					},
 				},
+				"logging_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"log_setups": {
+							ConvertType: ve.ConvertJsonObjectArray,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"log_type": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"log_ttl": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"enabled": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+							},
+						},
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
@@ -456,6 +488,10 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				err := validateLogSetups(d)
+				if err != nil {
+					return nil, err
+				}
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改cluster属性
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -687,4 +723,59 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
 	}
+}
+
+func validateLogSetups(d *schema.ResourceData) error {
+	if d.HasChange("logging_config.0.log_setups") {
+		oldSet, newSet := d.GetChange("logging_config.0.log_setups")
+		logger.DebugInfo("set get change", oldSet, newSet)
+		oldTypeArr := make([]string, 0)
+		newTypeArr := make([]string, 0)
+		// 取到old和new的去重log type数组
+		for _, o := range oldSet.(*schema.Set).List() {
+			if oMap, ok := o.(map[string]interface{}); ok {
+				if !ContainsInSlice(oldTypeArr, oMap["log_type"].(string)) {
+					oldTypeArr = append(oldTypeArr, oMap["log_type"].(string))
+				}
+			}
+		}
+		for _, n := range newSet.(*schema.Set).List() {
+			if nMap, ok := n.(map[string]interface{}); ok {
+				if !ContainsInSlice(newTypeArr, nMap["log_type"].(string)) {
+					newTypeArr = append(newTypeArr, nMap["log_type"].(string))
+				}
+			}
+		}
+		/*
+			1. old数组长度大，必出现了减少 报错
+			2. old数组长度小，需判断old所有type是否都在new中，如有缺失，报错
+			3. old和new长度相等，需判断old和new完全相等
+		*/
+		if len(oldTypeArr) > len(newTypeArr) {
+			return fmt.Errorf("logging setups can only be modified and added, and cannot be deleted")
+		}
+		if len(oldTypeArr) < len(newTypeArr) {
+			for _, o := range oldTypeArr {
+				if !ContainsInSlice(newTypeArr, o) {
+					return fmt.Errorf("logging setups can only be modified and added, and cannot be deleted")
+				}
+			}
+		} else {
+			sort.Strings(newTypeArr)
+			sort.Strings(oldTypeArr)
+			if !reflect.DeepEqual(oldTypeArr, newTypeArr) {
+				return fmt.Errorf("logging setups can only be modified and added, and cannot be deleted")
+			}
+		}
+	}
+	return nil
+}
+
+func ContainsInSlice(items []string, item string) bool {
+	for _, eachItem := range items {
+		if eachItem == item {
+			return true
+		}
+	}
+	return false
 }

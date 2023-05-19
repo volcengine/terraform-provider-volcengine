@@ -1,6 +1,6 @@
 resource "volcengine_escloud_instance" "foo" {
   instance_configuration {
-    version            = "V7_10"
+    version            = "V6_7"
     zone_number        = 1
     enable_https       = true
     admin_user_name    = "admin"
@@ -31,5 +31,6 @@ resource "volcengine_escloud_instance" "foo" {
     subnet_id = "subnet-2bz9vxrixqigw2dx0eextz50p"
     project_name = "default"
     force_restart_after_scale = false
+    project_name = "default"
   }
 }

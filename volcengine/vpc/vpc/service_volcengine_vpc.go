@@ -21,15 +21,6 @@ func NewVpcService(c *ve.SdkClient) *VolcengineVpcService {
 	}
 }
 
-//func (s *VolcengineVpcService) ProjectTrn() *ve.ProjectTrn {
-//	return &ve.ProjectTrn{
-//		ServiceName:          "vpc",
-//		ResourceType:         "vpc",
-//		ProjectSchemaField:   "project_name",
-//		ProjectResponseField: "ProjectName",
-//	}
-//}
-
 func (s *VolcengineVpcService) GetClient() *ve.SdkClient {
 	return s.Client
 }
@@ -98,6 +89,13 @@ func (s *VolcengineVpcService) ReadResource(resourceData *schema.ResourceData, v
 	if _, ok1 := data["AuxiliaryCidrBlocks"]; !ok1 {
 		data["AuxiliaryCidrBlocks"] = []string{}
 	}
+
+	if ipv6CidrBlock, ok2 := data["Ipv6CidrBlock"]; ok2 && ipv6CidrBlock != "" {
+		data["EnableIpv6"] = true
+	} else {
+		data["EnableIpv6"] = false
+	}
+
 	return data, err
 }
 
@@ -293,5 +291,14 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 		Action:      actionName,
+	}
+}
+
+func (s *VolcengineVpcService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "vpc",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }

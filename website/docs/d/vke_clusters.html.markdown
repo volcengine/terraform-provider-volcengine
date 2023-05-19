@@ -71,6 +71,12 @@ In addition to all arguments above, the following attributes are exported:
     * `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
     * `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
     * `kubernetes_version` - The Kubernetes version information corresponding to the cluster, specific to the patch version.
+    * `logging_config` - Cluster log configuration information.
+        * `log_project_id` - The TLS log item ID of the collection target.
+        * `log_setups` - Cluster logging options.
+            * `enabled` - Whether to enable the log option, true means enable, false means not enable, the default is false. When Enabled is changed from false to true, a new Topic will be created.
+            * `log_ttl` - The storage time of logs in Log Service. After the specified log storage time is exceeded, the expired logs in this log topic will be automatically cleared. The unit is days, and the default is 30 days. The value range is 1 to 3650, specifying 3650 days means permanent storage.
+            * `log_type` - The currently enabled log type, optional values: `Audit`.
     * `name` - The name of the cluster.
     * `node_statistics` - Statistics on the number of nodes corresponding to each master state in the cluster.
         * `creating_count` - Phase=Creating total number of nodes.

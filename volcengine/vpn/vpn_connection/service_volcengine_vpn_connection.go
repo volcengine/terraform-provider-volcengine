@@ -128,10 +128,21 @@ func (s *VolcengineVpnConnectionService) RefreshResourceState(resourceData *sche
 				failStates []string
 			)
 			failStates = append(failStates, "Error")
-			demo, err = s.ReadResource(resourceData, id)
-			if err != nil {
+
+			if err = resource.Retry(20*time.Minute, func() *resource.RetryError {
+				demo, err = s.ReadResource(resourceData, id)
+				if err != nil {
+					if ve.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
 				return nil, "", err
 			}
+
 			status, err = ve.ObtainSdkValue("Status", demo)
 			if err != nil {
 				return nil, "", err
@@ -284,6 +295,9 @@ func (s *VolcengineVpnConnectionService) CreateResource(resourceData *schema.Res
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("customer_gateway_id").(string)
+			},
 		},
 	}
 	callbacks = append(callbacks, createVpnConnection)
@@ -385,6 +399,9 @@ func (s *VolcengineVpnConnectionService) ModifyResource(resourceData *schema.Res
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("customer_gateway_id").(string)
+			},
 		},
 	}
 	callbacks = append(callbacks, modifyCallback)
@@ -425,6 +442,9 @@ func (s *VolcengineVpnConnectionService) RemoveResource(resourceData *schema.Res
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("customer_gateway_id").(string)
 			},
 		},
 	}
@@ -505,5 +525,14 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
+	}
+}
+
+func (s *VolcengineVpnConnectionService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpn",
+		ResourceType:         "vpnconnection",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }

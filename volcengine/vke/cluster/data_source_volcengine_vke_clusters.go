@@ -468,6 +468,44 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 								},
 							},
 						},
+						"logging_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Cluster log configuration information.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"log_project_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The TLS log item ID of the collection target.",
+									},
+									"log_setups": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "Cluster logging options.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"log_type": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The currently enabled log type, optional values: `Audit`.",
+												},
+												"log_ttl": {
+													Type:        schema.TypeInt,
+													Computed:    true,
+													Description: "The storage time of logs in Log Service. After the specified log storage time is exceeded, the expired logs in this log topic will be automatically cleared. The unit is days, and the default is 30 days. The value range is 1 to 3650, specifying 3650 days means permanent storage.",
+												},
+												"enabled": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: "Whether to enable the log option, true means enable, false means not enable, the default is false. When Enabled is changed from false to true, a new Topic will be created.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},

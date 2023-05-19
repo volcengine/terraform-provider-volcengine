@@ -41,7 +41,7 @@ func ResourceVolcenginePrivatelinkVpcEndpoint() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "the security group ids of vpc endpoint",
+				Description: "the security group ids of vpc endpoint.",
 			},
 			"service_id": {
 				Type:        schema.TypeString,

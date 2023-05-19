@@ -65,13 +65,17 @@ func (s *VolcengineEcsService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) ([]interface{}, error) {
+func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		resp               *map[string]interface{}
+		results            interface{}
+		next               string
+		ok                 bool
+		ecsInstance        map[string]interface{}
+		networkInterfaces  []interface{}
+		networkInterfaceId string
 	)
-	return ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 20, nil, func(m map[string]interface{}) (data []interface{}, next string, err error) {
+	data, err = ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 20, nil, func(m map[string]interface{}) ([]interface{}, string, error) {
 		ecs := s.Client.EcsClient
 		action := "DescribeInstances"
 		logger.Debug(logger.ReqFormat, action, condition)
@@ -107,6 +111,51 @@ func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (
 		data, err = RemoveSystemTags(data)
 		return data, next, err
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, v := range data {
+		if ecsInstance, ok = v.(map[string]interface{}); !ok {
+			return data, errors.New("Value is not map ")
+		} else {
+			// query primary network interface info of the ecs instance
+			if networkInterfaces, ok = ecsInstance["NetworkInterfaces"].([]interface{}); !ok {
+				return data, errors.New("Instances.NetworkInterfaces is not Slice")
+			}
+			for _, networkInterface := range networkInterfaces {
+				if networkInterfaceMap, ok := networkInterface.(map[string]interface{}); ok &&
+					networkInterfaceMap["Type"] == "primary" {
+					networkInterfaceId = networkInterfaceMap["NetworkInterfaceId"].(string)
+				}
+			}
+
+			action := "DescribeNetworkInterfaces"
+			req := map[string]interface{}{
+				"NetworkInterfaceIds.1": networkInterfaceId,
+			}
+			logger.Debug(logger.ReqFormat, action, req)
+			res, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
+			if err != nil {
+				logger.Info("DescribeNetworkInterfaces error:", err)
+				continue
+			}
+			logger.Debug(logger.RespFormat, action, condition, *res)
+
+			networkInterfaceInfos, err := ve.ObtainSdkValue("Result.NetworkInterfaceSets", *res)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.NetworkInterfaceSets error:", err)
+				continue
+			}
+			if ipv6Sets, ok := networkInterfaceInfos.([]interface{})[0].(map[string]interface{})["IPv6Sets"].([]interface{}); ok {
+				ecsInstance["Ipv6Addresses"] = ipv6Sets
+				ecsInstance["Ipv6AddressCount"] = len(ipv6Sets)
+			}
+		}
+	}
+
+	return data, err
 }
 
 func (s *VolcengineEcsService) ReadResource(resourceData *schema.ResourceData, instanceId string) (data map[string]interface{}, err error) {
@@ -378,6 +427,8 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 }
 
 func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "RunInstances",
@@ -434,6 +485,12 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
 				},
+				"ipv6_address_count": {
+					Ignore: true,
+				},
+				"ipv6_addresses": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -484,7 +541,65 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 分配Ipv6
+	ipv6Callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AssignIpv6Addresses",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				ipv6AddressCount, ok1 := d.GetOk("ipv6_address_count")
+				ipv6Addresses, ok2 := d.GetOk("ipv6_addresses")
+				if !ok1 && !ok2 {
+					return false, nil
+				}
+
+				var (
+					networkInterfaceId string
+					networkInterfaces  []interface{}
+					ok                 bool
+				)
+				ecsInstance, err := s.ReadResource(resourceData, d.Id())
+				if err != nil {
+					return false, err
+				}
+				// query primary network interface info of the ecs instance
+				if networkInterfaces, ok = ecsInstance["NetworkInterfaces"].([]interface{}); !ok {
+					return false, errors.New("Instances.NetworkInterfaces is not Slice")
+				}
+				for _, networkInterface := range networkInterfaces {
+					if networkInterfaceMap, ok := networkInterface.(map[string]interface{}); ok &&
+						networkInterfaceMap["Type"] == "primary" {
+						networkInterfaceId = networkInterfaceMap["NetworkInterfaceId"].(string)
+					}
+				}
+
+				(*call.SdkParam)["NetworkInterfaceId"] = networkInterfaceId
+				if ok1 {
+					(*call.SdkParam)["Ipv6AddressCount"] = ipv6AddressCount.(int)
+				} else if ok2 {
+					for index, ipv6Address := range ipv6Addresses.(*schema.Set).List() {
+						(*call.SdkParam)["Ipv6Address."+strconv.Itoa(index)] = ipv6Address
+					}
+				}
+
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//分配Ipv6地址
+				return s.Client.UniversalClient.DoCall(getVpcUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"RUNNING"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	callbacks = append(callbacks, ipv6Callback)
+
+	return callbacks
 }
 
 func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) (callbacks []ve.Callback) {
@@ -492,18 +607,6 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 		passwordChange bool
 		flag           bool
 	)
-
-	//project
-	projectCallback := ve.NewProjectService(s.Client).ModifyProjectOld(ve.ProjectTrn{
-		ResourceType: "instance",
-		ResourceID:   resourceData.Id(),
-		ServiceName:  "ecs",
-	}, resourceData, resource, "project_name",
-		&ve.StateRefresh{
-			Target:  []string{"RUNNING", "STOPPED"},
-			Timeout: resourceData.Timeout(schema.TimeoutUpdate),
-		})
-	callbacks = append(callbacks, projectCallback...)
 
 	if resourceData.HasChange("password") && !resourceData.HasChange("image_id") {
 		passwordChange = true
@@ -1284,6 +1387,15 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 	}
 }
 
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
+}
+
 type volumeInfo struct {
 	list []interface{}
 }
@@ -1298,4 +1410,13 @@ func (v *volumeInfo) Less(i, j int) bool {
 
 func (v *volumeInfo) Swap(i, j int) {
 	v.list[i], v.list[j] = v.list[j], v.list[i]
+}
+
+func (s *VolcengineEcsService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "instance",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }

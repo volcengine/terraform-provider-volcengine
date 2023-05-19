@@ -53,6 +53,11 @@ func ResourceVolcengineCustomerGateway() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the customer gateway.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the VPN customer gateway.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineCustomerGateways().Schema["customer_gateways"].Elem.(*schema.Resource).Schema

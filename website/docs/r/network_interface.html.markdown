@@ -11,12 +11,13 @@ Provides a resource to manage network interface
 ## Example Usage
 ```hcl
 resource "volcengine_network_interface" "foo" {
-  subnet_id              = "subnet-2744ht7fhjthc7fap8tm10eqg"
-  security_group_ids     = ["sg-2744hspo7jbpc7fap8t7lef1p"]
+  subnet_id              = "subnet-im67x70vxla88gbssz1hy1z2"
+  security_group_ids     = ["sg-im67wp9lx3i88gbssz3d22b2"]
   primary_ip_address     = "192.168.0.253"
   network_interface_name = "tf-test-up"
   description            = "tf-test-up"
   port_security_enabled  = false
+  project_name           = "default"
 }
 ```
 ## Argument Reference
@@ -28,7 +29,7 @@ The following arguments are supported:
 * `port_security_enabled` - (Optional) Set port security enable or disable.
 * `primary_ip_address` - (Optional, ForceNew) The primary IP address of the ENI.
 * `private_ip_address` - (Optional) The list of private ip address.
-* `project_name` - (Optional, ForceNew) The ProjectName of the ENI.
+* `project_name` - (Optional) The ProjectName of the ENI.
 * `secondary_private_ip_address_count` - (Optional) The count of secondary private ip address.
 * `tags` - (Optional) Tags.
 

@@ -52,6 +52,9 @@ func (s *VolcengineNetworkAclService) ReadResources(condition map[string]interfa
 		if err != nil {
 			return data, err
 		}
+		if results == nil {
+			results = []interface{}{}
+		}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.NetworkAcls is not Slice")
 		}
@@ -400,5 +403,14 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 		Action:      actionName,
+	}
+}
+
+func (s *VolcengineNetworkAclService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "networkacl",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }

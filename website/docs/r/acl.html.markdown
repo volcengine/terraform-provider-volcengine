@@ -21,6 +21,7 @@ resource "volcengine_acl" "foo" {
     entry       = "172.20.3.0/24"
     description = "e3"
   }
+  project_name = "default"
 }
 ```
 ## Argument Reference
@@ -28,7 +29,7 @@ The following arguments are supported:
 * `acl_entries` - (Optional) The acl entry set of the Acl.
 * `acl_name` - (Optional) The name of Acl.
 * `description` - (Optional) The description of the Acl.
-* `project_name` - (Optional, ForceNew) The ProjectName of the Acl.
+* `project_name` - (Optional) The ProjectName of the Acl.
 
 The `acl_entries` object supports the following:
 

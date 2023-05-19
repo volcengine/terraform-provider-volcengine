@@ -23,7 +23,7 @@ resource "volcengine_route_entry" "foo" {
 The following arguments are supported:
 * `destination_cidr_block` - (Required, ForceNew) The destination CIDR block of the route entry.
 * `next_hop_id` - (Required, ForceNew) The id of the next hop.
-* `next_hop_type` - (Required, ForceNew) The type of the next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`.
+* `next_hop_type` - (Required, ForceNew) The type of the next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`, `TransitRouter`.
 * `route_table_id` - (Required, ForceNew) The id of the route table.
 * `description` - (Optional) The description of the route entry.
 * `route_entry_name` - (Optional) The name of the route entry.

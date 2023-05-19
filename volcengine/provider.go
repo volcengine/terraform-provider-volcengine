@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
 	plSecurityGroup "github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/security_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint"
@@ -15,6 +16,8 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -96,6 +99,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_readonly_node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
@@ -111,6 +118,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_address_bandwidth"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ipv6_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_interface"
@@ -187,14 +197,17 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"volcengine_vpcs":                 vpc.DataSourceVolcengineVpcs(),
-			"volcengine_subnets":              subnet.DataSourceVolcengineSubnets(),
-			"volcengine_route_tables":         route_table.DataSourceVolcengineRouteTables(),
-			"volcengine_route_entries":        route_entry.DataSourceVolcengineRouteEntries(),
-			"volcengine_security_groups":      security_group.DataSourceVolcengineSecurityGroups(),
-			"volcengine_security_group_rules": security_group_rule.DataSourceVolcengineSecurityGroupRules(),
-			"volcengine_network_interfaces":   network_interface.DataSourceVolcengineNetworkInterfaces(),
-			"volcengine_network_acls":         network_acl.DataSourceVolcengineNetworkAcls(),
+			"volcengine_vpcs":                        vpc.DataSourceVolcengineVpcs(),
+			"volcengine_subnets":                     subnet.DataSourceVolcengineSubnets(),
+			"volcengine_route_tables":                route_table.DataSourceVolcengineRouteTables(),
+			"volcengine_route_entries":               route_entry.DataSourceVolcengineRouteEntries(),
+			"volcengine_security_groups":             security_group.DataSourceVolcengineSecurityGroups(),
+			"volcengine_security_group_rules":        security_group_rule.DataSourceVolcengineSecurityGroupRules(),
+			"volcengine_network_interfaces":          network_interface.DataSourceVolcengineNetworkInterfaces(),
+			"volcengine_network_acls":                network_acl.DataSourceVolcengineNetworkAcls(),
+			"volcengine_vpc_ipv6_gateways":           ipv6_gateway.DataSourceVolcengineIpv6Gateways(),
+			"volcengine_vpc_ipv6_address_bandwidths": ipv6_address_bandwidth.DataSourceVolcengineIpv6AddressBandwidths(),
+			"volcengine_vpc_ipv6_addresses":          ipv6_address.DataSourceVolcengineIpv6Addresses(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
@@ -266,9 +279,6 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_ip_lists":            rds_ip_list.DataSourceVolcengineRdsIpLists(),
 			"volcengine_rds_parameter_templates": rds_parameter_template.DataSourceVolcengineRdsParameterTemplates(),
 
-			// ================ RDS V2 ==============
-			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
-
 			// ================ ESCloud =============
 			"volcengine_escloud_instances": instance.DataSourceVolcengineESCloudInstances(),
 			"volcengine_escloud_regions":   region.DataSourceVolcengineESCloudRegions(),
@@ -316,19 +326,30 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_privatelink_vpc_endpoint_service_permissions": vpc_endpoint_service_permission.DataSourceVolcenginePrivatelinkVpcEndpointServicePermissions(),
 			"volcengine_privatelink_vpc_endpoint_connections":         vpc_endpoint_connection.DataSourceVolcenginePrivatelinkVpcEndpointConnections(),
 			"volcengine_privatelink_vpc_endpoint_zones":               vpc_endpoint_zone.DataSourceVolcenginePrivatelinkVpcEndpointZones(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
+
+			// ================ RdsMysql ================
+			"volcengine_rds_mysql_instances":  rds_mysql_instance.DataSourceVolcengineRdsMysqlInstances(),
+			"volcengine_rds_mysql_accounts":   rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
+			"volcengine_rds_mysql_databases":  rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
+			"volcengine_rds_mysql_allowlists": allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"volcengine_vpc":                      vpc.ResourceVolcengineVpc(),
-			"volcengine_subnet":                   subnet.ResourceVolcengineSubnet(),
-			"volcengine_route_table":              route_table.ResourceVolcengineRouteTable(),
-			"volcengine_route_entry":              route_entry.ResourceVolcengineRouteEntry(),
-			"volcengine_route_table_associate":    route_table_associate.ResourceVolcengineRouteTableAssociate(),
-			"volcengine_security_group":           security_group.ResourceVolcengineSecurityGroup(),
-			"volcengine_network_interface":        network_interface.ResourceVolcengineNetworkInterface(),
-			"volcengine_network_interface_attach": network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
-			"volcengine_security_group_rule":      security_group_rule.ResourceVolcengineSecurityGroupRule(),
-			"volcengine_network_acl":              network_acl.ResourceVolcengineNetworkAcl(),
-			"volcengine_network_acl_associate":    network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
+			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
+			"volcengine_subnet":                     subnet.ResourceVolcengineSubnet(),
+			"volcengine_route_table":                route_table.ResourceVolcengineRouteTable(),
+			"volcengine_route_entry":                route_entry.ResourceVolcengineRouteEntry(),
+			"volcengine_route_table_associate":      route_table_associate.ResourceVolcengineRouteTableAssociate(),
+			"volcengine_security_group":             security_group.ResourceVolcengineSecurityGroup(),
+			"volcengine_network_interface":          network_interface.ResourceVolcengineNetworkInterface(),
+			"volcengine_network_interface_attach":   network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
+			"volcengine_security_group_rule":        security_group_rule.ResourceVolcengineSecurityGroupRule(),
+			"volcengine_network_acl":                network_acl.ResourceVolcengineNetworkAcl(),
+			"volcengine_network_acl_associate":      network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
+			"volcengine_vpc_ipv6_gateway":           ipv6_gateway.ResourceVolcengineIpv6Gateway(),
+			"volcengine_vpc_ipv6_address_bandwidth": ipv6_address_bandwidth.ResourceVolcengineIpv6AddressBandwidth(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),
@@ -412,15 +433,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_account_privilege":  rds_account_privilege.ResourceVolcengineRdsAccountPrivilege(),
 			"volcengine_rds_parameter_template": rds_parameter_template.ResourceVolcengineRdsParameterTemplate(),
 
-			// ================ RDS V2 ==============
-			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
-
 			// ================ ESCloud ================
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 
 			//================= TOS =================
-			"volcengine_tos_bucket": bucket.ResourceVolcengineTosBucket(),
-			"volcengine_tos_object": object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket":        bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object":        object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket_policy": bucket_policy.ResourceVolcengineTosBucketPolicy(),
 
 			// ================ CR ================
 			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
@@ -457,6 +476,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_privatelink_security_group":                  plSecurityGroup.ResourceVolcenginePrivatelinkSecurityGroupService(),
 			"volcengine_privatelink_vpc_endpoint_connection":         vpc_endpoint_connection.ResourceVolcenginePrivatelinkVpcEndpointConnectionService(),
 			"volcengine_privatelink_vpc_endpoint_zone":               vpc_endpoint_zone.ResourceVolcenginePrivatelinkVpcEndpointZone(),
+
+			// ================ RDS V2 ==============
+			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
+
+			// ================ RdsMysql ================
+			"volcengine_rds_mysql_instance":               rds_mysql_instance.ResourceVolcengineRdsMysqlInstance(),
+			"volcengine_rds_mysql_instance_readonly_node": rds_mysql_instance_readonly_node.ResourceVolcengineRdsMysqlInstanceReadonlyNode(),
+			"volcengine_rds_mysql_account":                rds_mysql_account.ResourceVolcengineRdsMysqlAccount(),
+			"volcengine_rds_mysql_database":               rds_mysql_database.ResourceVolcengineRdsMysqlDatabase(),
+			"volcengine_rds_mysql_allowlist":              allowlist.ResourceVolcengineRdsMysqlAllowlist(),
+			"volcengine_rds_mysql_allowlist_associate":    allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

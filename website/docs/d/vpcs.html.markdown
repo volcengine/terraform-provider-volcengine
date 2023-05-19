@@ -42,6 +42,7 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - The create time of VPC.
     * `description` - The description of VPC.
     * `dns_servers` - The dns server list of VPC.
+    * `ipv6_cidr_block` - The IPv6 CIDR block of the VPC.
     * `nat_gateway_ids` - The nat gateway ID list of VPC.
     * `project_name` - The ProjectName of the VPC.
     * `route_table_ids` - The route table ID list of VPC.

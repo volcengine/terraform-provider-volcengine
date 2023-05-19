@@ -62,10 +62,28 @@ func ResourceVolcengineVpc() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The DNS server list of the VPC. And you can specify 0 to 5 servers to this list.",
 			},
-			"project_name": {
-				Type:        schema.TypeString,
+			"enable_ipv6": {
+				Type:        schema.TypeBool,
 				Optional:    true,
-				ForceNew:    true,
+				Computed:    true,
+				Description: "Specifies whether to enable the IPv6 CIDR block of the VPC.",
+			},
+			"ipv6_cidr_block": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.HasChange("enable_ipv6") && d.Get("enable_ipv6").(bool) {
+						return false
+					}
+					return true
+				},
+				Description: "The IPv6 CIDR block of the VPC.",
+			},
+			"project_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				//ForceNew:    true,
 				Description: "The ProjectName of the VPC.",
 			},
 			"tags": ve.TagsSchema(),
