@@ -262,7 +262,7 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 							Type:        schema.TypeSet,
 							Optional:    true,
 							Set:         logSetupsHash,
-							Description: "Cluster logging options. This structure can only be modified and added, and cannot be deleted.",
+							Description: "Cluster logging options. This structure can only be modified and added, and cannot be deleted. When encountering a `cannot be deleted` error, please query the log setups of the current cluster and fill in the current `tf` file.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"log_type": {

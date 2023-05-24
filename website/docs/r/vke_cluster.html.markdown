@@ -90,7 +90,7 @@ The `log_setups` object supports the following:
 The `logging_config` object supports the following:
 
 * `log_project_id` - (Optional) The TLS log item ID of the collection target.
-* `log_setups` - (Optional) Cluster logging options. This structure can only be modified and added, and cannot be deleted.
+* `log_setups` - (Optional) Cluster logging options. This structure can only be modified and added, and cannot be deleted. When encountering a `cannot be deleted` error, please query the log setups of the current cluster and fill in the current `tf` file.
 
 The `pods_config` object supports the following:
 
