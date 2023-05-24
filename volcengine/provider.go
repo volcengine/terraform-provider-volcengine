@@ -6,6 +6,14 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
+	plSecurityGroup "github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/security_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_connection"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_permission"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_resource"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_zone"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account"
@@ -312,6 +320,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_clusters":   bioosCluster.DataSourceVolcengineBioosClusters(),
 			"volcengine_bioos_workspaces": workspace.DataSourceVolcengineBioosWorkspaces(),
 
+			// ================ PrivateLink ==================
+			"volcengine_privatelink_vpc_endpoints":                    vpc_endpoint.DataSourceVolcenginePrivatelinkVpcEndpoints(),
+			"volcengine_privatelink_vpc_endpoint_services":            vpc_endpoint_service.DataSourceVolcenginePrivatelinkVpcEndpointServices(),
+			"volcengine_privatelink_vpc_endpoint_service_permissions": vpc_endpoint_service_permission.DataSourceVolcenginePrivatelinkVpcEndpointServicePermissions(),
+			"volcengine_privatelink_vpc_endpoint_connections":         vpc_endpoint_connection.DataSourceVolcenginePrivatelinkVpcEndpointConnections(),
+			"volcengine_privatelink_vpc_endpoint_zones":               vpc_endpoint_zone.DataSourceVolcenginePrivatelinkVpcEndpointZones(),
+
 			// ================ RDS V2 ==============
 			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
 
@@ -452,6 +467,15 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_bioos_cluster":      bioosCluster.ResourceVolcengineBioosCluster(),
 			"volcengine_bioos_workspace":    workspace.ResourceVolcengineBioosWorkspace(),
 			"volcengine_bioos_cluster_bind": cluster_bind.ResourceVolcengineBioosClusterBind(),
+
+			// ================ PrivateLink ==================
+			"volcengine_privatelink_vpc_endpoint":                    vpc_endpoint.ResourceVolcenginePrivatelinkVpcEndpoint(),
+			"volcengine_privatelink_vpc_endpoint_service":            vpc_endpoint_service.ResourceVolcenginePrivatelinkVpcEndpointService(),
+			"volcengine_privatelink_vpc_endpoint_service_resource":   vpc_endpoint_service_resource.ResourceVolcenginePrivatelinkVpcEndpointServiceResource(),
+			"volcengine_privatelink_vpc_endpoint_service_permission": vpc_endpoint_service_permission.ResourceVolcenginePrivatelinkVpcEndpointServicePermission(),
+			"volcengine_privatelink_security_group":                  plSecurityGroup.ResourceVolcenginePrivatelinkSecurityGroupService(),
+			"volcengine_privatelink_vpc_endpoint_connection":         vpc_endpoint_connection.ResourceVolcenginePrivatelinkVpcEndpointConnectionService(),
+			"volcengine_privatelink_vpc_endpoint_zone":               vpc_endpoint_zone.ResourceVolcenginePrivatelinkVpcEndpointZone(),
 
 			// ================ RDS V2 ==============
 			"volcengine_rds_instance_v2": rds_instance_v2.ResourceVolcengineRdsInstance(),
