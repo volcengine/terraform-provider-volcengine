@@ -16,7 +16,8 @@ func ResourceNotFoundError(err error) bool {
 		strings.Contains(errMessage, "not exist") ||
 		strings.Contains(errMessage, "not associate") ||
 		strings.Contains(errMessage, "invalid") ||
-		strings.Contains(errMessage, "not_found") {
+		strings.Contains(errMessage, "not_found") ||
+		strings.Contains(errMessage, "notexist") {
 		return true
 	}
 	return false
