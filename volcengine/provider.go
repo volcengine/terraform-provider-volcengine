@@ -3,6 +3,10 @@ package volcengine
 import (
 	"strings"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/pitr_time_period"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 
@@ -98,12 +102,21 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_ip_list"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_readonly_node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
+	redisAccount "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/account"
+	redis_allow_list "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/allow_list"
+	redis_allow_list_associate "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/allow_list_associate"
+	redis_backup "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/backup"
+	redis_backup_restore "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/backup_restore"
+	redisContinuousBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/continuous_backup"
+	redis_endpoint "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/endpoint"
+	redisInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance"
+	redisRegion "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/region"
+	redisZone "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/available_resource"
@@ -288,6 +301,15 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
 			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
 
+			// ================ Redis =============
+			"volcengine_redis_allow_lists":       redis_allow_list.DataSourceVolcengineRedisAllowLists(),
+			"volcengine_redis_backups":           redis_backup.DataSourceVolcengineRedisBackups(),
+			"volcengine_redis_regions":           redisRegion.DataSourceVolcengineRedisRegions(),
+			"volcengine_redis_zones":             redisZone.DataSourceVolcengineRedisZones(),
+			"volcengine_redis_accounts":          redisAccount.DataSourceVolcengineRedisAccounts(),
+			"volcengine_redis_instances":         redisInstance.DataSourceVolcengineRedisDbInstances(),
+			"volcengine_redis_pitr_time_windows": pitr_time_period.DataSourceVolcengineRedisPitrTimeWindows(),
+
 			// ================ CR ================
 			"volcengine_cr_registries":           cr_registry.DataSourceVolcengineCrRegistries(),
 			"volcengine_cr_namespaces":           cr_namespace.DataSourceVolcengineCrNamespaces(),
@@ -440,6 +462,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tos_bucket":        bucket.ResourceVolcengineTosBucket(),
 			"volcengine_tos_object":        object.ResourceVolcengineTosObject(),
 			"volcengine_tos_bucket_policy": bucket_policy.ResourceVolcengineTosBucketPolicy(),
+
+			// ================ Redis ==============
+			"volcengine_redis_allow_list":           redis_allow_list.ResourceVolcengineRedisAllowList(),
+			"volcengine_redis_endpoint":             redis_endpoint.ResourceVolcengineRedisEndpoint(),
+			"volcengine_redis_allow_list_associate": redis_allow_list_associate.ResourceVolcengineRedisAllowListAssociate(),
+			"volcengine_redis_backup":               redis_backup.ResourceVolcengineRedisBackup(),
+			"volcengine_redis_backup_restore":       redis_backup_restore.ResourceVolcengineRedisBackupRestore(),
+			"volcengine_redis_account":              redisAccount.ResourceVolcengineRedisAccount(),
+			"volcengine_redis_instance":             redisInstance.ResourceVolcengineRedisDbInstance(),
+			"volcengine_redis_instance_state":       instance_state.ResourceVolcengineRedisInstanceState(),
+			"volcengine_redis_continuous_backup":    redisContinuousBackup.ResourceVolcengineRedisContinuousBackup(),
 
 			// ================ CR ================
 			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
