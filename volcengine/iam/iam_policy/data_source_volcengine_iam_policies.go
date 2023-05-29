@@ -41,6 +41,16 @@ func DataSourceVolcengineIamPolicies() *schema.Resource {
 				Optional:    true,
 				Description: "The status of policy.",
 			},
+			"user_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the IAM user.",
+			},
+			"role_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the IAM role.",
+			},
 			"policies": {
 				Description: "The collection of Policy query.",
 				Type:        schema.TypeList,
@@ -86,6 +96,26 @@ func DataSourceVolcengineIamPolicies() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The document of the Policy.",
+						},
+						"user_attach_date": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The user attach time of the Policy.The data show only query with user_name.",
+						},
+						"user_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the IAM user.The data show only query with user_name.",
+						},
+						"role_attach_date": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The role attach time of the Policy.The data show only query with role_name.",
+						},
+						"role_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the IAM role.The data show only query with role_name.",
 						},
 					},
 				},

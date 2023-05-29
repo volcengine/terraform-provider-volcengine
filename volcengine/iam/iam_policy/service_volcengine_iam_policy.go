@@ -27,11 +27,61 @@ func (s *VolcengineIamPolicyService) GetClient() *ve.SdkClient {
 
 func (s *VolcengineIamPolicyService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		resp         *map[string]interface{}
+		results      interface{}
+		ok           bool
+		allPolicies  []interface{}
+		userPolicies []interface{}
+		rolePolicies []interface{}
+		temp         interface{}
+		userName     string
+		roleName     string
 	)
-	return ve.WithPageOffsetQuery(m, "Limit", "Offset", 100, 0, func(condition map[string]interface{}) ([]interface{}, error) {
+	if userName, ok = m["UserName"].(string); ok {
+		action := "ListAttachedUserPolicies"
+		param := map[string]interface{}{
+			"UserName": userName,
+		}
+		logger.Debug(logger.ReqFormat, action, param)
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &param)
+		if err != nil {
+			return data, err
+		}
+		temp, err = ve.ObtainSdkValue("Result.AttachedPolicyMetadata", *resp)
+		if err != nil {
+			return data, err
+		}
+		if temp != nil {
+			if userPolicies, ok = temp.([]interface{}); !ok {
+				return data, fmt.Errorf("%s Response AttachedPolicyMetadata not []interface{}", action)
+			}
+		}
+		delete(m, "UserName")
+	}
+
+	if roleName, ok = m["RoleName"].(string); ok {
+		action := "ListAttachedRolePolicies"
+		param := map[string]interface{}{
+			"RoleName": roleName,
+		}
+		logger.Debug(logger.ReqFormat, action, param)
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &param)
+		if err != nil {
+			return data, err
+		}
+		temp, err = ve.ObtainSdkValue("Result.AttachedPolicyMetadata", *resp)
+		if err != nil {
+			return data, err
+		}
+		if temp != nil {
+			if rolePolicies, ok = temp.([]interface{}); !ok {
+				return data, fmt.Errorf("%s Response AttachedPolicyMetadata not []interface{}", action)
+			}
+		}
+		delete(m, "RoleName")
+	}
+
+	allPolicies, err = ve.WithPageOffsetQuery(m, "Limit", "Offset", 100, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
 		action := "ListPolicies"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
@@ -46,8 +96,6 @@ func (s *VolcengineIamPolicyService) ReadResources(m map[string]interface{}) (da
 			}
 		}
 
-		logger.Debug(logger.RespFormat, action, condition, *resp)
-
 		results, err = ve.ObtainSdkValue("Result.PolicyMetadata", *resp)
 		if err != nil {
 			return data, err
@@ -60,6 +108,27 @@ func (s *VolcengineIamPolicyService) ReadResources(m map[string]interface{}) (da
 		}
 		return data, err
 	})
+	if err != nil {
+		return data, err
+	}
+
+	data = allPolicies
+
+	if len(userPolicies) > 0 {
+		data, err = s.MergeAttachedPolicies(userPolicies, data, "UserName", userName, "UserAttachDate")
+		if err != nil {
+			return data, err
+		}
+	}
+
+	if len(rolePolicies) > 0 {
+		data, err = s.MergeAttachedPolicies(rolePolicies, data, "RoleName", roleName, "RoleAttachDate")
+		if err != nil {
+			return data, err
+		}
+	}
+
+	return data, err
 }
 
 func (s *VolcengineIamPolicyService) ReadResource(resourceData *schema.ResourceData, policyId string) (data map[string]interface{}, err error) {
@@ -213,6 +282,38 @@ func (s *VolcengineIamPolicyService) DatasourceResources(data *schema.ResourceDa
 
 func (s *VolcengineIamPolicyService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineIamPolicyService) MergeAttachedPolicies(attached []interface{}, source []interface{}, k, v, attachKey string) (data []interface{}, err error) {
+	var (
+		temp interface{}
+	)
+	for _, p0 := range attached {
+		temp, err = ve.ObtainSdkValue("PolicyName", p0)
+		if err != nil {
+			return data, err
+		}
+		p0PolicyName := temp.(string)
+		temp, err = ve.ObtainSdkValue("AttachDate", p0)
+		if err != nil {
+			return data, err
+		}
+		attachDate := temp.(string)
+		for _, p1 := range source {
+			temp, err = ve.ObtainSdkValue("PolicyName", p0)
+			if err != nil {
+				return data, err
+			}
+			p1PolicyName := temp.(string)
+			if p0PolicyName == p1PolicyName {
+				p1.(map[string]interface{})[attachKey] = attachDate
+				p1.(map[string]interface{})[k] = v
+				data = append(data, p1)
+				break
+			}
+		}
+	}
+	return data, err
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
