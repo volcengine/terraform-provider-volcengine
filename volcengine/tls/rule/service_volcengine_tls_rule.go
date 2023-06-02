@@ -265,8 +265,14 @@ func (v *VolcengineTlsRuleService) CreateResource(data *schema.ResourceData, res
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				// 接口中 processors 为小写，需删除自动转换的大写key
 				if _, ok := (*call.SdkParam)["UserDefineRule"]; ok {
-					if _, ok = (*call.SdkParam)["UserDefineRule"].(map[string]interface{})["Plugin"].(map[string]interface{})["Processors"]; ok {
-						delete((*call.SdkParam)["UserDefineRule"].(map[string]interface{})["Plugin"].(map[string]interface{}), "Processors")
+					if userDefineMap, ok := (*call.SdkParam)["UserDefineRule"].(map[string]interface{}); ok {
+						if plugin, ok := userDefineMap["Plugin"]; ok {
+							if pluginMap, ok := plugin.(map[string]interface{}); ok {
+								if _, ok = pluginMap["Processors"]; ok {
+									delete((*call.SdkParam)["UserDefineRule"].(map[string]interface{})["Plugin"].(map[string]interface{}), "Processors")
+								}
+							}
+						}
 					}
 				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
