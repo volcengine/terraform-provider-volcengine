@@ -15,9 +15,10 @@ use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
 resource "volcengine_mongodb_instance" "foo" {
-  zone_id       = "cn-beijing-a"
-  instance_type = "ReplicaSet"
-  node_spec     = "mongo.2c4g"
+  zone_id           = "cn-beijing-a"
+  db_engine_version = "MongoDB_4_0"
+  instance_type     = "ReplicaSet"
+  node_spec         = "mongo.2c4g"
   #    mongos_node_spec="mongo.mongos.2c4g"
   #    mongos_node_number = 3
   #    shard_number=3
@@ -49,6 +50,7 @@ The following arguments are supported:
 * `subnet_id` - (Required, ForceNew) The subnet id of instance.
 * `auto_renew` - (Optional) Whether to enable automatic renewal.
 * `charge_type` - (Optional) The charge type of instance, valid value contains `Prepaid` or `PostPaid`.
+* `db_engine_version` - (Optional, ForceNew) The version of db engine, valid value contains `MongoDB_4_0`, `MongoDB_5_0`.
 * `instance_name` - (Optional) The instance name.
 * `instance_type` - (Optional, ForceNew) The type of instance,the valid value contains `ReplicaSet` or `ShardedCluster`.
 * `mongos_node_number` - (Optional) The mongos node number of shard cluster,value range is `2~23`, this parameter is required when `InstanceType` is `ShardedCluster`.

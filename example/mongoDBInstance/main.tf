@@ -1,5 +1,6 @@
 resource "volcengine_mongodb_instance" "foo"{
     zone_id="cn-beijing-a"
+    db_engine_version = "MongoDB_4_0"
     instance_type="ReplicaSet"
     node_spec="mongo.2c4g"
 #    mongos_node_spec="mongo.mongos.2c4g"
