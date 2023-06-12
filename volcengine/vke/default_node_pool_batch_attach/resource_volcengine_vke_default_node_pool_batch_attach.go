@@ -5,7 +5,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
-	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
 )
 
@@ -28,7 +27,7 @@ func ResourceVolcengineDefaultNodePoolBatchAttach() *schema.Resource {
 	}
 	ve.MergeDateSourceToResource(default_node_pool.ResourceVolcengineDefaultNodePool().Schema, &m)
 
-	logger.Debug(logger.RespFormat, "ATTACH_TEST", m)
+	// logger.Debug(logger.RespFormat, "ATTACH_TEST", m)
 
 	return &schema.Resource{
 		Create: resourceVolcengineDefaultNodePoolBatchAttachCreate,

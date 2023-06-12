@@ -76,7 +76,7 @@ In addition to all arguments above, the following attributes are exported:
         * `log_setups` - Cluster logging options.
             * `enabled` - Whether to enable the log option, true means enable, false means not enable, the default is false. When Enabled is changed from false to true, a new Topic will be created.
             * `log_ttl` - The storage time of logs in Log Service. After the specified log storage time is exceeded, the expired logs in this log topic will be automatically cleared. The unit is days, and the default is 30 days. The value range is 1 to 3650, specifying 3650 days means permanent storage.
-            * `log_type` - The currently enabled log type, optional values: `Audit`.
+            * `log_type` - The currently enabled log type.
     * `name` - The name of the cluster.
     * `node_statistics` - Statistics on the number of nodes corresponding to each master state in the cluster.
         * `creating_count` - Phase=Creating total number of nodes.
