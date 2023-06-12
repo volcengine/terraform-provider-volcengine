@@ -49,7 +49,7 @@ In addition to all arguments above, the following attributes are exported:
 
 
 ## Import
-BypassSvc Bucket can be imported using the id, e.g.
+Tos Bucket can be imported using the id, e.g.
 ```
 $ terraform import volcengine_tos_bucket.default bucketName
 ```
