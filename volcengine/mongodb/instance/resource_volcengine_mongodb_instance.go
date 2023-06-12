@@ -50,13 +50,13 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 			// 	ValidateFunc: validation.StringInSlice([]string{"MongoDB"}, false),
 			// 	Description:  "The db engine,valid value contains `MongoDB`.",
 			// },
-			// "db_engine_version": {
-			// 	Type:         schema.TypeString,
-			// 	Optional:     true,
-			// 	Computed:     true,
-			// 	ValidateFunc: validation.StringInSlice([]string{"MongoDB_4_0"}, false),
-			// 	Description:  "The version of db engine,valid value contains `MongoDB_4_0`.",
-			// },
+			"db_engine_version": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The version of db engine, valid value contains `MongoDB_4_0`, `MongoDB_5_0`.",
+			},
 			"node_spec": {
 				Type:        schema.TypeString,
 				Required:    true,

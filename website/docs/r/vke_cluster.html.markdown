@@ -15,7 +15,7 @@ resource "volcengine_vke_cluster" "foo" {
   description               = "created by terraform"
   delete_protection_enabled = false
   cluster_config {
-    subnet_ids                       = ["subnet-2bzud0pbor8qo2dx0ee884y6h"]
+    subnet_ids                       = ["subnet-rrqvkt2nq1hcv0x57ccqf3x"]
     api_server_public_access_enabled = true
     api_server_public_access_config {
       public_access_network_config {
@@ -26,21 +26,29 @@ resource "volcengine_vke_cluster" "foo" {
     resource_public_access_default_enabled = true
   }
   pods_config {
-    pod_network_mode = "Flannel"
-    flannel_config {
-      pod_cidrs         = ["172.27.224.0/19"]
-      max_pods_per_node = 64
-    }
+    pod_network_mode = "VpcCniShared"
+    #    flannel_config {
+    #      pod_cidrs = ["172.27.224.0/19"]
+    #      max_pods_per_node = 64
+    #    }
     vpc_cni_config {
-      subnet_ids = ["subnet-2bzud0pbor8qo2dx0ee884y6h"]
+      subnet_ids = ["subnet-rrqvkt2nq1hcv0x57ccqf3x", "subnet-miklcqh75vcw5smt1amo4ik5", "subnet-13g0x0ytpm0hs3n6nu5j591lv"]
     }
   }
   services_config {
-    service_cidrsv4 = ["192.168.0.0/16"]
+    service_cidrsv4 = ["172.30.0.0/18"]
   }
   tags {
     key   = "k1"
     value = "v1"
+  }
+  logging_config {
+    //log_project_id = "3189316d-a1ee-4892-a8fc-9a566489d590"
+    log_setups {
+      enabled  = false
+      log_ttl  = 30
+      log_type = "Audit"
+    }
   }
 }
 ```
@@ -48,12 +56,13 @@ resource "volcengine_vke_cluster" "foo" {
 The following arguments are supported:
 * `cluster_config` - (Required) The config of the cluster.
 * `name` - (Required) The name of the cluster.
-* `pods_config` - (Required, ForceNew) The config of the pods.
+* `pods_config` - (Required) The config of the pods.
 * `services_config` - (Required, ForceNew) The config of the services.
 * `client_token` - (Optional) ClientToken is a case-sensitive string of no more than 64 ASCII characters passed in by the caller.
 * `delete_protection_enabled` - (Optional) The delete protection of the cluster, the value is `true` or `false`.
 * `description` - (Optional) The description of the cluster.
 * `kubernetes_version` - (Optional, ForceNew) The version of Kubernetes specified when creating a VKE cluster (specified to patch version), if not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.
+* `logging_config` - (Optional) Cluster log configuration information.
 * `tags` - (Optional) Tags.
 
 The `api_server_public_access_config` object supports the following:
@@ -72,11 +81,22 @@ The `flannel_config` object supports the following:
 * `max_pods_per_node` - (Optional, ForceNew) The maximum number of single-node Pod instances for a Flannel container network, the value can be `16` or `32` or `64` or `128` or `256`.
 * `pod_cidrs` - (Optional, ForceNew) Pod CIDR for the Flannel container network.
 
+The `log_setups` object supports the following:
+
+* `log_type` - (Required) The currently enabled log type.
+* `enabled` - (Optional) Whether to enable the log option, true means enable, false means not enable, the default is false. When Enabled is changed from false to true, a new Topic will be created.
+* `log_ttl` - (Optional) The storage time of logs in Log Service. After the specified log storage time is exceeded, the expired logs in this log topic will be automatically cleared. The unit is days, and the default is 30 days. The value range is 1 to 3650, specifying 3650 days means permanent storage.
+
+The `logging_config` object supports the following:
+
+* `log_project_id` - (Optional) The TLS log item ID of the collection target.
+* `log_setups` - (Optional) Cluster logging options. This structure can only be modified and added, and cannot be deleted. When encountering a `cannot be deleted` error, please query the log setups of the current cluster and fill in the current `tf` file.
+
 The `pods_config` object supports the following:
 
 * `pod_network_mode` - (Required, ForceNew) The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.
 * `flannel_config` - (Optional, ForceNew) Flannel network configuration.
-* `vpc_cni_config` - (Optional, ForceNew) VPC-CNI network configuration.
+* `vpc_cni_config` - (Optional) VPC-CNI network configuration.
 
 The `public_access_network_config` object supports the following:
 
@@ -94,7 +114,7 @@ The `tags` object supports the following:
 
 The `vpc_cni_config` object supports the following:
 
-* `subnet_ids` - (Optional, ForceNew) A list of Pod subnet IDs for the VPC-CNI container network.
+* `subnet_ids` - (Optional) A list of Pod subnet IDs for the VPC-CNI container network.
 * `vpc_id` - (Optional, ForceNew) The private network where the cluster control plane network resides.
 
 ## Attributes Reference

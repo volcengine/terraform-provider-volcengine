@@ -147,6 +147,7 @@ func (d *Dispatcher) Read(resourceService ResourceService, resourceDate *schema.
 	}
 	handlers := resourceService.WithResourceResponseHandlers(instance)
 	if len(handlers) == 0 {
+		resourceSpecial(resource, instance, nil)
 		_, err = ResponseToResourceData(resourceDate, resource, instance, nil)
 		return err
 	}
@@ -159,6 +160,7 @@ func (d *Dispatcher) Read(resourceService ResourceService, resourceDate *schema.
 		if err != nil {
 			return err
 		}
+		resourceSpecial(resource, data, convert)
 		_, err = ResponseToResourceData(resourceDate, resource, data, convert)
 		if err != nil {
 			return err

@@ -295,7 +295,7 @@ func (s *VolcengineMongoDBInstanceService) WithResourceResponseHandlers(instance
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return instance, map[string]ve.ResponseConvert{
 			"DBEngine": {
-				TargetField: "db_ending",
+				TargetField: "db_engine",
 			},
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
@@ -348,9 +348,9 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 				// "db_engine": {
 				// 	TargetField: "DBEngine",
 				// },
-				// "db_engine_version": {
-				// 	TargetField: "DBEngineVersion",
-				// },
+				"db_engine_version": {
+					TargetField: "DBEngineVersion",
+				},
 				"storage_space_gb": {
 					TargetField: "StorageSpaceGB",
 				},
@@ -557,6 +557,9 @@ func (s *VolcengineMongoDBInstanceService) RemoveResource(resourceData *schema.R
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

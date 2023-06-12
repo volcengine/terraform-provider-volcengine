@@ -47,7 +47,7 @@ func (s *VolcengineScalingGroupService) ReadResources(m map[string]interface{}) 
 				return data, err
 			}
 		}
-		logger.Debug(logger.RespFormat, action, action, resp)
+		logger.Debug(logger.RespFormat, action, action, *resp)
 		results, err = ve.ObtainSdkValue("Result.ScalingGroups", *resp)
 		if err != nil {
 			return data, err
@@ -127,6 +127,9 @@ func (VolcengineScalingGroupService) WithResourceResponseHandlers(scalingGroup m
 		return scalingGroup, map[string]ve.ResponseConvert{
 			"MultiAZPolicy": {
 				TargetField: "multi_az_policy",
+			},
+			"DBInstanceIds": {
+				TargetField: "db_instance_ids",
 			},
 		}, nil
 	}
@@ -422,6 +425,9 @@ func (s *VolcengineScalingGroupService) DatasourceResources(*schema.ResourceData
 			},
 			"MultiAZPolicy": {
 				TargetField: "multi_az_policy",
+			},
+			"DBInstanceIds": {
+				TargetField: "db_instance_ids",
 			},
 		},
 	}
