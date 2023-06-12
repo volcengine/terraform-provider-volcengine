@@ -488,7 +488,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 												"log_type": {
 													Type:        schema.TypeString,
 													Computed:    true,
-													Description: "The currently enabled log type, optional values: `Audit`.",
+													Description: "The currently enabled log type.",
 												},
 												"log_ttl": {
 													Type:        schema.TypeInt,
