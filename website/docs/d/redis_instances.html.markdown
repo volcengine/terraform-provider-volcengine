@@ -10,7 +10,9 @@ description: |-
 Use this data source to query detailed information of redis instances
 ## Example Usage
 ```hcl
-
+data "volcengine_redis_instances" "default" {
+  instance_id = "redis-cnlf2lh1kksvv****"
+}
 ```
 ## Argument Reference
 The following arguments are supported:

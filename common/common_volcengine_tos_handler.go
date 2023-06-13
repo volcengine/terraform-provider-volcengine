@@ -12,21 +12,62 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"reflect"
 	"sort"
 	"strings"
 	"time"
 
 	"github.com/volcengine/volcengine-go-sdk/volcengine"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/client"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/client/metadata"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/corehandlers"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/request"
-	"github.com/volcengine/volcengine-go-sdk/volcengine/volcenginebody"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineerr"
 )
 
 var tosSignRequestHandler = request.NamedHandler{Name: "TosSignRequestHandler", Fn: tosSign}
-var tosBuildHandler = request.NamedHandler{Name: "TosBuildHandler", Fn: tosBuild}
-var tosUnmarshalHandler = request.NamedHandler{Name: "TosUnmarshalHandler", Fn: tosUnmarshal}
 var tosUnmarshalErrorHandler = request.NamedHandler{Name: "TosUnmarshalErrorHandler", Fn: tosUnmarshalError}
+
+func (u *BypassSvc) NewTosClient() *client.Client {
+	svc := "tos"
+	config := u.Session.ClientConfig(svc)
+	var (
+		endpoint string
+	)
+	if u.info.Domain == "" {
+		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
+			endpoint = fmt.Sprintf("%s://tos-%s.volces.com", "http", config.SigningRegion)
+		} else {
+			endpoint = fmt.Sprintf("%s://tos-%s.volces.com", "https", config.SigningRegion)
+		}
+	} else {
+		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
+			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "http", u.info.Domain, config.SigningRegion)
+		} else {
+			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "https", u.info.Domain, config.SigningRegion)
+		}
+
+	}
+
+	c := client.New(
+		*config.Config,
+		metadata.ClientInfo{
+			SigningName:   config.SigningName,
+			SigningRegion: config.SigningRegion,
+			Endpoint:      endpoint,
+			ServiceName:   svc,
+			ServiceID:     svc,
+		},
+		config.Handlers,
+	)
+	c.Handlers.Build.PushBackNamed(corehandlers.SDKVersionUserAgentHandler)
+	c.Handlers.Build.PushBackNamed(corehandlers.AddHostExecEnvUserAgentHandler)
+	c.Handlers.Sign.PushBackNamed(tosSignRequestHandler)
+	c.Handlers.Build.PushBackNamed(bypassBuildHandler)
+	c.Handlers.Unmarshal.PushBackNamed(bypassUnmarshalHandler)
+	c.Handlers.UnmarshalError.PushBackNamed(tosUnmarshalErrorHandler)
+
+	return c
+}
 
 func tosSign(req *request.Request) {
 	//region := req.ClientInfo.SigningRegion
@@ -53,50 +94,6 @@ func tosSign(req *request.Request) {
 	}
 	r := sign(req.HTTPRequest, c)
 	req.HTTPRequest.Header = r.Header
-}
-
-func tosBuild(r *request.Request) {
-	body := url.Values{}
-
-	params := r.Params
-	if reflect.TypeOf(r.Params) == reflect.TypeOf(&map[string]interface{}{}) {
-		if v, ok := (*r.Params.(*map[string]interface{}))[TosInfoUrlParam]; ok {
-			for k1, v1 := range v.(map[string]string) {
-				body.Add(k1, v1)
-			}
-		}
-		if v, ok := (*r.Params.(*map[string]interface{}))[TosInfoInput]; ok {
-			params = v
-		}
-	}
-
-	r.Params = params
-
-	r.HTTPRequest.Host = r.HTTPRequest.URL.Host
-	if r.Config.ExtraUserAgent != nil && *r.Config.ExtraUserAgent != "" {
-		if strings.HasPrefix(*r.Config.ExtraUserAgent, "/") {
-			request.AddToUserAgent(r, *r.Config.ExtraUserAgent)
-		} else {
-			request.AddToUserAgent(r, "/"+*r.Config.ExtraUserAgent)
-		}
-	}
-	contentType := r.HTTPRequest.Header.Get("Content-Type")
-	if (strings.ToUpper(r.HTTPRequest.Method) == "PUT" ||
-		strings.ToUpper(r.HTTPRequest.Method) == "POST" ||
-		strings.ToUpper(r.HTTPRequest.Method) == "DELETE" ||
-		strings.ToUpper(r.HTTPRequest.Method) == "PATCH") &&
-		strings.Contains(strings.ToLower(contentType), "application/json") {
-		r.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
-		volcenginebody.BodyJson(&body, r)
-	} else {
-		if len(contentType) > 0 && !strings.Contains(strings.ToLower(contentType), "x-www-form-urlencoded") {
-			r.HTTPRequest.Header.Del("Content-Type")
-		}
-		volcenginebody.BodyParam(&body, r)
-		if len(contentType) > 0 {
-			r.HTTPRequest.Header.Set("Content-Type", contentType)
-		}
-	}
 }
 
 type tosMetadata struct {
@@ -168,7 +165,7 @@ func hashedCanonicalRequestV4(request *http.Request, meta *tosMetadata) string {
 	var sortedHeaderKeys []string
 	for key := range request.Header {
 		switch key {
-		case "Content-Type", "Content-Md5", "Host", "X-Tos-Security-Token":
+		case "Content-Type", "Content-Md5", "Host", "X-BypassSvc-Security-Token":
 		default:
 			if !strings.HasPrefix(key, "X-") {
 				continue
@@ -214,7 +211,7 @@ func signatureV4(signingKey []byte, stringToSign string) string {
 
 func prepareRequestV4(request *http.Request) *http.Request {
 	necessaryDefaults := map[string]string{
-		"X-Tos-Date": timestampV4(),
+		"X-BypassSvc-Date": timestampV4(),
 	}
 
 	for header, value := range necessaryDefaults {
@@ -340,42 +337,6 @@ func normquery(v url.Values) string {
 	queryString := v.Encode()
 
 	return strings.Replace(queryString, "+", "%20", -1)
-}
-
-func tosUnmarshal(r *request.Request) {
-	defer r.HTTPResponse.Body.Close()
-	if r.DataFilled() {
-		body, err := ioutil.ReadAll(r.HTTPResponse.Body)
-		if err != nil {
-			fmt.Printf("read volcenginebody err, %v\n", err)
-			r.Error = err
-			return
-		}
-
-		if reflect.TypeOf(r.Data) == reflect.TypeOf(&map[string]interface{}{}) {
-			(*r.Data.(*map[string]interface{}))[TosHeader] = r.HTTPResponse.Header
-			temp := make(map[string]interface{})
-			if len(body) == 0 {
-				(*r.Data.(*map[string]interface{}))[TosResponse] = temp
-				return
-			}
-
-			if strings.Contains(strings.ToLower(r.HTTPResponse.Header.Get("Accept")), "application/json") ||
-				strings.Contains(strings.ToLower(r.HTTPResponse.Header.Get("Content-Type")), "application/json") {
-				if err = json.Unmarshal(body, &temp); err != nil {
-					fmt.Printf("Unmarshal err, %v\n", err)
-					r.Error = err
-					return
-				}
-				(*r.Data.(*map[string]interface{}))[TosResponse] = temp
-			} else {
-				(*r.Data.(*map[string]interface{}))[TosResponse] = temp
-				//(*r.Data.(*map[string]interface{}))[TosPlainResponse] = string(body)
-			}
-
-		}
-
-	}
 }
 
 func tosUnmarshalError(r *request.Request) {

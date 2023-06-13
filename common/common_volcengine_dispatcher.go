@@ -243,8 +243,8 @@ func (d *Dispatcher) Data(resourceService ResourceService, resourceDate *schema.
 		}
 	}
 	switch info.ServiceCategory {
-	case ServiceTos:
-		condition, err = convertToTosParams(info.RequestConverts, condition)
+	case ServiceBypass:
+		condition, err = convertToBypassParams(info.RequestConverts, condition)
 		if err != nil {
 			return err
 		}

@@ -26,7 +26,7 @@ func (s *VolcengineTosBucketPolicyService) GetClient() *ve.SdkClient {
 }
 
 func (s *VolcengineTosBucketPolicyService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
-	tos := s.Client.TosClient
+	tos := s.Client.BypassSvcClient
 	var (
 		action  string
 		resp    *map[string]interface{}
@@ -34,9 +34,9 @@ func (s *VolcengineTosBucketPolicyService) ReadResources(condition map[string]in
 	)
 	action = "GetBucketPolicy"
 	logger.Debug(logger.ReqFormat, action, nil)
-	resp, err = tos.DoTosCall(ve.TosInfo{
+	resp, err = tos.DoBypassSvcCall(ve.BypassSvcInfo{
 		HttpMethod: ve.GET,
-		Domain:     condition[ve.TosDomain].(string),
+		Domain:     condition[ve.BypassDomain].(string),
 		UrlParam: map[string]string{
 			"policy": "",
 		},
@@ -44,13 +44,13 @@ func (s *VolcengineTosBucketPolicyService) ReadResources(condition map[string]in
 	if err != nil {
 		return data, err
 	}
-	results, err = ve.ObtainSdkValue(ve.TosResponse, *resp)
+	results, err = ve.ObtainSdkValue(ve.BypassResponse, *resp)
 	if err != nil {
 		return data, err
 	}
 
 	if len(results.(map[string]interface{})) == 0 {
-		return data, fmt.Errorf("bucket Policy %s not exist ", condition[ve.TosDomain].(string))
+		return data, fmt.Errorf("bucket Policy %s not exist ", condition[ve.BypassDomain].(string))
 	}
 
 	data = append(data, map[string]interface{}{
@@ -74,7 +74,7 @@ func (s *VolcengineTosBucketPolicyService) ReadResource(resourceData *schema.Res
 
 	logger.Debug(logger.ReqFormat, "GetBucketPolicy", bucketName+":"+instanceId)
 	condition := map[string]interface{}{
-		ve.TosDomain: bucketName,
+		ve.BypassDomain: bucketName,
 	}
 	results, err = s.ReadResources(condition)
 
@@ -115,7 +115,7 @@ func (s *VolcengineTosBucketPolicyService) WithResourceResponseHandlers(m map[st
 func (s *VolcengineTosBucketPolicyService) putBucketPolicy(data *schema.ResourceData, resource *schema.Resource, isUpdate bool) ve.Callback {
 	return ve.Callback{
 		Call: ve.SdkCall{
-			ServiceCategory: ve.ServiceTos,
+			ServiceCategory: ve.ServiceBypass,
 			Action:          "PutBucketPolicy",
 			ConvertMode:     ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
@@ -133,32 +133,32 @@ func (s *VolcengineTosBucketPolicyService) putBucketPolicy(data *schema.Resource
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				j := (*call.SdkParam)[ve.TosParam].(map[string]interface{})["Policy"]
+				j := (*call.SdkParam)[ve.BypassParam].(map[string]interface{})["Policy"]
 				data := map[string]interface{}{}
 				err := json.Unmarshal([]byte(j.(string)), &data)
 				if err != nil {
 					return false, err
 				}
-				delete((*call.SdkParam)[ve.TosParam].(map[string]interface{}), "Policy")
+				delete((*call.SdkParam)[ve.BypassParam].(map[string]interface{}), "Policy")
 				for k, v := range data {
-					(*call.SdkParam)[ve.TosParam].(map[string]interface{})[k] = v
+					(*call.SdkParam)[ve.BypassParam].(map[string]interface{})[k] = v
 				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				param := (*call.SdkParam)[ve.TosParam].(map[string]interface{})
-				return s.Client.TosClient.DoTosCall(ve.TosInfo{
+				param := (*call.SdkParam)[ve.BypassParam].(map[string]interface{})
+				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					HttpMethod:  ve.PUT,
 					ContentType: ve.ApplicationJSON,
 					UrlParam: map[string]string{
 						"policy": "",
 					},
-					Domain: (*call.SdkParam)[ve.TosDomain].(string),
+					Domain: (*call.SdkParam)[ve.BypassDomain].(string),
 				}, &param)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId((*call.SdkParam)[ve.TosDomain].(string) + ":POLICY")
+				d.SetId((*call.SdkParam)[ve.BypassDomain].(string) + ":POLICY")
 				return nil
 			},
 		},
@@ -176,7 +176,7 @@ func (s *VolcengineTosBucketPolicyService) ModifyResource(data *schema.ResourceD
 func (s *VolcengineTosBucketPolicyService) RemoveResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			ServiceCategory: ve.ServiceTos,
+			ServiceCategory: ve.ServiceBypass,
 			Action:          "DeleteBucketPolicy",
 			ConvertMode:     ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
@@ -191,9 +191,9 @@ func (s *VolcengineTosBucketPolicyService) RemoveResource(data *schema.ResourceD
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.TosClient.DoTosCall(ve.TosInfo{
+				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					HttpMethod: ve.DELETE,
-					Domain:     (*call.SdkParam)[ve.TosDomain].(string),
+					Domain:     (*call.SdkParam)[ve.BypassDomain].(string),
 					UrlParam: map[string]string{
 						"policy": "",
 					},

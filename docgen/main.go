@@ -145,6 +145,7 @@ var resourceKeys = map[string]string{
 	"rds_mysql":   "RDS_MYSQL",
 	"privatelink": "PRIVATELINK",
 	"redis":       "REDIS",
+	"tls":         "TLS",
 }
 
 type Products struct {
