@@ -34,7 +34,7 @@ type ServiceCategory int
 
 const (
 	DefaultServiceCategory ServiceCategory = iota
-	ServiceTos
+	ServiceBypass
 )
 
 type SpecialParamType int
