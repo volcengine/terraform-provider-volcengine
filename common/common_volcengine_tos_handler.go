@@ -165,7 +165,7 @@ func hashedCanonicalRequestV4(request *http.Request, meta *tosMetadata) string {
 	var sortedHeaderKeys []string
 	for key := range request.Header {
 		switch key {
-		case "Content-Type", "Content-Md5", "Host", "X-BypassSvc-Security-Token":
+		case "Content-Type", "Content-Md5", "Host", "X-Tos-Security-Token":
 		default:
 			if !strings.HasPrefix(key, "X-") {
 				continue
@@ -211,7 +211,7 @@ func signatureV4(signingKey []byte, stringToSign string) string {
 
 func prepareRequestV4(request *http.Request) *http.Request {
 	necessaryDefaults := map[string]string{
-		"X-BypassSvc-Date": timestampV4(),
+		"X-Tos-Date": timestampV4(),
 	}
 
 	for header, value := range necessaryDefaults {
