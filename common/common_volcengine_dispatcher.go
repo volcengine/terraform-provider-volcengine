@@ -2,7 +2,10 @@ package common
 
 import (
 	"context"
+	"fmt"
+	"time"
 
+	re "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"golang.org/x/sync/semaphore"
 	"golang.org/x/time/rate"
@@ -141,7 +144,25 @@ func (d *Dispatcher) Read(resourceService ResourceService, resourceDate *schema.
 			}
 		}
 	}
-	instance, err := resourceService.ReadResource(resourceDate, resourceDate.Id())
+
+	var (
+		instance map[string]interface{}
+		callErr  error
+	)
+
+	err = re.Retry(3*time.Minute, func() *re.RetryError {
+		instance, callErr = resourceService.ReadResource(resourceDate, resourceDate.Id())
+		if callErr != nil {
+			if ResourceFlowLimitExceededError(callErr) {
+				return re.RetryableError(callErr)
+			} else {
+				return re.NonRetryableError(fmt.Errorf("error on  reading  resource %q, %w", resourceDate.Id(), callErr))
+			}
+		} else {
+			return nil
+		}
+	})
+
 	if err != nil {
 		return err
 	}
