@@ -22,3 +22,11 @@ func ResourceNotFoundError(err error) bool {
 	}
 	return false
 }
+
+func ResourceFlowLimitExceededError(err error) bool {
+	errMessage := strings.ToLower(err.Error())
+	if strings.Contains(errMessage, "FlowLimitExceeded") {
+		return true
+	}
+	return false
+}
