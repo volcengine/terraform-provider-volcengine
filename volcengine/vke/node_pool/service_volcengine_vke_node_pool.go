@@ -383,27 +383,21 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"enabled": {
-							ForceGet:    true,
 							TargetField: "Enabled",
 						},
 						"max_replicas": {
-							ForceGet:    true,
 							TargetField: "MaxReplicas",
 						},
 						"min_replicas": {
-							ForceGet:    true,
 							TargetField: "MinReplicas",
 						},
 						"desired_replicas": {
-							ForceGet:    true,
 							TargetField: "DesiredReplicas",
 						},
 						"priority": {
-							ForceGet:    true,
 							TargetField: "Priority",
 						},
 						"subnet_policy": {
-							ForceGet:    true,
 							TargetField: "SubnetPolicy",
 						},
 					},
