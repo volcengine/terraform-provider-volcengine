@@ -77,14 +77,20 @@ func (s *VolcengineSecurityGroupRuleService) CreateResource(resourceData *schema
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				var (
-					securityGroupId = resourceData.Get("security_group_id").(string)
-					cidrIp          = resourceData.Get("cidr_ip").(string)
-					protocol        = resourceData.Get("protocol").(string)
-					portStart       = resourceData.Get("port_start").(int)
-					portEnd         = resourceData.Get("port_end").(int)
+					securityGroupId = resourceData.Get("security_group_id")
+					cidrIp          = resourceData.Get("cidr_ip")
+					protocol        = resourceData.Get("protocol")
+					portStart       = resourceData.Get("port_start")
+					portEnd         = resourceData.Get("port_end")
+					sourceGroupId   = resourceData.Get("source_group_id")
+					dir             = resourceData.Get("direction")
+					policy          = resourceData.Get("policy")
+					priority        = resourceData.Get("priority")
 				)
-				id, _ := ve.ObtainSdkValue("Result.RuleId", securityGroupId+":"+protocol+":"+strconv.Itoa(portStart)+":"+strconv.Itoa(portEnd)+":"+cidrIp)
-				d.SetId(id.(string))
+				d.SetId(fmt.Sprintf("%v:%v:%v:%v:%v:%v:%v:%v:%v",
+					securityGroupId, protocol, portStart,
+					portEnd, cidrIp, sourceGroupId,
+					dir, policy, priority))
 				return nil
 			},
 		},
@@ -114,6 +120,7 @@ func (s *VolcengineSecurityGroupRuleService) ReadResources(condition map[string]
 			return data, err
 		}
 	}
+	logger.Debug(logger.RespFormat, action, condition, *resp)
 
 	results, err = ve.ObtainSdkValue("Result.Permissions", *resp)
 
@@ -126,13 +133,71 @@ func (s *VolcengineSecurityGroupRuleService) ReadResources(condition map[string]
 	if data, ok = results.([]interface{}); !ok {
 		return data, errors.New("Result.Permissions is not Slice")
 	}
-	logger.Debug(logger.ReqFormat, "", data)
+
+	securityGroupStatus, err := ve.ObtainSdkValue("Result.Status", *resp)
+	if err != nil {
+		return nil, err
+	}
+
+	// Resource 里定义了 status，已经发布无法修改，这里将 status 回填
+	for index := range data {
+		data[index].(map[string]interface{})["Status"] = securityGroupStatus
+
+		ele := data[index].(map[string]interface{})
+		data[index].(map[string]interface{})["PortStart"] = int(ele["PortStart"].(float64))
+		data[index].(map[string]interface{})["PortEnd"] = int(ele["PortEnd"].(float64))
+		data[index].(map[string]interface{})["Priority"] = int(ele["Priority"].(float64))
+	}
 
 	return data, err
 }
 
-func (s *VolcengineSecurityGroupRuleService) ReadResource(resourceData *schema.ResourceData, tmpId string) (data map[string]interface{}, err error) {
-	return data, err
+func (s *VolcengineSecurityGroupRuleService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+	var (
+		results []interface{}
+	)
+	if id == "" {
+		id = s.ReadResourceId(resourceData.Id())
+	}
+
+	ids := strings.Split(id, ":")
+
+	req := map[string]interface{}{
+		"SecurityGroupId": ids[0],
+		"Direction":       resourceData.Get("direction"),
+		"Protocol":        resourceData.Get("protocol"),
+	}
+	if len(resourceData.Get("cidr_ip").(string)) > 0 {
+		req["CidrIp"] = resourceData.Get("cidr_ip")
+	}
+	if len(resourceData.Get("source_group_id").(string)) > 0 {
+		req["SourceGroupId"] = resourceData.Get("source_group_id")
+	}
+
+	results, err = s.ReadResources(req)
+	if err != nil {
+		return data, err
+	}
+
+	for _, v := range results {
+		data = v.(map[string]interface{})
+
+		if data["PortStart"] != resourceData.Get("port_start") {
+			continue
+		}
+		if data["PortEnd"] != resourceData.Get("port_end") {
+			continue
+		}
+		if data["Policy"] != resourceData.Get("policy") {
+			continue
+		}
+		if data["Priority"] != resourceData.Get("priority") {
+			continue
+		}
+		return data, nil
+	}
+
+	return data, fmt.Errorf("SecurityGroupRule %s not exist ", id)
 }
 
 func (s *VolcengineSecurityGroupRuleService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
@@ -151,36 +216,35 @@ func (s *VolcengineSecurityGroupRuleService) ModifyResource(resourceData *schema
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      action,
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"description": {
+					TargetField: "Description",
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				items := strings.Split(d.Id(), ":")
-				if len(items) != 5 {
-					return false, fmt.Errorf("import id must be of the form SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp")
+
+				start, _ := strconv.Atoi(items[2])
+				end, _ := strconv.Atoi(items[3])
+
+				(*call.SdkParam)["SecurityGroupId"] = items[0]
+				(*call.SdkParam)["Protocol"] = items[1]
+				(*call.SdkParam)["PortStart"] = start
+				(*call.SdkParam)["PortEnd"] = end
+				if len(items[4]) > 0 {
+					(*call.SdkParam)["CidrIp"] = items[4]
 				}
+				if len(items[5]) > 0 {
+					(*call.SdkParam)["SourceGroupId"] = items[5]
+				}
+				(*call.SdkParam)["Policy"] = items[7]
+				(*call.SdkParam)["Priority"] = resourceData.Get("priority")
 
-				securityGroupId := items[0]
-				protocol := items[1]
-				portStart := items[2]
-				portEnd := items[3]
-				cidrIp := items[4]
-				ruleId := securityGroupId + ":" + protocol + ":" + portStart + ":" + portEnd + ":" + cidrIp
-
-				(*call.SdkParam)["Protocol"] = protocol
-				(*call.SdkParam)["PortStart"] = portStart
-				(*call.SdkParam)["PortEnd"] = portEnd
-				(*call.SdkParam)["CidrIp"] = cidrIp
-				(*call.SdkParam)["SecurityGroupId"] = securityGroupId
-				(*call.SdkParam)["RuleId"] = ruleId
-
-				start, _ := strconv.Atoi((*call.SdkParam)["PortStart"].(string))
-				end, _ := strconv.Atoi((*call.SdkParam)["PortEnd"].(string))
-
-				if err := validateProtocol(protocol, start, end); err != nil {
+				// validate protocol
+				if err := validateProtocol(items[1], start, end); err != nil {
 					return false, err
 				}
-
-				d.SetId(ruleId)
-
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -210,31 +274,19 @@ func (s *VolcengineSecurityGroupRuleService) RemoveResource(resourceData *schema
 		action = "RevokeSecurityGroupIngress"
 	}
 
-	items := strings.Split(resourceData.Id(), ":")
-	if len(items) != 5 {
-		return []ve.Callback{}
-	}
-
-	securityGroupId := items[0]
-	protocol := items[1]
-	portStart := items[2]
-	portEnd := items[3]
-	cidrIp := items[4]
-
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      action,
 			ConvertMode: ve.RequestConvertIgnore,
 			SdkParam: &map[string]interface{}{
-				"RuleId":          resourceData.Id(),
-				"PortStart":       portStart,
-				"PortEnd":         portEnd,
-				"Protocol":        protocol,
-				"SecurityGroupId": securityGroupId,
-				"CidrIp":          cidrIp,
-				"Priority":        resourceData.Get("priority"),
-				"Policy":          resourceData.Get("policy"),
+				"SecurityGroupId": resourceData.Get("security_group_id"),
+				"Protocol":        resourceData.Get("protocol"),
+				"PortStart":       resourceData.Get("port_start"),
+				"PortEnd":         resourceData.Get("port_end"),
+				"CidrIp":          resourceData.Get("cidr_ip"),
 				"SourceGroupId":   resourceData.Get("source_group_id"),
+				"Policy":          resourceData.Get("policy"),
+				"Priority":        resourceData.Get("priority"),
 			},
 
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -265,42 +317,8 @@ func (s *VolcengineSecurityGroupRuleService) DatasourceResources(d *schema.Resou
 	}
 }
 
-func importSecurityGroupRule(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	var err error
-	items := strings.Split(d.Id(), ":")
-	if len(items) != 5 {
-		return []*schema.ResourceData{d}, fmt.Errorf("import id must be of the form SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp")
-	}
-	err = d.Set("security_group_id", items[0])
-	if err != nil {
-		return []*schema.ResourceData{d}, err
-	}
-	err = d.Set("protocol", items[1])
-	if err != nil {
-		return []*schema.ResourceData{d}, err
-	}
-
-	err = d.Set("port_start", items[2])
-	if err != nil {
-		return []*schema.ResourceData{d}, err
-	}
-
-	err = d.Set("port_end", items[3])
-	if err != nil {
-		return []*schema.ResourceData{d}, err
-	}
-
-	err = d.Set("cidr_ip", items[4])
-	if err != nil {
-		return []*schema.ResourceData{d}, err
-	}
-
-	return []*schema.ResourceData{d}, nil
-}
-
 func (s *VolcengineSecurityGroupRuleService) ReadResourceId(id string) string {
-	items := strings.Split(id, ":")
-	return items[0]
+	return id
 }
 
 func validateProtocol(protocol string, start, end int) error {
@@ -323,4 +341,14 @@ func validateProtocol(protocol string, start, end int) error {
 		}
 	}
 	return nil
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }
