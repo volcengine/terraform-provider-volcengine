@@ -2,6 +2,8 @@ package security_group_rule
 
 import (
 	"fmt"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -14,7 +16,7 @@ import (
 Import
 SecurityGroupRule can be imported using the id, e.g.
 ```
-$ terraform import volcengine_security_group_rule.default ID is a string concatenated with colons(SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp)
+$ terraform import volcengine_security_group_rule.default ID is a string concatenated with colons(SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp:SourceGroupId:Direction:Policy:Priority)
 ```
 
 */
@@ -60,6 +62,7 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 			"security_group_id": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Id of SecurityGroup.",
 			},
 			"port_start": {
@@ -77,20 +80,18 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 				Description:  "Port end of egress/ingress Rule.",
 			},
 			"cidr_ip": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Cidr ip of egress/ingress Rule.",
-			},
-			"status": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Status of SecurityGroup.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"source_group_id"},
+				Description:   "Cidr ip of egress/ingress Rule.",
 			},
 			"source_group_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "ID of the source security group whose access permission you want to set.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"cidr_ip"},
+				Description:   "ID of the source security group whose access permission you want to set.",
 			},
 			"policy": {
 				Type:     schema.TypeString,
@@ -107,6 +108,7 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Default:      1,
+				ForceNew:     true,
 				ValidateFunc: validation.IntBetween(1, 100),
 				Description:  "Priority of a security group rule.",
 			},
@@ -115,8 +117,84 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 				Optional:    true,
 				Description: "description of a egress rule.",
 			},
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Status of SecurityGroup.",
+			},
 		},
 	}
+}
+
+func importSecurityGroupRule(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	var err error
+	items := strings.Split(d.Id(), ":")
+	if len(items) != 9 {
+		return []*schema.ResourceData{d}, fmt.Errorf("import id must be of the form " +
+			"SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp:SourceGroupId:Direction:Policy:Priority")
+	}
+	err = d.Set("security_group_id", items[0])
+	if err != nil {
+		return []*schema.ResourceData{d}, err
+	}
+	err = d.Set("protocol", items[1])
+	if err != nil {
+		return []*schema.ResourceData{d}, err
+	}
+
+	if len(items[2]) > 0 {
+		ps, err := strconv.Atoi(items[2])
+		if err != nil {
+			return []*schema.ResourceData{d}, err
+		}
+		err = d.Set("port_start", ps)
+		if err != nil {
+			return []*schema.ResourceData{d}, err
+		}
+	}
+
+	if len(items[3]) > 0 {
+		pn, err := strconv.Atoi(items[3])
+		if err != nil {
+			return []*schema.ResourceData{d}, err
+		}
+		err = d.Set("port_end", pn)
+		if err != nil {
+			return []*schema.ResourceData{d}, err
+		}
+	}
+
+	err = d.Set("cidr_ip", items[4])
+	if err != nil {
+		return []*schema.ResourceData{d}, err
+	}
+
+	err = d.Set("source_group_id", items[5])
+	if err != nil {
+		return []*schema.ResourceData{d}, err
+	}
+
+	err = d.Set("direction", items[6])
+	if err != nil {
+		return []*schema.ResourceData{d}, err
+	}
+
+	err = d.Set("policy", items[7])
+	if err != nil {
+		return []*schema.ResourceData{d}, err
+	}
+
+	if len(items[8]) > 0 {
+		pr, err := strconv.Atoi(items[8])
+		if err != nil {
+			return []*schema.ResourceData{d}, err
+		}
+		err = d.Set("priority", pr)
+		if err != nil {
+			return []*schema.ResourceData{d}, err
+		}
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceVolcengineSecurityGroupRuleCreate(d *schema.ResourceData, meta interface{}) (err error) {
