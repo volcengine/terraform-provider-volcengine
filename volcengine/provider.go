@@ -79,10 +79,12 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_vpc_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_command"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_invocation"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_launch_template"
@@ -266,6 +268,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_deployment_sets":  ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
 			"volcengine_ecs_key_pairs":        ecs_key_pair.DataSourceVolcengineEcsKeyPairs(),
 			"volcengine_ecs_launch_templates": ecs_launch_template.DataSourceVolcengineEcsLaunchTemplates(),
+			"volcengine_ecs_commands":         ecs_command.DataSourceVolcengineEcsCommands(),
+			"volcengine_ecs_invocations":      ecs_invocation.DataSourceVolcengineEcsInvocations(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
@@ -441,6 +445,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_key_pair":                 ecs_key_pair.ResourceVolcengineEcsKeyPair(),
 			"volcengine_ecs_key_pair_associate":       ecs_key_pair_associate.ResourceVolcengineEcsKeyPairAssociate(),
 			"volcengine_ecs_launch_template":          ecs_launch_template.ResourceVolcengineEcsLaunchTemplate(),
+			"volcengine_ecs_command":                  ecs_command.ResourceVolcengineEcsCommand(),
+			"volcengine_ecs_invocation":               ecs_invocation.ResourceVolcengineEcsInvocation(),
 
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
