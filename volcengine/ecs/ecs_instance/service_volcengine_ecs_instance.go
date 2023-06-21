@@ -1420,3 +1420,15 @@ func (s *VolcengineEcsService) ProjectTrn() *ve.ProjectTrn {
 		ProjectSchemaField:   "project_name",
 	}
 }
+
+func (s *VolcengineEcsService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) *ve.UnsubscribeInfo {
+	info := ve.UnsubscribeInfo{
+		Product:    "ECS",
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	//这里需要区分下不同的ecs实例
+	if resourceData.Get("instance_charge_type") == "PrePaid" {
+		info.NeedUnsubscribe = true
+	}
+	return &info
+}
