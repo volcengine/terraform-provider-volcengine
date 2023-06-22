@@ -47,6 +47,7 @@ func ResourceVolcengineAcl() *schema.Resource {
 			"acl_entries": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Description: "The acl entry set of the Acl.",
 				Set:         ve.ClbAclEntryHash,
 				Elem: &schema.Resource{
