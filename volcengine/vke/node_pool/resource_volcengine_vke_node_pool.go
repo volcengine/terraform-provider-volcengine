@@ -245,7 +245,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Computed:    true,
-							ForceNew:    true,
 							Description: "The ImageId of NodeConfig.",
 						},
 						"instance_charge_type": {
