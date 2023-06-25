@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -289,6 +290,25 @@ func (s *VolcengineEcsInvocationService) RemoveResource(resourceData *schema.Res
 
 func (s *VolcengineEcsInvocationService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"invocation_status": {
+				TargetField: "InvocationStatus",
+				Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+					var status string
+					statusSet, ok := data.GetOk("invocation_status")
+					if !ok {
+						return status
+					}
+					statusList := statusSet.(*schema.Set).List()
+					statusArr := make([]string, 0)
+					for _, value := range statusList {
+						statusArr = append(statusArr, value.(string))
+					}
+					status = strings.Join(statusArr, ",")
+					return status
+				},
+			},
+		},
 		NameField:    "InvocationName",
 		IdField:      "InvocationId",
 		CollectField: "invocations",

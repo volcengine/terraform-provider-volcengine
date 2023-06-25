@@ -46,13 +46,17 @@ func DataSourceVolcengineEcsInvocations() *schema.Resource {
 				Description: "The repeat mode of ecs invocation. Valid values: `Once`, `Rate`, `Fixed`.",
 			},
 			"invocation_status": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeSet,
 				Optional: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Pending", "Scheduled", "Running", "Success",
-					"Failed", "Stopped", "PartialFailed", "Finished",
-				}, false),
-				Description: "The status of ecs invocation. Valid values: `Pending`, `Scheduled`, `Running`, `Success`, `Failed`, `Stopped`, `PartialFailed`, `Finished`.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{
+						"Pending", "Scheduled", "Running", "Success",
+						"Failed", "Stopped", "PartialFailed", "Finished",
+					}, false),
+				},
+				Set:         schema.HashString,
+				Description: "The list of status of ecs invocation. Valid values: `Pending`, `Scheduled`, `Running`, `Success`, `Failed`, `Stopped`, `PartialFailed`, `Finished`.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -144,7 +148,7 @@ func DataSourceVolcengineEcsInvocations() *schema.Resource {
 						"username": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The user name of the ecs command.",
+							Description: "The username of the ecs command.",
 						},
 						"start_time": {
 							Type:        schema.TypeString,

@@ -100,7 +100,7 @@ func DataSourceVolcengineEcsCommands() *schema.Resource {
 						"username": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The user name of the ecs command.",
+							Description: "The username of the ecs command.",
 						},
 						"description": {
 							Type:        schema.TypeString,

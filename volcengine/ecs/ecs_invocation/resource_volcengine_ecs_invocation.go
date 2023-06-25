@@ -64,7 +64,7 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The user name of the ecs command. When this field is not specified, use the value of the field with the same name in ecs command as the default value.",
+				Description: "The username of the ecs command. When this field is not specified, use the value of the field with the same name in ecs command as the default value.",
 			},
 			"working_dir": {
 				Type:        schema.TypeString,

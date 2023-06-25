@@ -60,7 +60,7 @@ func ResourceVolcengineEcsCommand() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "The user name of the ecs command.",
+				Description: "The username of the ecs command.",
 			},
 			"timeout": {
 				Type:         schema.TypeInt,
