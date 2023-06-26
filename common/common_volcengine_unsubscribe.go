@@ -111,5 +111,6 @@ func (u *UnsubscribeService) getUniversalInfo(actionName string) UniversalInfo {
 		Version:     "2022-01-01",
 		HttpMethod:  POST,
 		Action:      actionName,
+		ContentType: ApplicationJSON,
 	}
 }
