@@ -218,7 +218,10 @@ func (d *Dispatcher) Delete(resourceService ResourceService, resourceDate *schem
 
 	// 自动退订逻辑
 	if unsubscribeEnabled, ok := resourceService.(UnsubscribeEnabled); ok {
-		unsubscribeInfo = unsubscribeEnabled.UnsubscribeInfo(resourceDate, resource)
+		unsubscribeInfo, err = unsubscribeEnabled.UnsubscribeInfo(resourceDate, resource)
+		if err != nil {
+			return err
+		}
 	}
 
 	if unsubscribeInfo != nil && unsubscribeInfo.NeedUnsubscribe {
