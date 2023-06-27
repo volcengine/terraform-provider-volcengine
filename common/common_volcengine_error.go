@@ -24,8 +24,14 @@ func ResourceNotFoundError(err error) bool {
 }
 
 func ResourceFlowLimitExceededError(err error) bool {
-	errMessage := strings.ToLower(err.Error())
-	if strings.Contains(errMessage, "FlowLimitExceeded") {
+	if strings.Contains(err.Error(), "FlowLimitExceeded") {
+		return true
+	}
+	return false
+}
+
+func UnsubscribeProductError(err error) bool {
+	if strings.Contains(err.Error(), "The product code is inconsistent with the instance product") {
 		return true
 	}
 	return false

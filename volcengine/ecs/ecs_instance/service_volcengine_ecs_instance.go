@@ -1420,3 +1420,41 @@ func (s *VolcengineEcsService) ProjectTrn() *ve.ProjectTrn {
 		ProjectSchemaField:   "project_name",
 	}
 }
+
+func (s *VolcengineEcsService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	if resourceData.Get("instance_charge_type") == "PrePaid" {
+		//查询实例类型的配置
+		action := "DescribeInstanceTypes"
+		input := map[string]interface{}{
+			"InstanceTypeIds.1": resourceData.Get("instance_type"),
+		}
+		var (
+			output *map[string]interface{}
+			err    error
+			t      interface{}
+		)
+		output, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &input)
+		if err != nil {
+			return &info, err
+		}
+		t, err = ve.ObtainSdkValue("Result.InstanceTypes.0", *output)
+		if err != nil {
+			return &info, err
+		}
+		if tt, ok := t.(map[string]interface{}); ok {
+			if tt["Gpu"] != nil && tt["Rdma"] != nil {
+				info.Products = []string{"HPC_GPU", "ECS", "ECS_BareMetal", "GPU_Server"}
+			} else if tt["Gpu"] != nil && tt["Rdma"] == nil {
+				info.Products = []string{"GPU_Server", "ECS", "ECS_BareMetal", "HPC_GPU"}
+			} else {
+				info.Products = []string{"ECS", "ECS_BareMetal", "GPU_Server", "HPC_GPU"}
+			}
+			info.NeedUnsubscribe = true
+		}
+
+	}
+	return &info, nil
+}

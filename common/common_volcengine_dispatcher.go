@@ -211,7 +211,26 @@ func (d *Dispatcher) Delete(resourceService ResourceService, resourceDate *schem
 			}
 		}
 	}
-	callbacks := resourceService.RemoveResource(resourceDate, resource)
+	var (
+		callbacks       []Callback
+		unsubscribeInfo *UnsubscribeInfo
+	)
+
+	// 自动退订逻辑
+	if unsubscribeEnabled, ok := resourceService.(UnsubscribeEnabled); ok {
+		unsubscribeInfo, err = unsubscribeEnabled.UnsubscribeInfo(resourceDate, resource)
+		if err != nil {
+			return err
+		}
+	}
+
+	if unsubscribeInfo != nil && unsubscribeInfo.NeedUnsubscribe {
+		unsubscribeCallback := NewUnsubscribeService(resourceService.GetClient()).UnsubscribeInstance(unsubscribeInfo)
+		callbacks = append(callbacks, unsubscribeCallback...)
+	} else {
+		callbacks = resourceService.RemoveResource(resourceDate, resource)
+	}
+
 	var calls []SdkCall
 	for _, callback := range callbacks {
 		if callback.Err != nil {
