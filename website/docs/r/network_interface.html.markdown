@@ -11,13 +11,15 @@ Provides a resource to manage network interface
 ## Example Usage
 ```hcl
 resource "volcengine_network_interface" "foo" {
-  subnet_id              = "subnet-im67x70vxla88gbssz1hy1z2"
-  security_group_ids     = ["sg-im67wp9lx3i88gbssz3d22b2"]
-  primary_ip_address     = "192.168.0.253"
+  subnet_id              = "subnet-2fe79j7c8o5c059gp68ksxr93"
+  security_group_ids     = ["sg-2fepz3c793g1s59gp67y21r34"]
+  primary_ip_address     = "192.168.5.253"
   network_interface_name = "tf-test-up"
   description            = "tf-test-up"
   port_security_enabled  = false
   project_name           = "default"
+  private_ip_address     = ["192.168.5.2"]
+  //secondary_private_ip_address_count = 0
 }
 ```
 ## Argument Reference
@@ -28,9 +30,9 @@ The following arguments are supported:
 * `network_interface_name` - (Optional) The name of the ENI.
 * `port_security_enabled` - (Optional) Set port security enable or disable.
 * `primary_ip_address` - (Optional, ForceNew) The primary IP address of the ENI.
-* `private_ip_address` - (Optional) The list of private ip address.
+* `private_ip_address` - (Optional) The list of private ip address. This field conflicts with `secondary_private_ip_address_count`.
 * `project_name` - (Optional) The ProjectName of the ENI.
-* `secondary_private_ip_address_count` - (Optional) The count of secondary private ip address.
+* `secondary_private_ip_address_count` - (Optional) The count of secondary private ip address. This field conflicts with `private_ip_address`.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:
