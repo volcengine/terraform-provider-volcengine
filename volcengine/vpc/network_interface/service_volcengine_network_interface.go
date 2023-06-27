@@ -3,6 +3,7 @@ package network_interface
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -46,7 +47,7 @@ func (s *VolcengineNetworkInterfaceService) ReadResources(m map[string]interface
 				return data, err
 			}
 		}
-
+		logger.Debug(logger.RespFormat, action, *resp)
 		results, err = ve.ObtainSdkValue("Result.NetworkInterfaceSets", *resp)
 		if err != nil {
 			return data, err
@@ -84,6 +85,22 @@ func (s *VolcengineNetworkInterfaceService) ReadResource(resourceData *schema.Re
 	if len(data) == 0 {
 		return data, fmt.Errorf("network_interface %s not exist ", id)
 	}
+	privateIpAddress := make([]string, 0)
+	if privateIpMap, ok := data["PrivateIpSets"].(map[string]interface{}); ok {
+		if privateIpSets, ok := privateIpMap["PrivateIpSet"].([]interface{}); ok {
+			for _, p := range privateIpSets {
+				if pMap, ok := p.(map[string]interface{}); ok {
+					isPrimary := pMap["Primary"].(bool)
+					ip := pMap["PrivateIpAddress"].(string)
+					if !isPrimary {
+						privateIpAddress = append(privateIpAddress, ip)
+					}
+				}
+			}
+		}
+	}
+	data["PrivateIpAddress"] = privateIpAddress
+	data["SecondaryPrivateIpAddressCount"] = len(privateIpAddress)
 	return data, err
 }
 
@@ -186,10 +203,140 @@ func (s *VolcengineNetworkInterfaceService) ModifyResource(resourceData *schema.
 					TargetField: "SecurityGroupIds",
 					ConvertType: ve.ConvertWithN,
 				},
+				"private_ip_address": {
+					Ignore: true,
+				},
+				"secondary_private_ip_address_count": {
+					Ignore: true,
+				},
 			},
 		},
 	}
 	callbacks = append(callbacks, callback)
+
+	// 检查private_ip_address改变
+	if resourceData.HasChange("private_ip_address") {
+		add, remove, _, _ := ve.GetSetDifference("private_ip_address", resourceData, schema.HashString, false)
+		if remove.Len() > 0 {
+			callback = ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "UnassignPrivateIpAddresses",
+					ConvertMode: ve.RequestConvertInConvert,
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+						for index, r := range remove.List() {
+							(*call.SdkParam)["PrivateIpAddress."+strconv.Itoa(index+1)] = r
+						}
+						return true, nil
+					},
+					Convert: map[string]ve.RequestConvert{
+						"private_ip_address": {
+							Ignore: true,
+						},
+						"secondary_private_ip_address_count": {
+							Ignore: true,
+						},
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					},
+				},
+			}
+			callbacks = append(callbacks, callback)
+		}
+		if add.Len() > 0 {
+			callback = ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "AssignPrivateIpAddresses",
+					ConvertMode: ve.RequestConvertInConvert,
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+						for index, r := range add.List() {
+							(*call.SdkParam)["PrivateIpAddress."+strconv.Itoa(index+1)] = r
+						}
+						return true, nil
+					},
+					Convert: map[string]ve.RequestConvert{
+						"private_ip_address": {
+							Ignore: true,
+						},
+						"secondary_private_ip_address_count": {
+							Ignore: true,
+						},
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					},
+				},
+			}
+			callbacks = append(callbacks, callback)
+		}
+	}
+	// 检查secondary_private_ip_address_count改变
+	if resourceData.HasChange("secondary_private_ip_address_count") {
+		privateIpAddress := resourceData.Get("private_ip_address").(*schema.Set).List()
+		oldCount, newCount := resourceData.GetChange("secondary_private_ip_address_count")
+		if oldCount != nil && newCount != nil && newCount != len(privateIpAddress) {
+			diff := newCount.(int) - oldCount.(int)
+			if diff > 0 {
+				callback = ve.Callback{
+					Call: ve.SdkCall{
+						Action:      "AssignPrivateIpAddresses",
+						ConvertMode: ve.RequestConvertInConvert,
+						BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+							(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+							(*call.SdkParam)["SecondaryPrivateIpAddressCount"] = diff
+							return true, nil
+						},
+						Convert: map[string]ve.RequestConvert{
+							"private_ip_address": {
+								Ignore: true,
+							},
+							"secondary_private_ip_address_count": {
+								Ignore: true,
+							},
+						},
+						ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+							logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+							return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						},
+					},
+				}
+				callbacks = append(callbacks, callback)
+			} else {
+				diff *= -1
+				removeIpAddress := privateIpAddress[:diff]
+				callback = ve.Callback{
+					Call: ve.SdkCall{
+						Action:      "UnassignPrivateIpAddresses",
+						ConvertMode: ve.RequestConvertInConvert,
+						BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+							(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+							for index, r := range removeIpAddress {
+								(*call.SdkParam)["PrivateIpAddress."+strconv.Itoa(index+1)] = r
+							}
+							return true, nil
+						},
+						Convert: map[string]ve.RequestConvert{
+							"private_ip_address": {
+								Ignore: true,
+							},
+							"secondary_private_ip_address_count": {
+								Ignore: true,
+							},
+						},
+						ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+							logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+							return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						},
+					},
+				}
+				callbacks = append(callbacks, callback)
+			}
+		}
+	}
 
 	// 更新Tags
 	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "eni", resourceData, getUniversalInfo)
