@@ -207,6 +207,9 @@ func genIndex(pwd string) (prods []Product) {
 						p2 := p1 + "/" + f1.Name()
 						fs2, _ := ioutil.ReadDir(p2)
 						for _, f2 := range fs2 {
+							if strings.Contains(f2.Name(), "_test") {
+								continue
+							}
 							if strings.HasPrefix(f2.Name(), "data_source_") {
 								product.DataSource = strings.Replace(strings.Replace(f2.Name(), "data_source_"+cloudMark+"_", "", -1), ".go", "", -1)
 								if provider.DataSourcesMap[cloudMark+"_"+product.DataSource] == nil {
