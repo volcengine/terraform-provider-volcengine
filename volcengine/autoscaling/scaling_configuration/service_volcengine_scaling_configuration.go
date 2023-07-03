@@ -94,7 +94,17 @@ func (s *VolcengineScalingConfigurationService) RefreshResourceState(resourceDat
 
 func (VolcengineScalingConfigurationService) WithResourceResponseHandlers(scalingConfiguration map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return scalingConfiguration, nil, nil
+		return scalingConfiguration, map[string]ve.ResponseConvert{
+			"Eip.Bandwidth": {
+				TargetField: "eip_bandwidth",
+			},
+			"Eip.ISP": {
+				TargetField: "eip_isp",
+			},
+			"Eip.BillingType": {
+				TargetField: "eip_billing_type",
+			},
+		}, nil
 	}
 
 	return []ve.ResourceResponseHandler{handler}
