@@ -509,6 +509,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						"hpc_cluster_ids": {
 							ConvertType: ve.ConvertJsonArray,
 						},
+						"image_id": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 				"kubernetes_config": {
