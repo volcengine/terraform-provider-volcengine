@@ -112,7 +112,7 @@ The `node_config` object supports the following:
 * `data_volumes` - (Optional, ForceNew) The DataVolumes of NodeConfig.
 * `ecs_tags` - (Optional) Tags for Ecs.
 * `hpc_cluster_ids` - (Optional) The IDs of HpcCluster, only one ID is supported currently.
-* `image_id` - (Optional, ForceNew) The ImageId of NodeConfig.
+* `image_id` - (Optional) The ImageId of NodeConfig.
 * `initialize_script` - (Optional) The initializeScript of NodeConfig.
 * `instance_charge_type` - (Optional, ForceNew) The InstanceChargeType of PrePaid instance of NodeConfig. Valid values: PostPaid, PrePaid. Default value: PostPaid.
 * `name_prefix` - (Optional) The NamePrefix of NodeConfig.
