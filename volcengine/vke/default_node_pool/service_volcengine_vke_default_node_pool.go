@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
 )
@@ -125,7 +126,12 @@ func (s *VolcengineDefaultNodePoolService) RefreshResourceState(resourceData *sc
 				instanceMap[instancesId.(string)] = true
 			}
 
-			failStates = append(failStates, "Failed")
+			failStates = []string{
+				"Failed+InitializeFailed",
+				"Failed+Unknown",
+				"Failed+ResourceCleanupFailed",
+			}
+
 			nodes, err = s.nodeService.ReadResources(map[string]interface{}{
 				"Filter": map[string]interface{}{
 					"NodePoolIds": []string{id},
@@ -135,10 +141,30 @@ func (s *VolcengineDefaultNodePoolService) RefreshResourceState(resourceData *sc
 				return nil, "", err
 			}
 			for _, n := range nodes {
-				instancesId, _ := ve.ObtainSdkValue("InstanceId", n)
-				sts, _ := ve.ObtainSdkValue("Status.Phase", n)
+				var (
+					instancesId interface{}
+					sts         interface{}
+					conditions  interface{}
+					ss          []string
+				)
+				instancesId, err = ve.ObtainSdkValue("InstanceId", n)
+				if err != nil {
+					return nil, "", err
+				}
+				sts, err = ve.ObtainSdkValue("Status.Phase", n)
+				if err != nil {
+					return nil, "", err
+				}
+				conditions, _ = ve.ObtainSdkValue("Status.Conditions", n)
+				if err != nil {
+					return nil, "", err
+				}
+				ss, err = vke.BinaryJudgment(sts.(string), conditions.([]interface{}), []string{"Failed"})
+				if err != nil {
+					return nil, "", err
+				}
 				if _, ok := instanceMap[instancesId.(string)]; ok {
-					statuses = append(statuses, sts.(string))
+					statuses = append(statuses, ss...)
 				}
 			}
 			for _, v := range failStates {
