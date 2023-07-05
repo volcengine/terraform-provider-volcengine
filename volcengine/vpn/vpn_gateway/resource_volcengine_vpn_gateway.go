@@ -73,15 +73,15 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				Description: "The BillingType of the VPN gateway. Only support `PrePaid`.\n" +
 					"Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.",
 			},
-			"period_unit": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Default:          "Month",
-				DiffSuppressFunc: periodDiffSuppress,
-				ValidateFunc:     validation.StringInSlice([]string{"Month", "Year"}, false),
-				Description: "The PeriodUnit of the VPN gateway. Valid values are `Month`, `Year`. When importing resources, this attribute will not be imported. " +
-					"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
-			},
+			//"period_unit": {
+			//	Type:         schema.TypeString,
+			//	Optional:     true,
+			//	ForceNew:     true,
+			//	Default:      "Month",
+			//	ValidateFunc: validation.StringInSlice([]string{"Month"}, false),
+			//	DiffSuppressFunc: periodDiffSuppress,
+			//	Description:  "The PeriodUnit of the VPN gateway.",
+			//},
 			"period": {
 				Type:             schema.TypeInt,
 				Optional:         true,
@@ -90,8 +90,8 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				ValidateFunc: validation.Any(
 					validation.IntBetween(1, 9),
 					validation.IntInSlice([]int{12, 24, 36})),
-				Description: "The Period of the VPN gateway. Default value is 12. This parameter is only useful when creating vpn gateway. Default period unit is Month. " +
-					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+				Description: "The Period of the VPN gateway. Default value is 12. This parameter is only useful when creating vpn gateway. Default period unit is Month.\n" +
+					"Value range: 1~9, 12, 24, 36. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"renew_type": {
 				Type:        schema.TypeString,

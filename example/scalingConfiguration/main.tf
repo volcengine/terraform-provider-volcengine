@@ -7,7 +7,7 @@ resource "volcengine_scaling_configuration" "foo" {
   instance_description = ""
   host_name = ""
   password = ""
-  key_pair_name = "renhuaxi"
+  key_pair_name = "tf-keypair"
   security_enhancement_strategy = "InActive"
   volumes {
     volume_type = "ESSD_PL0"
@@ -25,12 +25,12 @@ resource "volcengine_scaling_configuration" "foo" {
   eip_billing_type = "PostPaidByBandwidth"
   user_data = "IyEvYmluL2Jhc2gKZWNobyAidGVzdCI="
   tags {
-    key = "xx"
-    value = "xx"
+    key = "tf-key1"
+    value = "tf-value1"
   }
   tags {
-    key = "da"
-    value = "da"
+    key = "tf-key2"
+    value = "tf-value2"
   }
   project_name = "default"
   hpc_cluster_id = ""

@@ -9,7 +9,7 @@ resource "volcengine_scaling_group" "foo" {
   default_cooldown = 10
   project_name = "default"
   tags {
-    key = "xx"
-    value = "xxaaa"
+    key = "tf-key1"
+    value = "tf-value1"
   }
 }

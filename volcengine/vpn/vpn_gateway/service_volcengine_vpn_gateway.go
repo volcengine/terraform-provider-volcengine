@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -176,13 +177,13 @@ func (s *VolcengineVpnGatewayService) RefreshResourceState(resourceData *schema.
 
 func (VolcengineVpnGatewayService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		//if v["BillingType"].(float64) == 1 {
-		//	ct, _ := time.Parse("2006-01-02T15:04:05", v["CreationTime"].(string)[0:strings.Index(v["CreationTime"].(string), "+")])
-		//	et, _ := time.Parse("2006-01-02T15:04:05", v["ExpiredTime"].(string)[0:strings.Index(v["ExpiredTime"].(string), "+")])
-		//	y := et.Year() - ct.Year()
-		//	m := et.Month() - ct.Month()
-		//	v["Period"] = y*12 + int(m)
-		//}
+		if v["BillingType"].(float64) == 1 {
+			ct, _ := time.Parse("2006-01-02T15:04:05", v["CreationTime"].(string)[0:strings.Index(v["CreationTime"].(string), "+")])
+			et, _ := time.Parse("2006-01-02T15:04:05", v["ExpiredTime"].(string)[0:strings.Index(v["ExpiredTime"].(string), "+")])
+			y := et.Year() - ct.Year()
+			m := et.Month() - ct.Month()
+			v["Period"] = y*12 + int(m)
+		}
 		return v, map[string]ve.ResponseConvert{
 			"BillingType": {
 				TargetField: "billing_type",
@@ -239,6 +240,13 @@ func (s *VolcengineVpnGatewayService) CreateResource(resourceData *schema.Resour
 				"project_name": {
 					ConvertType: ve.ConvertDefault,
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) < 1 {
+					return false, nil
+				}
+				(*call.SdkParam)["PeriodUnit"] = "Month"
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -297,46 +305,27 @@ func (s *VolcengineVpnGatewayService) ModifyResource(resourceData *schema.Resour
 	callbacks = append(callbacks, modifyCallback)
 
 	// 续费时长
-	if resourceData.Get("renew_type").(string) == "ManualRenew" &&
-		(resourceData.HasChange("period") || resourceData.HasChange("period_unit")) {
+	if resourceData.Get("renew_type").(string) == "ManualRenew" && resourceData.HasChange("period") {
 		renewVpnGateway := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "RenewVpnGateway",
 				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"period": {
+						ConvertType: ve.ConvertDefault,
+						Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+							o, n := data.GetChange("period")
+							return n.(int) - o.(int)
+						},
+					},
+				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					(*call.SdkParam)["VpnGatewayId"] = d.Id()
-					(*call.SdkParam)["PeriodUnit"] = "Month"
-					// 计算差值
-					month := 0
-					o, n := d.GetChange("period")
-					oldUnit, newUnit := d.GetChange("period_unit")
-					// 默认为Month，不填的统一设置为Month进行计算
-					if len(oldUnit.(string)) == 0 {
-						oldUnit = "Month"
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["PeriodUnit"] = "Month"
+						(*call.SdkParam)["VpnGatewayId"] = d.Id()
+						return true, nil
 					}
-					if len(newUnit.(string)) == 0 {
-						newUnit = "Month"
-					}
-					if oldUnit.(string) == "Month" && newUnit.(string) == "Year" {
-						// 月改年
-						month = n.(int)*12 - o.(int)
-					} else if oldUnit.(string) == "Year" && newUnit.(string) == "Month" {
-						// 年改月
-						month = n.(int) - o.(int)*12
-					} else if oldUnit == "Year" && newUnit == "Year" {
-						// 单位没改则period必然发生了改变，直接计算差值
-						// 需要区分单位是年还是月
-						month = n.(int)*12 - o.(int)*12
-					} else {
-						// 不填改月 或者 一直是月没改变
-						month = n.(int) - o.(int)
-					}
-					// 如果差值小于等于0则直接报错
-					if month <= 0 {
-						return false, fmt.Errorf("The difference modified by Period must be greater than 0. ")
-					}
-					(*call.SdkParam)["Period"] = month
-					return true, nil
+					return false, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
