@@ -44,10 +44,16 @@ func ResourceVolcengineEipAssociate() *schema.Resource {
 				Description: "The instance id which be associated to the EIP.",
 			},
 			"instance_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The type of the associated instance,the value is `NAT` or `NetworkInterface` or `ClbInstance` or `EcsInstance` or `HaVip`.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if old == "Nat" && new == "NAT" {
+						return true
+					}
+					return false
+				},
+				Description: "The type of the associated instance,the value is `Nat` or `NetworkInterface` or `ClbInstance` or `EcsInstance` or `HaVip`.",
 			},
 			"private_ip_address": {
 				Type:        schema.TypeString,

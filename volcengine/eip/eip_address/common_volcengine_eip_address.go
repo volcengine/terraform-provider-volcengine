@@ -36,6 +36,17 @@ var billingTypeResponseConvert = func(i interface{}) interface{} {
 	return ty
 }
 
+//func periodUnitRequestConvert(value interface{}) interface{} {
+//	ty := 0
+//	switch value.(string) {
+//	case "Month":
+//		ty = 1
+//	case "Year":
+//		ty = 2
+//	}
+//	return ty
+//}
+
 func RemoveSystemTags(data []interface{}) ([]interface{}, error) {
 	var (
 		ok      bool

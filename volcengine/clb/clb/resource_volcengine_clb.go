@@ -91,8 +91,11 @@ func ResourceVolcengineClb() *schema.Resource {
 				Description: "The reason of the console modification protection.",
 			},
 			"load_balancer_spec": {
-				Type:        schema.TypeString,
-				Required:    true,
+				Type:     schema.TypeString,
+				Required: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"small_1", "small_2", "medium_1", "medium_2", "large_1", "large_2",
+				}, false),
 				Description: "The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`.",
 			},
 			"load_balancer_billing_type": {
@@ -100,8 +103,26 @@ func ResourceVolcengineClb() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ForceNew:     true,
-				Description:  "The billing type of the CLB, the value can be `PostPaid`.",
-				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
+				Description:  "The billing type of the CLB, the value can be `PostPaid` or `PrePaid`.",
+				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
+			},
+			"period": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  12,
+				ValidateFunc: validation.Any(
+					validation.IntBetween(1, 9),
+					validation.IntInSlice([]int{12, 24, 36})),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return !(d.Get("load_balancer_billing_type").(string) == "PrePaid")
+				},
+				Description: "The period of the NatGateway, the valid value range in 1~9 or 12 or 24 or 36. Default value is 12. The period unit defaults to `Month`." +
+					"This field is only effective when creating a PrePaid NatGateway. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
+			"renew_type": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The renew type of the CLB. When the value of the load_balancer_billing_type is `PrePaid`, the query returns this field.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
