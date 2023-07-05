@@ -178,6 +178,10 @@ func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.Reso
 					TargetField: "MultiAZPolicy",
 					ConvertType: ve.ConvertDefault,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -196,40 +200,7 @@ func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.Reso
 		},
 	}
 	callbacks = append(callbacks, callback)
-	// serverGroup
-	if resourceData.Get("server_group_attributes") != nil &&
-		len(resourceData.Get("server_group_attributes").(*schema.Set).List()) > 0 {
-		attachServerGroupCallback := ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "AttachServerGroup",
-				ConvertMode: ve.RequestConvertAll,
-				Convert: map[string]ve.RequestConvert{
-					"server_group_attributes": {
-						ConvertType: ve.ConvertListN,
-					},
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-				CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
-					return resource.Retry(15*time.Minute, func() *resource.RetryError {
-						_, callErr := s.ReadResource(d, d.Get("scaling_group_id").(string))
-						if callErr != nil {
-							return resource.NonRetryableError(fmt.Errorf("error reading ScalingGroup: %q, %w", d.Id(), callErr))
-						}
-						_, callErr = call.ExecuteCall(d, client, call)
-						if callErr == nil {
-							return nil
-						}
-						return resource.RetryableError(callErr)
-					})
-				},
-			},
-		}
-		callbacks = append(callbacks, attachServerGroupCallback)
-	}
-	return []ve.Callback{callback}
+	return callbacks
 }
 
 func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -274,6 +245,12 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 				},
 				"multi_az_policy": {
 					TargetField: "MultiAZPolicy",
+				},
+				"launch_template_id": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"launch_template_version": {
+					ConvertType: ve.ConvertDefault,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -364,7 +341,9 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 		},
 	}
 	callbacks = append(callbacks, removeAttrCallback, attachAttrCallback)
-
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "scalinggroup", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
 	return callbacks
 }
 
@@ -444,5 +423,14 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2020-01-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
+	}
+}
+
+func (s *VolcengineScalingGroupService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "auto_scaling",
+		ResourceType:         "scalinggroup",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
 	}
 }

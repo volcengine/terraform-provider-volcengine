@@ -12,6 +12,7 @@ import (
 
 Import
 Scaling instance attachment can be imported using the scaling_group_id and instance_id, e.g.
+You can choose to remove or detach the instance according to the `delete_type` field.
 ```
 $ terraform import volcengine_scaling_instance_attachment.default scg-mizl7m1kqccg5smt1bdpijuj:i-l8u2ai4j0fauo6mrpgk8
 ```

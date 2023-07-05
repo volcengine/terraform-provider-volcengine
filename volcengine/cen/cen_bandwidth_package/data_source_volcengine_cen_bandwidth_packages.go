@@ -156,6 +156,11 @@ func DataSourceVolcengineCenBandwidthPackages() *schema.Resource {
 							Description: "The deleted time of the cen bandwidth package.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the cen bandwidth package.",
+						},
 					},
 				},
 			},

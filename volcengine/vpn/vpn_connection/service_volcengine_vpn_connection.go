@@ -387,6 +387,9 @@ func (s *VolcengineVpnConnectionService) ModifyResource(resourceData *schema.Res
 					TargetField: "IpsecConfig.Lifetime",
 					ConvertType: ve.ConvertDefault,
 				},
+				"log_enabled": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) < 1 {

@@ -55,7 +55,7 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				Optional:     true,
 				Computed:     true,
 				ValidateFunc: validation.IntBetween(2, 10000),
-				Description:  "The bandwidth of the cen bandwidth package.",
+				Description:  "The bandwidth of the cen bandwidth package. Value: 2~10000.",
 			},
 			"cen_bandwidth_package_name": {
 				Type:        schema.TypeString,
@@ -75,7 +75,8 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				ForceNew:     true,
 				Default:      "PrePaid",
 				ValidateFunc: validation.StringInSlice([]string{"PrePaid"}, false),
-				Description:  "The billing type of the cen bandwidth package. Terraform will only remove the PrePaid cen bandwidth package from the state file, not actually remove.",
+				Description: "The billing type of the cen bandwidth package. Only support `PrePaid` and default value is `PrePaid`.\n" +
+					"Terraform will only remove the PrePaid cen bandwidth package from the state file, not actually remove.",
 			},
 			"period_unit": {
 				Type:             schema.TypeString,
@@ -83,16 +84,21 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				Default:          "Month",
 				ValidateFunc:     validation.StringInSlice([]string{"Month", "Year"}, false),
 				DiffSuppressFunc: periodDiffSuppress,
-				Description:      "The period unit of the cen bandwidth package.",
+				Description:      "The period unit of the cen bandwidth package. Value : `Month`, `Year`. Default value is `Month`.",
 			},
 			"period": {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Default:          1,
 				DiffSuppressFunc: periodDiffSuppress,
-				Description:      "The period of the cen bandwidth package.",
+				Description:      "The period of the cen bandwidth package. Default value is 1.",
 			},
 			"tags": ve.TagsSchema(),
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the cen bandwidth package.",
+			},
 		},
 	}
 	s := DataSourceVolcengineCenBandwidthPackages().Schema["bandwidth_packages"].Elem.(*schema.Resource).Schema

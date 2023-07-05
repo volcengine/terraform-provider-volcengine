@@ -1,6 +1,7 @@
 package scaling_configuration
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -138,6 +139,22 @@ func (s *VolcengineScalingConfigurationService) CreateResource(resourceData *sch
 					TargetField: "Eip.BillingType",
 				},
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if tags, ok := d.GetOk("tags"); ok {
+					tagMap := map[string]interface{}{}
+					for _, v := range tags.(*schema.Set).List() {
+						if vMap, ok := v.(map[string]interface{}); ok {
+							tagMap[vMap["key"].(string)] = vMap["value"]
+						}
+					}
+					if tagsStr, err := json.Marshal(tagMap); err != nil {
+						return false, err
+					} else {
+						(*call.SdkParam)["Tags"] = string(tagsStr)
+					}
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -213,12 +230,18 @@ func (s *VolcengineScalingConfigurationService) ModifyResource(resourceData *sch
 				"eip_billing_type": {
 					TargetField: "Eip.BillingType",
 				},
+				"project_name": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"spot_strategy": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"hpc_cluster_id": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			RequestIdField: "ScalingConfigurationId",
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) < 2 {
-					return false, nil
-				}
 				if d.HasChange("eip_bandwidth") || d.HasChange("eip_isp") || d.HasChange("eip_billing_type") {
 					(*call.SdkParam)["Eip.Bandwidth"] = d.Get("eip_bandwidth")
 					(*call.SdkParam)["Eip.ISP"] = d.Get("eip_isp")
@@ -230,6 +253,24 @@ func (s *VolcengineScalingConfigurationService) ModifyResource(resourceData *sch
 						(*call.SdkParam)[fmt.Sprintf("Volumes.%d.DeleteWithInstance", i+1)] = volume["delete_with_instance"]
 						(*call.SdkParam)[fmt.Sprintf("Volumes.%d.Size", i+1)] = volume["size"]
 						(*call.SdkParam)[fmt.Sprintf("Volumes.%d.VolumeType", i+1)] = volume["volume_type"]
+					}
+				}
+				if d.HasChange("tags") {
+					if tags, ok := d.GetOk("tags"); ok {
+						logger.DebugInfo(logger.ReqFormat, "测试", tags)
+						tagMap := map[string]interface{}{}
+						for _, v := range tags.(*schema.Set).List() {
+							logger.DebugInfo(logger.ReqFormat, "测试", v)
+							if vMap, ok := v.(map[string]interface{}); ok {
+								tagMap[vMap["key"].(string)] = vMap["value"]
+							}
+						}
+						logger.DebugInfo(logger.ReqFormat, "测试", tagMap)
+						if tagsStr, err := json.Marshal(tagMap); err != nil {
+							return false, err
+						} else {
+							(*call.SdkParam)["Tags"] = string(tagsStr)
+						}
 					}
 				}
 				return true, nil

@@ -13,12 +13,12 @@ resource "volcengine_vpn_connection" "foo" {
   ike_config_enc_alg = "aes"
   ike_config_auth_alg = "md5"
   ike_config_dh_group = "group2"
-  ike_config_lifetime = 100
+  ike_config_lifetime = 9000
   ike_config_local_id = "tf_test"
   ike_config_remote_id = "tf_test"
   ipsec_config_enc_alg = "aes"
   ipsec_config_auth_alg = "sha256"
   ipsec_config_dh_group = "group2"
-  ipsec_config_lifetime = 100
+  ipsec_config_lifetime = 9000
   project_name = "default"
 }
