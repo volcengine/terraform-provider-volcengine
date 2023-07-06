@@ -2,6 +2,9 @@ package volcengine
 
 import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_access"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_file_system"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
@@ -387,6 +390,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_projects":            tlsProject.DataSourceVolcengineTlsProjects(),
 			"volcengine_tls_topics":              tlsTopic.DataSourceVolcengineTlsTopics(),
 			"volcengine_tls_indexes":             tlsIndex.DataSourceVolcengineTlsIndexes(),
+
+			// ================ Cloudfs ================
+			"volcengine_cloudfs_quotas":       cloudfs_quota.DataSourceVolcengineCloudfsQuotas(),
+			"volcengine_cloudfs_file_systems": cloudfs_file_system.DataSourceVolcengineCloudfsFileSystems(),
+			"volcengine_cloudfs_accesses":     cloudfs_access.DataSourceVolcengineCloudfsAccesses(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -563,6 +571,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_project":            tlsProject.ResourceVolcengineTlsProject(),
 			"volcengine_tls_topic":              tlsTopic.ResourceVolcengineTlsTopic(),
 			"volcengine_tls_index":              tlsIndex.ResourceVolcengineTlsIndex(),
+
+			// ================ Cloudfs ================
+			"volcengine_cloudfs_file_system": cloudfs_file_system.ResourceVolcengineCloudfsFileSystem(),
+			"volcengine_cloudfs_access":      cloudfs_access.ResourceVolcengineCloudfsAccess(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
