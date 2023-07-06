@@ -5,6 +5,5 @@ resource "volcengine_vpn_gateway" "foo" {
   vpn_gateway_name = "tf-test"
   description = "tf-test"
   period = 2
-  period_unit = "Year"
   project_name = "default"
 }

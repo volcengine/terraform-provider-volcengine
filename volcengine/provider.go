@@ -1,6 +1,7 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"strings"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
@@ -279,8 +280,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cen_attach_instances":        cen_attach_instance.DataSourceVolcengineCenAttachInstances(),
 			"volcengine_cen_bandwidth_packages":      cen_bandwidth_package.DataSourceVolcengineCenBandwidthPackages(),
 			"volcengine_cen_inter_region_bandwidths": cen_inter_region_bandwidth.DataSourceVolcengineCenInterRegionBandwidths(),
-			//"volcengine_cen_service_route_entries": 	cen_service_route_entry.DataSourceVolcengineCenServiceRouteEntries(),
-			"volcengine_cen_route_entries": cen_route_entry.DataSourceVolcengineCenRouteEntries(),
+			"volcengine_cen_service_route_entries":   cen_service_route_entry.DataSourceVolcengineCenServiceRouteEntries(),
+			"volcengine_cen_route_entries":           cen_route_entry.DataSourceVolcengineCenRouteEntries(),
 
 			// ================ VPN ================
 			"volcengine_vpn_gateways":       vpn_gateway.DataSourceVolcengineVpnGateways(),
@@ -450,8 +451,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cen_bandwidth_package":           cen_bandwidth_package.ResourceVolcengineCenBandwidthPackage(),
 			"volcengine_cen_bandwidth_package_associate": cen_bandwidth_package_associate.ResourceVolcengineCenBandwidthPackageAssociate(),
 			"volcengine_cen_inter_region_bandwidth":      cen_inter_region_bandwidth.ResourceVolcengineCenInterRegionBandwidth(),
-			//"volcengine_cen_service_route_entry": 			cen_service_route_entry.ResourceVolcengineCenServiceRouteEntry(),
-			//"volcengine_cen_route_entry": 					cen_route_entry.ResourceVolcengineCenRouteEntry(),
+			"volcengine_cen_service_route_entry":         cen_service_route_entry.ResourceVolcengineCenServiceRouteEntry(),
+			"volcengine_cen_route_entry":                 cen_route_entry.ResourceVolcengineCenRouteEntry(),
 
 			// ================ VPN ================
 			"volcengine_vpn_gateway":       vpn_gateway.ResourceVolcengineVpnGateway(),

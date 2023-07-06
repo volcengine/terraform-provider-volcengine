@@ -257,15 +257,12 @@ func (s *VolcengineScalingConfigurationService) ModifyResource(resourceData *sch
 				}
 				if d.HasChange("tags") {
 					if tags, ok := d.GetOk("tags"); ok {
-						logger.DebugInfo(logger.ReqFormat, "测试", tags)
 						tagMap := map[string]interface{}{}
 						for _, v := range tags.(*schema.Set).List() {
-							logger.DebugInfo(logger.ReqFormat, "测试", v)
 							if vMap, ok := v.(map[string]interface{}); ok {
 								tagMap[vMap["key"].(string)] = vMap["value"]
 							}
 						}
-						logger.DebugInfo(logger.ReqFormat, "测试", tagMap)
 						if tagsStr, err := json.Marshal(tagMap); err != nil {
 							return false, err
 						} else {
