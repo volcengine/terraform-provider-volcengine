@@ -190,6 +190,18 @@ func ResourceVolcengineListener() *schema.Resource {
 							Description:      "The normal http status code of health check, the value can be `http_2xx` or `http_3xx` or `http_4xx` or `http_5xx`.",
 							DiffSuppressFunc: HealthCheckHTTPOnlyFieldDiffSuppress,
 						},
+						"udp_request": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "The UDP request of health check. This field must be specified simultaneously with field `udp_expect`.",
+							DiffSuppressFunc: HealthCheckUDPOnlyFieldDiffSuppress,
+						},
+						"udp_expect": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "The UDP expect of health check. This field must be specified simultaneously with field `udp_request`.",
+							DiffSuppressFunc: HealthCheckUDPOnlyFieldDiffSuppress,
+						},
 					},
 				},
 			},

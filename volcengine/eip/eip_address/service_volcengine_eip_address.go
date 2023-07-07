@@ -215,7 +215,7 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 				return s.Client.VpcClient.ModifyEipAddressAttributesCommon(call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"Available"},
+				Target:  []string{"Available", "Attached"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 			Convert: map[string]ve.RequestConvert{
@@ -271,7 +271,7 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 					return nil
 				},
 				Refresh: &ve.StateRefresh{
-					Target:  []string{"Available"},
+					Target:  []string{"Available", "Attached"},
 					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},

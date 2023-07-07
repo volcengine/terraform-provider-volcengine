@@ -87,10 +87,11 @@ func ResourceVolcengineEipAddress() *schema.Resource {
 					"This field is only effective when creating a PrePaid Eip or changing the billing_type from PostPaid to PrePaid.",
 			},
 			"bandwidth": {
-				Type:        schema.TypeInt,
-				Optional:    true,
-				Computed:    true,
-				Description: "The peek bandwidth of the EIP, the value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic.",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 500),
+				Description:  "The peek bandwidth of the EIP, the value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic.",
 			},
 			"isp": {
 				Type:         schema.TypeString,

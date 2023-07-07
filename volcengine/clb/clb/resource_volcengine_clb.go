@@ -102,9 +102,8 @@ func ResourceVolcengineClb() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ForceNew:     true,
-				Description:  "The billing type of the CLB, the value can be `PostPaid` or `PrePaid`.",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
+				Description:  "The billing type of the CLB, the value can be `PostPaid` or `PrePaid`.",
 			},
 			"period": {
 				Type:     schema.TypeInt,
@@ -123,6 +122,52 @@ func ResourceVolcengineClb() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The renew type of the CLB. When the value of the load_balancer_billing_type is `PrePaid`, the query returns this field.",
+			},
+			"eip_billing_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				MaxItems: 1,
+				Description: "The billing configuration of the EIP which automatically associated to CLB. This field is valid when the type of CLB is `public`." +
+					"When the type of the CLB is `private`, suggest using a combination of resource `volcengine_eip_address` and `volcengine_eip_associate` to achieve public network access function.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"isp": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"BGP"}, false),
+							Description:  "The ISP of the EIP which automatically associated to CLB, the value can be `BGP`.",
+						},
+						"eip_billing_type": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PostPaidByBandwidth", "PostPaidByTraffic"}, false),
+							Description: "The billing type of the EIP which automatically assigned to CLB. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic` or `PrePaid`." +
+								"When creating a `PrePaid` public CLB, this field must be specified as `PrePaid` simultaneously." +
+								"When the LoadBalancerBillingType changes from `PostPaid` to `PrePaid`, please manually modify the value of this field to `PrePaid` simultaneously.",
+						},
+						"bandwidth": {
+							Type:         schema.TypeInt,
+							Optional:     true,
+							Computed:     true,
+							ValidateFunc: validation.IntBetween(1, 500),
+							Description:  "The peek bandwidth of the EIP which automatically assigned to CLB. The value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic.",
+						},
+					},
+				},
+			},
+			"eip_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Eip ID of the Clb.",
+			},
+			"eip_address": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Eip address of the Clb.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,

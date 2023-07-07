@@ -69,18 +69,39 @@ func (s *VolcengineClbService) ReadResources(condition map[string]interface{}) (
 			return data, fmt.Errorf(" Clb is not map ")
 		}
 
-		action := "DescribeLoadBalancersBilling"
-		req := map[string]interface{}{
-			"LoadBalancerIds.1": clb["LoadBalancerId"],
+		eipAction := "DescribeLoadBalancerAttributes"
+		eipReq := map[string]interface{}{
+			"LoadBalancerId": clb["LoadBalancerId"],
 		}
-		logger.Debug(logger.ReqFormat, action, condition)
-		resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+		logger.Debug(logger.ReqFormat, eipAction, eipReq)
+		eipResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(eipAction), &eipReq)
 		if err != nil {
 			return data, err
 		}
-		logger.Debug(logger.RespFormat, action, *resp)
+		logger.Debug(logger.RespFormat, eipAction, *eipResp)
 
-		billingConfigs, err := ve.ObtainSdkValue("Result.LoadBalancerBillingConfigs", *resp)
+		eipConfig, err := ve.ObtainSdkValue("Result.Eip", *eipResp)
+		if err != nil {
+			return data, err
+		}
+		clb["EipBillingConfig"] = eipConfig
+
+		// `PostPaid` 实例不需查询续费相关信息
+		if billingType := clb["LoadBalancerBillingType"]; billingType == 2.0 {
+			continue
+		}
+		billingAction := "DescribeLoadBalancersBilling"
+		billingReq := map[string]interface{}{
+			"LoadBalancerIds.1": clb["LoadBalancerId"],
+		}
+		logger.Debug(logger.ReqFormat, billingAction, billingReq)
+		billingResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(billingAction), &billingReq)
+		if err != nil {
+			return data, err
+		}
+		logger.Debug(logger.RespFormat, billingAction, *billingResp)
+
+		billingConfigs, err := ve.ObtainSdkValue("Result.LoadBalancerBillingConfigs", *billingResp)
 		if err != nil {
 			return data, err
 		}
@@ -206,6 +227,30 @@ func (VolcengineClbService) WithResourceResponseHandlers(clb map[string]interfac
 					return i
 				},
 			},
+			"EipID": {
+				TargetField: "eip_id",
+			},
+			"ISP": {
+				TargetField: "isp",
+			},
+			"EipBillingType": {
+				TargetField: "eip_billing_type",
+				Convert: func(i interface{}) interface{} {
+					if i == nil {
+						return nil
+					}
+					billingType := i.(float64)
+					switch billingType {
+					case 1:
+						return "PrePaid"
+					case 2:
+						return "PostPaidByBandwidth"
+					case 3:
+						return "PostPaidByTraffic"
+					}
+					return i
+				},
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -234,6 +279,33 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 						return i
 					},
 				},
+				"eip_billing_config": {
+					TargetField: "EipBillingConfig",
+					ConvertType: ve.ConvertListUnique,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"isp": {
+							TargetField: "ISP",
+						},
+						"eip_billing_type": {
+							TargetField: "EipBillingType",
+							Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+								if i == nil {
+									return nil
+								}
+								billingType := i.(string)
+								switch billingType {
+								case "PrePaid":
+									return 1
+								case "PostPaidByBandwidth":
+									return 2
+								case "PostPaidByTraffic":
+									return 3
+								}
+								return i
+							},
+						},
+					},
+				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
@@ -244,6 +316,25 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 					(*call.SdkParam)["RegionId"] = *s.Client.ClbClient.Config.Region
 				} else if regionId.(string) != *s.Client.ClbClient.Config.Region {
 					return false, fmt.Errorf("region_id is not equal to provider region config(%s)", *s.Client.ClbClient.Config.Region)
+				}
+
+				// private 类型不传 eip_billing_config
+				if (*call.SdkParam)["Type"] == "private" {
+					delete(*call.SdkParam, "EipBillingConfig.ISP")
+					delete(*call.SdkParam, "EipBillingConfig.EipBillingType")
+					delete(*call.SdkParam, "EipBillingConfig.Bandwidth")
+				}
+				if eipBillingType, exist := (*call.SdkParam)["EipBillingConfig.EipBillingType"]; exist {
+					ty := 0
+					switch eipBillingType.(string) {
+					case "PrePaid":
+						ty = 1
+					case "PostPaidByBandwidth":
+						ty = 2
+					case "PostPaidByTraffic":
+						ty = 3
+					}
+					(*call.SdkParam)["EipBillingConfig.EipBillingType"] = ty
 				}
 
 				// PeriodUnit 默认传 Month
@@ -298,9 +389,11 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["LoadBalancerId"] = d.Id()
-				delete(*call.SdkParam, "Tags")
-				return true, nil
+				if len(*call.SdkParam) > 0 {
+					(*call.SdkParam)["LoadBalancerId"] = d.Id()
+					return true, nil
+				}
+				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -355,7 +448,7 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					//修改 clb 计费类型
-					return s.Client.ClbClient.ModifyLoadBalancerAttributesCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"Active"},
@@ -511,6 +604,27 @@ func (s *VolcengineClbService) DatasourceResources(*schema.ResourceData, *schema
 						return "AutoRenew"
 					case 3:
 						return "NoneRenew"
+					}
+					return i
+				},
+			},
+			"ISP": {
+				TargetField: "isp",
+			},
+			"EipBillingType": {
+				TargetField: "eip_billing_type",
+				Convert: func(i interface{}) interface{} {
+					if i == nil {
+						return nil
+					}
+					billingType := i.(float64)
+					switch billingType {
+					case 1:
+						return "PrePaid"
+					case 2:
+						return "PostPaidByBandwidth"
+					case 3:
+						return "PostPaidByTraffic"
 					}
 					return i
 				},
