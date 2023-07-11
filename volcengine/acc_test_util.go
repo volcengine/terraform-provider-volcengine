@@ -54,7 +54,12 @@ func AccTestCheckResourceExists(acc *AccTestResource) resource.TestCheckFunc {
 		val := it.FieldByName(acc.ClientField)
 		val.Set(reflect.ValueOf(testAccProvider.Meta()))
 
-		out, err := acc.Svc.ReadResource(&schema.ResourceData{}, acc.Svc.ReadResourceId(rs.Primary.ID))
+		resourceData, err := buildResourceData(rs)
+		if err != nil {
+			return err
+		}
+
+		out, err := acc.Svc.ReadResource(resourceData, acc.Svc.ReadResourceId(rs.Primary.ID))
 		if err != nil {
 			return err
 		}
@@ -64,6 +69,26 @@ func AccTestCheckResourceExists(acc *AccTestResource) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func buildResourceData(rs *terraform.ResourceState) (*schema.ResourceData, error) {
+	var resourceSchema map[string]*schema.Schema
+	if v, ok := testAccProvider.DataSourcesMap[rs.Type]; ok {
+		resourceSchema = v.Schema
+	}
+	if v, ok := testAccProvider.ResourcesMap[rs.Type]; ok {
+		resourceSchema = v.Schema
+	}
+	if resourceSchema == nil {
+		return nil, fmt.Errorf("cannot get schema from provider")
+	}
+
+	// build resource data
+	resourceData, err := schema.InternalMap(resourceSchema).Data(rs.Primary, nil)
+	if err != nil {
+		return nil, err
+	}
+	return resourceData, nil
 }
 
 func AccTestCheckResourceRemove(acc *AccTestResource) resource.TestCheckFunc {
@@ -81,7 +106,12 @@ func AccTestCheckResourceRemove(acc *AccTestResource) resource.TestCheckFunc {
 			val := it.FieldByName(acc.ClientField)
 			val.Set(reflect.ValueOf(testAccProvider.Meta()))
 
-			out, err := acc.Svc.ReadResource(&schema.ResourceData{}, acc.Svc.ReadResourceId(rs.Primary.ID))
+			resourceData, err := buildResourceData(rs)
+			if err != nil {
+				return resource.NonRetryableError(fmt.Errorf("resource data build error %s", err.Error()))
+			}
+
+			out, err := acc.Svc.ReadResource(resourceData, acc.Svc.ReadResourceId(rs.Primary.ID))
 			if err != nil {
 				if common.ResourceNotFoundError(err) {
 					return nil
