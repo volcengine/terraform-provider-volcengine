@@ -4,6 +4,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_access"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_file_system"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_ns_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
 	"strings"
 
@@ -395,6 +396,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_quotas":       cloudfs_quota.DataSourceVolcengineCloudfsQuotas(),
 			"volcengine_cloudfs_file_systems": cloudfs_file_system.DataSourceVolcengineCloudfsFileSystems(),
 			"volcengine_cloudfs_accesses":     cloudfs_access.DataSourceVolcengineCloudfsAccesses(),
+			"volcengine_cloudfs_ns_quotas":    cloudfs_ns_quota.DataSourceVolcengineCloudfsNsQuotas(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
