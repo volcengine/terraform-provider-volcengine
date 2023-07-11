@@ -129,28 +129,29 @@ func (s *VolcengineEcsInvocationService) ReadResource(resourceData *schema.Resou
 	}
 
 	// 处理 launch_time、recurrence_end_time 传参与查询结果不一致的问题
-	if mode := resourceData.Get("repeat_mode"); mode.(string) == "Rate" {
+	if mode := resourceData.Get("repeat_mode"); mode.(string) != "Once" {
 		layout := "2006-01-02T15:04:05Z"
 		launchTimeExpr, exist1 := resourceData.GetOkExists("launch_time")
 		endTimeExpr, exist2 := resourceData.GetOkExists("recurrence_end_time")
-		if !exist1 || !exist2 {
-			return data, fmt.Errorf(" launch_time or recurrence_end_time is not exist ")
+		if exist1 && launchTimeExpr.(string) != "" {
+			launchTime, err := ParseUTCTime(launchTimeExpr.(string))
+			if err != nil {
+				return data, err
+			}
+			lt := launchTime.Format(layout)
+			if lt == data["LaunchTime"].(string) {
+				data["LaunchTime"] = launchTimeExpr
+			}
 		}
-		launchTime, err := ParseUTCTime(launchTimeExpr.(string))
-		if err != nil {
-			return data, err
-		}
-		endTime, err := ParseUTCTime(endTimeExpr.(string))
-		if err != nil {
-			return data, err
-		}
-		lt := launchTime.Format(layout)
-		et := endTime.Format(layout)
-		if lt == data["LaunchTime"].(string) {
-			data["LaunchTime"] = launchTimeExpr
-		}
-		if et == data["RecurrenceEndTime"].(string) {
-			data["RecurrenceEndTime"] = endTimeExpr
+		if exist2 && endTimeExpr.(string) != "" {
+			endTime, err := ParseUTCTime(endTimeExpr.(string))
+			if err != nil {
+				return data, err
+			}
+			et := endTime.Format(layout)
+			if et == data["RecurrenceEndTime"].(string) {
+				data["RecurrenceEndTime"] = endTimeExpr
+			}
 		}
 	}
 

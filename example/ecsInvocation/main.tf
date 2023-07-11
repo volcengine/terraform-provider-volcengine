@@ -7,7 +7,6 @@ resource "volcengine_ecs_invocation" "foo" {
   timeout = 90
   working_dir = "/home"
   repeat_mode = "Rate"
-#  frequency = "2023-06-20T08:28:00Z"
   frequency = "5m"
   launch_time = "2023-06-20T09:48:00Z"
   recurrence_end_time = "2023-06-20T09:59:00Z"

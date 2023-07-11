@@ -98,30 +98,28 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("repeat_mode").(string) == "Rate" {
+						return false
+					}
+					return true
+				},
+				Description: "The frequency of the ecs invocation. This field is valid and required when the value of the repeat_mode field is `Rate`.",
+			},
+			"launch_time": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if d.Get("repeat_mode").(string) == "Once" {
 						return true
 					}
 					return false
 				},
-				Description: "The frequency of the ecs invocation. This field is valid when the value of the repeat_mode field is `Rate` or `Fixed`.",
-			},
-			"launch_time": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				ForceNew: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("repeat_mode").(string) == "Rate" {
-						return false
-					}
-					return true
-				},
-				Description: "The launch time of the ecs invocation. RFC3339 format. This field is valid when the value of the repeat_mode field is `Rate`.",
+				Description: "The launch time of the ecs invocation. RFC3339 format. This field is valid and required when the value of the repeat_mode field is `Rate` or `Fixed`.",
 			},
 			"recurrence_end_time": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				ForceNew: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if d.Get("repeat_mode").(string) == "Rate" {
@@ -129,7 +127,7 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 					}
 					return true
 				},
-				Description: "The recurrence end time of the ecs invocation. RFC3339 format. This field is valid when the value of the repeat_mode field is `Rate`.",
+				Description: "The recurrence end time of the ecs invocation. RFC3339 format. This field is valid and required when the value of the repeat_mode field is `Rate`.",
 			},
 
 			"invocation_status": {
