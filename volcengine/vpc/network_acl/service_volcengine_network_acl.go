@@ -3,13 +3,15 @@ package network_acl
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"strconv"
-	"time"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 )
 
 type VolcengineNetworkAclService struct {
@@ -89,20 +91,22 @@ func (s *VolcengineNetworkAclService) ReadResource(resourceData *schema.Resource
 
 	// 删除默认创建的拒绝规则
 	if ingressAclEntries, ok := data["IngressAclEntries"]; ok {
-		for index, entry := range ingressAclEntries.([]interface{}) {
-			if priority, ok := entry.(map[string]interface{})["Priority"]; ok && priority.(float64) > 100 {
-				ingressAclEntries = append(ingressAclEntries.([]interface{})[:index], ingressAclEntries.([]interface{})[index+1:]...)
-				data["IngressAclEntries"] = ingressAclEntries
+		var tempEntries []interface{}
+		for _, entry := range ingressAclEntries.([]interface{}) {
+			if priority, ok := entry.(map[string]interface{})["Priority"]; ok && priority.(float64) < 100 {
+				tempEntries = append(tempEntries, entry)
 			}
 		}
+		data["IngressAclEntries"] = tempEntries
 	}
 	if egressAclEntries, ok := data["EgressAclEntries"]; ok {
-		for index, entry := range egressAclEntries.([]interface{}) {
-			if priority, ok := entry.(map[string]interface{})["Priority"]; ok && priority.(float64) > 100 {
-				egressAclEntries = append(egressAclEntries.([]interface{})[:index], egressAclEntries.([]interface{})[index+1:]...)
-				data["EgressAclEntries"] = egressAclEntries
+		var tempEntries []interface{}
+		for _, entry := range egressAclEntries.([]interface{}) {
+			if priority, ok := entry.(map[string]interface{})["Priority"]; ok && priority.(float64) < 100 {
+				tempEntries = append(tempEntries, entry)
 			}
 		}
+		data["EgressAclEntries"] = tempEntries
 	}
 
 	return data, err
@@ -176,6 +180,16 @@ func (s *VolcengineNetworkAclService) CreateResource(resourceData *schema.Resour
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc.NewVpcService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("vpc_id").(string),
+				},
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
 			},
 		},
 	}
@@ -253,6 +267,16 @@ func (s *VolcengineNetworkAclService) ModifyResource(resourceData *schema.Resour
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc.NewVpcService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("vpc_id").(string),
+				},
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
 			},
 		},
 	}
@@ -364,6 +388,16 @@ func (s *VolcengineNetworkAclService) RemoveResource(resourceData *schema.Resour
 					}
 					return resource.RetryableError(callErr)
 				})
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc.NewVpcService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("vpc_id").(string),
+				},
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
 			},
 		},
 	}
