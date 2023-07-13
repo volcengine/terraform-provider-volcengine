@@ -222,9 +222,10 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			},
 
 			"system_volume_size": {
-				Type:        schema.TypeInt,
-				Required:    true,
-				Description: "The size of system volume.",
+				Type:     schema.TypeInt,
+				Required: true,
+				Description: "The size of system volume. " +
+					"The value range of the system volume size is ESSD_PL0: 20~2048, ESSD_FlexPL: 20~2048, PTSSD: 10~500.",
 			},
 
 			"system_volume_id": {
@@ -278,10 +279,11 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 							Description: "The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 						},
 						"size": {
-							Type:        schema.TypeInt,
-							Required:    true,
-							ForceNew:    true,
-							Description: "The size of volume.",
+							Type:     schema.TypeInt,
+							Required: true,
+							ForceNew: true,
+							Description: "The size of volume. " +
+								"The value range of the data volume size is ESSD_PL0: 10~32768, ESSD_FlexPL: 10~32768, PTSSD: 20~8192.",
 						},
 						"delete_with_instance": {
 							Type:        schema.TypeBool,
