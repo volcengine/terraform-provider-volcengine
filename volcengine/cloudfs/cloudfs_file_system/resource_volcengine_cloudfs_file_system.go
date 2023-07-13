@@ -98,7 +98,7 @@ func ResourceVolcengineCloudfsFileSystem() *schema.Resource {
 					"When importing ACC_MODE resources, this attribute will not be imported.",
 			},
 			"tos_account_id": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeInt,
 				Optional: true,
 				ForceNew: true,
 				Description: "When a data lake scenario instance chooses to associate a bucket under another account, you need to set the ID of the account. " +
@@ -119,7 +119,7 @@ func ResourceVolcengineCloudfsFileSystem() *schema.Resource {
 					"When importing resources, this attribute will not be imported.",
 			},
 			"read_only": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
 				Description: "Whether the Namespace created automatically when mounting the TOS Bucket is read-only. " +

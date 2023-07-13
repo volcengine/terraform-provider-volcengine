@@ -101,9 +101,7 @@ func (s *VolcengineCloudfsFileSystemService) ReadResource(resourceData *schema.R
 		if tosSk := resourceData.Get("tos_sk"); len(tosSk.(string)) > 0 {
 			data["TosSk"] = tosSk
 		}
-		if tosAccountId := resourceData.Get("tos_account_id"); len(tosAccountId.(string)) > 0 {
-			data["TosAccountId"] = tosAccountId
-		}
+		data["TosAccountId"] = resourceData.Get("tos_account_id")
 	}
 
 	// get cache access id
