@@ -7,4 +7,5 @@ resource "volcengine_cen_bandwidth_package" "foo" {
   billing_type = "PrePaid"
   period_unit = "Year"
   period = 1
+  project_name = "default"
 }

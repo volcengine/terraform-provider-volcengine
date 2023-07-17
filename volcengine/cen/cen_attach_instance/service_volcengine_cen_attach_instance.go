@@ -162,7 +162,7 @@ func (s *VolcengineCenAttachInstanceService) CreateResource(resourceData *schema
 				},
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("instance_id").(string)
+				return d.Get("cen_id").(string)
 			},
 		},
 	}
@@ -219,7 +219,7 @@ func (s *VolcengineCenAttachInstanceService) RemoveResource(resourceData *schema
 				},
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("instance_id").(string)
+				return d.Get("cen_id").(string)
 			},
 		},
 	}

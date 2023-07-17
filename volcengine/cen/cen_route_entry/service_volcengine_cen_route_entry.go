@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen"
 )
 
 type VolcengineCenRouteEntryService struct {
@@ -158,6 +159,16 @@ func (s *VolcengineCenRouteEntryService) CreateResource(resourceData *schema.Res
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				cen.NewCenService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("cen_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -203,6 +214,9 @@ func (s *VolcengineCenRouteEntryService) RemoveResource(resourceData *schema.Res
 					}
 					return resource.RetryableError(callErr)
 				})
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
 			},
 		},
 	}

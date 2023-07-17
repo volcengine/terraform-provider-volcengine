@@ -48,6 +48,7 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The ID of the cen bandwidth package.
     * `local_geographic_region_set_id` - The local geographic region set id of the cen bandwidth package.
     * `peer_geographic_region_set_id` - The peer geographic region set id of the cen bandwidth package.
+    * `project_name` - The ProjectName of the cen bandwidth package.
     * `remaining_bandwidth` - The remain bandwidth of the cen bandwidth package.
     * `status` - The status of the cen bandwidth package.
     * `tags` - Tags.

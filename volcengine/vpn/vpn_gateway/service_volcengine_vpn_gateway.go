@@ -357,7 +357,7 @@ func (s *VolcengineVpnGatewayService) RemoveResource(resourceData *schema.Resour
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				// todo 打印前台提示日志
-				log.Println("[WARN] Cannot destroy PrePaid resource volcengine_vpn_gateway. Terraform will remove this resource from the state file, however resources may remain.")
+				log.Println("[WARN] Terraform will unsubscribe the resource.")
 				//return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				return nil, nil
 			},
@@ -443,4 +443,13 @@ func (s *VolcengineVpnGatewayService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func (s *VolcengineVpnGatewayService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	info.NeedUnsubscribe = true
+	info.Products = []string{"VPN"}
+	return &info, nil
 }

@@ -101,6 +101,11 @@ func DataSourceVolcengineCens() *schema.Resource {
 							Description: "A list of bandwidth package IDs of the cen.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the cen instance.",
+						},
 					},
 				},
 			},

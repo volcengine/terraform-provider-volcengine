@@ -19,6 +19,7 @@ resource "volcengine_nat_gateway" "foo" {
   subnet_id        = "subnet-im67x70vxla88gbssz1hy1z2"
   spec             = "Medium"
   nat_gateway_name = "tf-auto-demo-1"
+  billing_type     = "PostPaid"
   description      = "This nat gateway auto-created by terraform. "
   project_name     = "default"
 }
@@ -27,9 +28,10 @@ resource "volcengine_nat_gateway" "foo" {
 The following arguments are supported:
 * `subnet_id` - (Required, ForceNew) The ID of the Subnet.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC.
-* `billing_type` - (Optional, ForceNew) The billing type of the NatGateway, the value is `PostPaid`.
+* `billing_type` - (Optional, ForceNew) The billing type of the NatGateway, the value is `PostPaid` or `PrePaid`.
 * `description` - (Optional) The description of the NatGateway.
 * `nat_gateway_name` - (Optional) The name of the NatGateway.
+* `period` - (Optional, ForceNew) The period of the NatGateway, the valid value range in 1~9 or 12 or 24 or 36. Default value is 12. The period unit defaults to `Month`.This field is only effective when creating a PrePaid NatGateway. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `project_name` - (Optional) The ProjectName of the NatGateway.
 * `spec` - (Optional) The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large`.
 * `tags` - (Optional) Tags.

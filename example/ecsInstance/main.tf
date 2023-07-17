@@ -18,8 +18,8 @@ resource "volcengine_security_group" "foo1" {
 resource "volcengine_ecs_instance" "default" {
   image_id = "image-aagd56zrw2jtdro3bnrl"
   instance_type = "ecs.g1.large"
-  instance_name = "xym-tf-test-2"
-  description = "xym-tf-test-desc-1"
+  instance_name = "tf-ecs-test"
+  description = "tf-ecs-test-desc"
   password = "93f0cb0614Aab12"
   instance_charge_type = "PostPaid"
   system_volume_type = "PTSSD"
@@ -31,10 +31,26 @@ resource "volcengine_ecs_instance" "default" {
     size = 100
     delete_with_instance = true
   }
-  deployment_set_id = ""
-  ipv6_address_count = 1
+  data_volumes {
+    volume_type = "PTSSD"
+    size = 50
+    delete_with_instance = true
+  }
+#  deployment_set_id = ""
+#  ipv6_address_count = 1
 #  secondary_network_interfaces {
 #    subnet_id = volcengine_subnet.foo1.id
 #    security_group_ids = [volcengine_security_group.foo1.id]
 #  }
+
+  tags {
+    key = "tfk1"
+    value = "tfv1"
+  }
+
+  tags {
+    key = "tfk2"
+    value = "tfv2"
+  }
+
 }

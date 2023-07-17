@@ -19,6 +19,7 @@ func DataSourceVolcengineCertificates() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The list of Certificate IDs.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -102,6 +103,7 @@ func DataSourceVolcengineCertificates() *schema.Resource {
 							Computed:    true,
 							Description: "The ID list of the Listener.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

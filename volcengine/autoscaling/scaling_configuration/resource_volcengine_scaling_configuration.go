@@ -51,7 +51,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "The list of the ECS instance type which the scaling configuration set.",
+				Description: "The list of the ECS instance type which the scaling configuration set. The maximum number of instance types is 10.",
 			},
 			"instance_name": {
 				Type:        schema.TypeString,
@@ -92,7 +92,8 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 				Type:        schema.TypeList,
 				Required:    true,
 				MinItems:    1,
-				Description: "The list of volume of the scaling configuration.",
+				MaxItems:    15,
+				Description: "The list of volume of the scaling configuration. The number of supported volumes ranges from 1 to 15.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"volume_type": {
@@ -103,8 +104,8 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 						"size": {
 							Type:         schema.TypeInt,
 							Required:     true,
-							ValidateFunc: validation.IntAtLeast(1),
-							Description:  "The size of volume.",
+							ValidateFunc: validation.IntBetween(10, 8192),
+							Description:  "The size of volume. System disk value range: 10 - 500. The value range of the data disk: 10 - 8192.",
 						},
 						"delete_with_instance": {
 							Type:        schema.TypeBool,
@@ -118,17 +119,21 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Required: true,
+				MaxItems: 5,
+				MinItems: 1,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "The list of the security group id of the networkInterface which the scaling configuration set.",
+				Description: "The list of the security group id of the networkInterface which the scaling configuration set." +
+					" A maximum of 5 security groups can be bound at the same time, and the value ranges from 1 to 5.",
 			},
 			"eip_bandwidth": {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.IntAtLeast(0),
-				Description:  "The EIP bandwidth which the scaling configuration set.",
+				ValidateFunc: validation.IntBetween(1, 500),
+				Description: "The EIP bandwidth which the scaling configuration set. " +
+					"When the value of Eip.BillingType is PostPaidByBandwidth, the value is 1 to 500. When the value of Eip.BillingType is PostPaidByTraffic, the value is 1 to 200.",
 			},
 			"eip_isp": {
 				Type:             schema.TypeString,
@@ -150,6 +155,47 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The ECS user data which the scaling configuration set.",
+			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The label of the instance created by the scaling configuration. Up to 20 tags are supported.",
+				MaxItems:    20,
+				Set:         ve.TagsHash,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Value of Tags.",
+						},
+					},
+				},
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project to which the instance created by the scaling configuration belongs.",
+			},
+			"hpc_cluster_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of the HPC cluster to which the instance belongs. Valid only when InstanceTypes.N specifies High Performance Computing GPU Type.",
+			},
+			"spot_strategy": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "NoSpot",
+				Description: "The preemption policy of the instance. Valid Value: NoSpot (default), SpotAsPriceGo.",
+				ValidateFunc: validation.StringInSlice([]string{
+					"NoSpot",
+					"SpotAsPriceGo",
+				}, false),
 			},
 		},
 	}

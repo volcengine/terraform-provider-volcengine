@@ -141,6 +141,15 @@ func (s *VolcengineCenService) RefreshResourceState(resourceData *schema.Resourc
 					return nil, "", fmt.Errorf("cen status error, status:%s", status.(string))
 				}
 			}
+			project, err := ve.ObtainSdkValue("ProjectName", demo)
+			if err != nil {
+				return nil, "", err
+			}
+			if resourceData.Get("project_name") != nil && resourceData.Get("project_name").(string) != "" {
+				if project != resourceData.Get("project_name") {
+					return demo, "", err
+				}
+			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
 			return demo, status.(string), err
 		},
@@ -211,6 +220,10 @@ func (s *VolcengineCenService) ModifyResource(resourceData *schema.ResourceData,
 	callbacks = append(callbacks, callback)
 	tagCallback := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "cen", resourceData, getUniversalInfo)
 	callbacks = append(callbacks, tagCallback...)
+	if resourceData.HasChange("project_name") {
+		projectCallback := s.ModifyProject(resourceData)
+		callbacks = append(callbacks, projectCallback...)
+	}
 	return callbacks
 }
 
@@ -293,5 +306,61 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
+	}
+}
+
+func (s *VolcengineCenService) ModifyProject(resourceData *schema.ResourceData) []ve.Callback {
+	var call []ve.Callback
+	id := s.ReadResourceId(resourceData.Id())
+	if resourceData.HasChange("project_name") {
+		modifyProject := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "MoveProjectResource",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"project_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "TargetProjectName",
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if (*call.SdkParam)["TargetProjectName"] == nil || (*call.SdkParam)["TargetProjectName"] == "" {
+						return false, fmt.Errorf("Could set ProjectName to empty ")
+					}
+					//获取用户ID
+					input := map[string]interface{}{
+						"ProjectName": (*call.SdkParam)["TargetProjectName"],
+					}
+					logger.Debug(logger.ReqFormat, "GetProject", input)
+					out, err := s.Client.UniversalClient.DoCall(s.getIAMUniversalInfo("GetProject"), &input)
+					if err != nil {
+						return false, err
+					}
+					accountId, err := ve.ObtainSdkValue("Result.AccountID", *out)
+					if err != nil {
+						return false, err
+					}
+					trnStr := fmt.Sprintf("trn:%s:%s:%d:%s/%s", "cen", "", int(accountId.(float64)),
+						"cen", id)
+					(*call.SdkParam)["ResourceTrn.1"] = trnStr
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(s.getIAMUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		call = append(call, modifyProject)
+	}
+	return call
+}
+
+func (s *VolcengineCenService) getIAMUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "iam",
+		Version:     "2021-08-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
 	}
 }

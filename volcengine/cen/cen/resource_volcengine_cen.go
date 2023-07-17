@@ -46,6 +46,11 @@ func ResourceVolcengineCen() *schema.Resource {
 				Description: "The description of the cen.",
 			},
 			"tags": ve.TagsSchema(),
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the cen instance.",
+			},
 		},
 	}
 	s := DataSourceVolcengineCens().Schema["cens"].Elem.(*schema.Resource).Schema

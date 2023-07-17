@@ -1,9 +1,9 @@
 resource "volcengine_vpn_gateway" "foo" {
-  vpc_id = "vpc-2fe19q1dn2g3k59gp68n7w3rr"
-  subnet_id = "subnet-2fe19qp20f3sw59gp67w8om25"
+  vpc_id = "vpc-12b31m7z2kc8w17q7y2fih9ts"
+  subnet_id = "subnet-12bh8g2d7fshs17q7y2nx82uk"
   bandwidth = 20
   vpn_gateway_name = "tf-test"
   description = "tf-test"
   period = 2
-  project_name = "yuwenhao"
+  project_name = "default"
 }

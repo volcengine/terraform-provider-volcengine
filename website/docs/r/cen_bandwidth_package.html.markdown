@@ -23,18 +23,21 @@ resource "volcengine_cen_bandwidth_package" "foo" {
   billing_type                   = "PrePaid"
   period_unit                    = "Year"
   period                         = 1
+  project_name                   = "default"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `bandwidth` - (Optional) The bandwidth of the cen bandwidth package.
-* `billing_type` - (Optional, ForceNew) The billing type of the cen bandwidth package. Terraform will only remove the PrePaid cen bandwidth package from the state file, not actually remove.
+* `bandwidth` - (Optional) The bandwidth of the cen bandwidth package. Value: 2~10000.
+* `billing_type` - (Optional, ForceNew) The billing type of the cen bandwidth package. Only support `PrePaid` and default value is `PrePaid`.
+Terraform will only remove the PrePaid cen bandwidth package from the state file, not actually remove.
 * `cen_bandwidth_package_name` - (Optional) The name of the cen bandwidth package.
 * `description` - (Optional) The description of the cen bandwidth package.
-* `local_geographic_region_set_id` - (Optional, ForceNew) The local geographic region set id of the cen bandwidth package.
-* `peer_geographic_region_set_id` - (Optional, ForceNew) The peer geographic region set id of the cen bandwidth package.
-* `period_unit` - (Optional) The period unit of the cen bandwidth package.
-* `period` - (Optional) The period of the cen bandwidth package.
+* `local_geographic_region_set_id` - (Optional, ForceNew) The local geographic region set id of the cen bandwidth package. Valid value: `China`, `Asia`.
+* `peer_geographic_region_set_id` - (Optional, ForceNew) The peer geographic region set id of the cen bandwidth package. Valid value: `China`, `Asia`.
+* `period_unit` - (Optional) The period unit of the cen bandwidth package. Value: `Month`, `Year`. Default value is `Month`.
+* `period` - (Optional) The period of the cen bandwidth package. Default value is 1.
+* `project_name` - (Optional) The ProjectName of the cen bandwidth package.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:

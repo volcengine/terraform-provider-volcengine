@@ -18,18 +18,19 @@ resource "volcengine_eip_address" "foo" {
   billing_type = "PostPaidByBandwidth"
   bandwidth    = 1
   isp          = "ChinaUnicom"
-  name         = "tf-project-1"
+  name         = "tf-eip"
   description  = "tf-test"
-  project_name = "yuwenhao"
+  project_name = "default"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `billing_type` - (Required) The billing type of the EIP Address. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic`.
+* `billing_type` - (Required) The billing type of the EIP Address. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic` or `PrePaid`.
 * `bandwidth` - (Optional) The peek bandwidth of the EIP, the value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic.
 * `description` - (Optional) The description of the EIP.
-* `isp` - (Optional, ForceNew) The ISP of the EIP, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.
+* `isp` - (Optional, ForceNew) The ISP of the EIP, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom` or `SingleLine_BGP` or `Static_BGP`.
 * `name` - (Optional) The name of the EIP Address.
+* `period` - (Optional) The period of the EIP Address, the valid value range in 1~9 or 12 or 36. Default value is 12. The period unit defaults to `Month`.This field is only effective when creating a PrePaid Eip or changing the billing_type from PostPaid to PrePaid.
 * `project_name` - (Optional) The ProjectName of the EIP.
 * `tags` - (Optional) Tags.
 
@@ -41,7 +42,10 @@ The `tags` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `deleted_time` - The deleted time of the EIP.
 * `eip_address` - The ip address of the EIP.
+* `expired_time` - The expired time of the EIP.
+* `overdue_time` - The overdue time of the EIP.
 * `status` - The status of the EIP.
 
 

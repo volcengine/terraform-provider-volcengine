@@ -34,8 +34,8 @@ resource "volcengine_security_group" "foo1" {
 resource "volcengine_ecs_instance" "default" {
   image_id             = "image-aagd56zrw2jtdro3bnrl"
   instance_type        = "ecs.g1.large"
-  instance_name        = "xym-tf-test-2"
-  description          = "xym-tf-test-desc-1"
+  instance_name        = "tf-ecs-test"
+  description          = "tf-ecs-test-desc"
   password             = "93f0cb0614Aab12"
   instance_charge_type = "PostPaid"
   system_volume_type   = "PTSSD"
@@ -47,12 +47,28 @@ resource "volcengine_ecs_instance" "default" {
     size                 = 100
     delete_with_instance = true
   }
-  deployment_set_id  = ""
-  ipv6_address_count = 1
+  data_volumes {
+    volume_type          = "PTSSD"
+    size                 = 50
+    delete_with_instance = true
+  }
+  #  deployment_set_id = ""
+  #  ipv6_address_count = 1
   #  secondary_network_interfaces {
   #    subnet_id = volcengine_subnet.foo1.id
   #    security_group_ids = [volcengine_security_group.foo1.id]
   #  }
+
+  tags {
+    key   = "tfk1"
+    value = "tfv1"
+  }
+
+  tags {
+    key   = "tfk2"
+    value = "tfv2"
+  }
+
 }
 ```
 ## Argument Reference
@@ -61,7 +77,7 @@ The following arguments are supported:
 * `instance_type` - (Required) The instance type of ECS instance.
 * `security_group_ids` - (Required) The security group ID set of primary networkInterface.
 * `subnet_id` - (Required, ForceNew) The subnet ID of primary networkInterface.
-* `system_volume_size` - (Required) The size of system volume.
+* `system_volume_size` - (Required) The size of system volume. The value range of the system volume size is ESSD_PL0: 20~2048, ESSD_FlexPL: 20~2048, PTSSD: 10~500.
 * `system_volume_type` - (Required, ForceNew) The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `auto_renew_period` - (Optional, ForceNew) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `auto_renew` - (Optional, ForceNew) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
@@ -83,7 +99,7 @@ The following arguments are supported:
 * `password` - (Optional) The password of ECS instance.
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.
 * `project_name` - (Optional) The ProjectName of the ecs instance.
-* `secondary_network_interfaces` - (Optional) The secondary networkInterface detail collection of ECS instance.
+* `secondary_network_interfaces` - (Optional, ForceNew) The secondary networkInterface detail collection of ECS instance.
 * `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `spot_strategy` - (Optional, ForceNew) The spot strategy will autoremove instance in some conditions.Please make sure you can maintain instance lifecycle before auto remove.The spot strategy of ECS instance, the value can be `NoSpot` or `SpotAsPriceGo`.
 * `tags` - (Optional) Tags.
@@ -92,7 +108,7 @@ The following arguments are supported:
 
 The `data_volumes` object supports the following:
 
-* `size` - (Required, ForceNew) The size of volume.
+* `size` - (Required, ForceNew) The size of volume. The value range of the data volume size is ESSD_PL0: 10~32768, ESSD_FlexPL: 10~32768, PTSSD: 20~8192.
 * `volume_type` - (Required, ForceNew) The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `delete_with_instance` - (Optional, ForceNew) The delete with instance flag of volume.
 

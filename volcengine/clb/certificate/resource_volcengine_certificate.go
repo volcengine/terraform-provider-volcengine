@@ -22,19 +22,20 @@ func ResourceVolcengineCertificate() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineCertificateCreate,
 		Read:   resourceVolcengineCertificateRead,
+		Update: resourceVolcengineCertificateUpdate,
 		Delete: resourceVolcengineCertificateDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"certificate_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "The name of the Certificate.",
 			},
 			"public_key": {
@@ -52,7 +53,6 @@ func ResourceVolcengineCertificate() *schema.Resource {
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "The description of the Certificate.",
 			},
 			"project_name": {
@@ -61,6 +61,7 @@ func ResourceVolcengineCertificate() *schema.Resource {
 				ForceNew:    true,
 				Description: "The ProjectName of the Certificate.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 }

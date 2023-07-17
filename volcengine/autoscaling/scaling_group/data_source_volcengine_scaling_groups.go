@@ -34,7 +34,6 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of scaling group.",
 			},
-
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -181,6 +180,12 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 							Computed:    true,
 							Description: "The version of the launch template bound to the scaling group.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of scaling group.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

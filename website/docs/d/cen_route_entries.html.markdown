@@ -11,7 +11,7 @@ Use this data source to query detailed information of cen route entries
 ## Example Usage
 ```hcl
 data "volcengine_cen_route_entries" "foo" {
-  cen_id = "cen-12bjcqtr8ah3417q7y38h8t79"
+  cen_id = "cen-12ar8uclj68sg17q7y20v9gil"
 }
 ```
 ## Argument Reference

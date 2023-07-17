@@ -3,13 +3,14 @@ package network_acl_associate
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/network_acl"
-	"strings"
-	"time"
 )
 
 type VolcengineNetworkAclAssociateService struct {
@@ -53,6 +54,9 @@ func (s *VolcengineNetworkAclAssociateService) ReadResources(condition map[strin
 		results, err = ve.ObtainSdkValue("Result.NetworkAcls", *resp)
 		if err != nil {
 			return []interface{}{}, err
+		}
+		if results == nil {
+			results = []interface{}{}
 		}
 		if _, ok = results.([]interface{}); !ok {
 			return []interface{}{}, errors.New("Result.NetworkAcls is not Slice")

@@ -181,6 +181,41 @@ func DataSourceVolcengineScalingConfigurations() *schema.Resource {
 							Computed:    true,
 							Description: "The ECS user data which the scaling configuration set.",
 						},
+						"tags": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The label of the instance created by the scaling configuration.",
+							Set:         ve.TagsHash,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Tags.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Tags.",
+									},
+								},
+							},
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project to which the instance created by the scaling configuration belongs.",
+						},
+						"hpc_cluster_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the HPC cluster to which the instance belongs. Valid only when InstanceTypes.N specifies High Performance Computing GPU Type.",
+						},
+						"spot_strategy": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The preemption policy of the instance. Valid Value: NoSpot (default), SpotAsPriceGo.",
+						},
 					},
 				},
 			},

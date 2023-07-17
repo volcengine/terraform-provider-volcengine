@@ -217,7 +217,7 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 							Description: "Whether the network card has been authorized to be used by other account services.",
 						},
 						"private_ip_sets": {
-							Type:        schema.TypeSet,
+							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "The IP address of secondary private network interface.",
 							Elem: &schema.Resource{
@@ -228,7 +228,7 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 										Description: "The secondary private network IP address of the network interface card.",
 									},
 									"associated_elastic_ip": {
-										Type:        schema.TypeSet,
+										Type:        schema.TypeList,
 										Computed:    true,
 										Description: "The public IP that secondary private network IP associated with.",
 										Elem: &schema.Resource{
@@ -254,16 +254,6 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 								},
 							},
 						},
-						//"associated_elastic_ip_id": {
-						//	Type:        schema.TypeString,
-						//	Computed:    true,
-						//	Description: "The allocation id of the EIP to which the ENI associates.",
-						//},
-						//"associated_elastic_ip_address": {
-						//	Type:        schema.TypeString,
-						//	Computed:    true,
-						//	Description: "The IP address of the EIP to which the ENI associates.",
-						//},
 						"project_name": {
 							Type:        schema.TypeString,
 							Computed:    true,

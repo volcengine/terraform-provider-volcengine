@@ -30,6 +30,7 @@ In addition to all arguments above, the following attributes are exported:
     * `eip_billing_type` - The EIP ISP which the scaling configuration set.
     * `eip_isp` - The EIP ISP which the scaling configuration set.
     * `host_name` - The ECS hostname which the scaling configuration set.
+    * `hpc_cluster_id` - The ID of the HPC cluster to which the instance belongs. Valid only when InstanceTypes.N specifies High Performance Computing GPU Type.
     * `id` - The id of the scaling configuration.
     * `image_id` - The ECS image id which the scaling configuration set.
     * `instance_description` - The ECS instance description which the scaling configuration set.
@@ -37,11 +38,16 @@ In addition to all arguments above, the following attributes are exported:
     * `instance_types` - The list of the ECS instance type which the scaling configuration set.
     * `key_pair_name` - The ECS key pair name which the scaling configuration set.
     * `lifecycle_state` - The lifecycle state of the scaling configuration.
+    * `project_name` - The project to which the instance created by the scaling configuration belongs.
     * `scaling_configuration_id` - The id of the scaling configuration.
     * `scaling_configuration_name` - The name of the scaling configuration.
     * `scaling_group_id` - The id of the scaling group to which the scaling configuration belongs.
     * `security_enhancement_strategy` - The Ecs security enhancement strategy which the scaling configuration set.
     * `security_group_ids` - The list of the security group id of the networkInterface which the scaling configuration set.
+    * `spot_strategy` - The preemption policy of the instance. Valid Value: NoSpot (default), SpotAsPriceGo.
+    * `tags` - The label of the instance created by the scaling configuration.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `updated_at` - The create time of the scaling configuration.
     * `user_data` - The ECS user data which the scaling configuration set.
     * `volumes` - The list of volume of the scaling configuration.

@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen"
 )
 
 type VolcengineCenServiceRouteEntryService struct {
@@ -140,6 +141,11 @@ func (s *VolcengineCenServiceRouteEntryService) CreateResource(resourceData *sch
 		Call: ve.SdkCall{
 			Action:      "CreateCenServiceRouteEntry",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"publish_to_instances": {
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				return true, nil
 			},
@@ -157,6 +163,16 @@ func (s *VolcengineCenServiceRouteEntryService) CreateResource(resourceData *sch
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				cen.NewCenService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("cen_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -164,7 +180,60 @@ func (s *VolcengineCenServiceRouteEntryService) CreateResource(resourceData *sch
 }
 
 func (s *VolcengineCenServiceRouteEntryService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ModifyCenServiceRouteEntryAttributes",
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"cen_id": {
+					ForceGet: true,
+				},
+				"destination_cidr_block": {
+					ForceGet: true,
+				},
+				"service_region_id": {
+					ForceGet: true,
+				},
+				"description": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"publish_mode": {
+					ForceGet:    true,
+					ConvertType: ve.ConvertDefault,
+				},
+				"publish_to_instances": {
+					ForceGet:    true,
+					ConvertType: ve.ConvertListN,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				mode := d.Get("publish_mode").(string)
+				instances := d.Get("publish_to_instances").([]interface{})
+				if mode == "Custom" && len(instances) == 0 {
+					return false, fmt.Errorf("public_to_instances must exist when publish_mode is Custom")
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Available"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				cen.NewCenService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("cen_id").(string),
+				},
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineCenServiceRouteEntryService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -202,6 +271,9 @@ func (s *VolcengineCenServiceRouteEntryService) RemoveResource(resourceData *sch
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
 			},
 		},
 	}
