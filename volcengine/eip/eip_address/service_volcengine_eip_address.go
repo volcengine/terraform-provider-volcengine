@@ -85,9 +85,6 @@ func (s *VolcengineEipAddressService) ReadResource(resourceData *schema.Resource
 	if len(data) == 0 {
 		return data, fmt.Errorf("eip address %s not exist ", allocationId)
 	}
-	if data["BillingType"].(float64) == 1 {
-		return data, fmt.Errorf("not support PrePaid eip address")
-	}
 	return data, err
 }
 
@@ -154,6 +151,19 @@ func (s *VolcengineEipAddressService) CreateResource(resourceData *schema.Resour
 		Call: ve.SdkCall{
 			Action:      "AllocateEipAddress",
 			ConvertMode: ve.RequestConvertAll,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				//periodUnit, ok := (*call.SdkParam)["PeriodUnit"]
+				//if !ok {
+				//	return true, nil
+				//}
+				//(*call.SdkParam)["PeriodUnit"] = periodUnitRequestConvert(periodUnit)
+
+				// PeriodUnit 默认传 1(Month)
+				if (*call.SdkParam)["BillingType"] == 1 {
+					(*call.SdkParam)["PeriodUnit"] = 1
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.VpcClient.AllocateEipAddressCommon(call.SdkParam)
@@ -205,7 +215,7 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 				return s.Client.VpcClient.ModifyEipAddressAttributesCommon(call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"Available"},
+				Target:  []string{"Available", "Attached"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 			Convert: map[string]ve.RequestConvert{
@@ -234,6 +244,17 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					if len(*call.SdkParam) > 0 {
 						(*call.SdkParam)["AllocationId"] = d.Id()
+						if (*call.SdkParam)["BillingType"] == 1 {
+							//periodUnit, ok := d.GetOk("period_unit")
+							//if !ok {
+							//	return false, fmt.Errorf("PeriodUnit is not exist")
+							//}
+							//(*call.SdkParam)["PeriodUnit"] = periodUnitRequestConvert(periodUnit)
+
+							// PeriodUnit 默认传 1(Month)
+							(*call.SdkParam)["PeriodUnit"] = 1
+							(*call.SdkParam)["Period"] = d.Get("period")
+						}
 						return true, nil
 					}
 					return false, nil
@@ -242,8 +263,15 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					if d.Get("billing_type").(string) != "PrePaid" {
+						d.Set("period", nil)
+						//d.Set("period_unit", nil)
+					}
+					return nil
+				},
 				Refresh: &ve.StateRefresh{
-					Target:  []string{"Available"},
+					Target:  []string{"Available", "Attached"},
 					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
@@ -359,4 +387,15 @@ func (s *VolcengineEipAddressService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func (s *VolcengineEipAddressService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	if resourceData.Get("billing_type") == "PrePaid" {
+		info.Products = []string{"EIP"}
+		info.NeedUnsubscribe = true
+	}
+	return &info, nil
 }

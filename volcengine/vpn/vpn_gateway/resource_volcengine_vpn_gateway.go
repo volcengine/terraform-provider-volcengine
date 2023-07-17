@@ -50,7 +50,7 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				Type:         schema.TypeInt,
 				Required:     true,
 				ValidateFunc: validation.IntInSlice([]int{5, 10, 20, 50, 100, 200, 500, 1000}),
-				Description:  "The bandwidth of the VPN gateway.",
+				Description:  "The bandwidth of the VPN gateway. Unit: Mbps. Values: 5, 10, 20, 50, 100, 200, 500.",
 			},
 			"vpn_gateway_name": {
 				Type:        schema.TypeString,
@@ -70,7 +70,8 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				ForceNew:     true,
 				Default:      "PrePaid",
 				ValidateFunc: validation.StringInSlice([]string{"PrePaid"}, false),
-				Description:  "The BillingType of the VPN gateway. Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.",
+				Description: "The BillingType of the VPN gateway. Only support `PrePaid`.\n" +
+					"Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.",
 			},
 			//"period_unit": {
 			//	Type:         schema.TypeString,
@@ -84,10 +85,13 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 			"period": {
 				Type:             schema.TypeInt,
 				Optional:         true,
-				Default:          1,
-				ValidateFunc:     validation.IntAtLeast(1),
+				Default:          12,
 				DiffSuppressFunc: periodDiffSuppress,
-				Description:      "The Period of the VPN gateway. This parameter is only useful when creating vpn gateway. Default period unit is Month.",
+				ValidateFunc: validation.Any(
+					validation.IntBetween(1, 9),
+					validation.IntInSlice([]int{12, 24, 36})),
+				Description: "The Period of the VPN gateway. Default value is 12. This parameter is only useful when creating vpn gateway. Default period unit is Month.\n" +
+					"Value range: 1~9, 12, 24, 36. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"renew_type": {
 				Type:        schema.TypeString,

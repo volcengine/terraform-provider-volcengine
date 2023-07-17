@@ -37,6 +37,7 @@ In addition to all arguments above, the following attributes are exported:
     * `max_instance_number` - The max instance number of the scaling group.
     * `min_instance_number` - The min instance number of the scaling group.
     * `multi_az_policy` - The multi az policy of the scaling group. Valid values: PRIORITY, BALANCE.
+    * `project_name` - The ProjectName of scaling group.
     * `scaling_group_id` - The id of the scaling group.
     * `scaling_group_name` - The name of the scaling group.
     * `server_group_attributes` - The list of server group attributes.
@@ -45,6 +46,9 @@ In addition to all arguments above, the following attributes are exported:
         * `server_group_id` - The server group id.
         * `weight` - The weight of the instance.
     * `subnet_ids` - The list of the subnet id to which the ENI is connected.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `total_instance_count` - The total instance count of the scaling group.
     * `updated_at` - The create time of the scaling group.
     * `vpc_id` - The VPC id of the scaling group.

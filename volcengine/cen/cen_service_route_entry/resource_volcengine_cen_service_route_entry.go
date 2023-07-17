@@ -22,6 +22,7 @@ $ terraform import volcengine_cen_service_route_entry.default cen-2nim00ybaylts7
 func ResourceVolcengineCenServiceRouteEntry() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineCenServiceRouteEntryCreate,
+		Update: resourceVolcengineCenServiceRouteEntryUpdate,
 		Read:   resourceVolcengineCenServiceRouteEntryRead,
 		Delete: resourceVolcengineCenServiceRouteEntryDelete,
 		Importer: &schema.ResourceImporter{
@@ -29,6 +30,7 @@ func ResourceVolcengineCenServiceRouteEntry() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -61,8 +63,46 @@ func ResourceVolcengineCenServiceRouteEntry() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Description: "The description of the cen service route entry.",
+			},
+			"publish_mode": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "LocalDCGW",
+				ValidateFunc: validation.StringInSlice([]string{
+					"LocalDCGW",
+					"Custom",
+				}, false),
+				Description: "Publishing scope of cloud service access routes. Valid values are `LocalDCGW`(default), `Custom`.",
+			},
+			"publish_to_instances": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    100,
+				Description: "The publish instances. A maximum of 100 can be uploaded in one request. This field needs to be filled in when the `publish_mode` is `Custom`.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance_region_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The region where the cloud service access route needs to be published.",
+						},
+						"instance_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ValidateFunc: validation.StringInSlice([]string{
+								"VPC",
+								"DCGW",
+							}, false),
+							Description: "The network instance type that needs to be published for cloud service access routes. The values are as follows: `VPC`, `DCGW`.",
+						},
+						"instance_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Cloud service access routes need to publish the network instance ID.",
+						},
+					},
+				},
 			},
 		},
 	}
@@ -87,6 +127,15 @@ func resourceVolcengineCenServiceRouteEntryRead(d *schema.ResourceData, meta int
 		return fmt.Errorf("error on reading cen service route entry %q, %s", d.Id(), err)
 	}
 	return err
+}
+
+func resourceVolcengineCenServiceRouteEntryUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewCenServiceRouteEntryService(meta.(*ve.SdkClient))
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCenServiceRouteEntry())
+	if err != nil {
+		return fmt.Errorf("error on updating cen service route entry %q, %s", d.Id(), err)
+	}
+	return resourceVolcengineCenServiceRouteEntryRead(d, meta)
 }
 
 func resourceVolcengineCenServiceRouteEntryDelete(d *schema.ResourceData, meta interface{}) (err error) {

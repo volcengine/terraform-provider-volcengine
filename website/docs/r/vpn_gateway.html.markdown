@@ -15,23 +15,25 @@ use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
 resource "volcengine_vpn_gateway" "foo" {
-  vpc_id           = "vpc-2fe19q1dn2g3k59gp68n7w3rr"
-  subnet_id        = "subnet-2fe19qp20f3sw59gp67w8om25"
+  vpc_id           = "vpc-12b31m7z2kc8w17q7y2fih9ts"
+  subnet_id        = "subnet-12bh8g2d7fshs17q7y2nx82uk"
   bandwidth        = 20
   vpn_gateway_name = "tf-test"
   description      = "tf-test"
   period           = 2
-  project_name     = "yuwenhao"
+  project_name     = "default"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `bandwidth` - (Required) The bandwidth of the VPN gateway.
+* `bandwidth` - (Required) The bandwidth of the VPN gateway. Unit: Mbps. Values: 5, 10, 20, 50, 100, 200, 500.
 * `subnet_id` - (Required, ForceNew) The ID of the subnet where you want to create the VPN gateway.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC where you want to create the VPN gateway.
-* `billing_type` - (Optional, ForceNew) The BillingType of the VPN gateway. Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.
+* `billing_type` - (Optional, ForceNew) The BillingType of the VPN gateway. Only support `PrePaid`.
+Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.
 * `description` - (Optional) The description of the VPN gateway.
-* `period` - (Optional) The Period of the VPN gateway. This parameter is only useful when creating vpn gateway. Default period unit is Month.
+* `period` - (Optional) The Period of the VPN gateway. Default value is 12. This parameter is only useful when creating vpn gateway. Default period unit is Month.
+Value range: 1~9, 12, 24, 36. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `project_name` - (Optional) The project name of the VPN gateway.
 * `tags` - (Optional) Tags.
 * `vpn_gateway_name` - (Optional) The name of the VPN gateway.

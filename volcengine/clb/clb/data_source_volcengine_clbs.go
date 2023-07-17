@@ -154,16 +154,6 @@ func DataSourceVolcengineClbs() *schema.Resource {
 							Computed:    true,
 							Description: "The reason why Clb is locked.",
 						},
-						"overdue_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The overdue time of the Clb.",
-						},
-						"deleted_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The expected recycle time of the Clb.",
-						},
 						"load_balancer_spec": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -189,6 +179,75 @@ func DataSourceVolcengineClbs() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The slave zone ID of the CLB.",
+						},
+						"renew_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The renew type of the CLB. When the value of the load_balancer_billing_type is `PrePaid`, the query returns this field.",
+						},
+						"renew_period_times": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The renew period times of the CLB. When the value of the renew_type is `AutoRenew`, the query returns this field.",
+						},
+						"remain_renew_times": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The remain renew times of the CLB. When the value of the renew_type is `AutoRenew`, the query returns this field.",
+						},
+						"instance_status": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The billing status of the CLB.",
+						},
+						"expired_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The expired time of the CLB.",
+						},
+						"reclaim_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The reclaim time of the CLB.",
+						},
+						"overdue_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The overdue time of the Clb.",
+						},
+						"overdue_reclaim_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The over reclaim time of the CLB.",
+						},
+						"deleted_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The expected recycle time of the Clb.",
+						},
+						"eip_billing_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"isp": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ISP of the EIP assigned to CLB, the value can be `BGP`.",
+									},
+									"eip_billing_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The billing type of the EIP assigned to CLB. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic` or `PrePaid`.",
+									},
+									"bandwidth": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The peek bandwidth of the EIP assigned to CLB. The value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic.",
+									},
+								},
+							},
 						},
 					},
 				},

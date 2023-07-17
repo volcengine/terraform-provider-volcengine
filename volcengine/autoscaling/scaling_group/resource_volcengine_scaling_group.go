@@ -40,7 +40,7 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				Description:  "The default cooldown interval of the scaling group. Default value: 300.",
+				Description:  "The default cooldown interval of the scaling group. Value range: 5 ~ 86400, unit: second. Default value: 300.",
 				ValidateFunc: validation.IntBetween(5, 86400),
 			},
 			"subnet_ids": {
@@ -65,14 +65,14 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 			"min_instance_number": {
 				Type:         schema.TypeInt,
 				Required:     true,
-				Description:  "The min instance number of the scaling group.",
-				ValidateFunc: validation.IntAtLeast(0),
+				Description:  "The min instance number of the scaling group. Value range: 0 ~ 100.",
+				ValidateFunc: validation.IntBetween(0, 100),
 			},
 			"max_instance_number": {
 				Type:         schema.TypeInt,
 				Required:     true,
-				Description:  "The max instance number of the scaling group.",
-				ValidateFunc: validation.IntAtLeast(0),
+				Description:  "The max instance number of the scaling group. Value range: 0 ~ 100.",
+				ValidateFunc: validation.IntBetween(0, 100),
 			},
 			"instance_terminate_policy": {
 				Type:        schema.TypeString,
@@ -95,7 +95,7 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 						"port": {
 							Type:         schema.TypeInt,
 							Required:     true,
-							Description:  "The port receiving request of the server group.",
+							Description:  "The port receiving request of the server group. Value range: 1 ~ 65535.",
 							ValidateFunc: validation.IntBetween(1, 65535),
 						},
 						"server_group_id": {
@@ -106,7 +106,7 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 						"weight": {
 							Type:         schema.TypeInt,
 							Required:     true,
-							Description:  "The weight of the instance.",
+							Description:  "The weight of the instance. Value range: 0 ~ 100.",
 							ValidateFunc: validation.IntBetween(0, 100),
 						},
 						"load_balancer_id": {
@@ -131,13 +131,19 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 			"launch_template_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The ID of the launch template bound to the scaling group.",
+				Description: "The ID of the launch template bound to the scaling group. The launch template and scaling configuration cannot take effect at the same time.",
 			},
 			"launch_template_version": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The version of the launch template bound to the scaling group.",
+				Description: "The version of the launch template bound to the scaling group. Valid values are the version number, Latest, or Default.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the scaling group.",
+			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	dataSource := DataSourceVolcengineScalingGroups().Schema["scaling_groups"].Elem.(*schema.Resource).Schema

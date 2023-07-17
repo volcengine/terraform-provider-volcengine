@@ -64,9 +64,8 @@ func (s *VolcengineNatGatewayService) ReadResources(condition map[string]interfa
 
 func (s *VolcengineNatGatewayService) ReadResource(resourceData *schema.ResourceData, natGatewayId string) (data map[string]interface{}, err error) {
 	var (
-		results     []interface{}
-		ok          bool
-		billingType interface{}
+		results []interface{}
+		ok      bool
 	)
 	if natGatewayId == "" {
 		natGatewayId = s.ReadResourceId(resourceData.Id())
@@ -85,20 +84,6 @@ func (s *VolcengineNatGatewayService) ReadResource(resourceData *schema.Resource
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("NatGateway %s not exist ", natGatewayId)
-	}
-
-	billingType, err = ve.ObtainSdkValue("BillingType", data)
-	if err != nil {
-		return data, err
-	}
-
-	if billingType, ok = billingType.(float64); !ok {
-		return data, errors.New("BillingType is invalid")
-	}
-
-	if billingType.(float64) == 1 {
-		// prepaid not support
-		return data, fmt.Errorf("Prepaid nat gateway %s is not supported ", natGatewayId)
 	}
 
 	return data, err
@@ -198,6 +183,13 @@ func (s *VolcengineNatGatewayService) CreateResource(resourceData *schema.Resour
 					ConvertType: ve.ConvertListN,
 				},
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				// PeriodUnit 默认传 Month
+				if (*call.SdkParam)["BillingType"] == 1 {
+					(*call.SdkParam)["PeriodUnit"] = "Month"
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建natGateway
@@ -225,23 +217,16 @@ func (s *VolcengineNatGatewayService) ModifyResource(resourceData *schema.Resour
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyNatGatewayAttributes",
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
-				"billing_type": {
-					TargetField: "BillingType",
-					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-						if i == nil {
-							return nil
-						}
-						billingType := i.(string)
-						switch billingType {
-						case "PrePaid":
-							return 1
-						case "PostPaid":
-							return 2
-						}
-						return i
-					},
+				"nat_gateway_name": {
+					TargetField: "NatGatewayName",
+				},
+				"description": {
+					TargetField: "Description",
+				},
+				"spec": {
+					TargetField: "Spec",
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -388,4 +373,15 @@ func (s *VolcengineNatGatewayService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func (s *VolcengineNatGatewayService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	if resourceData.Get("billing_type") == "PrePaid" {
+		info.Products = []string{"NAT_Gateway"}
+		info.NeedUnsubscribe = true
+	}
+	return &info, nil
 }

@@ -79,7 +79,7 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 							Optional: true,
 							//Computed:    true,
 							Default:     "accept",
-							Description: "The policy of entry.",
+							Description: "The policy of entry, default is `accept`. The value can be `accept` or `drop`.",
 						},
 						"source_cidr_ip": {
 							Type:        schema.TypeString,
@@ -90,8 +90,9 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							//Computed:    true,
-							Default:     "all",
-							Description: "The protocol of entry.",
+							Default: "all",
+							Description: "The protocol of entry, default is `all`. " +
+								"The value can be `icmp` or `gre` or `tcp` or `udp` or `all`.",
 						},
 						"priority": {
 							Type:        schema.TypeInt,
@@ -102,8 +103,11 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							//Computed:    true,
-							Default:     "-1/-1",
-							Description: "The port of entry.",
+							Default: "-1/-1",
+							Description: "The port of entry. Default is `-1/-1`. When Protocol is `all`, `icmp` or `gre`, " +
+								"the port range is `-1/-1`, which means no port restriction. " +
+								"When the Protocol is `tcp` or `udp`, the port range is `1~65535`, and the format is `1/200`, `80/80`, " +
+								"which means port 1 to port 200, port 80.",
 						},
 					},
 				},
@@ -137,7 +141,7 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 							Optional: true,
 							//Computed:    true,
 							Default:     "accept",
-							Description: "The policy of entry.",
+							Description: "The policy of entry. Default is `accept`. The value can be `accept` or `drop`.",
 						},
 						"destination_cidr_ip": {
 							Type:        schema.TypeString,
@@ -148,8 +152,9 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							//Computed:    true,
-							Default:     "all",
-							Description: "The protocol of entry.",
+							Default: "all",
+							Description: "The protocol of entry. " +
+								"The value can be `icmp` or `gre` or `tcp` or `udp` or `all`. Default is `all`.",
 						},
 						"priority": {
 							Type:        schema.TypeInt,
@@ -160,8 +165,12 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 							//Computed:    true,
-							Default:     "-1/-1",
-							Description: "The port of entry.",
+							Default: "-1/-1",
+							Description: "The port of entry. Default is `-1/-1`. " +
+								"When Protocol is `all`, `icmp` or `gre`, the port range is `-1/-1`, " +
+								"which means no port restriction." +
+								"When the Protocol is `tcp` or `udp`, the port range is `1~65535`, and the format is `1/200`, `80/80`," +
+								"which means port 1 to port 200, port 80.",
 						},
 					},
 				},

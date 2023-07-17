@@ -83,6 +83,35 @@ func DataSourceVolcengineCenServiceRouteEntries() *schema.Resource {
 							Computed:    true,
 							Description: "The description of the cen service route entry.",
 						},
+						"publish_mode": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Publishing scope of cloud service access routes. Valid values are `LocalDCGW`(default), `Custom`.",
+						},
+						"publish_to_instances": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The publish instances. A maximum of 100 can be uploaded in one request.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"instance_region_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The region where the cloud service access route needs to be published.",
+									},
+									"instance_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The network instance type that needs to be published for cloud service access routes. The values are as follows: `VPC`, `DCGW`.",
+									},
+									"instance_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Cloud service access routes need to publish the network instance ID.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

@@ -45,5 +45,8 @@ var renewTypeResponseConvert = func(v interface{}) interface{} {
 }
 
 var periodDiffSuppress = func(k, old, new string, d *schema.ResourceData) bool {
-	return d.Get("renew_type").(string) != "ManualRenew"
+	if len(d.Id()) != 0 {
+		return d.Get("renew_type").(string) != "ManualRenew"
+	}
+	return false
 }

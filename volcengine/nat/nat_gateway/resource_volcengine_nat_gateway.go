@@ -47,8 +47,12 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Description: "The ID of the Subnet.",
 			},
 			"spec": {
-				Type:        schema.TypeString,
-				Optional:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "Small",
+				ValidateFunc: validation.StringInSlice([]string{
+					"Small", "Medium", "Large",
+				}, false),
 				Description: "The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large`.",
 			},
 			"nat_gateway_name": {
@@ -66,8 +70,36 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Optional:     true,
 				ForceNew:     true,
 				Default:      "PostPaid",
-				Description:  "The billing type of the NatGateway, the value is `PostPaid`.",
-				ValidateFunc: validation.StringInSlice([]string{"PostPaid"}, false),
+				Description:  "The billing type of the NatGateway, the value is `PostPaid` or `PrePaid`.",
+				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
+			},
+			//"period_unit": {
+			//	Type:     schema.TypeString,
+			//	Optional: true,
+			//	Default:  "Month",
+			//	ForceNew: true,
+			//	ValidateFunc: validation.StringInSlice([]string{
+			//		"Month", "Year",
+			//	}, false),
+			//	DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			//		return !(d.Get("billing_type").(string) == "PrePaid")
+			//	},
+			//	Description: "The period unit of the NatGateway. Optional choice contains `Month` or `Year`. Default is `Month`." +
+			//		"This field is only effective when creating a PrePaid NatGateway. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			//},
+			"period": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  12,
+				ForceNew: true,
+				ValidateFunc: validation.Any(
+					validation.IntBetween(1, 9),
+					validation.IntInSlice([]int{12, 24, 36})),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return !(d.Get("billing_type").(string) == "PrePaid")
+				},
+				Description: "The period of the NatGateway, the valid value range in 1~9 or 12 or 24 or 36. Default value is 12. The period unit defaults to `Month`." +
+					"This field is only effective when creating a PrePaid NatGateway. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"tags": ve.TagsSchema(),
 			"project_name": {
@@ -75,25 +107,6 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Optional:    true,
 				Description: "The ProjectName of the NatGateway.",
 			},
-			//"period_unit": {
-			//	Type:         schema.TypeString,
-			//	Optional:     true,
-			//	ForceNew:     true,
-			//	Description:  "The period unit of the NatGateway.",
-			//	ValidateFunc: validation.StringInSlice([]string{"Month", "Year"}, false),
-			//	DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			//		return d.Id() != ""
-			//	},
-			//},
-			//"period": {
-			//	Type:        schema.TypeInt,
-			//	Optional:    true,
-			//	ForceNew:    true,
-			//	Description: "The period of the NatGateway.",
-			//	DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-			//		return d.Id() != ""
-			//	},
-			//},
 		},
 	}
 }

@@ -28,6 +28,11 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 ECS key pair associate can be imported using the id, e.g.
+
+After binding the key pair, the instance needs to be restarted for the key pair to take effect.
+
+After the key pair is bound, the password login method will automatically become invalid. If your instance has been set for password login, after the key pair is bound, you will no longer be able to use the password login method.
+
 ```
 $ terraform import volcengine_ecs_key_pair_associate.default kp-ybti5tkpkv2udbfolrft:i-mizl7m1kqccg5smt1bdpijuj
 ```

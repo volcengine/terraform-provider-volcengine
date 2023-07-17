@@ -41,7 +41,9 @@ In addition to all arguments above, the following attributes are exported:
     * `eip_id` - The Eip ID of the Clb.
     * `eni_address` - The Eni address of the Clb.
     * `eni_id` - The Eni ID of the Clb.
+    * `expired_time` - The expired time of the CLB.
     * `id` - The ID of the Clb.
+    * `instance_status` - The billing status of the CLB.
     * `load_balancer_billing_type` - The billing type of the Clb.
     * `load_balancer_id` - The ID of the Clb.
     * `load_balancer_name` - The name of the Clb.
@@ -50,8 +52,13 @@ In addition to all arguments above, the following attributes are exported:
     * `master_zone_id` - The master zone ID of the CLB.
     * `modification_protection_reason` - The modification protection reason of the Clb.
     * `modification_protection_status` - The modification protection status of the Clb.
+    * `overdue_reclaim_time` - The over reclaim time of the CLB.
     * `overdue_time` - The overdue time of the Clb.
     * `project_name` - The ProjectName of the Clb.
+    * `reclaim_time` - The reclaim time of the CLB.
+    * `remain_renew_times` - The remain renew times of the CLB. When the value of the renew_type is `AutoRenew`, the query returns this field.
+    * `renew_period_times` - The renew period times of the CLB. When the value of the renew_type is `AutoRenew`, the query returns this field.
+    * `renew_type` - The renew type of the CLB. When the value of the load_balancer_billing_type is `PrePaid`, the query returns this field.
     * `slave_zone_id` - The slave zone ID of the CLB.
     * `status` - The status of the Clb.
     * `subnet_id` - The subnet ID of the Clb.

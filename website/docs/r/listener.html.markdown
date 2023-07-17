@@ -92,6 +92,8 @@ The `health_check` object supports the following:
 * `interval` - (Optional) The interval executing health check, default 2, range in 1~300.
 * `method` - (Optional) The method of health check, the value can be `GET` or `HEAD`.
 * `timeout` - (Optional) The response timeout of health check, default 2, range in 1~60..
+* `udp_expect` - (Optional) The UDP expect of health check. This field must be specified simultaneously with field `udp_request`.
+* `udp_request` - (Optional) The UDP request of health check. This field must be specified simultaneously with field `udp_expect`.
 * `un_healthy_threshold` - (Optional) The unhealthy threshold of health check, default 3, range in 2~10.
 * `uri` - (Optional) The uri of health check.
 
