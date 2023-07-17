@@ -26,6 +26,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 Scaling Configuration attachment can be imported using the scaling_configuration_id e.g.
+The launch template and scaling configuration cannot take effect at the same time.
 ```
 $ terraform import volcengine_scaling_configuration_attachment.default enable:scc-ybrurj4uw6gh9zecj327
 ```

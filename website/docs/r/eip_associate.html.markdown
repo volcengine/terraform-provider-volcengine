@@ -20,7 +20,7 @@ resource "volcengine_eip_associate" "foo" {
 The following arguments are supported:
 * `allocation_id` - (Required, ForceNew) The allocation id of the EIP.
 * `instance_id` - (Required, ForceNew) The instance id which be associated to the EIP.
-* `instance_type` - (Required, ForceNew) The type of the associated instance,the value is `NAT` or `NetworkInterface` or `ClbInstance` or `EcsInstance` or `HaVip`.
+* `instance_type` - (Required, ForceNew) The type of the associated instance,the value is `Nat` or `NetworkInterface` or `ClbInstance` or `EcsInstance` or `HaVip`.
 * `private_ip_address` - (Optional, ForceNew) The private IP address of the instance will be associated to the EIP.
 
 ## Attributes Reference

@@ -37,6 +37,7 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - The create time of the cen.
     * `description` - The description of the cen.
     * `id` - The ID of the cen.
+    * `project_name` - The ProjectName of the cen instance.
     * `status` - The status of the cen.
     * `tags` - Tags.
         * `key` - The Key of Tags.

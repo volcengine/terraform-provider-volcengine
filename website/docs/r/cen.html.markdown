@@ -11,14 +11,16 @@ Provides a resource to manage cen
 ## Example Usage
 ```hcl
 resource "volcengine_cen" "foo" {
-  cen_name    = "tf-test"
-  description = "tf-test"
+  cen_name     = "tf-test-3"
+  description  = "tf-test"
+  project_name = "default"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `cen_name` - (Optional) The name of the cen.
 * `description` - (Optional) The description of the cen.
+* `project_name` - (Optional) The ProjectName of the cen instance.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:

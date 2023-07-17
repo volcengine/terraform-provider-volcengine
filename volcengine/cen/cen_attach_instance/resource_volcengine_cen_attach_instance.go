@@ -48,7 +48,7 @@ func ResourceVolcengineCenAttachInstance() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "The type of the instance. Valid values : `VPC`, `DCGW`.",
+				Description:  "The type of the instance. Valid values: `VPC`, `DCGW`.",
 				ValidateFunc: validation.StringInSlice([]string{"VPC", "DCGW"}, false),
 			},
 			"instance_region_id": {

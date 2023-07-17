@@ -84,7 +84,7 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				Default:          "Month",
 				ValidateFunc:     validation.StringInSlice([]string{"Month", "Year"}, false),
 				DiffSuppressFunc: periodDiffSuppress,
-				Description:      "The period unit of the cen bandwidth package. Value : `Month`, `Year`. Default value is `Month`.",
+				Description:      "The period unit of the cen bandwidth package. Value: `Month`, `Year`. Default value is `Month`.",
 			},
 			"period": {
 				Type:             schema.TypeInt,
