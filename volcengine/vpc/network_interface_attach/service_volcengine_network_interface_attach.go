@@ -47,6 +47,9 @@ func (s *VolcengineNetworkInterfaceAttachService) ReadResource(resourceData *sch
 	}
 
 	ids = strings.Split(id, ":")
+	if len(ids) != 2 {
+		return map[string]interface{}{}, fmt.Errorf("invalid network interface attach id: %v", id)
+	}
 	networkInterfaceId = ids[0]
 	targetInstanceId = ids[1]
 
@@ -69,12 +72,16 @@ func (s *VolcengineNetworkInterfaceAttachService) ReadResource(resourceData *sch
 		return data, errors.New("value is not map")
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("network interface attributes %s not exist ", networkInterfaceId)
+		return data, fmt.Errorf("network interface attributes %s does not exist ", networkInterfaceId)
+	}
+	eniId, ok := data["NetworkInterfaceId"]
+	if !ok || eniId == "" {
+		return data, fmt.Errorf("network interface attributes %s does not exist ", networkInterfaceId)
 	}
 
 	eniType, ok = data["Type"]
-	if !ok {
-		return data, errors.New("eni type not exist")
+	if !ok || eniType == "" {
+		return data, errors.New("eni type does not exist")
 	}
 	if eniType.(string) != "secondary" {
 		return data, errors.New("only secondary eni support attach/detach")
@@ -82,7 +89,7 @@ func (s *VolcengineNetworkInterfaceAttachService) ReadResource(resourceData *sch
 
 	deviceId, ok = data["DeviceId"]
 	if !ok {
-		return data, errors.New("device id not exist")
+		return data, errors.New("device id does not exist")
 	}
 	if len(deviceId.(string)) == 0 {
 		return data, errors.New("not associate")
@@ -203,6 +210,5 @@ func (s *VolcengineNetworkInterfaceAttachService) DatasourceResources(*schema.Re
 }
 
 func (s *VolcengineNetworkInterfaceAttachService) ReadResourceId(id string) string {
-	items := strings.Split(id, ":")
-	return items[0]
+	return id
 }
