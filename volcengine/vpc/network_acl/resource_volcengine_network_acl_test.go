@@ -48,6 +48,12 @@ const testAccNetworkAclUpdate = `
 	  vpc_id = "${volcengine_vpc.foo.id}"
 	  network_acl_name = "acc-test-acl2"
 	  ingress_acl_entries {
+		network_acl_entry_name = "acc-ingress1"
+		policy = "accept"
+		protocol = "all"
+		source_cidr_ip = "192.168.1.0/24"
+	  }
+	  ingress_acl_entries {
 		network_acl_entry_name = "acc-ingress2"
 		policy = "accept"
 		protocol = "all"
@@ -58,6 +64,12 @@ const testAccNetworkAclUpdate = `
 		policy = "accept"
 		protocol = "all"
 		destination_cidr_ip = "192.168.0.0/16"
+	  }
+	  egress_acl_entries {
+		network_acl_entry_name = "acc-egress4"
+		policy = "accept"
+		protocol = "all"
+		destination_cidr_ip = "192.168.0.0/20"
 	  }
 	}
 `
@@ -82,6 +94,20 @@ func TestAccVpcNetworkAclResource_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "network_acl_name", "acc-test-acl"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "ingress_acl_entries.#", "1"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "ingress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-ingress1",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"source_cidr_ip":         "192.168.0.0/24",
+					}),
+					resource.TestCheckResourceAttr(acc.ResourceId, "egress_acl_entries.#", "1"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "egress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-egress2",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"destination_cidr_ip":    "192.168.0.0/16",
+					}),
 				),
 			},
 			{
@@ -113,6 +139,20 @@ func TestAccVpcNetworkAclResource_Update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "network_acl_name", "acc-test-acl"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "ingress_acl_entries.#", "1"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "ingress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-ingress1",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"source_cidr_ip":         "192.168.0.0/24",
+					}),
+					resource.TestCheckResourceAttr(acc.ResourceId, "egress_acl_entries.#", "1"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "egress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-egress2",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"destination_cidr_ip":    "192.168.0.0/16",
+					}),
 				),
 			},
 			{
@@ -120,6 +160,32 @@ func TestAccVpcNetworkAclResource_Update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "network_acl_name", "acc-test-acl2"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "ingress_acl_entries.#", "2"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "ingress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-ingress1",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"source_cidr_ip":         "192.168.1.0/24",
+					}),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "ingress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-ingress2",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"source_cidr_ip":         "192.168.0.0/24",
+					}),
+					resource.TestCheckResourceAttr(acc.ResourceId, "egress_acl_entries.#", "2"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "egress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-egress3",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"destination_cidr_ip":    "192.168.0.0/16",
+					}),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "egress_acl_entries.*", map[string]string{
+						"network_acl_entry_name": "acc-egress4",
+						"policy":                 "accept",
+						"protocol":               "all",
+						"destination_cidr_ip":    "192.168.0.0/20",
+					}),
 				),
 			},
 			{
