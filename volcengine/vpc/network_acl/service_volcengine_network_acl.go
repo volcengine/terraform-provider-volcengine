@@ -314,6 +314,16 @@ func (s *VolcengineNetworkAclService) ModifyResource(resourceData *schema.Resour
 					Target:  []string{"Available"},
 					Timeout: resourceData.Timeout(schema.TimeoutCreate),
 				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("vpc_id").(string)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					vpc.NewVpcService(s.Client): {
+						Target:     []string{"Available"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: resourceData.Get("vpc_id").(string),
+					},
+				},
 			},
 		}
 		callbacks = append(callbacks, ingressUpdateCallback)

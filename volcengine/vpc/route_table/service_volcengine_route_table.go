@@ -162,6 +162,9 @@ func (s *VolcengineRouteTableService) CreateResource(resourceData *schema.Resour
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -183,6 +186,9 @@ func (s *VolcengineRouteTableService) ModifyResource(resourceData *schema.Resour
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
 			},
 		},
 	}
@@ -221,6 +227,9 @@ func (s *VolcengineRouteTableService) RemoveResource(resourceData *schema.Resour
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("vpc_id").(string)
 			},
 		},
 	}

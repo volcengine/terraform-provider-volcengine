@@ -300,6 +300,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				ForceNew:    true,
+				Computed:    true,
 				MinItems:    1,
 				Description: "The secondary networkInterface detail collection of ECS instance.",
 				Elem: &schema.Resource{
