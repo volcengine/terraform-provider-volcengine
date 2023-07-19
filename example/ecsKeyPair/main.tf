@@ -1,4 +1,4 @@
-resource "volcengine_ecs_key_pair" "default" {
-  key_pair_name = "tf-test-key-name1"
-  description ="tftest21111"
+resource "volcengine_ecs_key_pair" "foo" {
+  key_pair_name = "acc-test-key-name"
+  description ="acc-test"
 }
