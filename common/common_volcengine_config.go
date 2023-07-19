@@ -78,7 +78,12 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.UniversalClient = NewUniversalClient(sess, c.CustomerEndpoints)
 	client.BypassSvcClient = NewBypassClient(sess)
 
+	//InitLocks()
+	//InitSyncLimit()
+	return &client, nil
+}
+
+func init() {
 	InitLocks()
 	InitSyncLimit()
-	return &client, nil
 }

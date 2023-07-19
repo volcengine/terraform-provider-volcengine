@@ -95,7 +95,7 @@ func (s *VolcengineIpv6AddressBandwidthService) ReadResource(resourceData *schem
 func (s *VolcengineIpv6AddressBandwidthService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
-		Delay:      1 * time.Second,
+		Delay:      5 * time.Second,
 		MinTimeout: 1 * time.Second,
 		Target:     target,
 		Timeout:    timeout,

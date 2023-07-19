@@ -79,6 +79,9 @@ func (s *VolcengineRouteTableAssociateService) ReadResource(resourceData *schema
 	}
 
 	ids = strings.Split(associateId, ":")
+	if len(ids) != 2 {
+		return map[string]interface{}{}, fmt.Errorf("invalid route table associate id: %v", associateId)
+	}
 	routeTableId = ids[0]
 	targetSubnetId = ids[1]
 
