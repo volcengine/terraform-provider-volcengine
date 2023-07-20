@@ -36,11 +36,19 @@ func EcsInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) b
 		return true
 	}
 
-	if d.Get("instance_charge_type").(string) == "PostPaid" && (k == "period" || k == "period_unit" || k == "auto_renew" || k == "auto_renew_period") {
+	if d.Get("instance_charge_type").(string) == "PostPaid" && (k == "period" || k == "period_unit") {
 		return true
 	}
 
 	return false
+}
+
+func AutoRenewDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	// 仅当创建 PrePaid 实例时有效
+	if d.Id() == "" && d.Get("instance_charge_type").(string) == "PrePaid" {
+		return false
+	}
+	return true
 }
 
 func UserDateImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool {

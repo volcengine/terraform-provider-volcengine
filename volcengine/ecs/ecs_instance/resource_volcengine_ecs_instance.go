@@ -159,19 +159,19 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			//	Description:      "The period unit of ECS instance.Only effective when instance_charge_type is PrePaid. Default is Month.",
 			//},
 			"auto_renew": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				ForceNew:         true,
+				Type:     schema.TypeBool,
+				Optional: true,
+				//ForceNew: true,
 				Default:          true,
-				DiffSuppressFunc: EcsInstanceImportDiffSuppress,
+				DiffSuppressFunc: AutoRenewDiffSuppress,
 				Description:      "The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"auto_renew_period": {
-				Type:             schema.TypeInt,
-				Optional:         true,
-				ForceNew:         true,
+				Type:     schema.TypeInt,
+				Optional: true,
+				//ForceNew: true,
 				Default:          1,
-				DiffSuppressFunc: EcsInstanceImportDiffSuppress,
+				DiffSuppressFunc: AutoRenewDiffSuppress,
 				Description:      "The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 
@@ -237,6 +237,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			"deployment_set_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The ID of Ecs Deployment Set.",
 			},
 
