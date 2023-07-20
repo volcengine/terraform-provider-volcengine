@@ -10,8 +10,10 @@ description: |-
 Use this data source to query detailed information of images
 ## Example Usage
 ```hcl
-data "volcengine_images" "default" {
-  ids = ["image-cm9ssb4eqmhdas306zlp", "image-ybkzct2rtj4ay5rmlfc3"]
+data "volcengine_images" "foo" {
+  os_type          = "Linux"
+  visibility       = "public"
+  instance_type_id = "ecs.g1.large"
 }
 ```
 ## Argument Reference

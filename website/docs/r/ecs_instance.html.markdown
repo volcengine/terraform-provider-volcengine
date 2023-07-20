@@ -14,61 +14,62 @@ in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),wh
 use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
+data "volcengine_zones" "foo" {
+}
+
 resource "volcengine_vpc" "foo" {
-  vpc_name   = "tf-test-2"
+  vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
-resource "volcengine_subnet" "foo1" {
-  subnet_name = "subnet-test-1"
-  cidr_block  = "172.16.1.0/24"
-  zone_id     = "cn-beijing-a"
+resource "volcengine_subnet" "foo" {
+  subnet_name = "acc-test-subnet"
+  cidr_block  = "172.16.0.0/24"
+  zone_id     = data.volcengine_zones.foo.zones[0].id
   vpc_id      = volcengine_vpc.foo.id
 }
 
-resource "volcengine_security_group" "foo1" {
-  depends_on = [volcengine_subnet.foo1]
-  vpc_id     = volcengine_vpc.foo.id
+resource "volcengine_security_group" "foo" {
+  security_group_name = "acc-test-security-group"
+  vpc_id              = volcengine_vpc.foo.id
 }
 
-resource "volcengine_ecs_instance" "default" {
-  image_id             = "image-aagd56zrw2jtdro3bnrl"
+data "volcengine_images" "foo" {
+  os_type          = "Linux"
+  visibility       = "public"
+  instance_type_id = "ecs.g1.large"
+}
+
+resource "volcengine_ecs_instance" "foo" {
+  instance_name        = "acc-test-ecs"
+  description          = "acc-test"
+  host_name            = "tf-acc-test"
+  image_id             = data.volcengine_images.foo.images[0].image_id
   instance_type        = "ecs.g1.large"
-  instance_name        = "tf-ecs-test"
-  description          = "tf-ecs-test-desc"
   password             = "93f0cb0614Aab12"
   instance_charge_type = "PostPaid"
-  system_volume_type   = "PTSSD"
-  system_volume_size   = 60
-  subnet_id            = volcengine_subnet.foo1.id
-  security_group_ids   = [volcengine_security_group.foo1.id]
+  system_volume_type   = "ESSD_PL0"
+  system_volume_size   = 40
   data_volumes {
-    volume_type          = "PTSSD"
-    size                 = 100
-    delete_with_instance = true
-  }
-  data_volumes {
-    volume_type          = "PTSSD"
+    volume_type          = "ESSD_PL0"
     size                 = 50
     delete_with_instance = true
   }
+  subnet_id          = volcengine_subnet.foo.id
+  security_group_ids = [volcengine_security_group.foo.id]
+
   #  deployment_set_id = ""
   #  ipv6_address_count = 1
   #  secondary_network_interfaces {
-  #    subnet_id = volcengine_subnet.foo1.id
-  #    security_group_ids = [volcengine_security_group.foo1.id]
+  #    subnet_id = volcengine_subnet.foo.id
+  #    security_group_ids = [volcengine_security_group.foo.id]
   #  }
 
+  project_name = "default"
   tags {
-    key   = "tfk1"
-    value = "tfv1"
+    key   = "k1"
+    value = "v1"
   }
-
-  tags {
-    key   = "tfk2"
-    value = "tfv2"
-  }
-
 }
 ```
 ## Argument Reference
@@ -79,8 +80,8 @@ The following arguments are supported:
 * `subnet_id` - (Required, ForceNew) The subnet ID of primary networkInterface.
 * `system_volume_size` - (Required) The size of system volume. The value range of the system volume size is ESSD_PL0: 20~2048, ESSD_FlexPL: 20~2048, PTSSD: 10~500.
 * `system_volume_type` - (Required, ForceNew) The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
-* `auto_renew_period` - (Optional, ForceNew) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
-* `auto_renew` - (Optional, ForceNew) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `auto_renew_period` - (Optional) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `auto_renew` - (Optional) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `data_volumes` - (Optional) The data volumes collection of  ECS instance.
 * `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
 * `description` - (Optional) The description of ECS instance.
