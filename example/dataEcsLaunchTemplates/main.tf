@@ -14,5 +14,5 @@ resource "volcengine_ecs_launch_template" "foo" {
 }
 
 data "volcengine_ecs_launch_templates" "foo"{
-  ids = ["${volcengine_ecs_launch_template.foo.id}"]
+  ids = [volcengine_ecs_launch_template.foo.id]
 }
