@@ -264,11 +264,31 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				ConflictsWith: []string{"ipv6_address_count"},
 			},
 
+			"cpu_options": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				MaxItems:    1,
+				MinItems:    1,
+				Description: "The option of cpu.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"threads_per_core": {
+							Type:        schema.TypeInt,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The per core of threads.",
+						},
+					},
+				},
+			},
+
 			"data_volumes": {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    15,
 				MinItems:    1,
+				Computed:    true,
 				Description: "The data volumes collection of  ECS instance.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
