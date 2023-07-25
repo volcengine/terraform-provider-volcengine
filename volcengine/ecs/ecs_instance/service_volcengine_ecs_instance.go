@@ -459,6 +459,15 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 					TargetField: "Volumes",
 					StartIndex:  1,
 				},
+				"cpu_options": {
+					ConvertType: ve.ConvertListUnique,
+					TargetField: "CpuOptions",
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"threads_per_core": {
+							TargetField: "ThreadsPerCore",
+						},
+					},
+				},
 				"secondary_network_interfaces": {
 					ConvertType: ve.ConvertListN,
 					TargetField: "NetworkInterfaces",

@@ -22,12 +22,12 @@ resource "volcengine_ecs_instance" "default" {
   description = "tf-ecs-test-desc"
   password = "93f0cb0614Aab12"
   instance_charge_type = "PostPaid"
-  system_volume_type = "PTSSD"
+  system_volume_type = "ESSD_PL0"
   system_volume_size = 60
   subnet_id = volcengine_subnet.foo1.id
   security_group_ids = [volcengine_security_group.foo1.id]
   data_volumes {
-    volume_type = "PTSSD"
+    volume_type = "ESSD_PL0"
     size = 100
     delete_with_instance = true
   }
