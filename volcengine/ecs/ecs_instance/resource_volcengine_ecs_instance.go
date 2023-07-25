@@ -267,6 +267,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			"cpu_options": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				Computed:    true,
 				MaxItems:    1,
 				MinItems:    1,
 				Description: "The option of cpu.",
