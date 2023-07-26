@@ -86,12 +86,35 @@ provider "volcengine" {
 
 Usage:
 
-```hcl
+```
 $ export VOLCENGINE_ACCESS_KEY="your_public_key"
 $ export VOLCENGINE_SECRET_KEY="your_private_key"
 $ export VOLCENGINE_REGION="cn-beijing"
 $ terraform plan
 ```
+
+## Manual Install Volcengine Provider
+
+You can use the script [manual_install_tf.sh](manual_install_tf.sh) to manually install the required version of terraform-provider-volcengine.
+
+This script is only for linux. ( windows will support later )
+
+Prerequisite: you must install terraform, wget, xattr at first.
+
+```
+$ ./manual_intall_tf.sh --version YourVersion --provider /YourPath/ProviderFile.zip
+```
+
+Usage:
+
+```
+options:
+-h, --help      show help
+-v, --version   [required] specify the version of the terraform-provider-volcengine
+-p, --provider  [optional] specify the local path of the provider zip file, if no value is specified, the file will be downloaded from github by default
+-a, --arch      [optional] specify the architecture, if no value is specified, the default value is amd64
+```
+
 
 
 
