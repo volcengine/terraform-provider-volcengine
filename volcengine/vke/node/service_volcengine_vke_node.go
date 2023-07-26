@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke"
 	"strings"
 	"time"
 
@@ -103,6 +104,10 @@ func (s *VolcengineVkeNodeService) ReadResource(resourceData *schema.ResourceDat
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("Vke node %s not exist ", id)
+	}
+	kubernetesConfig := vke.TransKubernetesConfig(resourceData)
+	if kubernetesConfig != nil {
+		data["KubernetesConfig"] = kubernetesConfig
 	}
 	return data, err
 }

@@ -562,64 +562,10 @@ func (s *VolcengineDefaultNodePoolService) ProcessNodeInstances(resourceData *sc
 					}
 					delete(*call.SdkParam, "Key")
 					delete(*call.SdkParam, "Value")
-					if value, ok := d.GetOk("kubernetes_config"); ok {
-						kubernetesConfig := make(map[string]interface{})
-						if kubernetesArr, ok := value.([]interface{}); ok {
-							if len(kubernetesArr) > 0 {
-								kubernetesMap, ok := kubernetesArr[0].(map[string]interface{})
-								if ok {
-									if value, ok = kubernetesMap["labels"]; ok {
-										labels := make([]map[string]interface{}, 0)
-										if valueArr, ok := value.([]interface{}); ok {
-											for _, v := range valueArr {
-												label := make(map[string]interface{})
-												if vMap, ok := v.(map[string]interface{}); ok {
-													if l, ok := vMap["key"]; ok {
-														label["Key"] = l
-													}
-													if l, ok := vMap["value"]; ok {
-														label["Value"] = l
-													}
-												}
-												if len(label) > 0 {
-													labels = append(labels, label)
-												}
-											}
-										}
-										kubernetesConfig["Labels"] = labels
-									}
-									if value, ok = kubernetesMap["taints"]; ok {
-										taints := make([]map[string]interface{}, 0)
-										if valueArr, ok := value.([]interface{}); ok {
-											for _, v := range valueArr {
-												taint := make(map[string]interface{})
-												if vMap, ok := v.(map[string]interface{}); ok {
-													if l, ok := vMap["key"]; ok {
-														taint["Key"] = l
-													}
-													if l, ok := vMap["value"]; ok {
-														taint["Value"] = l
-													}
-													if l, ok := vMap["effect"]; ok {
-														taint["Effect"] = l
-													}
-												}
-												if len(taint) > 0 {
-													taints = append(taints, taint)
-												}
-											}
-										}
-										kubernetesConfig["Taints"] = taints
-									}
-									if value, ok = kubernetesMap["cordon"]; ok {
-										kubernetesConfig["Cordon"] = value
-									}
-								}
-							}
-						}
+					kubernetesConfig := vke.TransKubernetesConfig(d)
+					if kubernetesConfig != nil {
 						(*call.SdkParam)["KubernetesConfig"] = kubernetesConfig
 					}
-
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					return true, nil
 				},
