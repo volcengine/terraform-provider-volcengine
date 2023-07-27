@@ -46,6 +46,7 @@ func (s *VolcengineClbService) ReadResources(condition map[string]interface{}) (
 				return data, err
 			}
 		}
+		logger.Debug(logger.RespFormat, action, condition, *resp)
 
 		results, err = ve.ObtainSdkValue("Result.LoadBalancers", *resp)
 		if err != nil {
@@ -248,7 +249,7 @@ func (VolcengineClbService) WithResourceResponseHandlers(clb map[string]interfac
 					case 3:
 						return "PostPaidByTraffic"
 					}
-					return i
+					return ""
 				},
 			},
 		}, nil
@@ -448,7 +449,9 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					//修改 clb 计费类型
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					time.Sleep(10 * time.Second)
+					return resp, err
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"Active"},
@@ -626,7 +629,7 @@ func (s *VolcengineClbService) DatasourceResources(*schema.ResourceData, *schema
 					case 3:
 						return "PostPaidByTraffic"
 					}
-					return i
+					return ""
 				},
 			},
 		},
