@@ -94,13 +94,12 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 						"labels": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Computed: true,
 							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Optional:    true,
 										ForceNew:    true,
 										Description: "The Key of Labels.",
 									},
@@ -123,7 +122,7 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Optional:    true,
 										ForceNew:    true,
 										Description: "The Key of Taints.",
 									},

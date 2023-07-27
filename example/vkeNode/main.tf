@@ -6,21 +6,21 @@ resource "volcengine_vke_node" "foo" {
   container_storage_path = ""
   kubernetes_config {
     labels {
-      key   = "ni"
-      value = "bb"
+      key   = "tf-key1"
+      value = "tf-value1"
     }
     labels {
-      key   = "cccc"
-      value = "dddd"
+      key   = "tf-key2"
+      value = "tf-value2"
     }
     taints {
-      key = "nini"
-      value = "dddd"
+      key = "tf-key3"
+      value = "tf-value3"
       effect = "NoSchedule"
     }
     taints {
-      key = "ninininini"
-      value = "111"
+      key = "tf-key4"
+      value = "tf-value4"
       effect = "NoSchedule"
     }
     cordon = true

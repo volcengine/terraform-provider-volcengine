@@ -55,8 +55,8 @@ resource "volcengine_vke_cluster" "foo" {
         service_cidrsv4 = ["172.30.0.0/18"]
     }
     tags {
-        key = "k1"
-        value = "v1"
+        key = "tf-k1"
+        value = "tf-v1"
     }
 }
 
@@ -75,21 +75,21 @@ resource "volcengine_vke_default_node_pool" "default" {
     }
     kubernetes_config {
         labels {
-            key   = "aacc"
-            value = "bb"
+            key   = "tf-key1"
+            value = "tf-value1"
         }
         labels {
-            key   = "cccc"
-            value = "dddd"
+            key   = "tf-key2"
+            value = "tf-value2"
         }
         taints {
-            key = "cccccc"
-            value = "dddd"
+            key = "tf-key3"
+            value = "tf-value3"
             effect = "NoSchedule"
         }
         taints {
-            key = "aa11"
-            value = "111"
+            key = "tf-key4"
+            value = "tf-value4"
             effect = "NoSchedule"
         }
         cordon = true
@@ -110,21 +110,21 @@ resource "volcengine_vke_default_node_pool_batch_attach" "default" {
     }
     kubernetes_config {
         labels {
-            key   = "ni"
-            value = "bb"
+            key   = "tf-key1"
+            value = "tf-value1"
         }
         labels {
-            key   = "cccc"
-            value = "dddd"
+            key   = "tf-key2"
+            value = "tf-value2"
         }
         taints {
-            key = "nini"
-            value = "dddd"
+            key = "tf-key3"
+            value = "tf-value3"
             effect = "NoSchedule"
         }
         taints {
-            key = "ninininini"
-            value = "111"
+            key = "tf-key4"
+            value = "tf-value4"
             effect = "NoSchedule"
         }
         cordon = true
