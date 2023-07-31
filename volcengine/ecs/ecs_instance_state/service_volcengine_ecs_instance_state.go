@@ -262,6 +262,5 @@ func (s *VolcengineInstanceStateService) DatasourceResources(*schema.ResourceDat
 }
 
 func (s *VolcengineInstanceStateService) ReadResourceId(id string) string {
-	items := strings.Split(id, ":")
-	return items[1]
+	return id
 }

@@ -10,9 +10,17 @@ description: |-
 Use this data source to query detailed information of ecs deployment sets
 ## Example Usage
 ```hcl
-data "volcengine_ecs_deployment_sets" "default" {
-  ids         = ["dps-ybp1b059cb5m57n135g3"]
-  granularity = "host"
+resource "volcengine_ecs_deployment_set" "foo" {
+  deployment_set_name = "acc-test-ecs-ds-${count.index}"
+  description         = "acc-test"
+  granularity         = "switch"
+  strategy            = "Availability"
+  count               = 3
+}
+
+data "volcengine_ecs_deployment_sets" "foo" {
+  granularity = "switch"
+  ids         = volcengine_ecs_deployment_set.foo[*].id
 }
 ```
 ## Argument Reference

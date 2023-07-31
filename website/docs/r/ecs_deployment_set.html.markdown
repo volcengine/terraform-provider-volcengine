@@ -10,10 +10,11 @@ description: |-
 Provides a resource to manage ecs deployment set
 ## Example Usage
 ```hcl
-resource "volcengine_ecs_deployment_set" "default" {
-  deployment_set_name = "tf-test"
-  description         = "test1"
-  granularity         = "host"
+resource "volcengine_ecs_deployment_set" "foo" {
+  deployment_set_name = "acc-test-ecs-ds"
+  description         = "acc-test"
+  granularity         = "switch"
+  strategy            = "Availability"
 }
 ```
 ## Argument Reference

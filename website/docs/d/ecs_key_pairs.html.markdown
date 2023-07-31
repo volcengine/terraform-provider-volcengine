@@ -10,8 +10,12 @@ description: |-
 Use this data source to query detailed information of ecs key pairs
 ## Example Usage
 ```hcl
-data "volcengine_ecs_key_pairs" "default" {
-  key_pair_ids = ["kp-l8u16bn69r8ny0fz01oc", "kp-l8u1wc12n3a82ep2s1px"]
+resource "volcengine_ecs_key_pair" "foo" {
+  key_pair_name = "acc-test-key-name"
+  description   = "acc-test"
+}
+data "volcengine_ecs_key_pairs" "foo" {
+  key_pair_name = volcengine_ecs_key_pair.foo.key_pair_name
 }
 ```
 ## Argument Reference
