@@ -219,6 +219,9 @@ func (s *VolcengineVkeNodeService) CreateResource(resourceData *schema.ResourceD
 						},
 					},
 				},
+				"node_pool_id": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("cluster_id").(string)

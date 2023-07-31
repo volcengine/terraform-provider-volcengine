@@ -1,9 +1,10 @@
 resource "volcengine_vke_node" "foo" {
   cluster_id = "ccj08tcur544aafnqu450"
-  instance_id = "i-yck8mmkjxpa8j5x0wfey"
+  instance_id = "i-ycklnc6atg2udanwod4g"
   keep_instance_name = true
   additional_container_storage_enabled = false
   container_storage_path = ""
+  #node_pool_id = "pcj3ifqd5ue15fodk669g"
   kubernetes_config {
     labels {
       key   = "tf-key1"

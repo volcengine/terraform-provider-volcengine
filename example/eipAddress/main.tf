@@ -2,7 +2,7 @@ resource "volcengine_eip_address" "foo" {
   billing_type = "PostPaidByBandwidth"
   bandwidth = 1
   isp = "ChinaUnicom"
-  name = "tf-eip"
-  description = "tf-test"
+  name = "acc-eip"
+  description = "acc-test"
   project_name = "default"
 }
