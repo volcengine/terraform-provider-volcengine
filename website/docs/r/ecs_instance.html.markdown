@@ -82,6 +82,7 @@ The following arguments are supported:
 * `system_volume_type` - (Required, ForceNew) The type of system volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `auto_renew_period` - (Optional) The auto renew period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 1.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `auto_renew` - (Optional) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `cpu_options` - (Optional) The option of cpu.
 * `data_volumes` - (Optional) The data volumes collection of  ECS instance.
 * `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
 * `description` - (Optional) The description of ECS instance.
@@ -106,6 +107,10 @@ The following arguments are supported:
 * `tags` - (Optional) Tags.
 * `user_data` - (Optional) The user data of ECS instance, this field must be encrypted with base64.
 * `zone_id` - (Optional, ForceNew) The available zone ID of ECS instance.
+
+The `cpu_options` object supports the following:
+
+* `threads_per_core` - (Required, ForceNew) The per core of threads.
 
 The `data_volumes` object supports the following:
 
