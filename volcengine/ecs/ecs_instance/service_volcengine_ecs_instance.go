@@ -456,6 +456,12 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 					ConvertType: ve.ConvertListN,
 					TargetField: "Volumes",
 					StartIndex:  1,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"delete_with_instance": {
+							TargetField: "DeleteWithInstance",
+							ForceGet:    true,
+						},
+					},
 				},
 				"cpu_options": {
 					ConvertType: ve.ConvertListUnique,
