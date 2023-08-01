@@ -258,9 +258,10 @@ func (s *VolcengineVkeNodeService) RemoveResource(resourceData *schema.ResourceD
 				if len(nodePool) == 0 {
 					return false, fmt.Errorf("node pool not found")
 				}
-				if nodePool[0].(map[string]interface{})["Name"] != "vke-default-nodepool" { // 非默认节点池，删除实例
-					(*call.SdkParam)["CascadingDeleteResources.1"] = "Ecs"
-				}
+				// 无需删除实例，确保整体流程的完整性
+				//if nodePool[0].(map[string]interface{})["Name"] != "vke-default-nodepool" { // 非默认节点池，删除实例
+				//	(*call.SdkParam)["CascadingDeleteResources.1"] = "Ecs"
+				//}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
