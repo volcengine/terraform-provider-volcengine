@@ -58,7 +58,17 @@ func (s *VolcengineServerGroupService) ReadResources(condition map[string]interf
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.ServerGroups is not Slice")
 		}
-
+		for index, serverGroup := range data {
+			if serverGroupMap, ok := serverGroup.(map[string]interface{}); ok {
+				id := serverGroupMap["ServerGroupId"].(string)
+				clbId, err := s.queryLoadBalancerId(id)
+				if err != nil {
+					return data, err
+				}
+				serverGroupMap["LoadBalancerId"] = clbId
+				data[index] = serverGroupMap
+			}
+		}
 		return data, err
 	})
 }

@@ -78,53 +78,64 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 			"initialize_script": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
 				Description: "The initializeScript of Node.",
 			},
 			"kubernetes_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
 				Description: "The KubernetesConfig of Node.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "The Key of Labels.",
 									},
 									"value": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "The Value of Labels.",
 									},
 								},
 							},
-							Set:         kubernetesConfigLabelHash,
 							Description: "The Labels of KubernetesConfig.",
 						},
 						"taints": {
-							Type:     schema.TypeSet,
+							Type:     schema.TypeList,
 							Optional: true,
+							ForceNew: true,
+							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "The Key of Taints.",
 									},
 									"value": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "The Value of Taints.",
 									},
 									"effect": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										ForceNew:    true,
 										Description: "The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.",
 									},
 								},
@@ -134,6 +145,8 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 						"cordon": {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
 							Description: "The Cordon of KubernetesConfig.",
 						},
 					},
@@ -152,6 +165,8 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 			},
 			"node_pool_id": {
 				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The node pool id.",
 			},

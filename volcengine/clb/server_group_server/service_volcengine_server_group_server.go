@@ -258,7 +258,8 @@ func (s *VolcengineServerGroupServerService) ModifyResource(resourceData *schema
 
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action: "ModifyServerGroupAttributes",
+			Action:      "ModifyServerGroupAttributes",
+			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ServerGroupId"] = ids[0]
 				(*call.SdkParam)["Servers.1.ServerId"] = ids[1]
