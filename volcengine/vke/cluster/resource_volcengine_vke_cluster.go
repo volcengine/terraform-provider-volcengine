@@ -132,6 +132,13 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 							ForceNew:    true,
 							Description: "Node public network access configuration, the value is `true` or `false`.",
 						},
+						"ip_family": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							ForceNew:    true,
+							Description: "[SkipDoc]The IpFamily configuration,the value is `Ipv4` or `DualStack`.",
+						},
 					},
 				},
 			},

@@ -376,8 +376,10 @@ func genDoc(pwd string, resourceName, product, docType, filename, name string, r
 		attributes   []string
 		subStruct    []string
 	)
-
 	for k, v := range resource.Schema {
+		if strings.Contains(v.Description, "[SkipDoc]") {
+			continue
+		}
 		if v.Description == "" {
 			message("[FAIL!]description for '%s' is missing: %s\n", k, filename)
 			os.Exit(1)
@@ -482,6 +484,10 @@ func getAttributes(step int, k string, v *schema.Schema) []string {
 	var attributes []string
 	ident := strings.Repeat(" ", step*4)
 
+	if strings.Contains(v.Description, "[SkipDoc]") {
+		return attributes
+	}
+
 	if v.Description == "" {
 		return attributes
 	} else {
@@ -534,6 +540,10 @@ func getFileDescription(fname string) (string, error) {
 func getSubStruct(step int, k string, v *schema.Schema) []string {
 	var subStructs []string
 
+	if strings.Contains(v.Description, "[SkipDoc]") {
+		return subStructs
+	}
+
 	if v.Description == "" {
 		return subStructs
 	} else {
@@ -549,6 +559,9 @@ func getSubStruct(step int, k string, v *schema.Schema) []string {
 				optionalArgs []string
 			)
 			for kk, vv := range v.Elem.(*schema.Resource).Schema {
+				if strings.Contains(vv.Description, "[SkipDoc]") {
+					continue
+				}
 				if vv.Required {
 					opt := "Required"
 					if vv.ForceNew {
