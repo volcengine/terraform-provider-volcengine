@@ -250,6 +250,11 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 													Set:         schema.HashString,
 													Description: "IPv4 public network access whitelist. A null value means all network segments (0.0.0.0/0) are allowed to pass.",
 												},
+												"ip_family": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "[SkipDoc]The IpFamily configuration,the value is `Ipv4` or `DualStack`.",
+												},
 											},
 										},
 									},
