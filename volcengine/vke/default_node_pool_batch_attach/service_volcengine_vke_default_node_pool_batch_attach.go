@@ -36,7 +36,12 @@ func (s *VolcengineVkeDefaultNodePoolBatchAttachService) ReadResource(resourceDa
 	if nodePoolId == "" {
 		nodePoolId = s.ReadResourceId(resourceData.Id())
 	}
-	return s.defaultNodePoolService.ReadResource(resourceData, nodePoolId)
+	data, err = s.defaultNodePoolService.ReadResource(resourceData, nodePoolId)
+	// 节点池和节点均有kubernetes config
+	// 相同key以节点池的config为准，不同key时一起生效，因此需删除config保持不触发变更
+	delete(data, "KubernetesConfig")
+	logger.Debug(logger.ReqFormat, "VolcengineVkeDefaultNodePoolBatchAttachService ReadResource", "data", data)
+	return data, err
 }
 
 func (s *VolcengineVkeDefaultNodePoolBatchAttachService) RefreshResourceState(data *schema.ResourceData, strings []string, duration time.Duration, id string) *resource.StateChangeConf {

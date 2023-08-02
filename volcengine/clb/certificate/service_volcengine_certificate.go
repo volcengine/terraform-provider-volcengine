@@ -135,8 +135,8 @@ func (s *VolcengineCertificateService) ModifyResource(resourceData *schema.Resou
 			Action:      "ModifyCertificateAttributes",
 			ConvertMode: ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
-				"certification_name": {
-					TargetField: "CertificationName",
+				"certificate_name": {
+					TargetField: "CertificateName",
 				},
 				"description": {
 					TargetField: "Description",

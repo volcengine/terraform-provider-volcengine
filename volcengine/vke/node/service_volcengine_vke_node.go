@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke"
 	"strings"
 	"time"
 
@@ -103,6 +104,10 @@ func (s *VolcengineVkeNodeService) ReadResource(resourceData *schema.ResourceDat
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("Vke node %s not exist ", id)
+	}
+	kubernetesConfig := vke.TransKubernetesConfig(resourceData)
+	if kubernetesConfig != nil {
+		data["KubernetesConfig"] = kubernetesConfig
 	}
 	return data, err
 }
@@ -214,6 +219,9 @@ func (s *VolcengineVkeNodeService) CreateResource(resourceData *schema.ResourceD
 						},
 					},
 				},
+				"node_pool_id": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("cluster_id").(string)
@@ -250,9 +258,10 @@ func (s *VolcengineVkeNodeService) RemoveResource(resourceData *schema.ResourceD
 				if len(nodePool) == 0 {
 					return false, fmt.Errorf("node pool not found")
 				}
-				if nodePool[0].(map[string]interface{})["Name"] != "vke-default-nodepool" { // 非默认节点池，删除实例
-					(*call.SdkParam)["CascadingDeleteResources.1"] = "Ecs"
-				}
+				// 无需删除实例，确保整体流程的完整性
+				//if nodePool[0].(map[string]interface{})["Name"] != "vke-default-nodepool" { // 非默认节点池，删除实例
+				//	(*call.SdkParam)["CascadingDeleteResources.1"] = "Ecs"
+				//}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

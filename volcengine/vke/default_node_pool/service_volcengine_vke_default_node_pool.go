@@ -560,15 +560,17 @@ func (s *VolcengineDefaultNodePoolService) ProcessNodeInstances(resourceData *sc
 					} else if len(ks) > 4 {
 						(*call.SdkParam)["ContainerStoragePath"] = (*call.SdkParam)["Key"].(string)[len(ks[0])+1+len(ks[1])+1+len(ks[2])+1:]
 					}
-
 					delete(*call.SdkParam, "Key")
 					delete(*call.SdkParam, "Value")
-
+					kubernetesConfig := vke.TransKubernetesConfig(d)
+					if kubernetesConfig != nil {
+						(*call.SdkParam)["KubernetesConfig"] = kubernetesConfig
+					}
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 					logger.Debug(logger.RespFormat, call.Action, resp, err)
 					return resp, err
@@ -588,7 +590,6 @@ func (s *VolcengineDefaultNodePoolService) ProcessNodeInstances(resourceData *sc
 				},
 			},
 		}
-
 		calls = append(calls, nodeCall)
 	}
 	return calls
