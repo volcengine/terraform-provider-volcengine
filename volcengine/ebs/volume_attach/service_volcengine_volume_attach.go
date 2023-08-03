@@ -10,15 +10,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 )
 
 type VolcengineVolumeAttachService struct {
-	Client *ve.SdkClient
+	Client        *ve.SdkClient
+	volumeService *volume.VolcengineVolumeService
 }
 
 func NewVolumeAttachService(c *ve.SdkClient) *VolcengineVolumeAttachService {
 	return &VolcengineVolumeAttachService{
-		Client: c,
+		Client:        c,
+		volumeService: volume.NewVolumeService(c),
 	}
 }
 
@@ -140,6 +143,24 @@ func (s *VolcengineVolumeAttachService) CreateResource(resourceData *schema.Reso
 		Call: ve.SdkCall{
 			Action:      "AttachVolume",
 			ConvertMode: ve.RequestConvertAll,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				_, exist := d.GetOkExists("delete_with_instance")
+				if exist {
+					return true, nil
+				} else {
+					volumeId := resourceData.Get("volume_id")
+					volume, err := s.volumeService.ReadResource(resourceData, volumeId.(string))
+					if err != nil {
+						return false, err
+					}
+					deleteWithInstance, ok := volume["DeleteWithInstance"]
+					if !ok {
+						return false, fmt.Errorf(" DeleteWithInstance is not exist in volume ")
+					}
+					(*call.SdkParam)["DeleteWithInstance"] = deleteWithInstance
+					return true, nil
+				}
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.EbsClient.AttachVolumeCommon(call.SdkParam)
@@ -148,9 +169,12 @@ func (s *VolcengineVolumeAttachService) CreateResource(resourceData *schema.Reso
 				d.SetId(fmt.Sprint((*call.SdkParam)["VolumeId"], ":", (*call.SdkParam)["InstanceId"]))
 				return nil
 			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"attached"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				volume.NewVolumeService(s.Client): {
+					Target:     []string{"attached"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("volume_id").(string),
+				},
 			},
 		},
 	}
@@ -188,9 +212,12 @@ func (s *VolcengineVolumeAttachService) RemoveResource(resourceData *schema.Reso
 					return resource.RetryableError(callErr)
 				})
 			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"available"},
-				Timeout: resourceData.Timeout(schema.TimeoutDelete),
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				volume.NewVolumeService(s.Client): {
+					Target:     []string{"available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
+					ResourceId: resourceData.Get("volume_id").(string),
+				},
 			},
 		},
 	}

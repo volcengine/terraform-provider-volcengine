@@ -42,6 +42,7 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 			"subnet_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ExactlyOneOf: []string{"subnet_id", "source_cidr"},
 				Description:  "The id of the subnet that is required to access the internet. Only one of `subnet_id,source_cidr` can be specified.",
@@ -65,6 +66,7 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 			"source_cidr": {
 				Type:         schema.TypeString,
 				Optional:     true,
+				Computed:     true,
 				ForceNew:     true,
 				ExactlyOneOf: []string{"subnet_id", "source_cidr"},
 				Description:  "The SourceCidr of the SNAT entry. Only one of `subnet_id,source_cidr` can be specified.",
