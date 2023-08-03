@@ -177,7 +177,7 @@ func (s *VolcengineVpnGatewayService) RefreshResourceState(resourceData *schema.
 
 func (VolcengineVpnGatewayService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		if v["BillingType"].(float64) == 1 {
+		if v["BillingType"].(float64) == 1 && strings.Contains(v["ExpiredTime"].(string), "+") {
 			ct, _ := time.Parse("2006-01-02T15:04:05", v["CreationTime"].(string)[0:strings.Index(v["CreationTime"].(string), "+")])
 			et, _ := time.Parse("2006-01-02T15:04:05", v["ExpiredTime"].(string)[0:strings.Index(v["ExpiredTime"].(string), "+")])
 			y := et.Year() - ct.Year()
