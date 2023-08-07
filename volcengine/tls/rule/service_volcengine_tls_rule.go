@@ -110,6 +110,9 @@ func (v *VolcengineTlsRuleService) ReadResource(resourceData *schema.ResourceDat
 		Path:        []string{action},
 		Client:      v.Client.BypassSvcClient.NewTlsClient(),
 	}, &req)
+	if err != nil {
+		return data, err
+	}
 	logger.Debug(logger.RespFormat, action, resp)
 	projectId, err = ve.ObtainSdkValue("RESPONSE.ProjectId", *resp)
 	if err != nil {

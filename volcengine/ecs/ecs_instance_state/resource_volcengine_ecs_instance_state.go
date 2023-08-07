@@ -53,10 +53,7 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"KeepCharging", "StopCharging"}, false),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					// 如开机行为，该字段修改忽略
-					if d.Get("action").(string) == "Start" {
-						return true
-					}
-					return false
+					return d.Get("action").(string) == "Start"
 				},
 				Description: "Stop Mode of Instance, the value can be `KeepCharging` or `StopCharging`, default `KeepCharging`.",
 			},

@@ -65,11 +65,11 @@ func (s *VolcengineMongoDBEndpointService) ReadResources(condition map[string]in
 
 func (s *VolcengineMongoDBEndpointService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		instanceId   = ""
-		endpointId   = ""
-		objectId     = ""
-		tempObjectId = ""
-		networkType  = ""
+		instanceId   string
+		endpointId   string
+		objectId     string
+		tempObjectId string
+		networkType  string
 	)
 
 	if id == "" {
@@ -238,7 +238,7 @@ func (s *VolcengineMongoDBEndpointService) CreateResource(resourceData *schema.R
 					return nil, err
 				}
 				endpointId := endpoint["EndpointId"].(string)
-				d.Set("endpoint_id", endpointId)
+				_ = d.Set("endpoint_id", endpointId)
 				d.SetId(fmt.Sprintf("%s:%s", instanceId, endpointId))
 				return nil, nil
 			},

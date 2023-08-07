@@ -42,7 +42,7 @@ func ResourceVolcengineRule() *schema.Resource {
 				if err != nil {
 					return nil, err
 				}
-				d.Set("listener_id", listenerId)
+				_ = d.Set("listener_id", listenerId)
 				d.SetId(ruleId)
 				return []*schema.ResourceData{d}, nil
 			},

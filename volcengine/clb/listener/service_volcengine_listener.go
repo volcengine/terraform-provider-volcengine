@@ -212,7 +212,7 @@ func (s *VolcengineListenerService) checkAcl(aclIds []string) error {
 
 		for _, aclId := range aclIds {
 			if _, exist := aclIdMap[aclId]; !exist {
-				return resource.NonRetryableError(errors.New(fmt.Sprintf("cannot find acl: %s", aclId)))
+				return resource.NonRetryableError(fmt.Errorf(fmt.Sprintf("cannot find acl: %s", aclId)))
 			}
 		}
 		return nil

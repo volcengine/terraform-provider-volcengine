@@ -48,9 +48,8 @@ func resourceSpecial(resource *schema.Resource, data map[string]interface{}, con
 						}
 					}
 				}
-				break
 			default:
-				break
+				// do nothing
 			}
 			if v.Elem != nil {
 				if next, ok = v.Elem.(*schema.Resource); ok {

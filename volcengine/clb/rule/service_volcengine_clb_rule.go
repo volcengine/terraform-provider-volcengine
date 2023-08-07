@@ -41,11 +41,11 @@ func (s *VolcengineRuleService) ReadResources(condition map[string]interface{}) 
 		idsMap := make(map[string]bool)
 		if ids, ok := condition["RuleIds"]; ok {
 			var values []interface{}
-			switch ids.(type) {
+			switch _ids := ids.(type) {
 			case *schema.Set:
-				values = ids.(*schema.Set).List() // from datasource
+				values = _ids.List() // from datasource
 			default:
-				values = ids.([]interface{}) // from resource_read
+				values = _ids.([]interface{}) // from resource_read
 			}
 			for _, value := range values {
 				if value == nil {

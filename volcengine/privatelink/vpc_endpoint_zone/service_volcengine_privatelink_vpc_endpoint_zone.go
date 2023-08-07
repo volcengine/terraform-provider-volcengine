@@ -84,7 +84,7 @@ func (s *VolcengineVpcEndpointZoneService) ReadResource(resourceData *schema.Res
 		return data, err
 	}
 	for _, v := range results {
-		zoneMap := make(map[string]interface{})
+		var zoneMap map[string]interface{}
 		if zoneMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		}

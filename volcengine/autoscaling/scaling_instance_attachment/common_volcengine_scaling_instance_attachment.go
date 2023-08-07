@@ -30,10 +30,10 @@ func formatInstanceIdsRequest(instanceId string) map[string]interface{} {
 	return res
 }
 
-func convertSliceInterfaceToString(org []interface{}) []string {
-	res := make([]string, len(org))
-	for i, ele := range org {
-		res[i] = ele.(string)
-	}
-	return res
-}
+//func convertSliceInterfaceToString(org []interface{}) []string {
+//	res := make([]string, len(org))
+//	for i, ele := range org {
+//		res[i] = ele.(string)
+//	}
+//	return res
+//}

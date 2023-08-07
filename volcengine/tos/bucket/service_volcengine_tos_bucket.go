@@ -161,18 +161,18 @@ func (s *VolcengineTosBucketService) RefreshResourceState(data *schema.ResourceD
 	}
 }
 
-func (s *VolcengineTosBucketService) getIdPermission(p string, grants []interface{}) []interface{} {
-	var result []interface{}
-	for _, grant := range grants {
-		permission, _ := ve.ObtainSdkValue("Permission", grant)
-		id, _ := ve.ObtainSdkValue("Grantee.ID", grant)
-		t, _ := ve.ObtainSdkValue("Grantee.Type", grant)
-		if id != nil && t.(string) == "CanonicalUser" && p == permission.(string) {
-			result = append(result, "Id="+id.(string))
-		}
-	}
-	return result
-}
+//func (s *VolcengineTosBucketService) getIdPermission(p string, grants []interface{}) []interface{} {
+//	var result []interface{}
+//	for _, grant := range grants {
+//		permission, _ := ve.ObtainSdkValue("Permission", grant)
+//		id, _ := ve.ObtainSdkValue("Grantee.ID", grant)
+//		t, _ := ve.ObtainSdkValue("Grantee.Type", grant)
+//		if id != nil && t.(string) == "CanonicalUser" && p == permission.(string) {
+//			result = append(result, "Id="+id.(string))
+//		}
+//	}
+//	return result
+//}
 
 func (s *VolcengineTosBucketService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
@@ -180,10 +180,7 @@ func (s *VolcengineTosBucketService) WithResourceResponseHandlers(m map[string]i
 			"EnableVersion": {
 				Convert: func(i interface{}) interface{} {
 					status, _ := ve.ObtainSdkValue("Status", i)
-					if status.(string) != "Enabled" {
-						return false
-					}
-					return true
+					return status.(string) == "Enabled"
 				},
 			},
 			"AccountAcl": {

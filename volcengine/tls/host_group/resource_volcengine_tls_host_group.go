@@ -53,10 +53,7 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("host_group_type").(string) == "IP" {
-						return false
-					}
-					return true
+					return d.Get("host_group_type").(string) != "IP"
 				},
 			},
 			"host_identifier": {
@@ -64,10 +61,7 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 				Optional:    true,
 				Description: "The identifier of host.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("host_group_type").(string) == "Label" {
-						return false
-					}
-					return true
+					return d.Get("host_group_type").(string) != "Label"
 				},
 			},
 			"auto_update": {

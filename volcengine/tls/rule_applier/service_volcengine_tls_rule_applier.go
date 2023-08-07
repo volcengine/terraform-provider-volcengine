@@ -75,7 +75,7 @@ func (v *VolcengineTlsRuleApplierService) ReadResources(m map[string]interface{}
 			logger.DebugInfo("plugin ori : ", processors)
 			p, _ := json.Marshal(processors)
 			pStr := string(p)
-			strings.ReplaceAll(pStr, "\\", "")
+			pStr = strings.ReplaceAll(pStr, "\\", "")
 			newStr := ""
 			if len(pStr) > 1 {
 				newStr = pStr[1 : len(pStr)-1]

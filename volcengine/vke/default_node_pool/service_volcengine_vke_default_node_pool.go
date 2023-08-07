@@ -80,7 +80,7 @@ func (s *VolcengineDefaultNodePoolService) ReadResource(resourceData *schema.Res
 			n.(map[string]interface{})["Phase"], _ = ve.ObtainSdkValue("Status.Phase", n)
 			ins = append(ins, n)
 		}
-		resourceData.Set("is_import", false)
+		_ = resourceData.Set("is_import", false)
 	} else {
 		for _, ins := range instances.List() {
 			instancesId, _ := ve.ObtainSdkValue("instance_id", ins)

@@ -159,9 +159,9 @@ func (s *VolcengineInstanceStateService) ReadResource(resourceData *schema.Resou
 		// check status
 		status := data["Status"].(string)
 		if status == "RUNNING" {
-			resourceData.Set("action", "Start")
+			_ = resourceData.Set("action", "Start")
 		} else if status == "STOPPED" {
-			resourceData.Set("action", "Stop")
+			_ = resourceData.Set("action", "Stop")
 		} else {
 			return nil, fmt.Errorf("instance %s status %s is not RUNNING or STOPPED", instanceId, status)
 		}

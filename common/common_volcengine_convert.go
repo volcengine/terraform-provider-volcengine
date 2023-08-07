@@ -203,15 +203,12 @@ func ResourceDateToRequest(d *schema.ResourceData, resource *schema.Resource, is
 	switch mode {
 	case RequestConvertAll:
 		onlyMode = false
-		break
 	case RequestConvertInConvert:
 		onlyMode = true
-		break
 	case RequestConvertIgnore:
 		return req, err
 	default:
 		onlyMode = true
-		break
 	}
 
 	if convert != nil && onlyMode {
@@ -251,28 +248,20 @@ func Convert(d *schema.ResourceData, k string, v interface{}, t RequestConvert, 
 	switch t.ConvertType {
 	case ConvertDefault:
 		err = RequestConvertDefault(v, k, t, req, chain)
-		break
 	case ConvertSingleN:
 		err = RequestConvertSingleN(v, k, t, req, chain)
-		break
 	case ConvertWithN:
 		err = RequestConvertWithN(v, k, t, req, chain)
-		break
 	case ConvertListN:
 		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, false, contentType, schemaChain, setIndex)
-		break
 	case ConvertListUnique:
 		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, true, contentType, schemaChain, setIndex)
-		break
 	case ConvertJsonObject: //equal ConvertListUnique
 		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, true, contentType, schemaChain, setIndex)
-		break
 	case ConvertJsonArray: //equal ConvertWithN
 		err = RequestConvertWithN(v, k, t, req, chain)
-		break
 	case ConvertJsonObjectArray: //equal ConvertListN
 		err = RequestConvertListN(v, k, t, req, chain, d, forceGet, false, contentType, schemaChain, setIndex)
-		break
 		//case ConvertWithFilter:
 		//	index, err = RequestConvertWithFilter(v, k, t, index, req)
 		//	break
@@ -432,7 +421,6 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 							if err != nil {
 								return err
 							}
-							break
 						case reflect.Ptr:
 							if _v2, ok2 := v2.(*schema.Set); ok2 {
 								var setIndex []int
@@ -449,11 +437,9 @@ func RequestConvertListN(v interface{}, k string, t RequestConvert, req *map[str
 								}
 								break
 							}
-							break
 						default:
 							k3 = k3 + GetFinalKey(t, k2, false)
 							(*req)[k3] = v2
-							break
 						}
 					}
 				}

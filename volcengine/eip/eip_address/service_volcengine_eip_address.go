@@ -265,7 +265,7 @@ func (s *VolcengineEipAddressService) ModifyResource(resourceData *schema.Resour
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 					if d.Get("billing_type").(string) != "PrePaid" {
-						d.Set("period", nil)
+						_ = d.Set("period", nil)
 						//d.Set("period_unit", nil)
 					}
 					return nil

@@ -268,7 +268,7 @@ func (c *SdkCall) InitReadCall(resourceData *schema.ResourceData, resource *sche
 }
 
 func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, service ResourceService) (err error) {
-	if calls != nil {
+	if len(calls) > 0 {
 		for _, fn := range calls {
 			if fn.ExecuteCall != nil {
 				var (
@@ -285,7 +285,7 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 					}
 					fn.SdkParam = &trans
 				case DefaultServiceCategory:
-					break
+					//do nothing
 				}
 
 				if fn.BeforeCall != nil {
@@ -294,7 +294,7 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 				if doExecute {
 					switch fn.ContentType {
 					case ContentTypeDefault:
-						break
+						//do nothing
 					case ContentTypeJson:
 						var jsonParam map[string]interface{}
 						jsonParam, err = SortAndStartTransJson(*fn.SdkParam)
@@ -302,7 +302,6 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 							return err
 						}
 						fn.SdkParam = &jsonParam
-						break
 					}
 					if fn.LockId != nil {
 						key := fn.LockId(d)
