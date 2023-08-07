@@ -45,6 +45,11 @@ func ResourceVolcengineScalingPolicy() *schema.Resource {
 				ForceNew:    true,
 				Description: "The id of the scaling group to which the scaling policy belongs.",
 			},
+			"scaling_policy_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The id of the scaling policy.",
+			},
 			"scaling_policy_name": {
 				Type:        schema.TypeString,
 				Required:    true,

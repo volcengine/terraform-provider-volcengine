@@ -127,7 +127,41 @@ func (s *VolcengineScalingPolicyService) RefreshResourceState(resourceData *sche
 func (VolcengineScalingPolicyService) WithResourceResponseHandlers(scalingPolicy map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		scalingPolicy["active"] = scalingPolicy["Status"].(string) == "Active"
-		return scalingPolicy, nil, nil
+		return scalingPolicy, map[string]ve.ResponseConvert{
+			"ScheduledPolicy.LaunchTime": {
+				TargetField: "scheduled_policy_launch_time",
+			},
+			"ScheduledPolicy.RecurrenceStartTime": {
+				TargetField: "scheduled_policy_recurrence_start_time",
+			},
+			"ScheduledPolicy.RecurrenceEndTime": {
+				TargetField: "scheduled_policy_recurrence_end_time",
+			},
+			"ScheduledPolicy.RecurrenceType": {
+				TargetField: "scheduled_policy_recurrence_type",
+			},
+			"ScheduledPolicy.RecurrenceValue": {
+				TargetField: "scheduled_policy_recurrence_value",
+			},
+			"AlarmPolicy.RuleType": {
+				TargetField: "alarm_policy_rule_type",
+			},
+			"AlarmPolicy.EvaluationCount": {
+				TargetField: "alarm_policy_evaluation_count",
+			},
+			"AlarmPolicy.Condition.MetricName": {
+				TargetField: "alarm_policy_condition_metric_name",
+			},
+			"AlarmPolicy.Condition.MetricUnit": {
+				TargetField: "alarm_policy_condition_metric_unit",
+			},
+			"AlarmPolicy.Condition.ComparisonOperator": {
+				TargetField: "alarm_policy_condition_comparison_operator",
+			},
+			"AlarmPolicy.Condition.Threshold": {
+				TargetField: "alarm_policy_condition_threshold",
+			},
+		}, nil
 	}
 
 	return []ve.ResourceResponseHandler{handler}
@@ -188,6 +222,7 @@ func (s *VolcengineScalingPolicyService) CreateResource(resourceData *schema.Res
 				//注意 获取内容 这个地方不能是指针 需要转一次
 				id, _ := ve.ObtainSdkValue("Result.ScalingPolicyId", *resp)
 				d.SetId(fmt.Sprintf("%v:%v", d.Get("scaling_group_id"), id))
+				d.Set("scaling_policy_id", id)
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
@@ -425,7 +460,7 @@ func (s *VolcengineScalingPolicyService) DatasourceResources(*schema.ResourceDat
 }
 
 func (s *VolcengineScalingPolicyService) ReadResourceId(id string) string {
-	return strings.Split(id, ":")[1]
+	return id
 }
 
 func (s *VolcengineScalingPolicyService) enableOrDisablePolicyCallback(resourceData *schema.ResourceData) ve.Callback {
