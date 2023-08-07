@@ -3,6 +3,7 @@ package scaling_instance_attachment
 import (
 	"errors"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/autoscaling/scaling_group"
 	"strings"
 	"time"
 
@@ -91,6 +92,7 @@ func (s *VolcengineScalingInstanceAttachmentService) ReadResource(resourceData *
 	status = tempData["Status"].(string)
 	data["InstanceId"] = instanceId
 	data["Status"] = status
+	data["Entrusted"] = tempData["Entrusted"]
 
 	return data, nil
 }
@@ -139,7 +141,7 @@ func (VolcengineScalingInstanceAttachmentService) WithResourceResponseHandlers(s
 
 func (s *VolcengineScalingInstanceAttachmentService) CreateResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	instanceId := d.Get("instance_id").(string)
-	return s.attachInstances(d.Get("scaling_group_id").(string), instanceId, d.Timeout(schema.TimeoutUpdate))
+	return s.attachInstances(d, d.Get("scaling_group_id").(string), instanceId, d.Timeout(schema.TimeoutUpdate))
 }
 
 func (s *VolcengineScalingInstanceAttachmentService) ModifyResource(d *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -150,7 +152,7 @@ func (s *VolcengineScalingInstanceAttachmentService) RemoveResource(d *schema.Re
 	instanceId := d.Get("instance_id").(string)
 	deleteType := d.Get("delete_type").(string)
 	detachOption := d.Get("detach_option").(string)
-	return s.removeInstances(d.Get("scaling_group_id").(string), instanceId, d.Timeout(schema.TimeoutDelete), deleteType, detachOption)
+	return s.removeInstances(d, d.Get("scaling_group_id").(string), instanceId, deleteType, detachOption)
 }
 
 func (s *VolcengineScalingInstanceAttachmentService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
@@ -161,7 +163,7 @@ func (s *VolcengineScalingInstanceAttachmentService) ReadResourceId(id string) s
 	return id
 }
 
-func (s *VolcengineScalingInstanceAttachmentService) attachInstances(groupId string, instanceId string, timeout time.Duration) []ve.Callback {
+func (s *VolcengineScalingInstanceAttachmentService) attachInstances(d *schema.ResourceData, groupId string, instanceId string, timeout time.Duration) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 	attachCallback := ve.Callback{
 		Call: ve.SdkCall{
@@ -194,13 +196,20 @@ func (s *VolcengineScalingInstanceAttachmentService) attachInstances(groupId str
 				Target:  []string{"InService", "Protected"},
 				Timeout: timeout,
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				scaling_group.NewScalingGroupService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    d.Timeout(schema.TimeoutCreate),
+					ResourceId: d.Get("scaling_group_id").(string),
+				},
+			},
 		},
 	}
 	callbacks = append(callbacks, attachCallback)
 	return callbacks
 }
 
-func (s *VolcengineScalingInstanceAttachmentService) removeInstances(groupId string, instanceId string, timeout time.Duration, deleteType, detachOption string) []ve.Callback {
+func (s *VolcengineScalingInstanceAttachmentService) removeInstances(d *schema.ResourceData, groupId string, instanceId string, deleteType, detachOption string) []ve.Callback {
 	var action string
 	if deleteType == "Detach" {
 		action = "DetachInstances"
@@ -233,6 +242,13 @@ func (s *VolcengineScalingInstanceAttachmentService) removeInstances(groupId str
 				}
 				time.Sleep(10 * time.Second) // remove以后需要等一下
 				return common, nil
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				scaling_group.NewScalingGroupService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    d.Timeout(schema.TimeoutCreate),
+					ResourceId: d.Get("scaling_group_id").(string),
+				},
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
