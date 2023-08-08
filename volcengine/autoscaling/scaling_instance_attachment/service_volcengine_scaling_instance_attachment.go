@@ -192,6 +192,9 @@ func (s *VolcengineScalingInstanceAttachmentService) attachInstances(d *schema.R
 				d.SetId(fmt.Sprint((*call.SdkParam)["ScalingGroupId"], ":", (*call.SdkParam)["InstanceIds.1"]))
 				return nil
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("scaling_group_id").(string)
+			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"InService", "Protected"},
 				Timeout: timeout,
@@ -233,6 +236,9 @@ func (s *VolcengineScalingInstanceAttachmentService) removeInstances(d *schema.R
 				}
 				*call.SdkParam = param
 				return true, nil
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("scaling_group_id").(string)
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
