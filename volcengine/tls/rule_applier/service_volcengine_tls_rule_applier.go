@@ -1,7 +1,6 @@
 package rule_applier
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -23,10 +22,9 @@ func (v *VolcengineTlsRuleApplierService) GetClient() *ve.SdkClient {
 
 func (v *VolcengineTlsRuleApplierService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp        *map[string]interface{}
-		results     interface{}
-		transResult []interface{}
-		ok          bool
+		resp    *map[string]interface{}
+		results interface{}
+		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeHostGroupRules"
@@ -47,44 +45,6 @@ func (v *VolcengineTlsRuleApplierService) ReadResources(m map[string]interface{}
 		}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.RuleInfos is not Slice")
-		}
-		for _, d := range data {
-			dataMap, ok := d.(map[string]interface{})
-			if !ok {
-				return data, errors.New("value is not map")
-			}
-			userRuleMap, ok := dataMap["UserDefineRule"].(map[string]interface{})
-			if !ok {
-				return data, errors.New("value is not map")
-			}
-			plugin, ok := userRuleMap["Plugin"].(map[string]interface{})
-			if !ok {
-				if plugin == nil {
-					continue
-				}
-				return data, errors.New("value is not map")
-			}
-			if len(plugin) == 0 {
-				continue
-			}
-			// 接口中 processors 为小写
-			processors, ok := plugin["processors"]
-			if !ok {
-				continue
-			}
-			logger.DebugInfo("plugin ori : ", processors)
-			p, _ := json.Marshal(processors)
-			pStr := string(p)
-			pStr = strings.ReplaceAll(pStr, "\\", "")
-			newStr := ""
-			if len(pStr) > 1 {
-				newStr = pStr[1 : len(pStr)-1]
-			}
-			logger.DebugInfo("plugin marshal : ", newStr)
-			plugin["processors"] = newStr
-			userRuleMap["Plugin"] = plugin
-			dataMap["UserDefineRule"] = userRuleMap
-			transResult = append(transResult, dataMap)
 		}
 		return data, err
 	})
