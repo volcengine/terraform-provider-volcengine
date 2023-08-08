@@ -342,13 +342,3 @@ func validateProtocol(protocol string, start, end int) error {
 	}
 	return nil
 }
-
-func getUniversalInfo(actionName string) ve.UniversalInfo {
-	return ve.UniversalInfo{
-		ServiceName: "vpc",
-		Version:     "2020-04-01",
-		HttpMethod:  ve.GET,
-		ContentType: ve.Default,
-		Action:      actionName,
-	}
-}

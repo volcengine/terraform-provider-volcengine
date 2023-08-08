@@ -106,7 +106,7 @@ func mongoDBParameterImporter(d *schema.ResourceData, m interface{}) ([]*schema.
 	if len(items) != 3 || items[0] != "param" {
 		return []*schema.ResourceData{d}, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName'")
 	}
-	d.Set("instance_id", items[1])
-	d.Set("parameter_name", items[2])
+	_ = d.Set("instance_id", items[1])
+	_ = d.Set("parameter_name", items[2])
 	return []*schema.ResourceData{d}, nil
 }

@@ -83,10 +83,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					// 当实例类型为分片集群（即InstanceType取值为ShardedCluster）时，该参数必填。
-					if d.Get("instance_type") == "ReplicaSet" {
-						return true
-					}
-					return false
+					return d.Get("instance_type") == "ReplicaSet"
 				},
 				Description: "The mongos node spec of shard cluster, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
@@ -94,10 +91,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("instance_type") == "ReplicaSet" {
-						return true
-					}
-					return false
+					return d.Get("instance_type") == "ReplicaSet"
 				},
 				Description: "The mongos node number of shard cluster,value range is `2~23`, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},
@@ -105,10 +99,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Get("instance_type") == "ReplicaSet" {
-						return true
-					}
-					return false
+					return d.Get("instance_type") == "ReplicaSet"
 				},
 				Description: "The number of shards in shard cluster,value range is `2~32`, this parameter is required when `InstanceType` is `ShardedCluster`.",
 			},

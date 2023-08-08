@@ -3,9 +3,7 @@ package common
 import (
 	"bytes"
 	"crypto/hmac"
-	"crypto/md5"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -264,11 +262,11 @@ func hashSHA256(content []byte) string {
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
-func hashMD5(content []byte) string {
-	h := md5.New()
-	h.Write(content)
-	return base64.StdEncoding.EncodeToString(h.Sum(nil))
-}
+//func hashMD5(content []byte) string {
+//	h := md5.New()
+//	h.Write(content)
+//	return base64.StdEncoding.EncodeToString(h.Sum(nil))
+//}
 
 func readAndReplaceBody(request *http.Request) []byte {
 	if request.Body == nil {

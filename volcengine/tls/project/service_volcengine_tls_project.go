@@ -87,7 +87,7 @@ func (s *VolcengineTlsProjectService) ReadResource(resourceData *schema.Resource
 		return data, err
 	}
 	for _, v := range results {
-		projectMap := make(map[string]interface{})
+		var projectMap map[string]interface{}
 		if projectMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		}

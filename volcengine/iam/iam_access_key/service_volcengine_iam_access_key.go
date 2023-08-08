@@ -192,10 +192,10 @@ func (s *VolcengineIamAccessKeyService) CreateResource(resourceData *schema.Reso
 					if err != nil {
 						return fmt.Errorf("encrypt secret err: %s", err.Error())
 					}
-					d.Set("key_fingerprint", fingerprint)
-					d.Set("encrypted_secret", encrypted)
+					_ = d.Set("key_fingerprint", fingerprint)
+					_ = d.Set("encrypted_secret", encrypted)
 				} else {
-					d.Set("secret", sk.(string))
+					_ = d.Set("secret", sk.(string))
 				}
 				if output, ok := d.GetOk("secret_file"); ok && output != nil {
 					akSk, _ := ve.ObtainSdkValue("Result.AccessKey", *resp)

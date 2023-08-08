@@ -165,7 +165,7 @@ func (s *VolcengineMongoDBSSLStateService) ModifyResource(resourceData *schema.R
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
-				d.Set("ssl_action", "noupdate")
+				_ = d.Set("ssl_action", "noupdate")
 				return nil
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{

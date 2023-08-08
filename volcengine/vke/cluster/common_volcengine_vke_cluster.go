@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -35,7 +36,7 @@ var billingTypeResponseConvert = func(i interface{}) interface{} {
 
 func ApiServerPublicAccessConfigFieldDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	apiServerPublicAccessEnabled := d.Get("cluster_config").([]interface{})[0].(map[string]interface{})["api_server_public_access_enabled"].(bool)
-	return apiServerPublicAccessEnabled == false
+	return !apiServerPublicAccessEnabled
 }
 
 func FlannelFieldDiffSuppress(k, old, new string, d *schema.ResourceData) bool {

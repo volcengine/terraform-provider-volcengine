@@ -12,7 +12,7 @@ func mongoDBSSLStateImporter(d *schema.ResourceData, m interface{}) ([]*schema.R
 	if len(items) != 2 {
 		return []*schema.ResourceData{d}, fmt.Errorf("the format of import id must be 'ssl:instanceId'")
 	}
-	d.Set("instance_id", items[1])
+	_ = d.Set("instance_id", items[1])
 
 	return []*schema.ResourceData{d}, nil
 }

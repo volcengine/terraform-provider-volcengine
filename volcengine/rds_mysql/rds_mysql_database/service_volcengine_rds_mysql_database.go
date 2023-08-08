@@ -92,7 +92,7 @@ func (s *VolcengineRdsMysqlDatabaseService) ReadResource(resourceData *schema.Re
 		return data, err
 	}
 	for _, v := range results {
-		dbMap := make(map[string]interface{})
+		var dbMap map[string]interface{}
 		if dbMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		}

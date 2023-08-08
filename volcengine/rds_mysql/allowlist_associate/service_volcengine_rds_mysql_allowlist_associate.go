@@ -28,9 +28,9 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) ReadResources(m map[string
 func (s *VolcengineRdsMysqlAllowListAssociateService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results     interface{}
-		resultsMap  = make(map[string]interface{})
-		instanceMap = make(map[string]interface{})
-		instances   = make([]interface{}, 0)
+		resultsMap  map[string]interface{}
+		instanceMap map[string]interface{}
+		instances   []interface{}
 		ok          bool
 	)
 	if id == "" {

@@ -11,28 +11,19 @@ func ResourceNotFoundError(err error) bool {
 		return true
 	}
 	errMessage := strings.ToLower(err.Error())
-	if strings.Contains(errMessage, "notfound") ||
+	return strings.Contains(errMessage, "notfound") ||
 		strings.Contains(errMessage, "not found") ||
 		strings.Contains(errMessage, "not exist") ||
 		strings.Contains(errMessage, "not associate") ||
 		strings.Contains(errMessage, "invalid") ||
 		strings.Contains(errMessage, "not_found") ||
-		strings.Contains(errMessage, "notexist") {
-		return true
-	}
-	return false
+		strings.Contains(errMessage, "notexist")
 }
 
 func ResourceFlowLimitExceededError(err error) bool {
-	if strings.Contains(err.Error(), "FlowLimitExceeded") {
-		return true
-	}
-	return false
+	return strings.Contains(err.Error(), "FlowLimitExceeded")
 }
 
 func UnsubscribeProductError(err error) bool {
-	if strings.Contains(err.Error(), "The product code is inconsistent with the instance product") {
-		return true
-	}
-	return false
+	return strings.Contains(err.Error(), "The product code is inconsistent with the instance product")
 }

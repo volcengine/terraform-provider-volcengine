@@ -105,11 +105,9 @@ func mapMapping(result interface{}, ds dataSource) (map[string]interface{}, erro
 }
 
 func mergeDatasource(resource *schema.Resource, collectField string, item map[string]interface{}, extraMapping map[string]ResponseConvert) map[string]interface{} {
-	var result map[string]interface{}
-	result = make(map[string]interface{})
+	result := make(map[string]interface{})
 	keys := strings.Split(collectField, ".")
-	var extra map[string]interface{}
-	extra = make(map[string]interface{})
+	extra := make(map[string]interface{})
 	if len(keys) == 0 {
 		return result
 	}
@@ -221,7 +219,7 @@ func datasourceMapping(d *schema.ResourceData, result interface{}, datasource da
 	data = []map[string]interface{}{}
 
 	if reflect.TypeOf(result).Kind() == reflect.Slice {
-		var length = 0
+		var length int
 		if v, ok := result.([]map[string]interface{}); ok {
 			length = len(v)
 			for _, v1 := range v {

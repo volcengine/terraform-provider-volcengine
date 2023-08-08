@@ -155,7 +155,7 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) CreateResource(resourceD
 			},
 			AfterRefresh: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) error {
 				var (
-					instance = make(map[string]interface{})
+					instance map[string]interface{}
 					err      error
 				)
 				instance, err = s.RdsInstanceService.ReadResource(d, d.Get("instance_id").(string))

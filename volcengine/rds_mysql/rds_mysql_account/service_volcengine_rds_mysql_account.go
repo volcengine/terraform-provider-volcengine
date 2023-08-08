@@ -70,7 +70,7 @@ func (s *VolcengineRdsMysqlAccountService) ReadResources(m map[string]interface{
 func (s *VolcengineRdsMysqlAccountService) ReadResource(resourceData *schema.ResourceData, RdsMysqlAccountId string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
-		account = make(map[string]interface{})
+		account map[string]interface{}
 		ok      bool
 	)
 	if RdsMysqlAccountId == "" {
