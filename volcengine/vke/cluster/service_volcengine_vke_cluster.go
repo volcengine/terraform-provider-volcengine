@@ -143,7 +143,7 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 					if eipAddresses, ok := eipAddresses.([]interface{}); !ok {
 						return data, errors.New("Result.EipAddresses is not Slice")
 					} else if len(eipAddresses) == 0 {
-						return data, fmt.Errorf(fmt.Sprintf("Eip %s not found", publicIp))
+						return data, fmt.Errorf("Eip %s not found ", publicIp)
 					} else {
 						// get eip allocation id
 						cluster["EipAllocationId"] = eipAddresses[0].(map[string]interface{})["AllocationId"].(string)
