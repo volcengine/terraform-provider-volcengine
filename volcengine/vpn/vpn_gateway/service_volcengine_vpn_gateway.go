@@ -126,7 +126,7 @@ func (s *VolcengineVpnGatewayService) ReadResource(resourceData *schema.Resource
 		return data, err
 	}
 	if tmpRes == nil {
-		results = []interface{}{}
+		return data, errors.New("Result.VpnGateways is not nil")
 	}
 	tmpData, ok := tmpRes.([]interface{})
 	if !ok {

@@ -59,6 +59,6 @@ var kubernetesConfigLabelHash = func(v interface{}) int {
 }
 
 var defaultNodePoolImporter = func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
-	data.Set("is_import", true)
+	_ = data.Set("is_import", true)
 	return []*schema.ResourceData{data}, nil
 }

@@ -140,7 +140,7 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 		return data, errors.New("Result.Items is not Slice")
 	}
 
-	if temp == nil || len(temp) == 0 {
+	if len(temp) == 0 {
 		return data, fmt.Errorf("NodePool %s not exist ", nodePoolId)
 	}
 

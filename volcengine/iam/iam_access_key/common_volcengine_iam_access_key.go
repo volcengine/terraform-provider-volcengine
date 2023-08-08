@@ -6,16 +6,14 @@ import (
 	"strings"
 
 	"encoding/json"
-	"io/ioutil"
 	"os/user"
 )
 
 func writeToFile(filePath string, data interface{}) error {
 	var out string
-	switch data.(type) {
+	switch _data := data.(type) {
 	case string:
-		out = data.(string)
-		break
+		out = _data
 	case nil:
 		return nil
 	default:
@@ -42,7 +40,7 @@ func writeToFile(filePath string, data interface{}) error {
 		}
 	}
 
-	return ioutil.WriteFile(filePath, []byte(out), 422) // ignore_security_alert
+	return os.WriteFile(filePath, []byte(out), 0422) // ignore_security_alert
 }
 
 func getUserHomeDir() (string, error) {

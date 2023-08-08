@@ -138,14 +138,14 @@ func (s *VolcengineRedisDbInstanceService) readInstanceNodeIds(id string) (nodeI
 	return nodeIds, err
 }
 
-func idInTargets(id string, ids interface{}) bool {
-	for _, targetId := range ids.([]interface{}) {
-		if id == targetId.(string) {
-			return true
-		}
-	}
-	return false
-}
+//func idInTargets(id string, ids interface{}) bool {
+//	for _, targetId := range ids.([]interface{}) {
+//		if id == targetId.(string) {
+//			return true
+//		}
+//	}
+//	return false
+//}
 
 func (s *VolcengineRedisDbInstanceService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
@@ -234,7 +234,7 @@ func (s *VolcengineRedisDbInstanceService) ReadResource(resourceData *schema.Res
 		return data, err
 	}
 	for _, v := range results {
-		instanceMap := make(map[string]interface{})
+		var instanceMap map[string]interface{}
 		if instanceMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("value is not map")
 		}

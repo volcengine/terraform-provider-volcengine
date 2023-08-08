@@ -813,7 +813,7 @@ func (s *VolcengineESCloudInstanceService) modifyProject(resourceData *schema.Re
 					err      error
 				)
 				// 通过 retry 确保 project_name 已成功修改
-				resource.Retry(15*time.Minute, func() *resource.RetryError {
+				err = resource.Retry(15*time.Minute, func() *resource.RetryError {
 					instance, err = s.ReadResource(d, d.Id())
 					if err != nil {
 						if ve.ResourceNotFoundError(err) {
@@ -831,7 +831,7 @@ func (s *VolcengineESCloudInstanceService) modifyProject(resourceData *schema.Re
 					}
 					return nil
 				})
-				return nil
+				return err
 			},
 		},
 	}

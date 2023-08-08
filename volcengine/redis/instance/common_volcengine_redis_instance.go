@@ -36,10 +36,7 @@ var tagsHash = func(v interface{}) int {
 func redisInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// 不启用分片集群时，忽略 shard_number 的修改
 	if k == "shard_number" {
-		if d.Get("sharded_cluster").(int) == 1 {
-			return false
-		}
-		return true
+		return d.Get("sharded_cluster").(int) != 1
 	}
 
 	// 计费方式为 PostPaid 时，忽略相关参数的修改

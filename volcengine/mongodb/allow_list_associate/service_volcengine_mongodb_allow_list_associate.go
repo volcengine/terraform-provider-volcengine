@@ -41,8 +41,8 @@ func (s *VolcengineMongodbAllowListAssociateService) ReadResource(resourceData *
 		targetInstanceId string
 		allowListId      string
 		output           *map[string]interface{}
-		resultsMap       = make(map[string]interface{})
-		instanceMap      = make(map[string]interface{})
+		resultsMap       map[string]interface{}
+		instanceMap      map[string]interface{}
 		results          interface{}
 		ok               bool
 	)

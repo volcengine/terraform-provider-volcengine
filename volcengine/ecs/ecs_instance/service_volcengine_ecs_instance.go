@@ -249,9 +249,7 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			syncMap             sync.Map
 		)
 		// 使用小写的 Hostname
-		if _, exist := ecs["HostName"]; exist {
-			delete(ecs, "HostName")
-		}
+		delete(ecs, "HostName")
 
 		//计算period
 		if ecs["InstanceChargeType"].(string) == "PrePaid" {

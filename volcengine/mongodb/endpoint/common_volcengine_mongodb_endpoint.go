@@ -14,8 +14,8 @@ func mongoDBEndpointImporter(d *schema.ResourceData, m interface{}) ([]*schema.R
 	}
 	instanceId := items[0]
 	endpointId := items[1]
-	d.Set("instance_id", instanceId)
-	d.Set("endpoint_id", endpointId)
+	_ = d.Set("instance_id", instanceId)
+	_ = d.Set("endpoint_id", endpointId)
 
 	return []*schema.ResourceData{d}, nil
 }

@@ -115,7 +115,7 @@ func (s *VolcengineTlsTopicService) ReadResource(resourceData *schema.ResourceDa
 		return data, err
 	}
 	for _, v := range results {
-		topicMap := make(map[string]interface{})
+		var topicMap map[string]interface{}
 		if topicMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		}
