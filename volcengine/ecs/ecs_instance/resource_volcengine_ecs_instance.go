@@ -162,7 +162,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				//ForceNew: true,
-				Default:          false,
+				Default:          true,
 				DiffSuppressFunc: AutoRenewDiffSuppress,
 				Description:      "The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
