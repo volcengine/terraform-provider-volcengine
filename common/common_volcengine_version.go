@@ -2,5 +2,5 @@ package common
 
 const (
 	TerraformProviderName    = "terraform-provider-volcengine"
-	TerraformProviderVersion = "0.0.94"
+	TerraformProviderVersion = "0.0.95"
 )
