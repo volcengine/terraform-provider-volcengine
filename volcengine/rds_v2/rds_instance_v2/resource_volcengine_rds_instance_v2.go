@@ -49,7 +49,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return true
 				},
-				Description: "Instance type. Value:\nHA: High availability version.",
+				Description: "The type of Instance.",
 			},
 			"storage_type": {
 				Type:        schema.TypeString,
