@@ -46,8 +46,6 @@ The following arguments are supported:
 * `db_engine_version` - (Required, ForceNew) Instance type. Value:
 MySQL_5_7
 MySQL_8_0.
-* `instance_type` - (Required, ForceNew) Instance type. Value:
-HA: High availability version.
 * `node_info` - (Required) Instance specification configuration. This parameter is required for RDS for MySQL, RDS for PostgreSQL and MySQL Sharding. There is one and only one Primary node, one and only one Secondary node, and 0-10 Read-Only nodes.
 * `storage_type` - (Required) Instance storage type. When the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, the value is:
 LocalSSD - local SSD disk
@@ -60,6 +58,8 @@ DistributedStorage - Distributed Storage.
 * `instance_name` - (Optional, ForceNew) Instance name. Cannot start with a number or a dash
 Can only contain Chinese characters, letters, numbers, underscores and dashes
 The length is limited between 1 ~ 128.
+* `instance_type` - (Optional, **Deprecated**) The field instance_type is no longer support. Instance type. Value:
+HA: High availability version.
 * `lower_case_table_names` - (Optional, ForceNew) Whether the table name is case sensitive, the default value is 1.
 Ranges:
 0: Table names are stored as fixed and table names are case-sensitive.
