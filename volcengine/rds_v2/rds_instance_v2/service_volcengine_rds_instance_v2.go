@@ -250,6 +250,9 @@ func (s *VolcengineRdsInstanceService) CreateResource(resourceData *schema.Resou
 				"node_info": {
 					ConvertType: volc.ConvertJsonObjectArray,
 				},
+				"instance_type": {
+					Ignore: true,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)

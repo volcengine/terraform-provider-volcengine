@@ -10,34 +10,42 @@ description: |-
 (Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds instance v2
 ## Example Usage
 ```hcl
+data "volcengine_zones" "foo" {
+}
+
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-vpc"
+  cidr_block = "172.16.0.0/16"
+}
+
+resource "volcengine_subnet" "foo" {
+  subnet_name = "acc-test-subnet"
+  cidr_block  = "172.16.0.0/24"
+  zone_id     = data.volcengine_zones.foo.zones[0].id
+  vpc_id      = volcengine_vpc.foo.id
+}
+
 resource "volcengine_rds_instance_v2" "foo" {
   db_engine_version = "MySQL_5_7"
-  instance_type     = "HA"
   node_info {
     node_type = "Primary"
     node_spec = "rds.mysql.2c4g"
-    zone_id   = "cn-beijing-a"
+    zone_id   = data.volcengine_zones.foo.zones[0].id
   }
   node_info {
     node_type = "Secondary"
     node_spec = "rds.mysql.2c4g"
-    zone_id   = "cn-beijing-a"
-  }
-  node_info {
-    node_type = "ReadOnly"
-    node_spec = "rds.mysql.1c2g"
-    zone_id   = "cn-beijing-a"
+    zone_id   = data.volcengine_zones.foo.zones[0].id
   }
   storage_type           = "LocalSSD"
   storage_space          = 100
-  vpc_id                 = "vpc-13fawddpwi41s3n6nu4g2y8bt"
-  subnet_id              = "subnet-mj92ij84m5fk5smt1arvwrtw"
+  vpc_id                 = volcengine_vpc.foo.id
+  subnet_id              = volcengine_subnet.foo.id
   instance_name          = "tf-test-v2"
   lower_case_table_names = "1"
   charge_info {
     charge_type = "PostPaid"
   }
-  project_name = "yyy"
 }
 ```
 ## Argument Reference
@@ -46,8 +54,6 @@ The following arguments are supported:
 * `db_engine_version` - (Required, ForceNew) Instance type. Value:
 MySQL_5_7
 MySQL_8_0.
-* `instance_type` - (Required, ForceNew) Instance type. Value:
-HA: High availability version.
 * `node_info` - (Required) Instance specification configuration. This parameter is required for RDS for MySQL, RDS for PostgreSQL and MySQL Sharding. There is one and only one Primary node, one and only one Secondary node, and 0-10 Read-Only nodes.
 * `storage_type` - (Required) Instance storage type. When the database type is MySQL/PostgreSQL/SQL_Server/MySQL Sharding, the value is:
 LocalSSD - local SSD disk
@@ -60,6 +66,7 @@ DistributedStorage - Distributed Storage.
 * `instance_name` - (Optional, ForceNew) Instance name. Cannot start with a number or a dash
 Can only contain Chinese characters, letters, numbers, underscores and dashes
 The length is limited between 1 ~ 128.
+* `instance_type` - (Optional, **Deprecated**) The field instance_type is no longer support. The type of Instance.
 * `lower_case_table_names` - (Optional, ForceNew) Whether the table name is case sensitive, the default value is 1.
 Ranges:
 0: Table names are stored as fixed and table names are case-sensitive.

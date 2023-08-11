@@ -42,11 +42,14 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"MySQL_5_7", "MySQL_8_0"}, false),
 			},
 			"instance_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "Instance type. Value:\nHA: High availability version.",
-				ValidateFunc: validation.StringInSlice([]string{"HA"}, false),
+				Type:       schema.TypeString,
+				Optional:   true,
+				Computed:   true,
+				Deprecated: "The field instance_type is no longer support.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return true
+				},
+				Description: "The type of Instance.",
 			},
 			"storage_type": {
 				Type:        schema.TypeString,
@@ -97,6 +100,7 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Subordinate to the project.",
 			},
 			"charge_info": {
