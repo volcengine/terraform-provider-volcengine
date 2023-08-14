@@ -1,3 +1,13 @@
+package cluster_test
+
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
+	"testing"
+)
+
+const testAccVolcengineVkeClustersDatasourceConfig = `
 resource "volcengine_vpc" "foo" {
     vpc_name = "acc-test-project1"
     cidr_block = "172.16.0.0/16"
@@ -60,42 +70,31 @@ resource "volcengine_vke_cluster" "foo" {
     }
 }
 
-resource "volcengine_vke_default_node_pool" "foo" {
-    cluster_id = volcengine_vke_cluster.foo.id
-    node_config {
-        security {
-            login {
-                password = "amw4WTdVcTRJVVFsUXpVTw=="
-            }
-            security_group_ids = [volcengine_security_group.foo.id]
-            security_strategies = ["Hids"]
-        }
-        initialize_script = "ISMvYmluL2Jhc2gKZWNobyAx"
+data "volcengine_vke_clusters" "foo"{
+    ids = [volcengine_vke_cluster.foo.id]
+}
+`
 
-    }
-    kubernetes_config {
-        labels {
-            key   = "tf-key1"
-            value = "tf-value1"
-        }
-        labels {
-            key   = "tf-key2"
-            value = "tf-value2"
-        }
-        taints {
-            key = "tf-key3"
-            value = "tf-value3"
-            effect = "NoSchedule"
-        }
-        taints {
-            key = "tf-key4"
-            value = "tf-value4"
-            effect = "NoSchedule"
-        }
-        cordon = true
-    }
-    tags {
-        key = "tf-k1"
-        value = "tf-v1"
-    }
+func TestAccVolcengineVkeClustersDatasource_Basic(t *testing.T) {
+	resourceName := "data.volcengine_vke_clusters.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		Svc:        &cluster.VolcengineVkeClusterService{},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers: volcengine.GetTestAccProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcengineVkeClustersDatasourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acc.ResourceId, "clusters.#", "1"),
+				),
+			},
+		},
+	})
 }

@@ -30,6 +30,21 @@ resource "volcengine_ecs_instance" "foo" {
     }
 }
 
+resource "volcengine_ecs_instance" "foo2" {
+    image_id = "image-ybqi99s7yq8rx7mnk44b"
+    instance_type = "ecs.g1ie.large"
+    instance_name = "acc-test-ecs-name2"
+    password = "93f0cb0614Aab12"
+    instance_charge_type = "PostPaid"
+    system_volume_type = "ESSD_PL0"
+    system_volume_size = 40
+    subnet_id = volcengine_subnet.foo.id
+    security_group_ids = [volcengine_security_group.foo.id]
+    lifecycle {
+        ignore_changes = [security_group_ids, instance_name]
+    }
+}
+
 resource "volcengine_vke_cluster" "foo" {
     name = "acc-test-1"
     description = "created by terraform"
@@ -60,7 +75,7 @@ resource "volcengine_vke_cluster" "foo" {
     }
 }
 
-resource "volcengine_vke_default_node_pool" "default" {
+resource "volcengine_vke_default_node_pool" "foo" {
     cluster_id = volcengine_vke_cluster.foo.id
     node_config {
         security {
@@ -95,16 +110,21 @@ resource "volcengine_vke_default_node_pool" "default" {
         cordon = true
     }
     tags {
-        key = "k1"
-        value = "v1"
+        key = "tf-k1"
+        value = "tf-v1"
     }
 }
 
-resource "volcengine_vke_default_node_pool_batch_attach" "default" {
+resource "volcengine_vke_default_node_pool_batch_attach" "foo" {
     cluster_id = volcengine_vke_cluster.foo.id
-    default_node_pool_id = volcengine_vke_default_node_pool.default.id
+    default_node_pool_id = volcengine_vke_default_node_pool.foo.id
     instances {
         instance_id = volcengine_ecs_instance.foo.id
+        keep_instance_name = true
+        additional_container_storage_enabled = false
+    }
+    instances {
+        instance_id = volcengine_ecs_instance.foo2.id
         keep_instance_name = true
         additional_container_storage_enabled = false
     }
