@@ -119,7 +119,7 @@ func resourceVolcengineTosBucketPolicyCreate(d *schema.ResourceData, meta interf
 	tosBucketService := NewTosBucketPolicyService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Create(tosBucketService, d, ResourceVolcengineTosBucketPolicy())
 	if err != nil {
-		return fmt.Errorf("error on creating tos bucket  %q, %s", d.Id(), err)
+		return fmt.Errorf("error on creating tos bucket policy %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineTosBucketPolicyRead(d, meta)
 }
@@ -128,7 +128,7 @@ func resourceVolcengineTosBucketPolicyRead(d *schema.ResourceData, meta interfac
 	tosBucketService := NewTosBucketPolicyService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Read(tosBucketService, d, ResourceVolcengineTosBucketPolicy())
 	if err != nil {
-		return fmt.Errorf("error on reading tos bucket %q, %s", d.Id(), err)
+		return fmt.Errorf("error on reading tos bucket policy %q, %s", d.Id(), err)
 	}
 	return err
 }
@@ -137,7 +137,7 @@ func resourceVolcengineTosBucketPolicyUpdate(d *schema.ResourceData, meta interf
 	tosBucketService := NewTosBucketPolicyService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Update(tosBucketService, d, ResourceVolcengineTosBucketPolicy())
 	if err != nil {
-		return fmt.Errorf("error on updating tos bucket  %q, %s", d.Id(), err)
+		return fmt.Errorf("error on updating tos bucket policy %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineTosBucketPolicyRead(d, meta)
 }
@@ -146,7 +146,7 @@ func resourceVolcengineTosBucketPolicyDelete(d *schema.ResourceData, meta interf
 	tosBucketService := NewTosBucketPolicyService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Delete(tosBucketService, d, ResourceVolcengineTosBucketPolicy())
 	if err != nil {
-		return fmt.Errorf("error on deleting tos bucket %q, %s", d.Id(), err)
+		return fmt.Errorf("error on deleting tos bucket policy %q, %s", d.Id(), err)
 	}
 	return err
 }
