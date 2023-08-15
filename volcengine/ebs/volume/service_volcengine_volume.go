@@ -85,6 +85,17 @@ func (s *VolcengineVolumeService) ReadResource(resourceData *schema.ResourceData
 	if len(data) == 0 {
 		return data, fmt.Errorf("volume %s not exist ", volumeId)
 	}
+
+	payType, ok := data["PayType"]
+	if !ok {
+		return data, fmt.Errorf(" PayType of volume is not exist ")
+	}
+	if payType.(string) == "post" {
+		data["VolumeChargeType"] = "PostPaid"
+	} else if payType.(string) == "pre" {
+		data["VolumeChargeType"] = "PrePaid"
+	}
+
 	return data, err
 }
 
@@ -172,7 +183,19 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 		callbacks = append(callbacks, ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "ModifyVolumeAttribute",
-				ConvertMode: ve.RequestConvertAll,
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"volume_name": {
+						TargetField: "VolumeName",
+						ForceGet:    true,
+					},
+					"description": {
+						TargetField: "Description",
+					},
+					"delete_with_instance": {
+						TargetField: "DeleteWithInstance",
+					},
+				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					(*call.SdkParam)["VolumeId"] = d.Id()
 					return true, nil
@@ -225,16 +248,6 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 						return false, errors.New("instance id cannot be empty")
 					}
 
-					// get volume current info
-					data, err := s.ReadResource(resourceData, d.Id())
-					if err != nil {
-						return false, err
-					}
-					// PayType can be Pre or Post
-					if strings.Contains(resourceData.Get("volume_charge_type").(string), data["PayType"].(string)) {
-						return false, nil // 不再进行下去了
-					}
-
 					(*call.SdkParam)["VolumeIds.1"] = d.Id()
 					(*call.SdkParam)["DiskChargeType"] = "PrePaid"
 					(*call.SdkParam)["AutoPay"] = true
@@ -263,7 +276,7 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 							return re.NonRetryableError(fmt.Errorf("error on reading volume %q: %w", d.Id(), callErr))
 						}
 						// 计费方式已经转变成功
-						if data["PayType"] == "Pre" {
+						if data["PayType"] == "pre" {
 							return nil
 						}
 						// 计费方式还没有转换成功，尝试重新转换
@@ -292,11 +305,32 @@ func (s *VolcengineVolumeService) RemoveResource(resourceData *schema.ResourceDa
 			SdkParam: &map[string]interface{}{
 				"VolumeId": resourceData.Id(),
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				volume, err := s.ReadResource(d, d.Id())
+				if err != nil {
+					return false, err
+				}
+				status, err := ve.ObtainSdkValue("Status", volume)
+				if err != nil {
+					return false, err
+				}
+				if status != "available" {
+					return false, fmt.Errorf(" Only volume with a status of `available` can be deleted. ")
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.EbsClient.DeleteVolumeCommon(call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				// 不能删除已挂载云盘
+				if strings.Contains(baseErr.Error(), "Only volume with a status of `available` can be deleted.") {
+					msg := fmt.Sprintf("error: %s\n msg: %s",
+						baseErr.Error(),
+						"For volume with a status of `attached`, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.")
+					return fmt.Errorf(msg)
+				}
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
 					_, callErr := s.ReadResource(d, "")
 					if callErr != nil {

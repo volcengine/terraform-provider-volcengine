@@ -3,6 +3,7 @@ package ecs_deployment_set
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -189,6 +190,10 @@ func (s *VolcengineEcsDeploymentSetService) RemoveResource(resourceData *schema.
 					_, callErr = call.ExecuteCall(d, client, call)
 					if callErr == nil {
 						return nil
+					}
+					if strings.Contains(callErr.Error(), "InvalidDeploymentSet.InUse") {
+						return resource.NonRetryableError(fmt.Errorf("there are instances in the deployment set, " +
+							"please remove the instances in the deployment set before deleting the deployment set"))
 					}
 					return resource.RetryableError(callErr)
 				})

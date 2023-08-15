@@ -10,8 +10,14 @@ description: |-
 Use this data source to query detailed information of customer gateways
 ## Example Usage
 ```hcl
+resource "volcengine_customer_gateway" "foo" {
+  ip_address            = "192.0.1.3"
+  customer_gateway_name = "acc-test"
+  description           = "acc-test"
+  project_name          = "default"
+}
 data "volcengine_customer_gateways" "foo" {
-  ids = ["cgw-2d68c4zglycjk58ozfe96norh"]
+  ids = [volcengine_customer_gateway.foo.id]
 }
 ```
 ## Argument Reference

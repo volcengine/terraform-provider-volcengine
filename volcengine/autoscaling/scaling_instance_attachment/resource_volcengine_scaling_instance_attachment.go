@@ -44,6 +44,7 @@ func ResourceVolcengineScalingInstanceAttachment() *schema.Resource {
 			"entrusted": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Whether to host the instance to a scaling group. Default value is false.",
 			},
 			"delete_type": {
