@@ -45,10 +45,11 @@ func ResourceVolcengineVolumeAttach() *schema.Resource {
 				Description: "The Id of Instance.",
 			},
 			"delete_with_instance": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				Description: "Delete Volume with Attached Instance.",
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				Description: "Delete Volume with Attached Instance." +
+					"It is not recommended to use this field. If used, please ensure that the value of this field is consistent with the value of `delete_with_instance` in volcengine_volume.",
 			},
 			"status": {
 				Type:        schema.TypeString,

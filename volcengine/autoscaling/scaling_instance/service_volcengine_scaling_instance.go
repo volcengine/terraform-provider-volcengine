@@ -40,6 +40,7 @@ func (s *VolcengineScalingInstanceService) ReadResources(m map[string]interface{
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 50, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		universalClient := s.Client.UniversalClient
 		action := "DescribeScalingInstances"
+		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
@@ -51,7 +52,7 @@ func (s *VolcengineScalingInstanceService) ReadResources(m map[string]interface{
 				return data, err
 			}
 		}
-		logger.Debug(logger.RespFormat, action, action, resp)
+		logger.Debug(logger.RespFormat, action, condition, *resp)
 		results, err = ve.ObtainSdkValue("Result.ScalingInstances", *resp)
 		if err != nil {
 			return data, err

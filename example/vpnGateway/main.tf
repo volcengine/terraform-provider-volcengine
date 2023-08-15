@@ -1,9 +1,21 @@
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-vpc"
+  cidr_block = "172.16.0.0/16"
+}
+
+resource "volcengine_subnet" "foo" {
+  subnet_name = "acc-test-subnet"
+  cidr_block = "172.16.0.0/24"
+  zone_id = "cn-beijing-a"
+  vpc_id = volcengine_vpc.foo.id
+}
+
 resource "volcengine_vpn_gateway" "foo" {
-  vpc_id = "vpc-12b31m7z2kc8w17q7y2fih9ts"
-  subnet_id = "subnet-12bh8g2d7fshs17q7y2nx82uk"
-  bandwidth = 20
-  vpn_gateway_name = "tf-test"
-  description = "tf-test"
-  period = 2
+  vpc_id = volcengine_vpc.foo.id
+  subnet_id = volcengine_subnet.foo.id
+  bandwidth = 50
+  vpn_gateway_name = "acc-test1"
+  description = "acc-test1"
+  period = 7
   project_name = "default"
 }

@@ -37,7 +37,7 @@ func (s *VolcengineScalingGroupEnablerService) ReadResources(m map[string]interf
 				return data, err
 			}
 		}
-		logger.Debug(logger.RespFormat, action, action, resp)
+		logger.Debug(logger.RespFormat, action, action, *resp)
 		results, err = ve.ObtainSdkValue("Result.ScalingGroups", *resp)
 		if err != nil {
 			return data, err

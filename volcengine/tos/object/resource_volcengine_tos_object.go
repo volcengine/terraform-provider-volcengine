@@ -171,7 +171,7 @@ func resourceVolcengineTosObjectCreate(d *schema.ResourceData, meta interface{})
 	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Create(tosBucketService, d, ResourceVolcengineTosObject())
 	if err != nil {
-		return fmt.Errorf("error on creating tos bucket  %q, %s", d.Id(), err)
+		return fmt.Errorf("error on creating tos object %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineTosObjectRead(d, meta)
 }
@@ -180,7 +180,7 @@ func resourceVolcengineTosObjectRead(d *schema.ResourceData, meta interface{}) (
 	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Read(tosBucketService, d, ResourceVolcengineTosObject())
 	if err != nil {
-		return fmt.Errorf("error on reading tos bucket %q, %s", d.Id(), err)
+		return fmt.Errorf("error on reading tos object %q, %s", d.Id(), err)
 	}
 	return err
 }
@@ -189,7 +189,7 @@ func resourceVolcengineTosObjectUpdate(d *schema.ResourceData, meta interface{})
 	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Update(tosBucketService, d, ResourceVolcengineTosObject())
 	if err != nil {
-		return fmt.Errorf("error on updating tos bucket  %q, %s", d.Id(), err)
+		return fmt.Errorf("error on updating tos object  %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineTosObjectRead(d, meta)
 }
@@ -198,7 +198,7 @@ func resourceVolcengineTosObjectDelete(d *schema.ResourceData, meta interface{})
 	tosBucketService := NewTosObjectService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Delete(tosBucketService, d, ResourceVolcengineTosObject())
 	if err != nil {
-		return fmt.Errorf("error on deleting tos bucket %q, %s", d.Id(), err)
+		return fmt.Errorf("error on deleting tos object %q, %s", d.Id(), err)
 	}
 	return err
 }

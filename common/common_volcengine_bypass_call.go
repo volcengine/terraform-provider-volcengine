@@ -102,6 +102,7 @@ func (u *BypassSvc) DoBypassSvcCall(info BypassSvcInfo, input *map[string]interf
 	if info.ContentPath != "" && (op.HTTPMethod == "PUT" || op.HTTPMethod == "POST") {
 		content, _ = os.Open(info.ContentPath)
 		req.Body = content
+		req.ResetBody()
 		req.HTTPRequest.Header.Set("Content-Length", strconv.FormatInt(u.tryResolveLength(content), 10))
 	}
 
