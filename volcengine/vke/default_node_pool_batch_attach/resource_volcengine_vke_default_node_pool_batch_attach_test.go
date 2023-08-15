@@ -9,6 +9,9 @@ import (
 )
 
 const testAccVolcengineVkeDefaultNodePoolBatchAttachCreateConfig = `
+data "volcengine_zones" "foo"{
+}
+
 resource "volcengine_vpc" "foo" {
     vpc_name = "acc-test-project1"
     cidr_block = "172.16.0.0/16"
@@ -17,7 +20,7 @@ resource "volcengine_vpc" "foo" {
 resource "volcengine_subnet" "foo" {
     subnet_name = "acc-subnet-test-2"
     cidr_block = "172.16.0.0/24"
-    zone_id = "cn-beijing-a"
+    zone_id = data.volcengine_zones.foo.zones[0].id
     vpc_id = volcengine_vpc.foo.id
 }
 
@@ -27,6 +30,7 @@ resource "volcengine_security_group" "foo" {
 }
 
 resource "volcengine_ecs_instance" "foo" {
+	//默认节点池中的节点只能使用指定镜像，请参考 https://www.volcengine.com/docs/6460/115194#%E9%95%9C%E5%83%8F-id-%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E
     image_id = "image-ybqi99s7yq8rx7mnk44b"
     instance_type = "ecs.g1ie.large"
     instance_name = "acc-test-ecs-name2"
@@ -144,6 +148,9 @@ resource "volcengine_vke_default_node_pool_batch_attach" "foo" {
 `
 
 const testAccVolcengineVkeDefaultNodePoolBatchAttachUpdateConfig = `
+data "volcengine_zones" "foo"{
+}
+
 resource "volcengine_vpc" "foo" {
     vpc_name = "acc-test-project1"
     cidr_block = "172.16.0.0/16"
@@ -152,7 +159,7 @@ resource "volcengine_vpc" "foo" {
 resource "volcengine_subnet" "foo" {
     subnet_name = "acc-subnet-test-2"
     cidr_block = "172.16.0.0/24"
-    zone_id = "cn-beijing-a"
+    zone_id = data.volcengine_zones.foo.zones[0].id
     vpc_id = volcengine_vpc.foo.id
 }
 
@@ -162,6 +169,7 @@ resource "volcengine_security_group" "foo" {
 }
 
 resource "volcengine_ecs_instance" "foo" {
+	//默认节点池中的节点只能使用指定镜像，请参考 https://www.volcengine.com/docs/6460/115194#%E9%95%9C%E5%83%8F-id-%E9%85%8D%E7%BD%AE%E8%AF%B4%E6%98%8E
     image_id = "image-ybqi99s7yq8rx7mnk44b"
     instance_type = "ecs.g1ie.large"
     instance_name = "acc-test-ecs-name2"

@@ -9,6 +9,9 @@ import (
 )
 
 const testAccVolcengineVkeDefaultNodePoolCreateConfig = `
+data "volcengine_zones" "foo"{
+}
+
 resource "volcengine_vpc" "foo" {
     vpc_name = "acc-test-project1"
     cidr_block = "172.16.0.0/16"
@@ -17,7 +20,7 @@ resource "volcengine_vpc" "foo" {
 resource "volcengine_subnet" "foo" {
     subnet_name = "acc-subnet-test-2"
     cidr_block = "172.16.0.0/24"
-    zone_id = "cn-beijing-a"
+    zone_id = data.volcengine_zones.foo.zones[0].id
     vpc_id = volcengine_vpc.foo.id
 }
 
@@ -26,20 +29,6 @@ resource "volcengine_security_group" "foo" {
     security_group_name = "acc-test-security-group2"
 }
 
-resource "volcengine_ecs_instance" "foo" {
-    image_id = "image-ybqi99s7yq8rx7mnk44b"
-    instance_type = "ecs.g1ie.large"
-    instance_name = "acc-test-ecs-name2"
-    password = "93f0cb0614Aab12"
-    instance_charge_type = "PostPaid"
-    system_volume_type = "ESSD_PL0"
-    system_volume_size = 40
-    subnet_id = volcengine_subnet.foo.id
-    security_group_ids = [volcengine_security_group.foo.id]
-    lifecycle {
-        ignore_changes = [security_group_ids, instance_name]
-    }
-}
 
 resource "volcengine_vke_cluster" "foo" {
     name = "acc-test-1"
@@ -114,6 +103,9 @@ resource "volcengine_vke_default_node_pool" "foo" {
 `
 
 const testAccVolcengineVkeDefaultNodePoolUpdateConfig = `
+data "volcengine_zones" "foo"{
+}
+
 resource "volcengine_vpc" "foo" {
     vpc_name = "acc-test-project1"
     cidr_block = "172.16.0.0/16"
@@ -122,28 +114,13 @@ resource "volcengine_vpc" "foo" {
 resource "volcengine_subnet" "foo" {
     subnet_name = "acc-subnet-test-2"
     cidr_block = "172.16.0.0/24"
-    zone_id = "cn-beijing-a"
+    zone_id = data.volcengine_zones.foo.zones[0].id
     vpc_id = volcengine_vpc.foo.id
 }
 
 resource "volcengine_security_group" "foo" {
     vpc_id = volcengine_vpc.foo.id
     security_group_name = "acc-test-security-group2"
-}
-
-resource "volcengine_ecs_instance" "foo" {
-    image_id = "image-ybqi99s7yq8rx7mnk44b"
-    instance_type = "ecs.g1ie.large"
-    instance_name = "acc-test-ecs-name2"
-    password = "93f0cb0614Aab12"
-    instance_charge_type = "PostPaid"
-    system_volume_type = "ESSD_PL0"
-    system_volume_size = 40
-    subnet_id = volcengine_subnet.foo.id
-    security_group_ids = [volcengine_security_group.foo.id]
-    lifecycle {
-        ignore_changes = [security_group_ids, instance_name]
-    }
 }
 
 resource "volcengine_vke_cluster" "foo" {
