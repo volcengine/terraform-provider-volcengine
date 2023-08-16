@@ -73,15 +73,15 @@ func AccTestCheckResourceExists(acc *AccTestResource) resource.TestCheckFunc {
 }
 
 func initResourceService(acc *AccTestResource) error {
-	it := reflect.ValueOf(acc.Svc)
-	if !it.IsValid() {
+	if acc.Svc == nil || (reflect.ValueOf(acc.Svc).Kind() == reflect.Ptr && reflect.ValueOf(acc.Svc).IsNil()) {
 		if acc.SvcInitFunc != nil {
 			acc.Svc = acc.SvcInitFunc(testAccProvider.Meta().(*common.SdkClient))
 		} else {
 			return fmt.Errorf(" neither acc.Svc nor acc.SvcInitFunc is specified ")
 		}
 	} else {
-		val := it.Elem().FieldByName(acc.ClientField)
+		it := reflect.ValueOf(acc.Svc).Elem()
+		val := it.FieldByName(acc.ClientField)
 		if !val.IsNil() {
 			return nil
 		} else {
