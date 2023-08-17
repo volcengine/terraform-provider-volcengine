@@ -66,13 +66,13 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Type:         schema.TypeInt,
 				Required:     true,
 				Description:  "The min instance number of the scaling group. Value range: 0 ~ 100.",
-				ValidateFunc: validation.IntBetween(0, 100),
+				ValidateFunc: validation.IntBetween(0, 2000),
 			},
 			"max_instance_number": {
 				Type:         schema.TypeInt,
 				Required:     true,
 				Description:  "The max instance number of the scaling group. Value range: 0 ~ 100.",
-				ValidateFunc: validation.IntBetween(0, 100),
+				ValidateFunc: validation.IntBetween(0, 2000),
 			},
 			"instance_terminate_policy": {
 				Type:        schema.TypeString,

@@ -10,8 +10,13 @@ description: |-
 Use this data source to query detailed information of iam users
 ## Example Usage
 ```hcl
-data "volcengine_iam_users" "default" {
-  #  user_names = ["tf-test"]
+resource "volcengine_iam_user" "foo" {
+  user_name    = "acc-test-user"
+  description  = "acc test"
+  display_name = "name"
+}
+data "volcengine_iam_users" "foo" {
+  user_names = [volcengine_iam_user.foo.user_name]
 }
 ```
 ## Argument Reference

@@ -30,6 +30,7 @@ type AccTestResource struct {
 	ResourceId  string
 	Svc         common.ResourceService
 	ClientField string
+	SvcInitFunc func(*common.SdkClient) common.ResourceService
 }
 
 func GetTestAccProvider() *schema.Provider {
@@ -49,10 +50,10 @@ func AccTestCheckResourceExists(acc *AccTestResource) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("resource %s is not found", acc.ResourceId)
 		}
-		//反射获取
-		it := reflect.ValueOf(acc.Svc).Elem()
-		val := it.FieldByName(acc.ClientField)
-		val.Set(reflect.ValueOf(testAccProvider.Meta()))
+
+		if err := initResourceService(acc); err != nil {
+			return err
+		}
 
 		resourceData, err := buildResourceData(rs)
 		if err != nil {
@@ -69,6 +70,25 @@ func AccTestCheckResourceExists(acc *AccTestResource) resource.TestCheckFunc {
 
 		return nil
 	}
+}
+
+func initResourceService(acc *AccTestResource) error {
+	if acc.Svc == nil || (reflect.ValueOf(acc.Svc).Kind() == reflect.Ptr && reflect.ValueOf(acc.Svc).IsNil()) {
+		if acc.SvcInitFunc != nil {
+			acc.Svc = acc.SvcInitFunc(testAccProvider.Meta().(*common.SdkClient))
+		} else {
+			return fmt.Errorf(" neither acc.Svc nor acc.SvcInitFunc is specified ")
+		}
+	} else {
+		it := reflect.ValueOf(acc.Svc).Elem()
+		val := it.FieldByName(acc.ClientField)
+		if !val.IsNil() {
+			return nil
+		} else {
+			val.Set(reflect.ValueOf(testAccProvider.Meta()))
+		}
+	}
+	return nil
 }
 
 func buildResourceData(rs *terraform.ResourceState) (*schema.ResourceData, error) {
@@ -101,10 +121,10 @@ func AccTestCheckResourceRemove(acc *AccTestResource) resource.TestCheckFunc {
 			if !ok {
 				return resource.NonRetryableError(fmt.Errorf("resource %s is not found", acc.ResourceId))
 			}
-			//反射获取
-			it := reflect.ValueOf(acc.Svc).Elem()
-			val := it.FieldByName(acc.ClientField)
-			val.Set(reflect.ValueOf(testAccProvider.Meta()))
+
+			if err := initResourceService(acc); err != nil {
+				return resource.NonRetryableError(fmt.Errorf("resource service initialize error %s", err.Error()))
+			}
 
 			resourceData, err := buildResourceData(rs)
 			if err != nil {

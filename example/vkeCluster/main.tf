@@ -1,9 +1,41 @@
+resource "volcengine_vpc" "foo" {
+  vpc_name = "acc-test-project1"
+  cidr_block = "172.16.0.0/16"
+}
+
+resource "volcengine_subnet" "foo" {
+  subnet_name = "acc-subnet-test-2"
+  cidr_block = "172.16.0.0/24"
+  zone_id = "cn-beijing-a"
+  vpc_id = volcengine_vpc.foo.id
+}
+
+resource "volcengine_security_group" "foo" {
+  vpc_id = volcengine_vpc.foo.id
+  security_group_name = "acc-test-security-group2"
+}
+
+resource "volcengine_ecs_instance" "foo" {
+  image_id = "image-ybqi99s7yq8rx7mnk44b"
+  instance_type = "ecs.g1ie.large"
+  instance_name = "acc-test-ecs-name2"
+  password = "93f0cb0614Aab12"
+  instance_charge_type = "PostPaid"
+  system_volume_type = "ESSD_PL0"
+  system_volume_size = 40
+  subnet_id = volcengine_subnet.foo.id
+  security_group_ids = [volcengine_security_group.foo.id]
+  lifecycle {
+    ignore_changes = [security_group_ids, instance_name]
+  }
+}
+
 resource "volcengine_vke_cluster" "foo" {
-  name = "terraform-test-15"
+  name = "acc-test-1"
   description = "created by terraform"
   delete_protection_enabled = false
   cluster_config {
-    subnet_ids = ["subnet-rrqvkt2nq1hcv0x57ccqf3x"]
+    subnet_ids = [volcengine_subnet.foo.id]
     api_server_public_access_enabled = true
     api_server_public_access_config {
       public_access_network_config {
@@ -15,27 +47,15 @@ resource "volcengine_vke_cluster" "foo" {
   }
   pods_config {
     pod_network_mode = "VpcCniShared"
-#    flannel_config {
-#      pod_cidrs = ["172.27.224.0/19"]
-#      max_pods_per_node = 64
-#    }
     vpc_cni_config {
-      subnet_ids = ["subnet-rrqvkt2nq1hcv0x57ccqf3x", "subnet-miklcqh75vcw5smt1amo4ik5", "subnet-13g0x0ytpm0hs3n6nu5j591lv"]
+      subnet_ids = [volcengine_subnet.foo.id]
     }
   }
   services_config {
     service_cidrsv4 = ["172.30.0.0/18"]
   }
   tags {
-    key = "k1"
-    value = "v1"
-  }
-  logging_config {
-    //log_project_id = "3189316d-a1ee-4892-a8fc-9a566489d590"
-    log_setups {
-      enabled = false
-      log_ttl = 30
-      log_type = "Audit"
-    }
+    key = "tf-k1"
+    value = "tf-v1"
   }
 }

@@ -287,7 +287,9 @@ func (s *VolcengineVkeNodeService) RemoveResource(resourceData *schema.ResourceD
 				})
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
+				err := ve.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
+				time.Sleep(10 * time.Second)
+				return err
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("cluster_id").(string)

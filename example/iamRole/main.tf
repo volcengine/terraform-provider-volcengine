@@ -1,7 +1,7 @@
 resource "volcengine_iam_role" "foo" {
-  role_name = "TerraformTestRole"
-  display_name = "terraform role"
+  role_name = "acc-test-role"
+  display_name = "acc-test"
+  description = "acc-test"
   trust_policy_document = "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"sts:AssumeRole\"],\"Principal\":{\"Service\":[\"auto_scaling\"]}}]}"
-  description = "created by terraform"
-  max_session_duration = 43200
+  max_session_duration = 3600
 }
