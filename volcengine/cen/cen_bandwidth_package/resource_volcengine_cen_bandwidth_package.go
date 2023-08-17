@@ -54,7 +54,7 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				Type:         schema.TypeInt,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.IntBetween(2, 10000),
+				ValidateFunc: validation.IntBetween(2, 100000),
 				Description:  "The bandwidth of the cen bandwidth package. Value: 2~10000.",
 			},
 			"cen_bandwidth_package_name": {

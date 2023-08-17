@@ -63,7 +63,7 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				Required: true,
 				Set:      schema.HashString,
 				MinItems: 1,
-				MaxItems: 5,
+				MaxItems: 30,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validation.IsCIDR,
@@ -75,7 +75,7 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				Required: true,
 				Set:      schema.HashString,
 				MinItems: 1,
-				MaxItems: 5,
+				MaxItems: 30,
 				Elem: &schema.Schema{
 					Type:         schema.TypeString,
 					ValidateFunc: validation.IsCIDR,

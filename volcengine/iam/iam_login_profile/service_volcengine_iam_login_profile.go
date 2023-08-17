@@ -83,6 +83,7 @@ func (s *VolcengineIamLoginProfileService) CreateResource(resourceData *schema.R
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
+				time.Sleep(5 * time.Second)
 				d.SetId(d.Get("user_name").(string))
 				return nil
 			},
@@ -100,7 +101,9 @@ func (s *VolcengineIamLoginProfileService) ModifyResource(resourceData *schema.R
 			RequestIdField: "UserName",
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				time.Sleep(5 * time.Second)
+				return resp, err
 			},
 		},
 	}

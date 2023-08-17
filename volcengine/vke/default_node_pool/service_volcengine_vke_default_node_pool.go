@@ -370,6 +370,10 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 						if login != nil && login.(map[string]interface{})["SshKeyPairName"] != nil && login.(map[string]interface{})["SshKeyPairName"].(string) == "" {
 							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{}), "SshKeyPairName")
 						}
+						_, ok := security.(map[string]interface{})["SecurityStrategies"]
+						if !ok && d.HasChange("node_config.0.security.0.security_strategies") {
+							(*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["SecurityStrategies"] = []interface{}{}
+						}
 					}
 				}
 

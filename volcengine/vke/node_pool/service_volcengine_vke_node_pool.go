@@ -577,6 +577,10 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						if login != nil && login.(map[string]interface{})["SshKeyPairName"] != nil && login.(map[string]interface{})["SshKeyPairName"].(string) == "" {
 							delete((*call.SdkParam)["NodeConfig"].(map[string]interface{})["Security"].(map[string]interface{})["Login"].(map[string]interface{}), "SshKeyPairName")
 						}
+						_, exist := security.(map[string]interface{})["SecurityStrategies"]
+						if !exist && d.HasChange("node_config.0.security.0.security_strategies") {
+							security.(map[string]interface{})["SecurityStrategies"] = []interface{}{}
+						}
 					}
 
 					if _, ok1 := nodeconfig.(map[string]interface{})["HpcClusterIds"]; ok1 {
