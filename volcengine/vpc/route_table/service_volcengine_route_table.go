@@ -3,6 +3,7 @@ package route_table
 import (
 	"errors"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 	"strings"
 	"time"
 
@@ -165,6 +166,13 @@ func (s *VolcengineRouteTableService) CreateResource(resourceData *schema.Resour
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("vpc_id").(string)
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc.NewVpcService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("vpc_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -189,6 +197,13 @@ func (s *VolcengineRouteTableService) ModifyResource(resourceData *schema.Resour
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("vpc_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc.NewVpcService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("vpc_id").(string),
+				},
 			},
 		},
 	}
