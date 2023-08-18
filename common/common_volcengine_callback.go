@@ -17,22 +17,23 @@ type Callback struct {
 }
 
 type SdkCall struct {
-	Action          string
-	BeforeCall      BeforeCallFunc
-	ExecuteCall     ExecuteCallFunc
-	CallError       CallErrorFunc
-	AfterCall       AfterCallFunc
-	Convert         map[string]RequestConvert
-	ConvertMode     RequestConvertMode
-	SdkParam        *map[string]interface{}
-	RequestIdField  string
-	Refresh         *StateRefresh
-	ExtraRefresh    map[ResourceService]*StateRefresh
-	AfterRefresh    CallFunc
-	ContentType     RequestContentType
-	LockId          LockId
-	AfterLocked     CallFunc
-	ServiceCategory ServiceCategory
+	Action           string
+	BeforeCall       BeforeCallFunc
+	ExecuteCall      ExecuteCallFunc
+	CallError        CallErrorFunc
+	AfterCall        AfterCallFunc
+	Convert          map[string]RequestConvert
+	ConvertMode      RequestConvertMode
+	SdkParam         *map[string]interface{}
+	RequestIdField   string
+	Refresh          *StateRefresh
+	ExtraRefresh     map[ResourceService]*StateRefresh
+	AfterRefresh     CallFunc
+	ContentType      RequestContentType
+	LockId           LockId
+	AfterLocked      CallFunc
+	ServiceCategory  ServiceCategory
+	ExtraRefreshCall ExtraRefreshFunc
 
 	//common inner use
 	refreshState func(*schema.ResourceData, []string, time.Duration, string) *resource.StateChangeConf
@@ -50,6 +51,7 @@ type AfterCallFunc func(d *schema.ResourceData, client *SdkClient, resp *map[str
 type BeforeCallFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall) (bool, error)
 type ReadResourceFunc func(d *schema.ResourceData, resourceId string) (map[string]interface{}, error)
 type CallFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall) error
+type ExtraRefreshFunc func(d *schema.ResourceData, client *SdkClient, call SdkCall) (map[ResourceService]*StateRefresh, error)
 
 type LockId func(d *schema.ResourceData) string
 
@@ -337,6 +339,19 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 						_, err = stateConf.WaitForState()
 					}
 				}
+
+				if doExecute && fn.ExtraRefreshCall != nil && err == nil {
+					var refreshMap map[ResourceService]*StateRefresh
+					refreshMap, err = fn.ExtraRefreshCall(d, client, fn)
+					if fn.ExtraRefresh == nil {
+						fn.ExtraRefresh = refreshMap
+					} else {
+						for k, v := range fn.ExtraRefresh {
+							fn.ExtraRefresh[k] = v
+						}
+					}
+				}
+
 				if doExecute && fn.ExtraRefresh != nil && err == nil {
 					for k, v := range fn.ExtraRefresh {
 						stateConf := k.RefreshResourceState(d, v.Target, v.Timeout, v.ResourceId)
@@ -345,6 +360,7 @@ func CallProcess(calls []SdkCall, d *schema.ResourceData, client *SdkClient, ser
 						}
 					}
 				}
+
 				if doExecute && fn.AfterRefresh != nil && err == nil {
 					err = fn.AfterRefresh(d, client, fn)
 				}

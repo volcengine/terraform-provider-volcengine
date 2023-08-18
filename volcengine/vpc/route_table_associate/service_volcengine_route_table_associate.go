@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 )
 
 type VolcengineRouteTableAssociateService struct {
@@ -157,12 +159,22 @@ func (VolcengineRouteTableAssociateService) WithResourceResponseHandlers(routeTa
 }
 
 func (s *VolcengineRouteTableAssociateService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var vpcId string
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "AssociateRouteTable",
 			ConvertMode: ve.RequestConvertAll,
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("route_table_id").(string)
+				return vpcId
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				subnetId := resourceData.Get("subnet_id").(string)
+				resp, err := subnet.NewSubnetService(s.Client).ReadResource(resourceData, subnetId)
+				if err != nil {
+					return false, err
+				}
+				vpcId = resp["VpcId"].(string)
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -176,6 +188,16 @@ func (s *VolcengineRouteTableAssociateService) CreateResource(resourceData *sche
 				Target:  []string{"Associate"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			// 外部定义vpcId无法传入ExtraRefresh中
+			ExtraRefreshCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (map[ve.ResourceService]*ve.StateRefresh, error) {
+				return map[ve.ResourceService]*ve.StateRefresh{
+					vpc.NewVpcService(s.Client): {
+						Target:     []string{"Available"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: vpcId,
+					},
+				}, nil
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -186,6 +208,7 @@ func (s *VolcengineRouteTableAssociateService) ModifyResource(resourceData *sche
 }
 
 func (s *VolcengineRouteTableAssociateService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	var vpcId string
 	ids := strings.Split(s.ReadResourceId(resourceData.Id()), ":")
 	callback := ve.Callback{
 		Call: ve.SdkCall{
@@ -194,6 +217,18 @@ func (s *VolcengineRouteTableAssociateService) RemoveResource(resourceData *sche
 			SdkParam: &map[string]interface{}{
 				"RouteTableId": ids[0],
 				"SubnetId":     ids[1],
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return vpcId
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				subnetId := resourceData.Get("subnet_id").(string)
+				resp, err := subnet.NewSubnetService(s.Client).ReadResource(resourceData, subnetId)
+				if err != nil {
+					return false, err
+				}
+				vpcId = resp["VpcId"].(string)
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
