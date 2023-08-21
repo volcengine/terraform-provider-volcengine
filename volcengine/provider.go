@@ -7,6 +7,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_namespace"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_ns_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
 	"strings"
 
 	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
@@ -408,6 +409,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_accesses":     cloudfs_access.DataSourceVolcengineCloudfsAccesses(),
 			"volcengine_cloudfs_ns_quotas":    cloudfs_ns_quota.DataSourceVolcengineCloudfsNsQuotas(),
 			"volcengine_cloudfs_namespaces":   cloudfs_namespace.DataSourceVolcengineCloudfsNamespaces(),
+
+			// ================ NAS ================
+			"volcengine_nas_snapshots": nas_snapshot.DataSourceVolcengineNasSnapshots(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -586,11 +590,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_project":            tlsProject.ResourceVolcengineTlsProject(),
 			"volcengine_tls_topic":              tlsTopic.ResourceVolcengineTlsTopic(),
 			"volcengine_tls_index":              tlsIndex.ResourceVolcengineTlsIndex(),
-
+			
 			// ================ Cloudfs ================
 			"volcengine_cloudfs_file_system": cloudfs_file_system.ResourceVolcengineCloudfsFileSystem(),
 			"volcengine_cloudfs_access":      cloudfs_access.ResourceVolcengineCloudfsAccess(),
 			"volcengine_cloudfs_namespace":   cloudfs_namespace.ResourceVolcengineCloudfsNamespace(),
+
+			// ================ NAS ================
+			"volcengine_nas_snapshot": nas_snapshot.ResourceVolcengineNasSnapshot(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
