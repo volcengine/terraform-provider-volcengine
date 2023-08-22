@@ -179,6 +179,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_connection"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway_route"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_mount_point"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_permission_group"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -414,10 +417,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_namespaces":   cloudfs_namespace.DataSourceVolcengineCloudfsNamespaces(),
 
 			// ================ NAS ================
-			"volcengine_nas_snapshots":    nas_snapshot.DataSourceVolcengineNasSnapshots(),
-			"volcengine_nas_zones":        nas_zone.DataSourceVolcengineNasZones(),
-			"volcengine_nas_regions":      nas_region.DataSourceVolcengineNasRegions(),
-			"volcengine_nas_file_systems": nas_file_system.DataSourceVolcengineNasFileSystems(),
+			"volcengine_nas_file_systems":      nas_file_system.DataSourceVolcengineNasFileSystems(),
+			"volcengine_nas_snapshots":         nas_snapshot.DataSourceVolcengineNasSnapshots(),
+			"volcengine_nas_zones":             nas_zone.DataSourceVolcengineNasZones(),
+			"volcengine_nas_regions":           nas_region.DataSourceVolcengineNasRegions(),
+			"volcengine_nas_mount_points":      nas_mount_point.DataSourceVolcengineNasMountPoints(),
+			"volcengine_nas_permission_groups": nas_permission_group.DataSourceVolcengineNasPermissionGroups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -603,8 +608,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_namespace":   cloudfs_namespace.ResourceVolcengineCloudfsNamespace(),
 
 			// ================ NAS ================
-			"volcengine_nas_snapshot":    nas_snapshot.ResourceVolcengineNasSnapshot(),
-			"volcengine_nas_file_system": nas_file_system.ResourceVolcengineNasFileSystem(),
+			"volcengine_nas_file_system":      nas_file_system.ResourceVolcengineNasFileSystem(),
+			"volcengine_nas_snapshot":         nas_snapshot.ResourceVolcengineNasSnapshot(),
+			"volcengine_nas_mount_point":      nas_mount_point.ResourceVolcengineNasMountPoint(),
+			"volcengine_nas_permission_group": nas_permission_group.ResourceVolcengineNasPermissionGroup(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
