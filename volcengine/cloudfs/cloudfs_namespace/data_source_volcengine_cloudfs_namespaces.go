@@ -2,7 +2,6 @@ package cloudfs_namespace
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -24,12 +23,6 @@ func DataSourceVolcengineCloudfsNamespaces() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of tos bucket.",
-			},
-			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
-				Description:  "A Name Regex of cloudfs.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,

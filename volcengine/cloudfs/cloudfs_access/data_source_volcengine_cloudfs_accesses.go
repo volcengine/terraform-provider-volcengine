@@ -80,6 +80,11 @@ func DataSourceVolcengineCloudfsAccesses() *schema.Resource {
 							Computed:    true,
 							Description: "The status of access.",
 						},
+						"vpc_route_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable all vpc route.",
+						},
 					},
 				},
 			},

@@ -99,6 +99,7 @@ func (s *VolcengineCloudfsNamespaceService) ReadResource(resourceData *schema.Re
 		data["TosSk"] = tosSk
 	}
 	data["TosAccountId"] = resourceData.Get("tos_account_id")
+	data["NsId"] = ids[1]
 
 	return data, err
 }
@@ -247,7 +248,6 @@ func (s *VolcengineCloudfsNamespaceService) RemoveResource(resourceData *schema.
 
 func (s *VolcengineCloudfsNamespaceService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		NameField:    "Name",
 		IdField:      "Id",
 		CollectField: "namespaces",
 	}
