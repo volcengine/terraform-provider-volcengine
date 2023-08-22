@@ -7,6 +7,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_namespace"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_ns_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_file_system"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
@@ -413,9 +414,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_namespaces":   cloudfs_namespace.DataSourceVolcengineCloudfsNamespaces(),
 
 			// ================ NAS ================
-			"volcengine_nas_snapshots": nas_snapshot.DataSourceVolcengineNasSnapshots(),
-			"volcengine_nas_zones":     nas_zone.DataSourceVolcengineNasZones(),
-			"volcengine_nas_regions":   nas_region.DataSourceVolcengineNasRegions(),
+			"volcengine_nas_snapshots":    nas_snapshot.DataSourceVolcengineNasSnapshots(),
+			"volcengine_nas_zones":        nas_zone.DataSourceVolcengineNasZones(),
+			"volcengine_nas_regions":      nas_region.DataSourceVolcengineNasRegions(),
+			"volcengine_nas_file_systems": nas_file_system.DataSourceVolcengineNasFileSystems(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -601,7 +603,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_namespace":   cloudfs_namespace.ResourceVolcengineCloudfsNamespace(),
 
 			// ================ NAS ================
-			"volcengine_nas_snapshot": nas_snapshot.ResourceVolcengineNasSnapshot(),
+			"volcengine_nas_snapshot":    nas_snapshot.ResourceVolcengineNasSnapshot(),
+			"volcengine_nas_file_system": nas_file_system.ResourceVolcengineNasFileSystem(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
