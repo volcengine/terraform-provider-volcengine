@@ -25,13 +25,13 @@ import (
 var tosSignRequestHandler = request.NamedHandler{Name: "TosSignRequestHandler", Fn: tosSign}
 var tosUnmarshalErrorHandler = request.NamedHandler{Name: "TosUnmarshalErrorHandler", Fn: tosUnmarshalError}
 
-func (u *BypassSvc) NewTosClient() *client.Client {
+func (u *BypassSvc) NewTosClient(info *BypassSvcInfo) *client.Client {
 	svc := "tos"
 	config := u.Session.ClientConfig(svc)
 	var (
 		endpoint string
 	)
-	if u.info.Domain == "" {
+	if info.Domain == "" {
 		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
 			endpoint = fmt.Sprintf("%s://tos-%s.volces.com", "http", config.SigningRegion)
 		} else {
@@ -39,9 +39,9 @@ func (u *BypassSvc) NewTosClient() *client.Client {
 		}
 	} else {
 		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
-			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "http", u.info.Domain, config.SigningRegion)
+			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "http", info.Domain, config.SigningRegion)
 		} else {
-			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "https", u.info.Domain, config.SigningRegion)
+			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "https", info.Domain, config.SigningRegion)
 		}
 
 	}
