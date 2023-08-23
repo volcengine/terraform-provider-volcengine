@@ -21,7 +21,6 @@ const (
 
 type BypassSvc struct {
 	Session *session.Session
-	info    *BypassSvcInfo
 }
 
 type BypassSvcInfo struct {
@@ -65,10 +64,9 @@ func (u *BypassSvc) DoBypassSvcCall(info BypassSvcInfo, input *map[string]interf
 			err = content.Close()
 		}
 	}()
-	u.info = &info
 	var c *client.Client
 	if info.Client == nil {
-		c = u.NewTosClient()
+		c = u.NewTosClient(&info)
 	} else {
 		c = info.Client
 	}
