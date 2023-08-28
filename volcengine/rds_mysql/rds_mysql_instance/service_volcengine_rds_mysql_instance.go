@@ -121,6 +121,40 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResources(m map[string]interface
 				}
 			}
 			rdsInstance["Nodes"] = nodes
+
+			// query rds instance allow list ids
+			allowListInfo, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeAllowLists"), &map[string]interface{}{
+				"InstanceId": rdsInstance["InstanceId"],
+				"RegionId":   *(s.Client.ClbClient.Config.Region),
+			})
+			if err != nil {
+				logger.Info("DescribeAllowLists error:", err)
+				continue
+			}
+
+			allowLists, err := ve.ObtainSdkValue("Result.AllowLists", *allowListInfo)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.AllowLists error:", err)
+				continue
+			}
+			if allowLists == nil {
+				allowLists = []interface{}{}
+			}
+			allowListsArr, ok := allowLists.([]interface{})
+			if !ok {
+				logger.Info(" Result.AllowLists is not slice")
+				continue
+			}
+			allowListIds := make([]interface{}, 0)
+			for _, allowList := range allowListsArr {
+				allowListMap, ok := allowList.(map[string]interface{})
+				if !ok {
+					logger.Info(" AllowList is not map")
+					continue
+				}
+				allowListIds = append(allowListIds, allowListMap["AllowListId"])
+			}
+			rdsInstance["AllowListIds"] = allowListIds
 		}
 	}
 
@@ -161,6 +195,15 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResource(resourceData *schema.Re
 				}
 			}
 		}
+	}
+
+	if parameterSet, ok := resourceData.GetOk("parameters"); ok {
+		data["Parameters"] = parameterSet.(*schema.Set).List()
+	}
+
+	// DescribeDBInstances 不再返回 MaintenanceWindow 字段，需手动赋值为空数组
+	if _, ok := data["MaintenanceWindow"]; !ok {
+		data["MaintenanceWindow"] = []interface{}{}
 	}
 
 	data["ChargeInfo"] = data["ChargeDetail"]
