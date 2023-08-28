@@ -387,19 +387,22 @@ func (s *VolcengineTosObjectService) DatasourceResources(data *schema.ResourceDa
 				if err != nil {
 					return nil, err
 				}
-				newData, err = s.ReadResource(d, key.(string))
-				if err != nil {
-					return nil, err
-				}
 
-				v1 := v.(map[string]interface{})
-
-				for k, value := range newData {
-					if _, ok1 := v1[k]; !ok1 {
-						v1[k] = value
+				if str, ok1 := key.(string); ok1 {
+					newData, err = s.ReadResource(d, str)
+					if err != nil {
+						return nil, err
 					}
 				}
-				newSourceData = append(newSourceData, v1)
+
+				if v1, ok1 := v.(map[string]interface{}); ok1 {
+					for k, value := range newData {
+						if _, ok2 := v1[k]; !ok2 {
+							v1[k] = value
+						}
+					}
+					newSourceData = append(newSourceData, v1)
+				}
 			}
 			return newSourceData, nil
 		},
