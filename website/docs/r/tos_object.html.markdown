@@ -52,6 +52,7 @@ The `account_acl` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `content` - The content the TOS Object when content type is json or text.
 * `enable_version` - The flag of enable tos version.
 * `version_ids` - The version ids of the object if exist.
 

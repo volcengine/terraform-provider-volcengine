@@ -347,10 +347,12 @@ func tosUnmarshalError(r *request.Request) {
 			return
 		}
 		tos := tosError{}
-		if err = json.Unmarshal(body, &tos); err != nil {
-			fmt.Printf("Unmarshal err, %v\n", err)
-			r.Error = err
-			return
+		if len(body) > 0 {
+			if err = json.Unmarshal(body, &tos); err != nil {
+				fmt.Printf("Unmarshal err, %v\n", err)
+				r.Error = err
+				return
+			}
 		}
 		r.Error = volcengineerr.NewRequestFailure(
 			volcengineerr.New(tos.Code, tos.Message, nil),

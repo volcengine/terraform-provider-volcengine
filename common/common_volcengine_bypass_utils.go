@@ -8,13 +8,14 @@ import (
 )
 
 const (
-	BypassPath     = "PATH"
-	BypassDomain   = "DOMAIN"
-	BypassHeader   = "HEADER"
-	BypassParam    = "PARAM"
-	BypassUrlParam = "URL_PARAM"
-	BypassResponse = "RESPONSE"
-	BypassFilePath = "FILE_PATH"
+	BypassPath         = "PATH"
+	BypassDomain       = "DOMAIN"
+	BypassHeader       = "HEADER"
+	BypassParam        = "PARAM"
+	BypassUrlParam     = "URL_PARAM"
+	BypassResponse     = "RESPONSE"
+	BypassFilePath     = "FILE_PATH"
+	BypassResponseData = "RESPONSE_DATA"
 )
 
 func convertToBypassParams(convert map[string]RequestConvert, condition map[string]interface{}) (result map[string]interface{}, err error) {

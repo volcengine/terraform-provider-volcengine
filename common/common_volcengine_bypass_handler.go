@@ -40,13 +40,16 @@ func bypassBuild(r *request.Request) {
 		}
 	}
 	contentType := r.HTTPRequest.Header.Get("Content-Type")
-	if (strings.ToUpper(r.HTTPRequest.Method) == "PUT" ||
+	if strings.ToUpper(r.HTTPRequest.Method) == "PUT" ||
 		strings.ToUpper(r.HTTPRequest.Method) == "POST" ||
 		strings.ToUpper(r.HTTPRequest.Method) == "DELETE" ||
-		strings.ToUpper(r.HTTPRequest.Method) == "PATCH") &&
-		strings.Contains(strings.ToLower(contentType), "application/json") {
-		r.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
-		volcenginebody.BodyJson(&body, r)
+		strings.ToUpper(r.HTTPRequest.Method) == "PATCH" {
+		r.HTTPRequest.Header.Set("Content-Type", contentType)
+		if strings.Contains(strings.ToLower(contentType), "application/json") {
+			if r.HTTPRequest.Header.Get("Content-Length") == "" {
+				volcenginebody.BodyJson(&body, r)
+			}
+		}
 	} else {
 		if len(contentType) > 0 && !strings.Contains(strings.ToLower(contentType), "x-www-form-urlencoded") {
 			r.HTTPRequest.Header.Del("Content-Type")
@@ -90,6 +93,8 @@ func bypassUnmarshal(r *request.Request) {
 				(*r.Data.(*map[string]interface{}))[BypassResponse] = temp
 				//(*r.Data.(*map[string]interface{}))[TosPlainResponse] = string(body)
 			}
+
+			(*r.Data.(*map[string]interface{}))[BypassResponseData] = string(body)
 
 		}
 

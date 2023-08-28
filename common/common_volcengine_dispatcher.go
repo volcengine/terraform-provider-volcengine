@@ -295,8 +295,16 @@ func (d *Dispatcher) Data(resourceService ResourceService, resourceDate *schema.
 	if err != nil {
 		return err
 	}
+
 	if info.ExtraData != nil {
 		collection, err = info.ExtraData(collection)
+		if err != nil {
+			return err
+		}
+	}
+
+	if info.EachResource != nil {
+		collection, err = info.EachResource(collection, resourceDate)
 		if err != nil {
 			return err
 		}
