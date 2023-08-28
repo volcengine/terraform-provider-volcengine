@@ -68,6 +68,12 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResources(condition map[string]
 				return data, err
 			}
 			data[index].(map[string]interface{})["AssociatedInstances"] = instances
+			allowListIp, err := volc.ObtainSdkValue("Result.AllowList", *resp)
+			if err != nil {
+				return data, err
+			}
+			allowListIpArr := strings.Split(allowListIp.(string), ",")
+			data[index].(map[string]interface{})["AllowList"] = allowListIpArr
 		}
 		return data, err
 	})
