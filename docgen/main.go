@@ -146,6 +146,7 @@ var resourceKeys = map[string]string{
 	"privatelink": "PRIVATELINK",
 	"redis":       "REDIS",
 	"tls":         "TLS",
+	"cloudfs":     "CLOUDFS",
 }
 
 type Products struct {
