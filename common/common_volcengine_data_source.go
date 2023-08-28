@@ -18,6 +18,8 @@ import (
 
 type ExtraData func([]interface{}) ([]interface{}, error)
 
+type EachResource func([]interface{}, *schema.ResourceData) ([]interface{}, error)
+
 type DataSourceInfo struct {
 	RequestConverts  map[string]RequestConvert
 	ResponseConverts map[string]ResponseConvert
@@ -27,6 +29,7 @@ type DataSourceInfo struct {
 	ContentType      RequestContentType
 	ExtraData        ExtraData
 	ServiceCategory  ServiceCategory
+	EachResource     EachResource
 }
 
 func DataSourceToRequest(d *schema.ResourceData, r *schema.Resource, info DataSourceInfo) (req map[string]interface{}, err error) {

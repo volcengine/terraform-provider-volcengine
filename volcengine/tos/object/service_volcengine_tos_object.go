@@ -58,6 +58,7 @@ func (s *VolcengineTosObjectService) ReadResource(resourceData *schema.ResourceD
 	var (
 		action        string
 		resp          *map[string]interface{}
+		respBody      *map[string]interface{}
 		ok            bool
 		header        http.Header
 		acl           map[string]interface{}
@@ -88,6 +89,21 @@ func (s *VolcengineTosObjectService) ReadResource(resourceData *schema.ResourceD
 		}
 		if header.Get("Content-Type") != "" {
 			data["ContentType"] = header.Get("Content-Type")
+			if strings.Contains(strings.ToLower(header.Get("Content-Type")), "application/json") ||
+				strings.Contains(strings.ToLower(header.Get("Content-Type")), "application/xml") ||
+				strings.Contains(strings.ToLower(header.Get("Content-Type")), "text/plain") {
+				action = "GetObject"
+				logger.Debug(logger.ReqFormat, action, bucketName+":"+instanceId)
+				respBody, err = tos.DoBypassSvcCall(ve.BypassSvcInfo{
+					HttpMethod: ve.GET,
+					Domain:     bucketName,
+					Path:       []string{instanceId},
+				}, nil)
+				if err != nil {
+					return data, err
+				}
+				data["Content"] = (*respBody)[ve.BypassResponseData]
+			}
 		}
 		if header.Get("X-Tos-Server-Side-Encryption") != "" {
 			data["Encryption"] = header.Get("X-Tos-Server-Side-Encryption")
@@ -357,6 +373,35 @@ func (s *VolcengineTosObjectService) DatasourceResources(data *schema.ResourceDa
 
 			}
 			return extraData, err
+		},
+
+		EachResource: func(sourceData []interface{}, d *schema.ResourceData) ([]interface{}, error) {
+			var newSourceData []interface{}
+			for _, v := range sourceData {
+				var (
+					key     interface{}
+					newData map[string]interface{}
+					err     error
+				)
+				key, err = ve.ObtainSdkValue("Key", v)
+				if err != nil {
+					return nil, err
+				}
+				newData, err = s.ReadResource(d, key.(string))
+				if err != nil {
+					return nil, err
+				}
+
+				v1 := v.(map[string]interface{})
+
+				for k, value := range newData {
+					if _, ok1 := v1[k]; !ok1 {
+						v1[k] = value
+					}
+				}
+				newSourceData = append(newSourceData, v1)
+			}
+			return newSourceData, nil
 		},
 	}
 }

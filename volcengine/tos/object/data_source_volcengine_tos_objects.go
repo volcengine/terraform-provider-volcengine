@@ -59,6 +59,11 @@ func DataSourceVolcengineTosObjects() *schema.Resource {
 							Computed:    true,
 							Description: "The name the TOS Object storage class.",
 						},
+						"content": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The content the TOS Object when content type is json or text and xml.",
+						},
 					},
 				},
 			},
