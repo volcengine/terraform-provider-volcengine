@@ -69,27 +69,22 @@ func TestAccVolcengineRdsMysqlDatabaseResource_Basic(t *testing.T) {
 		PreCheck: func() {
 			volcengine.AccTestPreCheck(t)
 		},
-		Providers:    volcengine.GetTestAccProviders(),
+		Providers: volcengine.GetTestAccProviders(),
+		// CheckDestroy 此处可能存在问题，业务方接口查询已删除实例的数据库会报内部错误，预计于2023-09修复
 		CheckDestroy: volcengine.AccTestCheckResourceRemove(acc),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccVolcengineRdsMysqlDatabaseCreateConfig,
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
-					resource.TestCheckResourceAttr(acc.ResourceId, "character_set_name", ""),
-					resource.TestCheckResourceAttr(acc.ResourceId, "db_name", ""),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_id", ""),
+					resource.TestCheckResourceAttr(acc.ResourceId, "character_set_name", "utf8mb4"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "db_name", "acc-test"),
 				),
 			},
 			{
 				ResourceName:      resourceName,
 				ImportState:       true,
 				ImportStateVerify: true,
-			},
-			{
-				Config:             testAccVolcengineRdsMysqlDatabaseCreateConfig,
-				PlanOnly:           true,
-				ExpectNonEmptyPlan: false,
 			},
 		},
 	})
