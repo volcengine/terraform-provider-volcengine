@@ -162,6 +162,11 @@ func ResourceVolcengineTosObject() *schema.Resource {
 				Computed:    true,
 				Description: "The flag of enable tos version.",
 			},
+			"content": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The content the TOS Object when content type is json or text and xml.",
+			},
 		},
 	}
 	return resource
