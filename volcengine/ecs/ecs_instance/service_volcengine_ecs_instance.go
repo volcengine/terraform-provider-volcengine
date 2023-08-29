@@ -47,16 +47,15 @@ func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (
 		networkInterfaceId string
 	)
 	data, err = ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 20, nil, func(m map[string]interface{}) ([]interface{}, string, error) {
-		ecs := s.Client.EcsClient
 		action := "DescribeInstances"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = ecs.DescribeInstancesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, next, err
 			}
 		} else {
-			resp, err = ecs.DescribeInstancesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, next, err
 			}
@@ -274,10 +273,8 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 				if _err := recover(); _err != nil {
 					logger.Debug(logger.ReqFormat, "DescribeUserData", _err)
 				}
-				ve.Release()
 				wg.Done()
 			}()
-			ve.Acquire()
 			var (
 				userDataParam *map[string]interface{}
 				userDataResp  *map[string]interface{}
@@ -286,7 +283,7 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			userDataParam = &map[string]interface{}{
 				"InstanceId": instanceId,
 			}
-			userDataResp, userDataErr = s.Client.EcsClient.DescribeUserDataCommon(userDataParam)
+			userDataResp, userDataErr = s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeUserData"), userDataParam)
 			if userDataErr != nil {
 				return
 			}
@@ -302,10 +299,8 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 				if _err := recover(); _err != nil {
 					logger.Debug(logger.ReqFormat, "DescribeNetworkInterfaces", _err)
 				}
-				ve.Release()
 				wg.Done()
 			}()
-			ve.Acquire()
 			var (
 				networkInterfaceParam *map[string]interface{}
 				networkInterfaceResp  *map[string]interface{}
@@ -314,7 +309,7 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			networkInterfaceParam = &map[string]interface{}{
 				"InstanceId": instanceId,
 			}
-			networkInterfaceResp, networkInterfaceErr = s.Client.VpcClient.DescribeNetworkInterfacesCommon(networkInterfaceParam)
+			networkInterfaceResp, networkInterfaceErr = s.Client.UniversalClient.DoCall(getVpcUniversalInfo("DescribeNetworkInterfaces"), networkInterfaceParam)
 			if networkInterfaceErr != nil {
 				return
 			}
@@ -510,7 +505,7 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建ECS
-				return s.Client.EcsClient.RunInstancesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo("RunInstances"), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -630,7 +625,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改实例属性
-				return s.Client.EcsClient.ModifyInstanceAttributeCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo("ModifyInstanceAttribute"), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"RUNNING", "STOPPED"},
@@ -678,7 +673,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改实例计费方式
-				return s.Client.EcsClient.ModifyInstanceChargeTypeCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo("ModifyInstanceChargeType"), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return nil
@@ -710,7 +705,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.VpcClient.ModifyNetworkInterfaceAttributesCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getVpcUniversalInfo("ModifyNetworkInterfaceAttributes"), call.SdkParam)
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 					return nil
@@ -795,7 +790,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 					(*call.SdkParam)["ClientToken"] = uuid.New().String()
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					//续费实例
-					return s.Client.EcsClient.RenewInstanceCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo("RenewInstance"), call.SdkParam)
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 					return nil
@@ -840,7 +835,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 					(*call.SdkParam)["ClientToken"] = uuid.New().String()
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					//修改实例规格
-					return s.Client.EcsClient.ModifyInstanceSpecCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo("ModifyInstanceSpec"), call.SdkParam)
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 					return nil
@@ -890,7 +885,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.EcsClient.ReplaceSystemVolumeCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo("ReplaceSystemVolume"), call.SdkParam)
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 					return nil
@@ -962,7 +957,7 @@ func (s *VolcengineEcsService) RemoveResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除ECS
-				return s.Client.EcsClient.DeleteInstanceCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo("DeleteInstance"), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -1149,7 +1144,7 @@ func (s *VolcengineEcsService) StartOrStopInstanceCallback(resourceData *schema.
 		}
 		callback.Call.ExecuteCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 			logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-			return s.Client.EcsClient.StopInstanceCommon(call.SdkParam)
+			return s.Client.UniversalClient.DoCall(getUniversalInfo("StopInstance"), call.SdkParam)
 		}
 		callback.Call.AfterCall = func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 			*flag = true
@@ -1177,7 +1172,7 @@ func (s *VolcengineEcsService) StartOrStopInstanceCallback(resourceData *schema.
 		}
 		callback.Call.ExecuteCall = func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 			logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-			return s.Client.EcsClient.StartInstanceCommon(call.SdkParam)
+			return s.Client.UniversalClient.DoCall(getUniversalInfo("StartInstance"), call.SdkParam)
 		}
 		callback.Call.Refresh = &ve.StateRefresh{
 			Target:  []string{"RUNNING"},
@@ -1215,10 +1210,8 @@ func (s *VolcengineEcsService) readInstanceTypes(sourceData []interface{}) (extr
 				if e := recover(); e != nil {
 					logger.Debug(logger.ReqFormat, action, e)
 				}
-				ve.Release()
 				wg.Done()
 			}()
-			ve.Acquire()
 
 			instanceTypeId, _err = ve.ObtainSdkValue("InstanceTypeId", instance)
 			if _err != nil {
@@ -1236,7 +1229,7 @@ func (s *VolcengineEcsService) readInstanceTypes(sourceData []interface{}) (extr
 				"InstanceTypeIds.1": instanceTypeId,
 			}
 			logger.Debug(logger.ReqFormat, action, instanceTypeCondition)
-			resp, _err = s.Client.EcsClient.DescribeInstanceTypesCommon(&instanceTypeCondition)
+			resp, _err = s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeInstanceTypes"), &instanceTypeCondition)
 			if _err != nil {
 				syncMap.Store(instanceTypeId, err)
 				return
@@ -1308,10 +1301,8 @@ func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraDa
 				if e := recover(); e != nil {
 					logger.Debug(logger.ReqFormat, action, e)
 				}
-				ve.Release()
 				wg.Done()
 			}()
-			ve.Acquire()
 
 			instanceId, _err = ve.ObtainSdkValue("InstanceId", instance)
 			if _err != nil {

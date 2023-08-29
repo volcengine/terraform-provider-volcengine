@@ -85,5 +85,5 @@ func (c *Config) Client() (*SdkClient, error) {
 
 func init() {
 	InitLocks()
-	InitSyncLimit()
+	//InitSyncLimit()
 }

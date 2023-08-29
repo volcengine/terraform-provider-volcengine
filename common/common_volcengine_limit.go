@@ -11,7 +11,7 @@ var rateInfoMap map[string]*Rate
 
 func init() {
 	rateInfoMap = map[string]*Rate{
-		"ecs.RunInstance.2020-04-01": {
+		"ecs.RunInstances.2020-04-01": {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(14),
 		},
@@ -19,9 +19,13 @@ func init() {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(14),
 		},
+		"ecs.DeleteInstance.2020-04-01": {
+			Limiter:   rate.NewLimiter(4, 10),
+			Semaphore: semaphore.NewWeighted(10),
+		},
 		"vpc.DescribeNetworkInterfaces.2020-04-01": {
 			Limiter:   rate.NewLimiter(4, 10),
-			Semaphore: semaphore.NewWeighted(14),
+			Semaphore: semaphore.NewWeighted(10),
 		},
 	}
 }
