@@ -24,7 +24,7 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `objects` - The collection of TOS Object query.
-    * `content` - The content the TOS Object when content type is json or text.
+    * `content` - The content the TOS Object when content type is json or text and xml.
     * `name` - The name the TOS Object.
     * `size` - The name the TOS Object size.
     * `storage_class` - The name the TOS Object storage class.
