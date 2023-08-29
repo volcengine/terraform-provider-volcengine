@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"strings"
 
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client"
@@ -107,6 +108,27 @@ func getContentType(m ContentType) string {
 }
 
 func (u *Universal) DoCall(info UniversalInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
+	rate := GetRateInfoMap(info.ServiceName, info.Action, info.Version)
+	if rate == nil {
+		return u.doCall(info, input)
+	}
+
+	// 开始限流
+	ctx := context.Background()
+	if err = rate.Limiter.Wait(ctx); err != nil {
+		return nil, err
+	}
+	if err = rate.Semaphore.Acquire(ctx, 1); err != nil {
+		return nil, err
+	}
+	defer func() {
+		rate.Semaphore.Release(1)
+	}()
+
+	return u.doCall(info, input)
+}
+
+func (u *Universal) doCall(info UniversalInfo, input *map[string]interface{}) (output *map[string]interface{}, err error) {
 	c := u.newTargetClient(info)
 	op := &request.Operation{
 		HTTPMethod: u.getMethod(info.HttpMethod),

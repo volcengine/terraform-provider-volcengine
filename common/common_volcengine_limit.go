@@ -15,7 +15,11 @@ func init() {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(14),
 		},
-		"ecs.DescribeInstance.2020-04-01": {
+		"ecs.DescribeInstances.2020-04-01": {
+			Limiter:   rate.NewLimiter(4, 10),
+			Semaphore: semaphore.NewWeighted(14),
+		},
+		"vpc.DescribeNetworkInterfaces.2020-04-01": {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(14),
 		},
