@@ -271,14 +271,27 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Computed:    true,
 				MaxItems:    1,
 				MinItems:    1,
-				Description: "The option of cpu.",
+				Description: "The option of cpu,only support for ebm.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"threads_per_core": {
 							Type:        schema.TypeInt,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The per core of threads.",
+							Description: "The per core of threads,only support for ebm.",
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								//暂时增加这个逻辑 在不包含ebm的情况下 忽略掉这个变化 目前这个方式比较hack 后续接口能力完善后改变一下
+								if it, ok := d.Get("instance_type").(string); ok {
+									its := strings.Split(it, ".")
+									if len(its) == 3 && !strings.Contains(strings.ToLower(its[1]), "ebm") {
+										return true
+									} else {
+										return false
+									}
+								} else {
+									return true
+								}
+							},
 						},
 					},
 				},
