@@ -18,36 +18,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
-	"golang.org/x/sync/semaphore"
-	"golang.org/x/time/rate"
 )
-
-var rateInfo *ve.RateInfo
-
-func init() {
-	rateInfo = &ve.RateInfo{
-		Create: &ve.Rate{
-			Limiter:   rate.NewLimiter(4, 10),
-			Semaphore: semaphore.NewWeighted(14),
-		},
-		Update: &ve.Rate{
-			Limiter:   rate.NewLimiter(4, 10),
-			Semaphore: semaphore.NewWeighted(14),
-		},
-		Read: &ve.Rate{
-			Limiter:   rate.NewLimiter(4, 10),
-			Semaphore: semaphore.NewWeighted(14),
-		},
-		Delete: &ve.Rate{
-			Limiter:   rate.NewLimiter(4, 10),
-			Semaphore: semaphore.NewWeighted(14),
-		},
-		Data: &ve.Rate{
-			Limiter:   rate.NewLimiter(4, 10),
-			Semaphore: semaphore.NewWeighted(14),
-		},
-	}
-}
 
 type VolcengineEcsService struct {
 	Client        *ve.SdkClient
