@@ -27,6 +27,10 @@ func init() {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(10),
 		},
+		"vpc.DescribeSubnets.2020-04-01": {
+			Limiter:   rate.NewLimiter(4, 10),
+			Semaphore: semaphore.NewWeighted(10),
+		},
 	}
 }
 
