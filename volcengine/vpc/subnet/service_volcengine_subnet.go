@@ -36,16 +36,15 @@ func (s *VolcengineSubnetService) ReadResources(m map[string]interface{}) (data 
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		vpcClient := s.Client.VpcClient
 		action := "DescribeSubnets"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vpcClient.DescribeSubnetsCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vpcClient.DescribeSubnetsCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -314,4 +313,13 @@ func (s *VolcengineSubnetService) DatasourceResources(*schema.ResourceData, *sch
 
 func (s *VolcengineSubnetService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
 }
