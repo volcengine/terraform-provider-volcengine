@@ -167,6 +167,7 @@ func (s *VolcengineCrRegistryService) RefreshResourceState(resourceData *schema.
 			var (
 				demo       map[string]interface{}
 				status     interface{}
+				userStatus interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -184,6 +185,18 @@ func (s *VolcengineCrRegistryService) RefreshResourceState(resourceData *schema.
 			for _, v := range failStates {
 				if v == status.(string) {
 					return nil, "", fmt.Errorf("CrRegistry status error,status %s", status.(string))
+				}
+			}
+
+			//must wait user status
+			if len(target) > 0 && target[0] == "Active" {
+				userStatus, err = ve.ObtainSdkValue("UserStatus", demo)
+				if userStatus != "Active" {
+					status = "InActive"
+				} else {
+					if status == "Running" {
+						status = userStatus
+					}
 				}
 			}
 			return demo, status.(string), err
@@ -241,6 +254,10 @@ func (s *VolcengineCrRegistryService) CreateResource(resourceData *schema.Resour
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Active"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
 			},
 		}
 		callbacks = append(callbacks, callback)
@@ -265,6 +282,10 @@ func (s *VolcengineCrRegistryService) ModifyResource(resourceData *schema.Resour
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Active"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		}

@@ -41,6 +41,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 CR Instance can be imported using the name, e.g.
 ```
-$ terraform import volcengine_cr_instance.default enterprise-x
+$ terraform import volcengine_cr_registry.default enterprise-x
 ```
 

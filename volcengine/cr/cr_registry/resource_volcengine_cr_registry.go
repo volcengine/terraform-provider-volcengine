@@ -13,7 +13,7 @@ import (
 Import
 CR Instance can be imported using the name, e.g.
 ```
-$ terraform import volcengine_cr_instance.default enterprise-x
+$ terraform import volcengine_cr_registry.default enterprise-x
 ```
 
 */
