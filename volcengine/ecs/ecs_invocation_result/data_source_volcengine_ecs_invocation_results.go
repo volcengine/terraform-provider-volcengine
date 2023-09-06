@@ -91,7 +91,7 @@ func DataSourceVolcengineEcsInvocationResults() *schema.Resource {
 						"output": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The base64 encoded output message of the ecs invocation. ",
+							Description: "The base64 encoded output message of the ecs invocation.",
 						},
 						"exit_code": {
 							Type:        schema.TypeInt,
