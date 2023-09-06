@@ -81,9 +81,9 @@ func ResourceVolcengineVpc() *schema.Resource {
 				Description: "The IPv6 CIDR block of the VPC.",
 			},
 			"project_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				//ForceNew:    true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
 				Description: "The ProjectName of the VPC.",
 			},
 			"tags": ve.TagsSchema(),

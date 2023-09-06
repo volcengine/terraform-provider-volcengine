@@ -368,6 +368,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The ProjectName of the ecs instance.",
 			},
 			"tags": ve.TagsSchema(),
