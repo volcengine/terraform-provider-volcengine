@@ -85,6 +85,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_invocation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_invocation_result"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_launch_template"
@@ -262,14 +263,15 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_volumes": volume.DataSourceVolcengineVolumes(),
 
 			// ================ ECS ================
-			"volcengine_ecs_instances":        ecs_instance.DataSourceVolcengineEcsInstances(),
-			"volcengine_images":               image.DataSourceVolcengineImages(),
-			"volcengine_zones":                zone.DataSourceVolcengineZones(),
-			"volcengine_ecs_deployment_sets":  ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
-			"volcengine_ecs_key_pairs":        ecs_key_pair.DataSourceVolcengineEcsKeyPairs(),
-			"volcengine_ecs_launch_templates": ecs_launch_template.DataSourceVolcengineEcsLaunchTemplates(),
-			"volcengine_ecs_commands":         ecs_command.DataSourceVolcengineEcsCommands(),
-			"volcengine_ecs_invocations":      ecs_invocation.DataSourceVolcengineEcsInvocations(),
+			"volcengine_ecs_instances":          ecs_instance.DataSourceVolcengineEcsInstances(),
+			"volcengine_images":                 image.DataSourceVolcengineImages(),
+			"volcengine_zones":                  zone.DataSourceVolcengineZones(),
+			"volcengine_ecs_deployment_sets":    ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
+			"volcengine_ecs_key_pairs":          ecs_key_pair.DataSourceVolcengineEcsKeyPairs(),
+			"volcengine_ecs_launch_templates":   ecs_launch_template.DataSourceVolcengineEcsLaunchTemplates(),
+			"volcengine_ecs_commands":           ecs_command.DataSourceVolcengineEcsCommands(),
+			"volcengine_ecs_invocations":        ecs_invocation.DataSourceVolcengineEcsInvocations(),
+			"volcengine_ecs_invocation_results": ecs_invocation_result.DataSourceVolcengineEcsInvocationResults(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),

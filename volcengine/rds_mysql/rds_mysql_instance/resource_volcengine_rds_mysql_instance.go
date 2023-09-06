@@ -138,6 +138,7 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 			"allow_list_ids": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				Computed:    true,
 				Set:         schema.HashString,
 				Description: "Allow list Ids of the RDS instance.",
 				Elem: &schema.Schema{
