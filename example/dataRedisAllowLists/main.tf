@@ -41,7 +41,7 @@ resource "volcengine_redis_allow_list_associate" "foo" {
 }
 
 data "volcengine_redis_allow_lists" "foo"{
-  instance_id = volcengine_redis_instance.foo.id
+  instance_id = volcengine_redis_allow_list_associate.foo.instance_id
   region_id = "cn-beijing"
   name_regex = volcengine_redis_allow_list.foo.allow_list_name
 }
