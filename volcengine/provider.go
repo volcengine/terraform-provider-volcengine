@@ -9,6 +9,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
 	"strings"
 
+	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/pitr_time_period"
@@ -266,6 +268,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_instances":          ecs_instance.DataSourceVolcengineEcsInstances(),
 			"volcengine_images":                 image.DataSourceVolcengineImages(),
 			"volcengine_zones":                  zone.DataSourceVolcengineZones(),
+			"volcengine_regions":                regions.DataSourceVolcengineRegions(),
 			"volcengine_ecs_deployment_sets":    ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
 			"volcengine_ecs_key_pairs":          ecs_key_pair.DataSourceVolcengineEcsKeyPairs(),
 			"volcengine_ecs_launch_templates":   ecs_launch_template.DataSourceVolcengineEcsLaunchTemplates(),
