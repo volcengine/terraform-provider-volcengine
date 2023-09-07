@@ -2,6 +2,7 @@ package region
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -20,35 +21,47 @@ func (v *VolcengineRegionService) GetClient() *ve.SdkClient {
 
 func (v *VolcengineRegionService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		resp      *map[string]interface{}
+		nextToken interface{}
+		results   interface{}
+		next      string
+		ok        bool
 	)
-	action := "DescribeRegions"
-	logger.Debug(logger.ReqFormat, action, condition)
-	if condition == nil {
-		resp, err = v.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
-	} else {
-		resp, err = v.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
-	}
-	if err != nil {
-		return nil, err
-	}
-	logger.Debug(logger.RespFormat, action, condition, *resp)
+	return ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 10, nil, func(m map[string]interface{}) ([]interface{}, string, error) {
+		action := "DescribeRegions"
+		logger.Debug(logger.ReqFormat, action, condition)
+		if condition == nil {
+			resp, err = v.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
+		} else {
+			resp, err = v.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+		}
+		if err != nil {
+			return nil, next, err
+		}
+		logger.Debug(logger.RespFormat, action, condition, *resp)
 
-	results, err = ve.ObtainSdkValue("Result.Regions", *resp)
-	if err != nil {
-		return nil, err
-	}
-	if results == nil {
-		results = make([]interface{}, 0)
-	}
+		results, err = ve.ObtainSdkValue("Result.Regions", *resp)
+		if err != nil {
+			return nil, next, err
+		}
+		nextToken, err = ve.ObtainSdkValue("Result.NextToken", *resp)
+		if err != nil {
+			return nil, next, err
+		}
+		next, ok = nextToken.(string)
+		if !ok {
+			return nil, next, fmt.Errorf("next token must be a string")
+		}
+		if results == nil {
+			results = make([]interface{}, 0)
+		}
 
-	if data, ok = results.([]interface{}); !ok {
-		return nil, errors.New("Result.Regions is not Slice")
-	}
+		if data, ok = results.([]interface{}); !ok {
+			return nil, next, errors.New("Result.Regions is not Slice")
+		}
 
-	return data, nil
+		return data, next, err
+	})
 }
 
 func (v *VolcengineRegionService) ReadResource(data *schema.ResourceData, s string) (map[string]interface{}, error) {
