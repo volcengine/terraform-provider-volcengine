@@ -31,6 +31,10 @@ func init() {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(10),
 		},
+		"vpc.DescribeSecurityGroups.2020-04-01": {
+			Limiter:   rate.NewLimiter(4, 10),
+			Semaphore: semaphore.NewWeighted(10),
+		},
 	}
 }
 
