@@ -323,6 +323,11 @@ func (s *VolcengineVpnGatewayService) ModifyResource(resourceData *schema.Resour
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				// 修改完成后，需要等待一定时间
+				time.Sleep(5 * time.Second)
+				return nil
+			},
 		},
 	}
 	callbacks = append(callbacks, modifyCallback)
