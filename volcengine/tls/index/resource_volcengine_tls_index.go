@@ -69,7 +69,7 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 				},
 			},
 			"key_value": {
-				Type:         schema.TypeList,
+				Type:         schema.TypeSet,
 				Optional:     true,
 				AtLeastOneOf: []string{"full_text", "key_value"},
 				Description:  "The key value info of the tls index.",
@@ -111,7 +111,7 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 							Description: "Whether the filed is enabled for analysis.",
 						},
 						"json_keys": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
 							//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 							//	logger.DebugInfo("testValueType1", k)
@@ -145,7 +145,70 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 					},
 				},
 			},
-
+			"user_inner_key_value": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The reserved field index configuration of the tls index.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The key of the KeyValueInfo.",
+						},
+						"value_type": {
+							Type:         schema.TypeString,
+							Required:     true,
+							ValidateFunc: validation.StringInSlice([]string{"long", "double", "text", "json"}, false),
+							Description:  "The type of value. Valid values: `long`, `double`, `text`, `json`.",
+						},
+						"case_sensitive": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether the value is case sensitive.",
+						},
+						"delimiter": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Default:     "",
+							Description: "The delimiter of the value.",
+						},
+						"include_chinese": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether the value include chinese.",
+						},
+						"sql_flag": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether the filed is enabled for analysis.",
+						},
+						"json_keys": {
+							Type:        schema.TypeSet,
+							Optional:    true,
+							Description: "The JSON subfield key value index.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The key of the subfield key value index.",
+									},
+									"value_type": {
+										Type:         schema.TypeString,
+										Required:     true,
+										ValidateFunc: validation.StringInSlice([]string{"long", "double", "text"}, false),
+										Description:  "The type of value. Valid values: `long`, `double`, `text`.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"create_time": {
 				Type:        schema.TypeString,
 				Computed:    true,
