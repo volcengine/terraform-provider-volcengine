@@ -240,6 +240,17 @@ func (s *VolcengineVpnGatewayService) CreateResource(resourceData *schema.Resour
 				"project_name": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"ssl_max_connections": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"ssl_enabled": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
+				},
+				"ipsec_enabled": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) < 1 {
@@ -287,6 +298,17 @@ func (s *VolcengineVpnGatewayService) ModifyResource(resourceData *schema.Resour
 				},
 				"bandwidth": {
 					ConvertType: ve.ConvertDefault,
+				},
+				"ssl_max_connections": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"ssl_enabled": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
+				},
+				"ipsec_enabled": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
