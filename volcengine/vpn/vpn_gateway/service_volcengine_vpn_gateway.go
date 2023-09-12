@@ -61,7 +61,7 @@ func (s *VolcengineVpnGatewayService) ReadResources(m map[string]interface{}) (d
 				return data, err
 			}
 		}
-		logger.Debug(logger.RespFormat, action, resp)
+		logger.Debug(logger.RespFormat, action, *resp)
 		results, err = ve.ObtainSdkValue("Result.VpnGateways", *resp)
 		if err != nil {
 			return data, err
@@ -117,10 +117,10 @@ func (s *VolcengineVpnGatewayService) ReadResource(resourceData *schema.Resource
 		"VpnGatewayIds.1": id,
 	}
 	billingRes, err := s.Client.VpnClient.DescribeVpnGatewaysBillingCommon(params)
-	logger.Debug(logger.AllFormat, "DescribeVpnGatewaysBilling", params, billingRes, err)
 	if err != nil {
 		return data, err
 	}
+	logger.Debug(logger.AllFormat, "DescribeVpnGatewaysBilling", params, *billingRes)
 	tmpRes, err := ve.ObtainSdkValue("Result.VpnGateways", *billingRes)
 	if err != nil {
 		return data, err
@@ -299,9 +299,6 @@ func (s *VolcengineVpnGatewayService) ModifyResource(resourceData *schema.Resour
 				"bandwidth": {
 					ConvertType: ve.ConvertDefault,
 				},
-				"ssl_max_connections": {
-					ConvertType: ve.ConvertDefault,
-				},
 				"ssl_enabled": {
 					ConvertType: ve.ConvertDefault,
 					ForceGet:    true,
@@ -316,6 +313,10 @@ func (s *VolcengineVpnGatewayService) ModifyResource(resourceData *schema.Resour
 					return false, nil
 				}
 				(*call.SdkParam)["VpnGatewayId"] = d.Id()
+				// 只有为 true 的时候，强制加上去
+				if d.Get("ssl_enabled").(bool) {
+					(*call.SdkParam)["SslMaxConnections"] = d.Get("ssl_max_connections")
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
