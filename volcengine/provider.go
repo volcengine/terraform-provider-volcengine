@@ -8,8 +8,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_ns_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
 	"strings"
-
+	
 	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/ssl_vpn_server"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_state"
@@ -302,6 +303,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_customer_gateways":  customer_gateway.DataSourceVolcengineCustomerGateways(),
 			"volcengine_vpn_connections":    vpn_connection.DataSourceVolcengineVpnConnections(),
 			"volcengine_vpn_gateway_routes": vpn_gateway_route.DataSourceVolcengineVpnGatewayRoutes(),
+			"volcengine_ssl_vpn_servers":    ssl_vpn_server.DataSourceVolcengineSslVpnServers(),
 
 			// ================ VKE ================
 			"volcengine_vke_nodes":          node.DataSourceVolcengineVkeNodes(),
@@ -482,6 +484,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_customer_gateway":  customer_gateway.ResourceVolcengineCustomerGateway(),
 			"volcengine_vpn_connection":    vpn_connection.ResourceVolcengineVpnConnection(),
 			"volcengine_vpn_gateway_route": vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
+			"volcengine_ssl_vpn_server":    ssl_vpn_server.ResourceVolcengineSslVpnServer(),
 
 			// ================ VKE ================
 			"volcengine_vke_node":                           node.ResourceVolcengineVkeNode(),
