@@ -1,3 +1,15 @@
+package instance_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
+)
+
+const testAccVolcengineEscloudInstancesDatasourceConfig = `
 data "volcengine_zones" "foo"{
 }
 
@@ -10,8 +22,8 @@ resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet_new"
   description = "tfdesc"
   cidr_block = "172.16.0.0/24"
-  zone_id = data.volcengine_zones.foo.zones[0].id
-  vpc_id = volcengine_vpc.foo.id
+  zone_id = "${data.volcengine_zones.foo.zones[0].id}"
+  vpc_id = "${volcengine_vpc.foo.id}"
 }
 
 resource "volcengine_escloud_instance" "foo" {
@@ -51,5 +63,32 @@ resource "volcengine_escloud_instance" "foo" {
 }
 
 data "volcengine_escloud_instances" "foo"{
-  ids = [volcengine_escloud_instance.foo.id]
+    ids = [volcengine_escloud_instance.foo.id]
+}
+`
+
+func TestAccVolcengineEscloudInstancesDatasource_Basic(t *testing.T) {
+	resourceName := "data.volcengine_escloud_instances.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return instance.NewESCloudInstanceService(client)
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers: volcengine.GetTestAccProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcengineEscloudInstancesDatasourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acc.ResourceId, "instances.#", "1"),
+				),
+			},
+		},
+	})
 }

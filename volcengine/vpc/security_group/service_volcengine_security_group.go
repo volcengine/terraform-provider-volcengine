@@ -33,16 +33,16 @@ func (s *VolcengineSecurityGroupService) ReadResources(m map[string]interface{})
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		vpcClient := s.Client.VpcClient
+		vpcClient := s.Client.UniversalClient
 		action := "DescribeSecurityGroups"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vpcClient.DescribeSecurityGroupsCommon(nil)
+			resp, err = vpcClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vpcClient.DescribeSecurityGroupsCommon(&condition)
+			resp, err = vpcClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}

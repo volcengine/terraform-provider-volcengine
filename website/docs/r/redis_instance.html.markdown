@@ -14,8 +14,24 @@ in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),wh
 use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
+data "volcengine_zones" "foo" {
+}
+
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-vpc"
+  cidr_block = "172.16.0.0/16"
+}
+
+resource "volcengine_subnet" "foo" {
+  subnet_name = "acc-test-subnet"
+  cidr_block  = "172.16.0.0/24"
+  zone_id     = data.volcengine_zones.foo.zones[0].id
+  vpc_id      = volcengine_vpc.foo.id
+}
+
+
 resource "volcengine_redis_instance" "foo" {
-  zone_ids            = ["cn-beijing-a", "cn-beijing-b"]
+  zone_ids            = [data.volcengine_zones.foo.zones[0].id]
   instance_name       = "tf-test"
   sharded_cluster     = 1
   password            = "1qaz!QAZ12"
@@ -23,14 +39,12 @@ resource "volcengine_redis_instance" "foo" {
   shard_capacity      = 1024
   shard_number        = 2
   engine_version      = "5.0"
-  subnet_id           = "subnet-13g7c3lot0lc03n6nu4wj****"
+  subnet_id           = volcengine_subnet.foo.id
   deletion_protection = "disabled"
   vpc_auth_mode       = "close"
   charge_type         = "PostPaid"
-  #     purchase_months = 1
-  #     auto_renew = false
-  port         = 6381
-  project_name = "default"
+  port                = 6381
+  project_name        = "default"
   tags {
     key   = "k1"
     value = "v1"

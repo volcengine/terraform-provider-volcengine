@@ -11,7 +11,7 @@ Use this data source to query detailed information of tls indexes
 ## Example Usage
 ```hcl
 data "volcengine_tls_indexes" "default" {
-  ids = ["65d67d34-c5b4-4ec8-b3a9-175d3366****"]
+  ids = ["7ce12237-6670-44a7-9d79-2e36961586e6"]
 }
 ```
 ## Argument Reference
@@ -44,6 +44,20 @@ In addition to all arguments above, the following attributes are exported:
         * `value_type` - The type of value.
     * `modify_time` - The modify time of the tls index.
     * `topic_id` - The topic id of the tls index.
+    * `user_inner_key_value` - The reserved field index configuration of the tls topic.
+        * `case_sensitive` - Whether the value is case sensitive.
+        * `delimiter` - The delimiter of the value.
+        * `include_chinese` - Whether the value include chinese.
+        * `json_keys` - The JSON subfield key value index.
+            * `case_sensitive` - Whether the value is case sensitive.
+            * `delimiter` - The delimiter of the value.
+            * `include_chinese` - Whether the value include chinese.
+            * `key` - The key of the subfield key value index.
+            * `sql_flag` - Whether the filed is enabled for analysis.
+            * `value_type` - The type of value.
+        * `key` - The key of the KeyValue index.
+        * `sql_flag` - Whether the filed is enabled for analysis.
+        * `value_type` - The type of value.
 * `total_count` - The total count of tls index query.
 
 
