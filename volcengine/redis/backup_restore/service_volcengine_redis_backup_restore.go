@@ -105,6 +105,9 @@ func (s *VolcengineRedisBackupRestoreService) ModifyResource(resourceData *schem
 			ContentType: ve.ContentTypeJson,
 			ConvertMode: ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
+				"instance_id": {
+					ForceGet: true,
+				},
 				"backup_type": {
 					ForceGet: true,
 				},

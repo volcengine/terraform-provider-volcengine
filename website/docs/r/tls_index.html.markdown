@@ -11,13 +11,13 @@ Provides a resource to manage tls index
 ## Example Usage
 ```hcl
 resource "volcengine_tls_index" "foo" {
-  topic_id = "65d67d34-c5b4-4ec8-b3a9-175d3366****"
+  topic_id = "7ce12237-6670-44a7-9d79-2e36961586e6"
 
-  full_text {
-    case_sensitive  = true
-    delimiter       = "!"
-    include_chinese = false
-  }
+  #  full_text {
+  #    case_sensitive = true
+  #    delimiter = "!"
+  #    include_chinese = false
+  #  }
 
   key_value {
     key             = "k1"
@@ -27,11 +27,11 @@ resource "volcengine_tls_index" "foo" {
     include_chinese = false
     sql_flag        = false
     json_keys {
-      key        = "k2.k4"
+      key        = "class"
       value_type = "text"
     }
     json_keys {
-      key        = "k3.k4"
+      key        = "age"
       value_type = "long"
     }
   }
@@ -44,6 +44,23 @@ resource "volcengine_tls_index" "foo" {
     include_chinese = false
     sql_flag        = false
   }
+
+  user_inner_key_value {
+    key             = "__content__"
+    value_type      = "json"
+    delimiter       = ",:-/ "
+    case_sensitive  = false
+    include_chinese = false
+    sql_flag        = false
+    json_keys {
+      key        = "age"
+      value_type = "long"
+    }
+    json_keys {
+      key        = "name"
+      value_type = "long"
+    }
+  }
 }
 ```
 ## Argument Reference
@@ -51,6 +68,7 @@ The following arguments are supported:
 * `topic_id` - (Required, ForceNew) The topic id of the tls index.
 * `full_text` - (Optional) The full text info of the tls index.
 * `key_value` - (Optional) The key value info of the tls index.
+* `user_inner_key_value` - (Optional) The reserved field index configuration of the tls index.
 
 The `full_text` object supports the following:
 
@@ -64,6 +82,16 @@ The `json_keys` object supports the following:
 * `value_type` - (Required) The type of value. Valid values: `long`, `double`, `text`.
 
 The `key_value` object supports the following:
+
+* `key` - (Required) The key of the KeyValueInfo.
+* `value_type` - (Required) The type of value. Valid values: `long`, `double`, `text`, `json`.
+* `case_sensitive` - (Optional) Whether the value is case sensitive.
+* `delimiter` - (Optional) The delimiter of the value.
+* `include_chinese` - (Optional) Whether the value include chinese.
+* `json_keys` - (Optional) The JSON subfield key value index.
+* `sql_flag` - (Optional) Whether the filed is enabled for analysis.
+
+The `user_inner_key_value` object supports the following:
 
 * `key` - (Required) The key of the KeyValueInfo.
 * `value_type` - (Required) The type of value. Valid values: `long`, `double`, `text`, `json`.

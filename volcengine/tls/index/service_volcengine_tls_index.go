@@ -52,7 +52,7 @@ func (s *VolcengineTlsIndexService) ReadResources(condition map[string]interface
 			Path:        []string{action},
 			Client:      s.Client.BypassSvcClient.NewTlsClient(),
 		}, &req)
-		logger.Debug(logger.RespFormat, action, req, resp)
+		logger.Debug(logger.RespFormat, action, req, *resp)
 		if err != nil {
 			return data, err
 		}
@@ -70,6 +70,11 @@ func (s *VolcengineTlsIndexService) ReadResources(condition map[string]interface
 			continue
 		}
 		indexMap["KeyValue"], err = transKeyValueToResponse(keyValue)
+		userInnerKeyValue, ok := indexMap["UserInnerKeyValue"]
+		if !ok || userInnerKeyValue == nil {
+			continue
+		}
+		indexMap["UserInnerKeyValue"], err = transKeyValueToResponse(userInnerKeyValue)
 		if err != nil {
 			return data, err
 		}
@@ -135,30 +140,35 @@ func (s *VolcengineTlsIndexService) CreateResource(resourceData *schema.Resource
 					ConvertType: ve.ConvertJsonObject,
 				},
 				"key_value": {
-					ConvertType: ve.ConvertJsonObjectArray,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"json_keys": {
-							ConvertType: ve.ConvertJsonObjectArray,
-						},
-					},
+					// 框架层对于set套set的类型转换有bug，手动处理
+					Ignore: true,
+				},
+				"user_inner_key_value": {
+					// 框架层对于set套set的类型转换有bug，手动处理
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) > 0 {
+					if keyValueSet, ok := d.GetOk("key_value"); ok {
+						keyValues, err := transKeyValueToRequest(keyValueSet)
+						if err != nil {
+							return false, err
+						}
+						(*call.SdkParam)["KeyValue"] = keyValues
+					}
+					if userInnerKeyValueSet, ok := d.GetOk("user_inner_key_value"); ok {
+						keyValues, err := transKeyValueToRequest(userInnerKeyValueSet)
+						if err != nil {
+							return false, err
+						}
+						(*call.SdkParam)["UserInnerKeyValue"] = keyValues
+					}
 					return true, nil
 				}
 				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				if keyValue, exist := (*call.SdkParam)["KeyValue"]; exist {
-					newKeyValue, err := transKeyValueToRequest(keyValue)
-					if err != nil {
-						return nil, err
-					}
-					logger.DebugInfo("testKeyValue", newKeyValue)
-					(*call.SdkParam)["KeyValue"] = newKeyValue
-				}
-
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					ContentType: ve.ApplicationJSON,
@@ -192,33 +202,33 @@ func (s *VolcengineTlsIndexService) ModifyResource(resourceData *schema.Resource
 					ForceGet:    true,
 				},
 				"key_value": {
-					ConvertType: ve.ConvertJsonObjectArray,
-					ForceGet:    true,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"json_keys": {
-							ConvertType: ve.ConvertJsonObjectArray,
-							ForceGet:    true,
-						},
-					},
+					// 框架层对于set套set的类型转换有bug，手动处理
+					Ignore: true,
+				},
+				"user_inner_key_value": {
+					// 框架层对于set套set的类型转换有bug，手动处理
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) > 0 {
-					(*call.SdkParam)["TopicId"] = d.Get("topic_id")
-					return true, nil
+				(*call.SdkParam)["TopicId"] = d.Get("topic_id")
+				if keyValueSet, ok := d.GetOk("key_value"); ok {
+					keyValues, err := transKeyValueToRequest(keyValueSet)
+					if err != nil {
+						return false, err
+					}
+					(*call.SdkParam)["KeyValue"] = keyValues
 				}
-				return false, nil
+				if userInnerKeyValueSet, ok := d.GetOk("user_inner_key_value"); ok {
+					keyValues, err := transKeyValueToRequest(userInnerKeyValueSet)
+					if err != nil {
+						return false, err
+					}
+					(*call.SdkParam)["UserInnerKeyValue"] = keyValues
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				if keyValue, exist := (*call.SdkParam)["KeyValue"]; exist {
-					newKeyValue, err := transKeyValueToRequest(keyValue)
-					if err != nil {
-						return nil, err
-					}
-					logger.DebugInfo("testKeyValue", newKeyValue)
-					(*call.SdkParam)["KeyValue"] = newKeyValue
-				}
-
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					ContentType: ve.ApplicationJSON,
@@ -309,53 +319,57 @@ func (s *VolcengineTlsIndexService) ReadResourceId(id string) string {
 	return id
 }
 
-func transKeyValueToRequest(keyValue interface{}) ([]interface{}, error) {
-	keyValueArray, ok := keyValue.([]interface{})
-	if !ok {
-		return []interface{}{}, fmt.Errorf(" Index KeyValues is not slice ")
-	}
-	for _, v := range keyValueArray {
-		keyValueMap, ok := v.(map[string]interface{})
-		if !ok {
-			return []interface{}{}, fmt.Errorf(" Index KeyValue is not map ")
-		}
+func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
+	keyValues := make([]interface{}, 0)
+	for _, k := range keyValueSet.(*schema.Set).List() {
+		keyValue := make(map[string]interface{})
 		valueMap := make(map[string]interface{})
-		sqlFlag, exist := keyValueMap["SqlFlag"]
-		if !exist {
-			sqlFlag = false
+		kMap, ok := k.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("key value struct error")
 		}
-		for k1, v1 := range keyValueMap {
-			if k1 == "Key" {
-				continue
-			} else if k1 == "JsonKeys" && v1 != nil {
-				jsonArr, ok := v1.([]interface{})
-				if !ok {
-					return []interface{}{}, fmt.Errorf(" Index KeyValues JsonKeys is not slice ")
-				}
-				for _, v2 := range jsonArr {
-					jsonMap, ok := v2.(map[string]interface{})
-					if !ok {
-						return []interface{}{}, fmt.Errorf(" Index KeyValue JsonKeys is not map ")
-					}
-					jsonValueMap := make(map[string]interface{})
-					for k3, v3 := range jsonMap {
-						if k3 == "Key" {
-							continue
-						} else {
-							jsonValueMap[k3] = v3
-							delete(jsonMap, k3)
-						}
-					}
-					jsonValueMap["SqlFlag"] = sqlFlag
-					jsonMap["Value"] = jsonValueMap
-				}
+		keyValue["Key"] = kMap["key"]
+		valueMap["ValueType"] = kMap["value_type"]
+		if v, ok := kMap["case_sensitive"]; ok {
+			valueMap["CaseSensitive"] = v
+		}
+		if v, ok := kMap["include_chinese"]; ok {
+			valueMap["IncludeChinese"] = v
+		}
+		if v, ok := kMap["delimiter"]; ok {
+			valueMap["Delimiter"] = v
+		}
+		if v, ok := kMap["sql_flag"]; ok {
+			valueMap["SqlFlag"] = v
+		}
+		if v, ok := kMap["json_keys"]; ok {
+			jsonKeys := make([]interface{}, 0)
+			jsonList, ok := v.(*schema.Set)
+			if !ok {
+				return nil, fmt.Errorf("json keys struct error")
 			}
-			valueMap[k1] = v1
-			delete(keyValueMap, k1)
+			for _, key := range jsonList.List() {
+				jsonKey := make(map[string]interface{})
+				keyMap, ok := key.(map[string]interface{})
+				if !ok {
+					return nil, fmt.Errorf("json key struct error")
+				}
+				if v, ok = keyMap["key"]; ok {
+					jsonKey["Key"] = v
+				}
+				if v, ok = keyMap["value_type"]; ok {
+					jsonValue := make(map[string]interface{})
+					jsonValue["ValueType"] = v
+					jsonKey["Value"] = jsonValue
+				}
+				jsonKeys = append(jsonKeys, jsonKey)
+			}
+			valueMap["JsonKeys"] = jsonKeys
 		}
-		keyValueMap["Value"] = valueMap
+		keyValue["Value"] = valueMap
+		keyValues = append(keyValues, keyValue)
 	}
-	return keyValueArray, nil
+	return keyValues, nil
 }
 
 func transKeyValueToResponse(keyValue interface{}) ([]interface{}, error) {

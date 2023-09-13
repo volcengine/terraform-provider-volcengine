@@ -157,6 +157,84 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 								},
 							},
 						},
+						"user_inner_key_value": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The reserved field index configuration of the tls topic.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The key of the KeyValue index.",
+									},
+									"value_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The type of value.",
+									},
+									"case_sensitive": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the value is case sensitive.",
+									},
+									"delimiter": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The delimiter of the value.",
+									},
+									"include_chinese": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the value include chinese.",
+									},
+									"sql_flag": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the filed is enabled for analysis.",
+									},
+									"json_keys": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "The JSON subfield key value index.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"key": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The key of the subfield key value index.",
+												},
+												"value_type": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The type of value.",
+												},
+												"case_sensitive": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: "Whether the value is case sensitive.",
+												},
+												"delimiter": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The delimiter of the value.",
+												},
+												"include_chinese": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: "Whether the value include chinese.",
+												},
+												"sql_flag": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: "Whether the filed is enabled for analysis.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},
