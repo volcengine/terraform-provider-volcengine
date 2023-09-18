@@ -116,6 +116,7 @@ func ResourceVolcengineEipAddress() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The ProjectName of the EIP.",
 			},
 			"tags": ve.TagsSchema(),

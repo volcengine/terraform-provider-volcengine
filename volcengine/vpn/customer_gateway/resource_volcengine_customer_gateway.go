@@ -56,6 +56,7 @@ func ResourceVolcengineCustomerGateway() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The project name of the VPN customer gateway.",
 			},
 		},
