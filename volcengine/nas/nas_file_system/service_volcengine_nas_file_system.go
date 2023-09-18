@@ -306,23 +306,21 @@ func (s *VolcengineNasFileSystemService) ModifyResource(resourceData *schema.Res
 					return false, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					if d.HasChange("tags") {
-						if tags, exists := (*call.SdkParam)["Tags"]; exists {
-							tagsArr, ok := tags.([]interface{})
-							if !ok {
-								return nil, fmt.Errorf(" file system tags is not slice ")
-							}
-							for _, tag := range tagsArr {
-								tagMap, ok := tag.(map[string]interface{})
-								if !ok {
-									return nil, fmt.Errorf(" file system tag is not map")
-								}
-								tagMap["Type"] = "Custom"
-							}
-						} else {
-							// 当 Tags 被删除时，入参添加空列表来置空
-							(*call.SdkParam)["Tags"] = []interface{}{}
+					if tags, exists := (*call.SdkParam)["Tags"]; exists {
+						tagsArr, ok := tags.([]interface{})
+						if !ok {
+							return nil, fmt.Errorf(" file system tags is not slice ")
 						}
+						for _, tag := range tagsArr {
+							tagMap, ok := tag.(map[string]interface{})
+							if !ok {
+								return nil, fmt.Errorf(" file system tag is not map")
+							}
+							tagMap["Type"] = "Custom"
+						}
+					} else {
+						// 当 Tags 被删除时，入参添加空列表来置空
+						(*call.SdkParam)["Tags"] = []interface{}{}
 					}
 
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
