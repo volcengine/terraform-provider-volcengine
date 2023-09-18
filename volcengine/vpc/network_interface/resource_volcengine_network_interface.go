@@ -92,9 +92,9 @@ func ResourceVolcengineNetworkInterface() *schema.Resource {
 				Description:   "The list of private ip address. This field conflicts with `secondary_private_ip_address_count`.",
 			},
 			"project_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				//ForceNew:    true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
 				Description: "The ProjectName of the ENI.",
 			},
 			"tags": ve.TagsSchema(),

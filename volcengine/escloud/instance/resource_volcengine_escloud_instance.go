@@ -164,6 +164,7 @@ func ResourceVolcengineESCloudInstance() *schema.Resource {
 						"project_name": {
 							Type:        schema.TypeString,
 							Optional:    true,
+							Computed:    true,
 							Description: "The project name  to which the ESCloud instance belongs.",
 						},
 						"maintenance_time": {

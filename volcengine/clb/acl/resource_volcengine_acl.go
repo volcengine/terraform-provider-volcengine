@@ -66,9 +66,9 @@ func ResourceVolcengineAcl() *schema.Resource {
 				},
 			},
 			"project_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				//ForceNew:    true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
 				Description: "The ProjectName of the Acl.",
 			},
 			"create_time": {
