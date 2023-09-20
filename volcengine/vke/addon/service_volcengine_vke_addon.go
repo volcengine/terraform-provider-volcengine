@@ -14,13 +14,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-var addon_notsupport_update []string
+var addonSupportUpdate []string
 
 func init() {
-	addon_notsupport_update = []string{
-		"metrics-collector",
-		"event-collector",
-		"prometheus-adapter",
+	addonSupportUpdate = []string{
+		"cr-credential-controller",
+		"apmplus-opentelemetry-collector",
+		"cluster-autoscaler",
+		"ingress-nginx",
+		"p2p-accelerator",
 	}
 }
 
@@ -170,17 +172,23 @@ func (s *VolcengineVkeAddonService) CreateResource(resourceData *schema.Resource
 				name := (*call.SdkParam)["Name"]
 				data, err := s.ReadResource(d, fmt.Sprintf("%s:%s", clusterId, name))
 				if err != nil {
-					return nil, err
+					if !strings.Contains(err.Error(), "not exist") { // 其他类型的错误
+						return nil, err
+					}
 				}
 				//addon exist
 				if len(data) > 0 {
 					version := data["Version"]
-					if version == (*call.SdkParam)["Version"] {
-						//version is equal,check config
-						return s.updateConfig(name, data, client, call)
-					} else {
-						//version is not equal,update version
-						_, err = s.Client.UniversalClient.DoCall(getUniversalInfo("UpdateAddonVersion"), call.SdkParam)
+
+					hclVersion, ok := d.GetOk("version")
+					if ok && hclVersion != version { // 如果用户在tf中定义了 version，并且与已有的不相等
+						params := map[string]interface{}{
+							"ClusterId": clusterId,
+							"Name":      name,
+							"Version":   hclVersion,
+						}
+						logger.Debug(logger.ReqFormat, "UpdateAddonVersion", params)
+						_, err = s.Client.UniversalClient.DoCall(getUniversalInfo("UpdateAddonVersion"), &params)
 						if err != nil {
 							return nil, err
 						}
@@ -189,9 +197,10 @@ func (s *VolcengineVkeAddonService) CreateResource(resourceData *schema.Resource
 						if err != nil {
 							return nil, err
 						}
-						//check config
-						return s.updateConfig(name, data, client, call)
 					}
+
+					// 接下来检查 Config
+					return s.updateConfig(name, data, client, call)
 				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -223,6 +232,10 @@ func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.Resource
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) == 0 {
+					return false, nil
+				}
+
 				databaseId := d.Id()
 				ids := strings.Split(databaseId, ":")
 				if len(ids) != 2 {
@@ -259,6 +272,10 @@ func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.Resource
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) == 0 {
+					return false, nil
+				}
+
 				databaseId := d.Id()
 				ids := strings.Split(databaseId, ":")
 				if len(ids) != 2 {
@@ -424,18 +441,19 @@ func (s *VolcengineVkeAddonService) updateConfig(name interface{}, data map[stri
 	}
 	if needCheck && !reflect.DeepEqual(source, target) && checkSupportUpdate(fmt.Sprintf("%s", name)) {
 		//update config
+		logger.Debug(logger.ReqFormat, "UpdateAddonConfig", *call.SdkParam)
 		return s.Client.UniversalClient.DoCall(getUniversalInfo("UpdateAddonConfig"), call.SdkParam)
 	}
 	return nil, nil
 }
 
 func checkSupportUpdate(name string) bool {
-	for _, addon := range addon_notsupport_update {
+	for _, addon := range addonSupportUpdate {
 		if name == addon {
-			return false
+			return true
 		}
 	}
-	return true
+	return false
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
