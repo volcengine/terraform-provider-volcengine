@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/mitchellh/copystructure"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
@@ -37,33 +38,46 @@ func interfaceSlice2StringSlice(data []interface{}) []string {
 func (s *VolcengineNasSnapshotService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
 	return volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
 		var (
-			resp    *map[string]interface{}
-			results interface{}
-			ok      bool
+			newCondition map[string]interface{}
+			resp         *map[string]interface{}
+			results      interface{}
+			ok           bool
 		)
+
+		deepCopyValue, err := copystructure.Copy(condition)
+		if err != nil {
+			return data, fmt.Errorf(" DeepCopy condition error: %v ", err)
+		}
+		if newCondition, ok = deepCopyValue.(map[string]interface{}); !ok {
+			return data, fmt.Errorf(" DeepCopy condition error: newCondition is not map ")
+		}
+
 		// 处理 SnapshotIds，逗号分离
 		if v, ok := condition["SnapshotIds"]; ok {
-			ids := v.([]interface{})
+			ids, ok := v.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" SnapshotIds is not slice ")
+			}
 			if len(ids) > 0 {
-				condition["SnapshotIds"] = strings.Join(interfaceSlice2StringSlice(ids), ",")
+				newCondition["SnapshotIds"] = strings.Join(interfaceSlice2StringSlice(ids), ",")
 			}
 		}
 
 		universalClient := s.Client.UniversalClient
 		action := "DescribeSnapshots"
-		logger.Debug(logger.ReqFormat, action, condition)
-		if condition == nil {
+		logger.Debug(logger.ReqFormat, action, newCondition)
+		if newCondition == nil {
 			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &newCondition)
 			if err != nil {
 				return data, err
 			}
 		}
-		logger.Debug(logger.RespFormat, action, condition, *resp)
+		logger.Debug(logger.RespFormat, action, newCondition, *resp)
 
 		results, err = volc.ObtainSdkValue("Result.Snapshots", *resp)
 		if err != nil {

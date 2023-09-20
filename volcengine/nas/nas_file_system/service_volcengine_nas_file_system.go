@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/mitchellh/copystructure"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
@@ -32,12 +33,21 @@ func (s *VolcengineNasFileSystemService) GetClient() *ve.SdkClient {
 
 func (s *VolcengineNasFileSystemService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		newCondition map[string]interface{}
+		resp         *map[string]interface{}
+		results      interface{}
+		ok           bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeFileSystems"
+
+		deepCopyValue, err := copystructure.Copy(condition)
+		if err != nil {
+			return data, fmt.Errorf(" DeepCopy condition error: %v ", err)
+		}
+		if newCondition, ok = deepCopyValue.(map[string]interface{}); !ok {
+			return data, fmt.Errorf(" DeepCopy condition error: newCondition is not map ")
+		}
 
 		// 处理 FileSystemIds，逗号分离
 		if ids, exists := condition["FileSystemIds"]; exists {
@@ -49,7 +59,7 @@ func (s *VolcengineNasFileSystemService) ReadResources(m map[string]interface{})
 			for _, id := range idsArr {
 				fileSystemIds = append(fileSystemIds, id.(string))
 			}
-			condition["FileSystemIds"] = strings.Join(fileSystemIds, ",")
+			newCondition["FileSystemIds"] = strings.Join(fileSystemIds, ",")
 		}
 		// 处理 Filters
 		if filters, exists := condition["Filters"]; exists {
@@ -67,34 +77,34 @@ func (s *VolcengineNasFileSystemService) ReadResources(m map[string]interface{})
 				for _, status := range statusArr {
 					newStatus = append(newStatus, status.(string))
 				}
-				filtersMap["Status"] = strings.Join(newStatus, ",")
+				newCondition["Filters"].(map[string]interface{})["Status"] = strings.Join(newStatus, ",")
 			}
 
 			newFilters := make([]interface{}, 0)
-			for key, value := range filtersMap {
+			for key, value := range newCondition["Filters"].(map[string]interface{}) {
 				newFilters = append(newFilters, map[string]interface{}{
 					"Key":   key,
 					"Value": value,
 				})
 			}
-			condition["Filters"] = newFilters
+			newCondition["Filters"] = newFilters
 		}
 
-		bytes, _ := json.Marshal(condition)
+		bytes, _ := json.Marshal(newCondition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
-		if condition == nil {
+		if newCondition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &newCondition)
 			if err != nil {
 				return data, err
 			}
 		}
 		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		logger.Debug(logger.RespFormat, action, newCondition, string(respBytes))
 		results, err = ve.ObtainSdkValue("Result.FileSystems", *resp)
 		if err != nil {
 			return data, err
