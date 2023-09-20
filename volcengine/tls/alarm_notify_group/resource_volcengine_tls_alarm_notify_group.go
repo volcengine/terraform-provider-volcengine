@@ -53,8 +53,8 @@ func ResourceVolcengineTlsAlarmNotifyGroup() *schema.Resource {
 				},
 			},
 			"iam_project_name": {
-				Type: schema.TypeString,
-				//ForceNew:    true,
+				Type:        schema.TypeString,
+				Computed:    true,
 				Optional:    true,
 				Description: "The name of the iam project.",
 			},

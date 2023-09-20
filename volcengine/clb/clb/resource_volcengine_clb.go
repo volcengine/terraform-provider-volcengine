@@ -173,6 +173,7 @@ func ResourceVolcengineClb() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The ProjectName of the CLB.",
 			},
 			"tags": ve.TagsSchema(),

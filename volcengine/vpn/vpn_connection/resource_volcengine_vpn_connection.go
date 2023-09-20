@@ -195,6 +195,7 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The project name of the VPN connection.",
 			},
 			"attach_type": {
