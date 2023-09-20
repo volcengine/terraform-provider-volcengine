@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"reflect"
 	"strings"
 	"time"
 
@@ -12,6 +13,18 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
+
+var addonSupportUpdate []string
+
+func init() {
+	addonSupportUpdate = []string{
+		"cr-credential-controller",
+		"apmplus-opentelemetry-collector",
+		"cluster-autoscaler",
+		"ingress-nginx",
+		"p2p-accelerator",
+	}
+}
 
 type VolcengineVkeAddonService struct {
 	Client *ve.SdkClient
@@ -98,6 +111,7 @@ func (s *VolcengineVkeAddonService) ReadResource(resourceData *schema.ResourceDa
 	if len(data) == 0 {
 		return data, fmt.Errorf("Vke Addon %s:%s not exist ", clusterId, name)
 	}
+	data["CompleteConfig"] = data["Config"]
 	if cfg, ok := resourceData.GetOkExists("config"); ok {
 		// 返回的 config 可能会添加默认参数，这里始终使用创建的
 		data["Config"] = cfg
@@ -153,6 +167,41 @@ func (s *VolcengineVkeAddonService) CreateResource(resourceData *schema.Resource
 			Action:      "CreateAddon",
 			ContentType: ve.ContentTypeJson,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				//check addon exist
+				clusterId := (*call.SdkParam)["ClusterId"]
+				name := (*call.SdkParam)["Name"]
+				data, err := s.ReadResource(d, fmt.Sprintf("%s:%s", clusterId, name))
+				if err != nil {
+					if !strings.Contains(err.Error(), "not exist") { // 其他类型的错误
+						return nil, err
+					}
+				}
+				//addon exist
+				if len(data) > 0 {
+					version := data["Version"]
+
+					hclVersion, ok := d.GetOk("version")
+					if ok && hclVersion != version { // 如果用户在tf中定义了 version，并且与已有的不相等
+						params := map[string]interface{}{
+							"ClusterId": clusterId,
+							"Name":      name,
+							"Version":   hclVersion,
+						}
+						logger.Debug(logger.ReqFormat, "UpdateAddonVersion", params)
+						_, err = s.Client.UniversalClient.DoCall(getUniversalInfo("UpdateAddonVersion"), &params)
+						if err != nil {
+							return nil, err
+						}
+						// wait status
+						_, err = s.RefreshResourceState(d, []string{"Running"}, resourceData.Timeout(schema.TimeoutCreate), fmt.Sprintf("%s:%s", clusterId, name)).WaitForState()
+						if err != nil {
+							return nil, err
+						}
+					}
+
+					// 接下来检查 Config
+					return s.updateConfig(name, data, client, call)
+				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -172,11 +221,21 @@ func (s *VolcengineVkeAddonService) CreateResource(resourceData *schema.Resource
 }
 
 func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
+	versionCallback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "UpdateAddonConfig",
+			Action:      "UpdateAddonVersion",
 			ContentType: ve.ContentTypeJson,
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"version": {
+					ConvertType: ve.ConvertDefault,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) == 0 {
+					return false, nil
+				}
+
 				databaseId := d.Id()
 				ids := strings.Split(databaseId, ":")
 				if len(ids) != 2 {
@@ -184,10 +243,6 @@ func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.Resource
 				}
 				(*call.SdkParam)["ClusterId"] = ids[0]
 				(*call.SdkParam)["Name"] = ids[1]
-
-				if ids[1] == "ingress-nginx" {
-					return false, fmt.Errorf("ingress-nginx addon prohibits updating config")
-				}
 
 				return true, nil
 			},
@@ -205,7 +260,52 @@ func (s *VolcengineVkeAddonService) ModifyResource(resourceData *schema.Resource
 			},
 		},
 	}
-	return []ve.Callback{callback}
+
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UpdateAddonConfig",
+			ContentType: ve.ContentTypeJson,
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"config": {
+					ConvertType: ve.ConvertDefault,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) == 0 {
+					return false, nil
+				}
+
+				databaseId := d.Id()
+				ids := strings.Split(databaseId, ":")
+				if len(ids) != 2 {
+					return false, fmt.Errorf("invalid addon id")
+				}
+				(*call.SdkParam)["ClusterId"] = ids[0]
+				(*call.SdkParam)["Name"] = ids[1]
+
+				//if ids[1] == "ingress-nginx" {
+				//	return false, fmt.Errorf("ingress-nginx addon prohibits updating config")
+				//}
+
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				req, err := json.Marshal(*call.SdkParam)
+				if err != nil {
+					return nil, err
+				}
+				logger.Debug(logger.ReqFormat, call.Action, string(req))
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+
+	return []ve.Callback{versionCallback, callback}
 }
 
 func (s *VolcengineVkeAddonService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -308,6 +408,52 @@ func (s *VolcengineVkeAddonService) DatasourceResources(*schema.ResourceData, *s
 
 func (s *VolcengineVkeAddonService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineVkeAddonService) updateConfig(name interface{}, data map[string]interface{}, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+	var (
+		source    map[string]interface{}
+		target    map[string]interface{}
+		needCheck bool
+	)
+	if config, ok := data["CompleteConfig"].(string); ok {
+		err := json.Unmarshal([]byte(config), &source)
+		if err != nil {
+			return nil, err
+		}
+		needCheck = true
+	} else {
+		needCheck = false
+	}
+
+	if c, ok := (*call.SdkParam)["Config"]; ok {
+		if config, ok1 := c.(string); ok1 {
+			err := json.Unmarshal([]byte(config), &target)
+			if err != nil {
+				return nil, err
+			}
+			needCheck = true
+		} else {
+			needCheck = false
+		}
+	} else {
+		needCheck = false
+	}
+	if needCheck && !reflect.DeepEqual(source, target) && checkSupportUpdate(fmt.Sprintf("%s", name)) {
+		//update config
+		logger.Debug(logger.ReqFormat, "UpdateAddonConfig", *call.SdkParam)
+		return s.Client.UniversalClient.DoCall(getUniversalInfo("UpdateAddonConfig"), call.SdkParam)
+	}
+	return nil, nil
+}
+
+func checkSupportUpdate(name string) bool {
+	for _, addon := range addonSupportUpdate {
+		if name == addon {
+			return true
+		}
+	}
+	return false
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

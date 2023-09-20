@@ -32,6 +32,14 @@ func ResourceVolcengineVkeAddon() *schema.Resource {
 		Read:   resourceVolcengineVkeAddonRead,
 		Update: resourceVolcengineVkeAddonUpdate,
 		Delete: resourceVolcengineVkeAddonDelete,
+		CustomizeDiff: func(diff *schema.ResourceDiff, i interface{}) error {
+			if diff.HasChange("config") {
+				if n, ok := diff.Get("name").(string); ok && !checkSupportUpdate(n) {
+					return diff.ForceNew("config")
+				}
+			}
+			return nil
+		},
 		Importer: &schema.ResourceImporter{
 			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
 				items := strings.Split(data.Id(), ":")
@@ -66,10 +74,10 @@ func ResourceVolcengineVkeAddon() *schema.Resource {
 				Description: "The name of the addon.",
 			},
 			"version": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				//ForceNew:    true,
 				Description: "The version info of the cluster.",
 			},
 			"deploy_mode": {
