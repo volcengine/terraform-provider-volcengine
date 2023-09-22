@@ -67,8 +67,12 @@ In addition to all arguments above, the following attributes are exported:
     * `expired_time` - The expired time of the VPN gateway.
     * `id` - The ID of the VPN gateway.
     * `ip_address` - The IP address of the VPN gateway.
+    * `ipsec_enabled` - Whether ipsec is enabled.
     * `lock_reason` - The lock reason of the VPN gateway.
+    * `project_name` - The name of project.
     * `route_count` - The route count of the VPN gateway.
+    * `ssl_enabled` - Whether ssl is enabled.
+    * `ssl_max_connections` - The max connections of ssl.
     * `status` - The status of the VPN gateway.
     * `tags` - Tags.
         * `key` - The Key of Tags.
