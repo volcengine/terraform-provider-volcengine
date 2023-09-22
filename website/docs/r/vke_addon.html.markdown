@@ -26,7 +26,7 @@ The following arguments are supported:
 * `config` - (Optional) The config info of addon. Please notice that `ingress-nginx` component prohibits updating config, can only works on the web console.
 * `deploy_mode` - (Optional, ForceNew) The deploy mode.
 * `deploy_node_type` - (Optional, ForceNew) The deploy node type.
-* `version` - (Optional, ForceNew) The version info of the cluster.
+* `version` - (Optional) The version info of the cluster.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

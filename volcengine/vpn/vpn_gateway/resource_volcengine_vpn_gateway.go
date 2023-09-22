@@ -105,6 +105,25 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				Description: "The project name of the VPN gateway.",
 			},
 			"tags": ve.TagsSchema(),
+			"ipsec_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "Whether ipsec is enabled.",
+			},
+			"ssl_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether ssl is enabled.",
+			},
+			"ssl_max_connections": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				Description: "The max connections of ssl. " +
+					"This parameter can only be passed in when ssl_enabled is true. Default is 5.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineVpnGateways().Schema["vpn_gateways"].Elem.(*schema.Resource).Schema

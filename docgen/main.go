@@ -147,6 +147,7 @@ var resourceKeys = map[string]string{
 	"redis":       "REDIS",
 	"tls":         "TLS",
 	"cloudfs":     "CLOUDFS",
+	"nas":         "NAS",
 }
 
 type Products struct {
