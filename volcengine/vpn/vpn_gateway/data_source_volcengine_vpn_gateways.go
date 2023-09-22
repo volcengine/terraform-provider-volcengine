@@ -165,6 +165,26 @@ func DataSourceVolcengineVpnGateways() *schema.Resource {
 							Description: "The deleted time of the VPN gateway.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of project.",
+						},
+						"ipsec_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether ipsec is enabled.",
+						},
+						"ssl_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether ssl is enabled.",
+						},
+						"ssl_max_connections": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The max connections of ssl.",
+						},
 					},
 				},
 			},

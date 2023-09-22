@@ -176,6 +176,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/customer_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/ssl_vpn_client_cert"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/ssl_vpn_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_connection"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway_route"
@@ -305,10 +307,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cen_route_entries":           cen_route_entry.DataSourceVolcengineCenRouteEntries(),
 
 			// ================ VPN ================
-			"volcengine_vpn_gateways":       vpn_gateway.DataSourceVolcengineVpnGateways(),
-			"volcengine_customer_gateways":  customer_gateway.DataSourceVolcengineCustomerGateways(),
-			"volcengine_vpn_connections":    vpn_connection.DataSourceVolcengineVpnConnections(),
-			"volcengine_vpn_gateway_routes": vpn_gateway_route.DataSourceVolcengineVpnGatewayRoutes(),
+			"volcengine_vpn_gateways":         vpn_gateway.DataSourceVolcengineVpnGateways(),
+			"volcengine_customer_gateways":    customer_gateway.DataSourceVolcengineCustomerGateways(),
+			"volcengine_vpn_connections":      vpn_connection.DataSourceVolcengineVpnConnections(),
+			"volcengine_vpn_gateway_routes":   vpn_gateway_route.DataSourceVolcengineVpnGatewayRoutes(),
+			"volcengine_ssl_vpn_servers":      ssl_vpn_server.DataSourceVolcengineSslVpnServers(),
+			"volcengine_ssl_vpn_client_certs": ssl_vpn_client_cert.DataSourceVolcengineSslVpnClientCerts(),
 
 			// ================ VKE ================
 			"volcengine_vke_nodes":          node.DataSourceVolcengineVkeNodes(),
@@ -493,10 +497,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cen_route_entry":                 cen_route_entry.ResourceVolcengineCenRouteEntry(),
 
 			// ================ VPN ================
-			"volcengine_vpn_gateway":       vpn_gateway.ResourceVolcengineVpnGateway(),
-			"volcengine_customer_gateway":  customer_gateway.ResourceVolcengineCustomerGateway(),
-			"volcengine_vpn_connection":    vpn_connection.ResourceVolcengineVpnConnection(),
-			"volcengine_vpn_gateway_route": vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
+			"volcengine_vpn_gateway":         vpn_gateway.ResourceVolcengineVpnGateway(),
+			"volcengine_customer_gateway":    customer_gateway.ResourceVolcengineCustomerGateway(),
+			"volcengine_vpn_connection":      vpn_connection.ResourceVolcengineVpnConnection(),
+			"volcengine_vpn_gateway_route":   vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
+			"volcengine_ssl_vpn_server":      ssl_vpn_server.ResourceVolcengineSslVpnServer(),
+			"volcengine_ssl_vpn_client_cert": ssl_vpn_client_cert.ResourceVolcengineSslClientCertServer(),
 
 			// ================ VKE ================
 			"volcengine_vke_node":                           node.ResourceVolcengineVkeNode(),
