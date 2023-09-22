@@ -44,9 +44,12 @@ The following arguments are supported:
 * `billing_type` - (Optional, ForceNew) The BillingType of the VPN gateway. Only support `PrePaid`.
 Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.
 * `description` - (Optional) The description of the VPN gateway.
+* `ipsec_enabled` - (Optional) Whether ipsec is enabled.
 * `period` - (Optional) The Period of the VPN gateway. Default value is 12. This parameter is only useful when creating vpn gateway. Default period unit is Month.
 Value range: 1~9, 12, 24, 36. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `project_name` - (Optional) The project name of the VPN gateway.
+* `ssl_enabled` - (Optional) Whether ssl is enabled.
+* `ssl_max_connections` - (Optional) The max connections of ssl. This parameter can only be passed in when ssl_enabled is true. Default is 5.
 * `tags` - (Optional) Tags.
 * `vpn_gateway_name` - (Optional) The name of the VPN gateway.
 

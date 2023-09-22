@@ -58,6 +58,7 @@ func ResourceVolcengineCertificate() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				ForceNew:    true,
 				Description: "The ProjectName of the Certificate.",
 			},

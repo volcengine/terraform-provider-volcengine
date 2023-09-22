@@ -129,6 +129,9 @@ func (s *VolcengineIamRoleService) ModifyResource(data *schema.ResourceData, res
 			ConvertMode: ve.RequestConvertAll,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["RoleName"] = d.Get("role_name")
+				if maxSessionDuration, ok := d.GetOk("max_session_duration"); ok {
+					(*call.SdkParam)["MaxSessionDuration"] = maxSessionDuration
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

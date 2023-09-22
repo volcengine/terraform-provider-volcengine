@@ -7,6 +7,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_namespace"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_ns_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_file_system"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
 	"strings"
 
 	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
@@ -172,9 +176,14 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/customer_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/ssl_vpn_client_cert"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/ssl_vpn_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_connection"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpn/vpn_gateway_route"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_mount_point"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_permission_group"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -298,10 +307,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cen_route_entries":           cen_route_entry.DataSourceVolcengineCenRouteEntries(),
 
 			// ================ VPN ================
-			"volcengine_vpn_gateways":       vpn_gateway.DataSourceVolcengineVpnGateways(),
-			"volcengine_customer_gateways":  customer_gateway.DataSourceVolcengineCustomerGateways(),
-			"volcengine_vpn_connections":    vpn_connection.DataSourceVolcengineVpnConnections(),
-			"volcengine_vpn_gateway_routes": vpn_gateway_route.DataSourceVolcengineVpnGatewayRoutes(),
+			"volcengine_vpn_gateways":         vpn_gateway.DataSourceVolcengineVpnGateways(),
+			"volcengine_customer_gateways":    customer_gateway.DataSourceVolcengineCustomerGateways(),
+			"volcengine_vpn_connections":      vpn_connection.DataSourceVolcengineVpnConnections(),
+			"volcengine_vpn_gateway_routes":   vpn_gateway_route.DataSourceVolcengineVpnGatewayRoutes(),
+			"volcengine_ssl_vpn_servers":      ssl_vpn_server.DataSourceVolcengineSslVpnServers(),
+			"volcengine_ssl_vpn_client_certs": ssl_vpn_client_cert.DataSourceVolcengineSslVpnClientCerts(),
 
 			// ================ VKE ================
 			"volcengine_vke_nodes":          node.DataSourceVolcengineVkeNodes(),
@@ -408,6 +419,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_accesses":     cloudfs_access.DataSourceVolcengineCloudfsAccesses(),
 			"volcengine_cloudfs_ns_quotas":    cloudfs_ns_quota.DataSourceVolcengineCloudfsNsQuotas(),
 			"volcengine_cloudfs_namespaces":   cloudfs_namespace.DataSourceVolcengineCloudfsNamespaces(),
+
+			// ================ NAS ================
+			"volcengine_nas_file_systems":      nas_file_system.DataSourceVolcengineNasFileSystems(),
+			"volcengine_nas_snapshots":         nas_snapshot.DataSourceVolcengineNasSnapshots(),
+			"volcengine_nas_zones":             nas_zone.DataSourceVolcengineNasZones(),
+			"volcengine_nas_regions":           nas_region.DataSourceVolcengineNasRegions(),
+			"volcengine_nas_mount_points":      nas_mount_point.DataSourceVolcengineNasMountPoints(),
+			"volcengine_nas_permission_groups": nas_permission_group.DataSourceVolcengineNasPermissionGroups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -478,10 +497,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cen_route_entry":                 cen_route_entry.ResourceVolcengineCenRouteEntry(),
 
 			// ================ VPN ================
-			"volcengine_vpn_gateway":       vpn_gateway.ResourceVolcengineVpnGateway(),
-			"volcengine_customer_gateway":  customer_gateway.ResourceVolcengineCustomerGateway(),
-			"volcengine_vpn_connection":    vpn_connection.ResourceVolcengineVpnConnection(),
-			"volcengine_vpn_gateway_route": vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
+			"volcengine_vpn_gateway":         vpn_gateway.ResourceVolcengineVpnGateway(),
+			"volcengine_customer_gateway":    customer_gateway.ResourceVolcengineCustomerGateway(),
+			"volcengine_vpn_connection":      vpn_connection.ResourceVolcengineVpnConnection(),
+			"volcengine_vpn_gateway_route":   vpn_gateway_route.ResourceVolcengineVpnGatewayRoute(),
+			"volcengine_ssl_vpn_server":      ssl_vpn_server.ResourceVolcengineSslVpnServer(),
+			"volcengine_ssl_vpn_client_cert": ssl_vpn_client_cert.ResourceVolcengineSslClientCertServer(),
 
 			// ================ VKE ================
 			"volcengine_vke_node":                           node.ResourceVolcengineVkeNode(),
@@ -591,6 +612,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_file_system": cloudfs_file_system.ResourceVolcengineCloudfsFileSystem(),
 			"volcengine_cloudfs_access":      cloudfs_access.ResourceVolcengineCloudfsAccess(),
 			"volcengine_cloudfs_namespace":   cloudfs_namespace.ResourceVolcengineCloudfsNamespace(),
+
+			// ================ NAS ================
+			"volcengine_nas_file_system":      nas_file_system.ResourceVolcengineNasFileSystem(),
+			"volcengine_nas_snapshot":         nas_snapshot.ResourceVolcengineNasSnapshot(),
+			"volcengine_nas_mount_point":      nas_mount_point.ResourceVolcengineNasMountPoint(),
+			"volcengine_nas_permission_group": nas_permission_group.ResourceVolcengineNasPermissionGroup(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
