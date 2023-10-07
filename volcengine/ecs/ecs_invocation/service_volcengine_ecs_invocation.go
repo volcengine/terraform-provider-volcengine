@@ -75,6 +75,9 @@ func (s *VolcengineEcsInvocationService) ReadResources(m map[string]interface{})
 			}
 			logger.Debug(logger.ReqFormat, action, req)
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if err != nil {
+				return data, err
+			}
 			logger.Debug(logger.RespFormat, action, req, resp)
 			results, err := ve.ObtainSdkValue("Result.InvocationInstances", *resp)
 			if err != nil {
