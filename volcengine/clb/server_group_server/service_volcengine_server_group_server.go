@@ -134,8 +134,8 @@ func (*VolcengineServerGroupServerService) WithResourceResponseHandlers(serverGr
 }
 
 func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	clbId, err := s.queryLoadBalancerId(resourceData.Get("server_group_id").(string))
-	if err != nil {
+	clbId, _, err := s.describeServerGroupAttributes(resourceData.Get("server_group_id").(string))
+	if err != nil && clbId == "" {
 		return []ve.Callback{{
 			Err: err,
 		}}
@@ -154,8 +154,8 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 
 				ip := d.Get("ip").(string)
 				if ip == "" {
-					// query ecs primary private ip
-					ip, err = s.getEcsPrimaryPrivateIp(d.Get("instance_id").(string))
+					// query private ip
+					ip, err = s.getPrivateIp(d.Get("server_group_id").(string), d.Get("instance_id").(string), d.Get("type").(string))
 					if err != nil {
 						return false, err
 					}
@@ -191,7 +191,38 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 
 }
 
-func (s *VolcengineServerGroupServerService) getEcsPrimaryPrivateIp(instanceId string) (string, error) {
+func (s *VolcengineServerGroupServerService) getPrivateIp(serverGroupId, instanceId, instanceType string) (privateIp string, err error) {
+	if instanceId == "" || instanceType == "" {
+		return "", fmt.Errorf(" The instance_id and type of the ServerGroupServer cannot be empty ")
+	}
+	if instanceType == "ecs" {
+		privateIp, err = s.getEcsPrivateIp(serverGroupId, instanceId)
+		if err != nil {
+			return "", err
+		}
+	} else if instanceType == "eni" {
+		_, serverGroupType, err := s.describeServerGroupAttributes(serverGroupId)
+		if err != nil {
+			return "", err
+		}
+		ipv4Ip, ipv6Ip, err := s.describeNetworkInterfaceAttributes(instanceId)
+		if err != nil {
+			return "", err
+		}
+		if serverGroupType == "ipv4" {
+			privateIp = ipv4Ip
+		} else if serverGroupType == "ipv6" {
+			privateIp = ipv6Ip
+		}
+	}
+
+	if privateIp == "" {
+		return "", fmt.Errorf("The Private Ip of the instance %s does not exist ", instanceId)
+	}
+	return privateIp, nil
+}
+
+func (s *VolcengineServerGroupServerService) getEcsPrivateIp(serverGroupId, instanceId string) (string, error) {
 	var (
 		err     error
 		results interface{}
@@ -199,13 +230,21 @@ func (s *VolcengineServerGroupServerService) getEcsPrimaryPrivateIp(instanceId s
 		data    []interface{}
 	)
 
-	resp, err := s.Client.EcsClient.DescribeInstancesCommon(&map[string]interface{}{
-		"InstanceIds.1": instanceId,
-	})
-
+	_, serverGroupType, err := s.describeServerGroupAttributes(serverGroupId)
 	if err != nil {
 		return "", err
 	}
+
+	action := "DescribeInstances"
+	req := map[string]interface{}{
+		"InstanceIds.1": instanceId,
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action, "ecs"), &req)
+	if err != nil {
+		return "", err
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
 
 	results, err = ve.ObtainSdkValue("Result.Instances", *resp)
 	if err != nil {
@@ -227,30 +266,109 @@ func (s *VolcengineServerGroupServerService) getEcsPrimaryPrivateIp(instanceId s
 		return "", err
 	}
 
-	primaryPrivateIp := ""
+	var (
+		privateIp          string
+		ipv4Ip             string
+		ipv6Ip             string
+		networkInterfaceId string
+	)
 	if networkInterfaces, ok := interfaces.([]interface{}); !ok {
 		return "", errors.New("NetworkInterfaces is not Slice")
 	} else {
-		for _, v := range networkInterfaces {
-			vv := v.(map[string]interface{})
-			if vv["Type"].(string) == "primary" {
-				primaryPrivateIp = vv["PrimaryIpAddress"].(string)
+		for _, networkInterface := range networkInterfaces {
+			if networkInterfaceMap, ok := networkInterface.(map[string]interface{}); ok &&
+				networkInterfaceMap["Type"].(string) == "primary" {
+				networkInterfaceId = networkInterfaceMap["NetworkInterfaceId"].(string)
+				ipv4Ip = networkInterfaceMap["PrimaryIpAddress"].(string)
 			}
 		}
 	}
 
-	if primaryPrivateIp == "" {
-		return "", fmt.Errorf("Instance %s primary ip not exist ", instanceId)
+	if serverGroupType == "ipv4" {
+		if ipv4Ip == "" {
+			return "", fmt.Errorf("The primary ip of the Instance %s does not exist ", instanceId)
+		}
+		privateIp = ipv4Ip
+	} else if serverGroupType == "ipv6" {
+		_, ipv6Ip, err = s.describeNetworkInterfaceAttributes(networkInterfaceId)
+		if err != nil {
+			return "", err
+		}
+		if ipv6Ip == "" {
+			return "", fmt.Errorf("The ipv6 address of the Instance %s does not exist ", instanceId)
+		}
+		privateIp = ipv6Ip
 	}
 
-	return primaryPrivateIp, nil
+	if privateIp == "" {
+		return "", fmt.Errorf("The private ip of the Instance %s does not exist ", instanceId)
+	}
+	return privateIp, nil
+}
+
+func (s *VolcengineServerGroupServerService) describeNetworkInterfaceAttributes(networkInterfaceId string) (string, string, error) {
+	if networkInterfaceId == "" {
+		return "", "", fmt.Errorf("NetworkInterfaceId cannot be empty")
+	}
+
+	action := "DescribeNetworkInterfaceAttributes"
+	req := map[string]interface{}{
+		"NetworkInterfaceId": networkInterfaceId,
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action, "vpc"), &req)
+	if err != nil {
+		return "", "", err
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
+
+	var ipv6Ip string
+	ipv4Ip, err := ve.ObtainSdkValue("Result.PrimaryIpAddress", *resp)
+	if err != nil {
+		return "", "", err
+	}
+	ipv6Sets, err := ve.ObtainSdkValue("Result.IPv6Sets", *resp)
+	if err != nil {
+		return ipv4Ip.(string), "", err
+	}
+	if ipv6Arr, ok := ipv6Sets.([]interface{}); ok && len(ipv6Arr) > 0 {
+		ipv6Ip = ipv6Arr[0].(string)
+	}
+	return ipv4Ip.(string), ipv6Ip, err
+}
+
+func (s *VolcengineServerGroupServerService) describeServerGroupAttributes(serverGroupId string) (string, string, error) {
+	if serverGroupId == "" {
+		return "", "", fmt.Errorf("server_group_id cannot be empty")
+	}
+
+	// 查询 LoadBalancerId 和 AddressIpVersion
+	action := "DescribeServerGroupAttributes"
+	req := map[string]interface{}{
+		"ServerGroupId": serverGroupId,
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	serverGroupResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action, "clb"), &req)
+	if err != nil {
+		return "", "", err
+	}
+	logger.Debug(logger.RespFormat, action, req, *serverGroupResp)
+	clbId, err := ve.ObtainSdkValue("Result.LoadBalancerId", *serverGroupResp)
+	if err != nil {
+		return "", "", err
+	}
+	addressIpVersion, err := ve.ObtainSdkValue("Result.AddressIpVersion", *serverGroupResp)
+	if err != nil {
+		return clbId.(string), "", err
+	}
+	return clbId.(string), addressIpVersion.(string), nil
 }
 
 func (s *VolcengineServerGroupServerService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	ids := strings.Split(resourceData.Id(), ":")
 
-	clbId, err := s.queryLoadBalancerId(ids[0])
-	if err != nil {
+	clbId, _, err := s.describeServerGroupAttributes(ids[0])
+	if err != nil && clbId == "" {
 		return []ve.Callback{{
 			Err: err,
 		}}
@@ -291,8 +409,8 @@ func (s *VolcengineServerGroupServerService) ModifyResource(resourceData *schema
 func (s *VolcengineServerGroupServerService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	ids := strings.Split(resourceData.Id(), ":")
 
-	clbId, err := s.queryLoadBalancerId(ids[0])
-	if err != nil {
+	clbId, _, err := s.describeServerGroupAttributes(ids[0])
+	if err != nil && clbId == "" {
 		return []ve.Callback{{
 			Err: err,
 		}}
@@ -368,21 +486,12 @@ func (s *VolcengineServerGroupServerService) ReadResourceId(id string) string {
 	return id
 }
 
-func (s *VolcengineServerGroupServerService) queryLoadBalancerId(serverGroupId string) (string, error) {
-	if serverGroupId == "" {
-		return "", fmt.Errorf("server_group_id cannot be empty")
+func getUniversalInfo(actionName, serviceName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: serviceName,
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
 	}
-
-	// 查询 LoadBalancerId
-	serverGroupResp, err := s.Client.ClbClient.DescribeServerGroupAttributesCommon(&map[string]interface{}{
-		"ServerGroupId": serverGroupId,
-	})
-	if err != nil {
-		return "", err
-	}
-	clbId, err := ve.ObtainSdkValue("Result.LoadBalancerId", *serverGroupResp)
-	if err != nil {
-		return "", err
-	}
-	return clbId.(string), nil
 }
