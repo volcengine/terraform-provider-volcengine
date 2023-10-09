@@ -175,7 +175,7 @@ The `login` object supports the following:
 
 The `node_config` object supports the following:
 
-* `instance_type_ids` - (Required) The InstanceTypeIds of NodeConfig.
+* `instance_type_ids` - (Required) The InstanceTypeIds of NodeConfig. The value can get from volcengine_vke_support_resource_types datasource.
 * `security` - (Required) The Security of NodeConfig.
 * `subnet_ids` - (Required) The SubnetIds of NodeConfig.
 * `additional_container_storage_enabled` - (Optional, ForceNew) The AdditionalContainerStorageEnabled of NodeConfig.
