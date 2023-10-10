@@ -14,6 +14,7 @@ data "volcengine_zones" "foo"{
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
+  enable_ipv6 = true
 }
 
 resource "volcengine_security_group" "foo" {
@@ -27,7 +28,7 @@ resource "volcengine_security_group_rule" "foo" {
   protocol          = "tcp"
   port_start        = 8000
   port_end          = 9003
-  cidr_ip           = "172.16.0.0/24"
+  cidr_ip           = "2406:d440:10d:ff00::/64"
 }
 `
 
@@ -38,6 +39,7 @@ data "volcengine_zones" "foo"{
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
+  enable_ipv6 = true
 }
 
 resource "volcengine_security_group" "foo" {
@@ -51,7 +53,7 @@ resource "volcengine_security_group_rule" "foo" {
   protocol          = "tcp"
   port_start        = 8000
   port_end          = 9003
-  cidr_ip           = "172.16.0.0/24"
+  cidr_ip           = "2406:d440:10d:ff00::/64"
   description       = "tfdesc"
 }
 `
@@ -79,7 +81,7 @@ func TestAccVolcengineSecurityGroupRuleResource_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "protocol", "tcp"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "port_start", "8000"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "port_end", "9003"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "cidr_ip", "172.16.0.0/24"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "cidr_ip", "2406:d440:10d:ff00::/64"),
 					// compute status
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "Available"),
 				),
@@ -121,7 +123,7 @@ func TestAccVolcengineSubnetResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "protocol", "tcp"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "port_start", "8000"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "port_end", "9003"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "cidr_ip", "172.16.0.0/24"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "cidr_ip", "2406:d440:10d:ff00::/64"),
 					// compute status
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "Available"),
 				),
@@ -134,7 +136,7 @@ func TestAccVolcengineSubnetResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "protocol", "tcp"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "port_start", "8000"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "port_end", "9003"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "cidr_ip", "172.16.0.0/24"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "cidr_ip", "2406:d440:10d:ff00::/64"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "description", "tfdesc"),
 					// compute status
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "Available"),

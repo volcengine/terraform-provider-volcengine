@@ -223,8 +223,9 @@ func (s *VolcengineSecurityGroupRuleService) ModifyResource(resourceData *schema
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				var cidrIp string
 				items := strings.Split(d.Id(), ":")
-
+				itemsLength := len(items)
 				start, _ := strconv.Atoi(items[2])
 				end, _ := strconv.Atoi(items[3])
 
@@ -232,13 +233,24 @@ func (s *VolcengineSecurityGroupRuleService) ModifyResource(resourceData *schema
 				(*call.SdkParam)["Protocol"] = items[1]
 				(*call.SdkParam)["PortStart"] = start
 				(*call.SdkParam)["PortEnd"] = end
-				if len(items[4]) > 0 {
-					(*call.SdkParam)["CidrIp"] = items[4]
+				if itemsLength == 9 {
+					// ipv4
+					cidrIp = items[4]
+				} else {
+					// ipv6
+					strArr := make([]string, 0)
+					for i := 4; i < itemsLength-4; i++ {
+						strArr = append(strArr, items[i])
+					}
+					cidrIp = strings.Join(strArr, ":")
 				}
-				if len(items[5]) > 0 {
-					(*call.SdkParam)["SourceGroupId"] = items[5]
+				if len(cidrIp) > 0 {
+					(*call.SdkParam)["CidrIp"] = cidrIp
 				}
-				(*call.SdkParam)["Policy"] = items[7]
+				if len(items[itemsLength-4]) > 0 {
+					(*call.SdkParam)["SourceGroupId"] = items[itemsLength-4]
+				}
+				(*call.SdkParam)["Policy"] = items[itemsLength-2]
 				(*call.SdkParam)["Priority"] = resourceData.Get("priority")
 
 				// validate protocol
