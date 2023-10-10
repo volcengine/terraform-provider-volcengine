@@ -254,6 +254,14 @@ func DataSourceVolcengineNetworkInterfaces() *schema.Resource {
 								},
 							},
 						},
+						"ipv6_sets": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The IPv6 address list of the ENI.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 						"project_name": {
 							Type:        schema.TypeString,
 							Computed:    true,

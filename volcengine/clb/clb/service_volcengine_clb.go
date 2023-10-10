@@ -87,6 +87,12 @@ func (s *VolcengineClbService) ReadResources(condition map[string]interface{}) (
 		}
 		clb["EipBillingConfig"] = eipConfig
 
+		ipv6EipConfig, err := ve.ObtainSdkValue("Result.Ipv6AddressBandwidth", *eipResp)
+		if err != nil {
+			return data, err
+		}
+		clb["Ipv6AddressBandwidth"] = ipv6EipConfig
+
 		// `PostPaid` 实例不需查询续费相关信息
 		if billingType := clb["LoadBalancerBillingType"]; billingType == 2.0 {
 			continue
@@ -616,6 +622,24 @@ func (s *VolcengineClbService) DatasourceResources(*schema.ResourceData, *schema
 			},
 			"EipBillingType": {
 				TargetField: "eip_billing_type",
+				Convert: func(i interface{}) interface{} {
+					if i == nil {
+						return nil
+					}
+					billingType := i.(float64)
+					switch billingType {
+					case 1:
+						return "PrePaid"
+					case 2:
+						return "PostPaidByBandwidth"
+					case 3:
+						return "PostPaidByTraffic"
+					}
+					return ""
+				},
+			},
+			"BillingType": {
+				TargetField: "billing_type",
 				Convert: func(i interface{}) interface{} {
 					if i == nil {
 						return nil
