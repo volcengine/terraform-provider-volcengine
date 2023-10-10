@@ -101,6 +101,12 @@ func (s *VolcengineNetworkInterfaceService) ReadResource(resourceData *schema.Re
 	}
 	data["PrivateIpAddress"] = privateIpAddress
 	data["SecondaryPrivateIpAddressCount"] = len(privateIpAddress)
+
+	if ipv6Sets, ok := data["IPv6Sets"].([]interface{}); ok {
+		data["Ipv6Addresses"] = ipv6Sets
+		data["Ipv6AddressCount"] = len(ipv6Sets)
+	}
+
 	return data, err
 }
 
@@ -170,6 +176,10 @@ func (s *VolcengineNetworkInterfaceService) CreateResource(resourceData *schema.
 				},
 				"private_ip_address": {
 					TargetField: "PrivateIpAddress",
+					ConvertType: ve.ConvertWithN,
+				},
+				"ipv6_addresses": {
+					TargetField: "Ipv6Address",
 					ConvertType: ve.ConvertWithN,
 				},
 				"tags": {
@@ -324,6 +334,130 @@ func (s *VolcengineNetworkInterfaceService) ModifyResource(resourceData *schema.
 								Ignore: true,
 							},
 							"secondary_private_ip_address_count": {
+								Ignore: true,
+							},
+						},
+						ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+							logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+							return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						},
+					},
+				}
+				callbacks = append(callbacks, callback)
+			}
+		}
+	}
+
+	// 检查 ipv6_addresses 改变
+	if resourceData.HasChange("ipv6_addresses") {
+		add, remove, _, _ := ve.GetSetDifference("ipv6_addresses", resourceData, schema.HashString, false)
+		if remove.Len() > 0 {
+			callback = ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "UnassignIpv6Addresses",
+					ConvertMode: ve.RequestConvertInConvert,
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+						for index, r := range remove.List() {
+							(*call.SdkParam)["Ipv6Address."+strconv.Itoa(index+1)] = r
+						}
+						return true, nil
+					},
+					Convert: map[string]ve.RequestConvert{
+						"ipv6_addresses": {
+							Ignore: true,
+						},
+						"ipv6_address_count": {
+							Ignore: true,
+						},
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					},
+				},
+			}
+			callbacks = append(callbacks, callback)
+		}
+		if add.Len() > 0 {
+			callback = ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "AssignIpv6Addresses",
+					ConvertMode: ve.RequestConvertInConvert,
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+						for index, r := range add.List() {
+							(*call.SdkParam)["Ipv6Address."+strconv.Itoa(index+1)] = r
+						}
+						return true, nil
+					},
+					Convert: map[string]ve.RequestConvert{
+						"ipv6_addresses": {
+							Ignore: true,
+						},
+						"ipv6_address_count": {
+							Ignore: true,
+						},
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					},
+				},
+			}
+			callbacks = append(callbacks, callback)
+		}
+	}
+	// 检查 ipv6_address_count 改变
+	if resourceData.HasChange("ipv6_address_count") {
+		ipv6Addresses := resourceData.Get("ipv6_addresses").(*schema.Set).List()
+		oldCount, newCount := resourceData.GetChange("ipv6_address_count")
+		if oldCount != nil && newCount != nil && newCount != len(ipv6Addresses) {
+			diff := newCount.(int) - oldCount.(int)
+			if diff > 0 {
+				callback = ve.Callback{
+					Call: ve.SdkCall{
+						Action:      "AssignIpv6Addresses",
+						ConvertMode: ve.RequestConvertInConvert,
+						BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+							(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+							(*call.SdkParam)["Ipv6AddressCount"] = diff
+							return true, nil
+						},
+						Convert: map[string]ve.RequestConvert{
+							"ipv6_addresses": {
+								Ignore: true,
+							},
+							"ipv6_address_count": {
+								Ignore: true,
+							},
+						},
+						ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+							logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+							return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						},
+					},
+				}
+				callbacks = append(callbacks, callback)
+			} else {
+				diff *= -1
+				removeIpAddress := ipv6Addresses[:diff]
+				callback = ve.Callback{
+					Call: ve.SdkCall{
+						Action:      "UnassignIpv6Addresses",
+						ConvertMode: ve.RequestConvertInConvert,
+						BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+							(*call.SdkParam)["NetworkInterfaceId"] = d.Id()
+							for index, r := range removeIpAddress {
+								(*call.SdkParam)["Ipv6Address."+strconv.Itoa(index+1)] = r
+							}
+							return true, nil
+						},
+						Convert: map[string]ve.RequestConvert{
+							"ipv6_addresses": {
+								Ignore: true,
+							},
+							"ipv6_address_count": {
 								Ignore: true,
 							},
 						},

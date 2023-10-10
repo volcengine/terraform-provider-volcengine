@@ -150,3 +150,76 @@ func TestAccVolcengineServerGroupResource_Update(t *testing.T) {
 		},
 	})
 }
+
+const testAccVolcengineServerGroupCreateConfigIpv6 = `
+data "volcengine_zones" "foo"{
+}
+
+resource "volcengine_vpc" "vpc_ipv6" {
+  vpc_name = "acc-test-vpc-ipv6"
+  cidr_block = "172.16.0.0/16"
+  enable_ipv6 = true
+}
+
+resource "volcengine_subnet" "subnet_ipv6" {
+  subnet_name = "acc-test-subnet-ipv6"
+  cidr_block = "172.16.0.0/24"
+  zone_id = data.volcengine_zones.foo.zones[1].id
+  vpc_id = volcengine_vpc.vpc_ipv6.id
+  ipv6_cidr_block = 1
+}
+
+resource "volcengine_clb" "private_clb_ipv6" {
+  type = "private"
+  subnet_id = volcengine_subnet.subnet_ipv6.id
+  load_balancer_name = "acc-test-clb-ipv6"
+  load_balancer_spec = "small_1"
+  description = "acc-test-demo"
+  project_name = "default"
+  address_ip_version = "DualStack"
+  tags {
+    key = "k1"
+    value = "v1"
+  }
+}
+
+resource "volcengine_server_group" "foo" {
+  load_balancer_id = "${volcengine_clb.private_clb_ipv6.id}"
+  server_group_name = "acc-test-sg-ipv6"
+  description = "acc-test"
+  address_ip_version = "ipv6"
+}
+`
+
+func TestAccVolcengineServerGroupResource_CreateIpv6(t *testing.T) {
+	resourceName := "volcengine_server_group.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		Svc:        &server_group.VolcengineServerGroupService{},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers:    volcengine.GetTestAccProviders(),
+		CheckDestroy: volcengine.AccTestCheckResourceRemove(acc),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcengineServerGroupCreateConfigIpv6,
+				Check: resource.ComposeTestCheckFunc(
+					volcengine.AccTestCheckResourceExists(acc),
+					resource.TestCheckResourceAttr(acc.ResourceId, "server_group_name", "acc-test-sg-ipv6"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "description", "acc-test"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "address_ip_version", "ipv6"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
