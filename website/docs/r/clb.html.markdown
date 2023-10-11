@@ -29,24 +29,7 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
-resource "volcengine_clb" "foo" {
-  type                       = "public"
-  subnet_id                  = volcengine_subnet.foo.id
-  load_balancer_spec         = "small_1"
-  description                = "acc-test-demo"
-  load_balancer_name         = "acc-test-clb"
-  load_balancer_billing_type = "PostPaid"
-  eip_billing_config {
-    isp              = "BGP"
-    eip_billing_type = "PostPaidByBandwidth"
-    bandwidth        = 1
-  }
-  tags {
-    key   = "k1"
-    value = "v1"
-  }
-}
-
+# ipv4 public clb
 resource "volcengine_clb" "public_clb" {
   type               = "public"
   subnet_id          = volcengine_subnet.foo.id
@@ -65,6 +48,7 @@ resource "volcengine_clb" "public_clb" {
   }
 }
 
+# ipv4 private clb
 resource "volcengine_clb" "private_clb" {
   type               = "private"
   subnet_id          = volcengine_subnet.foo.id
@@ -88,15 +72,55 @@ resource "volcengine_eip_associate" "associate" {
   instance_id   = volcengine_clb.private_clb.id
   instance_type = "ClbInstance"
 }
+
+# ipv6 private clb
+resource "volcengine_vpc" "vpc_ipv6" {
+  vpc_name    = "acc-test-vpc-ipv6"
+  cidr_block  = "172.16.0.0/16"
+  enable_ipv6 = true
+}
+
+resource "volcengine_subnet" "subnet_ipv6" {
+  subnet_name     = "acc-test-subnet-ipv6"
+  cidr_block      = "172.16.0.0/24"
+  zone_id         = data.volcengine_zones.foo.zones[1].id
+  vpc_id          = volcengine_vpc.vpc_ipv6.id
+  ipv6_cidr_block = 1
+}
+
+resource "volcengine_clb" "private_clb_ipv6" {
+  type               = "private"
+  subnet_id          = volcengine_subnet.subnet_ipv6.id
+  load_balancer_name = "acc-test-clb-ipv6"
+  load_balancer_spec = "small_1"
+  description        = "acc-test-demo"
+  project_name       = "default"
+  address_ip_version = "DualStack"
+}
+
+resource "volcengine_vpc_ipv6_gateway" "ipv6_gateway" {
+  vpc_id = volcengine_vpc.vpc_ipv6.id
+  name   = "acc-test-ipv6-gateway"
+}
+
+resource "volcengine_vpc_ipv6_address_bandwidth" "foo" {
+  ipv6_address = volcengine_clb.private_clb_ipv6.eni_ipv6_address
+  billing_type = "PostPaidByBandwidth"
+  bandwidth    = 5
+  depends_on   = [volcengine_vpc_ipv6_gateway.ipv6_gateway]
+}
 ```
 ## Argument Reference
 The following arguments are supported:
 * `load_balancer_spec` - (Required) The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`.
 * `subnet_id` - (Required, ForceNew) The id of the Subnet.
 * `type` - (Required, ForceNew) The type of the CLB. And optional choice contains `public` or `private`.
+* `address_ip_version` - (Optional, ForceNew) The address ip version of the Clb. Valid values: `ipv4`, `DualStack`. Default is `ipv4`.
+When the value of this field is `DualStack`, the type of the CLB must be `private`, and suggest using a combination of resource `volcengine_vpc_ipv6_gateway` and `volcengine_vpc_ipv6_address_bandwidth` to achieve ipv6 public network access function.
 * `description` - (Optional) The description of the CLB.
 * `eip_billing_config` - (Optional, ForceNew) The billing configuration of the EIP which automatically associated to CLB. This field is valid when the type of CLB is `public`.When the type of the CLB is `private`, suggest using a combination of resource `volcengine_eip_address` and `volcengine_eip_associate` to achieve public network access function.
 * `eni_address` - (Optional, ForceNew) The eni address of the CLB.
+* `eni_ipv6_address` - (Optional, ForceNew) The eni ipv6 address of the Clb.
 * `load_balancer_billing_type` - (Optional) The billing type of the CLB, the value can be `PostPaid` or `PrePaid`.
 * `load_balancer_name` - (Optional) The name of the CLB.
 * `master_zone_id` - (Optional) The master zone ID of the CLB.
@@ -125,6 +149,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `eip_address` - The Eip address of the Clb.
 * `eip_id` - The Eip ID of the Clb.
+* `ipv6_eip_id` - The Ipv6 Eip ID of the Clb.
 * `renew_type` - The renew type of the CLB. When the value of the load_balancer_billing_type is `PrePaid`, the query returns this field.
 
 

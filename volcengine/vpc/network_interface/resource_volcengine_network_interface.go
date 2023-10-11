@@ -91,6 +91,26 @@ func ResourceVolcengineNetworkInterface() *schema.Resource {
 				ConflictsWith: []string{"secondary_private_ip_address_count"},
 				Description:   "The list of private ip address. This field conflicts with `secondary_private_ip_address_count`.",
 			},
+			"ipv6_address_count": {
+				Type:          schema.TypeInt,
+				Optional:      true,
+				Computed:      true,
+				Description:   "The number of IPv6 addresses to be automatically assigned from within the CIDR block of the subnet that hosts the ENI. Valid values: 0 to 10.\n You cannot specify both the ipv6_addresses and ipv6_address_count parameters.",
+				ValidateFunc:  validation.IntBetween(0, 10),
+				ConflictsWith: []string{"ipv6_addresses"},
+			},
+			"ipv6_addresses": {
+				Type:        schema.TypeSet,
+				MaxItems:    10,
+				Optional:    true,
+				Computed:    true,
+				Set:         schema.HashString,
+				Description: "One or more IPv6 addresses selected from within the CIDR block of the subnet that hosts the ENI. Support up to 10.\n You cannot specify both the ipv6_addresses and ipv6_address_count parameters.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				ConflictsWith: []string{"ipv6_address_count"},
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,

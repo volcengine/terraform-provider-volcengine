@@ -83,6 +83,11 @@ func DataSourceVolcengineServerGroups() *schema.Resource {
 							Computed:    true,
 							Description: "The description of the ServerGroup.",
 						},
+						"address_ip_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The address ip version of the ServerGroup.",
+						},
 					},
 				},
 			},

@@ -117,7 +117,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							Description: "The InstanceTypeIds of NodeConfig.",
+							Description: "The InstanceTypeIds of NodeConfig. The value can get from volcengine_vke_support_resource_types datasource.",
 						},
 						"subnet_ids": {
 							Type:     schema.TypeList,

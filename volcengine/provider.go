@@ -11,6 +11,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_resource_types"
 	"strings"
 
 	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
@@ -315,12 +316,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ssl_vpn_client_certs": ssl_vpn_client_cert.DataSourceVolcengineSslVpnClientCerts(),
 
 			// ================ VKE ================
-			"volcengine_vke_nodes":          node.DataSourceVolcengineVkeNodes(),
-			"volcengine_vke_clusters":       cluster.DataSourceVolcengineVkeVkeClusters(),
-			"volcengine_vke_node_pools":     node_pool.DataSourceVolcengineNodePools(),
-			"volcengine_vke_addons":         addon.DataSourceVolcengineVkeAddons(),
-			"volcengine_vke_support_addons": support_addon.DataSourceVolcengineVkeVkeSupportedAddons(),
-			"volcengine_vke_kubeconfigs":    kubeconfig.DataSourceVolcengineVkeKubeconfigs(),
+			"volcengine_vke_nodes":                  node.DataSourceVolcengineVkeNodes(),
+			"volcengine_vke_clusters":               cluster.DataSourceVolcengineVkeVkeClusters(),
+			"volcengine_vke_node_pools":             node_pool.DataSourceVolcengineNodePools(),
+			"volcengine_vke_addons":                 addon.DataSourceVolcengineVkeAddons(),
+			"volcengine_vke_support_addons":         support_addon.DataSourceVolcengineVkeVkeSupportedAddons(),
+			"volcengine_vke_kubeconfigs":            kubeconfig.DataSourceVolcengineVkeKubeconfigs(),
+			"volcengine_vke_support_resource_types": support_resource_types.DataSourceVolcengineVkeVkeSupportResourceTypes(),
 
 			// ================ IAM ================
 			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
