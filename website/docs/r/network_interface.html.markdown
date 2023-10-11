@@ -19,7 +19,9 @@ resource "volcengine_network_interface" "foo" {
   port_security_enabled  = false
   project_name           = "default"
   private_ip_address     = ["192.168.5.2"]
-  //secondary_private_ip_address_count = 0
+  #  secondary_private_ip_address_count = 0
+  #  ipv6_address_count = 2
+  #  ipv6_addresses = ["2000:1000:12ff:ff01:2f1a:ca69:8110:34f5", "2000:1000:12ff:ff01:df81:a2d2:e568:1715"]
 }
 ```
 ## Argument Reference
@@ -27,6 +29,10 @@ The following arguments are supported:
 * `security_group_ids` - (Required) The list of the security group id to which the secondary ENI belongs.
 * `subnet_id` - (Required, ForceNew) The id of the subnet to which the ENI is connected.
 * `description` - (Optional) The description of the ENI.
+* `ipv6_address_count` - (Optional) The number of IPv6 addresses to be automatically assigned from within the CIDR block of the subnet that hosts the ENI. Valid values: 0 to 10.
+ You cannot specify both the ipv6_addresses and ipv6_address_count parameters.
+* `ipv6_addresses` - (Optional) One or more IPv6 addresses selected from within the CIDR block of the subnet that hosts the ENI. Support up to 10.
+ You cannot specify both the ipv6_addresses and ipv6_address_count parameters.
 * `network_interface_name` - (Optional) The name of the ENI.
 * `port_security_enabled` - (Optional) Set port security enable or disable.
 * `primary_ip_address` - (Optional, ForceNew) The primary IP address of the ENI.

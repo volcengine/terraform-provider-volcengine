@@ -47,6 +47,7 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of the ENI.
     * `device_id` - The id of the device to which the ENI is bound.
     * `id` - The id of the ENI.
+    * `ipv6_sets` - The IPv6 address list of the ENI.
     * `mac_address` - The mac address of the ENI.
     * `network_interface_id` - The id of the ENI.
     * `network_interface_name` - The name of the ENI.
