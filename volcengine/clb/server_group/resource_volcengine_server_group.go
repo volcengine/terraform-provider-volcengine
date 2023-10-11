@@ -2,6 +2,7 @@ package server_group
 
 import (
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -56,6 +57,14 @@ func ResourceVolcengineServerGroup() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "The description of ServerGroup.",
+			},
+			"address_ip_version": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "ipv4",
+				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
+				Description:  "The address ip version of the ServerGroup. Valid values: `ipv4`, `ipv6`. Default is `ipv4`.",
 			},
 		},
 	}

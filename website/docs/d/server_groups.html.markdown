@@ -58,6 +58,7 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `groups` - The collection of ServerGroup query.
+    * `address_ip_version` - The address ip version of the ServerGroup.
     * `create_time` - The create time of the ServerGroup.
     * `description` - The description of the ServerGroup.
     * `id` - The ID of the ServerGroup.

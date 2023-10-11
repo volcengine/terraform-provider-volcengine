@@ -160,6 +160,24 @@ func ResourceVolcengineClb() *schema.Resource {
 					},
 				},
 			},
+			"address_ip_version": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "ipv4",
+				ValidateFunc: validation.StringInSlice([]string{"ipv4", "DualStack"}, false),
+				Description: "The address ip version of the Clb. Valid values: `ipv4`, `DualStack`. Default is `ipv4`.\n" +
+					"When the value of this field is `DualStack`, the type of the CLB must be `private`, " +
+					"and suggest using a combination of resource `volcengine_vpc_ipv6_gateway` and `volcengine_vpc_ipv6_address_bandwidth` to achieve ipv6 public network access function.",
+			},
+			"eni_ipv6_address": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IsIPv6Address,
+				Description:  "The eni ipv6 address of the Clb.",
+			},
 			"eip_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -169,6 +187,11 @@ func ResourceVolcengineClb() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The Eip address of the Clb.",
+			},
+			"ipv6_eip_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The Ipv6 Eip ID of the Clb.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,

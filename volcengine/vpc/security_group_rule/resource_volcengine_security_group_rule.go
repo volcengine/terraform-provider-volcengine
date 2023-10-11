@@ -127,9 +127,13 @@ func ResourceVolcengineSecurityGroupRule() *schema.Resource {
 }
 
 func importSecurityGroupRule(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	var err error
+	var (
+		err    error
+		cidrIp string
+	)
 	items := strings.Split(d.Id(), ":")
-	if len(items) != 9 {
+	itemsLength := len(items)
+	if itemsLength < 9 {
 		return []*schema.ResourceData{d}, fmt.Errorf("import id must be of the form " +
 			"SecurityGroupId:Protocol:PortStart:PortEnd:CidrIp:SourceGroupId:Direction:Policy:Priority")
 	}
@@ -163,29 +167,39 @@ func importSecurityGroupRule(d *schema.ResourceData, meta interface{}) ([]*schem
 			return []*schema.ResourceData{d}, err
 		}
 	}
-
-	err = d.Set("cidr_ip", items[4])
+	if itemsLength == 9 {
+		// ipv4
+		cidrIp = items[4]
+	} else {
+		// ipv6
+		strArr := make([]string, 0)
+		for i := 4; i < itemsLength-4; i++ {
+			strArr = append(strArr, items[i])
+		}
+		cidrIp = strings.Join(strArr, ":")
+	}
+	err = d.Set("cidr_ip", cidrIp)
 	if err != nil {
 		return []*schema.ResourceData{d}, err
 	}
 
-	err = d.Set("source_group_id", items[5])
+	err = d.Set("source_group_id", items[itemsLength-4])
 	if err != nil {
 		return []*schema.ResourceData{d}, err
 	}
 
-	err = d.Set("direction", items[6])
+	err = d.Set("direction", items[itemsLength-3])
 	if err != nil {
 		return []*schema.ResourceData{d}, err
 	}
 
-	err = d.Set("policy", items[7])
+	err = d.Set("policy", items[itemsLength-2])
 	if err != nil {
 		return []*schema.ResourceData{d}, err
 	}
 
-	if len(items[8]) > 0 {
-		pr, err := strconv.Atoi(items[8])
+	if len(items[itemsLength-1]) > 0 {
+		pr, err := strconv.Atoi(items[itemsLength-1])
 		if err != nil {
 			return []*schema.ResourceData{d}, err
 		}

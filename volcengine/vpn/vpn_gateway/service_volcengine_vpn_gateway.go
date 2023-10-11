@@ -177,9 +177,21 @@ func (s *VolcengineVpnGatewayService) RefreshResourceState(resourceData *schema.
 
 func (VolcengineVpnGatewayService) WithResourceResponseHandlers(v map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		if v["BillingType"].(float64) == 1 && strings.Contains(v["ExpiredTime"].(string), "+") {
-			ct, _ := time.Parse("2006-01-02T15:04:05", v["CreationTime"].(string)[0:strings.Index(v["CreationTime"].(string), "+")])
-			et, _ := time.Parse("2006-01-02T15:04:05", v["ExpiredTime"].(string)[0:strings.Index(v["ExpiredTime"].(string), "+")])
+		if v["BillingType"].(float64) == 1 {
+			var (
+				ct time.Time
+				et time.Time
+			)
+			if strings.Contains(v["CreationTime"].(string), "+") {
+				ct, _ = time.Parse("2006-01-02T15:04:05", v["CreationTime"].(string)[0:strings.Index(v["CreationTime"].(string), "+")])
+			} else {
+				ct, _ = time.Parse("2006-01-02 15:04:05", v["CreationTime"].(string))
+			}
+			if strings.Contains(v["ExpiredTime"].(string), "+") {
+				et, _ = time.Parse("2006-01-02T15:04:05", v["ExpiredTime"].(string)[0:strings.Index(v["ExpiredTime"].(string), "+")])
+			} else {
+				et, _ = time.Parse("2006-01-02 15:04:05", v["ExpiredTime"].(string))
+			}
 			y := et.Year() - ct.Year()
 			m := et.Month() - ct.Month()
 			v["Period"] = y*12 + int(m)

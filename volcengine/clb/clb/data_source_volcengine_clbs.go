@@ -124,6 +124,16 @@ func DataSourceVolcengineClbs() *schema.Resource {
 							Computed:    true,
 							Description: "The modification protection reason of the Clb.",
 						},
+						"address_ip_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The address ip version of the Clb.",
+						},
+						"eni_ipv6_address": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The eni ipv6 address of the Clb.",
+						},
 						"eip_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -133,6 +143,11 @@ func DataSourceVolcengineClbs() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The Eip address of the Clb.",
+						},
+						"ipv6_eip_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The Ipv6 Eip ID of the Clb.",
 						},
 						"eni_id": {
 							Type:        schema.TypeString,
@@ -228,7 +243,7 @@ func DataSourceVolcengineClbs() *schema.Resource {
 						"eip_billing_config": {
 							Type:        schema.TypeList,
 							Computed:    true,
-							Description: "",
+							Description: "The eip billing config of the Clb.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"isp": {
@@ -244,7 +259,41 @@ func DataSourceVolcengineClbs() *schema.Resource {
 									"bandwidth": {
 										Type:        schema.TypeInt,
 										Computed:    true,
-										Description: "The peek bandwidth of the EIP assigned to CLB. The value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic.",
+										Description: "The peek bandwidth of the EIP assigned to CLB. Units: Mbps.",
+									},
+								},
+							},
+						},
+						"ipv6_address_bandwidth": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The ipv6 address bandwidth information of the Clb.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"network_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The network type of the CLB Ipv6 address.",
+									},
+									"isp": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ISP of the Ipv6 EIP assigned to CLB, the value can be `BGP`.",
+									},
+									"billing_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The billing type of the Ipv6 EIP assigned to CLB. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic`.",
+									},
+									"bandwidth": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The peek bandwidth of the Ipv6 EIP assigned to CLB. Units: Mbps.",
+									},
+									"bandwidth_package_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The bandwidth package id of the Ipv6 EIP assigned to CLB.",
 									},
 								},
 							},

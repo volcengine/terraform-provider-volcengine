@@ -67,6 +67,9 @@ func (s *VolcengineSslVpnClientCertService) ReadResources(m map[string]interface
 			}
 			logger.Debug(logger.ReqFormat, action, req)
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if err != nil {
+				return data, err
+			}
 			logger.Debug(logger.RespFormat, action, req, resp)
 
 			caCertificate, err := ve.ObtainSdkValue("Result.CaCertificate", *resp)
