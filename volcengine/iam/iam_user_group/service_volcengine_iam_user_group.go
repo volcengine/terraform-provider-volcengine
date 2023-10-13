@@ -68,8 +68,9 @@ func (s *VolcengineIamUserGroupService) ReadResources(m map[string]interface{}) 
 
 func (s *VolcengineIamUserGroupService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		results []interface{}
-		ok      bool
+		results  []interface{}
+		tempData map[string]interface{}
+		ok       bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
@@ -82,8 +83,12 @@ func (s *VolcengineIamUserGroupService) ReadResource(resourceData *schema.Resour
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		if tempData, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
+		} else
+		// 接口为模糊查询，确保查询结果正确
+		if tempData["UserGroupName"].(string) == id {
+			data = tempData
 		}
 	}
 	if len(data) == 0 {
