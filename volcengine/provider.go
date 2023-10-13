@@ -109,6 +109,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/allow_list"
@@ -325,9 +327,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_support_resource_types": support_resource_types.DataSourceVolcengineVkeVkeSupportResourceTypes(),
 
 			// ================ IAM ================
-			"volcengine_iam_policies": iam_policy.DataSourceVolcengineIamPolicies(),
-			"volcengine_iam_roles":    iam_role.DataSourceVolcengineIamRoles(),
-			"volcengine_iam_users":    iam_user.DataSourceVolcengineIamUsers(),
+			"volcengine_iam_policies":    iam_policy.DataSourceVolcengineIamPolicies(),
+			"volcengine_iam_roles":       iam_role.DataSourceVolcengineIamRoles(),
+			"volcengine_iam_users":       iam_user.DataSourceVolcengineIamUsers(),
+			"volcengine_iam_user_groups": iam_user_group.DataSourceVolcengineIamUserGroups(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),
@@ -523,6 +526,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user":                   iam_user.ResourceVolcengineIamUser(),
 			"volcengine_iam_login_profile":          iam_login_profile.ResourceVolcengineIamLoginProfile(),
 			"volcengine_iam_user_policy_attachment": iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
+			"volcengine_iam_user_group":             iam_user_group.ResourceVolcengineIamUserGroup(),
+			"volcengine_iam_user_group_attachment":  iam_user_group_attachment.ResourceVolcengineIamUserGroupAttachment(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instance":           rds_instance.ResourceVolcengineRdsInstance(),
