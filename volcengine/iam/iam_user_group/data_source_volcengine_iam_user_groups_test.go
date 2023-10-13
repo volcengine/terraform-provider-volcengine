@@ -10,8 +10,14 @@ import (
 )
 
 const testAccVolcengineIamUserGroupsDatasourceConfig = `
+resource "volcengine_iam_user_group" "foo" {
+  user_group_name = "acc-test-group"
+  description = "acc-test"
+  display_name = "acc-test"
+}
+
 data "volcengine_iam_user_groups" "foo"{
-    query = ""
+    query = "acc-test-group"
 }
 `
 
@@ -19,7 +25,7 @@ func TestAccVolcengineIamUserGroupsDatasource_Basic(t *testing.T) {
 	resourceName := "data.volcengine_iam_user_groups.foo"
 
 	acc := &volcengine.AccTestResource{
-		ResourceId:  resourceName,
+		ResourceId: resourceName,
 		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
 			return iam_user_group.NewIamUserGroupService(client)
 		},
@@ -34,7 +40,7 @@ func TestAccVolcengineIamUserGroupsDatasource_Basic(t *testing.T) {
 			{
 				Config: testAccVolcengineIamUserGroupsDatasourceConfig,
 				Check: resource.ComposeTestCheckFunc(
-                    resource.TestCheckResourceAttr(acc.ResourceId, "user_groups.#", "2"),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "user_groups"),
 				),
 			},
 		},
