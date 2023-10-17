@@ -23,6 +23,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_zone"
 	trEntry "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_entry"
 	trTable "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table_association"
@@ -525,6 +527,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloud_monitor_contact_groups": cloud_monitor_contact_group.DataSourceVolcengineCloudMonitorContactGroups(),
 			"volcengine_cloud_monitor_event_rules":    cloud_monitor_event_rule.DataSourceVolcengineCloudMonitorEventRules(),
 			"volcengine_cloud_monitor_rules":          cloud_monitor_rule.DataSourceVolcengineCloudMonitorRules(),
+
+			// ================ RdsMssql ================
+			"volcengine_rds_mssql_regions": rds_mssql_region.DataSourceVolcengineRdsMssqlRegions(),
+			"volcengine_rds_mssql_zones":   rds_mssql_zone.DataSourceVolcengineRdsMssqlZones(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
