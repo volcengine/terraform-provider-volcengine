@@ -7,6 +7,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
+	mssqlBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_backup"
+	mssqlInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_instance"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact_group"
@@ -529,8 +532,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloud_monitor_rules":          cloud_monitor_rule.DataSourceVolcengineCloudMonitorRules(),
 
 			// ================ RdsMssql ================
-			"volcengine_rds_mssql_regions": rds_mssql_region.DataSourceVolcengineRdsMssqlRegions(),
-			"volcengine_rds_mssql_zones":   rds_mssql_zone.DataSourceVolcengineRdsMssqlZones(),
+			"volcengine_rds_mssql_regions":   rds_mssql_region.DataSourceVolcengineRdsMssqlRegions(),
+			"volcengine_rds_mssql_zones":     rds_mssql_zone.DataSourceVolcengineRdsMssqlZones(),
+			"volcengine_rds_mssql_instances": mssqlInstance.DataSourceVolcengineRdsMssqlInstances(),
+			"volcengine_rds_mssql_backups":   mssqlBackup.DataSourceVolcengineRdsMssqlBackups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -773,6 +778,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloud_monitor_contact_group": cloud_monitor_contact_group.ResourceVolcengineCloudMonitorContactGroup(),
 			"volcengine_cloud_monitor_event_rule":    cloud_monitor_event_rule.ResourceVolcengineCloudMonitorEventRule(),
 			"volcengine_cloud_monitor_rule":          cloud_monitor_rule.ResourceVolcengineCloudMonitorRule(),
+
+			// ================ RdsMssql ================
+			"volcengine_rds_mssql_instance": mssqlInstance.ResourceVolcengineRdsMssqlInstance(),
+			"volcengine_rds_mssql_backup":   mssqlBackup.ResourceVolcengineRdsMssqlBackup(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
