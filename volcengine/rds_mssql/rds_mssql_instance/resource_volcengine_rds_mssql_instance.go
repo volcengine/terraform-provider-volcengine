@@ -137,6 +137,31 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 							ForceNew:    true,
 							Description: "Example purchase quantity. Default value: 1, range of values is [1,10].",
 						},
+						"charge_start_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Charge start time.",
+						},
+						"charge_end_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Charge end time.",
+						},
+						"charge_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The charge status.",
+						},
+						"overdue_reclaim_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Expected release time when overdue fees are shut down.",
+						},
+						"overdue_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Time for Disconnection due to Unpaid Fees",
+						},
 					},
 				},
 			},
@@ -219,7 +244,7 @@ func resourceVolcengineSqlserverInstanceUpdate(d *schema.ResourceData, meta inte
 func resourceVolcengineSqlserverInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	return fmt.Errorf("This resource does not support deletion. " +
 		"If you want to remove it from terraform state, " +
-		"please use `terraform state rm volcengine_sqlserver_instance.resource_id` command. ")
+		"please use `terraform state rm volcengine_rds_mssql_instance.resource_id` command. ")
 }
 
 var tagsHash = func(v interface{}) int {

@@ -10,8 +10,7 @@ resource "volcengine_rds_mssql_instance" "foo" {
   server_collation = "Chinese_PRC_CI_AS"
   project_name = "default"
   charge_info {
-    charge_type = "PrePaid"
-    period = 1
+    charge_type = "PostPaid"
   }
   tags {
     key = "tf-key1"
