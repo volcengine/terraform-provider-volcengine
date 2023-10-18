@@ -302,6 +302,60 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 								},
 							},
 						},
+						"parameter_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The count of instance parameters.",
+						},
+						"parameters": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The list of instance parameters.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"parameter_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the parameter.",
+									},
+									"parameter_value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The value of the parameter.",
+									},
+									"parameter_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The type of the parameter.",
+									},
+									"parameter_description": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The description of the parameter.",
+									},
+									"parameter_default_value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The default value of the parameter.",
+									},
+									"checking_code": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The valid value range of the parameter.",
+									},
+									"force_modify": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Indicates whether the parameter running value can be modified.",
+									},
+									"force_restart": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Indicates whether the instance needs to be restarted to take effect after modifying the running value of the parameter.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

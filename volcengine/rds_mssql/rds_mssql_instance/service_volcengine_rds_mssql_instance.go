@@ -64,6 +64,40 @@ func (s *VolcengineRdsMssqlInstanceService) ReadResources(m map[string]interface
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.InstancesInfo is not Slice")
 		}
+
+		for _, v := range data {
+			rdsInstance, ok := v.(map[string]interface{})
+			if !ok {
+				return data, fmt.Errorf("Instance is not map ")
+			}
+
+			action := "DescribeDBInstanceParameters"
+			req := map[string]interface{}{
+				"InstanceId": rdsInstance["InstanceId"],
+			}
+			logger.Debug(logger.ReqFormat, action, req)
+			parameterInfo, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if err != nil {
+				logger.Info("DescribeDBInstanceParameters error:", err)
+				continue
+			}
+			logger.Debug(logger.RespFormat, action, req, &parameterInfo)
+
+			count, err := ve.ObtainSdkValue("Result.ParameterCount", *parameterInfo)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.ParameterCount error:", err)
+				continue
+			}
+			rdsInstance["ParameterCount"] = count
+
+			parameters, err := ve.ObtainSdkValue("Result.InstanceParameters", *parameterInfo)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.InstanceParameters error:", err)
+				continue
+			}
+			rdsInstance["Parameters"] = parameters
+		}
+
 		return data, err
 	})
 }
