@@ -112,10 +112,26 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"NoSpot",
 					"SpotAsPriceGo",
+					"SpotWithPriceLimit",
 				}, false),
 				Description: "The spot strategy will auto" +
 					"remove instance in some conditions.Please make sure you can maintain instance lifecycle before " +
-					"auto remove.The spot strategy of ECS instance, the value can be `NoSpot` or `SpotAsPriceGo`.",
+					"auto remove.The spot strategy of ECS instance, values:\n NoSpot (default): indicates creating a normal pay-as-you-go instance." +
+					"\nSpotAsPriceGo: spot instance with system automatically bidding and following the current market price." +
+					"\nSpotWithPriceLimit: spot instance with a set upper limit for bidding price.",
+			},
+			"spot_price_limit": {
+				Type:     schema.TypeFloat,
+				Optional: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if d.Get("instance_charge_type").(string) == "PostPaid" && d.Get("spot_strategy").(string) == "SpotWithPriceLimit" {
+						return false
+					}
+					return true
+				},
+				Description: "The maximum hourly price for spot instances supports up to three decimal places. " +
+					"This parameter only takes effect when SpotStrategy=SpotWithPriceLimit.",
 			},
 			"user_data": {
 				Type:             schema.TypeString,
