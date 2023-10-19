@@ -13,6 +13,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_resource_types"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip_associate"
 	"strings"
 
 	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
@@ -263,6 +265,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpc_ipv6_address_bandwidths": ipv6_address_bandwidth.DataSourceVolcengineIpv6AddressBandwidths(),
 			"volcengine_vpc_ipv6_addresses":          ipv6_address.DataSourceVolcengineIpv6Addresses(),
 			"volcengine_vpc_prefix_lists":            prefix_list.DataSourceVolcengineVpcPrefixLists(),
+			"volcengine_ha_vips":                     ha_vip.DataSourceVolcengineHaVips(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
@@ -453,6 +456,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpc_ipv6_gateway":           ipv6_gateway.ResourceVolcengineIpv6Gateway(),
 			"volcengine_vpc_ipv6_address_bandwidth": ipv6_address_bandwidth.ResourceVolcengineIpv6AddressBandwidth(),
 			"volcengine_vpc_prefix_list":            prefix_list.ResourceVolcengineVpcPrefixList(),
+			"volcengine_ha_vip":                     ha_vip.ResourceVolcengineHaVip(),
+			"volcengine_ha_vip_associate":           ha_vip_associate.ResourceVolcengineHaVipAssociate(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),
