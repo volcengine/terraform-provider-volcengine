@@ -103,7 +103,11 @@ The following arguments are supported:
 * `project_name` - (Optional) The ProjectName of the ecs instance.
 * `secondary_network_interfaces` - (Optional, ForceNew) The secondary networkInterface detail collection of ECS instance.
 * `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
-* `spot_strategy` - (Optional, ForceNew) The spot strategy will autoremove instance in some conditions.Please make sure you can maintain instance lifecycle before auto remove.The spot strategy of ECS instance, the value can be `NoSpot` or `SpotAsPriceGo`.
+* `spot_price_limit` - (Optional, ForceNew) The maximum hourly price for spot instances supports up to three decimal places. This parameter only takes effect when SpotStrategy=SpotWithPriceLimit.
+* `spot_strategy` - (Optional, ForceNew) The spot strategy will autoremove instance in some conditions.Please make sure you can maintain instance lifecycle before auto remove.The spot strategy of ECS instance, values:
+ NoSpot (default): indicates creating a normal pay-as-you-go instance.
+SpotAsPriceGo: spot instance with system automatically bidding and following the current market price.
+SpotWithPriceLimit: spot instance with a set upper limit for bidding price.
 * `tags` - (Optional) Tags.
 * `user_data` - (Optional) The user data of ECS instance, this field must be encrypted with base64.
 * `zone_id` - (Optional, ForceNew) The available zone ID of ECS instance.

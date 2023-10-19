@@ -171,6 +171,11 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The spot strategy of ECS instance.",
 						},
+						"spot_price_limit": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "The spot price limit of ECS instance.",
+						},
 						"instance_type": {
 							Type:        schema.TypeString,
 							Computed:    true,
