@@ -79,7 +79,8 @@ func (s *VolcengineScalingGroupEnablerService) ReadResource(resourceData *schema
 	if len(data) == 0 {
 		return data, fmt.Errorf("ScalingGroup %s not exist ", ids[1])
 	}
-	if data["LifecycleState"] != "Active" {
+	state := data["LifecycleState"].(string)
+	if state != "Active" && state != "Locked" {
 		return data, fmt.Errorf("ScalingGroup %s is not active", ids[1])
 	}
 	return data, err
