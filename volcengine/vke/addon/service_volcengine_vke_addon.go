@@ -23,6 +23,7 @@ func init() {
 		"cluster-autoscaler",
 		"ingress-nginx",
 		"p2p-accelerator",
+		"nvidia-device-plugin",
 	}
 }
 
