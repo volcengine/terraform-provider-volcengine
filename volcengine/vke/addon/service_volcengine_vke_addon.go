@@ -23,6 +23,10 @@ func init() {
 		"cluster-autoscaler",
 		"ingress-nginx",
 		"p2p-accelerator",
+		"nvidia-device-plugin",
+		"prometheus-agent",
+		"scheduler-plugin",
+		"mgpu",
 	}
 }
 
