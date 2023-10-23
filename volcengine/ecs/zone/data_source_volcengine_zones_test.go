@@ -9,7 +9,7 @@ import (
 
 const testAccVolcengineZonesDatasourceConfig = `
 data "volcengine_zones" "foo"{
-    ids = ["cn-chengdu-a"]
+    ids = ["cn-beijing-a"]
 }
 `
 
