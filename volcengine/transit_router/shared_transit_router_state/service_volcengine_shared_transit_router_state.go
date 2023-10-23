@@ -215,6 +215,10 @@ func (s *VolcengineSharedTransitRouterStateService) ModifyResource(resourceData 
 					},
 				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					o, n := d.GetChange("action")
+					if o.(string) == "Reject" && n.(string) == "Accept" {
+						return false, fmt.Errorf("The instance has been rejected and can no longer be accepted. ")
+					}
 					(*call.SdkParam)["TransitRouterId"] = d.Get("transit_router_id")
 					return true, nil
 				},

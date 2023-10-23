@@ -27,7 +27,7 @@ func ResourceVolcengineSharedTransitRouterState() *schema.Resource {
 		Update: resourceVolcengineSharedTransitRouterStateUpdate,
 		Delete: resourceVolcengineSharedTransitRouterStateDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: stateImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -48,7 +48,7 @@ func ResourceVolcengineSharedTransitRouterState() *schema.Resource {
 					"Accept",
 					"Reject",
 				}, false),
-				Description: "Accept or reject the shared transit router.",
+				Description: "`Accept` or `Reject` the shared transit router.",
 			},
 		},
 	}
