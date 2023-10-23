@@ -16,8 +16,11 @@ import (
 	trTable "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table_association"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table_propagation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/shared_transit_router_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_bandwidth_package"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_direct_connect_gateway_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_grant_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpc_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpn_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_resource_types"
@@ -450,14 +453,16 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nas_permission_groups": nas_permission_group.DataSourceVolcengineNasPermissionGroups(),
 
 			// ================ TransitRouter =============
-			"volcengine_transit_routers":                         transit_router.DataSourceVolcengineTransitRouters(),
-			"volcengine_transit_router_vpc_attachments":          transit_router_vpc_attachment.DataSourceVolcengineTransitRouterVpcAttachments(),
-			"volcengine_transit_router_vpn_attachments":          transit_router_vpn_attachment.DataSourceVolcengineTransitRouterVpnAttachments(),
-			"volcengine_transit_router_route_tables":             trTable.DataSourceVolcengineTransitRouterRouteTables(),
-			"volcengine_transit_router_route_entries":            trEntry.DataSourceVolcengineTransitRouterRouteEntries(),
-			"volcengine_transit_router_route_table_associations": route_table_association.DataSourceVolcengineTransitRouterRouteTableAssociations(),
-			"volcengine_transit_router_route_table_propagations": route_table_propagation.DataSourceVolcengineTransitRouterRouteTablePropagations(),
-			"volcengine_transit_router_bandwidth_packages":       transit_router_bandwidth_package.DataSourceVolcengineTransitRouterBandwidthPackages(),
+			"volcengine_transit_routers":                                   transit_router.DataSourceVolcengineTransitRouters(),
+			"volcengine_transit_router_vpc_attachments":                    transit_router_vpc_attachment.DataSourceVolcengineTransitRouterVpcAttachments(),
+			"volcengine_transit_router_vpn_attachments":                    transit_router_vpn_attachment.DataSourceVolcengineTransitRouterVpnAttachments(),
+			"volcengine_transit_router_route_tables":                       trTable.DataSourceVolcengineTransitRouterRouteTables(),
+			"volcengine_transit_router_route_entries":                      trEntry.DataSourceVolcengineTransitRouterRouteEntries(),
+			"volcengine_transit_router_route_table_associations":           route_table_association.DataSourceVolcengineTransitRouterRouteTableAssociations(),
+			"volcengine_transit_router_route_table_propagations":           route_table_propagation.DataSourceVolcengineTransitRouterRouteTablePropagations(),
+			"volcengine_transit_router_bandwidth_packages":                 transit_router_bandwidth_package.DataSourceVolcengineTransitRouterBandwidthPackages(),
+			"volcengine_transit_router_grant_rules":                        transit_router_grant_rule.DataSourceVolcengineTransitRouterGrantRules(),
+			"volcengine_transit_router_direct_connect_gateway_attachments": transit_router_direct_connect_gateway_attachment.DataSourceVolcengineTransitRouterDirectConnectGatewayAttachments(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -657,14 +662,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nas_permission_group": nas_permission_group.ResourceVolcengineNasPermissionGroup(),
 
 			// ================ TransitRouter =============
-			"volcengine_transit_router":                         transit_router.ResourceVolcengineTransitRouter(),
-			"volcengine_transit_router_vpc_attachment":          transit_router_vpc_attachment.ResourceVolcengineTransitRouterVpcAttachment(),
-			"volcengine_transit_router_vpn_attachment":          transit_router_vpn_attachment.ResourceVolcengineTransitRouterVpnAttachment(),
-			"volcengine_transit_router_route_table":             trTable.ResourceVolcengineTransitRouterRouteTable(),
-			"volcengine_transit_router_route_entry":             trEntry.ResourceVolcengineTransitRouterRouteEntry(),
-			"volcengine_transit_router_route_table_association": route_table_association.ResourceVolcengineTransitRouterRouteTableAssociation(),
-			"volcengine_transit_router_route_table_propagation": route_table_propagation.ResourceVolcengineTransitRouterRouteTablePropagation(),
-			"volcengine_transit_router_bandwidth_package":       transit_router_bandwidth_package.ResourceVolcengineTransitRouterBandwidthPackage(),
+			"volcengine_transit_router":                                   transit_router.ResourceVolcengineTransitRouter(),
+			"volcengine_transit_router_vpc_attachment":                    transit_router_vpc_attachment.ResourceVolcengineTransitRouterVpcAttachment(),
+			"volcengine_transit_router_vpn_attachment":                    transit_router_vpn_attachment.ResourceVolcengineTransitRouterVpnAttachment(),
+			"volcengine_transit_router_route_table":                       trTable.ResourceVolcengineTransitRouterRouteTable(),
+			"volcengine_transit_router_route_entry":                       trEntry.ResourceVolcengineTransitRouterRouteEntry(),
+			"volcengine_transit_router_route_table_association":           route_table_association.ResourceVolcengineTransitRouterRouteTableAssociation(),
+			"volcengine_transit_router_route_table_propagation":           route_table_propagation.ResourceVolcengineTransitRouterRouteTablePropagation(),
+			"volcengine_transit_router_bandwidth_package":                 transit_router_bandwidth_package.ResourceVolcengineTransitRouterBandwidthPackage(),
+			"volcengine_transit_router_grant_rule":                        transit_router_grant_rule.ResourceVolcengineTransitRouterGrantRule(),
+			"volcengine_transit_router_direct_connect_gateway_attachment": transit_router_direct_connect_gateway_attachment.ResourceVolcengineTransitRouterDirectConnectGatewayAttachment(),
+			"volcengine_transit_router_shared_transit_router_state":       shared_transit_router_state.ResourceVolcengineSharedTransitRouterState(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
