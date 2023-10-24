@@ -182,6 +182,36 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The expected response string for the health check.",
 						},
+						"bandwidth": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The bandwidth of the Listener. Unit: Mbps.",
+						},
+						"proxy_protocol_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether to enable proxy protocol.",
+						},
+						"persistence_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The persistence type of the Listener.",
+						},
+						"persistence_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The persistence timeout of the Listener.",
+						},
+						"connection_drain_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether to enable connection drain of the Listener.",
+						},
+						"connection_drain_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The connection drain timeout of the Listener.",
+						},
 					},
 				},
 			},
