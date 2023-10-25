@@ -30,7 +30,10 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The id of the bioos cluster.
     * `name` - The name of the cluster.
     * `public` - whether it is a public cluster.
+    * `shared_config` - The configuration of the shared cluster.
+        * `enable` - Whether to enable a shared cluster. This value must be `true`.
     * `start_time` - The start time of the cluster.
+    * `status` - The status of the cluster.
     * `stopped_time` - The end time of the cluster.
     * `vke_config_id` - The id of the vke cluster.
     * `vke_config_storage_class` - The name of the StorageClass that the vke cluster has installed.

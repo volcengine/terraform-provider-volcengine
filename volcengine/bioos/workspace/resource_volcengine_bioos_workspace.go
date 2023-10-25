@@ -46,6 +46,7 @@ func ResourceVolcengineBioosWorkspace() *schema.Resource {
 			"cover_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Cover path (relative path in tos bucket).",
 			},
 			"workspace_id": {
