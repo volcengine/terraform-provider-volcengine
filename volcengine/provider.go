@@ -103,7 +103,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_vpc_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
-	ecsAvailableResource "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/available_resource"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_available_resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_command"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
@@ -297,17 +297,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_volumes": volume.DataSourceVolcengineVolumes(),
 
 			// ================ ECS ================
-			"volcengine_ecs_instances":          ecs_instance.DataSourceVolcengineEcsInstances(),
-			"volcengine_images":                 image.DataSourceVolcengineImages(),
-			"volcengine_zones":                  zone.DataSourceVolcengineZones(),
-			"volcengine_regions":                regions.DataSourceVolcengineRegions(),
-			"volcengine_ecs_deployment_sets":    ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
-			"volcengine_ecs_key_pairs":          ecs_key_pair.DataSourceVolcengineEcsKeyPairs(),
-			"volcengine_ecs_launch_templates":   ecs_launch_template.DataSourceVolcengineEcsLaunchTemplates(),
-			"volcengine_ecs_commands":           ecs_command.DataSourceVolcengineEcsCommands(),
-			"volcengine_ecs_invocations":        ecs_invocation.DataSourceVolcengineEcsInvocations(),
-			"volcengine_ecs_invocation_results": ecs_invocation_result.DataSourceVolcengineEcsInvocationResults(),
-			"volcengine_available_resources":    ecsAvailableResource.DataSourceVolcengineAvailableResources(),
+			"volcengine_ecs_instances":           ecs_instance.DataSourceVolcengineEcsInstances(),
+			"volcengine_images":                  image.DataSourceVolcengineImages(),
+			"volcengine_zones":                   zone.DataSourceVolcengineZones(),
+			"volcengine_regions":                 regions.DataSourceVolcengineRegions(),
+			"volcengine_ecs_deployment_sets":     ecs_deployment_set.DataSourceVolcengineEcsDeploymentSets(),
+			"volcengine_ecs_key_pairs":           ecs_key_pair.DataSourceVolcengineEcsKeyPairs(),
+			"volcengine_ecs_launch_templates":    ecs_launch_template.DataSourceVolcengineEcsLaunchTemplates(),
+			"volcengine_ecs_commands":            ecs_command.DataSourceVolcengineEcsCommands(),
+			"volcengine_ecs_invocations":         ecs_invocation.DataSourceVolcengineEcsInvocations(),
+			"volcengine_ecs_invocation_results":  ecs_invocation_result.DataSourceVolcengineEcsInvocationResults(),
+			"volcengine_ecs_available_resources": ecs_available_resource.DataSourceVolcengineEcsAvailableResources(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),

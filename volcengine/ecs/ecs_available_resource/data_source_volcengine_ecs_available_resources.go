@@ -1,4 +1,4 @@
-package available_resource
+package ecs_available_resource
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -6,9 +6,9 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineAvailableResources() *schema.Resource {
+func DataSourceVolcengineEcsAvailableResources() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVolcengineAvailableResourcesRead,
+		Read: dataSourceVolcengineEcsAvailableResourcesRead,
 		Schema: map[string]*schema.Schema{
 			"destination_resource": {
 				Type:         schema.TypeString,
@@ -111,7 +111,7 @@ func DataSourceVolcengineAvailableResources() *schema.Resource {
 	}
 }
 
-func dataSourceVolcengineAvailableResourcesRead(d *schema.ResourceData, meta interface{}) error {
-	service := NewAvailableResourceService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineAvailableResources())
+func dataSourceVolcengineEcsAvailableResourcesRead(d *schema.ResourceData, meta interface{}) error {
+	service := NewEcsAvailableResourceService(meta.(*ve.SdkClient))
+	return service.Dispatcher.Data(service, d, DataSourceVolcengineEcsAvailableResources())
 }

@@ -1,4 +1,4 @@
-package available_resource
+package ecs_available_resource
 
 import (
 	"encoding/json"
@@ -11,23 +11,23 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineAvailableResourceService struct {
+type VolcengineEcsAvailableResourceService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewAvailableResourceService(c *ve.SdkClient) *VolcengineAvailableResourceService {
-	return &VolcengineAvailableResourceService{
+func NewEcsAvailableResourceService(c *ve.SdkClient) *VolcengineEcsAvailableResourceService {
+	return &VolcengineEcsAvailableResourceService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineAvailableResourceService) GetClient() *ve.SdkClient {
+func (s *VolcengineEcsAvailableResourceService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineAvailableResourceService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineEcsAvailableResourceService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -67,11 +67,11 @@ func (s *VolcengineAvailableResourceService) ReadResources(m map[string]interfac
 	})
 }
 
-func (s *VolcengineAvailableResourceService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineEcsAvailableResourceService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	return nil, nil
 }
 
-func (s *VolcengineAvailableResourceService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineEcsAvailableResourceService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -84,32 +84,32 @@ func (s *VolcengineAvailableResourceService) RefreshResourceState(resourceData *
 	}
 }
 
-func (VolcengineAvailableResourceService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineEcsAvailableResourceService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineAvailableResourceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineEcsAvailableResourceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineAvailableResourceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineEcsAvailableResourceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineAvailableResourceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineEcsAvailableResourceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineAvailableResourceService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineEcsAvailableResourceService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		CollectField: "available_zones",
 	}
 }
 
-func (s *VolcengineAvailableResourceService) ReadResourceId(id string) string {
+func (s *VolcengineEcsAvailableResourceService) ReadResourceId(id string) string {
 	return id
 }
 

@@ -1,4 +1,4 @@
-package available_resource_test
+package ecs_available_resource_test
 
 import (
 	"testing"
@@ -6,22 +6,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/available_resource"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_available_resource"
 )
 
 const testAccVolcengineAvailableResourcesDatasourceConfig = `
-data "volcengine_available_resources" "foo"{
+data "volcengine_ecs_available_resources" "foo"{
     destination_resource = "InstanceType"
 }
 `
 
 func TestAccVolcengineAvailableResourcesDatasource_Basic(t *testing.T) {
-	resourceName := "data.volcengine_available_resources.foo"
+	resourceName := "data.volcengine_ecs_available_resources.foo"
 
 	acc := &volcengine.AccTestResource{
 		ResourceId: resourceName,
 		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
-			return available_resource.NewAvailableResourceService(client)
+			return ecs_available_resource.NewEcsAvailableResourceService(client)
 		},
 	}
 
