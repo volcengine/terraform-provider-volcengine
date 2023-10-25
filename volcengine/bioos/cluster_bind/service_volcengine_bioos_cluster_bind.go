@@ -56,22 +56,49 @@ func (s *VolcengineBioosClusterBindService) ReadResources(m map[string]interface
 }
 
 func (s *VolcengineBioosClusterBindService) ReadResource(resData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
-	var (
-		results []interface{}
-		res     map[string]interface{}
-		ok      bool
-	)
+	req := make(map[string]interface{})
+	types := []string{"workflow", "notebook"}
 	ids := strings.Split(resData.Id(), ":")
 	if len(ids) != 2 {
 		return nil, nil
 	}
-	req := map[string]interface{}{
-		"ID":   ids[0],
-		"Type": resData.Get("type").(string),
+	req["ID"] = ids[0]
+	t := resData.Get("type").(string)
+	if len(t) != 0 {
+		req["Type"] = t
+		data, err = s.read(req, ids[1])
+		if err != nil {
+			return data, err
+		}
+	} else {
+		for _, ty := range types {
+			req["Type"] = ty
+			data, err = s.read(req, ids[1])
+			if err != nil {
+				return data, err
+			}
+			if len(data) != 0 {
+				data["Type"] = ty
+				return data, nil
+			}
+		}
 	}
+	if len(data) == 0 {
+		return data, fmt.Errorf("Bioos Cluster Bind %s not exist ", id)
+	}
+	data["Type"] = t
+	return data, nil
+}
+
+func (s *VolcengineBioosClusterBindService) read(req map[string]interface{}, clusterId string) (data map[string]interface{}, err error) {
+	var (
+		results []interface{}
+		ok      bool
+		res     map[string]interface{}
+	)
 	results, err = s.ReadResources(req)
 	if err != nil {
-		return data, nil
+		return data, err
 	}
 	for _, v := range results {
 		if data, ok = v.(map[string]interface{}); !ok {
@@ -80,12 +107,9 @@ func (s *VolcengineBioosClusterBindService) ReadResource(resData *schema.Resourc
 	}
 	for _, cluster := range data {
 		clusterMap, _ := cluster.(map[string]interface{})
-		if clusterMap["ID"] == ids[1] {
+		if clusterMap["ID"] == clusterId {
 			res = clusterMap
 		}
-	}
-	if len(res) == 0 {
-		return res, fmt.Errorf("Bioos Cluster Bind %s not exist ", id)
 	}
 	return res, nil
 }

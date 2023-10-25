@@ -75,6 +75,12 @@ func (s *VolcengineBioosClusterService) ReadResource(resourceData *schema.Resour
 	for _, v := range results {
 		if data, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
+		} else {
+			if _, ok = data["SharedConfig"]; ok {
+				data["SharedConfig"] = map[string]interface{}{
+					"Enable": true,
+				}
+			}
 		}
 	}
 	if len(data) == 0 {
@@ -84,7 +90,36 @@ func (s *VolcengineBioosClusterService) ReadResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineBioosClusterService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
-	return &resource.StateChangeConf{}
+	return &resource.StateChangeConf{
+		Pending:    []string{},
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Target:     target,
+		Timeout:    timeout,
+		Refresh: func() (result interface{}, state string, err error) {
+			var (
+				demo       map[string]interface{}
+				status     interface{}
+				failStates []string
+			)
+			failStates = append(failStates, "Error")
+			demo, err = s.ReadResource(resourceData, id)
+			if err != nil {
+				return nil, "", err
+			}
+			status, err = ve.ObtainSdkValue("Status", demo)
+			if err != nil {
+				return nil, "", err
+			}
+			for _, v := range failStates {
+				if v == status.(string) {
+					return nil, "", fmt.Errorf("Bioos Cluster status  error, status:%s", status.(string))
+				}
+			}
+			//注意 返回的第一个参数不能为空 否则会一直等下去
+			return demo, status.(string), err
+		},
+	}
 }
 
 func (s *VolcengineBioosClusterService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
@@ -104,10 +139,23 @@ func (s *VolcengineBioosClusterService) CreateResource(data *schema.ResourceData
 				"vke_config": {
 					TargetField: "VKEConfig",
 					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"cluster_id": {
+							TargetField: "ClusterID",
+						},
+					},
 				},
 				"shared_config": {
 					ConvertType: ve.ConvertJsonObject,
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if sharedConfig, ok := d.GetOk("SharedConfig"); ok {
+					if !sharedConfig.([]interface{})[0].(map[string]interface{})["enable"].(bool) {
+						return false, fmt.Errorf("The shared config enable must be true. ")
+					}
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -117,6 +165,10 @@ func (s *VolcengineBioosClusterService) CreateResource(data *schema.ResourceData
 				id, _ := ve.ObtainSdkValue("Result.ID", *resp)
 				d.SetId(id.(string))
 				return nil
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: data.Timeout(schema.TimeoutCreate),
 			},
 		},
 	}

@@ -82,6 +82,11 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 							Computed:    true,
 							Description: "The id of the bioos cluster.",
 						},
+						"status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The status of the cluster.",
+						},
 						"start_time": {
 							Computed:    true,
 							Type:        schema.TypeInt,
@@ -101,6 +106,20 @@ func DataSourceVolcengineBioosClusters() *schema.Resource {
 							Computed:    true,
 							Type:        schema.TypeBool,
 							Description: "whether it is a public cluster.",
+						},
+						"shared_config": {
+							Type:        schema.TypeList,
+							Description: "The configuration of the shared cluster.",
+							Computed:    true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enable": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to enable a shared cluster. This value must be `true`.",
+									},
+								},
+							},
 						},
 					},
 				},
