@@ -10,7 +10,9 @@ description: |-
 Use this data source to query detailed information of transit router peer attachments
 ## Example Usage
 ```hcl
-
+data "volcengine_transit_router_peer_attachments" "foo" {
+  ids = ["tr-attach-12be67d0yh2io17q7y1au****"]
+}
 ```
 ## Argument Reference
 The following arguments are supported:
