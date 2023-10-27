@@ -132,6 +132,12 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) RemoveResource(data *schem
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
+				err := volc.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
+				// 规避 解绑后删除实例OperationDenied: 无法执行该操作。
+				time.Sleep(5 * time.Second)
+				return err
+			},
 		},
 	}
 	return []volc.Callback{callback}
