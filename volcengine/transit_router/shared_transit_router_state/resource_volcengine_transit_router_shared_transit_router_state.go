@@ -15,7 +15,7 @@ import (
 Import
 SharedTransitRouterState can be imported using the id, e.g.
 ```
-$ terraform import volcengine_shared_transit_router_state.default state:transitRouterId
+$ terraform import volcengine_transit_router_shared_transit_router_state.default state:transitRouterId
 ```
 
 */
@@ -59,7 +59,7 @@ func resourceVolcengineSharedTransitRouterStateCreate(d *schema.ResourceData, me
 	service := NewSharedTransitRouterStateService(meta.(*ve.SdkClient))
 	err = service.Dispatcher.Create(service, d, ResourceVolcengineSharedTransitRouterState())
 	if err != nil {
-		return fmt.Errorf("error on creating shared_transit_router_state %q, %s", d.Id(), err)
+		return fmt.Errorf("error on creating volcengine_transit_router_shared_transit_router_state %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineSharedTransitRouterStateRead(d, meta)
 }
@@ -68,7 +68,7 @@ func resourceVolcengineSharedTransitRouterStateRead(d *schema.ResourceData, meta
 	service := NewSharedTransitRouterStateService(meta.(*ve.SdkClient))
 	err = service.Dispatcher.Read(service, d, ResourceVolcengineSharedTransitRouterState())
 	if err != nil {
-		return fmt.Errorf("error on reading shared_transit_router_state %q, %s", d.Id(), err)
+		return fmt.Errorf("error on reading volcengine_transit_router_shared_transit_router_state %q, %s", d.Id(), err)
 	}
 	return err
 }
@@ -77,7 +77,7 @@ func resourceVolcengineSharedTransitRouterStateUpdate(d *schema.ResourceData, me
 	service := NewSharedTransitRouterStateService(meta.(*ve.SdkClient))
 	err = service.Dispatcher.Update(service, d, ResourceVolcengineSharedTransitRouterState())
 	if err != nil {
-		return fmt.Errorf("error on update shared_transit_router_state %q, %s", d.Id(), err)
+		return fmt.Errorf("error on update volcengine_transit_router_shared_transit_router_state %q, %s", d.Id(), err)
 	}
 	return err
 }
@@ -86,7 +86,7 @@ func resourceVolcengineSharedTransitRouterStateDelete(d *schema.ResourceData, me
 	service := NewSharedTransitRouterStateService(meta.(*ve.SdkClient))
 	err = service.Dispatcher.Delete(service, d, ResourceVolcengineSharedTransitRouterState())
 	if err != nil {
-		return fmt.Errorf("error on deleting shared_transit_router_state %q, %s", d.Id(), err)
+		return fmt.Errorf("error on deleting volcengine_transit_router_shared_transit_router_state %q, %s", d.Id(), err)
 	}
 	return err
 }
