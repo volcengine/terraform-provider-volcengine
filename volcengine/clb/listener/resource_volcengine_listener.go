@@ -128,6 +128,67 @@ func ResourceVolcengineListener() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the Listener.",
 			},
+			"bandwidth": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     -1,
+				Description: "The bandwidth of the Listener. Unit: Mbps. Default is -1, indicating that the Listener does not specify a speed limit.",
+			},
+			"proxy_protocol_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "off",
+				ValidateFunc: validation.StringInSlice([]string{"off", "standard"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP"
+				},
+				Description: "Whether to enable proxy protocol. Valid values: `off`, `standard`. Default is `off`.\n" +
+					"This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.",
+			},
+			"persistence_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "off",
+				ValidateFunc: validation.StringInSlice([]string{"off", "source_ip"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP"
+				},
+				Description: "The persistence type of the Listener. Valid values: `off`, `source_ip`. Default is `off`.\n" +
+					"This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.",
+			},
+			"persistence_timeout": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      1000,
+				ValidateFunc: validation.IntBetween(1, 3600),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return (d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP") || d.Get("persistence_type").(string) != "source_ip"
+				},
+				Description: "The persistence timeout of the Listener. Unit: second. Valid value range is `1-3600`. Default is `1000`.\n" +
+					"This filed is valid only when the value of field `persistence_type` is `source_ip`.",
+			},
+			"connection_drain_enabled": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "off",
+				ValidateFunc: validation.StringInSlice([]string{"off", "on"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP"
+				},
+				Description: "Whether to enable connection drain of the Listener. Valid values: `off`, `on`. Default is `off`.\n" +
+					"This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.",
+			},
+			"connection_drain_timeout": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Computed:     true,
+				ValidateFunc: validation.IntBetween(1, 900),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return (d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP") || d.Get("connection_drain_enabled").(string) != "on"
+				},
+				Description: "The connection drain timeout of the Listener. Valid value range is `1-900`.\n" +
+					"This filed is required when the value of field `connection_drain_enabled` is `on`.",
+			},
 			"health_check": {
 				Type:        schema.TypeList,
 				Optional:    true,

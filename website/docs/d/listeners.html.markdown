@@ -82,7 +82,10 @@ In addition to all arguments above, the following attributes are exported:
     * `acl_ids` - The acl ID list to which the Listener is bound.
     * `acl_status` - The acl status of the Listener.
     * `acl_type` - The acl type of the Listener.
+    * `bandwidth` - The bandwidth of the Listener. Unit: Mbps.
     * `certificate_id` - The ID of the certificate which is associated with the Listener.
+    * `connection_drain_enabled` - Whether to enable connection drain of the Listener.
+    * `connection_drain_timeout` - The connection drain timeout of the Listener.
     * `create_time` - The create time of the Listener.
     * `enabled` - The enable status of the Listener.
     * `health_check_domain` - The domain of health check.
@@ -99,8 +102,11 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The ID of the Listener.
     * `listener_id` - The ID of the Listener.
     * `listener_name` - The name of the Listener.
+    * `persistence_timeout` - The persistence timeout of the Listener.
+    * `persistence_type` - The persistence type of the Listener.
     * `port` - The port receiving request of the Listener.
     * `protocol` - The protocol of the Listener.
+    * `proxy_protocol_type` - Whether to enable proxy protocol.
     * `server_group_id` - The ID of the backend server group which is associated with the Listener.
     * `status` - The status of the Listener.
     * `update_time` - The update time of the Listener.

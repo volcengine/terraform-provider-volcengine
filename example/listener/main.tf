@@ -50,3 +50,18 @@ resource "volcengine_listener" "foo" {
   }
   enabled = "on"
 }
+
+resource "volcengine_listener" "foo_tcp" {
+  load_balancer_id = volcengine_clb.foo.id
+  listener_name = "acc-test-listener"
+  protocol = "TCP"
+  port = 90
+  server_group_id = volcengine_server_group.foo.id
+  enabled = "on"
+  bandwidth = 2
+  proxy_protocol_type = "standard"
+  persistence_type = "source_ip"
+  persistence_timeout = 100
+  connection_drain_enabled = "on"
+  connection_drain_timeout = 100
+}

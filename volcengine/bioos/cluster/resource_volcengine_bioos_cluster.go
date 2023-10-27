@@ -44,10 +44,13 @@ func ResourceVolcengineBioosCluster() *schema.Resource {
 				Description: "The description of the cluster.",
 			},
 			"vke_config": {
-				Type:          schema.TypeList,
-				Description:   "The configuration of the vke cluster.",
+				Type: schema.TypeList,
+				Description: "The configuration of the vke cluster. This cluster type is not recommended. " +
+					"It is recommended to use a shared cluster.",
 				Optional:      true,
 				ForceNew:      true,
+				Computed:      true,
+				MaxItems:      1,
 				ConflictsWith: []string{"shared_config"},
 				AtLeastOneOf:  []string{"shared_config"},
 				Elem: &schema.Resource{
@@ -72,6 +75,8 @@ func ResourceVolcengineBioosCluster() *schema.Resource {
 				Description:   "The configuration of the shared cluster.",
 				Optional:      true,
 				ForceNew:      true,
+				MaxItems:      1,
+				Computed:      true,
 				ConflictsWith: []string{"vke_config"},
 				AtLeastOneOf:  []string{"vke_config"},
 				Elem: &schema.Resource{
@@ -80,7 +85,7 @@ func ResourceVolcengineBioosCluster() *schema.Resource {
 							Type:        schema.TypeBool,
 							Required:    true,
 							ForceNew:    true,
-							Description: "Whether to enable a shared cluster.",
+							Description: "Whether to enable a shared cluster. This value must be `true`.",
 						},
 					},
 				},

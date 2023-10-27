@@ -27,11 +27,11 @@ The following arguments are supported:
 * `name` - (Required, ForceNew) The name of the cluster.
 * `description` - (Optional, ForceNew) The description of the cluster.
 * `shared_config` - (Optional, ForceNew) The configuration of the shared cluster.
-* `vke_config` - (Optional, ForceNew) The configuration of the vke cluster.
+* `vke_config` - (Optional, ForceNew) The configuration of the vke cluster. This cluster type is not recommended. It is recommended to use a shared cluster.
 
 The `shared_config` object supports the following:
 
-* `enable` - (Required, ForceNew) Whether to enable a shared cluster.
+* `enable` - (Required, ForceNew) Whether to enable a shared cluster. This value must be `true`.
 
 The `vke_config` object supports the following:
 
