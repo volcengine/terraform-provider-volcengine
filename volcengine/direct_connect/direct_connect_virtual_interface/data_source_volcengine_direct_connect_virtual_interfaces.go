@@ -168,7 +168,7 @@ func DataSourceVolcengineDirectConnectVirtualInterfaces() *schema.Resource {
 						"bfd_detect_interval": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The BFD detect interval,in ms",
+							Description: "The BFD detect interval.",
 						},
 						"bfd_detect_multiplier": {
 							Type:        schema.TypeInt,
