@@ -189,11 +189,14 @@ func (s *VolcengineRedisDbInstanceService) ReadResources(condition map[string]in
 			}
 			ins["Params"] = params
 
-			backupPlan, err := s.readInstanceBackupPlan(instanceId)
-			if err != nil {
-				return data, err
+			// 单节点实例不支持查询 Backup plan
+			if nodeNumber, exist := ins["NodeNumber"]; exist && nodeNumber.(float64) > 1 {
+				backupPlan, err := s.readInstanceBackupPlan(instanceId)
+				if err != nil {
+					return data, err
+				}
+				ins["BackupPlan"] = backupPlan
 			}
-			ins["BackupPlan"] = backupPlan
 
 			nodeIds, err := s.readInstanceNodeIds(instanceId)
 			if err != nil {
@@ -257,10 +260,16 @@ func (s *VolcengineRedisDbInstanceService) ReadResource(resourceData *schema.Res
 		}
 	}
 
-	if backupMap, ok := data["BackupPlan"].(map[string]interface{}); ok {
-		data["BackupHour"] = backupMap["BackupHour"]
-		data["BackupActive"] = backupMap["Active"]
-		data["BackupPeriod"] = backupMap["Period"]
+	if backupPlan, exist := data["BackupPlan"]; exist {
+		if backupMap, ok := backupPlan.(map[string]interface{}); ok {
+			data["BackupHour"] = backupMap["BackupHour"]
+			data["BackupActive"] = backupMap["Active"]
+			data["BackupPeriod"] = backupMap["Period"]
+		}
+	}
+
+	if parameterSet, ok := resourceData.GetOk("param_values"); ok {
+		data["ParamValues"] = parameterSet.(*schema.Set).List()
 	}
 
 	return data, err
@@ -321,7 +330,9 @@ func (s *VolcengineRedisDbInstanceService) WithResourceResponseHandlers(instance
 }
 
 func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
+	var callbacks []ve.Callback
+
+	instanceCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateDBInstance",
 			ConvertMode: ve.RequestConvertAll,
@@ -335,8 +346,37 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 					TargetField: "ZoneIds",
 					ConvertType: ve.ConvertJsonArray,
 				},
+				"param_values": {
+					Ignore: true,
+				},
+				"vpc_auth_mode": {
+					Ignore: true,
+				},
+				"backup_period": {
+					Ignore: true,
+				},
+				"backup_hour": {
+					Ignore: true,
+				},
+				"backup_active": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if nodeNumber, ok := (*call.SdkParam)["NodeNumber"]; ok && nodeNumber.(int) == 1 {
+					// 单节点实例不支持设置 backup plan
+					_, exist1 := d.GetOkExists("backup_hour")
+					_, exist2 := d.GetOkExists("backup_active")
+					period := d.Get("backup_period")
+					periodSet, ok := period.(*schema.Set)
+					if !ok {
+						return false, fmt.Errorf("backup_period is not set ")
+					}
+					if exist1 || exist2 || periodSet.Len() > 0 {
+						return false, fmt.Errorf("The single node instance cannot specify any fields related to backup plan, including `backup_period`, `backup_hour` and `backup_active`. ")
+					}
+				}
+
 				if _, ok := (*call.SdkParam)["ShardedCluster"]; !ok {
 					(*call.SdkParam)["ShardedCluster"] = 0
 				}
@@ -357,7 +397,7 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, *resp)
 				id, _ := ve.ObtainSdkValue("Result.InstanceId", *resp)
 				d.SetId(id.(string))
 				return nil
@@ -368,7 +408,116 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, instanceCallback)
+
+	// parameters
+	parameterCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ModifyDBInstanceParams",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"param_values": {
+					TargetField: "ParamValues",
+					ConvertType: ve.ConvertJsonArray,
+					ForceGet:    true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) == 0 {
+					return false, nil
+				}
+				(*call.SdkParam)["InstanceId"] = d.Id()
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	callbacks = append(callbacks, parameterCallback)
+
+	// vpc_auth_mode
+	vpcAuthModeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ModifyDBInstanceVpcAuthMode",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"vpc_auth_mode": {
+					TargetField: "VpcAuthMode",
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) == 0 {
+					return false, nil
+				}
+				(*call.SdkParam)["InstanceId"] = d.Id()
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	callbacks = append(callbacks, vpcAuthModeCallback)
+
+	// backup plan
+	if nodeNumber := resourceData.Get("node_number"); nodeNumber.(int) > 1 {
+		backupPlanCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyBackupPlan",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					active, exist := d.GetOkExists("backup_active")
+					if !exist {
+						active = true
+					}
+					(*call.SdkParam)["Active"] = active
+
+					period := d.Get("backup_period")
+					periodSet, ok := period.(*schema.Set)
+					if !ok {
+						return false, fmt.Errorf("backup_period is not set ")
+					}
+					if periodSet.Len() > 0 {
+						(*call.SdkParam)["Period"] = periodSet.List()
+					} else {
+						(*call.SdkParam)["Period"] = []interface{}{1, 2, 3, 4, 5, 6, 7}
+					}
+
+					(*call.SdkParam)["BackupHour"] = d.Get("backup_hour")
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, backupPlanCallback)
+	}
+
+	return callbacks
 }
 
 func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -564,6 +713,10 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
 			},
 		}
 		callbacks = append(callbacks, callback)
@@ -602,6 +755,10 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		}
@@ -751,6 +908,10 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 				},
 			},
 		}
