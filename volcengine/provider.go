@@ -101,6 +101,11 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_repository"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_tag"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_vpc_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_bgp_peer"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_connection"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_gateway_route"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_virtual_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_available_resource"
@@ -467,6 +472,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_transit_router_grant_rules":                        transit_router_grant_rule.DataSourceVolcengineTransitRouterGrantRules(),
 			"volcengine_transit_router_direct_connect_gateway_attachments": transit_router_direct_connect_gateway_attachment.DataSourceVolcengineTransitRouterDirectConnectGatewayAttachments(),
 			"volcengine_transit_router_peer_attachments":                   transit_router_peer_attachment.DataSourceVolcengineTransitRouterPeerAttachments(),
+
+			// ================ DirectConnect ================
+			"volcengine_direct_connect_connections":        direct_connect_connection.DataSourceVolcengineDirectConnectConnections(),
+			"volcengine_direct_connect_gateways":           direct_connect_gateway.DataSourceVolcengineDirectConnectGateways(),
+			"volcengine_direct_connect_virtual_interfaces": direct_connect_virtual_interface.DataSourceVolcengineDirectConnectVirtualInterfaces(),
+			"volcengine_direct_connect_bgp_peers":          direct_connect_bgp_peer.DataSourceVolcengineDirectConnectBgpPeers(),
+			"volcengine_direct_connect_gateway_routes":     direct_connect_gateway_route.DataSourceVolcengineDirectConnectGatewayRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -678,6 +690,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_transit_router_direct_connect_gateway_attachment": transit_router_direct_connect_gateway_attachment.ResourceVolcengineTransitRouterDirectConnectGatewayAttachment(),
 			"volcengine_transit_router_shared_transit_router_state":       shared_transit_router_state.ResourceVolcengineSharedTransitRouterState(),
 			"volcengine_transit_router_peer_attachment":                   transit_router_peer_attachment.ResourceVolcengineTransitRouterPeerAttachment(),
+
+			// ================ DirectConnect ================
+			"volcengine_direct_connect_connection":        direct_connect_connection.ResourceVolcengineDirectConnectConnection(),
+			"volcengine_direct_connect_gateway":           direct_connect_gateway.ResourceVolcengineDirectConnectGateway(),
+			"volcengine_direct_connect_virtual_interface": direct_connect_virtual_interface.ResourceVolcengineDirectConnectVirtualInterface(),
+			"volcengine_direct_connect_bgp_peer":          direct_connect_bgp_peer.ResourceVolcengineDirectConnectBgpPeer(),
+			"volcengine_direct_connect_gateway_route":     direct_connect_gateway_route.ResourceVolcengineDirectConnectGatewayRoute(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

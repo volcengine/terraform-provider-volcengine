@@ -149,6 +149,7 @@ var resourceKeys = map[string]string{
 	"cloudfs":        "CLOUDFS",
 	"nas":            "NAS",
 	"transit_router": "TRANSIT_ROUTER",
+	"direct_connect": "DIRECT_CONNECT",
 }
 
 type Products struct {
