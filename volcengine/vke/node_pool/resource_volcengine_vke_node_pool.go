@@ -183,11 +183,10 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0", "ESSD_FlexPL"}, false),
-										Description:  "The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: "The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
@@ -207,11 +206,10 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
-										Type:         schema.TypeString,
-										Optional:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.StringInSlice([]string{"PTSSD", "ESSD_PL0", "ESSD_FlexPL"}, false),
-										Description:  "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
+										Type:        schema.TypeString,
+										Optional:    true,
+										ForceNew:    true,
+										Description: "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
 									},
 									"size": {
 										Type:         schema.TypeInt,
