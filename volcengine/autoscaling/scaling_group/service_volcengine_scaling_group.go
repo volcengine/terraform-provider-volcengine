@@ -182,6 +182,13 @@ func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.Reso
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
 				},
+				"db_instance_ids": {
+					TargetField: "DBInstanceIds",
+					ConvertType: ve.ConvertWithN,
+				},
+				"launch_template_overrides": {
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -251,6 +258,9 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 				},
 				"launch_template_version": {
 					ConvertType: ve.ConvertDefault,
+				},
+				"launch_template_overrides": {
+					ConvertType: ve.ConvertListN,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {

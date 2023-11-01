@@ -216,6 +216,11 @@ func DataSourceVolcengineScalingConfigurations() *schema.Resource {
 							Computed:    true,
 							Description: "The preemption policy of the instance. Valid Value: NoSpot (default), SpotAsPriceGo.",
 						},
+						"ipv6_address_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Assign IPv6 address to instance network card. Possible values:\n0: Do not assign IPv6 address.\n1: Assign IPv6 address and the system will automatically assign an IPv6 subnet for you.",
+						},
 					},
 				},
 			},

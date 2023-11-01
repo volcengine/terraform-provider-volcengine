@@ -53,10 +53,29 @@ func ResourceVolcengineScalingLifecycleHook() *schema.Resource {
 				Description:  "The type of the lifecycle hook. Valid values: SCALE_IN, SCALE_OUT.",
 			},
 			"lifecycle_hook_policy": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ValidateFunc: validation.StringInSlice([]string{"CONTINUE", "REJECT"}, false),
-				Description:  "The policy of the lifecycle hook. Valid values: CONTINUE, REJECT.",
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The policy of the lifecycle hook. Valid values: CONTINUE, REJECT, ROLLBACK.",
+			},
+			"lifecycle_command": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "Batch job command.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"command_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Batch job command ID, which indicates the batch job command to be executed after triggering the lifecycle hook and installed in the instance.",
+						},
+						"parameters": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Parameters and parameter values in batch job commands.\nThe number of parameters ranges from 0 to 60.",
+						},
+					},
+				},
 			},
 		},
 	}

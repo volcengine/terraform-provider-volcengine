@@ -34,6 +34,11 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of scaling group.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the scaling group.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -186,6 +191,45 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 							Description: "The ProjectName of scaling group.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"scaling_mode": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The scaling mode of the scaling group.",
+						},
+						"stopped_instance_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of stopped instances.",
+						},
+						"health_check_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The health check type of the scaling group.",
+						},
+						"load_balancer_health_check_grace_period": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Grace period for health check of CLB instance in elastic group.",
+						},
+						"launch_template_overrides": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Instance start template information.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"instance_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The instance type.",
+									},
+									"weighted_capacity": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "Weight of instance specifications.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
