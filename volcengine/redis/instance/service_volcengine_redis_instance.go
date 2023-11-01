@@ -419,7 +419,7 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 			Convert: map[string]ve.RequestConvert{
 				"param_values": {
 					TargetField: "ParamValues",
-					ConvertType: ve.ConvertJsonArray,
+					ConvertType: ve.ConvertJsonObjectArray,
 					ForceGet:    true,
 				},
 			},
@@ -697,7 +697,7 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 				Convert: map[string]ve.RequestConvert{
 					"param_values": {
 						TargetField: "ParamValues",
-						ConvertType: ve.ConvertJsonArray,
+						ConvertType: ve.ConvertJsonObjectArray,
 						ForceGet:    true,
 					},
 				},
