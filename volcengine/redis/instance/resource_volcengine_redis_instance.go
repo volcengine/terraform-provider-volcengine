@@ -172,19 +172,18 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 				DiffSuppressFunc: redisInstanceImportDiffSuppress,
 			},
 			"vpc_auth_mode": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				Description:      "Whether to enable password-free access when connecting to an instance through a private network. Valid values: `open`, `close`. Works only on modified scenes.",
-				ValidateFunc:     validation.StringInSlice([]string{"open", "close"}, true),
-				DiffSuppressFunc: redisInstanceImportDiffSuppress,
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				Description:  "Whether to enable password-free access when connecting to an instance through a private network. Valid values: `open`, `close`.",
+				ValidateFunc: validation.StringInSlice([]string{"open", "close"}, true),
 			},
 			"param_values": {
-				Type:             schema.TypeSet,
-				Optional:         true,
-				Set:              paramHash,
-				Description:      "The configuration item information to be modified. This field can only be added or modified. Deleting this field is invalid.",
-				DiffSuppressFunc: redisInstanceImportDiffSuppress,
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      paramHash,
+				Description: "The configuration item information to be modified. This field can only be added or modified. Deleting this field is invalid.\n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields, or use the command `terraform apply` to perform a modification operation.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -201,22 +200,24 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 				},
 			},
 			"backup_period": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Computed:    true,
-				Set:         schema.HashInt,
-				Description: "The backup period. The valid value can be any integer between 1 and 7. Among them, 1 means backup every Monday, 2 means backup every Tuesday, and so on. \nThis field is valid and required when updating the backup plan of primary and secondary instance.",
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				Set:      schema.HashInt,
 				Elem: &schema.Schema{
 					Type: schema.TypeInt,
 				},
 				DiffSuppressFunc: redisInstanceImportDiffSuppress,
+				Description: "The backup period. The valid value can be any integer between 1 and 7. Among them, 1 means backup every Monday, 2 means backup every Tuesday, and so on. \n" +
+					"This field is valid and required when updating the backup plan of primary and secondary instance.",
 			},
 			"backup_hour": {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: redisInstanceImportDiffSuppress,
-				Description:      "The time period to start performing the backup. The valid value range is any integer between 0 and 23, where 0 means that the system will perform the backup in the period of 00:00~01:00, 1 means that the backup will be performed in the period of 01:00~02:00, and so on. \nThis field is valid and required when updating the backup plan of primary and secondary instance.",
+				Description: "The time period to start performing the backup. The valid value range is any integer between 0 and 23, where 0 means that the system will perform the backup in the period of 00:00~01:00, 1 means that the backup will be performed in the period of 01:00~02:00, and so on. \n" +
+					"This field is valid and required when updating the backup plan of primary and secondary instance.",
 			},
 			"backup_active": {
 				Type:             schema.TypeBool,

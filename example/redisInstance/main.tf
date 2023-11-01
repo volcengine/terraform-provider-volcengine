@@ -48,7 +48,7 @@ resource "volcengine_redis_instance" "foo" {
   }
 
   backup_period = [1, 2, 3]
-  backup_hour   = 4
+  backup_hour   = 6
   backup_active = true
 
   create_backup     = false

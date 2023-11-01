@@ -44,11 +44,9 @@ func redisInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData)
 		return true
 	}
 
-	// 只在修改时需要这些参数
-	if d.Id() == "" {
-		if k == "vpc_auth_mode" || k == "backup_hour" || k == "backup_active" || strings.Contains(k, "param_values") || strings.Contains(k, "backup_period") {
-			return true
-		}
+	// 单节点实例，忽略 backup plan 相关参数
+	if k == "backup_hour" || k == "backup_active" || strings.Contains(k, "backup_period") {
+		return d.Get("node_number").(int) == 1
 	}
 
 	// 只在修改实例规格时需要这些参数，其它情况均忽略修改
