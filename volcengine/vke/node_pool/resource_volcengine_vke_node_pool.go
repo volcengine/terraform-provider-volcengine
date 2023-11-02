@@ -200,25 +200,23 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"data_volumes": {
 							Type:     schema.TypeList,
 							Optional: true,
-							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Computed:    true,
+										Default:     "ESSD_PL0",
 										Description: "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
 									},
 									"size": {
 										Type:        schema.TypeInt,
 										Optional:    true,
-										Computed:    true,
+										Default:     20,
 										Description: "The Size of DataVolumes, the value range in 20~32768.",
 									},
 									"mount_point": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Computed:    true,
 										Description: "The target mount directory of the disk. Must start with `/`.",
 									},
 								},

@@ -66,7 +66,7 @@ func ResourceVolcengineScalingLifecycleHook() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"command_id": {
 							Type:        schema.TypeString,
-							Optional:    true,
+							Required:    true,
 							Description: "Batch job command ID, which indicates the batch job command to be executed after triggering the lifecycle hook and installed in the instance.",
 						},
 						"parameters": {

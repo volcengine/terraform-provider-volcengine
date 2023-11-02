@@ -503,14 +503,8 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 								},
 							},
 						},
-						"system_volume": {
-							Ignore: true,
-						},
-						"data_volumes": {
-							Ignore: true,
-						},
 						"additional_container_storage_enabled": {
-							ConvertType: ve.ConvertDefault,
+							ConvertType: ve.ConvertJsonObject,
 						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
@@ -654,18 +648,7 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 
 				// 手动转数据盘
 				if d.HasChange("node_config.0.data_volumes") {
-					if dataVolumes, ok := d.GetOk("node_config.0.data_volumes"); !ok {
-						if additionStorageEnabled, ok := d.GetOk("node_config.0.additional_container_storage_enabled"); ok {
-							// 只有当additional_container_storage_enabled = false时才能清空数据盘
-							if additionStorageEnabled.(bool) {
-								return nil, fmt.Errorf("There is no data volume for additional container storage enabling. " +
-									"To clear the data disk, you need to set additional_container_storage_enabled to false. ")
-							}
-						}
-						(*call.SdkParam)["NodeConfig"].(map[string]interface{})["DataVolumes"] = []interface{}{}
-					} else // 手动转data_volumes
-					{
-						delete((*call.SdkParam)["NodeConfig"].(map[string]interface{}), "DataVolumes")
+					if dataVolumes, ok := d.GetOk("node_config.0.data_volumes"); ok {
 						volumes := make([]interface{}, 0)
 						for index, _ := range dataVolumes.([]interface{}) {
 							volume := make(map[string]interface{})
@@ -676,18 +659,22 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 								volume["Size"] = v
 							}
 							if v, ok := d.GetOkExists(fmt.Sprintf("node_config.0.data_volumes.%d.mount_point", index)); ok {
-								volume["MountPoint"] = v
+								if v != nil && len(v.(string)) > 0 {
+									volume["MountPoint"] = v
+								}
 							}
 							volumes = append(volumes, volume)
 						}
 						(*call.SdkParam)["NodeConfig"].(map[string]interface{})["DataVolumes"] = volumes
+					} else {
+						// 用户清空数据盘，传空list
+						(*call.SdkParam)["NodeConfig"].(map[string]interface{})["DataVolumes"] = []interface{}{}
 					}
 				}
 
 				if d.HasChange("node_config.0.system_volume") {
 					// 手动转system_volume
 					if _, ok := d.GetOk("node_config.0.system_volume"); ok {
-						delete((*call.SdkParam)["NodeConfig"].(map[string]interface{}), "SystemVolume")
 						systemVolume := map[string]interface{}{}
 						if v, ok := d.GetOkExists("node_config.0.system_volume.0.type"); ok {
 							systemVolume["Type"] = v

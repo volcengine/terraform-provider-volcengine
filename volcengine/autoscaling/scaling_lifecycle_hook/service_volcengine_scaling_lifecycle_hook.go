@@ -178,12 +178,7 @@ func (s *VolcengineScalingLifecycleHookService) ModifyResource(resourceData *sch
 				}
 				(*call.SdkParam)["LifecycleHookId"] = ids[1]
 				if d.HasChange("lifecycle_command") {
-					commandId, ok := d.GetOk("lifecycle_command.0.command_id")
-					if ok {
-						(*call.SdkParam)["LifecycleCommand.CommandId"] = commandId
-					} else {
-						(*call.SdkParam)["LifecycleCommand.CommandId"] = ""
-					}
+					(*call.SdkParam)["LifecycleCommand.CommandId"] = d.Get("lifecycle_command.0.command_id")
 					params, ok := d.GetOk("lifecycle_command.0.parameters")
 					if ok {
 						(*call.SdkParam)["LifecycleCommand.Parameters"] = params
