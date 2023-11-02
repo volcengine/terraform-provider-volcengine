@@ -81,16 +81,16 @@ resource "volcengine_vke_node_pool" "foo" {
     image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
     system_volume {
       type = "ESSD_PL0"
-      size = "60"
+      size = 80
     }
     data_volumes {
       type        = "ESSD_PL0"
-      size        = "60"
+      size        = 80
       mount_point = "/tf1"
     }
     data_volumes {
       type        = "ESSD_PL0"
-      size        = "60"
+      size        = 60
       mount_point = "/tf2"
     }
     initialize_script = "ZWNobyBoZWxsbyB0ZXJyYWZvcm0h"
@@ -101,7 +101,7 @@ resource "volcengine_vke_node_pool" "foo" {
       security_strategies = ["Hids"]
       security_group_ids  = [volcengine_security_group.foo.id]
     }
-    additional_container_storage_enabled = true
+    additional_container_storage_enabled = false
     instance_charge_type                 = "PostPaid"
     name_prefix                          = "acc-test"
     ecs_tags {
@@ -148,9 +148,9 @@ The `auto_scaling` object supports the following:
 
 The `data_volumes` object supports the following:
 
-* `mount_point` - (Optional, ForceNew) The target mount directory of the disk. Must start with `/`.
-* `size` - (Optional, ForceNew) The Size of DataVolumes, the value range in 20~32768.
-* `type` - (Optional, ForceNew) The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.
+* `mount_point` - (Optional) The target mount directory of the disk. Must start with `/`.
+* `size` - (Optional) The Size of DataVolumes, the value range in 20~32768. Default value is `20`.
+* `type` - (Optional) The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`. Default value is `ESSD_PL0`.
 
 The `ecs_tags` object supports the following:
 
@@ -178,10 +178,10 @@ The `node_config` object supports the following:
 * `instance_type_ids` - (Required) The InstanceTypeIds of NodeConfig. The value can get from volcengine_vke_support_resource_types datasource.
 * `security` - (Required) The Security of NodeConfig.
 * `subnet_ids` - (Required) The SubnetIds of NodeConfig.
-* `additional_container_storage_enabled` - (Optional, ForceNew) The AdditionalContainerStorageEnabled of NodeConfig.
+* `additional_container_storage_enabled` - (Optional) The AdditionalContainerStorageEnabled of NodeConfig.
 * `auto_renew_period` - (Optional) The AutoRenewPeriod of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 6, 12. Unit: month. when InstanceChargeType is PrePaid and AutoRenew enable, default value is 1.
 * `auto_renew` - (Optional) Is AutoRenew of PrePaid instance of NodeConfig. Valid values: true, false. when InstanceChargeType is PrePaid, default value is true.
-* `data_volumes` - (Optional, ForceNew) The DataVolumes of NodeConfig.
+* `data_volumes` - (Optional) The DataVolumes of NodeConfig.
 * `ecs_tags` - (Optional) Tags for Ecs.
 * `hpc_cluster_ids` - (Optional) The IDs of HpcCluster, only one ID is supported currently.
 * `image_id` - (Optional) The ImageId of NodeConfig.
@@ -189,7 +189,7 @@ The `node_config` object supports the following:
 * `instance_charge_type` - (Optional, ForceNew) The InstanceChargeType of PrePaid instance of NodeConfig. Valid values: PostPaid, PrePaid. Default value: PostPaid.
 * `name_prefix` - (Optional) The NamePrefix of NodeConfig.
 * `period` - (Optional) The Period of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Unit: month. when InstanceChargeType is PrePaid, default value is 12.
-* `system_volume` - (Optional, ForceNew) The SystemVolume of NodeConfig.
+* `system_volume` - (Optional) The SystemVolume of NodeConfig.
 
 The `security` object supports the following:
 
@@ -199,8 +199,8 @@ The `security` object supports the following:
 
 The `system_volume` object supports the following:
 
-* `size` - (Optional, ForceNew) The Size of SystemVolume, the value range in 20~2048.
-* `type` - (Optional, ForceNew) The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.
+* `size` - (Optional) The Size of SystemVolume, the value range in 20~2048.
+* `type` - (Optional) The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.
 
 The `tags` object supports the following:
 

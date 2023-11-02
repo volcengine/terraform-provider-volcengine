@@ -206,13 +206,13 @@ func ResourceVolcengineNodePool() *schema.Resource {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Default:     "ESSD_PL0",
-										Description: "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
+										Description: "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`. Default value is `ESSD_PL0`.",
 									},
 									"size": {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Default:     20,
-										Description: "The Size of DataVolumes, the value range in 20~32768.",
+										Description: "The Size of DataVolumes, the value range in 20~32768. Default value is `20`.",
 									},
 									"mount_point": {
 										Type:        schema.TypeString,
