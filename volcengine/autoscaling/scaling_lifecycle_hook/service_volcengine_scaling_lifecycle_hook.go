@@ -62,7 +62,7 @@ func (s *VolcengineScalingLifecycleHookService) ReadResources(m map[string]inter
 				return data, err
 			}
 		}
-		logger.Debug(logger.RespFormat, action, action, resp)
+		logger.Debug(logger.RespFormat, action, action, *resp)
 		results, err = ve.ObtainSdkValue("Result.LifecycleHooks", *resp)
 		if err != nil {
 			return data, err
@@ -137,6 +137,12 @@ func (s *VolcengineScalingLifecycleHookService) CreateResource(resourceData *sch
 		Call: ve.SdkCall{
 			Action:      "CreateLifecycleHook",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"lifecycle_command": {
+					TargetField: "LifecycleCommand",
+					ConvertType: ve.ConvertListUnique,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -158,14 +164,31 @@ func (s *VolcengineScalingLifecycleHookService) ModifyResource(resourceData *sch
 	ids := strings.Split(resourceData.Id(), ":")
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:         "ModifyLifecycleHook",
-			ConvertMode:    ve.RequestConvertAll,
+			Action:      "ModifyLifecycleHook",
+			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"lifecycle_command": {
+					Ignore: true,
+				},
+			},
 			RequestIdField: "LifecycleHookId",
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) < 1 {
 					return false, nil
 				}
 				(*call.SdkParam)["LifecycleHookId"] = ids[1]
+				if d.HasChange("lifecycle_command") {
+					commandId, ok := d.GetOk("lifecycle_command.0.command_id")
+					if ok {
+						(*call.SdkParam)["LifecycleCommand.CommandId"] = commandId
+					} else {
+						(*call.SdkParam)["LifecycleCommand.CommandId"] = ""
+					}
+					params, ok := d.GetOk("lifecycle_command.0.parameters")
+					if ok {
+						(*call.SdkParam)["LifecycleCommand.Parameters"] = params
+					}
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

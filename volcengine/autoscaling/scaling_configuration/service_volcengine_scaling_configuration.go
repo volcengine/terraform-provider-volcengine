@@ -239,6 +239,9 @@ func (s *VolcengineScalingConfigurationService) ModifyResource(resourceData *sch
 				"hpc_cluster_id": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"ipv6_address_count": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			RequestIdField: "ScalingConfigurationId",
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {

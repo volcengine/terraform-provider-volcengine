@@ -59,6 +59,15 @@ resource "volcengine_subnet" "foo" {
   vpc_id = "${volcengine_vpc.foo.id}"
 }
 
+resource "volcengine_ecs_command" "foo" {
+  name = "acc-test-command"
+  description = "tf"
+  working_dir = "/home"
+  username = "root"
+  timeout = 100
+  command_content = "IyEvYmluL2Jhc2gKCgplY2hvICJvcGVyYXRpb24gc3VjY2VzcyEi"
+}
+
 resource "volcengine_scaling_group" "foo" {
   scaling_group_name = "acc-test-scaling-group-lifecycle"
   subnet_ids = ["${volcengine_subnet.foo.id}"]
@@ -72,10 +81,14 @@ resource "volcengine_scaling_group" "foo" {
 
 resource "volcengine_scaling_lifecycle_hook" "foo" {
     lifecycle_hook_name = "acc-test-lifecycle"
-    lifecycle_hook_policy = "CONTINUE"
+    lifecycle_hook_policy = "ROLLBACK"
     lifecycle_hook_timeout = 300
     lifecycle_hook_type = "SCALE_OUT"
     scaling_group_id = "${volcengine_scaling_group.foo.id}"
+	lifecycle_command {
+    command_id = volcengine_ecs_command.foo.id
+    parameters = "{}"
+  }
 }
 `
 
@@ -143,9 +156,10 @@ func TestAccVolcengineScalingLifecycleHookResource_Update(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "lifecycle_hook_name", "acc-test-lifecycle"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "lifecycle_hook_policy", "CONTINUE"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "lifecycle_hook_policy", "ROLLBACK"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "lifecycle_hook_timeout", "300"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "lifecycle_hook_type", "SCALE_OUT"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "lifecycle_command.#", "1"),
 				),
 			},
 			{

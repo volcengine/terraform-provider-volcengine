@@ -179,21 +179,19 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							MaxItems: 1,
 							Optional: true,
 							Computed: true,
-							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										ForceNew:    true,
+										Computed:    true,
 										Description: "The Type of SystemVolume, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
 									},
 									"size": {
-										Type:         schema.TypeInt,
-										Optional:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.IntBetween(20, 2048),
-										Description:  "The Size of SystemVolume, the value range in 20~2048.",
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Computed:    true,
+										Description: "The Size of SystemVolume, the value range in 20~2048.",
 									},
 								},
 							},
@@ -202,26 +200,23 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"data_volumes": {
 							Type:     schema.TypeList,
 							Optional: true,
-							ForceNew: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										ForceNew:    true,
-										Description: "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`.",
+										Default:     "ESSD_PL0",
+										Description: "The Type of DataVolumes, the value can be `PTSSD` or `ESSD_PL0` or `ESSD_FlexPL`. Default value is `ESSD_PL0`.",
 									},
 									"size": {
-										Type:         schema.TypeInt,
-										Optional:     true,
-										ForceNew:     true,
-										ValidateFunc: validation.IntBetween(20, 32768),
-										Description:  "The Size of DataVolumes, the value range in 20~32768.",
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Default:     20,
+										Description: "The Size of DataVolumes, the value range in 20~32768. Default value is `20`.",
 									},
 									"mount_point": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										ForceNew:    true,
 										Description: "The target mount directory of the disk. Must start with `/`.",
 									},
 								},
@@ -236,7 +231,6 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"additional_container_storage_enabled": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							ForceNew:    true,
 							Description: "The AdditionalContainerStorageEnabled of NodeConfig.",
 						},
 						"image_id": {

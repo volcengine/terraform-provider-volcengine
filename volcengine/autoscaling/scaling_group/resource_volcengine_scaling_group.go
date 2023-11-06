@@ -138,6 +138,41 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Optional:    true,
 				Description: "The version of the launch template bound to the scaling group. Valid values are the version number, Latest, or Default.",
 			},
+			"launch_template_overrides": {
+				Type:        schema.TypeSet,
+				Description: "Specify instance specifications.",
+				Optional:    true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					_, ok := d.GetOk("launch_template_id")
+					return !ok
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance_type": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The instance type.",
+						},
+					},
+				},
+			},
+			"db_instance_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Set:      schema.HashString,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "ID of the RDS database instance.",
+			},
+			"scaling_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "Example recycling mode for the elastic group, with values:\nrelease (default): Release mode.\nrecycle: Shutdown recycling mode.",
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,

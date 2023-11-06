@@ -31,7 +31,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g2i.large"
 }
 
 resource "volcengine_scaling_group" "foo" {
@@ -48,7 +48,7 @@ resource "volcengine_scaling_group" "foo" {
 resource "volcengine_scaling_configuration" "foo" {
     image_id = "${data.volcengine_images.foo.images[0].image_id}"
     instance_name = "acc-test-instance"
-    instance_types = ["ecs.g1.large"]
+    instance_types = ["ecs.g2i.large"]
     password = "93f0cb0614Aab12"
     scaling_configuration_name = "acc-test-scaling-config"
     scaling_group_id = "${volcengine_scaling_group.foo.id}"
@@ -85,7 +85,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g2i.large"
 }
 
 resource "volcengine_scaling_group" "foo" {
@@ -102,7 +102,7 @@ resource "volcengine_scaling_group" "foo" {
 resource "volcengine_scaling_configuration" "foo" {
     image_id = "${data.volcengine_images.foo.images[0].image_id}"
     instance_name = "acc-test-instance-new"
-    instance_types = ["ecs.g1.large"]
+    instance_types = ["ecs.g2i.large"]
     password = "93f0cb0614Aab12"
     scaling_configuration_name = "acc-test-scaling-config-new"
     scaling_group_id = "${volcengine_scaling_group.foo.id}"
@@ -123,6 +123,7 @@ resource "volcengine_scaling_configuration" "foo" {
     	key = "k1"
     	value = "v1"
   	}
+	ipv6_address_count = 0
 }
 `
 
@@ -221,6 +222,7 @@ func TestAccVolcengineScalingConfigurationResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "volumes.1.size", "100"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "volumes.1.delete_with_instance", "true"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "tags.#", "1"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "ipv6_address_count", "0"),
 					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "tags.*", map[string]string{
 						"key":   "k1",
 						"value": "v1",

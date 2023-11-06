@@ -318,18 +318,10 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 							},
 						},
 						"system_volume": {
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"type": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-								"size": {
-									ConvertType: ve.ConvertJsonObject,
-								},
-							},
+							Ignore: true,
 						},
 						"data_volumes": {
-							ConvertType: ve.ConvertJsonObjectArray,
+							Ignore: true,
 						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
@@ -418,6 +410,37 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				// 手动转data_volumes
+				if dataVolumes, ok := d.GetOk("node_config.0.data_volumes"); ok {
+					delete((*call.SdkParam)["NodeConfig"].(map[string]interface{}), "DataVolumes")
+					volumes := make([]interface{}, 0)
+					for index, _ := range dataVolumes.([]interface{}) {
+						volume := make(map[string]interface{})
+						if v, ok := d.GetOkExists(fmt.Sprintf("node_config.0.data_volumes.%d.type", index)); ok {
+							volume["Type"] = v
+						}
+						if v, ok := d.GetOkExists(fmt.Sprintf("node_config.0.data_volumes.%d.size", index)); ok {
+							volume["Size"] = v
+						}
+						if v, ok := d.GetOkExists(fmt.Sprintf("node_config.0.data_volumes.%d.mount_point", index)); ok {
+							volume["MountPoint"] = v
+						}
+						volumes = append(volumes, volume)
+					}
+					(*call.SdkParam)["NodeConfig"].(map[string]interface{})["DataVolumes"] = volumes
+				}
+				// 手动转system_volume
+				if _, ok := d.GetOk("node_config.0.system_volume"); ok {
+					delete((*call.SdkParam)["NodeConfig"].(map[string]interface{}), "SystemVolume")
+					systemVolume := map[string]interface{}{}
+					if v, ok := d.GetOkExists("node_config.0.system_volume.0.type"); ok {
+						systemVolume["Type"] = v
+					}
+					if v, ok := d.GetOkExists("node_config.0.system_volume.0.size"); ok {
+						systemVolume["Size"] = v
+					}
+					(*call.SdkParam)["NodeConfig"].(map[string]interface{})["SystemVolume"] = systemVolume
+				}
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
@@ -479,6 +502,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 									ConvertType: ve.ConvertJsonArray,
 								},
 							},
+						},
+						"additional_container_storage_enabled": {
+							ConvertType: ve.ConvertJsonObject,
 						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
@@ -618,6 +644,46 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 					ve.DefaultMapValue(call.SdkParam, "NodeConfig", map[string]interface{}{
 						"Tags": []interface{}{},
 					})
+				}
+
+				// 手动转数据盘
+				if d.HasChange("node_config.0.data_volumes") {
+					if dataVolumes, ok := d.GetOk("node_config.0.data_volumes"); ok {
+						volumes := make([]interface{}, 0)
+						for index, _ := range dataVolumes.([]interface{}) {
+							volume := make(map[string]interface{})
+							if v, ok := d.GetOkExists(fmt.Sprintf("node_config.0.data_volumes.%d.type", index)); ok {
+								volume["Type"] = v
+							}
+							if v, ok := d.GetOkExists(fmt.Sprintf("node_config.0.data_volumes.%d.size", index)); ok {
+								volume["Size"] = v
+							}
+							if v, ok := d.GetOkExists(fmt.Sprintf("node_config.0.data_volumes.%d.mount_point", index)); ok {
+								if v != nil && len(v.(string)) > 0 {
+									volume["MountPoint"] = v
+								}
+							}
+							volumes = append(volumes, volume)
+						}
+						(*call.SdkParam)["NodeConfig"].(map[string]interface{})["DataVolumes"] = volumes
+					} else {
+						// 用户清空数据盘，传空list
+						(*call.SdkParam)["NodeConfig"].(map[string]interface{})["DataVolumes"] = []interface{}{}
+					}
+				}
+
+				if d.HasChange("node_config.0.system_volume") {
+					// 手动转system_volume
+					if _, ok := d.GetOk("node_config.0.system_volume"); ok {
+						systemVolume := map[string]interface{}{}
+						if v, ok := d.GetOkExists("node_config.0.system_volume.0.type"); ok {
+							systemVolume["Type"] = v
+						}
+						if v, ok := d.GetOkExists("node_config.0.system_volume.0.size"); ok {
+							systemVolume["Size"] = v
+						}
+						(*call.SdkParam)["NodeConfig"].(map[string]interface{})["SystemVolume"] = systemVolume
+					}
 				}
 
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
