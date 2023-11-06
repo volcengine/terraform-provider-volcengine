@@ -92,6 +92,25 @@ func DataSourceVolcengineScalingLifecycleHooks() *schema.Resource {
 							Computed:    true,
 							Description: "The policy of the lifecycle hook.",
 						},
+						"lifecycle_command": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Batch job command.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"command_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Batch job command ID, which indicates the batch job command to be executed after triggering the lifecycle hook and installed in the instance.",
+									},
+									"parameters": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Parameters and parameter values in batch job commands.\nThe number of parameters ranges from 0 to 60.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

@@ -32,6 +32,7 @@ resource "volcengine_scaling_group" "foo" {
   max_instance_number = 1
   instance_terminate_policy = "OldestInstance"
   default_cooldown = 10
+  scaling_mode = "recycle"
 }
 `
 
@@ -60,7 +61,7 @@ resource "volcengine_scaling_group" "foo" {
   max_instance_number = 10
   instance_terminate_policy = "OldestInstance"
   default_cooldown = 30
-
+  scaling_mode = "recycle"
   tags {
     key = "k2"
     value = "v2"
@@ -99,6 +100,7 @@ func TestAccVolcengineScalingGroupResource_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "min_instance_number", "0"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "desire_instance_number", "0"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "default_cooldown", "10"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "scaling_mode", "recycle"),
 				),
 			},
 			{
@@ -136,6 +138,7 @@ func TestAccVolcengineScalingGroupResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "min_instance_number", "0"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "desire_instance_number", "0"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "default_cooldown", "10"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "scaling_mode", "recycle"),
 				),
 			},
 			{
@@ -157,6 +160,7 @@ func TestAccVolcengineScalingGroupResource_Update(t *testing.T) {
 						"key":   "k2",
 						"value": "v2",
 					}),
+					resource.TestCheckResourceAttr(acc.ResourceId, "scaling_mode", "recycle"),
 				),
 			},
 			{

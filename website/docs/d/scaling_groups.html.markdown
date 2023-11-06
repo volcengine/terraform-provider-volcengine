@@ -56,6 +56,7 @@ The following arguments are supported:
 * `ids` - (Optional) A list of scaling group ids.
 * `name_regex` - (Optional) A Name Regex of scaling group.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the scaling group.
 * `scaling_group_names` - (Optional) A list of scaling group names.
 
 ## Attributes Reference
@@ -66,22 +67,29 @@ In addition to all arguments above, the following attributes are exported:
     * `db_instance_ids` - The list of db instance ids.
     * `default_cooldown` - The default cooldown interval of the scaling group.
     * `desire_instance_number` - The desire instance number of the scaling group.
+    * `health_check_type` - The health check type of the scaling group.
     * `id` - The id of the scaling group.
     * `instance_terminate_policy` - The instance terminate policy of the scaling group.
     * `launch_template_id` - The ID of the launch template bound to the scaling group.
+    * `launch_template_overrides` - Instance start template information.
+        * `instance_type` - The instance type.
+        * `weighted_capacity` - Weight of instance specifications.
     * `launch_template_version` - The version of the launch template bound to the scaling group.
     * `lifecycle_state` - The lifecycle state of the scaling group.
+    * `load_balancer_health_check_grace_period` - Grace period for health check of CLB instance in elastic group.
     * `max_instance_number` - The max instance number of the scaling group.
     * `min_instance_number` - The min instance number of the scaling group.
     * `multi_az_policy` - The multi az policy of the scaling group. Valid values: PRIORITY, BALANCE.
     * `project_name` - The ProjectName of scaling group.
     * `scaling_group_id` - The id of the scaling group.
     * `scaling_group_name` - The name of the scaling group.
+    * `scaling_mode` - The scaling mode of the scaling group.
     * `server_group_attributes` - The list of server group attributes.
         * `load_balancer_id` - The load balancer id.
         * `port` - The port receiving request of the server group.
         * `server_group_id` - The server group id.
         * `weight` - The weight of the instance.
+    * `stopped_instance_count` - The number of stopped instances.
     * `subnet_ids` - The list of the subnet id to which the ENI is connected.
     * `tags` - Tags.
         * `key` - The Key of Tags.

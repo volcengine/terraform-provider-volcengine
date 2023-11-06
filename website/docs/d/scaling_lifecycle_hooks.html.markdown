@@ -62,6 +62,10 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `lifecycle_hooks` - The collection of lifecycle hook query.
     * `id` - The id of the lifecycle hook.
+    * `lifecycle_command` - Batch job command.
+        * `command_id` - Batch job command ID, which indicates the batch job command to be executed after triggering the lifecycle hook and installed in the instance.
+        * `parameters` - Parameters and parameter values in batch job commands.
+The number of parameters ranges from 0 to 60.
     * `lifecycle_hook_id` - The id of the lifecycle hook.
     * `lifecycle_hook_name` - The name of the lifecycle hook.
     * `lifecycle_hook_policy` - The policy of the lifecycle hook.

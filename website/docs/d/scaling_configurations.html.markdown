@@ -89,6 +89,9 @@ In addition to all arguments above, the following attributes are exported:
     * `instance_description` - The ECS instance description which the scaling configuration set.
     * `instance_name` - The ECS instance name which the scaling configuration set.
     * `instance_types` - The list of the ECS instance type which the scaling configuration set.
+    * `ipv6_address_count` - Assign IPv6 address to instance network card. Possible values:
+0: Do not assign IPv6 address.
+1: Assign IPv6 address and the system will automatically assign an IPv6 subnet for you.
     * `key_pair_name` - The ECS key pair name which the scaling configuration set.
     * `lifecycle_state` - The lifecycle state of the scaling configuration.
     * `project_name` - The project to which the instance created by the scaling configuration belongs.

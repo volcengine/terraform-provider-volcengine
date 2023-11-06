@@ -105,6 +105,9 @@ The following arguments are supported:
 * `host_name` - (Optional) The ECS hostname which the scaling configuration set.
 * `hpc_cluster_id` - (Optional) The ID of the HPC cluster to which the instance belongs. Valid only when InstanceTypes.N specifies High Performance Computing GPU Type.
 * `instance_description` - (Optional) The ECS instance description which the scaling configuration set.
+* `ipv6_address_count` - (Optional) Assign IPv6 address to instance network card. Possible values:
+0: Do not assign IPv6 address.
+1: Assign IPv6 address and the system will automatically assign an IPv6 subnet for you.
 * `key_pair_name` - (Optional) The ECS key pair name which the scaling configuration set.
 * `password` - (Optional) The ECS password which the scaling configuration set.
 * `project_name` - (Optional) The project to which the instance created by the scaling configuration belongs.

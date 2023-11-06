@@ -197,6 +197,11 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 					"SpotAsPriceGo",
 				}, false),
 			},
+			"ipv6_address_count": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Assign IPv6 address to instance network card. Possible values:\n0: Do not assign IPv6 address.\n1: Assign IPv6 address and the system will automatically assign an IPv6 subnet for you.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineScalingConfigurations().Schema["scaling_configurations"].Elem.(*schema.Resource).Schema
