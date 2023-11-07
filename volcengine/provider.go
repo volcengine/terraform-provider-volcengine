@@ -1,6 +1,8 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_access"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_file_system"
@@ -479,6 +481,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_direct_connect_virtual_interfaces": direct_connect_virtual_interface.DataSourceVolcengineDirectConnectVirtualInterfaces(),
 			"volcengine_direct_connect_bgp_peers":          direct_connect_bgp_peer.DataSourceVolcengineDirectConnectBgpPeers(),
 			"volcengine_direct_connect_gateway_routes":     direct_connect_gateway_route.DataSourceVolcengineDirectConnectGatewayRoutes(),
+
+			// ================ ALB ================
+			"volcengine_alb_zones": alb_zone.DataSourceVolcengineAlbZones(),
+			"volcengine_alb_acls":  alb_acl.DataSourceVolcengineAlbAcls(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -697,6 +703,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_direct_connect_virtual_interface": direct_connect_virtual_interface.ResourceVolcengineDirectConnectVirtualInterface(),
 			"volcengine_direct_connect_bgp_peer":          direct_connect_bgp_peer.ResourceVolcengineDirectConnectBgpPeer(),
 			"volcengine_direct_connect_gateway_route":     direct_connect_gateway_route.ResourceVolcengineDirectConnectGatewayRoute(),
+
+			// ================ ALB ================
+			"volcengine_alb_acl": alb_acl.ResourceVolcengineAlbAcl(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
