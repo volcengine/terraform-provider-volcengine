@@ -212,6 +212,10 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_mount_point"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_permission_group"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/customized_cfg"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/health_check_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/listener"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -483,8 +487,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_direct_connect_gateway_routes":     direct_connect_gateway_route.DataSourceVolcengineDirectConnectGatewayRoutes(),
 
 			// ================ ALB ================
-			"volcengine_alb_zones": alb_zone.DataSourceVolcengineAlbZones(),
-			"volcengine_alb_acls":  alb_acl.DataSourceVolcengineAlbAcls(),
+			"volcengine_alb_zones":                  alb_zone.DataSourceVolcengineAlbZones(),
+			"volcengine_alb_acls":                   alb_acl.DataSourceVolcengineAlbAcls(),
+			"volcengine_alb_listeners":              alb_listener.DataSourceVolcengineListeners(),
+			"volcengine_alb_customized_cfgs":        alb_customized_cfg.DataSourceVolcengineAlbCustomizedCfgs(),
+			"volcengine_alb_health_check_templates": alb_health_check_template.DataSourceVolcengineAlbHealthCheckTemplates(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -705,7 +712,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_direct_connect_gateway_route":     direct_connect_gateway_route.ResourceVolcengineDirectConnectGatewayRoute(),
 
 			// ================ ALB ================
-			"volcengine_alb_acl": alb_acl.ResourceVolcengineAlbAcl(),
+			"volcengine_alb_acl":                   alb_acl.ResourceVolcengineAlbAcl(),
+			"volcengine_alb_listener":              alb_listener.ResourceVolcengineAlbListener(),
+			"volcengine_alb_customized_cfg":        alb_customized_cfg.ResourceVolcengineAlbCustomizedCfg(),
+			"volcengine_alb_health_check_template": alb_health_check_template.ResourceVolcengineAlbHealthCheckTemplate(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

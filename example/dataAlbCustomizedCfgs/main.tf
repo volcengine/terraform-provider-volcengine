@@ -1,0 +1,1 @@
+data "volcengine_alb_customized_cfgs" "foo" {}
