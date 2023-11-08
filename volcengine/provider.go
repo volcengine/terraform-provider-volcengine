@@ -213,9 +213,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_mount_point"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_permission_group"
 
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/customized_cfg"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/health_check_template"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/listener"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_customized_cfg"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_health_check_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener_domain_extension"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -712,10 +713,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_direct_connect_gateway_route":     direct_connect_gateway_route.ResourceVolcengineDirectConnectGatewayRoute(),
 
 			// ================ ALB ================
-			"volcengine_alb_acl":                   alb_acl.ResourceVolcengineAlbAcl(),
-			"volcengine_alb_listener":              alb_listener.ResourceVolcengineAlbListener(),
-			"volcengine_alb_customized_cfg":        alb_customized_cfg.ResourceVolcengineAlbCustomizedCfg(),
-			"volcengine_alb_health_check_template": alb_health_check_template.ResourceVolcengineAlbHealthCheckTemplate(),
+			"volcengine_alb_acl":                       alb_acl.ResourceVolcengineAlbAcl(),
+			"volcengine_alb_listener":                  alb_listener.ResourceVolcengineAlbListener(),
+			"volcengine_alb_customized_cfg":            alb_customized_cfg.ResourceVolcengineAlbCustomizedCfg(),
+			"volcengine_alb_health_check_template":     alb_health_check_template.ResourceVolcengineAlbHealthCheckTemplate(),
+			"volcengine_alb_listener_domain_extension": alb_listener_domain_extension.ResourceVolcengineAlbListenerDomainExtension(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

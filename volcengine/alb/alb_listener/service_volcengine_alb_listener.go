@@ -137,9 +137,6 @@ func (s *VolcengineAlbListenerService) CreateResource(resourceData *schema.Resou
 				"acl_ids": {
 					ConvertType: ve.ConvertWithN,
 				},
-				"domain_extensions": {
-					ConvertType: ve.ConvertListN,
-				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -155,6 +152,9 @@ func (s *VolcengineAlbListenerService) CreateResource(resourceData *schema.Resou
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Active", "Disabled"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("load_balancer_id").(string)
 			},
 		},
 	}
@@ -182,6 +182,9 @@ func (s *VolcengineAlbListenerService) CreateResource(resourceData *schema.Resou
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"Active", "Disabled"},
 					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("load_balancer_id").(string)
 				},
 			},
 		}
@@ -218,9 +221,6 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				"acl_ids": {
 					ConvertType: ve.ConvertWithN,
 				},
-				"domain_extensions": {
-					ConvertType: ve.ConvertListN,
-				},
 				"server_group_id": {
 					ConvertType: ve.ConvertDefault,
 				},
@@ -232,6 +232,7 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				},
 				"customized_cfg_id": {
 					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
 				},
 				"acl_status": {
 					ConvertType: ve.ConvertDefault,
@@ -257,6 +258,9 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				Target:  []string{"Active", "Disabled"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("load_balancer_id").(string)
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -264,39 +268,20 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 
 func (s *VolcengineAlbListenerService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
-	enabled := resourceData.Get("enabled")
-	if enabled.(string) == "on" {
-		offCallback := ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "ModifyListenerAttributes",
-				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam: &map[string]interface{}{
-					"Enabled": "off",
-				},
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					(*call.SdkParam)["ListenerId"] = d.Id()
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-					logger.Debug(logger.RespFormat, call.Action, resp, err)
-					return resp, err
-				},
-				Refresh: &ve.StateRefresh{
-					Target:  []string{"Disabled"},
-					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
-				},
-			},
-		}
-		callbacks = append(callbacks, offCallback)
-	}
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteListener",
 			ConvertMode: ve.RequestConvertIgnore,
 			SdkParam: &map[string]interface{}{
 				"ListenerId": resourceData.Id(),
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				enabled := resourceData.Get("enabled")
+				if enabled.(string) == "on" {
+					return false, fmt.Errorf("The listener can only be deleted when it is stopped. " +
+						"Please modify the enable field to off before performing the deletion operation. ")
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)

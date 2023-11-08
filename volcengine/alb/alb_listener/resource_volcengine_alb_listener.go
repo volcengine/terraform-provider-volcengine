@@ -2,10 +2,10 @@ package alb_listener
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -141,33 +141,12 @@ func ResourceVolcengineAlbListener() *schema.Resource {
 			"customized_cfg_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "Personalized configuration ID, with a value of \" \" when not bound.",
 			},
 			"listener_id": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The ID of the Listener.",
-			},
-			"domain_extensions": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Computed:    true,
-				Description: "List of extended domain names that need to be associated, only HTTPS listeners are valid.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"domain": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "Domain name,the maximum number of extended domain names that can be associated with an HTTPS listener is 20, ranging from 1 to 20.",
-						},
-						"certificate_id": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The server certificate Id that domain used.",
-						},
-					},
-				},
 			},
 		},
 	}

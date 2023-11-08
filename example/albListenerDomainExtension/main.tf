@@ -1,16 +1,9 @@
-resource "volcengine_alb_customized_cfg" "foo" {
-  customized_cfg_name = "acc-test-cfg1"
-  description = "This is a test modify"
-  customized_cfg_content = "proxy_connect_timeout 4s;proxy_request_buffering on;"
-  project_name = "default"
-}
-
 resource "volcengine_alb_listener" "foo" {
   load_balancer_id="alb-1iidd17v3klj474adhfrunyz9"
   listener_name="acc-test-listener-1"
   protocol="HTTPS"
   port=6666
-  enabled="off"
+  enabled="on"
   certificate_id = "cert-1iidd2pahdyio74adhfr9ajwg"
   ca_certificate_id = "cert-1iidd2r9ii0hs74adhfeodxo1"
   server_group_id="rsp-1g72w74y4umf42zbhq4k4hnln"
@@ -20,5 +13,10 @@ resource "volcengine_alb_listener" "foo" {
   acl_type="white"
   acl_ids=["acl-1g72w6z11ighs2zbhq4v3rvh4"]
   description="acc test listener"
-  customized_cfg_id = volcengine_alb_customized_cfg.foo.id
+}
+
+resource "volcengine_alb_listener_domain_extension" "foo" {
+  listener_id = volcengine_alb_listener.foo.id
+  domain = "test-modify.com"
+  certificate_id = "cert-1iidd2pahdyio74adhfr9ajwg"
 }
