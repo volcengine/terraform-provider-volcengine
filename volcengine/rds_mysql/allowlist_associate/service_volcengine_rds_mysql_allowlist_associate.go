@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
 )
 
 type VolcengineRdsMysqlAllowListAssociateService struct {
@@ -108,6 +109,13 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) CreateResource(data *schem
 				d.SetId(fmt.Sprint(instanceId, ":", allowListId))
 				return nil
 			},
+			ExtraRefresh: map[volc.ResourceService]*volc.StateRefresh{
+				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    data.Timeout(schema.TimeoutCreate),
+					ResourceId: instanceId,
+				},
+			},
 		},
 	}
 	return []volc.Callback{callback}
@@ -137,6 +145,13 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) RemoveResource(data *schem
 				// 规避 解绑后删除实例OperationDenied: 无法执行该操作。
 				time.Sleep(5 * time.Second)
 				return err
+			},
+			ExtraRefresh: map[volc.ResourceService]*volc.StateRefresh{
+				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    data.Timeout(schema.TimeoutDelete),
+					ResourceId: instanceId,
+				},
 			},
 		},
 	}
