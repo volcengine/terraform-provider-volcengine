@@ -107,6 +107,8 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) CreateResource(data *schem
 			},
 			AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
 				d.SetId(fmt.Sprint(instanceId, ":", allowListId))
+				// 规避 创建成功查询不到
+				time.Sleep(5 * time.Second)
 				return nil
 			},
 			ExtraRefresh: map[volc.ResourceService]*volc.StateRefresh{
