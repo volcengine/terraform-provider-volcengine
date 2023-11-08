@@ -488,11 +488,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_direct_connect_gateway_routes":     direct_connect_gateway_route.DataSourceVolcengineDirectConnectGatewayRoutes(),
 
 			// ================ ALB ================
-			"volcengine_alb_zones":                  alb_zone.DataSourceVolcengineAlbZones(),
-			"volcengine_alb_acls":                   alb_acl.DataSourceVolcengineAlbAcls(),
-			"volcengine_alb_listeners":              alb_listener.DataSourceVolcengineListeners(),
-			"volcengine_alb_customized_cfgs":        alb_customized_cfg.DataSourceVolcengineAlbCustomizedCfgs(),
-			"volcengine_alb_health_check_templates": alb_health_check_template.DataSourceVolcengineAlbHealthCheckTemplates(),
+			"volcengine_alb_zones":                      alb_zone.DataSourceVolcengineAlbZones(),
+			"volcengine_alb_acls":                       alb_acl.DataSourceVolcengineAlbAcls(),
+			"volcengine_alb_listeners":                  alb_listener.DataSourceVolcengineListeners(),
+			"volcengine_alb_customized_cfgs":            alb_customized_cfg.DataSourceVolcengineAlbCustomizedCfgs(),
+			"volcengine_alb_health_check_templates":     alb_health_check_template.DataSourceVolcengineAlbHealthCheckTemplates(),
+			"volcengine_alb_listener_domain_extensions": alb_listener_domain_extension.DataSourceVolcengineListenerDomainExtensions(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),

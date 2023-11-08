@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener"
 	"strings"
 	"time"
 
@@ -31,9 +32,10 @@ func (s *VolcengineAlbListenerDomainExtensionService) GetClient() *ve.SdkClient 
 
 func (s *VolcengineAlbListenerDomainExtensionService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		resp      *map[string]interface{}
+		results   interface{}
+		ok        bool
+		listeners []interface{}
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeListeners"
@@ -60,8 +62,18 @@ func (s *VolcengineAlbListenerDomainExtensionService) ReadResources(m map[string
 		if results == nil {
 			results = []interface{}{}
 		}
-		if data, ok = results.([]interface{}); !ok {
+		if listeners, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Listeners is not Slice")
+		}
+		if len(listeners) != 1 {
+			return data, nil
+		}
+		listenerMap := listeners[0].(map[string]interface{})
+		if results, ok = listenerMap["DomainExtensions"]; !ok {
+			results = []interface{}{}
+		}
+		if data, ok = results.([]interface{}); !ok {
+			return data, errors.New("DomainExtensions is not slice")
 		}
 		return data, err
 	})
@@ -87,14 +99,8 @@ func (s *VolcengineAlbListenerDomainExtensionService) ReadResource(resourceData 
 	for _, v := range results {
 		if temp, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
-		} else {
-			extensions := temp["DomainExtensions"]
-			for _, ext := range extensions.([]interface{}) {
-				extMap := ext.(map[string]interface{})
-				if extMap["DomainExtensionId"].(string) == ids[1] {
-					data = extMap
-				}
-			}
+		} else if temp["DomainExtensionId"].(string) == ids[1] {
+			data = temp
 		}
 	}
 	if len(data) == 0 {
@@ -139,6 +145,13 @@ func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceDat
 				d.SetId(id)
 				return nil
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb_listener.NewAlbListenerService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("listener_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -155,14 +168,8 @@ func (s *VolcengineAlbListenerDomainExtensionService) GetDomainExtensionId(liste
 	for _, r := range results {
 		if temp, ok := r.(map[string]interface{}); !ok {
 			return "", errors.New("Value is not map ")
-		} else {
-			extensions := temp["DomainExtensions"]
-			for _, ext := range extensions.([]interface{}) {
-				extMap := ext.(map[string]interface{})
-				if extMap["Domain"].(string) == domain && extMap["CertificateId"].(string) == certId {
-					return extMap["DomainExtensionId"].(string), nil
-				}
-			}
+		} else if temp["Domain"].(string) == domain && temp["CertificateId"].(string) == certId {
+			return temp["DomainExtensionId"].(string), nil
 		}
 	}
 	return extensionId, errors.New("DomainExtension not exist")
@@ -198,6 +205,13 @@ func (s *VolcengineAlbListenerDomainExtensionService) ModifyResource(resourceDat
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb_listener.NewAlbListenerService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("listener_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -224,13 +238,34 @@ func (s *VolcengineAlbListenerDomainExtensionService) RemoveResource(resourceDat
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb_listener.NewAlbListenerService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("listener_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
 }
 
 func (s *VolcengineAlbListenerDomainExtensionService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{}
+	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"listener_id": {
+				TargetField: "ListenerIds.1",
+			},
+		},
+		IdField:      "DomainExtensionId",
+		CollectField: "domain_extensions",
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"DomainExtensionId": {
+				TargetField: "id",
+				KeepDefault: true,
+			},
+		},
+	}
 }
 
 func (s *VolcengineAlbListenerDomainExtensionService) ReadResourceId(id string) string {

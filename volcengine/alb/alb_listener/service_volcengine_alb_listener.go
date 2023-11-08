@@ -220,6 +220,7 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				},
 				"acl_ids": {
 					ConvertType: ve.ConvertWithN,
+					ForceGet:    true,
 				},
 				"server_group_id": {
 					ConvertType: ve.ConvertDefault,
@@ -236,9 +237,11 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				},
 				"acl_status": {
 					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
 				},
 				"acl_type": {
 					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
 				},
 				"description": {
 					ConvertType: ve.ConvertDefault,
@@ -251,7 +254,7 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				logger.Debug(logger.RespFormat, call.Action, resp)
 				return resp, err
 			},
 			Refresh: &ve.StateRefresh{
