@@ -128,6 +128,9 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 				d.SetId(fmt.Sprintf("%s:%s", (*call.SdkParam)["ServerGroupId"], id.(string)))
 				return nil
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("server_group_id").(string)
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -152,6 +155,9 @@ func (s *VolcengineServerGroupServerService) ModifyResource(resourceData *schema
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("server_group_id").(string)
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -173,23 +179,8 @@ func (s *VolcengineServerGroupServerService) RemoveResource(resourceData *schema
 				//删除 Server Group
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
-			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
-				//出现错误后重试
-				return resource.Retry(15*time.Minute, func() *resource.RetryError {
-					_, callErr := s.ReadResource(d, "")
-					if callErr != nil {
-						if ve.ResourceNotFoundError(callErr) {
-							return nil
-						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on reading server group server on delete %q, %w", d.Id(), callErr))
-						}
-					}
-					_, callErr = call.ExecuteCall(d, client, call)
-					if callErr == nil {
-						return nil
-					}
-					return resource.RetryableError(callErr)
-				})
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("server_group_id").(string)
 			},
 		},
 	}
