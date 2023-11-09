@@ -107,8 +107,6 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) CreateResource(data *schem
 			},
 			AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
 				d.SetId(fmt.Sprint(instanceId, ":", allowListId))
-				// 规避 创建成功查询不到
-				time.Sleep(5 * time.Second)
 				return nil
 			},
 			LockId: func(d *schema.ResourceData) string {
@@ -147,8 +145,6 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) RemoveResource(data *schem
 			},
 			AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
 				err := volc.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
-				// 规避 解绑后删除实例OperationDenied: 无法执行该操作。
-				time.Sleep(5 * time.Second)
 				return err
 			},
 			LockId: func(d *schema.ResourceData) string {
