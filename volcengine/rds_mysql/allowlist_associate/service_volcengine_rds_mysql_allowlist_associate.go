@@ -111,6 +111,9 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) CreateResource(data *schem
 				time.Sleep(5 * time.Second)
 				return nil
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return instanceId
+			},
 			ExtraRefresh: map[volc.ResourceService]*volc.StateRefresh{
 				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
 					Target:     []string{"Running"},
@@ -147,6 +150,9 @@ func (s *VolcengineRdsMysqlAllowListAssociateService) RemoveResource(data *schem
 				// 规避 解绑后删除实例OperationDenied: 无法执行该操作。
 				time.Sleep(5 * time.Second)
 				return err
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return instanceId
 			},
 			ExtraRefresh: map[volc.ResourceService]*volc.StateRefresh{
 				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
