@@ -2,6 +2,7 @@ package volcengine
 
 import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_access"
@@ -494,6 +495,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_customized_cfgs":            alb_customized_cfg.DataSourceVolcengineAlbCustomizedCfgs(),
 			"volcengine_alb_health_check_templates":     alb_health_check_template.DataSourceVolcengineAlbHealthCheckTemplates(),
 			"volcengine_alb_listener_domain_extensions": alb_listener_domain_extension.DataSourceVolcengineListenerDomainExtensions(),
+			"volcengine_alb_server_group_servers":       alb_server_group_server.DataSourceVolcengineAlbServerGroupServers(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -719,6 +721,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_customized_cfg":            alb_customized_cfg.ResourceVolcengineAlbCustomizedCfg(),
 			"volcengine_alb_health_check_template":     alb_health_check_template.ResourceVolcengineAlbHealthCheckTemplate(),
 			"volcengine_alb_listener_domain_extension": alb_listener_domain_extension.ResourceVolcengineAlbListenerDomainExtension(),
+			"volcengine_alb_server_group_server":       alb_server_group_server.ResourceVolcengineAlbServerGroupServer(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
