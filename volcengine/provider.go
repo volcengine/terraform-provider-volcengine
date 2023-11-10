@@ -219,6 +219,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_health_check_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener_domain_extension"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_rule"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -498,6 +499,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_listener_domain_extensions": alb_listener_domain_extension.DataSourceVolcengineListenerDomainExtensions(),
 			"volcengine_alb_server_group_servers":       alb_server_group_server.DataSourceVolcengineAlbServerGroupServers(),
 			"volcengine_alb_certificates":               alb_certificate.DataSourceVolcengineAlbCertificates(),
+			"volcengine_alb_rules":                      alb_rule.DataSourceVolcengineAlbRules(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -725,6 +727,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_listener_domain_extension": alb_listener_domain_extension.ResourceVolcengineAlbListenerDomainExtension(),
 			"volcengine_alb_server_group_server":       alb_server_group_server.ResourceVolcengineAlbServerGroupServer(),
 			"volcengine_alb_certificate":               alb_certificate.ResourceVolcengineAlbCertificate(),
+			"volcengine_alb_rule":                      alb_rule.ResourceVolcengineAlbRule(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

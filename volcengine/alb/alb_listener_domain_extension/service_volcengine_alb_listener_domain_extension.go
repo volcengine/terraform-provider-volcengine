@@ -238,6 +238,9 @@ func (s *VolcengineAlbListenerDomainExtensionService) RemoveResource(resourceDat
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("listener_id").(string)
+			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				alb_listener.NewAlbListenerService(s.Client): {
 					Target:     []string{"Active"},
