@@ -60,15 +60,6 @@ func ResourceVolcengineMongoDBAllowList() *schema.Resource {
 				DiffSuppressFunc: mongoDBAllowListImportDiffSuppress,
 				Description:      "IP address or IP address segment in CIDR format.",
 			},
-			"modify_mode": {
-				Type:     schema.TypeString,
-				Optional: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Id() == ""
-				},
-				ValidateFunc: validation.StringInSlice([]string{"Cover"}, false),
-				Description:  "The modify mode. Only support Cover mode.",
-			},
 		},
 	}
 	return resource
