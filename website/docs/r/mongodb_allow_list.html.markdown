@@ -23,7 +23,6 @@ The following arguments are supported:
 * `allow_list` - (Required) IP address or IP address segment in CIDR format.
 * `allow_list_desc` - (Optional) The description of allow list.
 * `allow_list_type` - (Optional) The IP address type of allow list, valid value contains `IPv4`.
-* `modify_mode` - (Optional) The modify mode. Only support Cover mode.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
