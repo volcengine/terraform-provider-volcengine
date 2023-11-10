@@ -27,6 +27,7 @@ func init() {
 		"prometheus-agent",
 		"scheduler-plugin",
 		"mgpu",
+		"load-balancer-controller",
 	}
 }
 
