@@ -163,6 +163,9 @@ func (s *VolcengineCertificateService) ModifyResource(resourceData *schema.Resou
 				"description": {
 					ForceGet: true,
 				},
+				"certificate_name": {
+					ForceGet: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["CertificateId"] = d.Id()

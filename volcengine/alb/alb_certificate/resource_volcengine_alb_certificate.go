@@ -31,7 +31,6 @@ func ResourceVolcengineAlbCertificate() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Description: "The name of the Certificate.",
 			},
 			"public_key": {
