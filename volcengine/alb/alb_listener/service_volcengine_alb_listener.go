@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -156,6 +157,13 @@ func (s *VolcengineAlbListenerService) CreateResource(resourceData *schema.Resou
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("load_balancer_id").(string)
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb.NewAlbService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("load_balancer_id").(string),
+				},
+			},
 		},
 	}
 	callbacks = append(callbacks, callback)
@@ -185,6 +193,13 @@ func (s *VolcengineAlbListenerService) CreateResource(resourceData *schema.Resou
 				},
 				LockId: func(d *schema.ResourceData) string {
 					return d.Get("load_balancer_id").(string)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					alb.NewAlbService(s.Client): {
+						Target:     []string{"Active"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: resourceData.Get("load_balancer_id").(string),
+					},
 				},
 			},
 		}
@@ -264,6 +279,13 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("load_balancer_id").(string)
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb.NewAlbService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("load_balancer_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -292,6 +314,13 @@ func (s *VolcengineAlbListenerService) RemoveResource(resourceData *schema.Resou
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb.NewAlbService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("load_balancer_id").(string),
+				},
 			},
 		},
 	}
