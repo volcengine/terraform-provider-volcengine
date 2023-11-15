@@ -1,8 +1,10 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_certificate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
@@ -502,6 +504,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_certificates":               alb_certificate.DataSourceVolcengineAlbCertificates(),
 			"volcengine_alb_rules":                      alb_rule.DataSourceVolcengineAlbRules(),
 			"volcengine_alb_ca_certificates":            alb_ca_certificate.DataSourceVolcengineAlbCaCertificates(),
+			"volcengine_albs":                           alb.DataSourceVolcengineAlbs(),
+			"volcengine_alb_server_groups":              alb_server_group.DataSourceVolcengineAlbServerGroups(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -731,6 +735,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_certificate":               alb_certificate.ResourceVolcengineAlbCertificate(),
 			"volcengine_alb_rule":                      alb_rule.ResourceVolcengineAlbRule(),
 			"volcengine_alb_ca_certificate":            alb_ca_certificate.ResourceVolcengineAlbCaCertificate(),
+			"volcengine_alb":                           alb.ResourceVolcengineAlb(),
+			"volcengine_alb_server_group":              alb_server_group.ResourceVolcengineAlbServerGroup(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

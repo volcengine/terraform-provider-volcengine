@@ -293,24 +293,6 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 						"isp": {
 							TargetField: "ISP",
 						},
-						"eip_billing_type": {
-							TargetField: "EipBillingType",
-							Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-								if i == nil {
-									return nil
-								}
-								billingType := i.(string)
-								switch billingType {
-								case "PrePaid":
-									return 1
-								case "PostPaidByBandwidth":
-									return 2
-								case "PostPaidByTraffic":
-									return 3
-								}
-								return i
-							},
-						},
 					},
 				},
 				"tags": {
