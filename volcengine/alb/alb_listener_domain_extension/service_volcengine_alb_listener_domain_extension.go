@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener"
 	"strings"
 	"time"
 
@@ -12,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener"
 )
 
 type VolcengineAlbListenerDomainExtensionService struct {
@@ -114,12 +115,15 @@ func (s *VolcengineAlbListenerDomainExtensionService) RefreshResourceState(resou
 }
 
 func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	listenerId := resourceData.Get("listener_id").(string)
+	listener, _ := alb_listener.NewAlbListenerService(s.Client).ReadResource(resourceData, listenerId)
+	loadBalancerId := listener["LoadBalancerId"].(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyListenerAttributes",
 			ConvertMode: ve.RequestConvertIgnore,
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("listener_id").(string)
+				return loadBalancerId
 			},
 			Convert: map[string]ve.RequestConvert{},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -127,6 +131,9 @@ func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceDat
 				(*call.SdkParam)["DomainExtensions.1.Domain"] = d.Get("domain")
 				(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
 				(*call.SdkParam)["DomainExtensions.1.Action"] = "create"
+				if listener["Protocol"] == "HTTP" {
+					return false, fmt.Errorf("Domain extensions only HTTPS protocol listener. ")
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -146,10 +153,10 @@ func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceDat
 				return nil
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				alb_listener.NewAlbListenerService(s.Client): {
+				alb.NewAlbService(s.Client): {
 					Target:     []string{"Active"},
 					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-					ResourceId: resourceData.Get("listener_id").(string),
+					ResourceId: loadBalancerId,
 				},
 			},
 		},
@@ -183,12 +190,15 @@ func (VolcengineAlbListenerDomainExtensionService) WithResourceResponseHandlers(
 }
 
 func (s *VolcengineAlbListenerDomainExtensionService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	listenerId := resourceData.Get("listener_id").(string)
+	listener, _ := alb_listener.NewAlbListenerService(s.Client).ReadResource(resourceData, listenerId)
+	loadBalancerId := listener["LoadBalancerId"].(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyListenerAttributes",
 			ConvertMode: ve.RequestConvertIgnore,
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("listener_id").(string)
+				return loadBalancerId
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				ids := strings.Split(d.Id(), ":")
@@ -197,6 +207,9 @@ func (s *VolcengineAlbListenerDomainExtensionService) ModifyResource(resourceDat
 				(*call.SdkParam)["DomainExtensions.1.Domain"] = d.Get("domain")
 				(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
 				(*call.SdkParam)["DomainExtensions.1.Action"] = "modify"
+				if listener["Protocol"] == "HTTP" {
+					return false, fmt.Errorf("Domain extensions only HTTPS protocol listener. ")
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -206,10 +219,10 @@ func (s *VolcengineAlbListenerDomainExtensionService) ModifyResource(resourceDat
 				return resp, err
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				alb_listener.NewAlbListenerService(s.Client): {
+				alb.NewAlbService(s.Client): {
 					Target:     []string{"Active"},
 					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-					ResourceId: resourceData.Get("listener_id").(string),
+					ResourceId: loadBalancerId,
 				},
 			},
 		},
@@ -218,6 +231,9 @@ func (s *VolcengineAlbListenerDomainExtensionService) ModifyResource(resourceDat
 }
 
 func (s *VolcengineAlbListenerDomainExtensionService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	listenerId := resourceData.Get("listener_id").(string)
+	listener, _ := alb_listener.NewAlbListenerService(s.Client).ReadResource(resourceData, listenerId)
+	loadBalancerId := listener["LoadBalancerId"].(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyListenerAttributes",
@@ -229,6 +245,9 @@ func (s *VolcengineAlbListenerDomainExtensionService) RemoveResource(resourceDat
 				(*call.SdkParam)["DomainExtensions.1.Domain"] = d.Get("domain")
 				(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
 				(*call.SdkParam)["DomainExtensions.1.Action"] = "delete"
+				if listener["Protocol"] == "HTTP" {
+					return false, fmt.Errorf("Domain extensions only HTTPS protocol listener. ")
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -239,13 +258,13 @@ func (s *VolcengineAlbListenerDomainExtensionService) RemoveResource(resourceDat
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("listener_id").(string)
+				return loadBalancerId
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				alb_listener.NewAlbListenerService(s.Client): {
+				alb.NewAlbService(s.Client): {
 					Target:     []string{"Active"},
 					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-					ResourceId: resourceData.Get("listener_id").(string),
+					ResourceId: loadBalancerId,
 				},
 			},
 		},

@@ -38,12 +38,12 @@ func ResourceVolcengineAlbListenerDomainExtension() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The listener id.",
+				Description: "The listener id. Only HTTPS listener is effective.",
 			},
 			"domain": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The domain name.",
+				Description: "The domain name. The maximum number of associated domain names for an HTTPS listener is 20, with a value range of 1 to 20.",
 			},
 			"certificate_id": {
 				Type:        schema.TypeString,
