@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener"
 )
 
 type VolcengineAlbRuleService struct {
@@ -96,6 +98,9 @@ func (s *VolcengineAlbRuleService) RefreshResourceState(resourceData *schema.Res
 }
 
 func (s *VolcengineAlbRuleService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	listenerId := resourceData.Get("listener_id").(string)
+	listener, _ := alb_listener.NewAlbListenerService(s.Client).ReadResource(resourceData, listenerId)
+	loadBalancerId := listener["LoadBalancerId"].(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateRules",
@@ -144,7 +149,7 @@ func (s *VolcengineAlbRuleService) CreateResource(resourceData *schema.ResourceD
 				return resp, err
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("listener_id").(string)
+				return loadBalancerId
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				ids, _ := ve.ObtainSdkValue("Result.RuleIds", *resp)
@@ -152,9 +157,15 @@ func (s *VolcengineAlbRuleService) CreateResource(resourceData *schema.ResourceD
 					return fmt.Errorf("rule id not found")
 				}
 				ruleId := ids.([]interface{})[0].(string)
-				listenerId := d.Get("listener_id").(string)
 				d.SetId(fmt.Sprintf("%v:%v", listenerId, ruleId))
 				return nil
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb.NewAlbService(s.Client): {
+					Target:     []string{"Active", "Inactive"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: loadBalancerId,
+				},
 			},
 		},
 	}
@@ -169,6 +180,9 @@ func (VolcengineAlbRuleService) WithResourceResponseHandlers(d map[string]interf
 }
 
 func (s *VolcengineAlbRuleService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	listenerId := resourceData.Get("listener_id").(string)
+	listener, _ := alb_listener.NewAlbListenerService(s.Client).ReadResource(resourceData, listenerId)
+	loadBalancerId := listener["LoadBalancerId"].(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyRules",
@@ -219,7 +233,7 @@ func (s *VolcengineAlbRuleService) ModifyResource(resourceData *schema.ResourceD
 				return true, nil
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("listener_id").(string)
+				return loadBalancerId
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -227,18 +241,28 @@ func (s *VolcengineAlbRuleService) ModifyResource(resourceData *schema.ResourceD
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb.NewAlbService(s.Client): {
+					Target:     []string{"Active", "Inactive"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: loadBalancerId,
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
 }
 
 func (s *VolcengineAlbRuleService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	listenerId := resourceData.Get("listener_id").(string)
+	listener, _ := alb_listener.NewAlbListenerService(s.Client).ReadResource(resourceData, listenerId)
+	loadBalancerId := listener["LoadBalancerId"].(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteRules",
 			ConvertMode: ve.RequestConvertIgnore,
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("listener_id").(string)
+				return loadBalancerId
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				ids := strings.Split(d.Id(), ":")
@@ -252,6 +276,13 @@ func (s *VolcengineAlbRuleService) RemoveResource(resourceData *schema.ResourceD
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb.NewAlbService(s.Client): {
+					Target:     []string{"Active", "Inactive"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: loadBalancerId,
+				},
 			},
 		},
 	}

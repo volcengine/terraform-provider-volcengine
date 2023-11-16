@@ -154,7 +154,7 @@ func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceDat
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				alb.NewAlbService(s.Client): {
-					Target:     []string{"Active"},
+					Target:     []string{"Active", "Inactive"},
 					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
 					ResourceId: loadBalancerId,
 				},
@@ -220,7 +220,7 @@ func (s *VolcengineAlbListenerDomainExtensionService) ModifyResource(resourceDat
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				alb.NewAlbService(s.Client): {
-					Target:     []string{"Active"},
+					Target:     []string{"Active", "Inactive"},
 					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
 					ResourceId: loadBalancerId,
 				},
@@ -262,7 +262,7 @@ func (s *VolcengineAlbListenerDomainExtensionService) RemoveResource(resourceDat
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				alb.NewAlbService(s.Client): {
-					Target:     []string{"Active"},
+					Target:     []string{"Active", "Inactive"},
 					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
 					ResourceId: loadBalancerId,
 				},
