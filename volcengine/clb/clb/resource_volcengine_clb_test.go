@@ -69,7 +69,7 @@ func TestAccVolcengineClbResource_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "description", "acc-test-demo"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "modification_protection_reason", ""),
 					resource.TestCheckResourceAttr(acc.ResourceId, "modification_protection_status", ""),
-					resource.TestCheckResourceAttr(acc.ResourceId, "project_name", ""),
+					resource.TestCheckResourceAttr(acc.ResourceId, "project_name", "default"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "eip_billing_config.#", "1"),
 					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "eip_billing_config.*", map[string]string{
 						"isp":              "BGP",
