@@ -54,7 +54,7 @@ func ResourceVolcengineAlbHealthCheckTemplate() *schema.Resource {
 				Type:        schema.TypeInt,
 				Optional:    true,
 				Computed:    true,
-				Description: "The timeout of health check response,the default value is 2, and the value is 1-60",
+				Description: "The timeout of health check response,the default value is 2, and the value is 1-60.",
 			},
 			"healthy_threshold": {
 				Type:        schema.TypeInt,

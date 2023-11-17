@@ -43,7 +43,6 @@ func ResourceVolcengineAlbCustomizedCfg() *schema.Resource {
 				Required: true,
 				Description: "The content of CustomizedCfg. The length cannot exceed 4096 characters. " +
 					"Spaces and semicolons need to be escaped. " +
-					"Different configuration items are separated by ;, and configuration items cannot be repeated. " +
 					"Currently supported configuration items are `ssl_protocols`, `ssl_ciphers`, `client_max_body_size`, `keepalive_timeout`, `proxy_request_buffering` and `proxy_connect_timeout`.",
 			},
 			"description": {

@@ -150,6 +150,7 @@ var resourceKeys = map[string]string{
 	"nas":            "NAS",
 	"transit_router": "TRANSIT_ROUTER",
 	"direct_connect": "DIRECT_CONNECT",
+	"alb":            "ALB",
 }
 
 type Products struct {
