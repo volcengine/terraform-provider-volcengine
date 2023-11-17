@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 )
 
 type VolcengineIpv6GatewayService struct {
@@ -150,6 +151,13 @@ func (s *VolcengineIpv6GatewayService) CreateResource(resourceData *schema.Resou
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc.NewVpcService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("vpc_id").(string),
+				},
+			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("vpc_id").(string)
 			},
@@ -202,6 +210,13 @@ func (s *VolcengineIpv6GatewayService) RemoveResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vpc.NewVpcService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("vpc_id").(string),
+				},
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("vpc_id").(string)
