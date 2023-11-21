@@ -72,7 +72,14 @@ The `tags` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-
+* `config_servers_id` - The config servers id of the ShardedCluster instance.
+* `mongos_id` - The mongos id of the ShardedCluster instance.
+* `mongos` - The mongos information of the ShardedCluster instance.
+    * `mongos_node_id` - The mongos node ID.
+    * `node_spec` - The node spec.
+    * `node_status` - The node status.
+* `shards` - The shards information of the ShardedCluster instance.
+    * `shard_id` - The shard id.
 
 
 ## Import

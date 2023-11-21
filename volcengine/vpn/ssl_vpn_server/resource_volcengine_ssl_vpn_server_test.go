@@ -51,6 +51,9 @@ resource "volcengine_ssl_vpn_server" "foo" {
 `
 
 const testAccVolcengineSslVpnServerUpdateConfig = `
+data "volcengine_zones" "foo"{
+}
+
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
@@ -59,7 +62,7 @@ resource "volcengine_vpc" "foo" {
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block = "172.16.0.0/24"
-  zone_id = "cn-guilin-a"
+  zone_id = data.volcengine_zones.foo.zones[0].id
   vpc_id = volcengine_vpc.foo.id
 }
 

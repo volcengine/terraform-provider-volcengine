@@ -60,6 +60,9 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set: schema.HashString,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("network_type").(string) == "Private"
+				},
 			},
 			"eip_ids": {
 				Type:        schema.TypeSet,
@@ -71,6 +74,9 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set: schema.HashString,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("network_type").(string) == "Private"
+				},
 			},
 			"endpoint_id": {
 				Type:        schema.TypeString,

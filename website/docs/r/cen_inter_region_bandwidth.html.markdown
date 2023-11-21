@@ -1,5 +1,5 @@
 ---
-subcategory: "CEN(BETA)"
+subcategory: "CEN"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_cen_inter_region_bandwidth"
 sidebar_current: "docs-volcengine-resource-cen_inter_region_bandwidth"

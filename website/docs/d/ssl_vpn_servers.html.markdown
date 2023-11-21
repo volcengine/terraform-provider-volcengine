@@ -1,5 +1,5 @@
 ---
-subcategory: "VPN(BETA)"
+subcategory: "VPN"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_ssl_vpn_servers"
 sidebar_current: "docs-volcengine-datasource-ssl_vpn_servers"

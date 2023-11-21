@@ -180,6 +180,56 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Description: "The project name to which the instance belongs.",
 			},
 			"tags": ve.TagsSchema(),
+
+			// computed fields
+			"shards": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "The shards information of the ShardedCluster instance.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"shard_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The shard id.",
+						},
+					},
+				},
+			},
+			"config_servers_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The config servers id of the ShardedCluster instance.",
+			},
+			"mongos_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The mongos id of the ShardedCluster instance.",
+			},
+			"mongos": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "The mongos information of the ShardedCluster instance.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"mongos_node_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The mongos node ID.",
+						},
+						"node_spec": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The node spec.",
+						},
+						"node_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The node status.",
+						},
+					},
+				},
+			},
 		},
 	}
 	return resource

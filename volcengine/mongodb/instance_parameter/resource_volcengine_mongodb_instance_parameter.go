@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -17,8 +16,6 @@ mongodb parameter can be imported using the param:instanceId:parameterName, e.g.
 ```
 $ terraform import volcengine_mongodb_instance_parameter.default param:mongo-replica-e405f8e2****:connPoolMaxConnsPerHost
 ```
-Note: This resource must be imported before it can be used.
-Please note that instance_id and parameter_name must correspond to the ID of the above import.
 
 */
 
@@ -38,30 +35,21 @@ func ResourceVolcengineMongoDBInstanceParameter() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"instance_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return true
-				},
-				Description: "The instance ID. This field cannot be modified after the resource is imported.",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The instance ID.",
 			},
 			"parameter_name": {
-				Type:     schema.TypeString,
-				Required: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return true
-				},
-				Description: "The name of parameter. This field cannot be modified after the resource is imported.",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The name of parameter.",
 			},
 			"parameter_role": {
-				Type:     schema.TypeString,
-				Required: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"Node",
-					"Shard",
-					"ConfigServer",
-					"Mongos",
-				}, false),
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
 				Description: "The node type to which the parameter belongs. The value range is as follows: Node, Shard, ConfigServer, Mongos.",
 			},
 			"parameter_value": {
@@ -76,14 +64,19 @@ func ResourceVolcengineMongoDBInstanceParameter() *schema.Resource {
 }
 
 func resourceVolcengineMongoDBInstanceParameterCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	return fmt.Errorf("This resource must be imported before it can be used. ")
+	service := NewMongoDBInstanceParameterService(meta.(*ve.SdkClient))
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineMongoDBInstanceParameter())
+	if err != nil {
+		return fmt.Errorf("Error on creating instance parameters %q, %s ", d.Id(), err)
+	}
+	return nil
 }
 
 func resourceVolcengineMongoDBInstanceParameterUpdate(d *schema.ResourceData, meta interface{}) (err error) {
 	service := NewMongoDBInstanceParameterService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineMongoDBInstanceParameter())
 	if err != nil {
-		return fmt.Errorf("Error on updating instance %q, %s ", d.Id(), err)
+		return fmt.Errorf("Error on updating instance parameters %q, %s ", d.Id(), err)
 	}
 	return resourceVolcengineMongoDBInstanceParameterRead(d, meta)
 }
@@ -96,7 +89,7 @@ func resourceVolcengineMongoDBInstanceParameterRead(d *schema.ResourceData, meta
 	service := NewMongoDBInstanceParameterService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineMongoDBInstanceParameter())
 	if err != nil {
-		return fmt.Errorf("Error on reading instance %q, %s ", d.Id(), err)
+		return fmt.Errorf("Error on reading instance parameters %q, %s ", d.Id(), err)
 	}
 	return err
 }

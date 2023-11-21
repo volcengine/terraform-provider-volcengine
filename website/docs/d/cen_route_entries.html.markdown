@@ -1,5 +1,5 @@
 ---
-subcategory: "CEN(BETA)"
+subcategory: "CEN"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_cen_route_entries"
 sidebar_current: "docs-volcengine-datasource-cen_route_entries"

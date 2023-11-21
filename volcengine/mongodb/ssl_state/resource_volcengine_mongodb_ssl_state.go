@@ -16,7 +16,6 @@ mongodb ssl state can be imported using the ssl:instanceId, e.g.
 ```
 $ terraform import volcengine_mongodb_ssl_state.default ssl:mongo-shard-d050db19xxx
 ```
-Set `ssl_action` to `Update` will update ssl always when terraform apply.
 
 */
 
@@ -50,7 +49,8 @@ func ResourceVolcengineMongoDBSSLState() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{
 					"Update",
 				}, false),
-				Description: "The action of ssl, valid value contains `Update`. Set `ssl_action` to `Update` will update ssl always when terraform apply.",
+				Description: "The action of ssl, valid value contains `Update`. Set `ssl_action` to `Update` will will trigger an SSL update operation when executing `terraform apply`." +
+					"When the current time is less than 30 days from the `ssl_expired_time`, executing `terraform apply` will automatically renew the SSL.",
 			},
 		},
 	}
