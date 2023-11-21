@@ -3,12 +3,14 @@ package alb_server_group_server
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"strings"
-	"time"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group"
 )
 
 type VolcengineServerGroupServerService struct {
@@ -131,6 +133,13 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("server_group_id").(string)
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb_server_group.NewAlbServerGroupService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("server_group_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -158,6 +167,13 @@ func (s *VolcengineServerGroupServerService) ModifyResource(resourceData *schema
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("server_group_id").(string)
 			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb_server_group.NewAlbServerGroupService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("server_group_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -181,6 +197,13 @@ func (s *VolcengineServerGroupServerService) RemoveResource(resourceData *schema
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("server_group_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb_server_group.NewAlbServerGroupService(s.Client): {
+					Target:     []string{"Active"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("server_group_id").(string),
+				},
 			},
 		},
 	}

@@ -98,6 +98,13 @@ func (s *VolcengineMongoDBSSLStateService) ReadResource(resourceData *schema.Res
 	if len(data) == 0 {
 		return data, fmt.Errorf("SSLState %s is not exist", id)
 	}
+
+	expiredTime := data["SSLExpiredTime"]
+	flag := certificateSetPendingRenewal(expiredTime.(string))
+	if flag {
+		_ = resourceData.Set("ssl_action", "EarlyRenewal")
+	}
+
 	return data, err
 }
 
@@ -107,7 +114,14 @@ func (s *VolcengineMongoDBSSLStateService) RefreshResourceState(resourceData *sc
 
 func (s *VolcengineMongoDBSSLStateService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+		return instance, map[string]ve.ResponseConvert{
+			"SSLEnable": {
+				TargetField: "ssl_enable",
+			},
+			"SSLExpiredTime": {
+				TargetField: "ssl_expired_time",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -165,13 +179,13 @@ func (s *VolcengineMongoDBSSLStateService) ModifyResource(resourceData *schema.R
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
-				_ = d.Set("ssl_action", "noupdate")
+				_ = d.Set("ssl_action", "Update")
 				return nil
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				mongodbInstance.NewMongoDBInstanceService(s.Client): {
 					Target:     []string{"Running"},
-					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
 					ResourceId: instanceId,
 				},
 			},
@@ -202,7 +216,7 @@ func (s *VolcengineMongoDBSSLStateService) RemoveResource(resourceData *schema.R
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				mongodbInstance.NewMongoDBInstanceService(s.Client): {
 					Target:     []string{"Running"},
-					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
 					ResourceId: instanceId,
 				},
 			},
@@ -217,6 +231,18 @@ func (s *VolcengineMongoDBSSLStateService) RemoveResource(resourceData *schema.R
 
 func (s *VolcengineMongoDBSSLStateService) ReadResourceId(id string) string {
 	return id
+}
+
+func certificateSetPendingRenewal(sslExpiredTime string) bool {
+	expiredTime, err := time.Parse(time.RFC3339, sslExpiredTime)
+	if err != nil {
+		return false
+	}
+
+	// 到期前30天执行更新操作
+	earlyExpiration := expiredTime.AddDate(0, 0, -30)
+
+	return time.Now().After(earlyExpiration)
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

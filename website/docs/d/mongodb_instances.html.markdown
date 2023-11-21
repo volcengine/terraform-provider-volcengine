@@ -76,7 +76,7 @@ In addition to all arguments above, the following attributes are exported:
     * `nodes` - The node information.
         * `node_delay_time` - The master-slave delay time.
         * `node_id` - The node ID.
-        * `node_role` - The nod role.
+        * `node_role` - The node role.
         * `node_spec` - The node spec.
         * `node_status` - The node status.
         * `total_memory_gb` - The total memory in GB.
