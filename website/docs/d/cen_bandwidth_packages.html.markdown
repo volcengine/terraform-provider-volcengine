@@ -1,5 +1,5 @@
 ---
-subcategory: "CEN(BETA)"
+subcategory: "CEN"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_cen_bandwidth_packages"
 sidebar_current: "docs-volcengine-datasource-cen_bandwidth_packages"

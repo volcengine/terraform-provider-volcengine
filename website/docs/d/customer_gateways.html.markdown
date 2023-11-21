@@ -1,5 +1,5 @@
 ---
-subcategory: "VPN(BETA)"
+subcategory: "VPN"
 layout: "volcengine"
 page_title: "Volcengine: volcengine_customer_gateways"
 sidebar_current: "docs-volcengine-datasource-customer_gateways"

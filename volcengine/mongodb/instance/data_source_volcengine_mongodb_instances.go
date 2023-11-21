@@ -240,7 +240,7 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 									"node_role": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The nod role.",
+										Description: "The node role.",
 									},
 									"node_spec": {
 										Type:        schema.TypeString,
