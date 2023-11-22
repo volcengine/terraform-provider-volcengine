@@ -124,7 +124,7 @@ func (s *VolcengineScalingGroupEnablerService) ModifyResource(data *schema.Resou
 	return []ve.Callback{}
 }
 
-func (s *VolcengineScalingGroupEnablerService) RemoveResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineScalingGroupEnablerService) RemoveResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	param := &map[string]interface{}{
 		"ScalingGroupId": data.Get("scaling_group_id").(string),
 	}
@@ -136,6 +136,27 @@ func (s *VolcengineScalingGroupEnablerService) RemoveResource(data *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				return resource.Retry(5*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on  reading scaling group enabler on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					// 伸缩组lock，重试
+					if strings.Contains(callErr.Error(), "ErrInvalidGroupStatus") {
+						return resource.RetryableError(callErr)
+					}
+					return resource.NonRetryableError(callErr)
+				})
 			},
 		},
 	}
