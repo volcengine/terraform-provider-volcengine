@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -43,12 +42,8 @@ func ResourceVolcengineTlsAlarmNotifyGroup() *schema.Resource {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Set:         schema.HashString,
-				Description: "The notify type.",
+				Description: "The notify type.\nTrigger: Alarm Trigger\nRecovery: Alarm Recovery.",
 				Elem: &schema.Schema{
-					ValidateFunc: validation.StringInSlice([]string{
-						"Trigger",
-						"Recovery",
-					}, false),
 					Type: schema.TypeString,
 				},
 			},
@@ -65,12 +60,9 @@ func ResourceVolcengineTlsAlarmNotifyGroup() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"receiver_type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"User",
-							}, false),
-							Description: "The receiver type, value can be User.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The receiver type, Can be set as:\nUser: User ID.",
 						},
 						"receiver_names": {
 							Type:        schema.TypeSet,
@@ -83,13 +75,8 @@ func ResourceVolcengineTlsAlarmNotifyGroup() *schema.Resource {
 							Type:        schema.TypeSet,
 							Required:    true,
 							Set:         schema.HashString,
-							Description: "The list of the receiver channels.",
+							Description: "The list of the receiver channels. Currently supported channels: Email, Sms, Phone.",
 							Elem: &schema.Schema{
-								ValidateFunc: validation.StringInSlice([]string{
-									"Email",
-									"Sms",
-									"Phone",
-								}, false),
 								Type: schema.TypeString,
 							},
 						},
