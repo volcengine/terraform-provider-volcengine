@@ -28,6 +28,7 @@ func init() {
 		"scheduler-plugin",
 		"mgpu",
 		"load-balancer-controller",
+		"vpc-cni-controlplane",
 	}
 }
 
