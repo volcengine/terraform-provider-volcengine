@@ -63,6 +63,7 @@ func (s *VolcengineAlbService) ReadResources(m map[string]interface{}) (data []i
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.LoadBalancers is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 	if err != nil {
@@ -562,6 +563,27 @@ func (s *VolcengineAlbService) getVpcIdAndZoneIdBySubnets(subnetIds []interface{
 	}
 	vpcId := subnets[0].(map[string]interface{})["VpcId"].(string)
 	return vpcId, zoneIds, nil
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
