@@ -63,9 +63,12 @@ func ResourceVolcengineRdsMysqlAccount() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"Super", "Normal"}, false),
 			},
 			"account_privileges": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Set:         RdsMysqlAccountPrivilegeHash,
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      RdsMysqlAccountPrivilegeHash,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("account_type").(string) == "Super"
+				},
 				Description: "The privilege information of account.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
