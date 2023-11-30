@@ -368,6 +368,62 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				},
 				Description: "The KubernetesConfig of NodeConfig.",
 			},
+
+			// computed fields
+			"node_statistics": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"total_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The TotalCount of Node.",
+						},
+						"creating_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The CreatingCount of Node.",
+						},
+						"running_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The RunningCount of Node.",
+						},
+						"updating_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The UpdatingCount of Node.",
+						},
+						"deleting_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The DeletingCount of Node.",
+						},
+						"failed_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The FailedCount of Node.",
+						},
+						"stopped_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The StoppedCount of Node.",
+						},
+						"stopping_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The StoppingCount of Node.",
+						},
+						"starting_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The StartingCount of Node.",
+						},
+					},
+				},
+				Description: "The NodeStatistics of NodeConfig.",
+			},
 		},
 	}
 }
