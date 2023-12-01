@@ -62,7 +62,7 @@ func ResourceVolcengineTlsAlarmNotifyGroup() *schema.Resource {
 						"receiver_type": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "The receiver type, Can be set as:\nUser: User ID.",
+							Description: "The receiver type, Can be set as: `User`(The id of user).",
 						},
 						"receiver_names": {
 							Type:        schema.TypeSet,

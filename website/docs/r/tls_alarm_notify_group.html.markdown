@@ -37,8 +37,7 @@ The `receivers` object supports the following:
 * `end_time` - (Required) The end time.
 * `receiver_channels` - (Required) The list of the receiver channels. Currently supported channels: Email, Sms, Phone.
 * `receiver_names` - (Required) List of the receiver names.
-* `receiver_type` - (Required) The receiver type, Can be set as:
-User: User ID.
+* `receiver_type` - (Required) The receiver type, Can be set as: `User`(The id of user).
 * `start_time` - (Required) The start time.
 
 ## Attributes Reference
