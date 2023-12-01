@@ -120,6 +120,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_type"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_invocation"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_invocation_result"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair"
@@ -326,6 +327,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_invocations":         ecs_invocation.DataSourceVolcengineEcsInvocations(),
 			"volcengine_ecs_invocation_results":  ecs_invocation_result.DataSourceVolcengineEcsInvocationResults(),
 			"volcengine_ecs_available_resources": ecs_available_resource.DataSourceVolcengineEcsAvailableResources(),
+			"volcengine_ecs_instance_types":      ecs_instance_type.DataSourceVolcengineEcsInstanceTypes(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
