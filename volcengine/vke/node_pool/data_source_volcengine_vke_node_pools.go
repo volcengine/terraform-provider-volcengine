@@ -225,8 +225,6 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"system_volume": {
 							Type:     schema.TypeList,
 							Computed: true,
-							MaxItems: 1,
-							MinItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"type": {
@@ -246,8 +244,6 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 						"node_statistics": {
 							Type:     schema.TypeList,
 							Computed: true,
-							MaxItems: 1,
-							MinItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"total_count": {
