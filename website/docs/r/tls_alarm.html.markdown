@@ -71,6 +71,8 @@ The `request_cycle` object supports the following:
 
 * `time` - (Required) The cycle of alarm task execution, or the time point of periodic execution. The unit is minutes, and the value range is 1~1440.
 * `type` - (Required) Execution cycle type.
+Period: Periodic execution, which means executing once every certain period of time.
+Fixed: Regular execution, which means executing at a fixed time point every day.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

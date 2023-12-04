@@ -556,35 +556,6 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						},
 					},
 				},
-				"auto_scaling": {
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"enabled": {
-							ForceGet:    true,
-							TargetField: "Enabled",
-						},
-						"max_replicas": {
-							ForceGet:    true,
-							TargetField: "MaxReplicas",
-						},
-						"min_replicas": {
-							ForceGet:    true,
-							TargetField: "MinReplicas",
-						},
-						"desired_replicas": {
-							ForceGet:    true,
-							TargetField: "DesiredReplicas",
-						},
-						"priority": {
-							ForceGet:    true,
-							TargetField: "Priority",
-						},
-						"subnet_policy": {
-							ForceGet:    true,
-							TargetField: "SubnetPolicy",
-						},
-					},
-				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
@@ -698,6 +669,77 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 		},
 	}
 	callbacks = append(callbacks, callback)
+
+	if resourceData.HasChange("auto_scaling") {
+		desiredReplicasCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "UpdateNodePoolConfig",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"auto_scaling": {
+						ConvertType: ve.ConvertJsonObject,
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"enabled": {
+								ForceGet:    true,
+								TargetField: "Enabled",
+							},
+							"max_replicas": {
+								ForceGet:    true,
+								TargetField: "MaxReplicas",
+							},
+							"min_replicas": {
+								ForceGet:    true,
+								TargetField: "MinReplicas",
+							},
+							"desired_replicas": {
+								ForceGet:    true,
+								TargetField: "DesiredReplicas",
+							},
+							"priority": {
+								ForceGet:    true,
+								TargetField: "Priority",
+							},
+							"subnet_policy": {
+								ForceGet:    true,
+								TargetField: "SubnetPolicy",
+							},
+						},
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["Id"] = d.Id()
+					(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+				AfterRefresh: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) error {
+					result, err := s.ReadResource(d, d.Id())
+					if err != nil {
+						return err
+					}
+					nodes, ok := result["NodeStatistics"].(map[string]interface{})
+					if !ok {
+						return fmt.Errorf("NodeStatistics is not map ")
+					}
+					if int(nodes["TotalCount"].(float64)) != d.Get("auto_scaling.0.desired_replicas").(int) {
+						return fmt.Errorf("The number of nodes in node_pool %s is inconsistent. Suggest obtaining more detailed error message through the Volcengine console. ", d.Id())
+					}
+					return nil
+				},
+			},
+		}
+		callbacks = append(callbacks, desiredReplicasCallback)
+	}
 
 	// 更新Tags
 	callbacks = s.setResourceTags(resourceData, "NodePool", callbacks)

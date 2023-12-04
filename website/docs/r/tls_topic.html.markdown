@@ -34,9 +34,11 @@ The following arguments are supported:
 * `topic_name` - (Required) The name of the tls topic.
 * `ttl` - (Required) The data storage time of the tls topic. Unit: Day. Valid value range: 1-3650.
 * `auto_split` - (Optional) Whether to enable automatic partition splitting function of the tls topic.
+true: (default) When the amount of data written exceeds the capacity of existing partitions for 5 consecutive minutes, Log Service will automatically split partitions based on the data volume to meet business needs. However, the number of partitions after splitting cannot exceed the maximum number of partitions. Newly split partitions within the last 15 minutes will not be automatically split again.
+false: Disables automatic partition splitting.
 * `description` - (Optional) The description of the tls project.
 * `enable_tracking` - (Optional) Whether to enable WebTracking function of the tls topic.
-* `max_split_shard` - (Optional) The max count of shards in the tls topic.
+* `max_split_shard` - (Optional) The maximum number of partitions, which is the maximum number of partitions after partition splitting. The value range is 1 to 10, with a default of 10.
 * `tags` - (Optional) Tags.
 * `time_format` - (Optional) The format of the time field.
 * `time_key` - (Optional) The name of the time field.

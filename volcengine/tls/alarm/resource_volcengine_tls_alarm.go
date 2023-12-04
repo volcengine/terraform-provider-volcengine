@@ -8,7 +8,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -55,16 +54,14 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 				Description: "Whether to enable the alert policy. The default value is true, that is, on.",
 			},
 			"trigger_period": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      1,
-				ValidateFunc: validation.IntBetween(1, 10),
-				Description:  "Continuous cycle. The alarm will be issued after the trigger condition is continuously met for TriggerPeriod periods; the minimum value is 1, the maximum value is 10, and the default value is 1.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     1,
+				Description: "Continuous cycle. The alarm will be issued after the trigger condition is continuously met for TriggerPeriod periods; the minimum value is 1, the maximum value is 10, and the default value is 1.",
 			},
 			"alarm_period": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				ValidateFunc: validation.IntBetween(10, 1440),
 				ExactlyOneOf: []string{"alarm_period_detail", "alarm_period"},
 				Description:  "Period for sending alarm notifications. When the number of continuous alarm triggers reaches the specified limit (TriggerPeriod), Log Service will send alarm notifications according to the specified period.",
 			},
@@ -116,16 +113,14 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 							Description: "Alarm object sequence number; increments from 1.",
 						},
 						"start_time_offset": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ValidateFunc: validation.IntBetween(-1440, 0),
-							Description:  "The start time of the query range is relative to the current historical time, in minutes. The value is non-positive, the maximum value is 0, and the minimum value is -1440.",
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "The start time of the query range is relative to the current historical time, in minutes. The value is non-positive, the maximum value is 0, and the minimum value is -1440.",
 						},
 						"end_time_offset": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ValidateFunc: validation.IntBetween(-1440, 0),
-							Description:  "The end time of the query range is relative to the current historical time. The unit is minutes. The value is not positive and must be greater than StartTimeOffset. The maximum value is 0 and the minimum value is -1440.",
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "The end time of the query range is relative to the current historical time. The unit is minutes. The value is not positive and must be greater than StartTimeOffset. The maximum value is 0 and the minimum value is -1440.",
 						},
 					},
 				},
@@ -143,16 +138,14 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"Period", "Fixed"}, false),
-							Description:  "Execution cycle type.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Execution cycle type.\nPeriod: Periodic execution, which means executing once every certain period of time.\nFixed: Regular execution, which means executing at a fixed time point every day.",
 						},
 						"time": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ValidateFunc: validation.IntBetween(1, 1440),
-							Description:  "The cycle of alarm task execution, or the time point of periodic execution. The unit is minutes, and the value range is 1~1440.",
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "The cycle of alarm task execution, or the time point of periodic execution. The unit is minutes, and the value range is 1~1440.",
 						},
 					},
 				},
@@ -166,28 +159,24 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"sms": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ValidateFunc: validation.IntBetween(10, 1440),
-							Description:  "SMS alarm cycle, the unit is minutes, and the value range is 10~1440.",
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "SMS alarm cycle, the unit is minutes, and the value range is 10~1440.",
 						},
 						"phone": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ValidateFunc: validation.IntBetween(10, 1440),
-							Description:  "Telephone alarm cycle, the unit is minutes, and the value range is 10~1440.",
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Telephone alarm cycle, the unit is minutes, and the value range is 10~1440.",
 						},
 						"email": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ValidateFunc: validation.IntBetween(1, 1440),
-							Description:  "Email alarm period, the unit is minutes, and the value range is 1~1440.",
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Email alarm period, the unit is minutes, and the value range is 1~1440.",
 						},
 						"general_webhook": {
-							Type:         schema.TypeInt,
-							Required:     true,
-							ValidateFunc: validation.IntBetween(1, 1440),
-							Description:  "Customize the webhook alarm period, the unit is minutes, and the value range is 1~1440.",
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Customize the webhook alarm period, the unit is minutes, and the value range is 1~1440.",
 						},
 					},
 				},

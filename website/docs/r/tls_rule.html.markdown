@@ -234,7 +234,12 @@ The `kubernetes_rule` object supports the following:
 * `namespace_name_regex` - (Optional) The name of the Kubernetes Namespace to be collected. If no Namespace name is specified, all containers will be collected. Namespace names support regular matching.
 * `pod_name_regex` - (Optional) The Pod name is used to specify the container to be collected. When no Pod name is specified, it means to collect all containers.
 * `workload_name_regex` - (Optional) Specify the container to be collected by the name of the workload. When no workload name is specified, all containers are collected. The workload name supports regular matching.
-* `workload_type` - (Optional) Specify the container to be collected by the type of workload. Only one type can be selected. When no type is specified, it means to collect all types of containers.
+* `workload_type` - (Optional) Specify the containers to be collected by the type of workload, only one type can be selected. When no type is specified, it means all types of containers are collected. The supported types of workloads are:
+Deployment: stateless workload.
+StatefulSet: stateful workload.
+DaemonSet: daemon process.
+Job: task.
+CronJob: scheduled task.
 
 The `log_template` object supports the following:
 

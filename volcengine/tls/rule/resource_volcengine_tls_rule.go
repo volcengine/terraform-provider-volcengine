@@ -7,7 +7,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -58,16 +57,9 @@ func ResourceVolcengineTlsRule() *schema.Resource {
 				Description: "Collection path list.",
 			},
 			"log_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "minimalist_log",
-				ValidateFunc: validation.StringInSlice([]string{
-					"minimalist_log",
-					"json_log",
-					"delimiter_log",
-					"multiline_log",
-					"fullregex_log",
-				}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "minimalist_log",
 				Description: "The log type. The value can be one of the following: `minimalist_log`, `json_log`, `delimiter_log`, `multiline_log`, `fullregex_log`.",
 			},
 			"log_sample": {
@@ -76,14 +68,9 @@ func ResourceVolcengineTlsRule() *schema.Resource {
 				Description: "The sample of the log.",
 			},
 			"input_type": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
-				ValidateFunc: validation.IntInSlice([]int{
-					0,
-					1,
-					2,
-				}),
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
 				Description: "The type of the collection configuration. Validate value can be `0`(host log file), `1`(K8s container standard output) and `2`(Log files in the K8s container).",
 			},
 			"exclude_paths": {
@@ -95,12 +82,8 @@ func ResourceVolcengineTlsRule() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"File",
-								"Path",
-							}, false),
+							Type:        schema.TypeString,
+							Required:    true,
 							Description: "Collection path type. The path type can be `File` or `Path`.",
 						},
 						"value": {
@@ -394,14 +377,10 @@ func ResourceVolcengineTlsRule() *schema.Resource {
 									"workload_type": {
 										Type:     schema.TypeString,
 										Optional: true,
-										ValidateFunc: validation.StringInSlice([]string{
-											"Job",
-											"CronJob",
-											"DaemonSet",
-											"StatefulSet",
-											"Deployment",
-										}, false),
-										Description: "Specify the container to be collected by the type of workload. Only one type can be selected. When no type is specified, it means to collect all types of containers.",
+										Description: "Specify the containers to be collected by the type of workload, only one type can be selected. " +
+											"When no type is specified, it means all types of containers are collected. The supported types of workloads are:\n" +
+											"Deployment: stateless workload.\nStatefulSet: stateful workload.\n" +
+											"DaemonSet: daemon process.\nJob: task.\nCronJob: scheduled task.",
 									},
 									"workload_name_regex": {
 										Type:        schema.TypeString,

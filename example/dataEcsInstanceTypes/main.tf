@@ -1,0 +1,1 @@
+data "volcengine_ecs_instance_types" "foo" {}
