@@ -216,7 +216,16 @@ The `taints` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-
+* `node_statistics` - The NodeStatistics of NodeConfig.
+    * `creating_count` - The CreatingCount of Node.
+    * `deleting_count` - The DeletingCount of Node.
+    * `failed_count` - The FailedCount of Node.
+    * `running_count` - The RunningCount of Node.
+    * `starting_count` - The StartingCount of Node.
+    * `stopped_count` - The StoppedCount of Node.
+    * `stopping_count` - The StoppingCount of Node.
+    * `total_count` - The TotalCount of Node.
+    * `updating_count` - The UpdatingCount of Node.
 
 
 ## Import

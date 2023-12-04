@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -81,10 +80,9 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 							Description: "The key of the KeyValueInfo.",
 						},
 						"value_type": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"long", "double", "text", "json"}, false),
-							Description:  "The type of value. Valid values: `long`, `double`, `text`, `json`.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The type of value. Valid values: `long`, `double`, `text`, `json`.",
 						},
 						"case_sensitive": {
 							Type:        schema.TypeBool,
@@ -134,10 +132,9 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 										Description: "The key of the subfield key value index.",
 									},
 									"value_type": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"long", "double", "text"}, false),
-										Description:  "The type of value. Valid values: `long`, `double`, `text`.",
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The type of value. Valid values: `long`, `double`, `text`.",
 									},
 								},
 							},
@@ -157,10 +154,9 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 							Description: "The key of the KeyValueInfo.",
 						},
 						"value_type": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ValidateFunc: validation.StringInSlice([]string{"long", "double", "text", "json"}, false),
-							Description:  "The type of value. Valid values: `long`, `double`, `text`, `json`.",
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The type of value. Valid values: `long`, `double`, `text`, `json`.",
 						},
 						"case_sensitive": {
 							Type:        schema.TypeBool,
@@ -198,10 +194,9 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 										Description: "The key of the subfield key value index.",
 									},
 									"value_type": {
-										Type:         schema.TypeString,
-										Required:     true,
-										ValidateFunc: validation.StringInSlice([]string{"long", "double", "text"}, false),
-										Description:  "The type of value. Valid values: `long`, `double`, `text`.",
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The type of value. Valid values: `long`, `double`, `text`.",
 									},
 								},
 							},

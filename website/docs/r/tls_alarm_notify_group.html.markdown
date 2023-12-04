@@ -27,15 +27,17 @@ resource "volcengine_tls_alarm_notify_group" "foo" {
 The following arguments are supported:
 * `alarm_notify_group_name` - (Required) The name of the notify group.
 * `notify_type` - (Required) The notify type.
+Trigger: Alarm Trigger
+Recovery: Alarm Recovery.
 * `receivers` - (Required) List of IAM users to receive alerts.
 * `iam_project_name` - (Optional) The name of the iam project.
 
 The `receivers` object supports the following:
 
 * `end_time` - (Required) The end time.
-* `receiver_channels` - (Required) The list of the receiver channels.
+* `receiver_channels` - (Required) The list of the receiver channels. Currently supported channels: Email, Sms, Phone.
 * `receiver_names` - (Required) List of the receiver names.
-* `receiver_type` - (Required) The receiver type, value can be User.
+* `receiver_type` - (Required) The receiver type, Can be set as: `User`(The id of user).
 * `start_time` - (Required) The start time.
 
 ## Attributes Reference

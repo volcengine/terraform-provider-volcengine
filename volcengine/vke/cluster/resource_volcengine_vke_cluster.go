@@ -273,9 +273,13 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"log_type": {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "The currently enabled log type.",
+										Type:     schema.TypeString,
+										Required: true,
+										Description: "The current types of logs that can be enabled are:\n" +
+											"Audit: Cluster audit logs.\n" +
+											"KubeApiServer: kube-apiserver component logs.\n" +
+											"KubeScheduler: kube-scheduler component logs.\n" +
+											"KubeControllerManager: kube-controller-manager component logs.",
 									},
 									"log_ttl": {
 										Type:         schema.TypeInt,
