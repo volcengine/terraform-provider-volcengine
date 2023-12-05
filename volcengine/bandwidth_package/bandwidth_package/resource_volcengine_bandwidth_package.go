@@ -89,7 +89,12 @@ func ResourceVolcengineBandwidthPackage() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "Security protection types for shared bandwidth packages. Parameter - N: Indicates the number of security protection types, currently only supports taking 1. Value: `AntiDDoS_Enhanced`.",
+				Description: "Security protection types for shared bandwidth packages. " +
+					"Parameter - N: Indicates the number of security protection types, currently only supports taking 1. Value: `AntiDDoS_Enhanced` or left blank." +
+					"If the value is `AntiDDoS_Enhanced`, then will create a shared bandwidth package with enhanced protection," +
+					" which supports adding basic protection type public IP addresses." +
+					"If left blank, it indicates a shared bandwidth package with basic protection, " +
+					"which supports the addition of public IP addresses with enhanced protection.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
