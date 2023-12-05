@@ -33,16 +33,15 @@ func (s *VolcengineNetworkInterfaceService) ReadResources(m map[string]interface
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		vpcClient := s.Client.VpcClient
 		action := "DescribeNetworkInterfaces"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vpcClient.DescribeNetworkInterfacesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vpcClient.DescribeNetworkInterfacesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
