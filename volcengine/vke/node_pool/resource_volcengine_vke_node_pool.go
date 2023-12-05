@@ -62,20 +62,20 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Computed:    true,
-							Description: "Is Enabled of AutoScaling.",
+							Description: "Whether to enable the auto scaling function of the node pool. When a node needs to be manually added to the node pool, the value of this field must be `false`.",
 						},
 						"max_replicas": {
 							Type:         schema.TypeInt,
 							Optional:     true,
 							Default:      10,
 							ValidateFunc: validation.IntBetween(1, 2000),
-							Description:  "The MaxReplicas of AutoScaling, default 10, range in 1~2000.",
+							Description:  "The MaxReplicas of AutoScaling, default 10, range in 1~2000. This field is valid when the value of `enabled` is `true`.",
 						},
 						"min_replicas": {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Computed:    true,
-							Description: "The MinReplicas of AutoScaling, default 0.",
+							Description: "The MinReplicas of AutoScaling, default 0. This field is valid when the value of `enabled` is `true`.",
 						},
 						"desired_replicas": {
 							Type:        schema.TypeInt,
@@ -88,7 +88,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Optional:     true,
 							Computed:     true,
 							ValidateFunc: validation.IntBetween(0, 100),
-							Description:  "The Priority of AutoScaling, default 10, rang in 0~100.",
+							Description:  "The Priority of AutoScaling, default 10, rang in 0~100. This field is valid when the value of `enabled` is `true` and the value of `subnet_policy` is `Priority`.",
 						},
 						"subnet_policy": {
 							Type:     schema.TypeString,

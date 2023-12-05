@@ -756,7 +756,8 @@ func (s *VolcengineNodePoolService) RemoveResource(resourceData *schema.Resource
 			SdkParam: &map[string]interface{}{
 				"Id":                       resourceData.Id(),
 				"ClusterId":                resourceData.Get("cluster_id"),
-				"CascadingDeleteResources": [1]string{"Ecs"},
+				"RetainResources":          []string{},
+				"CascadingDeleteResources": []string{"Ecs"},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
