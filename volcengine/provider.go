@@ -1,6 +1,7 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
 
@@ -552,7 +553,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_postgresql_instances": rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
 
 			// ================ Organization ================
-			"volcengine_organization_units": organization_unit.DataSourceVolcengineOrganizationUnits(),
+			"volcengine_organization_units":                    organization_unit.DataSourceVolcengineOrganizationUnits(),
+			"volcengine_organization_service_control_policies": organization_service_control_policy.DataSourceVolcengineServiceControlPolicies(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -810,6 +812,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ Organization ================
 			"volcengine_organization_unit":                           organization_unit.ResourceVolcengineOrganizationUnit(),
 			"volcengine_organization_service_control_policy_enabler": organization_service_control_policy_enabler.ResourceVolcengineOrganizationServiceControlPolicyEnabler(),
+			"volcengine_organization_service_control_policy":         organization_service_control_policy.ResourceVolcengineServiceControlPolicy(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
