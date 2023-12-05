@@ -1,6 +1,8 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_certificate"
@@ -547,6 +549,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_postgresql_databases": rds_postgresql_database.DataSourceVolcengineRdsPostgresqlDatabases(),
 			"volcengine_rds_postgresql_accounts":  rds_postgresql_account.DataSourceVolcengineRdsPostgresqlAccounts(),
 			"volcengine_rds_postgresql_instances": rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
+
+			// ================ Organization ================
+			"volcengine_organization_units": organization_unit.DataSourceVolcengineOrganizationUnits(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -800,6 +805,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_postgresql_account":                rds_postgresql_account.ResourceVolcengineRdsPostgresqlAccount(),
 			"volcengine_rds_postgresql_instance":               rds_postgresql_instance.ResourceVolcengineRdsPostgresqlInstance(),
 			"volcengine_rds_postgresql_instance_readonly_node": rds_postgresql_instance_readonly_node.ResourceVolcengineRdsPostgresqlInstanceReadonlyNode(),
+
+			// ================ Organization ================
+			"volcengine_organization_unit": organization_unit.ResourceVolcengineOrganizationUnit(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
