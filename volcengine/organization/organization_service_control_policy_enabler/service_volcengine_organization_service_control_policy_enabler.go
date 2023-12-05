@@ -75,6 +75,7 @@ func (s *VolcengineOrganizationServiceControlPolicyEnablerService) CreateResourc
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				d.SetId("organization:service_control_policy_enable")
+				time.Sleep(3 * time.Second)
 				return nil
 			},
 		},
@@ -94,6 +95,10 @@ func (s *VolcengineOrganizationServiceControlPolicyEnablerService) RemoveResourc
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				time.Sleep(3 * time.Second)
+				return nil
 			},
 		},
 	}
