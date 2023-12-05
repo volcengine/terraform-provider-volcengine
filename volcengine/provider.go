@@ -1,6 +1,7 @@
 package volcengine
 
 import (
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
@@ -807,7 +808,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_postgresql_instance_readonly_node": rds_postgresql_instance_readonly_node.ResourceVolcengineRdsPostgresqlInstanceReadonlyNode(),
 
 			// ================ Organization ================
-			"volcengine_organization_unit": organization_unit.ResourceVolcengineOrganizationUnit(),
+			"volcengine_organization_unit":                           organization_unit.ResourceVolcengineOrganizationUnit(),
+			"volcengine_organization_service_control_policy_enabler": organization_service_control_policy_enabler.ResourceVolcengineOrganizationServiceControlPolicyEnabler(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
