@@ -332,3 +332,14 @@ func (s *VolcengineBandwidthPackageService) ProjectTrn() *ve.ProjectTrn {
 		ProjectSchemaField:   "project_name",
 	}
 }
+
+func (s *VolcengineBandwidthPackageService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	if resourceData.Get("billing_type").(string) == "PrePaid" {
+		info.NeedUnsubscribe = true
+		info.Products = []string{"BandwidthPackage"}
+	}
+	return &info, nil
+}
