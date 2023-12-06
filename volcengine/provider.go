@@ -224,6 +224,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_listener_domain_extension"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_rule"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/bandwidth_package/bandwidth_package"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/bandwidth_package/bandwidth_package_attachment"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -508,6 +511,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_ca_certificates":            alb_ca_certificate.DataSourceVolcengineAlbCaCertificates(),
 			"volcengine_albs":                           alb.DataSourceVolcengineAlbs(),
 			"volcengine_alb_server_groups":              alb_server_group.DataSourceVolcengineAlbServerGroups(),
+
+			// ============= Bandwidth Package =============
+			"volcengine_bandwidth_packages": bandwidth_package.DataSourceVolcengineBandwidthPackages(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -739,6 +745,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_ca_certificate":            alb_ca_certificate.ResourceVolcengineAlbCaCertificate(),
 			"volcengine_alb":                           alb.ResourceVolcengineAlb(),
 			"volcengine_alb_server_group":              alb_server_group.ResourceVolcengineAlbServerGroup(),
+
+			// ============= Bandwidth Package =============
+			"volcengine_bandwidth_package":            bandwidth_package.ResourceVolcengineBandwidthPackage(),
+			"volcengine_bandwidth_package_attachment": bandwidth_package_attachment.ResourceVolcengineBandwidthPackageAttachment(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
