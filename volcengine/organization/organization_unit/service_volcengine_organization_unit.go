@@ -114,6 +114,10 @@ func (s *VolcengineOrganizationUnitService) CreateResource(resourceData *schema.
 				d.SetId(id.(string))
 				return nil
 			},
+			// 必须顺序执行，否则并发失败
+			LockId: func(d *schema.ResourceData) string {
+				return "lock-Organization"
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -147,6 +151,10 @@ func (s *VolcengineOrganizationUnitService) ModifyResource(resourceData *schema.
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
+			// 必须顺序执行，否则并发失败
+			LockId: func(d *schema.ResourceData) string {
+				return "lock-Organization"
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -166,6 +174,10 @@ func (s *VolcengineOrganizationUnitService) RemoveResource(resourceData *schema.
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			// 必须顺序执行，否则并发失败
+			LockId: func(d *schema.ResourceData) string {
+				return "lock-Organization"
 			},
 		},
 	}

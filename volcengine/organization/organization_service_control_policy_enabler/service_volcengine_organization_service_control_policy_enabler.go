@@ -78,6 +78,10 @@ func (s *VolcengineOrganizationServiceControlPolicyEnablerService) CreateResourc
 				time.Sleep(3 * time.Second)
 				return nil
 			},
+			// 必须顺序执行，否则并发失败
+			LockId: func(d *schema.ResourceData) string {
+				return "lock-Organization"
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -99,6 +103,10 @@ func (s *VolcengineOrganizationServiceControlPolicyEnablerService) RemoveResourc
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				time.Sleep(3 * time.Second)
 				return nil
+			},
+			// 必须顺序执行，否则并发失败
+			LockId: func(d *schema.ResourceData) string {
+				return "lock-Organization"
 			},
 		},
 	}

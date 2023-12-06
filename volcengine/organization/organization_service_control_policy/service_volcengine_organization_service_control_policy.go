@@ -120,7 +120,7 @@ func (s *VolcenginePolicyService) CreateResource(data *schema.ResourceData, reso
 			},
 			// 必须顺序执行，否则并发失败
 			LockId: func(d *schema.ResourceData) string {
-				return "lock-ServiceControlPolicy"
+				return "lock-Organization"
 			},
 		},
 	}
@@ -151,8 +151,9 @@ func (s *VolcenginePolicyService) ModifyResource(data *schema.ResourceData, reso
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(postUniversalInfo(call.Action), call.SdkParam)
 			},
+			// 必须顺序执行，否则并发失败
 			LockId: func(d *schema.ResourceData) string {
-				return "lock-ServiceControlPolicy"
+				return "lock-Organization"
 			},
 		},
 	}
@@ -172,8 +173,9 @@ func (s *VolcenginePolicyService) RemoveResource(data *schema.ResourceData, r *s
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(postUniversalInfo(call.Action), call.SdkParam)
 			},
+			// 必须顺序执行，否则并发失败
 			LockId: func(d *schema.ResourceData) string {
-				return "lock-ServiceControlPolicy"
+				return "lock-Organization"
 			},
 		},
 	}
