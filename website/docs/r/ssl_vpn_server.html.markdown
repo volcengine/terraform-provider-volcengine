@@ -79,6 +79,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 SSL VPN server can be imported using the id, e.g.
 ```
-$ terraform import volcengine_ssl_vpn_gateway.default vss-zm55pqtvk17oq32zd****
+$ terraform import volcengine_ssl_vpn_server.default vss-zm55pqtvk17oq32zd****
 ```
 
