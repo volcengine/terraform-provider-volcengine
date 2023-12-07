@@ -32,9 +32,9 @@ resource "volcengine_bandwidth_package" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `bandwidth` - (Required) Bandwidth upper limit of shared bandwidth package, unit: Mbps. Valid values: 2 to 5000.
+* `bandwidth` - (Required) Bandwidth upper limit of shared bandwidth package, unit: Mbps. When BillingType is set to PrePaid: the value range is 5 to 5000. When BillingType is set to PostPaidByBandwidth: the value range is 2 to 5000. When BillingType is set to PostPaidByTraffic: the value range is 2 to 2000. When BillingType is set to PayBy95Peak: the value range is 2 to 5000.
 * `bandwidth_package_name` - (Optional) The name of the bandwidth package.
-* `billing_type` - (Optional, ForceNew) BillingType of the Ipv6 bandwidth. Valid values: `PrePaid`, `PostPaidByBandwidth`(Default), `PostPaidByTraffic`, `PayBy95Peak`.
+* `billing_type` - (Optional, ForceNew) BillingType of the bandwidth package. Valid values: `PrePaid`, `PostPaidByBandwidth`(Default), `PostPaidByTraffic`, `PayBy95Peak`. The billing method of IPv6 does not include `PrePaid`, and the billing method is only based on the `PostPaidByBandwidth`.
 * `description` - (Optional) The description of the bandwidth package.
 * `isp` - (Optional, ForceNew) Route type, default to BGP.
 * `period` - (Optional, ForceNew) Duration of purchasing shared bandwidth package on an annual or monthly basis. The valid value range in 1~9 or 12, 24 or 36. Default value is 1. The period unit defaults to `Month`.
