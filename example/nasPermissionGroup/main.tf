@@ -9,6 +9,6 @@ resource "volcengine_nas_permission_group" "foo" {
   permission_rules {
     cidr_ip = "192.168.0.0"
     rw_mode = "RO"
-    use_mode = "All_squash"
+    use_mode = "No_all_squash"
   }
 }

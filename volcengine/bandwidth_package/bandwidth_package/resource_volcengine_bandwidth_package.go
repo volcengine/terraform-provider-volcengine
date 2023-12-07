@@ -53,16 +53,21 @@ func ResourceVolcengineBandwidthPackage() *schema.Resource {
 				Description: "Route type, default to BGP.",
 			},
 			"billing_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "PostPaidByBandwidth",
-				Description: "BillingType of the Ipv6 bandwidth. Valid values: `PrePaid`, `PostPaidByBandwidth`(Default), `PostPaidByTraffic`, `PayBy95Peak`.",
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "PostPaidByBandwidth",
+				Description: "BillingType of the bandwidth package. Valid values: `PrePaid`, `PostPaidByBandwidth`(Default), `PostPaidByTraffic`, `PayBy95Peak`." +
+					" The billing method of IPv6 does not include `PrePaid`, and the billing method is only based on the `PostPaidByBandwidth`.",
 			},
 			"bandwidth": {
-				Type:        schema.TypeInt,
-				Required:    true,
-				Description: "Bandwidth upper limit of shared bandwidth package, unit: Mbps. Valid values: 2 to 5000.",
+				Type:     schema.TypeInt,
+				Required: true,
+				Description: "Bandwidth upper limit of shared bandwidth package, unit: Mbps. " +
+					"When BillingType is set to PrePaid: the value range is 5 to 5000. " +
+					"When BillingType is set to PostPaidByBandwidth: the value range is 2 to 5000. " +
+					"When BillingType is set to PostPaidByTraffic: the value range is 2 to 2000. " +
+					"When BillingType is set to PayBy95Peak: the value range is 2 to 5000.",
 			},
 			"protocol": {
 				Type:        schema.TypeString,
