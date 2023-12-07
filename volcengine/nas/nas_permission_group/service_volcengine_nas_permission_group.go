@@ -111,6 +111,18 @@ func (v *VolcengineNasPermissionGroupService) RefreshResourceState(data *schema.
 
 func (v *VolcengineNasPermissionGroupService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		if rules, ok := m["PermissionRules"].([]interface{}); ok {
+			newRules := make([]interface{}, 0)
+			for _, rule := range rules {
+				ruleMap := rule.(map[string]interface{})
+				if mode, ok := ruleMap["UserMode"]; ok {
+					ruleMap["UseMode"] = mode
+				}
+				delete(ruleMap, "UserMode")
+				newRules = append(newRules, ruleMap)
+			}
+			m["PermissionRules"] = newRules
+		}
 		return m, map[string]ve.ResponseConvert{}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -158,7 +170,7 @@ func (v *VolcengineNasPermissionGroupService) CreateResource(resData *schema.Res
 						if ruleMap, ok := rule.(map[string]interface{}); ok {
 							ruleMapValue["CidrIp"] = ruleMap["cidr_ip"]
 							ruleMapValue["RwMode"] = ruleMap["rw_mode"]
-							ruleMapValue["UseMode"] = ruleMap["use_mode"]
+							ruleMapValue["UserMode"] = ruleMap["use_mode"]
 						}
 						rulesValue = append(rulesValue, ruleMapValue)
 					}
@@ -222,7 +234,7 @@ func (v *VolcengineNasPermissionGroupService) ModifyResource(resData *schema.Res
 							if ruleMap, ok := rule.(map[string]interface{}); ok {
 								ruleMapValue["CidrIp"] = ruleMap["cidr_ip"]
 								ruleMapValue["RwMode"] = ruleMap["rw_mode"]
-								ruleMapValue["UseMode"] = ruleMap["use_mode"]
+								ruleMapValue["UserMode"] = ruleMap["use_mode"]
 							}
 							rulesValue = append(rulesValue, ruleMapValue)
 						}

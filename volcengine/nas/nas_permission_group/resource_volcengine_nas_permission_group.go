@@ -133,6 +133,6 @@ func permissionRuleHash(v interface{}) int {
 	)
 	buf.WriteString(fmt.Sprintf("%v:", m["cidr_ip"]))
 	buf.WriteString(fmt.Sprintf("%v:", m["rw_mode"]))
-	buf.WriteString(fmt.Sprintf("%v:", m["user_mode"]))
+	buf.WriteString(fmt.Sprintf("%v:", m["use_mode"]))
 	return hashcode.String(buf.String())
 }
