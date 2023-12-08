@@ -617,20 +617,27 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 
 	// Parameters
 	if resourceData.HasChange("parameters") {
+		modifiedParams, _, _, _ := ve.GetSetDifference("parameters", resourceData, parameterHash, false)
+
 		parameterCallback := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "ModifyDBInstanceParameters",
 				ContentType: ve.ContentTypeJson,
-				ConvertMode: ve.RequestConvertInConvert,
-				Convert: map[string]ve.RequestConvert{
-					"parameters": {
-						ConvertType: ve.ConvertJsonObjectArray,
-						ForceGet:    true,
-					},
-				},
+				ConvertMode: ve.RequestConvertIgnore,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					if len(*call.SdkParam) > 0 {
+					if modifiedParams != nil && len(modifiedParams.List()) > 0 {
 						(*call.SdkParam)["InstanceId"] = d.Id()
+						(*call.SdkParam)["Parameters"] = make([]map[string]interface{}, 0)
+						for _, v := range modifiedParams.List() {
+							paramMap, ok := v.(map[string]interface{})
+							if !ok {
+								return false, fmt.Errorf("Parameter is not map ")
+							}
+							(*call.SdkParam)["Parameters"] = append((*call.SdkParam)["Parameters"].([]map[string]interface{}), map[string]interface{}{
+								"ParameterName":  paramMap["parameter_name"],
+								"ParameterValue": paramMap["parameter_value"],
+							})
+						}
 						return true, nil
 					}
 					return false, nil
@@ -645,7 +652,6 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 				},
 			},
 		}
-
 		callbacks = append(callbacks, parameterCallback)
 	}
 
