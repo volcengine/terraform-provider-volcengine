@@ -1,6 +1,12 @@
 package volcengine
 
 import (
+	"fmt"
+	"os"
+	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
@@ -306,6 +312,45 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_PROXY_URL", nil),
 				Description: "PROXY URL for Volcengine Provider",
 			},
+			"assume_role": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "The ASSUME ROLE block for Volcengine Provider. If provided, terraform will attempt to assume this role using the supplied credentials.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"assume_role_trn": {
+							Type:        schema.TypeString,
+							Required:    true,
+							DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ASSUME_ROLE_TRN", nil),
+							Description: "The TRN of the role to assume.",
+						},
+						"assume_role_session_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ASSUME_ROLE_SESSION_NAME", nil),
+							Description: "The session name to use when making the AssumeRole call.",
+						},
+						"duration_seconds": {
+							Type:     schema.TypeInt,
+							Required: true,
+							DefaultFunc: func() (interface{}, error) {
+								if v := os.Getenv("VOLCENGINE_ASSUME_ROLE_DURATION_SECONDS"); v != "" {
+									return strconv.Atoi(v)
+								}
+								return 3600, nil
+							},
+							ValidateFunc: validation.IntBetween(900, 43200),
+							Description:  "The duration of the session when making the AssumeRole call. Its value ranges from 900 to 43200(seconds), and default is 3600 seconds.",
+						},
+						"policy": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "A more restrictive policy when making the AssumeRole call.",
+						},
+					},
+				},
+			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"volcengine_vpcs":                        vpc.DataSourceVolcengineVpcs(),
@@ -556,6 +601,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ Organization ================
 			"volcengine_organization_units":                    organization_unit.DataSourceVolcengineOrganizationUnits(),
 			"volcengine_organization_service_control_policies": organization_service_control_policy.DataSourceVolcengineServiceControlPolicies(),
+			"volcengine_organization_accounts":                 organization_account.DataSourceVolcengineOrganizationAccounts(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -815,6 +861,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policy_enabler":    organization_service_control_policy_enabler.ResourceVolcengineOrganizationServiceControlPolicyEnabler(),
 			"volcengine_organization_service_control_policy":            organization_service_control_policy.ResourceVolcengineServiceControlPolicy(),
 			"volcengine_organization_service_control_policy_attachment": organization_service_control_policy_attachment.ResourceVolcengineServiceControlPolicyAttachment(),
+			"volcengine_organization_account":                           organization_account.ResourceVolcengineOrganizationAccount(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
@@ -852,6 +899,37 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 			if len(point) == 2 {
 				config.CustomerEndpoints[point[0]] = point[1]
 			}
+		}
+	}
+
+	// get assume role
+	if v, ok := d.GetOk("assume_role"); ok {
+		assumeRoleList, ok := v.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("the assume_role is not slice ")
+		}
+		if len(assumeRoleList) == 1 {
+			assumeRoleMap, ok := assumeRoleList[0].(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("the value of the assume_role is not map ")
+			}
+			config.AssumeRoleTrn = assumeRoleMap["assume_role_trn"].(string)
+			config.AssumeRoleSessionName = assumeRoleMap["assume_role_session_name"].(string)
+			config.DurationSeconds = assumeRoleMap["duration_seconds"].(int)
+			config.AssumeRolePolicy = assumeRoleMap["policy"].(string)
+		}
+	} else {
+		config.AssumeRoleTrn = os.Getenv("VOLCENGINE_ASSUME_ROLE_TRN")
+		config.AssumeRoleSessionName = os.Getenv("VOLCENGINE_ASSUME_ROLE_SESSION_NAME")
+		duration := os.Getenv("VOLCENGINE_ASSUME_ROLE_DURATION_SECONDS")
+		if duration != "" {
+			durationSeconds, err := strconv.Atoi(duration)
+			if err != nil {
+				return nil, err
+			}
+			config.DurationSeconds = durationSeconds
+		} else {
+			config.DurationSeconds = 3600
 		}
 	}
 

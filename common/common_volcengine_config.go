@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/volcengine/volc-sdk-golang/base"
+	"github.com/volcengine/volc-sdk-golang/service/sts"
 	"github.com/volcengine/volcengine-go-sdk/service/autoscaling"
 	"github.com/volcengine/volcengine-go-sdk/service/clb"
 	"github.com/volcengine/volcengine-go-sdk/service/ecs"
@@ -23,15 +25,19 @@ import (
 )
 
 type Config struct {
-	AccessKey         string
-	SecretKey         string
-	SessionToken      string
-	Region            string
-	Endpoint          string
-	DisableSSL        bool
-	CustomerHeaders   map[string]string
-	CustomerEndpoints map[string]string
-	ProxyUrl          string
+	AccessKey             string
+	SecretKey             string
+	SessionToken          string
+	Region                string
+	Endpoint              string
+	DisableSSL            bool
+	CustomerHeaders       map[string]string
+	CustomerEndpoints     map[string]string
+	ProxyUrl              string
+	AssumeRoleTrn         string
+	AssumeRoleSessionName string
+	DurationSeconds       int
+	AssumeRolePolicy      string
 }
 
 func (c *Config) Client() (*SdkClient, error) {
@@ -51,6 +57,14 @@ func (c *Config) Client() (*SdkClient, error) {
 			}
 		}).
 		WithEndpoint(volcengineutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
+
+	if c.AssumeRoleTrn != "" && c.AssumeRoleSessionName != "" {
+		cred, err := c.assumeRole()
+		if err != nil {
+			return nil, err
+		}
+		config.WithCredentials(cred)
+	}
 
 	if c.ProxyUrl != "" {
 		u, _ := url.Parse(c.ProxyUrl)
@@ -83,6 +97,50 @@ func (c *Config) Client() (*SdkClient, error) {
 	//InitLocks()
 	//InitSyncLimit()
 	return &client, nil
+}
+
+func (c *Config) assumeRole() (*credentials.Credentials, error) {
+	ins := sts.NewInstance()
+	if c.Region != "" {
+		ins.SetRegion(c.Region)
+	}
+	if c.Endpoint != "" {
+		ins.SetHost(c.Endpoint)
+	}
+
+	ins.Client.SetAccessKey(c.AccessKey)
+	ins.Client.SetSecretKey(c.SecretKey)
+	input := &sts.AssumeRoleRequest{
+		RoleTrn:         c.AssumeRoleTrn,
+		RoleSessionName: c.AssumeRoleSessionName,
+		DurationSeconds: c.DurationSeconds,
+	}
+	output, statusCode, err := ins.AssumeRole(input)
+	var (
+		reqId  string
+		errObj *base.ErrorObj
+	)
+	if output != nil {
+		reqId = output.ResponseMetadata.RequestId
+		errObj = output.ResponseMetadata.Error
+	}
+	if err != nil {
+		return nil, fmt.Errorf("AssumeRole error, httpcode is %v and reqId is %s error is %s", statusCode, reqId, err.Error())
+	}
+	if errObj != nil {
+		return nil, fmt.Errorf("AssumeRole error, code is %v and reqId is %s error is %s", errObj.Code, reqId, errObj.Message)
+	}
+
+	if output.Result == nil {
+		return nil, fmt.Errorf("assume role failed, result is nil")
+	}
+	cred := credentials.NewCredentials(&credentials.StaticProvider{Value: credentials.Value{
+		AccessKeyID:     output.Result.Credentials.AccessKeyId,
+		SecretAccessKey: output.Result.Credentials.SecretAccessKey,
+		SessionToken:    output.Result.Credentials.SessionToken,
+	}})
+
+	return cred, nil
 }
 
 func init() {
