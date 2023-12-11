@@ -11,6 +11,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
+	"github.com/volcengine/volc-sdk-golang/base"
+	"github.com/volcengine/volc-sdk-golang/service/sts"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
@@ -903,6 +905,13 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 	}
 
 	// get assume role
+	var (
+		arTrn             string
+		arSessionName     string
+		arPolicy          string
+		arDurationSeconds int
+	)
+
 	if v, ok := d.GetOk("assume_role"); ok {
 		assumeRoleList, ok := v.([]interface{})
 		if !ok {
@@ -913,28 +922,78 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 			if !ok {
 				return nil, fmt.Errorf("the value of the assume_role is not map ")
 			}
-			config.AssumeRoleTrn = assumeRoleMap["assume_role_trn"].(string)
-			config.AssumeRoleSessionName = assumeRoleMap["assume_role_session_name"].(string)
-			config.DurationSeconds = assumeRoleMap["duration_seconds"].(int)
-			config.AssumeRolePolicy = assumeRoleMap["policy"].(string)
+			arTrn = assumeRoleMap["assume_role_trn"].(string)
+			arSessionName = assumeRoleMap["assume_role_session_name"].(string)
+			arDurationSeconds = assumeRoleMap["duration_seconds"].(int)
+			arPolicy = assumeRoleMap["policy"].(string)
 		}
 	} else {
-		config.AssumeRoleTrn = os.Getenv("VOLCENGINE_ASSUME_ROLE_TRN")
-		config.AssumeRoleSessionName = os.Getenv("VOLCENGINE_ASSUME_ROLE_SESSION_NAME")
+		arTrn = os.Getenv("VOLCENGINE_ASSUME_ROLE_TRN")
+		arSessionName = os.Getenv("VOLCENGINE_ASSUME_ROLE_SESSION_NAME")
 		duration := os.Getenv("VOLCENGINE_ASSUME_ROLE_DURATION_SECONDS")
 		if duration != "" {
 			durationSeconds, err := strconv.Atoi(duration)
 			if err != nil {
 				return nil, err
 			}
-			config.DurationSeconds = durationSeconds
+			arDurationSeconds = durationSeconds
 		} else {
-			config.DurationSeconds = 3600
+			arDurationSeconds = 3600
 		}
+	}
+
+	if arTrn != "" && arSessionName != "" {
+		cred, err := assumeRole(config, arTrn, arSessionName, arPolicy, arDurationSeconds)
+		if err != nil {
+			return nil, err
+		}
+		config.AccessKey = cred.AccessKeyId
+		config.SecretKey = cred.SecretAccessKey
+		config.SessionToken = cred.SessionToken
 	}
 
 	client, err := config.Client()
 	return client, err
+}
+
+func assumeRole(c ve.Config, arTrn, arSessionName, arPolicy string, arDurationSeconds int) (*sts.Credentials, error) {
+	ins := sts.NewInstance()
+	if c.Region != "" {
+		ins.SetRegion(c.Region)
+	}
+	if c.Endpoint != "" {
+		ins.SetHost(c.Endpoint)
+	}
+
+	ins.Client.SetAccessKey(c.AccessKey)
+	ins.Client.SetSecretKey(c.SecretKey)
+	input := &sts.AssumeRoleRequest{
+		RoleTrn:         arTrn,
+		RoleSessionName: arSessionName,
+		DurationSeconds: arDurationSeconds,
+		Policy:          arPolicy,
+	}
+	output, statusCode, err := ins.AssumeRole(input)
+	var (
+		reqId  string
+		errObj *base.ErrorObj
+	)
+	if output != nil {
+		reqId = output.ResponseMetadata.RequestId
+		errObj = output.ResponseMetadata.Error
+	}
+	if err != nil {
+		return nil, fmt.Errorf("AssumeRole error, httpcode is %v and reqId is %s error is %s", statusCode, reqId, err.Error())
+	}
+	if errObj != nil {
+		return nil, fmt.Errorf("AssumeRole error, code is %v and reqId is %s error is %s", errObj.Code, reqId, errObj.Message)
+	}
+
+	if output.Result == nil || output.Result.Credentials == nil {
+		return nil, fmt.Errorf("assume role failed, result is nil")
+	}
+
+	return output.Result.Credentials, nil
 }
 
 func defaultCustomerEndPoints() map[string]string {
