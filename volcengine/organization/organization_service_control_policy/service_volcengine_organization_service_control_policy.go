@@ -116,6 +116,9 @@ func (s *VolcenginePolicyService) CreateResource(data *schema.ResourceData, reso
 					return err
 				}
 				d.SetId(policyId.(string))
+
+				// 单独处理
+				time.Sleep(2 * time.Second)
 				return nil
 			},
 			// 必须顺序执行，否则并发失败
@@ -150,6 +153,11 @@ func (s *VolcenginePolicyService) ModifyResource(data *schema.ResourceData, reso
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(postUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				// 单独处理
+				time.Sleep(2 * time.Second)
+				return nil
 			},
 			// 必须顺序执行，否则并发失败
 			LockId: func(d *schema.ResourceData) string {
