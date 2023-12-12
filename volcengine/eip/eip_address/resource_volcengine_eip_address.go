@@ -119,6 +119,19 @@ func ResourceVolcengineEipAddress() *schema.Resource {
 				Computed:    true,
 				Description: "The ProjectName of the EIP.",
 			},
+			"security_protection_types": {
+				Type:     schema.TypeList,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Security protection types for public IP addresses. " +
+					"Parameter - N: Indicates the number of security protection types, currently only supports taking 1. Value: `AntiDDoS_Enhanced` or left blank." +
+					"If the value is `AntiDDoS_Enhanced`, then will create an eip with enhanced protection," +
+					"(can be added to DDoS native protection (enterprise version) instance). " +
+					"If left blank, it indicates an eip with basic protection.",
+			},
 			"tags": ve.TagsSchema(),
 			"status": {
 				Type:        schema.TypeString,
