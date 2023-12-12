@@ -27,7 +27,6 @@ The following arguments are supported:
 * `name` - (Optional) A name of EIP.
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The ProjectName of EIP.
-* `security_protection_enabled` - (Optional) Security protection. The values are as follows: `true`: Enhanced protection type for public IP (can be added to DDoS native protection (Enterprise Edition) instance). `false`: Default protection type for public IP.
 * `status` - (Optional) A status of EIP, the value can be `Attaching` or `Detaching` or `Attached` or `Available`.
 * `tags` - (Optional) Tags.
 

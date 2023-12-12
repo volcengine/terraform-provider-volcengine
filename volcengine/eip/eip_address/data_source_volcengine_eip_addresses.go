@@ -60,13 +60,6 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 				Description: "The ProjectName of EIP.",
 			},
 			"tags": ve.TagsSchema(),
-			"security_protection_enabled": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Description: "Security protection. The values are as follows: " +
-					"`true`: Enhanced protection type for public IP (can be added to DDoS native protection (Enterprise Edition) instance). " +
-					"`false`: Default protection type for public IP.",
-			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
