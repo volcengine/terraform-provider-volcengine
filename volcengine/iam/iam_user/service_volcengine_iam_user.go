@@ -130,6 +130,9 @@ func (VolcengineIamUserService) WithResourceResponseHandlers(v map[string]interf
 			},
 			"Id": {
 				TargetField: "user_id",
+				Convert: func(i interface{}) interface{} {
+					return strconv.FormatFloat(i.(float64), 'f', 0, 64)
+				},
 			},
 		}, nil
 	}
@@ -231,6 +234,9 @@ func (s *VolcengineIamUserService) DatasourceResources(*schema.ResourceData, *sc
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"Id": {
 				TargetField: "user_id",
+				Convert: func(i interface{}) interface{} {
+					return strconv.FormatFloat(i.(float64), 'f', 0, 64)
+				},
 			},
 			"AccountId": {
 				TargetField: "account_id",

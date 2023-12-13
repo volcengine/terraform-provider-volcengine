@@ -43,7 +43,7 @@ func DataSourceVolcengineIamUsers() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"user_id": {
-							Type:        schema.TypeFloat,
+							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The id of the user.",
 						},
