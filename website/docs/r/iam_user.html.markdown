@@ -27,10 +27,13 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `account_id` - The account id of the user.
+* `account_id` - Main account ID to which the sub-user belongs.
 * `create_date` - The create date of the user.
+* `email_is_verify` - Whether the email has been verified.
+* `mobile_phone_is_verify` - Whether the phone number has been verified.
 * `trn` - The trn of the user.
 * `update_date` - The update date of the user.
+* `user_id` - The id of the user.
 
 
 ## Import
