@@ -156,6 +156,9 @@ func (s *VolcengineDnatEntryService) ModifyResource(resourceData *schema.Resourc
 				(*call.SdkParam)["DnatEntryId"] = d.Id()
 				return true, nil
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("nat_gateway_id").(string)
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -180,6 +183,9 @@ func (s *VolcengineDnatEntryService) RemoveResource(resourceData *schema.Resourc
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("nat_gateway_id").(string)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

@@ -2,6 +2,9 @@ package snat_entry
 
 import (
 	"fmt"
+	"reflect"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -48,8 +51,18 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 				Description:  "The id of the subnet that is required to access the internet. Only one of `subnet_id,source_cidr` can be specified.",
 			},
 			"eip_id": {
-				Type:        schema.TypeString,
-				Required:    true,
+				Type:     schema.TypeString,
+				Required: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if len(old) != len(new) {
+						return false
+					}
+					oldArr := strings.Split(old, ",")
+					newArr := strings.Split(new, ",")
+					sort.Strings(oldArr)
+					sort.Strings(newArr)
+					return reflect.DeepEqual(oldArr, newArr)
+				},
 				Description: "The id of the public ip address used by the SNAT entry.",
 			},
 			"snat_entry_name": {

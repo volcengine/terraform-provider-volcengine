@@ -189,6 +189,10 @@ func (s *VolcengineEipAddressService) CreateResource(resourceData *schema.Resour
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
 				},
+				"security_protection_types": {
+					TargetField: "SecurityProtectionTypes",
+					ConvertType: ve.ConvertWithN,
+				},
 			},
 		},
 	}
