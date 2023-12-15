@@ -20,7 +20,7 @@ data "volcengine_eip_addresses" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `associated_instance_id` - (Optional) An id of associated instance.
-* `associated_instance_type` - (Optional) A type of associated instance, the value can be `Nat`, `NetworkInterface`, `ClbInstance` or `EcsInstance`.
+* `associated_instance_type` - (Optional) A type of associated instance, the value can be `Nat`, `NetworkInterface`, `ClbInstance`, `AlbInstance`, `HaVip` or `EcsInstance`.
 * `eip_addresses` - (Optional) A list of EIP ip address that you want to query.
 * `ids` - (Optional) A list of EIP allocation ids.
 * `isp` - (Optional) An ISP of EIP Address, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.
@@ -40,6 +40,7 @@ In addition to all arguments above, the following attributes are exported:
 * `addresses` - The collection of EIP addresses.
     * `allocation_id` - The id of the EIP address.
     * `allocation_time` - The allocation time of the EIP.
+    * `bandwidth_package_id` - The id of the bandwidth package.
     * `bandwidth` - The peek bandwidth of the EIP.
     * `billing_type` - The billing type of the EIP.
     * `business_status` - The business status of the EIP.
@@ -55,6 +56,7 @@ In addition to all arguments above, the following attributes are exported:
     * `name` - The name of the EIP.
     * `overdue_time` - The overdue time of the EIP.
     * `project_name` - The ProjectName of the EIP.
+    * `security_protection_types` - Security protection types for shared bandwidth packages. Parameter - N: Indicates the number of security protection types, currently only supports taking 1. Value: `AntiDDoS_Enhanced`.
     * `status` - The status of the EIP.
     * `tags` - Tags.
         * `key` - The Key of Tags.

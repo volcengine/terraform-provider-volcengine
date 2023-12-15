@@ -32,6 +32,7 @@ The following arguments are supported:
 * `name` - (Optional) The name of the EIP Address.
 * `period` - (Optional) The period of the EIP Address, the valid value range in 1~9 or 12 or 36. Default value is 12. The period unit defaults to `Month`.This field is only effective when creating a PrePaid Eip or changing the billing_type from PostPaid to PrePaid.
 * `project_name` - (Optional) The ProjectName of the EIP.
+* `security_protection_types` - (Optional, ForceNew) Security protection types for public IP addresses. Parameter - N: Indicates the number of security protection types, currently only supports taking 1. Value: `AntiDDoS_Enhanced` or left blank.If the value is `AntiDDoS_Enhanced`, then will create an eip with enhanced protection,(can be added to DDoS native protection (enterprise version) instance). If left blank, it indicates an eip with basic protection.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:

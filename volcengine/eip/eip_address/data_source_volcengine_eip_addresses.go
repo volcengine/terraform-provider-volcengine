@@ -40,16 +40,14 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 				Description: "A name of EIP.",
 			},
 			"isp": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "An ISP of EIP Address, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.",
-				ValidateFunc: validation.StringInSlice([]string{"BGP", "ChinaMobile", "ChinaUnicom", "ChinaTelecom"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "An ISP of EIP Address, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom`.",
 			},
 			"associated_instance_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "A type of associated instance, the value can be `Nat`, `NetworkInterface`, `ClbInstance` or `EcsInstance`.",
-				ValidateFunc: validation.StringInSlice([]string{"Nat", "NetworkInterface", "ClbInstance", "EcsInstance"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "A type of associated instance, the value can be `Nat`, `NetworkInterface`, `ClbInstance`, `AlbInstance`, `HaVip` or `EcsInstance`.",
 			},
 			"associated_instance_id": {
 				Type:        schema.TypeString,
@@ -62,7 +60,6 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 				Description: "The ProjectName of EIP.",
 			},
 			"tags": ve.TagsSchema(),
-
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -173,6 +170,19 @@ func DataSourceVolcengineEipAddresses() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The ProjectName of the EIP.",
+						},
+						"security_protection_types": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "Security protection types for shared bandwidth packages. Parameter - N: Indicates the number of security protection types, currently only supports taking 1. Value: `AntiDDoS_Enhanced`.",
+						},
+						"bandwidth_package_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the bandwidth package.",
 						},
 						"tags": ve.TagsSchemaComputed(),
 					},

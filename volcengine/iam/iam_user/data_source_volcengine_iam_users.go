@@ -42,6 +42,11 @@ func DataSourceVolcengineIamUsers() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"user_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the user.",
+						},
 						"user_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -60,12 +65,42 @@ func DataSourceVolcengineIamUsers() *schema.Resource {
 						"account_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The account id of the user.",
+							Description: "Main account ID to which the sub-user belongs.",
 						},
 						"trn": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The trn of the user.",
+						},
+						"display_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The display name of the user.",
+						},
+						"mobile_phone": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The mobile phone of the user.",
+						},
+						"mobile_phone_is_verify": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether the phone number has been verified.",
+						},
+						"email": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The email of the user.",
+						},
+						"email_is_verify": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether the email has been verified.",
+						},
+						"description": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The description of the user.",
 						},
 					},
 				},
