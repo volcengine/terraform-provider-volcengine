@@ -328,6 +328,7 @@ func (s *VolcengineVkeAddonService) RemoveResource(resourceData *schema.Resource
 				}
 				(*call.SdkParam)["ClusterId"] = ids[0]
 				(*call.SdkParam)["Name"] = ids[1]
+				(*call.SdkParam)["RetainResources"] = []string{}
 				(*call.SdkParam)["CascadingDeleteResources"] = []string{"Crd"}
 				return true, nil
 			},

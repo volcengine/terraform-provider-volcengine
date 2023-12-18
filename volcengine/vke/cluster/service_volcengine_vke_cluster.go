@@ -548,7 +548,8 @@ func (s *VolcengineVkeClusterService) RemoveResource(resourceData *schema.Resour
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = resourceData.Id()
-				(*call.SdkParam)["CascadingDeleteResources"] = []string{"NodePoolResource", "Clb", "Nat"}
+				(*call.SdkParam)["RetainResources"] = []string{}
+				(*call.SdkParam)["CascadingDeleteResources"] = []string{"All"}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
