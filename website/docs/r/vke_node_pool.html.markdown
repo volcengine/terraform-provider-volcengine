@@ -140,10 +140,10 @@ The following arguments are supported:
 The `auto_scaling` object supports the following:
 
 * `desired_replicas` - (Optional) The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.
-* `enabled` - (Optional) Is Enabled of AutoScaling.
-* `max_replicas` - (Optional) The MaxReplicas of AutoScaling, default 10, range in 1~2000.
-* `min_replicas` - (Optional) The MinReplicas of AutoScaling, default 0.
-* `priority` - (Optional) The Priority of AutoScaling, default 10, rang in 0~100.
+* `enabled` - (Optional) Whether to enable the auto scaling function of the node pool. When a node needs to be manually added to the node pool, the value of this field must be `false`.
+* `max_replicas` - (Optional) The MaxReplicas of AutoScaling, default 10, range in 1~2000. This field is valid when the value of `enabled` is `true`.
+* `min_replicas` - (Optional) The MinReplicas of AutoScaling, default 0. This field is valid when the value of `enabled` is `true`.
+* `priority` - (Optional) The Priority of AutoScaling, default 10, rang in 0~100. This field is valid when the value of `enabled` is `true` and the value of `subnet_policy` is `Priority`.
 * `subnet_policy` - (Optional) Multi-subnet scheduling strategy for nodes. The value can be `ZoneBalance` or `Priority`.
 
 The `data_volumes` object supports the following:

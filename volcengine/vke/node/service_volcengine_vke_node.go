@@ -242,9 +242,10 @@ func (s *VolcengineVkeNodeService) RemoveResource(resourceData *schema.ResourceD
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"ClusterId":  resourceData.Get("cluster_id"),
-				"NodePoolId": resourceData.Get("node_pool_id"),
-				"Ids.1":      resourceData.Id(),
+				"ClusterId":       resourceData.Get("cluster_id"),
+				"NodePoolId":      resourceData.Get("node_pool_id"),
+				"Ids.1":           resourceData.Id(),
+				"RetainResources": []string{"Ecs"},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				nodePool, err := s.nodePoolService.ReadResources(map[string]interface{}{
