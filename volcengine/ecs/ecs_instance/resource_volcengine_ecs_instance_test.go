@@ -31,7 +31,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g1ie.large"
 }
 
 resource "volcengine_ecs_instance" "foo" {
@@ -39,7 +39,7 @@ resource "volcengine_ecs_instance" "foo" {
 	description = "acc-test"
 	host_name = "tf-acc-test"
   	image_id = "${data.volcengine_images.foo.images[0].image_id}"
-  	instance_type = "ecs.g1.large"
+  	instance_type = "ecs.g1ie.large"
   	password = "93f0cb0614Aab12"
   	instance_charge_type = "PostPaid"
   	system_volume_type = "ESSD_PL0"
@@ -51,6 +51,7 @@ resource "volcengine_ecs_instance" "foo" {
   	}
 	subnet_id = "${volcengine_subnet.foo.id}"
 	security_group_ids = ["${volcengine_security_group.foo.id}"]
+	primary_ip_address = "172.16.0.120"
 	project_name = "default"
 	tags {
     	key = "k1"
@@ -79,7 +80,8 @@ func TestAccVolcengineEcsInstanceResource_Basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -107,7 +109,6 @@ func TestAccVolcengineEcsInstanceResource_Basic(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -153,7 +154,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g1ie.large"
 }
 
 resource "volcengine_ecs_instance" "foo" {
@@ -162,7 +163,7 @@ resource "volcengine_ecs_instance" "foo" {
 	host_name = "tf-acc-test"
 	user_data = "ZWNobyBoZWxsbyBlY3Mh"
   	image_id = "${data.volcengine_images.foo.images[0].image_id}"
-  	instance_type = "ecs.g1.large"
+  	instance_type = "ecs.g1ie.large"
   	password = "93f0cb0614Aab12new"
   	instance_charge_type = "PostPaid"
   	system_volume_type = "ESSD_PL0"
@@ -174,6 +175,7 @@ resource "volcengine_ecs_instance" "foo" {
   	}
 	subnet_id = "${volcengine_subnet.foo.id}"
 	security_group_ids = ["${volcengine_security_group.foo.id}"]
+	primary_ip_address = "172.16.0.120"
 	project_name = "default"
 	tags {
     	key = "k1"
@@ -202,7 +204,8 @@ func TestAccVolcengineEcsInstanceResource_Update_BasicAttribute(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -230,7 +233,6 @@ func TestAccVolcengineEcsInstanceResource_Update_BasicAttribute(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -247,7 +249,8 @@ func TestAccVolcengineEcsInstanceResource_Update_BasicAttribute(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs-new"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -275,7 +278,6 @@ func TestAccVolcengineEcsInstanceResource_Update_BasicAttribute(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -321,7 +323,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g1ie.large"
 }
 
 resource "volcengine_ecs_instance" "foo" {
@@ -329,7 +331,7 @@ resource "volcengine_ecs_instance" "foo" {
 	description = "acc-test"
 	host_name = "tf-acc-test"
   	image_id = "${data.volcengine_images.foo.images[0].image_id}"
-  	instance_type = "ecs.g1.large"
+  	instance_type = "ecs.g1ie.large"
   	password = "93f0cb0614Aab12"
   	instance_charge_type = "PostPaid"
   	system_volume_type = "ESSD_PL0"
@@ -341,6 +343,7 @@ resource "volcengine_ecs_instance" "foo" {
   	}
 	subnet_id = "${volcengine_subnet.foo.id}"
 	security_group_ids = volcengine_security_group.foo[*].id
+	primary_ip_address = "172.16.0.120"
 	project_name = "default"
 	tags {
     	key = "k1"
@@ -369,7 +372,8 @@ func TestAccVolcengineEcsInstanceResource_Update_SecurityGroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -397,7 +401,6 @@ func TestAccVolcengineEcsInstanceResource_Update_SecurityGroup(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -414,7 +417,8 @@ func TestAccVolcengineEcsInstanceResource_Update_SecurityGroup(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -442,7 +446,6 @@ func TestAccVolcengineEcsInstanceResource_Update_SecurityGroup(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -487,7 +490,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g1ie.large"
 }
 
 resource "volcengine_ecs_instance" "foo" {
@@ -495,7 +498,7 @@ resource "volcengine_ecs_instance" "foo" {
 	description = "acc-test"
 	host_name = "tf-acc-test"
   	image_id = "${data.volcengine_images.foo.images[0].image_id}"
-  	instance_type = "ecs.g1.large"
+  	instance_type = "ecs.g1ie.large"
   	password = "93f0cb0614Aab12"
   	instance_charge_type = "PostPaid"
   	system_volume_type = "ESSD_PL0"
@@ -507,6 +510,7 @@ resource "volcengine_ecs_instance" "foo" {
   	}
 	subnet_id = "${volcengine_subnet.foo.id}"
 	security_group_ids = ["${volcengine_security_group.foo.id}"]
+	primary_ip_address = "172.16.0.120"
 	project_name = "default"
 	tags {
     	key = "k1"
@@ -535,7 +539,8 @@ func TestAccVolcengineEcsInstanceResource_Update_SystemVolume(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -563,7 +568,6 @@ func TestAccVolcengineEcsInstanceResource_Update_SystemVolume(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -580,7 +584,8 @@ func TestAccVolcengineEcsInstanceResource_Update_SystemVolume(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -608,7 +613,6 @@ func TestAccVolcengineEcsInstanceResource_Update_SystemVolume(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -653,7 +657,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.xlarge"
+  	instance_type_id = "ecs.g1ie.xlarge"
 }
 
 resource "volcengine_ecs_instance" "foo" {
@@ -661,7 +665,7 @@ resource "volcengine_ecs_instance" "foo" {
 	description = "acc-test"
 	host_name = "tf-acc-test"
   	image_id = "${data.volcengine_images.foo.images[0].image_id}"
-  	instance_type = "ecs.g1.xlarge"
+  	instance_type = "ecs.g1ie.xlarge"
   	password = "93f0cb0614Aab12"
   	instance_charge_type = "PostPaid"
   	system_volume_type = "ESSD_PL0"
@@ -673,6 +677,7 @@ resource "volcengine_ecs_instance" "foo" {
   	}
 	subnet_id = "${volcengine_subnet.foo.id}"
 	security_group_ids = ["${volcengine_security_group.foo.id}"]
+	primary_ip_address = "172.16.0.120"
 	project_name = "default"
 	tags {
     	key = "k1"
@@ -701,7 +706,8 @@ func TestAccVolcengineEcsInstanceResource_Update_InstanceType(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -729,7 +735,6 @@ func TestAccVolcengineEcsInstanceResource_Update_InstanceType(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -746,7 +751,8 @@ func TestAccVolcengineEcsInstanceResource_Update_InstanceType(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.xlarge"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.xlarge"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -774,7 +780,6 @@ func TestAccVolcengineEcsInstanceResource_Update_InstanceType(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -819,7 +824,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g1ie.large"
 }
 
 resource "volcengine_ecs_instance" "foo" {
@@ -827,7 +832,7 @@ resource "volcengine_ecs_instance" "foo" {
 	description = "acc-test"
 	host_name = "tf-acc-test"
   	image_id = "${data.volcengine_images.foo.images[1].image_id}"
-  	instance_type = "ecs.g1.large"
+  	instance_type = "ecs.g1ie.large"
   	password = "93f0cb0614Aab12"
   	instance_charge_type = "PostPaid"
   	system_volume_type = "ESSD_PL0"
@@ -839,6 +844,7 @@ resource "volcengine_ecs_instance" "foo" {
   	}
 	subnet_id = "${volcengine_subnet.foo.id}"
 	security_group_ids = ["${volcengine_security_group.foo.id}"]
+	primary_ip_address = "172.16.0.120"
 	project_name = "default"
 	tags {
     	key = "k1"
@@ -867,7 +873,8 @@ func TestAccVolcengineEcsInstanceResource_Update_Image(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -895,7 +902,6 @@ func TestAccVolcengineEcsInstanceResource_Update_Image(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -912,7 +918,8 @@ func TestAccVolcengineEcsInstanceResource_Update_Image(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -940,7 +947,6 @@ func TestAccVolcengineEcsInstanceResource_Update_Image(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -985,7 +991,7 @@ resource "volcengine_security_group" "foo" {
 data "volcengine_images" "foo" {
   	os_type = "Linux"
   	visibility = "public"
-  	instance_type_id = "ecs.g1.large"
+  	instance_type_id = "ecs.g1ie.large"
 }
 
 resource "volcengine_ecs_instance" "foo" {
@@ -993,7 +999,7 @@ resource "volcengine_ecs_instance" "foo" {
 	description = "acc-test"
 	host_name = "tf-acc-test"
   	image_id = "${data.volcengine_images.foo.images[0].image_id}"
-  	instance_type = "ecs.g1.large"
+  	instance_type = "ecs.g1ie.large"
   	password = "93f0cb0614Aab12"
   	instance_charge_type = "PostPaid"
   	system_volume_type = "ESSD_PL0"
@@ -1005,6 +1011,7 @@ resource "volcengine_ecs_instance" "foo" {
   	}
 	subnet_id = "${volcengine_subnet.foo.id}"
 	security_group_ids = ["${volcengine_security_group.foo.id}"]
+	primary_ip_address = "172.16.0.120"
 	project_name = "default"
 	tags {
     	key = "k2"
@@ -1037,7 +1044,8 @@ func TestAccVolcengineEcsInstanceResource_Update_Tags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -1065,7 +1073,6 @@ func TestAccVolcengineEcsInstanceResource_Update_Tags(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),
@@ -1082,7 +1089,8 @@ func TestAccVolcengineEcsInstanceResource_Update_Tags(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					volcengine.AccTestCheckResourceExists(acc),
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test-ecs"),
-					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "instance_type", "ecs.g1ie.large"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "primary_ip_address", "172.16.0.120"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "status", "RUNNING"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.#", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "data_volumes.0.volume_type", "ESSD_PL0"),
@@ -1114,7 +1122,6 @@ func TestAccVolcengineEcsInstanceResource_Update_Tags(t *testing.T) {
 					}),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "zone_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "image_id"),
-					resource.TestCheckResourceAttrSet(acc.ResourceId, "primary_ip_address"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "network_interface_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "system_volume_id"),

@@ -100,6 +100,7 @@ The following arguments are supported:
 * `key_pair_name` - (Optional, ForceNew) The ssh key name of ECS instance.
 * `password` - (Optional) The password of ECS instance.
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.
+* `primary_ip_address` - (Optional, ForceNew) The private ip address of primary networkInterface.
 * `project_name` - (Optional) The ProjectName of the ecs instance.
 * `secondary_network_interfaces` - (Optional, ForceNew) The secondary networkInterface detail collection of ECS instance.
 * `security_enhancement_strategy` - (Optional, ForceNew) The security enhancement strategy of ECS instance. The value can be Active or InActive. Default is Active.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
@@ -149,7 +150,6 @@ In addition to all arguments above, the following attributes are exported:
 * `network_interface_id` - The ID of primary networkInterface.
 * `os_name` - The os name of ECS instance.
 * `os_type` - The os type of ECS instance.
-* `primary_ip_address` - The private ip address of primary networkInterface.
 * `status` - The status of ECS instance.
 * `stopped_mode` - The stop mode of ECS instance.
 * `system_volume_id` - The ID of system volume.
