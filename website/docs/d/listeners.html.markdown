@@ -86,6 +86,7 @@ In addition to all arguments above, the following attributes are exported:
     * `certificate_id` - The ID of the certificate which is associated with the Listener.
     * `connection_drain_enabled` - Whether to enable connection drain of the Listener.
     * `connection_drain_timeout` - The connection drain timeout of the Listener.
+    * `cookie` - The name of the cookie for session persistence configured on the backend server.
     * `create_time` - The create time of the Listener.
     * `enabled` - The enable status of the Listener.
     * `health_check_domain` - The domain of health check.
