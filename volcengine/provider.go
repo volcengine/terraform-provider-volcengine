@@ -8,6 +8,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_access"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_file_system"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_namespace"
@@ -515,6 +516,9 @@ func Provider() terraform.ResourceProvider {
 
 			// ============= Bandwidth Package =============
 			"volcengine_bandwidth_packages": bandwidth_package.DataSourceVolcengineBandwidthPackages(),
+
+			// ============= Cloud Monitor =============
+			"volcengine_cloud_monitor_contacts": cloud_monitor_contact.DataSourceVolcengineCloudMonitorContacts(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -751,6 +755,9 @@ func Provider() terraform.ResourceProvider {
 			// ============= Bandwidth Package =============
 			"volcengine_bandwidth_package":            bandwidth_package.ResourceVolcengineBandwidthPackage(),
 			"volcengine_bandwidth_package_attachment": bandwidth_package_attachment.ResourceVolcengineBandwidthPackageAttachment(),
+
+			// ============= Cloud Monitor =============
+			"volcengine_cloud_monitor_contact": cloud_monitor_contact.ResourceVolcengineCloudMonitorContact(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
