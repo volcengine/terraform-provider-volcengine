@@ -13,6 +13,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_namespace"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_ns_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_iam_role_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_file_system"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_region"
@@ -561,6 +562,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_launch_template":          ecs_launch_template.ResourceVolcengineEcsLaunchTemplate(),
 			"volcengine_ecs_command":                  ecs_command.ResourceVolcengineEcsCommand(),
 			"volcengine_ecs_invocation":               ecs_invocation.ResourceVolcengineEcsInvocation(),
+			"volcengine_iam_role_attachment":          ecs_iam_role_attachment.ResourceVolcengineIamRoleAttachment(),
 
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
