@@ -155,6 +155,7 @@ func (s *VolcengineCloudMonitorContactGroupService) ModifyResource(resourceData 
 			Convert: map[string]ve.RequestConvert{
 				"name": {
 					TargetField: "Name",
+					ForceGet:    true,
 				},
 				"description": {
 					TargetField: "Description",
