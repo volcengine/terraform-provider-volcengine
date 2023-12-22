@@ -226,7 +226,9 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 
 			"primary_ip_address": {
 				Type:        schema.TypeString,
+				Optional:    true,
 				Computed:    true,
+				ForceNew:    true,
 				Description: "The private ip address of primary networkInterface.",
 			},
 

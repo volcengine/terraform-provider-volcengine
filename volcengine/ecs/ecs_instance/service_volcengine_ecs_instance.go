@@ -418,6 +418,10 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 					ConvertType: ve.ConvertWithN,
 					TargetField: "NetworkInterfaces.1.SecurityGroupIds",
 				},
+				"primary_ip_address": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "NetworkInterfaces.1.PrimaryIpAddress",
+				},
 				"data_volumes": {
 					ConvertType: ve.ConvertListN,
 					TargetField: "Volumes",
