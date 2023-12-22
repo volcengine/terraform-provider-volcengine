@@ -88,6 +88,13 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: "Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the RDS instance.",
+			},
+			"tags": ve.TagsSchema(),
 			"charge_info": {
 				Type:        schema.TypeList,
 				MaxItems:    1,

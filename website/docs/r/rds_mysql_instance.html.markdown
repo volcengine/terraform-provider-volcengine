@@ -47,6 +47,12 @@ resource "volcengine_rds_mysql_instance" "foo" {
     parameter_name  = "auto_increment_offset"
     parameter_value = "4"
   }
+
+  project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -69,7 +75,9 @@ Ranges:
 0: Table names are stored as fixed and table names are case-sensitive.
 1: Table names will be stored in lowercase and table names are not case sensitive.
 * `parameters` - (Optional) Parameter of the RDS instance. This field can only be added or modified. Deleting this field is invalid.
+* `project_name` - (Optional) The project name of the RDS instance.
 * `storage_space` - (Optional) Instance storage space. Value range: [20, 3000], unit: GB, increments every 100GB. Default value: 100.
+* `tags` - (Optional) Tags.
 
 The `charge_info` object supports the following:
 
@@ -87,6 +95,11 @@ The `parameters` object supports the following:
 
 * `parameter_name` - (Required) Parameter name.
 * `parameter_value` - (Required) Parameter value.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
