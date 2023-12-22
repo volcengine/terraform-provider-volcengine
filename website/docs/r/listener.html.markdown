@@ -93,15 +93,15 @@ The following arguments are supported:
 This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.
 * `connection_drain_timeout` - (Optional) The connection drain timeout of the Listener. Valid value range is `1-900`.
 This filed is required when the value of field `connection_drain_enabled` is `on`.
+* `cookie` - (Optional) The name of the cookie for session persistence configured on the backend server. When PersistenceType is configured as `server`, this parameter is required. When PersistenceType is configured as any other value, this parameter is not effective.
 * `description` - (Optional) The description of the Listener.
 * `enabled` - (Optional) The enable status of the Listener. Optional choice contains `on`, `off`.
 * `established_timeout` - (Optional) The connection timeout of the Listener.
 * `health_check` - (Optional) The config of health check.
 * `listener_name` - (Optional) The name of the Listener.
-* `persistence_timeout` - (Optional) The persistence timeout of the Listener. Unit: second. Valid value range is `1-3600`. Default is `1000`.
-This filed is valid only when the value of field `persistence_type` is `source_ip`.
-* `persistence_type` - (Optional) The persistence type of the Listener. Valid values: `off`, `source_ip`. Default is `off`.
-This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.
+* `persistence_timeout` - (Optional) The persistence timeout of the Listener. Unit: second. Default is `1000`. When PersistenceType is configured as source_ip, the value range is 1-3600. When PersistenceType is configured as insert, the value range is 1-86400. This filed is valid only when the value of field `persistence_type` is `source_ip` or `insert`.
+* `persistence_type` - (Optional) The persistence type of the Listener. Valid values: `off`, `source_ip`, `insert`, `server`. Default is `off`.
+`source_ip`: Represents the source IP address, only effective for TCP/UDP protocols. `insert`: means implanting a cookie, only effective for HTTP/HTTPS protocol and when the scheduler is `wrr`. `server`: Indicates rewriting cookies, only effective for HTTP/HTTPS protocols and when the scheduler is `wrr`.
 * `proxy_protocol_type` - (Optional) Whether to enable proxy protocol. Valid values: `off`, `standard`. Default is `off`.
 This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.
 * `scheduler` - (Optional) The scheduling algorithm of the Listener. Optional choice contains `wrr`, `wlc`, `sh`.

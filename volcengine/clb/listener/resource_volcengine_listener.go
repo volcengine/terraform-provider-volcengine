@@ -52,11 +52,10 @@ func ResourceVolcengineListener() *schema.Resource {
 				Description: "The name of the Listener.",
 			},
 			"protocol": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "The protocol of the Listener. Optional choice contains `TCP`, `UDP`, `HTTP`, `HTTPS`.",
-				ValidateFunc: validation.StringInSlice([]string{"TCP", "UDP", "HTTP", "HTTPS"}, false),
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The protocol of the Listener. Optional choice contains `TCP`, `UDP`, `HTTP`, `HTTPS`.",
 			},
 			"port": {
 				Type:        schema.TypeInt,
@@ -65,18 +64,16 @@ func ResourceVolcengineListener() *schema.Resource {
 				Description: "The port receiving request of the Listener, the value range in 1~65535.",
 			},
 			"scheduler": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Description:  "The scheduling algorithm of the Listener. Optional choice contains `wrr`, `wlc`, `sh`.",
-				ValidateFunc: validation.StringInSlice([]string{"wrr", "wlc", "sh"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The scheduling algorithm of the Listener. Optional choice contains `wrr`, `wlc`, `sh`.",
 			},
 			"enabled": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Description:  "The enable status of the Listener. Optional choice contains `on`, `off`.",
-				ValidateFunc: validation.StringInSlice([]string{"on", "off"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The enable status of the Listener. Optional choice contains `on`, `off`.",
 			},
 			"established_timeout": {
 				Type:        schema.TypeInt,
@@ -95,18 +92,16 @@ func ResourceVolcengineListener() *schema.Resource {
 				Description: "The server group id associated with the listener.",
 			},
 			"acl_status": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Description:  "The enable status of Acl. Optional choice contains `on`, `off`.",
-				ValidateFunc: validation.StringInSlice([]string{"on", "off"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The enable status of Acl. Optional choice contains `on`, `off`.",
 			},
 			"acl_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Computed:     true,
-				Description:  "The type of the Acl. Optional choice contains `white`, `black`.",
-				ValidateFunc: validation.StringInSlice([]string{"white", "black"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The type of the Acl. Optional choice contains `white`, `black`.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("acl_status").(string) == "off"
 				},
@@ -135,10 +130,9 @@ func ResourceVolcengineListener() *schema.Resource {
 				Description: "The bandwidth of the Listener. Unit: Mbps. Default is -1, indicating that the Listener does not specify a speed limit.",
 			},
 			"proxy_protocol_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "off",
-				ValidateFunc: validation.StringInSlice([]string{"off", "standard"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "off",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP"
 				},
@@ -146,32 +140,56 @@ func ResourceVolcengineListener() *schema.Resource {
 					"This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.",
 			},
 			"persistence_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "off",
-				ValidateFunc: validation.StringInSlice([]string{"off", "source_ip"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "off",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP"
+					persistenceType := d.Get("persistence_type").(string)
+					if persistenceType == "off" {
+						return false
+					}
+					protocol := d.Get("protocol").(string)
+					if persistenceType == "source_ip" && (protocol == "TCP" || protocol == "UDP") {
+						return false
+					}
+					scheduler := d.Get("scheduler").(string)
+					if (persistenceType == "insert" || persistenceType == "server") &&
+						(protocol == "HTTP" || protocol == "HTTPS") && scheduler == "wrr" {
+						return false
+					}
+					return true
 				},
-				Description: "The persistence type of the Listener. Valid values: `off`, `source_ip`. Default is `off`.\n" +
-					"This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.",
+				Description: "The persistence type of the Listener. Valid values: `off`, `source_ip`, `insert`, `server`. Default is `off`.\n" +
+					"`source_ip`: Represents the source IP address, only effective for TCP/UDP protocols. " +
+					"`insert`: means implanting a cookie, only effective for HTTP/HTTPS protocol and when the scheduler is `wrr`. " +
+					"`server`: Indicates rewriting cookies, only effective for HTTP/HTTPS protocols and when the scheduler is `wrr`.",
 			},
 			"persistence_timeout": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      1000,
-				ValidateFunc: validation.IntBetween(1, 3600),
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  1000,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return (d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP") || d.Get("persistence_type").(string) != "source_ip"
+					return d.Get("persistence_type").(string) != "source_ip" && d.Get("persistence_type").(string) != "insert"
 				},
-				Description: "The persistence timeout of the Listener. Unit: second. Valid value range is `1-3600`. Default is `1000`.\n" +
-					"This filed is valid only when the value of field `persistence_type` is `source_ip`.",
+				Description: "The persistence timeout of the Listener. Unit: second. Default is `1000`. When PersistenceType is configured as source_ip, " +
+					"the value range is 1-3600. When PersistenceType is configured as insert, the value range is 1-86400. " +
+					"This filed is valid only when the value of field `persistence_type` is `source_ip` or `insert`.",
+			},
+			"cookie": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("persistence_type").(string) != "server"
+				},
+				Description: "The name of the cookie for session persistence configured on the backend server. " +
+					"When PersistenceType is configured as `server`, " +
+					"this parameter is required. When PersistenceType is configured as any other value, " +
+					"this parameter is not effective.",
 			},
 			"connection_drain_enabled": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Default:      "off",
-				ValidateFunc: validation.StringInSlice([]string{"off", "on"}, false),
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "off",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP"
 				},
@@ -179,10 +197,9 @@ func ResourceVolcengineListener() *schema.Resource {
 					"This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.",
 			},
 			"connection_drain_timeout": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(1, 900),
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return (d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP") || d.Get("connection_drain_enabled").(string) != "on"
 				},

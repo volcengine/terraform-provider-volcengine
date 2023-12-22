@@ -202,6 +202,11 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The persistence timeout of the Listener.",
 						},
+						"cookie": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the cookie for session persistence configured on the backend server.",
+						},
 						"connection_drain_enabled": {
 							Type:        schema.TypeString,
 							Computed:    true,
