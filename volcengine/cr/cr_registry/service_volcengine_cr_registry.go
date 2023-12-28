@@ -309,6 +309,14 @@ func (s *VolcengineCrRegistryService) RemoveResource(resourceData *schema.Resour
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				deleteImmediately := d.Get("delete_immediately").(bool)
+				// 如选择立即销毁，则进行removed检查
+				if deleteImmediately {
+					return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+				}
+				return nil
+			},
 		},
 	}
 	return []ve.Callback{callback}
