@@ -47,6 +47,12 @@ resource "volcengine_rds_mysql_instance" "foo" {
     parameter_name = "auto_increment_offset"
     parameter_value = "4"
   }
+
+  project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 `
 
@@ -108,6 +114,16 @@ resource "volcengine_rds_mysql_instance" "foo" {
     parameter_name = "innodb_thread_concurrency"
     parameter_value = "0"
   }
+
+  project_name = "default"
+  tags {
+    key   = "k2"
+    value = "v2"
+  }
+  tags {
+    key   = "k3"
+    value = "v3"
+  }
 }
 `
 
@@ -139,6 +155,12 @@ func TestAccVolcengineRdsMysqlInstanceResource_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "lower_case_table_names", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "node_spec", "rds.mysql.1c2g"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "project_name", "default"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.#", "1"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "tags.*", map[string]string{
+						"key":   "k1",
+						"value": "v1",
+					}),
 					resource.TestCheckResourceAttr(acc.ResourceId, "parameters.#", "2"),
 					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "parameters.*", map[string]string{
 						"parameter_name":  "auto_increment_increment",
@@ -189,6 +211,12 @@ func TestAccVolcengineRdsMysqlInstanceResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "lower_case_table_names", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "node_spec", "rds.mysql.1c2g"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "project_name", "default"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.#", "1"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "tags.*", map[string]string{
+						"key":   "k1",
+						"value": "v1",
+					}),
 					resource.TestCheckResourceAttr(acc.ResourceId, "parameters.#", "2"),
 					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "parameters.*", map[string]string{
 						"parameter_name":  "auto_increment_increment",
@@ -212,6 +240,16 @@ func TestAccVolcengineRdsMysqlInstanceResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "instance_name", "acc-test1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "lower_case_table_names", "1"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "node_spec", "rds.mysql.2c4g"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "project_name", "default"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.#", "2"),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "tags.*", map[string]string{
+						"key":   "k2",
+						"value": "v2",
+					}),
+					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "tags.*", map[string]string{
+						"key":   "k3",
+						"value": "v3",
+					}),
 					resource.TestCheckResourceAttr(acc.ResourceId, "parameters.#", "3"),
 					volcengine.TestCheckTypeSetElemNestedAttrs(acc.ResourceId, "parameters.*", map[string]string{
 						"parameter_name":  "auto_increment_increment",

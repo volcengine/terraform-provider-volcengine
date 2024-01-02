@@ -64,7 +64,13 @@ The following arguments are supported:
 * `instance_status` - (Optional) The status of the RDS instance.
 * `name_regex` - (Optional) A Name Regex of RDS instance.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
 * `zone_id` - (Optional) The available zone of the RDS instance.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -151,11 +157,15 @@ ReadOnly: Read-only node.
         * `update_time` - Node updates local time.
         * `v_cpu` - CPU size. For example: 1 means 1U.
         * `zone_id` - Availability zone ID. Subsequent support for multi-availability zones can be separated and displayed by an English colon.
+    * `project_name` - The project name of the RDS instance.
     * `region_id` - The region of the RDS instance.
     * `storage_space` - Total instance storage space. Unit: GB.
     * `storage_type` - Instance storage type.
     * `storage_use` - The instance has used storage space. Unit: GB.
     * `subnet_id` - The subnet ID of the RDS instance.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `time_zone` - Time zone.
     * `update_time` - The update time of the RDS instance.
     * `v_cpu` - CPU size.

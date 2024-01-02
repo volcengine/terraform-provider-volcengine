@@ -67,6 +67,8 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 				Description:  "The charge type of the RDS instance.",
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
 			},
+			"tags": ve.TagsSchema(),
+
 			"rds_mysql_instances": {
 				Description: "The collection of RDS instance query.",
 				Type:        schema.TypeList,
@@ -188,6 +190,12 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The version of allow list.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the RDS instance.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"charge_detail": {
 							Type:        schema.TypeList,
 							Computed:    true,

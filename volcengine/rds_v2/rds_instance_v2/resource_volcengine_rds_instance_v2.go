@@ -118,25 +118,28 @@ func ResourceVolcengineRdsInstance() *schema.Resource {
 							Description: "Payment type. Value:\nPostPaid - Pay-As-You-Go\nPrePaid - Yearly and monthly (default).",
 						},
 						"auto_renew": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Computed:    true,
-							ForceNew:    true,
-							Description: "Whether to automatically renew in prepaid scenarios.",
+							Type:             schema.TypeBool,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: RdsMysqlInstanceImportDiffSuppress,
+							Description:      "Whether to automatically renew in prepaid scenarios.",
 						},
 						"period_unit": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Computed:    true,
-							ForceNew:    true,
-							Description: "The purchase cycle in the prepaid scenario.\nMonth - monthly subscription (default)\nYear - Package year.",
+							Type:             schema.TypeString,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: RdsMysqlInstanceImportDiffSuppress,
+							Description:      "The purchase cycle in the prepaid scenario.\nMonth - monthly subscription (default)\nYear - Package year.",
 						},
 						"period": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Computed:    true,
-							ForceNew:    true,
-							Description: "Purchase duration in prepaid scenarios. Default: 1.",
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Computed:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: RdsMysqlInstanceImportDiffSuppress,
+							Description:      "Purchase duration in prepaid scenarios. Default: 1.",
 						},
 					},
 				},
@@ -319,4 +322,13 @@ func resourceVolcengineRdsInstanceDelete(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("error on deleting RDS instance %q, %w", d.Id(), err)
 	}
 	return err
+}
+
+func RdsMysqlInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	//在计费方式为PostPaid的时候 period的变化会被忽略
+	if d.Get("charge_info.0.charge_type").(string) == "PostPaid" && (k == "charge_info.0.period" || k == "charge_info.0.period_unit" || k == "charge_info.0.auto_renew") {
+		return true
+	}
+
+	return false
 }

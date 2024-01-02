@@ -12,15 +12,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcenginePrivateLinkVpcEndpointConnection struct {
+type VolcenginePrivateLinkVpcEndpointConnectionService struct {
 	Client *ve.SdkClient
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) GetClient() *ve.SdkClient {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) GetClient() *ve.SdkClient {
 	return v.Client
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -55,7 +55,7 @@ func (v *VolcenginePrivateLinkVpcEndpointConnection) ReadResources(m map[string]
 	})
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -86,7 +86,7 @@ func (v *VolcenginePrivateLinkVpcEndpointConnection) ReadResource(resourceData *
 	return data, nil
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -119,11 +119,11 @@ func (v *VolcenginePrivateLinkVpcEndpointConnection) RefreshResourceState(resour
 	}
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	return nil
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "EnableVpcEndpointConnection",
@@ -146,11 +146,11 @@ func (v *VolcenginePrivateLinkVpcEndpointConnection) CreateResource(data *schema
 	return []ve.Callback{callback}
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return nil
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DisableVpcEndpointConnection",
@@ -172,7 +172,7 @@ func (v *VolcenginePrivateLinkVpcEndpointConnection) RemoveResource(resourceData
 	return []ve.Callback{callback}
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		CollectField: "connections",
 		ResponseConverts: map[string]ve.ResponseConvert{
@@ -183,12 +183,12 @@ func (v *VolcenginePrivateLinkVpcEndpointConnection) DatasourceResources(data *s
 	}
 }
 
-func (v *VolcenginePrivateLinkVpcEndpointConnection) ReadResourceId(s string) string {
+func (v *VolcenginePrivateLinkVpcEndpointConnectionService) ReadResourceId(s string) string {
 	return s
 }
 
-func NewVpcEndpointConnectionService(c *ve.SdkClient) *VolcenginePrivateLinkVpcEndpointConnection {
-	return &VolcenginePrivateLinkVpcEndpointConnection{
+func NewVpcEndpointConnectionService(c *ve.SdkClient) *VolcenginePrivateLinkVpcEndpointConnectionService {
+	return &VolcenginePrivateLinkVpcEndpointConnectionService{
 		Client: c,
 	}
 }

@@ -21,7 +21,7 @@ resource "volcengine_privatelink_vpc_endpoint_service" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `resources` - (Required) The resources info. When create vpc endpoint service, the resource must exist.
+* `resources` - (Required) The resources info. When create vpc endpoint service, the resource must exist. It is recommended to bind resources using the resources' field in this resource instead of using vpc_endpoint_service_resource. For operations that jointly use this resource and vpc_endpoint_service_resource, use lifecycle ignore_changes to suppress changes to the resources field.
 * `auto_accept_enabled` - (Optional) Whether auto accept node connect.
 * `description` - (Optional) The description of service.
 
@@ -49,4 +49,6 @@ VpcEndpointService can be imported using the id, e.g.
 ```
 $ terraform import volcengine_privatelink_vpc_endpoint_service.default epsvc-2fe630gurkl37k5gfuy33****
 ```
+It is recommended to bind resources using the resources' field in this resource instead of using vpc_endpoint_service_resource.
+For operations that jointly use this resource and vpc_endpoint_service_resource, use lifecycle ignore_changes to suppress changes to the resources field.
 
