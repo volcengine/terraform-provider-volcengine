@@ -152,6 +152,17 @@ func (s *VolcengineEcsService) ReadResource(resourceData *schema.ResourceData, i
 	if len(data) == 0 {
 		return data, fmt.Errorf("Ecs Instance %s not exist ", instanceId)
 	}
+
+	if numa := resourceData.Get("cpu_options.0.numa_per_socket"); numa != 0 {
+		if v, exist := data["CpuOptions"]; exist {
+			cpuOptions, ok := v.(map[string]interface{})
+			if !ok {
+				return data, fmt.Errorf("CpuOptions is not map ")
+			}
+			cpuOptions["NumaPerSocket"] = numa
+		}
+	}
+
 	return data, nil
 }
 
@@ -439,6 +450,9 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"threads_per_core": {
 							TargetField: "ThreadsPerCore",
+						},
+						"numa_per_socket": {
+							TargetField: "NumaPerSocket",
 						},
 					},
 				},
