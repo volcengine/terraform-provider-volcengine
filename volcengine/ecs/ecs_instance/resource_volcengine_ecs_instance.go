@@ -294,9 +294,29 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"threads_per_core": {
 							Type:        schema.TypeInt,
-							Required:    true,
+							Optional:    true,
+							Computed:    true,
 							ForceNew:    true,
-							Description: "The per core of threads,only support for ebm.",
+							Description: "The per core of threads, only support for ebm. `1` indicates disabling hyper threading function.",
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								//暂时增加这个逻辑 在不包含ebm的情况下 忽略掉这个变化 目前这个方式比较hack 后续接口能力完善后改变一下
+								if it, ok := d.Get("instance_type").(string); ok {
+									its := strings.Split(it, ".")
+									if len(its) == 3 && !strings.Contains(strings.ToLower(its[1]), "ebm") {
+										return true
+									} else {
+										return false
+									}
+								} else {
+									return true
+								}
+							},
+						},
+						"numa_per_socket": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "The number of subnuma in socket, only support for ebm. `1` indicates disabling SNC/NPS function. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 								//暂时增加这个逻辑 在不包含ebm的情况下 忽略掉这个变化 目前这个方式比较hack 后续接口能力完善后改变一下
 								if it, ok := d.Get("instance_type").(string); ok {

@@ -115,7 +115,8 @@ SpotWithPriceLimit: spot instance with a set upper limit for bidding price.
 
 The `cpu_options` object supports the following:
 
-* `threads_per_core` - (Required, ForceNew) The per core of threads,only support for ebm.
+* `numa_per_socket` - (Optional, ForceNew) The number of subnuma in socket, only support for ebm. `1` indicates disabling SNC/NPS function. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `threads_per_core` - (Optional, ForceNew) The per core of threads, only support for ebm. `1` indicates disabling hyper threading function.
 
 The `data_volumes` object supports the following:
 
