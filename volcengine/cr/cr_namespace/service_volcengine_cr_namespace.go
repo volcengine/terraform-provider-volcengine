@@ -175,6 +175,9 @@ func (s *VolcengineCrNamespaceService) RemoveResource(resourceData *schema.Resou
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)
+			},
 		},
 	}
 	return []ve.Callback{callback}

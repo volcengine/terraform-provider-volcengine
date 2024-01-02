@@ -16,7 +16,8 @@ VpcEndpointServiceResource can be imported using the serviceId:resourceId, e.g.
 ```
 $ terraform import volcengine_privatelink_vpc_endpoint_service_resource.default epsvc-2fe630gurkl37k5gfuy33****:clb-bp1o94dp5i6ea****
 ```
-
+It is not recommended to use this resource for binding resources, it is recommended to use the resources field of vpc_endpoint_service for binding.
+If using this resource and vpc_endpoint_service jointly for operations, use lifecycle ignore_changes to suppress changes to the resources field in vpc_endpoint_service.
 */
 
 func ResourceVolcenginePrivatelinkVpcEndpointServiceResource() *schema.Resource {
@@ -45,10 +46,13 @@ func ResourceVolcenginePrivatelinkVpcEndpointServiceResource() *schema.Resource 
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The id of resource.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Description: "The id of resource. It is not recommended to use this resource for binding resources, " +
+					"it is recommended to use the resources field of vpc_endpoint_service for binding. " +
+					"If using this resource and vpc_endpoint_service jointly for operations, " +
+					"use lifecycle ignore_changes to suppress changes to the resources field in vpc_endpoint_service.",
 			},
 			"service_id": {
 				Type:        schema.TypeString,

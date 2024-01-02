@@ -301,6 +301,13 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 				"charge_info": {
 					ConvertType: ve.ConvertJsonObject,
 				},
+				"project_name": {
+					TargetField: "ProjectName",
+				},
+				"tags": {
+					TargetField: "InstanceTags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				var (
@@ -655,6 +662,9 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 		callbacks = append(callbacks, parameterCallback)
 	}
 
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, callbacks)
+
 	return callbacks
 }
 
@@ -744,6 +754,10 @@ func (s *VolcengineRdsMysqlInstanceService) DatasourceResources(*schema.Resource
 			"db_engine_version": {
 				TargetField: "DBEngineVersion",
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+			},
 		},
 		NameField:    "InstanceName",
 		IdField:      "InstanceId",
@@ -783,6 +797,67 @@ func convertAddressInfo(addressesInfo interface{}) interface{} {
 
 func (s *VolcengineRdsMysqlInstanceService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineRdsMysqlInstanceService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "RemoveTagsFromResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddTagsToResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag.(map[string]interface{}))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
+}
+
+func (s *VolcengineRdsMysqlInstanceService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "rds_mysql",
+		ResourceType:         "instance",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
