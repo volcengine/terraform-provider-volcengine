@@ -143,8 +143,10 @@ func (VolcengineNatGatewayService) WithResourceResponseHandlers(natGateway map[s
 						return "PrePaid"
 					case 2:
 						return "PostPaid"
+					case 3:
+						return "PostPaidByUsage"
 					}
-					return i
+					return fmt.Sprintf("%v", i)
 				},
 			},
 		}, nil
@@ -174,8 +176,10 @@ func (s *VolcengineNatGatewayService) CreateResource(resourceData *schema.Resour
 							return 1
 						case "PostPaid":
 							return 2
+						case "PostPaidByUsage":
+							return 3
 						}
-						return i
+						return 0
 					},
 				},
 				"tags": {
@@ -344,8 +348,10 @@ func (s *VolcengineNatGatewayService) DatasourceResources(*schema.ResourceData, 
 						return "PrePaid"
 					case 2:
 						return "PostPaid"
+					case 3:
+						return "PostPaidByUsage"
 					}
-					return i
+					return fmt.Sprintf("%v", i)
 				},
 			},
 		},
