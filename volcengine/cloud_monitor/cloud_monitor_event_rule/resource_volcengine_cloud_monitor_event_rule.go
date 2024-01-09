@@ -65,7 +65,7 @@ func ResourceVolcengineCloudMonitorEventRule() *schema.Resource {
 			"level": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Severity of alarm rules. Value can be `notice` ,`warning`, `critical`.",
+				Description: "Severity of alarm rules. Value can be `notice`, `warning`, `critical`.",
 			},
 			"filter_pattern": {
 				Type:        schema.TypeList,
