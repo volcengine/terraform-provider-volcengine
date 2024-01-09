@@ -65,6 +65,14 @@ func DataSourceVolcengineRdsMysqlAllowLists() *schema.Resource {
 							Computed:    true,
 							Description: "The total number of instances bound under the whitelist.",
 						},
+						"allow_list": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The IP address or a range of IP addresses in CIDR format.",
+						},
 						"associated_instances": {
 							Type:        schema.TypeList,
 							Computed:    true,
