@@ -23,9 +23,10 @@ func (s *VolcengineRdsMysqlAllowListService) GetClient() *volc.SdkClient {
 
 func (s *VolcengineRdsMysqlAllowListService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		resp        *map[string]interface{}
+		results     interface{}
+		ok          bool
+		allowListId string
 	)
 	return volc.WithSimpleQuery(condition, func(m map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeAllowLists"
@@ -51,29 +52,36 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResources(condition map[string]
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.AllowLists is not slice ")
 		}
+
+		if id, exist := condition["AllowListId"]; exist {
+			allowListId = id.(string)
+		}
 		for index, ele := range data {
 			allowList := ele.(map[string]interface{})
-			query := map[string]interface{}{
-				"AllowListId": allowList["AllowListId"],
+
+			if allowListId == "" || allowListId == allowList["AllowListId"].(string) {
+				query := map[string]interface{}{
+					"AllowListId": allowList["AllowListId"],
+				}
+				action = "DescribeAllowListDetail"
+				logger.Debug(logger.ReqFormat, action, query)
+				resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &query)
+				if err != nil {
+					return data, err
+				}
+				logger.Debug(logger.RespFormat, action, query, *resp)
+				instances, err := volc.ObtainSdkValue("Result.AssociatedInstances", *resp)
+				if err != nil {
+					return data, err
+				}
+				data[index].(map[string]interface{})["AssociatedInstances"] = instances
+				allowListIp, err := volc.ObtainSdkValue("Result.AllowList", *resp)
+				if err != nil {
+					return data, err
+				}
+				allowListIpArr := strings.Split(allowListIp.(string), ",")
+				data[index].(map[string]interface{})["AllowList"] = allowListIpArr
 			}
-			action = "DescribeAllowListDetail"
-			logger.Debug(logger.ReqFormat, action, query)
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &query)
-			if err != nil {
-				return data, err
-			}
-			logger.Debug(logger.RespFormat, action, query, *resp)
-			instances, err := volc.ObtainSdkValue("Result.AssociatedInstances", *resp)
-			if err != nil {
-				return data, err
-			}
-			data[index].(map[string]interface{})["AssociatedInstances"] = instances
-			allowListIp, err := volc.ObtainSdkValue("Result.AllowList", *resp)
-			if err != nil {
-				return data, err
-			}
-			allowListIpArr := strings.Split(allowListIp.(string), ",")
-			data[index].(map[string]interface{})["AllowList"] = allowListIpArr
 		}
 		return data, err
 	})

@@ -35,6 +35,14 @@ func init() {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(10),
 		},
+		"rds_mysql.DescribeAllowLists.2022-01-01": {
+			Limiter:   rate.NewLimiter(4, 10),
+			Semaphore: semaphore.NewWeighted(10),
+		},
+		"rds_mysql.DescribeAllowListDetail.2022-01-01": {
+			Limiter:   rate.NewLimiter(4, 10),
+			Semaphore: semaphore.NewWeighted(10),
+		},
 	}
 }
 

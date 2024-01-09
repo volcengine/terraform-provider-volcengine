@@ -47,13 +47,10 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Description: "The ID of the Subnet.",
 			},
 			"spec": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "Small",
-				ValidateFunc: validation.StringInSlice([]string{
-					"Small", "Medium", "Large",
-				}, false),
-				Description: "The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large`.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large` or leave blank.",
 			},
 			"nat_gateway_name": {
 				Type:        schema.TypeString,
@@ -66,12 +63,11 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Description: "The description of the NatGateway.",
 			},
 			"billing_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "PostPaid",
-				Description:  "The billing type of the NatGateway, the value is `PostPaid` or `PrePaid`.",
-				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "PostPaid",
+				Description: "The billing type of the NatGateway, the value is `PostPaid` or `PrePaid`.",
 			},
 			//"period_unit": {
 			//	Type:     schema.TypeString,
