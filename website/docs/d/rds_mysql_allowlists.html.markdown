@@ -76,6 +76,7 @@ In addition to all arguments above, the following attributes are exported:
     * `allow_list_ip_num` - The total number of IP addresses (or address ranges) in the whitelist.
     * `allow_list_name` - The name of the allow list.
     * `allow_list_type` - The type of the allow list.
+    * `allow_list` - The IP address or a range of IP addresses in CIDR format.
     * `associated_instance_num` - The total number of instances bound under the whitelist.
     * `associated_instances` - The list of instances.
         * `instance_id` - The id of the instance.
