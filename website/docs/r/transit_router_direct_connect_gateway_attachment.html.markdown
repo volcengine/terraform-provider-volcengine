@@ -10,11 +10,25 @@ description: |-
 Provides a resource to manage transit router direct connect gateway attachment
 ## Example Usage
 ```hcl
+resource "volcengine_transit_router" "foo" {
+  transit_router_name = "acc-test-tf-acc"
+  description         = "acc-test-tf-acc"
+}
+
+resource "volcengine_direct_connect_gateway" "foo" {
+  direct_connect_gateway_name = "acc-test-gateway-acc"
+  description                 = "acc-test-acc"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
+}
+
 resource "volcengine_transit_router_direct_connect_gateway_attachment" "foo" {
-  transit_router_id              = "tr-2bzy39x27qtxc2dx0eg5qaj05"
-  direct_connect_gateway_id      = "dcg-3reaq6ymdzegw5zsk2igxzusb"
-  description                    = "tf-test-modify"
-  transit_router_attachment_name = "tf-test-modify"
+  description                    = "acc-test-tf"
+  transit_router_attachment_name = "acc-test-tf"
+  transit_router_id              = volcengine_transit_router.foo.id
+  direct_connect_gateway_id      = volcengine_direct_connect_gateway.foo.id
 }
 ```
 ## Argument Reference
