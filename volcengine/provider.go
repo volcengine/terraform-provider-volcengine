@@ -8,6 +8,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_event_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_access"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_file_system"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_namespace"
@@ -515,6 +519,12 @@ func Provider() terraform.ResourceProvider {
 
 			// ============= Bandwidth Package =============
 			"volcengine_bandwidth_packages": bandwidth_package.DataSourceVolcengineBandwidthPackages(),
+
+			// ============= Cloud Monitor =============
+			"volcengine_cloud_monitor_contacts":       cloud_monitor_contact.DataSourceVolcengineCloudMonitorContacts(),
+			"volcengine_cloud_monitor_contact_groups": cloud_monitor_contact_group.DataSourceVolcengineCloudMonitorContactGroups(),
+			"volcengine_cloud_monitor_event_rules":    cloud_monitor_event_rule.DataSourceVolcengineCloudMonitorEventRules(),
+			"volcengine_cloud_monitor_rules":          cloud_monitor_rule.DataSourceVolcengineCloudMonitorRules(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -751,6 +761,12 @@ func Provider() terraform.ResourceProvider {
 			// ============= Bandwidth Package =============
 			"volcengine_bandwidth_package":            bandwidth_package.ResourceVolcengineBandwidthPackage(),
 			"volcengine_bandwidth_package_attachment": bandwidth_package_attachment.ResourceVolcengineBandwidthPackageAttachment(),
+
+			// ============= Cloud Monitor =============
+			"volcengine_cloud_monitor_contact":       cloud_monitor_contact.ResourceVolcengineCloudMonitorContact(),
+			"volcengine_cloud_monitor_contact_group": cloud_monitor_contact_group.ResourceVolcengineCloudMonitorContactGroup(),
+			"volcengine_cloud_monitor_event_rule":    cloud_monitor_event_rule.ResourceVolcengineCloudMonitorEventRule(),
+			"volcengine_cloud_monitor_rule":          cloud_monitor_rule.ResourceVolcengineCloudMonitorRule(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
