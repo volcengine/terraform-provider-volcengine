@@ -152,6 +152,7 @@ var resourceKeys = map[string]string{
 	"direct_connect":    "DIRECT_CONNECT",
 	"alb":               "ALB",
 	"bandwidth_package": "BANDWIDTH_PACKAGE",
+	"cloud_monitor":     "CLOUD_MONITOR",
 }
 
 type Products struct {
