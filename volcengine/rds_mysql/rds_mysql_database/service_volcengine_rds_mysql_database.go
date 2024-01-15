@@ -129,10 +129,12 @@ func (s *VolcengineRdsMysqlDatabaseService) CreateResource(resourceData *schema.
 			Action:      "CreateDatabase",
 			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertAll,
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
 			Convert: map[string]volc.RequestConvert{
-				"database_privileges": {
-					TargetField: "DatabasePrivileges",
-					ConvertType: volc.ConvertJsonObjectArray,
+				"db_name": {
+					TargetField: "DBName",
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
@@ -160,6 +162,9 @@ func (s *VolcengineRdsMysqlDatabaseService) RemoveResource(resourceData *schema.
 			Action:      "DeleteDatabase",
 			ContentType: volc.ContentTypeJson,
 			ConvertMode: volc.RequestConvertIgnore,
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
 				databaseId := d.Id()
 				ids := strings.Split(databaseId, ":")
