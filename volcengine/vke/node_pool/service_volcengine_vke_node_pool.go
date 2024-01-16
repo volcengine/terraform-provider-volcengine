@@ -369,6 +369,9 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						"cordon": {
 							ConvertType: ve.ConvertJsonObject,
 						},
+						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 				"auto_scaling": {
@@ -552,6 +555,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 							ForceGet:    true,
 						},
 						"cordon": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"name_prefix": {
 							ConvertType: ve.ConvertJsonObject,
 						},
 					},
@@ -848,6 +854,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"AutoScaling.SubnetPolicy": {
 				TargetField: "subnet_policy",
+			},
+			"KubernetesConfig.NamePrefix": {
+				TargetField: "kube_config_name_prefix",
 			},
 			"KubernetesConfig.Cordon": {
 				TargetField: "cordon",
