@@ -1,9 +1,7 @@
 package sqlserver_instance
 
 import (
-	"bytes"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -39,13 +37,27 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "Compatible version. Currently only supports the value SQLServer_2019_Std, which represents SQL Server 2019 Standard Edition.",
+				Description: "The Compatible version. Valid values: `SQLServer_2019_Std`, `SQLServer_2019_Web`, `SQLServer_2019_Ent`.",
 			},
 			"instance_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Instance type. Currently only supports the value HA, which represents high availability type.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Description: "The Instance type. When the value of the `db_engine_version` is `SQLServer_2019_Std`, the value of this field can be `HA` or `Basic`." +
+					"When the value of the `db_engine_version` is `SQLServer_2019_Ent`, the value of this field can be `Cluster` or `Basic`." +
+					"When the value of the `db_engine_version` is `SQLServer_2019_Web`, the value of this field can be `Basic`.",
+			},
+			"subnet_id": {
+				Type:     schema.TypeList,
+				Required: true,
+				ForceNew: true,
+				MinItems: 1,
+				MaxItems: 2,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The subnet id of the instance node. When creating an instance that includes primary and backup nodes and needs to deploy primary and backup nodes across availability zones, you can specify two subnet_id. " +
+					"By default, the first is the primary node availability zone, and the second is the backup node availability zone",
 			},
 			"node_spec": {
 				Type:        schema.TypeString,
@@ -59,24 +71,12 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: "Storage space size, measured in GiB. The range of values is 20GiB to 4000GiB, with a step size of 10GiB.",
 			},
-			"subnet_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The subnet id.",
-			},
 			"super_account_password": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Sensitive:   true,
 				ForceNew:    true,
-				Description: "The super account password.",
-			},
-			"db_time_zone": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Time zone. Currently only supports the value of China Standard Time.",
+				Description: "The super account password. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"instance_name": {
 				Type:        schema.TypeString,
@@ -84,18 +84,13 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 				ForceNew:    true,
 				Description: "Name of the instance.",
 			},
-			"server_collation": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "SQL Server sorting rules, currently only support the Chinese_PRC_CI_AS (default) value.",
-			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				Description: "The project name.",
 			},
+			"tags": ve.TagsSchema(),
 			"charge_info": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -108,34 +103,23 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							ForceNew:    true,
-							Description: "The charge type.",
+							Description: "The charge type. Valid values: `PostPaid`, `PrePaid`.",
 						},
 						"auto_renew": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							ForceNew:    true,
-							Computed:    true,
-							Description: "Whether to enable automatic renewal in the prepaid scenario. This parameter can be set when ChargeType is Prepaid.",
-						},
-						"period_unit": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							ForceNew:    true,
-							Computed:    true,
-							Description: "Purchase cycle in prepaid scenarios. This parameter can be set when ChargeType is Prepaid.\nMonth: represents monthly (default).\nYear: represents yearly.",
+							Type:             schema.TypeBool,
+							Optional:         true,
+							ForceNew:         true,
+							Computed:         true,
+							DiffSuppressFunc: rdsMssqlInstanceDiffSuppress,
+							Description:      "Whether to enable automatic renewal in the prepaid scenario. This parameter can be set when the ChargeType is `Prepaid`.",
 						},
 						"period": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							ForceNew:    true,
-							Computed:    true,
-							Description: "Purchase duration in a prepaid scenario.",
-						},
-						"number": {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							ForceNew:    true,
-							Description: "Example purchase quantity. Default value: 1, range of values is [1,10].",
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ForceNew:         true,
+							Computed:         true,
+							DiffSuppressFunc: rdsMssqlInstanceDiffSuppress,
+							Description:      "Purchase duration in a prepaid scenario. This parameter is required when the ChargeType is `Prepaid`.",
 						},
 						"charge_start_time": {
 							Type:        schema.TypeString,
@@ -161,29 +145,6 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "Time for Disconnection due to Unpaid Fees",
-						},
-					},
-				},
-			},
-			"tags": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Tags.",
-				Set:         tagsHash,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
-							Description: "The Key of Tags.",
-						},
-						"value": {
-							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
-							Description: "The Value of Tags.",
 						},
 					},
 				},
@@ -244,17 +205,14 @@ func resourceVolcengineSqlserverInstanceUpdate(d *schema.ResourceData, meta inte
 func resourceVolcengineSqlserverInstanceDelete(d *schema.ResourceData, meta interface{}) (err error) {
 	return fmt.Errorf("This resource does not support deletion. " +
 		"If you want to remove it from terraform state, " +
-		"please use `terraform state rm volcengine_rds_mssql_instance.resource_id` command. ")
+		"please use `terraform state rm volcengine_rds_mssql_instance.resource_name` command. ")
 }
 
-var tagsHash = func(v interface{}) int {
-	if v == nil {
-		return hashcode.String("")
+func rdsMssqlInstanceDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	//在计费方式为PostPaid的时候 period的变化会被忽略
+	if d.Get("charge_info.0.charge_type").(string) == "PostPaid" && (k == "charge_info.0.period" || k == "charge_info.0.auto_renew") {
+		return true
 	}
-	m := v.(map[string]interface{})
-	var (
-		buf bytes.Buffer
-	)
-	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
-	return hashcode.String(buf.String())
+
+	return false
 }

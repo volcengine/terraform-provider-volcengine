@@ -2,6 +2,7 @@ package sqlserver_instance
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -27,12 +28,12 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 			"db_engine_version": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Compatible version. Currently only supports the value SQLServer_2019_Std, which represents SQL Server 2019 Standard Edition.",
+				Description: "Compatible version. Valid values: `SQLServer_2019_Std`, `SQLServer_2019_Web`, `SQLServer_2019_Ent`.",
 			},
 			"instance_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Instance type. Currently only supports the value HA, which represents high availability type.",
+				Description: "Instance type. Valid values: `HA`, `Basic`, `Cluster`.",
 			},
 			"create_time_start": {
 				Type:        schema.TypeString,
@@ -52,26 +53,14 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 			"charge_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The charge type.",
+				Description: "The charge type. Valid values: `PostPaid`, `PrePaid`.",
 			},
-			"tag_filters": {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "Tag query array object.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The tag key of the instance tag.",
-						},
-						"value": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The tag value of the instance tag.",
-						},
-					},
-				},
+			"tags": ve.TagsSchema(),
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of RDS mssql instance.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -93,11 +82,6 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The id of the instance.",
-						},
-						"create_time": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The creation time of the instance.",
 						},
 						"db_engine_version": {
 							Type:        schema.TypeString,
@@ -159,6 +143,11 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The storage type.",
 						},
+						"storage_use": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "The used storage space.",
+						},
 						"subnet_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -179,6 +168,62 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The zone id.",
 						},
+						"instance_category": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The instance category.",
+						},
+						"primary_instance_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the primary instance.",
+						},
+						"read_only_number": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of read only instance.",
+						},
+						"backup_use": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "The used backup space of the instance. Unit: GiB.",
+						},
+						"inner_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The inner version of the instance.",
+						},
+						"memory": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The Memory of the instance. Unit: GiB.",
+						},
+						"slow_query_enable": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable slow query function.",
+						},
+						"slow_query_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The slow query time. Unit: second.",
+						},
+						"v_cpu": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The CPU size of the instance. For example: 1 represents 1U.",
+						},
+						"create_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The creation time of the instance.",
+						},
+						"update_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The update time of the instance.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"charge_detail": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -198,7 +243,7 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 									"period_unit": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Purchase cycle in prepaid scenarios. This parameter can be set when ChargeType is Prepaid.\nMonth: represents monthly (default).\nYear: represents yearly.",
+										Description: "Purchase cycle in prepaid scenarios. This parameter can be set when ChargeType is Prepaid.",
 									},
 									"period": {
 										Type:        schema.TypeInt,
@@ -239,11 +284,6 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 							Description: "Node detail information.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"create_time": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "Node creation time.",
-									},
 									"instance_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
@@ -279,12 +319,17 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 										Computed:    true,
 										Description: "The region id.",
 									},
+									"create_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Node creation time.",
+									},
 									"update_time": {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The update time.",
 									},
-									"vcpu": {
+									"v_cpu": {
 										Type:        schema.TypeInt,
 										Computed:    true,
 										Description: "CPU size. For example: 1 represents 1U.",
@@ -298,6 +343,79 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The node ip.",
+									},
+								},
+							},
+						},
+						"connection_info": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The connection info of the instance.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"endpoint_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The endpoint id.",
+									},
+									"endpoint_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The endpoint name.",
+									},
+									"endpoint_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The endpoint type.",
+									},
+									"description": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The description.",
+									},
+									"address": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "The address info.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"dns_visibility": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: "Whether to enable private to public network resolution.",
+												},
+												"domain": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The domain.",
+												},
+												"eip_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The eip id for public address.",
+												},
+												"ip_address": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The ip address.",
+												},
+												"network_type": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The network type.",
+												},
+												"port": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The port.",
+												},
+												"subnet_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The subnet id for private address.",
+												},
+											},
+										},
 									},
 								},
 							},

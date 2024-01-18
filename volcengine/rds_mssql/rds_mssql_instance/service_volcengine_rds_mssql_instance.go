@@ -71,6 +71,45 @@ func (s *VolcengineRdsMssqlInstanceService) ReadResources(m map[string]interface
 				return data, fmt.Errorf("Instance is not map ")
 			}
 
+			detailAction := "DescribeDBInstanceDetail"
+			detailReq := map[string]interface{}{
+				"InstanceId": rdsInstance["InstanceId"],
+			}
+			logger.Debug(logger.ReqFormat, detailAction, detailReq)
+			detailInfo, err := s.Client.UniversalClient.DoCall(getUniversalInfo(detailAction), &detailReq)
+			if err != nil {
+				logger.Info("DescribeDBInstanceDetail error:", err)
+				continue
+			}
+			logger.Debug(logger.RespFormat, detailAction, detailReq, &detailInfo)
+			basicInfo, err := ve.ObtainSdkValue("Result.BasicInfo", *detailInfo)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.BasicInfo error:", err)
+				continue
+			}
+			basicMap, ok := basicInfo.(map[string]interface{})
+			if !ok {
+				logger.Info("Result.BasicInfo is not map")
+				continue
+			}
+			for k, v := range basicMap {
+				rdsInstance[k] = v
+			}
+
+			nodeDetail, err := ve.ObtainSdkValue("Result.NodeDetailInfo", *detailInfo)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.NodeDetailInfo error:", err)
+				continue
+			}
+			rdsInstance["NodeDetailInfo"] = nodeDetail
+
+			connection, err := ve.ObtainSdkValue("Result.ConnectionInfo", *detailInfo)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result.ConnectionInfo error:", err)
+				continue
+			}
+			rdsInstance["ConnectionInfo"] = connection
+
 			action := "DescribeDBInstanceParameters"
 			req := map[string]interface{}{
 				"InstanceId": rdsInstance["InstanceId"],
@@ -121,12 +160,18 @@ func (s *VolcengineRdsMssqlInstanceService) ReadResource(resourceData *schema.Re
 		if data, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		} else {
+			// 处理 subnet_id
+			if subnetIds, ok := data["SubnetId"]; ok {
+				ids := strings.Split(subnetIds.(string), ";")
+				data["SubnetId"] = ids
+			}
+
 			// 回填数据
 			if _, ok = data["ChargeDetail"]; ok {
 				data["ChargeInfo"] = data["ChargeDetail"]
 			}
-			if _, ok = data["TimeZone"]; ok {
-				data["DbTimeZone"] = data["TimeZone"]
+			if _, ok = data["DBEngineVersion"]; ok {
+				data["DbEngineVersion"] = data["DBEngineVersion"]
 			}
 			if fullBackupPeriod, ok := resourceData.GetOk("full_backup_period"); ok {
 				data["FullBackupPeriod"] = fullBackupPeriod
@@ -136,7 +181,6 @@ func (s *VolcengineRdsMssqlInstanceService) ReadResource(resourceData *schema.Re
 	if len(data) == 0 {
 		return data, fmt.Errorf("sqlserver_instance %s not exist ", id)
 	}
-	logger.Debug(logger.RespFormat, "ReadResource data", data)
 	return data, err
 }
 
@@ -198,8 +242,8 @@ func (s *VolcengineRdsMssqlInstanceService) CreateResource(resourceData *schema.
 				"tags": {
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
-				"db_time_zone": {
-					TargetField: "DBTimeZone",
+				"subnet_id": {
+					Ignore: true,
 				},
 				"full_backup_period": {
 					Ignore: true,
@@ -212,14 +256,34 @@ func (s *VolcengineRdsMssqlInstanceService) CreateResource(resourceData *schema.
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if subnetId, ok := d.GetOk("subnet_id"); ok {
-					resp, err := subnet.NewSubnetService(s.Client).ReadResource(resourceData, subnetId.(string))
+				subnetId := d.Get("subnet_id")
+				ids, ok := subnetId.([]interface{})
+				if !ok {
+					return false, fmt.Errorf("subnet_id is not slice ")
+				}
+				zoneIds := make([]string, 0)
+				subnetIds := make([]string, 0)
+				for _, id := range ids {
+					resp, err := subnet.NewSubnetService(s.Client).ReadResource(resourceData, id.(string))
 					if err != nil {
 						return false, err
 					}
 					(*call.SdkParam)["VpcId"] = resp["VpcId"]
-					(*call.SdkParam)["ZoneId"] = resp["ZoneId"]
+					zoneIds = append(zoneIds, resp["ZoneId"].(string))
+					subnetIds = append(subnetIds, id.(string))
 				}
+				(*call.SdkParam)["ZoneId"] = strings.Join(zoneIds, ";")
+				(*call.SdkParam)["SubnetId"] = strings.Join(subnetIds, ";")
+
+				if (*call.SdkParam)["ChargeInfo.0.ChargeType"] == "PrePaid" {
+					if (*call.SdkParam)["ChargeInfo.0.Period"] == nil || (*call.SdkParam)["ChargeInfo.0.Period"].(int) < 1 {
+						return false, fmt.Errorf("Instance Charge Type is PrePaid. Must set Period more than 1. ")
+					}
+					(*call.SdkParam)["ChargeInfo.0.PeriodUnit"] = "Month"
+				}
+
+				(*call.SdkParam)["DBTimeZone"] = "China Standard Time"
+				(*call.SdkParam)["ServerCollation"] = "Chinese_PRC_CI_AS"
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -240,6 +304,7 @@ func (s *VolcengineRdsMssqlInstanceService) CreateResource(resourceData *schema.
 		},
 	}
 	callbacks = append(callbacks, callback)
+
 	backTime, timeOk := resourceData.GetOk("backup_time")
 	fullBackupPeriod, fullOk := resourceData.GetOk("full_backup_period")
 	backPeriod, retentionOk := resourceData.GetOk("backup_retention_period")
@@ -346,6 +411,10 @@ func (s *VolcengineRdsMssqlInstanceService) ModifyResource(resourceData *schema.
 		}
 		callbacks = append(callbacks, backupCallback)
 	}
+
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, callbacks)
+
 	return callbacks
 }
 
@@ -360,7 +429,8 @@ func (s *VolcengineRdsMssqlInstanceService) DatasourceResources(*schema.Resource
 			"db_engine_version": {
 				TargetField: "DBEngineVersion",
 			},
-			"tag_filters": {
+			"tags": {
+				TargetField: "TagFilters",
 				ConvertType: ve.ConvertJsonObjectArray,
 			},
 		},
@@ -374,13 +444,19 @@ func (s *VolcengineRdsMssqlInstanceService) DatasourceResources(*schema.Resource
 				KeepDefault: true,
 			},
 			"VCPU": {
-				TargetField: "vcpu",
+				TargetField: "v_cpu",
 			},
 			"NodeIP": {
 				TargetField: "node_ip",
 			},
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
+			},
+			"DNSVisibility": {
+				TargetField: "dns_visibility",
+			},
+			"IPAddress": {
+				TargetField: "ip_address",
 			},
 		},
 	}
@@ -398,6 +474,58 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
 	}
+}
+
+func (s *VolcengineRdsMssqlInstanceService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "RemoveTagsFromResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddTagsToResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag.(map[string]interface{}))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func (s *VolcengineRdsMssqlInstanceService) ProjectTrn() *ve.ProjectTrn {
