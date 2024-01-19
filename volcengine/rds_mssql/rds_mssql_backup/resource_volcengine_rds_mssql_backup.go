@@ -61,7 +61,7 @@ func ResourceVolcengineRdsMssqlBackup() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Backup repository information.",
+				Description: "Backup repository information. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"db_name": {
