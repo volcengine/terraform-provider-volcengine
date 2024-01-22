@@ -1,5 +1,17 @@
+resource "volcengine_transit_router" "foo" {
+  transit_router_name = "test-tf-acc"
+  description         = "test-tf-acc"
+}
+
+resource "volcengine_transit_router_route_table" "foo" {
+  description = "tf-test-acc-description"
+  transit_router_route_table_name = "tf-table-test-acc"
+  transit_router_id = volcengine_transit_router.foo.id
+}
+
+
 data "volcengine_transit_router_route_tables" "default" {
-  transit_router_id = "tr-2ff4v69tkxji859gp684cm14e"
-  ids = ["tr-rtb-12b7qd3fmzf2817q7y2jkbd55"]
+  transit_router_id = volcengine_transit_router.foo.id
+  ids = [volcengine_transit_router_route_table.foo.transit_router_route_table_id]
   //transit_router_route_table_type = ""
 }

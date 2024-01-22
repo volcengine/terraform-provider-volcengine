@@ -31,7 +31,7 @@ func (s *VolcengineRdsMysqlAccountService) GetClient() *volc.SdkClient {
 }
 
 func (s *VolcengineRdsMysqlAccountService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
-	return volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 0, func(condition map[string]interface{}) (data []interface{}, err error) {
+	return volc.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) (data []interface{}, err error) {
 		var (
 			resp    *map[string]interface{}
 			results interface{}

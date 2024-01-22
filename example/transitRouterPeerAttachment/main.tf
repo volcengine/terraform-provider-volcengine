@@ -1,9 +1,24 @@
+resource "volcengine_transit_router_bandwidth_package" "foo" {
+  transit_router_bandwidth_package_name = "acc-tf-test"
+  description = "acc-test"
+  bandwidth = 2
+  period = 1
+  renew_type = "Manual"
+  renew_period = 1
+  remain_renew_times = -1
+}
+
+resource "volcengine_transit_router" "foo" {
+  transit_router_name = "acc-test-tf"
+  description         = "acc-test-tf"
+}
+
 resource "volcengine_transit_router_peer_attachment" "foo" {
-  transit_router_id = "tr-12bbdsa6ode6817q7y1f5****"
-  transit_router_attachment_name = "tf-test-tra"
+  transit_router_id = volcengine_transit_router.foo.id
+  transit_router_attachment_name = "acc-test-tf"
   description = "tf-test"
-  peer_transit_router_id = "tr-3jgsfiktn0feo3pncmfb5****"
-  peer_transit_router_region_id = "cn-beijing"
-  transit_router_bandwidth_package_id = "tbp-cd-2felfww0i6pkw59gp68bq****"
+  peer_transit_router_id = "tr-xxx"
+  peer_transit_router_region_id = "cn-xx"
+  transit_router_bandwidth_package_id = volcengine_transit_router_bandwidth_package.foo.id
   bandwidth = 2
 }
