@@ -10,10 +10,15 @@ description: |-
 Provides a resource to manage transit router grant rule
 ## Example Usage
 ```hcl
+resource "volcengine_transit_router" "foo" {
+  transit_router_name = "acc-test-tf"
+  description         = "acc-test-tf"
+}
+
 resource "volcengine_transit_router_grant_rule" "foo" {
-  transit_router_id = "tr-2bzy39uy6u3282dx0efxiqyq0"
-  grant_account_id  = "200000xxxx"
-  description       = "tf-test"
+  grant_account_id  = "2000xxxxx"
+  description       = "acc-test-tf"
+  transit_router_id = volcengine_transit_router.foo.id
 }
 ```
 ## Argument Reference

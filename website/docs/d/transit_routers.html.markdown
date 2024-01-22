@@ -10,9 +10,14 @@ description: |-
 Use this data source to query detailed information of transit routers
 ## Example Usage
 ```hcl
+resource "volcengine_transit_router" "foo" {
+  transit_router_name = "test-tf-acc"
+  description         = "test-tf-acc"
+}
+
 data "volcengine_transit_routers" "default" {
-  ids                 = ["tr-2d6fr7mzya2gw58ozfes5g2oh"]
-  transit_router_name = "tf2"
+  ids                 = [volcengine_transit_router.foo.id]
+  transit_router_name = "test"
 }
 ```
 ## Argument Reference
