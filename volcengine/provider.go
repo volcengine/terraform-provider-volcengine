@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
@@ -604,6 +605,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_units":                    organization_unit.DataSourceVolcengineOrganizationUnits(),
 			"volcengine_organization_service_control_policies": organization_service_control_policy.DataSourceVolcengineServiceControlPolicies(),
 			"volcengine_organization_accounts":                 organization_account.DataSourceVolcengineOrganizationAccounts(),
+			"volcengine_organizations":                         organization.DataSourceVolcengineOrganizations(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -864,6 +866,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policy":            organization_service_control_policy.ResourceVolcengineServiceControlPolicy(),
 			"volcengine_organization_service_control_policy_attachment": organization_service_control_policy_attachment.ResourceVolcengineServiceControlPolicyAttachment(),
 			"volcengine_organization_account":                           organization_account.ResourceVolcengineOrganizationAccount(),
+			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

@@ -1,5 +1,13 @@
+resource "volcengine_organization" "foo" {
+
+}
+
+data "volcengine_organization_units" "foo" {
+    depends_on = [volcengine_organization.foo]
+}
+
 resource "volcengine_organization_unit" "foo" {
-    name = "tftest57"
-    parent_id = "7306629044253098034"
-    description = "test"
+    name = "tf-test-unit"
+    parent_id = [for unit in data.volcengine_organization_units.foo.units : unit.id if unit.parent_id == "0"][0]
+    description = "tf-test"
 }
