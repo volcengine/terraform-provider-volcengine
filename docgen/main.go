@@ -154,6 +154,7 @@ var resourceKeys = map[string]string{
 	"bandwidth_package": "BANDWIDTH_PACKAGE",
 	"cloud_monitor":     "CLOUD_MONITOR",
 	"rds_mssql":         "RDS_MSSQL",
+	"rds_postgresql":    "RDS_POSTGRESQL",
 }
 
 type Products struct {
