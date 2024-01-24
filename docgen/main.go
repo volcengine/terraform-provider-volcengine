@@ -153,6 +153,7 @@ var resourceKeys = map[string]string{
 	"alb":               "ALB",
 	"bandwidth_package": "BANDWIDTH_PACKAGE",
 	"cloud_monitor":     "CLOUD_MONITOR",
+	"rds_mssql":         "RDS_MSSQL",
 }
 
 type Products struct {

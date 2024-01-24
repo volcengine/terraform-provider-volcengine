@@ -273,7 +273,7 @@ func DataSourceVolcengineRdsMssqlInstances() *schema.Resource {
 									"overdue_time": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Time for Disconnection due to Unpaid Fees",
+										Description: "Time for Disconnection due to Unpaid Fees.",
 									},
 								},
 							},

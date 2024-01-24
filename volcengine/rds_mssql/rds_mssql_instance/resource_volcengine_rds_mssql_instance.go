@@ -57,7 +57,7 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "The subnet id of the instance node. When creating an instance that includes primary and backup nodes and needs to deploy primary and backup nodes across availability zones, you can specify two subnet_id. " +
-					"By default, the first is the primary node availability zone, and the second is the backup node availability zone",
+					"By default, the first is the primary node availability zone, and the second is the backup node availability zone.",
 			},
 			"node_spec": {
 				Type:        schema.TypeString,
@@ -144,7 +144,7 @@ func ResourceVolcengineRdsMssqlInstance() *schema.Resource {
 						"overdue_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Time for Disconnection due to Unpaid Fees",
+							Description: "Time for Disconnection due to Unpaid Fees.",
 						},
 					},
 				},
