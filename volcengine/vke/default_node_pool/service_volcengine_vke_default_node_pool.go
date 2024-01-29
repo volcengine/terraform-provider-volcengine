@@ -228,6 +228,9 @@ func (s *VolcengineDefaultNodePoolService) CreateResource(resourceData *schema.R
 						"taints": {
 							ConvertType: ve.ConvertJsonArray,
 						},
+						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 				"node_config": {
@@ -348,6 +351,9 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 							ForceGet:    true,
 						},
 						"cordon": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"name_prefix": {
 							ConvertType: ve.ConvertJsonObject,
 						},
 					},

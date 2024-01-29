@@ -364,6 +364,11 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Required:    true,
 							Description: "The Cordon of KubernetesConfig.",
 						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The NamePrefix of node metadata.",
+						},
 					},
 				},
 				Description: "The KubernetesConfig of NodeConfig.",

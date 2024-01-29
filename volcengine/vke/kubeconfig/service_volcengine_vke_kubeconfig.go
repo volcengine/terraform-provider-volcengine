@@ -196,6 +196,10 @@ func (s *VolcengineVkeKubeconfigService) DatasourceResources(*schema.ResourceDat
 				TargetField: "Filter.ClusterIds",
 				ConvertType: ve.ConvertJsonArray,
 			},
+			"role_ids": {
+				TargetField: "Filter.RoleIds",
+				ConvertType: ve.ConvertJsonArray,
+			},
 			"types": {
 				TargetField: "Filter.Types",
 				ConvertType: ve.ConvertJsonArray,
