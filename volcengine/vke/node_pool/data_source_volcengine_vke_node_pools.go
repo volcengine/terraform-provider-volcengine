@@ -300,6 +300,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The Cordon of KubernetesConfig.",
 						},
+						"kube_config_name_prefix": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The NamePrefix of node metadata.",
+						},
 						"label_content": {
 							Type:        schema.TypeList,
 							Computed:    true,

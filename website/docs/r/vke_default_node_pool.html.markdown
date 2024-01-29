@@ -137,6 +137,7 @@ The `kubernetes_config` object supports the following:
 
 * `cordon` - (Required) The Cordon of KubernetesConfig.
 * `labels` - (Optional) The Labels of KubernetesConfig.
+* `name_prefix` - (Optional) The NamePrefix of node metadata.
 * `taints` - (Optional) The Taints of KubernetesConfig.
 
 The `labels` object supports the following:

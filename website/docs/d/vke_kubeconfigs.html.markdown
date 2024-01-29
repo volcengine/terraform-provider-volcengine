@@ -84,6 +84,7 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `page_number` - (Optional) The page number of Kubeconfigs query.
 * `page_size` - (Optional) The page size of Kubeconfigs query.
+* `role_ids` - (Optional) A list of Role IDs.
 * `types` - (Optional) The type of Kubeconfigs query.
 
 ## Attributes Reference
