@@ -1,4 +1,4 @@
-package sqlserver_instance
+package rds_mssql_instance
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"

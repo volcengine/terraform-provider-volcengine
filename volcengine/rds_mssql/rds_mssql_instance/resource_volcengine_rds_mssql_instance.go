@@ -1,4 +1,4 @@
-package sqlserver_instance
+package rds_mssql_instance
 
 import (
 	"fmt"
