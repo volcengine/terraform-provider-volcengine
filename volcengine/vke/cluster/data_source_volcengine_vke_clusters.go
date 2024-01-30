@@ -413,6 +413,7 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 									"stopped_count": {
 										Type:        schema.TypeInt,
 										Computed:    true,
+										Deprecated:  "This field has been deprecated and is not recommended for use.",
 										Description: "Phase=Stopped total number of nodes.",
 									},
 									"updating_count": {
