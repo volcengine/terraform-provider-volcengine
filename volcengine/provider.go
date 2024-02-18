@@ -9,6 +9,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
 	mssqlBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_backup"
 	mssqlInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_readonly_node"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact"
@@ -536,6 +540,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mssql_zones":     rds_mssql_zone.DataSourceVolcengineRdsMssqlZones(),
 			"volcengine_rds_mssql_instances": mssqlInstance.DataSourceVolcengineRdsMssqlInstances(),
 			"volcengine_rds_mssql_backups":   mssqlBackup.DataSourceVolcengineRdsMssqlBackups(),
+
+			// ================ Postgresql ================
+			"volcengine_rds_postgresql_databases": rds_postgresql_database.DataSourceVolcengineRdsPostgresqlDatabases(),
+			"volcengine_rds_postgresql_accounts":  rds_postgresql_account.DataSourceVolcengineRdsPostgresqlAccounts(),
+			"volcengine_rds_postgresql_instances": rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -782,6 +791,12 @@ func Provider() terraform.ResourceProvider {
 			// ================ RdsMssql ================
 			"volcengine_rds_mssql_instance": mssqlInstance.ResourceVolcengineRdsMssqlInstance(),
 			"volcengine_rds_mssql_backup":   mssqlBackup.ResourceVolcengineRdsMssqlBackup(),
+
+			// ================ Postgresql ================
+			"volcengine_rds_postgresql_database":               rds_postgresql_database.ResourceVolcengineRdsPostgresqlDatabase(),
+			"volcengine_rds_postgresql_account":                rds_postgresql_account.ResourceVolcengineRdsPostgresqlAccount(),
+			"volcengine_rds_postgresql_instance":               rds_postgresql_instance.ResourceVolcengineRdsPostgresqlInstance(),
+			"volcengine_rds_postgresql_instance_readonly_node": rds_postgresql_instance_readonly_node.ResourceVolcengineRdsPostgresqlInstanceReadonlyNode(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

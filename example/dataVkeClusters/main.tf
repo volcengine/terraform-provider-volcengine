@@ -15,21 +15,6 @@ resource "volcengine_security_group" "foo" {
   security_group_name = "acc-test-security-group2"
 }
 
-resource "volcengine_ecs_instance" "foo" {
-  image_id = "image-ybqi99s7yq8rx7mnk44b"
-  instance_type = "ecs.g1ie.large"
-  instance_name = "acc-test-ecs-name2"
-  password = "93f0cb0614Aab12"
-  instance_charge_type = "PostPaid"
-  system_volume_type = "ESSD_PL0"
-  system_volume_size = 40
-  subnet_id = volcengine_subnet.foo.id
-  security_group_ids = [volcengine_security_group.foo.id]
-  lifecycle {
-    ignore_changes = [security_group_ids, instance_name]
-  }
-}
-
 resource "volcengine_vke_cluster" "foo" {
   name = "acc-test-1"
   description = "created by terraform"
