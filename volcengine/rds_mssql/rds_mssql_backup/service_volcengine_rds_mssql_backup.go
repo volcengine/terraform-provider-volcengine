@@ -1,4 +1,4 @@
-package sqlserver_backup
+package rds_mssql_backup
 
 import (
 	"encoding/json"
