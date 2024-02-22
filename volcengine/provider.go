@@ -16,10 +16,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
+
 	"github.com/volcengine/volcengine-go-sdk/volcengine"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/credentials"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/session"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineutil"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_certificate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_domain_enabler"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
@@ -612,6 +617,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policies": organization_service_control_policy.DataSourceVolcengineServiceControlPolicies(),
 			"volcengine_organization_accounts":                 organization_account.DataSourceVolcengineOrganizationAccounts(),
 			"volcengine_organizations":                         organization.DataSourceVolcengineOrganizations(),
+
+			// ================ CDN ================
+			"volcengine_cdn_certificates": cdn_certificate.DataSourceVolcengineCdnCertificates(),
+			"volcengine_cdn_domains":      cdn_domain.DataSourceVolcengineCdnDomains(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -873,6 +882,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policy_attachment": organization_service_control_policy_attachment.ResourceVolcengineServiceControlPolicyAttachment(),
 			"volcengine_organization_account":                           organization_account.ResourceVolcengineOrganizationAccount(),
 			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
+
+			// ================ CDN ================
+			"volcengine_cdn_certificate":    cdn_certificate.ResourceVolcengineCdnCertificate(),
+			"volcengine_cdn_domain":         cdn_domain.ResourceVolcengineCdnDomain(),
+			"volcengine_cdn_domain_enabler": cdn_domain_enabler.ResourceVolcengineCdnDomainEnabler(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

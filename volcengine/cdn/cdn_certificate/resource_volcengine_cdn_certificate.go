@@ -1,0 +1,120 @@
+package cdn_certificate
+
+import (
+	"fmt"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+)
+
+/*
+
+Import
+CdnCertificate can be imported using the id, e.g.
+```
+$ terraform import volcengine_cdn_certificate.default resource_id
+```
+
+*/
+
+func ResourceVolcengineCdnCertificate() *schema.Resource {
+	resource := &schema.Resource{
+		Create: resourceVolcengineCdnCertificateCreate,
+		Read:   resourceVolcengineCdnCertificateRead,
+		Delete: resourceVolcengineCdnCertificateDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
+		},
+		Schema: map[string]*schema.Schema{
+			"certificate": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Represents a certificate object.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"certificate": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+							Description: "Content of the specified certificate public key file. " +
+								"Line breaks in the content should be replaced with `\\r\\n`. " +
+								"The file extension for the certificate public key is `.crt` or `.pem`. " +
+								"The public key must include the complete certificate chain.",
+						},
+						"private_key": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+							Description: "The content of the specified certificate private key file. " +
+								"Replace line breaks in the content with `\\r\\n`. " +
+								"The file extension for the certificate private key is `.key` or `.pem`. " +
+								"The private key must be unencrypted.",
+						},
+					},
+				},
+			},
+			"source": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Computed: true,
+				Description: "Specify the location for storing the certificate. " +
+					"The parameter can take the following values: " +
+					"`volc_cert_center`: indicates that the certificate will be stored in the certificate center." +
+					"`cdn_cert_hosting`: indicates that the certificate will be hosted on the content delivery network.",
+			},
+			"cert_info": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Object representing a certificate remark.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"desc": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "Note on the certificate.",
+						},
+					},
+				},
+			},
+		},
+	}
+	return resource
+}
+
+func resourceVolcengineCdnCertificateCreate(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewCdnCertificateService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Create(service, d, ResourceVolcengineCdnCertificate())
+	if err != nil {
+		return fmt.Errorf("error on creating cdn_certificate %q, %s", d.Id(), err)
+	}
+	return resourceVolcengineCdnCertificateRead(d, meta)
+}
+
+func resourceVolcengineCdnCertificateRead(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewCdnCertificateService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Read(service, d, ResourceVolcengineCdnCertificate())
+	if err != nil {
+		return fmt.Errorf("error on reading cdn_certificate %q, %s", d.Id(), err)
+	}
+	return err
+}
+
+func resourceVolcengineCdnCertificateDelete(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewCdnCertificateService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Delete(service, d, ResourceVolcengineCdnCertificate())
+	if err != nil {
+		return fmt.Errorf("error on deleting cdn_certificate %q, %s", d.Id(), err)
+	}
+	return err
+}
