@@ -27,7 +27,7 @@ func DataSourceVolcengineServiceControlPolicies() *schema.Resource {
 			"policy_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The type of policy. The value can be System or Custom",
+				Description: "The type of policy. The value can be System or Custom.",
 			},
 			"policies": {
 				Description: "The collection of Policy query.",
