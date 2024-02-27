@@ -126,7 +126,7 @@ In addition to all arguments above, the following attributes are exported:
         * `deleting_count` - Phase=Deleting total number of nodes.
         * `failed_count` - Phase=Failed total number of nodes.
         * `running_count` - Phase=Running total number of nodes.
-        * `stopped_count` - Phase=Stopped total number of nodes.
+        * `stopped_count` - (**Deprecated**) This field has been deprecated and is not recommended for use. Phase=Stopped total number of nodes.
         * `total_count` - Total number of nodes.
         * `updating_count` - Phase=Updating total number of nodes.
     * `pods_config` - The config of the pods.

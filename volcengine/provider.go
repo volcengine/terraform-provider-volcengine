@@ -1,6 +1,20 @@
 package volcengine
 
 import (
+	"fmt"
+	"os"
+	"strconv"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
+	"github.com/volcengine/volc-sdk-golang/base"
+	"github.com/volcengine/volc-sdk-golang/service/sts"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_certificate"
@@ -152,6 +166,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role_policy_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_saml_provider"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group_attachment"
@@ -300,6 +315,45 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_PROXY_URL", nil),
 				Description: "PROXY URL for Volcengine Provider",
 			},
+			"assume_role": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "The ASSUME ROLE block for Volcengine Provider. If provided, terraform will attempt to assume this role using the supplied credentials.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"assume_role_trn": {
+							Type:        schema.TypeString,
+							Required:    true,
+							DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ASSUME_ROLE_TRN", nil),
+							Description: "The TRN of the role to assume.",
+						},
+						"assume_role_session_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ASSUME_ROLE_SESSION_NAME", nil),
+							Description: "The session name to use when making the AssumeRole call.",
+						},
+						"duration_seconds": {
+							Type:     schema.TypeInt,
+							Required: true,
+							DefaultFunc: func() (interface{}, error) {
+								if v := os.Getenv("VOLCENGINE_ASSUME_ROLE_DURATION_SECONDS"); v != "" {
+									return strconv.Atoi(v)
+								}
+								return 3600, nil
+							},
+							ValidateFunc: validation.IntBetween(900, 43200),
+							Description:  "The duration of the session when making the AssumeRole call. Its value ranges from 900 to 43200(seconds), and default is 3600 seconds.",
+						},
+						"policy": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "A more restrictive policy when making the AssumeRole call.",
+						},
+					},
+				},
+			},
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"volcengine_vpcs":                        vpc.DataSourceVolcengineVpcs(),
@@ -390,6 +444,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_users":                         iam_user.DataSourceVolcengineIamUsers(),
 			"volcengine_iam_user_groups":                   iam_user_group.DataSourceVolcengineIamUserGroups(),
 			"volcengine_iam_user_group_policy_attachments": iam_user_group_policy_attachment.DataSourceVolcengineIamUserGroupPolicyAttachments(),
+			"volcengine_iam_saml_providers":                iam_saml_provider.DataSourceVolcengineIamSamlProviders(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),
@@ -545,6 +600,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_postgresql_databases": rds_postgresql_database.DataSourceVolcengineRdsPostgresqlDatabases(),
 			"volcengine_rds_postgresql_accounts":  rds_postgresql_account.DataSourceVolcengineRdsPostgresqlAccounts(),
 			"volcengine_rds_postgresql_instances": rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
+
+			// ================ Organization ================
+			"volcengine_organization_units":                    organization_unit.DataSourceVolcengineOrganizationUnits(),
+			"volcengine_organization_service_control_policies": organization_service_control_policy.DataSourceVolcengineServiceControlPolicies(),
+			"volcengine_organization_accounts":                 organization_account.DataSourceVolcengineOrganizationAccounts(),
+			"volcengine_organizations":                         organization.DataSourceVolcengineOrganizations(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -646,6 +707,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user_group":                   iam_user_group.ResourceVolcengineIamUserGroup(),
 			"volcengine_iam_user_group_attachment":        iam_user_group_attachment.ResourceVolcengineIamUserGroupAttachment(),
 			"volcengine_iam_user_group_policy_attachment": iam_user_group_policy_attachment.ResourceVolcengineIamUserGroupPolicyAttachment(),
+			"volcengine_iam_saml_provider":                iam_saml_provider.ResourceVolcengineIamSamlProvider(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instance":           rds_instance.ResourceVolcengineRdsInstance(),
@@ -797,6 +859,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_postgresql_account":                rds_postgresql_account.ResourceVolcengineRdsPostgresqlAccount(),
 			"volcengine_rds_postgresql_instance":               rds_postgresql_instance.ResourceVolcengineRdsPostgresqlInstance(),
 			"volcengine_rds_postgresql_instance_readonly_node": rds_postgresql_instance_readonly_node.ResourceVolcengineRdsPostgresqlInstanceReadonlyNode(),
+
+			// ================ Organization ================
+			"volcengine_organization_unit":                              organization_unit.ResourceVolcengineOrganizationUnit(),
+			"volcengine_organization_service_control_policy_enabler":    organization_service_control_policy_enabler.ResourceVolcengineOrganizationServiceControlPolicyEnabler(),
+			"volcengine_organization_service_control_policy":            organization_service_control_policy.ResourceVolcengineServiceControlPolicy(),
+			"volcengine_organization_service_control_policy_attachment": organization_service_control_policy_attachment.ResourceVolcengineServiceControlPolicyAttachment(),
+			"volcengine_organization_account":                           organization_account.ResourceVolcengineOrganizationAccount(),
+			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
@@ -837,8 +907,96 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 		}
 	}
 
+	// get assume role
+	var (
+		arTrn             string
+		arSessionName     string
+		arPolicy          string
+		arDurationSeconds int
+	)
+
+	if v, ok := d.GetOk("assume_role"); ok {
+		assumeRoleList, ok := v.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("the assume_role is not slice ")
+		}
+		if len(assumeRoleList) == 1 {
+			assumeRoleMap, ok := assumeRoleList[0].(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("the value of the assume_role is not map ")
+			}
+			arTrn = assumeRoleMap["assume_role_trn"].(string)
+			arSessionName = assumeRoleMap["assume_role_session_name"].(string)
+			arDurationSeconds = assumeRoleMap["duration_seconds"].(int)
+			arPolicy = assumeRoleMap["policy"].(string)
+		}
+	} else {
+		arTrn = os.Getenv("VOLCENGINE_ASSUME_ROLE_TRN")
+		arSessionName = os.Getenv("VOLCENGINE_ASSUME_ROLE_SESSION_NAME")
+		duration := os.Getenv("VOLCENGINE_ASSUME_ROLE_DURATION_SECONDS")
+		if duration != "" {
+			durationSeconds, err := strconv.Atoi(duration)
+			if err != nil {
+				return nil, err
+			}
+			arDurationSeconds = durationSeconds
+		} else {
+			arDurationSeconds = 3600
+		}
+	}
+
+	if arTrn != "" && arSessionName != "" {
+		cred, err := assumeRole(config, arTrn, arSessionName, arPolicy, arDurationSeconds)
+		if err != nil {
+			return nil, err
+		}
+		config.AccessKey = cred.AccessKeyId
+		config.SecretKey = cred.SecretAccessKey
+		config.SessionToken = cred.SessionToken
+	}
+
 	client, err := config.Client()
 	return client, err
+}
+
+func assumeRole(c ve.Config, arTrn, arSessionName, arPolicy string, arDurationSeconds int) (*sts.Credentials, error) {
+	ins := sts.NewInstance()
+	if c.Region != "" {
+		ins.SetRegion(c.Region)
+	}
+	if c.Endpoint != "" {
+		ins.SetHost(c.Endpoint)
+	}
+
+	ins.Client.SetAccessKey(c.AccessKey)
+	ins.Client.SetSecretKey(c.SecretKey)
+	input := &sts.AssumeRoleRequest{
+		RoleTrn:         arTrn,
+		RoleSessionName: arSessionName,
+		DurationSeconds: arDurationSeconds,
+		Policy:          arPolicy,
+	}
+	output, statusCode, err := ins.AssumeRole(input)
+	var (
+		reqId  string
+		errObj *base.ErrorObj
+	)
+	if output != nil {
+		reqId = output.ResponseMetadata.RequestId
+		errObj = output.ResponseMetadata.Error
+	}
+	if err != nil {
+		return nil, fmt.Errorf("AssumeRole error, httpcode is %v and reqId is %s error is %s", statusCode, reqId, err.Error())
+	}
+	if errObj != nil {
+		return nil, fmt.Errorf("AssumeRole error, code is %v and reqId is %s error is %s", errObj.Code, reqId, errObj.Message)
+	}
+
+	if output.Result == nil || output.Result.Credentials == nil {
+		return nil, fmt.Errorf("assume role failed, result is nil")
+	}
+
+	return output.Result.Credentials, nil
 }
 
 func defaultCustomerEndPoints() map[string]string {

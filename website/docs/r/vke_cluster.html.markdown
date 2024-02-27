@@ -66,7 +66,7 @@ The following arguments are supported:
 * `client_token` - (Optional) ClientToken is a case-sensitive string of no more than 64 ASCII characters passed in by the caller.
 * `delete_protection_enabled` - (Optional) The delete protection of the cluster, the value is `true` or `false`.
 * `description` - (Optional) The description of the cluster.
-* `kubernetes_version` - (Optional, ForceNew) The version of Kubernetes specified when creating a VKE cluster (specified to patch version), if not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.
+* `kubernetes_version` - (Optional, ForceNew) The version of Kubernetes specified when creating a VKE cluster (specified to patch version), with an example value of `v1.24`. If not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.
 * `logging_config` - (Optional) Cluster log configuration information.
 * `tags` - (Optional) Tags.
 
