@@ -24,7 +24,6 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_certificate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_domain"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_domain_enabler"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
@@ -884,9 +883,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
 
 			// ================ CDN ================
-			"volcengine_cdn_certificate":    cdn_certificate.ResourceVolcengineCdnCertificate(),
-			"volcengine_cdn_domain":         cdn_domain.ResourceVolcengineCdnDomain(),
-			"volcengine_cdn_domain_enabler": cdn_domain_enabler.ResourceVolcengineCdnDomainEnabler(),
+			"volcengine_cdn_certificate": cdn_certificate.ResourceVolcengineCdnCertificate(),
+			"volcengine_cdn_domain":      cdn_domain.ResourceVolcengineCdnDomain(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

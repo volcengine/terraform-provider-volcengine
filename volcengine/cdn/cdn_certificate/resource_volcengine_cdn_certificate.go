@@ -15,7 +15,8 @@ CdnCertificate can be imported using the id, e.g.
 ```
 $ terraform import volcengine_cdn_certificate.default resource_id
 ```
-
+You can delete the certificate hosted on the content delivery network.
+If the certificate to be deleted is already associated with a domain name, the deletion will fail. To remove the association between the domain name and the certificate, you can disable the HTTPS function for the domain name in the Content Delivery Network console.
 */
 
 func ResourceVolcengineCdnCertificate() *schema.Resource {
@@ -46,7 +47,9 @@ func ResourceVolcengineCdnCertificate() *schema.Resource {
 							Description: "Content of the specified certificate public key file. " +
 								"Line breaks in the content should be replaced with `\\r\\n`. " +
 								"The file extension for the certificate public key is `.crt` or `.pem`. " +
-								"The public key must include the complete certificate chain.",
+								"The public key must include the complete certificate chain. " +
+								"When importing resources, this attribute will not be imported. " +
+								"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 						},
 						"private_key": {
 							Type:     schema.TypeString,
@@ -55,7 +58,9 @@ func ResourceVolcengineCdnCertificate() *schema.Resource {
 							Description: "The content of the specified certificate private key file. " +
 								"Replace line breaks in the content with `\\r\\n`. " +
 								"The file extension for the certificate private key is `.key` or `.pem`. " +
-								"The private key must be unencrypted.",
+								"The private key must be unencrypted. " +
+								"When importing resources, this attribute will not be imported. " +
+								"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 						},
 					},
 				},

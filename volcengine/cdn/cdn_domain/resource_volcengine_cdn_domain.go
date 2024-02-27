@@ -15,7 +15,7 @@ CdnDomain can be imported using the domain, e.g.
 ```
 $ terraform import volcengine_cdn_domain.default www.volcengine.com
 ```
-
+Please note that when you execute destroy, we will first take the domain name offline and then delete it.
 */
 
 func ResourceVolcengineCdnDomain() *schema.Resource {
@@ -29,6 +29,7 @@ func ResourceVolcengineCdnDomain() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -50,9 +51,40 @@ func ResourceVolcengineCdnDomain() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
+				Computed: true,
 				Description: "Indicates the acceleration area. The parameter can take the following values: " +
 					"`chinese_mainland`: Indicates mainland China. `global`: Indicates global." +
 					" `outside_chinese_mainland`: Indicates global (excluding mainland China).",
+			},
+			"origin_protocol": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Description: "Configuration for origin-pull protocol. " +
+					"The parameter can take the following values: " +
+					"`http`: HTTP origin-pull will be used for both HTTP and HTTPS requests initiated by the user. " +
+					"`https`: HTTPS origin-pull will be used for both HTTP and HTTPS requests initiated by the user. " +
+					"`followclient`: HTTP origin-pull will be used for HTTP requests initiated by the user, " +
+					"and HTTPS origin-pull will be used for HTTPS requests initiated by the user.",
+			},
+			"origin_host": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Description: "The value of the Host header for origin retrieval, " +
+					"with a maximum length of 1,024 characters. " +
+					"This parameter has the following specifications: " +
+					"- The default value of this parameter is the same as the accelerated domain name. " +
+					"- The priority of this parameter is lower than the OriginHost parameter in the origin configuration module. " +
+					"- This parameter does not take effect if the InstanceType of the origin is tos.",
+			},
+			"domain_config": {
+				Type:     schema.TypeString,
+				Required: true,
+				Description: "Accelerate domain configuration. " +
+					"Please convert the configuration module structure into json and pass it into a string. " +
+					"You must specify the Origin module. The OriginProtocol parameter, OriginHost parameter, " +
+					"and other domain configuration modules are optional.",
 			},
 			"project": {
 				Type:        schema.TypeString,
@@ -64,6 +96,7 @@ func ResourceVolcengineCdnDomain() *schema.Resource {
 			"resource_tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Indicate the tags you have set for this domain name. You can set up to 10 tags.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -102,6 +135,11 @@ func ResourceVolcengineCdnDomain() *schema.Resource {
 						},
 					},
 				},
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The status of the domain.",
 			},
 		},
 	}

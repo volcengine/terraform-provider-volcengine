@@ -139,6 +139,26 @@ func (s *VolcengineCdnDomainService) CreateResource(resourceData *schema.Resourc
 					TargetField: "SharedCname",
 					ConvertType: ve.ConvertJsonObject,
 				},
+				"domain_config": {
+					Ignore: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				var (
+					config map[string]interface{}
+				)
+				domainConfig, ok := d.Get("domain_config").(string)
+				if !ok {
+					return false, errors.New("domain config is not a map")
+				}
+				err := json.Unmarshal([]byte(domainConfig), &config)
+				if err != nil || len(config) == 0 {
+					return false, errors.New("domain config err or is empty")
+				}
+				for k, v := range config {
+					(*call.SdkParam)[k] = v
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -168,13 +188,68 @@ func (VolcengineCdnDomainService) WithResourceResponseHandlers(d map[string]inte
 }
 
 func (s *VolcengineCdnDomainService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{}
-	// 修改tag
-
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UpdateCdnConfig",
+			ConvertMode: ve.RequestConvertIgnore,
+			ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				var (
+					config map[string]interface{}
+				)
+				(*call.SdkParam)["Domain"] = d.Id()
+				domainConfig, ok := d.Get("domain_config").(string)
+				if !ok {
+					return false, errors.New("domain config is not a map")
+				}
+				err := json.Unmarshal([]byte(domainConfig), &config)
+				if err != nil || len(config) == 0 {
+					return false, errors.New("domain config err or is empty")
+				}
+				for k, v := range config {
+					(*call.SdkParam)[k] = v
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"online", "offline"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
 	return []ve.Callback{callback}
 }
 
 func (s *VolcengineCdnDomainService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+	status := resourceData.Get("status").(string)
+	if status == "online" {
+		stopCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "StopCdnDomain",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				SdkParam: &map[string]interface{}{
+					"Domain": resourceData.Id(),
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"offline"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, stopCallback)
+	}
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteCdnDomain",
@@ -192,7 +267,8 @@ func (s *VolcengineCdnDomainService) RemoveResource(resourceData *schema.Resourc
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	return callbacks
 }
 
 func (s *VolcengineCdnDomainService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
