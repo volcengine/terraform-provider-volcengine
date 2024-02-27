@@ -197,9 +197,9 @@ In addition to all arguments above, the following attributes are exported:
         * `deleting_count` - The DeletingCount of Node.
         * `failed_count` - The FailedCount of Node.
         * `running_count` - The RunningCount of Node.
-        * `starting_count` - The StartingCount of Node.
-        * `stopped_count` - The StoppedCount of Node.
-        * `stopping_count` - The StoppingCount of Node.
+        * `starting_count` - (**Deprecated**) This field has been deprecated and is not recommended for use. The StartingCount of Node.
+        * `stopped_count` - (**Deprecated**) This field has been deprecated and is not recommended for use. The StoppedCount of Node.
+        * `stopping_count` - (**Deprecated**) This field has been deprecated and is not recommended for use. The StoppingCount of Node.
         * `total_count` - The TotalCount of Node.
         * `updating_count` - The UpdatingCount of Node.
     * `period` - The period of the PrePaid instance of NodeConfig.

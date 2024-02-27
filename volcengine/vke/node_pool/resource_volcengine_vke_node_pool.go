@@ -413,16 +413,19 @@ func ResourceVolcengineNodePool() *schema.Resource {
 						"stopped_count": {
 							Type:        schema.TypeInt,
 							Computed:    true,
+							Deprecated:  "This field has been deprecated and is not recommended for use.",
 							Description: "The StoppedCount of Node.",
 						},
 						"stopping_count": {
 							Type:        schema.TypeInt,
 							Computed:    true,
+							Deprecated:  "This field has been deprecated and is not recommended for use.",
 							Description: "The StoppingCount of Node.",
 						},
 						"starting_count": {
 							Type:        schema.TypeInt,
 							Computed:    true,
+							Deprecated:  "This field has been deprecated and is not recommended for use.",
 							Description: "The StartingCount of Node.",
 						},
 					},

@@ -9,6 +9,7 @@ import (
 	"github.com/volcengine/volcengine-go-sdk/service/autoscaling"
 	"github.com/volcengine/volcengine-go-sdk/service/clb"
 	"github.com/volcengine/volcengine-go-sdk/service/ecs"
+	"github.com/volcengine/volcengine-go-sdk/service/iam"
 	"github.com/volcengine/volcengine-go-sdk/service/natgateway"
 	"github.com/volcengine/volcengine-go-sdk/service/rdsmysql"
 	"github.com/volcengine/volcengine-go-sdk/service/rdsmysqlv2"
@@ -75,6 +76,7 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.AutoScalingClient = autoscaling.New(sess)
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
+	client.IamClient = iam.New(sess)
 	client.UniversalClient = NewUniversalClient(sess, c.CustomerEndpoints)
 	client.BypassSvcClient = NewBypassClient(sess)
 

@@ -4,6 +4,7 @@ import (
 	"github.com/volcengine/volcengine-go-sdk/service/autoscaling"
 	"github.com/volcengine/volcengine-go-sdk/service/clb"
 	"github.com/volcengine/volcengine-go-sdk/service/ecs"
+	"github.com/volcengine/volcengine-go-sdk/service/iam"
 	"github.com/volcengine/volcengine-go-sdk/service/natgateway"
 	"github.com/volcengine/volcengine-go-sdk/service/rdsmysql"
 	"github.com/volcengine/volcengine-go-sdk/service/rdsmysqlv2"
@@ -23,6 +24,7 @@ type SdkClient struct {
 	AutoScalingClient *autoscaling.AUTOSCALING
 	RdsClient         *rdsmysql.RDSMYSQL
 	RdsClientV2       *rdsmysqlv2.RDSMYSQLV2
+	IamClient         *iam.IAM
 	UniversalClient   *Universal
 	BypassSvcClient   *BypassSvc
 }
