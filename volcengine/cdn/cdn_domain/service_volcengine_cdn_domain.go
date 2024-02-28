@@ -125,6 +125,7 @@ func (s *VolcengineCdnDomainService) RefreshResourceState(resourceData *schema.R
 }
 
 func (s *VolcengineCdnDomainService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "AddCdnDomain",
@@ -177,7 +178,8 @@ func (s *VolcengineCdnDomainService) CreateResource(resourceData *schema.Resourc
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	return callbacks
 }
 
 func (VolcengineCdnDomainService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
@@ -188,6 +190,7 @@ func (VolcengineCdnDomainService) WithResourceResponseHandlers(d map[string]inte
 }
 
 func (s *VolcengineCdnDomainService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateCdnConfig",
@@ -223,7 +226,8 @@ func (s *VolcengineCdnDomainService) ModifyResource(resourceData *schema.Resourc
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	return callbacks
 }
 
 func (s *VolcengineCdnDomainService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
