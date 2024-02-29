@@ -132,7 +132,7 @@ func (s *VolcengineCdnDomainService) CreateResource(resourceData *schema.Resourc
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-				"resource_tags": {
+				"tags": {
 					TargetField: "ResourceTags",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
@@ -184,7 +184,11 @@ func (s *VolcengineCdnDomainService) CreateResource(resourceData *schema.Resourc
 
 func (VolcengineCdnDomainService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		return d, map[string]ve.ResponseConvert{
+			"ResourceTags": {
+				TargetField: "tags",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -227,6 +231,68 @@ func (s *VolcengineCdnDomainService) ModifyResource(resourceData *schema.Resourc
 		},
 	}
 	callbacks = append(callbacks, callback)
+	// 更新tag
+	addTags, removeTags, _, _ := ve.GetSetDifference("tags", resourceData, TagsHash, false)
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DeleteResourceTags",
+			ConvertMode: ve.RequestConvertIgnore,
+			ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removeTags != nil && removeTags.Len() > 0 {
+					(*call.SdkParam)["Resources"] = []string{d.Id()}
+					tags := make([]interface{}, 0)
+					for _, tag := range removeTags.List() {
+						tagMap := tag.(map[string]interface{})
+						tags = append(tags, map[string]interface{}{
+							"Key":   tagMap["key"].(string),
+							"Value": tagMap["value"].(string),
+						})
+					}
+					(*call.SdkParam)["ResourceTags"] = tags
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddResourceTags",
+			ConvertMode: ve.RequestConvertIgnore,
+			ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addTags != nil && addTags.Len() > 0 {
+					(*call.SdkParam)["Resources"] = []string{d.Id()}
+					tags := make([]interface{}, 0)
+					for _, tag := range addTags.List() {
+						tagMap := tag.(map[string]interface{})
+						tags = append(tags, map[string]interface{}{
+							"Key":   tagMap["key"].(string),
+							"Value": tagMap["value"].(string),
+						})
+					}
+					(*call.SdkParam)["ResourceTags"] = tags
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
 	return callbacks
 }
 
@@ -278,7 +344,7 @@ func (s *VolcengineCdnDomainService) RemoveResource(resourceData *schema.Resourc
 func (s *VolcengineCdnDomainService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"resource_tags": {
+			"tags": {
 				TargetField: "ResourceTags",
 				ConvertType: ve.ConvertJsonArray,
 			},
@@ -297,6 +363,9 @@ func (s *VolcengineCdnDomainService) DatasourceResources(*schema.ResourceData, *
 			},
 			"IPv6": {
 				TargetField: "ipv6",
+			},
+			"ResourceTags": {
+				TargetField: "tags",
 			},
 		},
 	}

@@ -21,7 +21,7 @@ func DataSourceVolcengineCdnDomains() *schema.Resource {
 					"The possible values are: `download`: for file downloads. `web`: for web pages. " +
 					"`video`: for audio and video on demand.",
 			},
-			"resource_tags": {
+			"tags": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
@@ -94,7 +94,7 @@ func DataSourceVolcengineCdnDomains() *schema.Resource {
 								"The possible values are: `download`: for file downloads. `web`: for web pages. " +
 								"`video`: for audio and video on demand.",
 						},
-						"resource_tags": {
+						"tags": {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "Indicate the tags you have set for this domain name. You can set up to 10 tags.",

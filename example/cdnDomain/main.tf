@@ -9,9 +9,9 @@ resource "volcengine_cdn_certificate" "foo" {
 resource "volcengine_cdn_domain" "foo" {
     domain = "tftest.byte-test.com"
     service_type = "web"
-    origin_protocol = "https"
     domain_config = jsonencode(
         {
+            OriginProtocol = "https"
             Origin = [
                 {
                     OriginAction = {

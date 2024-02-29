@@ -1,7 +1,9 @@
 package cdn_domain
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -56,28 +58,6 @@ func ResourceVolcengineCdnDomain() *schema.Resource {
 					"`chinese_mainland`: Indicates mainland China. `global`: Indicates global." +
 					" `outside_chinese_mainland`: Indicates global (excluding mainland China).",
 			},
-			"origin_protocol": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-				Description: "Configuration for origin-pull protocol. " +
-					"The parameter can take the following values: " +
-					"`http`: HTTP origin-pull will be used for both HTTP and HTTPS requests initiated by the user. " +
-					"`https`: HTTPS origin-pull will be used for both HTTP and HTTPS requests initiated by the user. " +
-					"`followclient`: HTTP origin-pull will be used for HTTP requests initiated by the user, " +
-					"and HTTPS origin-pull will be used for HTTPS requests initiated by the user.",
-			},
-			"origin_host": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Description: "The value of the Host header for origin retrieval, " +
-					"with a maximum length of 1,024 characters. " +
-					"This parameter has the following specifications: " +
-					"- The default value of this parameter is the same as the accelerated domain name. " +
-					"- The priority of this parameter is lower than the OriginHost parameter in the origin configuration module. " +
-					"- This parameter does not take effect if the InstanceType of the origin is tos.",
-			},
 			"domain_config": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -93,11 +73,11 @@ func ResourceVolcengineCdnDomain() *schema.Resource {
 				Default:     "default",
 				Description: "The project to which this domain name belongs. Default is `default`.",
 			},
-			"resource_tags": {
+			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Indicate the tags you have set for this domain name. You can set up to 10 tags.",
+				Set:         TagsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
@@ -182,4 +162,16 @@ func resourceVolcengineCdnDomainDelete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("error on deleting cdn_domain %q, %s", d.Id(), err)
 	}
 	return err
+}
+
+var TagsHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
+	return hashcode.String(buf.String())
 }
