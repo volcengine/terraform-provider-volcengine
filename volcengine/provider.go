@@ -23,7 +23,9 @@ import (
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineutil"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_certificate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_config"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_shared_config"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
@@ -618,8 +620,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organizations":                         organization.DataSourceVolcengineOrganizations(),
 
 			// ================ CDN ================
-			"volcengine_cdn_certificates": cdn_certificate.DataSourceVolcengineCdnCertificates(),
-			"volcengine_cdn_domains":      cdn_domain.DataSourceVolcengineCdnDomains(),
+			"volcengine_cdn_certificates":   cdn_certificate.DataSourceVolcengineCdnCertificates(),
+			"volcengine_cdn_domains":        cdn_domain.DataSourceVolcengineCdnDomains(),
+			"volcengine_cdn_configs":        cdn_config.DataSourceVolcengineCdnConfigs(),
+			"volcengine_cdn_shared_configs": cdn_shared_config.DataSourceVolcengineCdnSharedConfigs(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -883,8 +887,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
 
 			// ================ CDN ================
-			"volcengine_cdn_certificate": cdn_certificate.ResourceVolcengineCdnCertificate(),
-			"volcengine_cdn_domain":      cdn_domain.ResourceVolcengineCdnDomain(),
+			"volcengine_cdn_certificate":   cdn_certificate.ResourceVolcengineCdnCertificate(),
+			"volcengine_cdn_domain":        cdn_domain.ResourceVolcengineCdnDomain(),
+			"volcengine_cdn_shared_config": cdn_shared_config.ResourceVolcengineCdnSharedConfig(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
