@@ -153,6 +153,9 @@ func (s *VolcengineCdnSharedConfigService) CreateResource(resourceData *schema.R
 				"deny_ip_access_rule": {
 					Ignore: true,
 				},
+				"project_name": {
+					TargetField: "project",
+				},
 				"allow_referer_access_rule": {
 					TargetField: "AllowRefererAccessRule",
 					ConvertType: ve.ConvertJsonObject,
@@ -222,7 +225,8 @@ func (s *VolcengineCdnSharedConfigService) CreateResource(resourceData *schema.R
 					result := make(map[string]interface{})
 					if list, ok := allowIp.([]interface{}); ok && len(list) > 0 {
 						ipMap := list[0].(map[string]interface{})
-						result["Rules"] = ipMap["rules"]
+						rules := ipMap["rules"]
+						result["Rules"] = rules.(*schema.Set).List()
 						(*call.SdkParam)["AllowIpAccessRule"] = result
 					}
 				}
@@ -230,7 +234,8 @@ func (s *VolcengineCdnSharedConfigService) CreateResource(resourceData *schema.R
 					result := make(map[string]interface{})
 					if list, ok := denyIp.([]interface{}); ok && len(list) > 0 {
 						ipMap := list[0].(map[string]interface{})
-						result["Rules"] = ipMap["rules"]
+						rules := ipMap["rules"]
+						result["Rules"] = rules.(*schema.Set).List()
 						(*call.SdkParam)["DenyIpAccessRule"] = result
 					}
 				}
@@ -254,7 +259,11 @@ func (s *VolcengineCdnSharedConfigService) CreateResource(resourceData *schema.R
 
 func (VolcengineCdnSharedConfigService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		return d, map[string]ve.ResponseConvert{
+			"Project": {
+				TargetField: "project_name",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -336,7 +345,8 @@ func (s *VolcengineCdnSharedConfigService) ModifyResource(resourceData *schema.R
 						result := make(map[string]interface{})
 						if list, ok := allowIp.([]interface{}); ok && len(list) > 0 {
 							ipMap := list[0].(map[string]interface{})
-							result["Rules"] = ipMap["rules"]
+							rules := ipMap["rules"]
+							result["Rules"] = rules.(*schema.Set).List()
 							(*call.SdkParam)["AllowIpAccessRule"] = result
 						}
 					} else {
@@ -348,7 +358,8 @@ func (s *VolcengineCdnSharedConfigService) ModifyResource(resourceData *schema.R
 						result := make(map[string]interface{})
 						if list, ok := denyIp.([]interface{}); ok && len(list) > 0 {
 							ipMap := list[0].(map[string]interface{})
-							result["Rules"] = ipMap["rules"]
+							rules := ipMap["rules"]
+							result["Rules"] = rules.(*schema.Set).List()
 							(*call.SdkParam)["DenyIpAccessRule"] = result
 						}
 					} else {

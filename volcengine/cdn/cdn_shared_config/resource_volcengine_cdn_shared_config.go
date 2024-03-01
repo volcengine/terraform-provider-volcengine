@@ -141,7 +141,8 @@ func ResourceVolcengineCdnSharedConfig() *schema.Resource {
 										Description: "This list is case-sensitive when matching requests. Default is true.",
 									},
 									"rules": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeSet,
+										Set:      schema.HashString,
 										Required: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -188,7 +189,8 @@ func ResourceVolcengineCdnSharedConfig() *schema.Resource {
 										Description: "This list is case-sensitive when matching requests. Default is true.",
 									},
 									"rules": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeSet,
+										Set:      schema.HashString,
 										Required: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
@@ -228,7 +230,8 @@ func ResourceVolcengineCdnSharedConfig() *schema.Resource {
 										Description: "This list is case-sensitive when matching requests. Default is true.",
 									},
 									"rules": {
-										Type:     schema.TypeList,
+										Type:     schema.TypeSet,
+										Set:      schema.HashString,
 										Required: true,
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
