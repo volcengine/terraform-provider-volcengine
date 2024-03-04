@@ -1,17 +1,24 @@
 resource "volcengine_cdn_certificate" "foo" {
-    certificate {
-        certificate = ""
-        private_key = ""
-    }
+    certificate = ""
+    private_key = ""
+    desc = "tftest"
     source = "cdn_cert_hosting"
 }
 
 resource "volcengine_cdn_domain" "foo" {
     domain = "tftest.byte-test.com"
     service_type = "web"
-    origin_protocol = "https"
+    tags {
+        key = "tfkey1"
+        value = "tfvalue1"
+    }
+    tags {
+        key = "tfkey2"
+        value = "tfvalue2"
+    }
     domain_config = jsonencode(
         {
+            OriginProtocol = "https"
             Origin = [
                 {
                     OriginAction = {
@@ -45,7 +52,6 @@ resource "volcengine_cdn_domain" "foo" {
         }
     )
 }
-
 
 data "volcengine_cdn_configs" "foo"{
     domain = volcengine_cdn_domain.foo.id

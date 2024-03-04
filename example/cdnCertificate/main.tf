@@ -1,7 +1,6 @@
 resource "volcengine_cdn_certificate" "foo" {
-  certificate {
-    certificate = ""
-    private_key = ""
-  }
+  certificate = ""
+  private_key = ""
+  desc = "tftest"
   source = "cdn_cert_hosting"
 }

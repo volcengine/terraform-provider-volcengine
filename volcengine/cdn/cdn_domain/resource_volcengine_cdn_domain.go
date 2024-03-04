@@ -83,13 +83,11 @@ func ResourceVolcengineCdnDomain() *schema.Resource {
 						"key": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 							Description: "The key of the tag.",
 						},
 						"value": {
 							Type:        schema.TypeString,
 							Required:    true,
-							ForceNew:    true,
 							Description: "The value of the tag.",
 						},
 					},

@@ -135,13 +135,26 @@ func (s *VolcengineCdnCertificateService) CreateResource(resourceData *schema.Re
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"certificate": {
-					TargetField: "Certificate",
-					ConvertType: ve.ConvertJsonObject,
+					Ignore: true,
 				},
-				"cert_info": {
-					TargetField: "CertInfo",
-					ConvertType: ve.ConvertJsonObject,
+				"private_key": {
+					Ignore: true,
 				},
+				"desc": {
+					Ignore: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				cert := make(map[string]interface{})
+				cert["Certificate"] = d.Get("certificate")
+				cert["PrivateKey"] = d.Get("private_key")
+				(*call.SdkParam)["Certificate"] = cert
+				if desc, ok := d.GetOk("desc"); ok {
+					certInfo := make(map[string]interface{})
+					certInfo["Desc"] = desc
+					(*call.SdkParam)["CertInfo"] = certInfo
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)

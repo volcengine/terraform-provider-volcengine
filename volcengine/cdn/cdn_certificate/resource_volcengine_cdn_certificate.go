@@ -35,37 +35,26 @@ func ResourceVolcengineCdnCertificate() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"certificate": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Represents a certificate object.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"certificate": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-							Description: "Content of the specified certificate public key file. " +
-								"Line breaks in the content should be replaced with `\\r\\n`. " +
-								"The file extension for the certificate public key is `.crt` or `.pem`. " +
-								"The public key must include the complete certificate chain. " +
-								"When importing resources, this attribute will not be imported. " +
-								"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
-						},
-						"private_key": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-							Description: "The content of the specified certificate private key file. " +
-								"Replace line breaks in the content with `\\r\\n`. " +
-								"The file extension for the certificate private key is `.key` or `.pem`. " +
-								"The private key must be unencrypted. " +
-								"When importing resources, this attribute will not be imported. " +
-								"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
-						},
-					},
-				},
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Description: "Content of the specified certificate public key file. " +
+					"Line breaks in the content should be replaced with `\\r\\n`. " +
+					"The file extension for the certificate public key is `.crt` or `.pem`. " +
+					"The public key must include the complete certificate chain. " +
+					"When importing resources, this attribute will not be imported. " +
+					"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
+			"private_key": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Description: "The content of the specified certificate private key file. " +
+					"Replace line breaks in the content with `\\r\\n`. " +
+					"The file extension for the certificate private key is `.key` or `.pem`. " +
+					"The private key must be unencrypted. " +
+					"When importing resources, this attribute will not be imported. " +
+					"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"source": {
 				Type:     schema.TypeString,
@@ -83,15 +72,14 @@ func ResourceVolcengineCdnCertificate() *schema.Resource {
 				ForceNew:    true,
 				Description: "Object representing a certificate remark.",
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"desc": {
-							Type:        schema.TypeString,
-							Required:    true,
-							ForceNew:    true,
-							Description: "Note on the certificate.",
-						},
-					},
+					Schema: map[string]*schema.Schema{},
 				},
+			},
+			"desc": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Note on the certificate.",
 			},
 		},
 	}
