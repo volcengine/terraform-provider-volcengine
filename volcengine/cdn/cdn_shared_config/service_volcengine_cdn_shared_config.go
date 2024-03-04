@@ -88,15 +88,24 @@ func (s *VolcengineCdnSharedConfigService) ReadResources(m map[string]interface{
 			if err != nil {
 				return data, err
 			}
+			if allowReferer != nil {
+				allowReferer.(map[string]interface{})["CommonType"] = []interface{}{allowReferer.(map[string]interface{})["CommonType"]}
+			}
 			data[index].(map[string]interface{})["AllowRefererAccessRule"] = allowReferer
 			denyReferer, err := ve.ObtainSdkValue("Result.DenyRefererAccessRule", *resp)
 			if err != nil {
 				return data, err
 			}
+			if denyReferer != nil {
+				denyReferer.(map[string]interface{})["CommonType"] = []interface{}{denyReferer.(map[string]interface{})["CommonType"]}
+			}
 			data[index].(map[string]interface{})["DenyRefererAccessRule"] = denyReferer
 			common, err := ve.ObtainSdkValue("Result.CommonMatchList", *resp)
 			if err != nil {
 				return data, err
+			}
+			if common != nil {
+				common.(map[string]interface{})["CommonType"] = []interface{}{common.(map[string]interface{})["CommonType"]}
 			}
 			data[index].(map[string]interface{})["CommonMatchList"] = common
 		}
@@ -157,67 +166,13 @@ func (s *VolcengineCdnSharedConfigService) CreateResource(resourceData *schema.R
 					TargetField: "project",
 				},
 				"allow_referer_access_rule": {
-					TargetField: "AllowRefererAccessRule",
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"allow_empty": {
-							TargetField: "AllowEmpty",
-						},
-						"common_type": {
-							TargetField: "CommonType",
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"ignore_case": {
-									TargetField: "IgnoreCase",
-								},
-								"rules": {
-									TargetField: "Rules",
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
+					Ignore: true,
 				},
 				"deny_referer_access_rule": {
-					TargetField: "DenyRefererAccessRule",
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"allow_empty": {
-							TargetField: "AllowEmpty",
-						},
-						"common_type": {
-							TargetField: "CommonType",
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"ignore_case": {
-									TargetField: "IgnoreCase",
-								},
-								"rules": {
-									TargetField: "Rules",
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
+					Ignore: true,
 				},
 				"common_match_list": {
-					TargetField: "CommonMatchList",
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"common_type": {
-							TargetField: "CommonType",
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"ignore_case": {
-									TargetField: "IgnoreCase",
-								},
-								"rules": {
-									TargetField: "Rules",
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -227,18 +182,83 @@ func (s *VolcengineCdnSharedConfigService) CreateResource(resourceData *schema.R
 						ipMap := list[0].(map[string]interface{})
 						rules := ipMap["rules"]
 						result["Rules"] = rules.(*schema.Set).List()
-						(*call.SdkParam)["AllowIpAccessRule"] = result
 					}
+					(*call.SdkParam)["AllowIpAccessRule"] = result
 				}
+
 				if denyIp, ok := d.GetOk("deny_ip_access_rule"); ok {
 					result := make(map[string]interface{})
 					if list, ok := denyIp.([]interface{}); ok && len(list) > 0 {
 						ipMap := list[0].(map[string]interface{})
 						rules := ipMap["rules"]
 						result["Rules"] = rules.(*schema.Set).List()
-						(*call.SdkParam)["DenyIpAccessRule"] = result
 					}
+					(*call.SdkParam)["DenyIpAccessRule"] = result
 				}
+
+				if allowRefererAccessRule, ok := d.GetOk("allow_referer_access_rule"); ok {
+					result := make(map[string]interface{})
+					if list, ok := allowRefererAccessRule.([]interface{}); ok && len(list) > 0 {
+						allowRefererAccessRuleMap := list[0].(map[string]interface{})
+						if allowEmpty, ok := allowRefererAccessRuleMap["allow_empty"]; ok {
+							result["AllowEmpty"] = allowEmpty
+						}
+						commonTypeResult := make(map[string]interface{})
+						commonType := allowRefererAccessRuleMap["common_type"]
+						if commonTypeList, ok := commonType.([]interface{}); ok && len(commonTypeList) > 0 {
+							commonTypeMap := commonTypeList[0].(map[string]interface{})
+							if ignoreCase, ok := commonTypeMap["ignore_case"]; ok {
+								commonTypeResult["IgnoreCase"] = ignoreCase
+							}
+							rules := commonTypeMap["rules"]
+							commonTypeResult["Rules"] = rules.(*schema.Set).List()
+							result["CommonType"] = commonTypeResult
+						}
+					}
+					(*call.SdkParam)["AllowRefererAccessRule"] = result
+				}
+
+				if denyRefererAccessRule, ok := d.GetOk("deny_referer_access_rule"); ok {
+					result := make(map[string]interface{})
+					if list, ok := denyRefererAccessRule.([]interface{}); ok && len(list) > 0 {
+						denyRefererAccessRuleMap := list[0].(map[string]interface{})
+						if allowEmpty, ok := denyRefererAccessRuleMap["allow_empty"]; ok {
+							result["AllowEmpty"] = allowEmpty
+						}
+						commonTypeResult := make(map[string]interface{})
+						commonType := denyRefererAccessRuleMap["common_type"]
+						if commonTypeList, ok := commonType.([]interface{}); ok && len(commonTypeList) > 0 {
+							commonTypeMap := commonTypeList[0].(map[string]interface{})
+							if ignoreCase, ok := commonTypeMap["ignore_case"]; ok {
+								commonTypeResult["IgnoreCase"] = ignoreCase
+							}
+							rules := commonTypeMap["rules"]
+							commonTypeResult["Rules"] = rules.(*schema.Set).List()
+							result["CommonType"] = commonTypeResult
+						}
+					}
+					(*call.SdkParam)["DenyRefererAccessRule"] = result
+				}
+
+				if common, ok := d.GetOk("common_match_list"); ok {
+					result := make(map[string]interface{})
+					if list, ok := common.([]interface{}); ok && len(list) > 0 {
+						commonMap := list[0].(map[string]interface{})
+						commonTypeResult := make(map[string]interface{})
+						commonType := commonMap["common_type"]
+						if commonTypeList, ok := commonType.([]interface{}); ok && len(commonTypeList) > 0 {
+							commonTypeMap := commonTypeList[0].(map[string]interface{})
+							if ignoreCase, ok := commonTypeMap["ignore_case"]; ok {
+								commonTypeResult["IgnoreCase"] = ignoreCase
+							}
+							rules := commonTypeMap["rules"]
+							commonTypeResult["Rules"] = rules.(*schema.Set).List()
+							result["CommonType"] = commonTypeResult
+						}
+					}
+					(*call.SdkParam)["CommonMatchList"] = result
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -272,74 +292,10 @@ func (s *VolcengineCdnSharedConfigService) ModifyResource(resourceData *schema.R
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateSharedConfig",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"allow_referer_access_rule": {
-					TargetField: "AllowRefererAccessRule",
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"allow_empty": {
-							TargetField: "AllowEmpty",
-						},
-						"common_type": {
-							TargetField: "CommonType",
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"ignore_case": {
-									TargetField: "IgnoreCase",
-								},
-								"rules": {
-									TargetField: "Rules",
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
-				},
-				"deny_referer_access_rule": {
-					TargetField: "DenyRefererAccessRule",
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"allow_empty": {
-							TargetField: "AllowEmpty",
-						},
-						"common_type": {
-							TargetField: "CommonType",
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"ignore_case": {
-									TargetField: "IgnoreCase",
-								},
-								"rules": {
-									TargetField: "Rules",
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
-				},
-				"common_match_list": {
-					TargetField: "CommonMatchList",
-					ConvertType: ve.ConvertJsonObject,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"common_type": {
-							TargetField: "CommonType",
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"ignore_case": {
-									TargetField: "IgnoreCase",
-								},
-								"rules": {
-									TargetField: "Rules",
-									ConvertType: ve.ConvertJsonArray,
-								},
-							},
-						},
-					},
-				},
-			},
+			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ConfigName"] = d.Id()
+
 				if d.HasChange("allow_ip_access_rule") {
 					if allowIp, ok := d.GetOk("allow_ip_access_rule"); ok {
 						result := make(map[string]interface{})
@@ -347,12 +303,13 @@ func (s *VolcengineCdnSharedConfigService) ModifyResource(resourceData *schema.R
 							ipMap := list[0].(map[string]interface{})
 							rules := ipMap["rules"]
 							result["Rules"] = rules.(*schema.Set).List()
-							(*call.SdkParam)["AllowIpAccessRule"] = result
 						}
+						(*call.SdkParam)["AllowIpAccessRule"] = result
 					} else {
 						(*call.SdkParam)["AllowIpAccessRule"] = map[string]interface{}{}
 					}
 				}
+
 				if d.HasChange("deny_ip_access_rule") {
 					if denyIp, ok := d.GetOk("deny_ip_access_rule"); ok {
 						result := make(map[string]interface{})
@@ -360,10 +317,88 @@ func (s *VolcengineCdnSharedConfigService) ModifyResource(resourceData *schema.R
 							ipMap := list[0].(map[string]interface{})
 							rules := ipMap["rules"]
 							result["Rules"] = rules.(*schema.Set).List()
-							(*call.SdkParam)["DenyIpAccessRule"] = result
 						}
+						(*call.SdkParam)["DenyIpAccessRule"] = result
 					} else {
 						(*call.SdkParam)["DenyIpAccessRule"] = map[string]interface{}{}
+					}
+				}
+
+				if d.HasChange("allow_referer_access_rule") {
+					// common type 必传
+					if allowRefererAccessRule, ok := d.GetOk("allow_referer_access_rule"); ok {
+						result := make(map[string]interface{})
+						if list, ok := allowRefererAccessRule.([]interface{}); ok && len(list) > 0 {
+							allowRefererAccessRuleMap := list[0].(map[string]interface{})
+							if allowEmpty, ok := allowRefererAccessRuleMap["allow_empty"]; ok {
+								result["AllowEmpty"] = allowEmpty
+							}
+							commonTypeResult := make(map[string]interface{})
+							commonType := allowRefererAccessRuleMap["common_type"]
+							if commonTypeList, ok := commonType.([]interface{}); ok && len(commonTypeList) > 0 {
+								commonTypeMap := commonTypeList[0].(map[string]interface{})
+								if ignoreCase, ok := commonTypeMap["ignore_case"]; ok {
+									commonTypeResult["IgnoreCase"] = ignoreCase
+								}
+								rules := commonTypeMap["rules"]
+								commonTypeResult["Rules"] = rules.(*schema.Set).List()
+								result["CommonType"] = commonTypeResult
+							}
+						}
+						(*call.SdkParam)["AllowRefererAccessRule"] = result
+					} else {
+						(*call.SdkParam)["AllowRefererAccessRule"] = map[string]interface{}{}
+					}
+				}
+
+				if d.HasChange("deny_referer_access_rule") {
+					// common type 必传
+					if denyRefererAccessRule, ok := d.GetOk("deny_referer_access_rule"); ok {
+						result := make(map[string]interface{})
+						if list, ok := denyRefererAccessRule.([]interface{}); ok && len(list) > 0 {
+							denyRefererAccessRuleMap := list[0].(map[string]interface{})
+							if allowEmpty, ok := denyRefererAccessRuleMap["allow_empty"]; ok {
+								result["AllowEmpty"] = allowEmpty
+							}
+							commonTypeResult := make(map[string]interface{})
+							commonType := denyRefererAccessRuleMap["common_type"]
+							if commonTypeList, ok := commonType.([]interface{}); ok && len(commonTypeList) > 0 {
+								commonTypeMap := commonTypeList[0].(map[string]interface{})
+								if ignoreCase, ok := commonTypeMap["ignore_case"]; ok {
+									commonTypeResult["IgnoreCase"] = ignoreCase
+								}
+								rules := commonTypeMap["rules"]
+								commonTypeResult["Rules"] = rules.(*schema.Set).List()
+								result["CommonType"] = commonTypeResult
+							}
+						}
+						(*call.SdkParam)["DenyRefererAccessRule"] = result
+					} else {
+						(*call.SdkParam)["DenyRefererAccessRule"] = map[string]interface{}{}
+					}
+				}
+
+				if d.HasChange("common_match_list") {
+					// common type 必传
+					if common, ok := d.GetOk("common_match_list"); ok {
+						result := make(map[string]interface{})
+						if list, ok := common.([]interface{}); ok && len(list) > 0 {
+							commonMap := list[0].(map[string]interface{})
+							commonTypeResult := make(map[string]interface{})
+							commonType := commonMap["common_type"]
+							if commonTypeList, ok := commonType.([]interface{}); ok && len(commonTypeList) > 0 {
+								commonTypeMap := commonTypeList[0].(map[string]interface{})
+								if ignoreCase, ok := commonTypeMap["ignore_case"]; ok {
+									commonTypeResult["IgnoreCase"] = ignoreCase
+								}
+								rules := commonTypeMap["rules"]
+								commonTypeResult["Rules"] = rules.(*schema.Set).List()
+								result["CommonType"] = commonTypeResult
+							}
+						}
+						(*call.SdkParam)["CommonMatchList"] = result
+					} else {
+						(*call.SdkParam)["CommonMatchList"] = map[string]interface{}{}
 					}
 				}
 				return true, nil
