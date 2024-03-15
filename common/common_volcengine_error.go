@@ -27,3 +27,7 @@ func ResourceFlowLimitExceededError(err error) bool {
 func UnsubscribeProductError(err error) bool {
 	return strings.Contains(err.Error(), "The product code is inconsistent with the instance product")
 }
+
+func UnsubscribeProductConflictError(err error) bool {
+	return strings.Contains(err.Error(), "RequestConflict")
+}
