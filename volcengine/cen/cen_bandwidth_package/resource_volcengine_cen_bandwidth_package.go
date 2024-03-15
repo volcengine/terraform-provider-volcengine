@@ -75,8 +75,7 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				ForceNew:     true,
 				Default:      "PrePaid",
 				ValidateFunc: validation.StringInSlice([]string{"PrePaid"}, false),
-				Description: "The billing type of the cen bandwidth package. Only support `PrePaid` and default value is `PrePaid`.\n" +
-					"Terraform will only remove the PrePaid cen bandwidth package from the state file, not actually remove.",
+				Description:  "The billing type of the cen bandwidth package. Only support `PrePaid` and default value is `PrePaid`.",
 			},
 			"period_unit": {
 				Type:             schema.TypeString,

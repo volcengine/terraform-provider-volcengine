@@ -151,6 +151,9 @@ func (s *VolcengineCenInterRegionBandwidthService) CreateResource(resourceData *
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -174,6 +177,13 @@ func (s *VolcengineCenInterRegionBandwidthService) ModifyResource(resourceData *
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Available"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
 			},
 		},
 	}
@@ -212,6 +222,9 @@ func (s *VolcengineCenInterRegionBandwidthService) RemoveResource(resourceData *
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("cen_id").(string)
 			},
 		},
 	}

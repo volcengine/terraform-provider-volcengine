@@ -3,7 +3,6 @@ package cen_bandwidth_package
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -250,6 +249,10 @@ func (s *VolcengineCenBandwidthPackageService) ModifyResource(resourceData *sche
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Available", "InUse"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
 		},
 	}
 	callbacks = append(callbacks, callback)
@@ -271,11 +274,6 @@ func (s *VolcengineCenBandwidthPackageService) RemoveResource(resourceData *sche
 				"CenBandwidthPackageId": resourceData.Id(),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				//删除CenBandwidthPackage
-				log.Println("[WARN] Cannot destroy PrePaid resource volcengine_cen_bandwidth_package. Terraform will remove this resource from the state file, however resources may remain.")
-
-				//return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				return nil, nil
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
@@ -406,4 +404,15 @@ func (s *VolcengineCenBandwidthPackageService) getIAMUniversalInfo(actionName st
 		HttpMethod:  ve.GET,
 		Action:      actionName,
 	}
+}
+
+func (s *VolcengineCenBandwidthPackageService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	if resourceData.Get("billing_type").(string) == "PrePaid" {
+		info.NeedUnsubscribe = true
+		info.Products = []string{"CEN"}
+	}
+	return &info, nil
 }

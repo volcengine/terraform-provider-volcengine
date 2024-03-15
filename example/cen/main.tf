@@ -1,5 +1,9 @@
 resource "volcengine_cen" "foo" {
-  cen_name = "tf-test-3"
-  description = "tf-test"
+  cen_name     = "acc-test-cen"
+  description  = "acc-test"
   project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }

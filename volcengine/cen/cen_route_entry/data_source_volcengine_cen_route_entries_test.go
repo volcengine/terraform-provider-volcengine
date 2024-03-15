@@ -1,3 +1,15 @@
+package cen_route_entry_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_route_entry"
+)
+
+const testAccVolcengineCenRouteEntriesDatasourceConfig = `
 data "volcengine_zones" "foo" {
 }
 
@@ -41,7 +53,7 @@ resource "volcengine_cen" "foo" {
 resource "volcengine_cen_attach_instance" "foo" {
   cen_id             = volcengine_cen.foo.id
   instance_id        = volcengine_vpc.foo.id
-  instance_region_id = "cn-beijing"
+  instance_region_id = "cn-chengdu-sdv"
   instance_type      = "VPC"
 }
 
@@ -49,11 +61,38 @@ resource "volcengine_cen_route_entry" "foo" {
   cen_id                 = volcengine_cen.foo.id
   destination_cidr_block = volcengine_route_entry.foo.destination_cidr_block
   instance_type          = "VPC"
-  instance_region_id     = "cn-beijing"
+  instance_region_id     = "cn-chengdu-sdv"
   instance_id            = volcengine_cen_attach_instance.foo.instance_id
 }
 
-data "volcengine_cen_route_entries" "foo" {
+data "volcengine_cen_route_entries" "foo"{
   cen_id                 = volcengine_cen.foo.id
   destination_cidr_block = volcengine_cen_route_entry.foo.destination_cidr_block
+}
+`
+
+func TestAccVolcengineCenRouteEntriesDatasource_Basic(t *testing.T) {
+	resourceName := "data.volcengine_cen_route_entries.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return cen_route_entry.NewCenRouteEntryService(client)
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers: volcengine.GetTestAccProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcengineCenRouteEntriesDatasourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acc.ResourceId, "cen_route_entries.#", "1"),
+				),
+			},
+		},
+	})
 }
