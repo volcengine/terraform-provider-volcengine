@@ -36,12 +36,14 @@ func ResourceVolcenginePrivatelinkVpcEndpoint() *schema.Resource {
 			"security_group_ids": {
 				Type:     schema.TypeSet,
 				Required: true,
-				ForceNew: true,
+				MinItems: 1,
 				Set:      schema.HashString,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "the security group ids of vpc endpoint.",
+				Description: "The security group ids of vpc endpoint. " +
+					"It is recommended to bind security groups using the 'security_group_ids' field in this resource instead of using `volcengine_privatelink_security_group`.\n" +
+					"For operations that jointly use this resource and `volcengine_privatelink_security_group`, use lifecycle ignore_changes to suppress changes to the 'security_group_ids' field.",
 			},
 			"service_id": {
 				Type:        schema.TypeString,

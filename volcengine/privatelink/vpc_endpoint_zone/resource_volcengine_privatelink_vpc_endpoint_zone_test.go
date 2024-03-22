@@ -1,3 +1,15 @@
+package vpc_endpoint_zone_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_zone"
+)
+
+const testAccVolcenginePrivatelinkVpcEndpointZoneCreateConfig = `
 data "volcengine_zones" "foo" {
 }
 
@@ -56,4 +68,40 @@ resource "volcengine_privatelink_vpc_endpoint_zone" "foo" {
   endpoint_id        = volcengine_privatelink_vpc_endpoint.foo.id
   subnet_id          = volcengine_subnet.foo.id
   private_ip_address = "172.16.0.251"
+}
+`
+
+func TestAccVolcenginePrivatelinkVpcEndpointZoneResource_Basic(t *testing.T) {
+	resourceName := "volcengine_privatelink_vpc_endpoint_zone.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return vpc_endpoint_zone.NewVpcEndpointZoneService(client)
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers:    volcengine.GetTestAccProviders(),
+		CheckDestroy: volcengine.AccTestCheckResourceRemove(acc),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcenginePrivatelinkVpcEndpointZoneCreateConfig,
+				Check: resource.ComposeTestCheckFunc(
+					volcengine.AccTestCheckResourceExists(acc),
+					resource.TestCheckResourceAttr(acc.ResourceId, "private_ip_address", "172.16.0.251"),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "endpoint_id"),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "subnet_id"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }

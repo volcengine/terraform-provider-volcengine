@@ -1,3 +1,15 @@
+package vpc_endpoint_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint"
+)
+
+const testAccVolcenginePrivatelinkVpcEndpointsDatasourceConfig = `
 data "volcengine_zones" "foo" {
 }
 
@@ -41,7 +53,8 @@ resource "volcengine_privatelink_vpc_endpoint_service" "foo" {
     resource_id   = volcengine_clb.foo.id
     resource_type = "CLB"
   }
-  description = "acc-test"
+  description         = "acc-test"
+  auto_accept_enabled = true
 }
 
 resource "volcengine_privatelink_vpc_endpoint" "foo" {
@@ -49,14 +62,36 @@ resource "volcengine_privatelink_vpc_endpoint" "foo" {
   service_id         = volcengine_privatelink_vpc_endpoint_service.foo.id
   endpoint_name      = "acc-test-ep"
   description        = "acc-test"
+  count = 2
 }
 
-resource "volcengine_privatelink_vpc_endpoint_connection" "foo" {
-  endpoint_id = volcengine_privatelink_vpc_endpoint.foo.id
-  service_id  = volcengine_privatelink_vpc_endpoint_service.foo.id
+data "volcengine_privatelink_vpc_endpoints" "foo"{
+  ids = volcengine_privatelink_vpc_endpoint.foo[*].id
 }
+`
 
-data "volcengine_privatelink_vpc_endpoint_connections" "foo"{
-  endpoint_id = volcengine_privatelink_vpc_endpoint_connection.foo.endpoint_id
-  service_id  = volcengine_privatelink_vpc_endpoint_connection.foo.service_id
+func TestAccVolcenginePrivatelinkVpcEndpointsDatasource_Basic(t *testing.T) {
+	resourceName := "data.volcengine_privatelink_vpc_endpoints.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return vpc_endpoint.NewVpcEndpointService(client)
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers: volcengine.GetTestAccProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcenginePrivatelinkVpcEndpointsDatasourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acc.ResourceId, "vpc_endpoints.#", "2"),
+				),
+			},
+		},
+	})
 }

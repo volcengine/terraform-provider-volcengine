@@ -1,3 +1,15 @@
+package vpc_endpoint_service_permission_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_permission"
+)
+
+const testAccVolcenginePrivatelinkVpcEndpointServicePermissionsDatasourceConfig = `
 data "volcengine_zones" "foo" {
 }
 
@@ -48,4 +60,31 @@ resource "volcengine_privatelink_vpc_endpoint_service_permission" "foo" {
 data "volcengine_privatelink_vpc_endpoint_service_permissions" "foo"{
   permit_account_id = volcengine_privatelink_vpc_endpoint_service_permission.foo.permit_account_id
   service_id        = volcengine_privatelink_vpc_endpoint_service.foo.id
+}
+`
+
+func TestAccVolcenginePrivatelinkVpcEndpointServicePermissionsDatasource_Basic(t *testing.T) {
+	resourceName := "data.volcengine_privatelink_vpc_endpoint_service_permissions.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return vpc_endpoint_service_permission.NewService(client)
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers: volcengine.GetTestAccProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcenginePrivatelinkVpcEndpointServicePermissionsDatasourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acc.ResourceId, "permissions.#", "1"),
+				),
+			},
+		},
+	})
 }

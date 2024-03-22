@@ -1,3 +1,15 @@
+package security_group_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/security_group"
+)
+
+const testAccVolcenginePrivatelinkSecurityGroupCreateConfig = `
 data "volcengine_zones" "foo" {
 }
 
@@ -55,12 +67,45 @@ resource "volcengine_privatelink_vpc_endpoint" "foo" {
   service_id         = volcengine_privatelink_vpc_endpoint_service.foo.id
   endpoint_name      = "acc-test-ep"
   description        = "acc-test"
-  lifecycle {
-    ignore_changes = [security_group_ids]
-  }
 }
 
 resource "volcengine_privatelink_security_group" "foo" {
   endpoint_id       = volcengine_privatelink_vpc_endpoint.foo.id
   security_group_id = volcengine_security_group.foo1.id
+}
+`
+
+func TestAccVolcenginePrivatelinkSecurityGroupResource_Basic(t *testing.T) {
+	resourceName := "volcengine_privatelink_security_group.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return security_group.NewPrivateLinkSecurityGroupService(client)
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers:    volcengine.GetTestAccProviders(),
+		CheckDestroy: volcengine.AccTestCheckResourceRemove(acc),
+		Steps: []resource.TestStep{
+			{
+				Config:             testAccVolcenginePrivatelinkSecurityGroupCreateConfig,
+				ExpectNonEmptyPlan: true,
+				Check: resource.ComposeTestCheckFunc(
+					volcengine.AccTestCheckResourceExists(acc),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "endpoint_id"),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "security_group_id"),
+				),
+			},
+			{
+				ResourceName:      resourceName,
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
 }

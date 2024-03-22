@@ -51,6 +51,7 @@ func ResourceVolcenginePrivatelinkVpcEndpointService() *schema.Resource {
 			"resources": {
 				Type:     schema.TypeSet,
 				Required: true,
+				MinItems: 1,
 				Description: "The resources info. When create vpc endpoint service, the resource must exist. " +
 					"It is recommended to bind resources using the resources' field in this resource instead of " +
 					"using vpc_endpoint_service_resource. For operations that jointly use this resource and vpc_endpoint_service_resource, " +

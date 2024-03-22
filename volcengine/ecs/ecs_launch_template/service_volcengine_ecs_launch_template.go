@@ -59,8 +59,8 @@ func (s *VolcengineEcsLaunchTemplateService) ReadResources(m map[string]interfac
 			action = "DescribeLaunchTemplateVersions"
 			template := ele.(map[string]interface{})
 			query := map[string]interface{}{
-				"launch_template_id":         template["LaunchTemplateId"],
-				"launch_template_versions.1": template["LatestVersionNumber"],
+				"LaunchTemplateId":         template["LaunchTemplateId"],
+				"LaunchTemplateVersions.1": template["LatestVersionNumber"],
 			}
 			resp, err = client.DoCall(getUniversalInfo(action), &query)
 			if err != nil {
@@ -101,7 +101,7 @@ func (s *VolcengineEcsLaunchTemplateService) ReadResource(resourceData *schema.R
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
-		"launch_template_ids.1": id,
+		"LaunchTemplateIds.1": id,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {

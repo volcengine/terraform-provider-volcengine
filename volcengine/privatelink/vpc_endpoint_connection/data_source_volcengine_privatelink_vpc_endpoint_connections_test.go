@@ -1,3 +1,15 @@
+package vpc_endpoint_connection_test
+
+import (
+	"testing"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_connection"
+)
+
+const testAccVolcenginePrivatelinkVpcEndpointConnectionsDatasourceConfig = `
 data "volcengine_zones" "foo" {
 }
 
@@ -57,6 +69,33 @@ resource "volcengine_privatelink_vpc_endpoint_connection" "foo" {
 }
 
 data "volcengine_privatelink_vpc_endpoint_connections" "foo"{
-  endpoint_id = volcengine_privatelink_vpc_endpoint_connection.foo.endpoint_id
-  service_id  = volcengine_privatelink_vpc_endpoint_connection.foo.service_id
+    endpoint_id = volcengine_privatelink_vpc_endpoint_connection.foo.endpoint_id
+    service_id  = volcengine_privatelink_vpc_endpoint_connection.foo.service_id
+}
+`
+
+func TestAccVolcenginePrivatelinkVpcEndpointConnectionsDatasource_Basic(t *testing.T) {
+	resourceName := "data.volcengine_privatelink_vpc_endpoint_connections.foo"
+
+	acc := &volcengine.AccTestResource{
+		ResourceId: resourceName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return vpc_endpoint_connection.NewVpcEndpointConnectionService(client)
+		},
+	}
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck: func() {
+			volcengine.AccTestPreCheck(t)
+		},
+		Providers: volcengine.GetTestAccProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcenginePrivatelinkVpcEndpointConnectionsDatasourceConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acc.ResourceId, "connections.#", "1"),
+				),
+			},
+		},
+	})
 }
