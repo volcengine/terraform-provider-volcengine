@@ -7,7 +7,7 @@ import (
 
 func DataSourceVolcengineRegions() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVolcengieRegionsRead,
+		Read: dataSourceVolcengineRegionsRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeSet,
@@ -51,7 +51,7 @@ func DataSourceVolcengineRegions() *schema.Resource {
 	}
 }
 
-func dataSourceVolcengieRegionsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceVolcengineRegionsRead(d *schema.ResourceData, meta interface{}) error {
 	regionService := NewRegionService(meta.(*ve.SdkClient))
 	return ve.DefaultDispatcher().Data(regionService, d, DataSourceVolcengineRegions())
 }

@@ -232,6 +232,14 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The private ip address of primary networkInterface.",
 			},
 
+			"eip_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Description: "The id of an existing Available EIP which will be automatically assigned to this instance. \n" +
+					"It is not recommended to use this field, it is recommended to use `volcengine_eip_associate` resource to bind EIP.",
+			},
+
 			"system_volume_type": {
 				Type:        schema.TypeString,
 				Required:    true,

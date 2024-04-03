@@ -39,10 +39,12 @@ func ResourceVolcenginePrivatelinkSecurityGroupService() *schema.Resource {
 				Description: "The id of the endpoint.",
 			},
 			"security_group_id": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The id of the security group.",
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+				Description: "The id of the security group. " +
+					"It is not recommended to use this resource for binding security groups, it is recommended to use the `security_group_id` field of `volcengine_privatelink_vpc_endpoint` for binding.\n" +
+					"If using this resource and `volcengine_privatelink_vpc_endpoint` jointly for operations, use lifecycle ignore_changes to suppress changes to the `security_group_id` field in `volcengine_privatelink_vpc_endpoint`.",
 			},
 		},
 	}

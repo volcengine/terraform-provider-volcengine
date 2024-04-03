@@ -252,7 +252,41 @@ func (s *VolcengineVpcEndpointService) ModifyResource(resourceData *schema.Resou
 		callbacks = append(callbacks, callback)
 	}
 
+	if resourceData.HasChange("security_group_ids") {
+		add, remove, _, _ := ve.GetSetDifference("security_group_ids", resourceData, schema.HashString, false)
+		for _, element := range add.List() {
+			callbacks = append(callbacks, s.securityGroupActionCallback(resourceData, "AttachSecurityGroupToVpcEndpoint", element))
+		}
+		for _, element := range remove.List() {
+			callbacks = append(callbacks, s.securityGroupActionCallback(resourceData, "DetachSecurityGroupFromVpcEndpoint", element))
+		}
+	}
+
 	return callbacks
+}
+
+func (s *VolcengineVpcEndpointService) securityGroupActionCallback(resourceData *schema.ResourceData, action string, element interface{}) ve.Callback {
+	return ve.Callback{
+		Call: ve.SdkCall{
+			Action:      action,
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["EndpointId"] = d.Id()
+				(*call.SdkParam)["SecurityGroupId"] = element.(string)
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
+				return resp, err
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Available"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+		},
+	}
 }
 
 func (s *VolcengineVpcEndpointService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {

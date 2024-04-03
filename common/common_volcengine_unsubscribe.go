@@ -94,6 +94,12 @@ func (u *UnsubscribeService) UnsubscribeInstance(info *UnsubscribeInfo) []Callba
 							return nil
 						}
 						return resource.RetryableError(callErr)
+					} else if UnsubscribeProductConflictError(baseErr) {
+						_, callErr := call.ExecuteCall(d, client, call)
+						if callErr == nil {
+							return nil
+						}
+						return resource.RetryableError(callErr)
 					} else {
 						return resource.NonRetryableError(baseErr)
 					}

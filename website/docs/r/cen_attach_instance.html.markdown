@@ -10,18 +10,26 @@ description: |-
 Provides a resource to manage cen attach instance
 ## Example Usage
 ```hcl
-resource "volcengine_cen_attach_instance" "foo" {
-  cen_id             = "cen-12ar8uclj68sg17q7y20v9gil"
-  instance_id        = "vpc-2fe5dpn0av2m859gp68rhk2dc"
-  instance_type      = "VPC"
-  instance_region_id = "cn-beijing"
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-vpc"
+  cidr_block = "172.16.0.0/16"
 }
 
-resource "volcengine_cen_attach_instance" "foo1" {
-  cen_id             = "cen-12ar8uclj68sg17q7y20v9gil"
-  instance_id        = "vpc-in66ktl5t24g8gbssz0sqva1"
-  instance_type      = "VPC"
+resource "volcengine_cen" "foo" {
+  cen_name     = "acc-test-cen"
+  description  = "acc-test"
+  project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
+}
+
+resource "volcengine_cen_attach_instance" "foo" {
+  cen_id             = volcengine_cen.foo.id
+  instance_id        = volcengine_vpc.foo.id
   instance_region_id = "cn-beijing"
+  instance_type      = "VPC"
 }
 ```
 ## Argument Reference

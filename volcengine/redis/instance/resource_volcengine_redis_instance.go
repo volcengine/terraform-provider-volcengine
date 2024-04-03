@@ -126,13 +126,11 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
-				Description: "The project name to which the redis instance belongs, if this parameter is empty, the new redis instance will not be added to any project.",
+				Description: "The project name to which the redis instance belongs, if this parameter is empty, the new redis instance will be added to the `default` project.",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Tags.",
 				Set:         tagsHash,
 				Elem: &schema.Resource{
