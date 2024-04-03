@@ -17,20 +17,23 @@ use 'terraform state rm ${resourceId}' to remove.
 resource "volcengine_cen_bandwidth_package" "foo" {
   local_geographic_region_set_id = "China"
   peer_geographic_region_set_id  = "China"
-  bandwidth                      = 32
-  cen_bandwidth_package_name     = "tf-test"
-  description                    = "tf-test1"
+  bandwidth                      = 2
+  cen_bandwidth_package_name     = "acc-test-cen-bp"
+  description                    = "acc-test"
   billing_type                   = "PrePaid"
-  period_unit                    = "Year"
+  period_unit                    = "Month"
   period                         = 1
   project_name                   = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `bandwidth` - (Optional) The bandwidth of the cen bandwidth package. Value: 2~10000.
 * `billing_type` - (Optional, ForceNew) The billing type of the cen bandwidth package. Only support `PrePaid` and default value is `PrePaid`.
-Terraform will only remove the PrePaid cen bandwidth package from the state file, not actually remove.
 * `cen_bandwidth_package_name` - (Optional) The name of the cen bandwidth package.
 * `description` - (Optional) The description of the cen bandwidth package.
 * `local_geographic_region_set_id` - (Optional, ForceNew) The local geographic region set id of the cen bandwidth package. Valid value: `China`, `Asia`.

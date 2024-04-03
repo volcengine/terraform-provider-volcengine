@@ -918,6 +918,9 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 		callbacks = append(callbacks, callback)
 	}
 
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, callbacks)
+
 	return callbacks
 }
 
@@ -1025,6 +1028,69 @@ func (s *VolcengineRedisDbInstanceService) getVpcIdAndZoneIdBySubnet(subnetId st
 	vpcId = subnets[0].(map[string]interface{})["VpcId"].(string)
 	zoneId = subnets[0].(map[string]interface{})["ZoneId"].(string)
 	return vpcId, zoneId, nil
+}
+
+func (s *VolcengineRedisDbInstanceService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "RemoveTagsFromResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddTagsToResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					(*call.SdkParam)["InstanceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag.(map[string]interface{}))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
+}
+
+func (s *VolcengineRedisDbInstanceService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "Redis",
+		ResourceType:         "instance",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

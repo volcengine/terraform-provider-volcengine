@@ -178,6 +178,9 @@ func (VolcengineBandwidthPackageService) WithResourceResponseHandlers(d map[stri
 				TargetField: "billing_type",
 				Convert:     billingTypeResponseConvert,
 			},
+			"ISP": {
+				TargetField: "isp",
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}

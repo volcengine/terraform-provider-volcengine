@@ -95,11 +95,11 @@ This field is valid and required when updating the backup plan of primary and se
 * `param_values` - (Optional) The configuration item information to be modified. This field can only be added or modified. Deleting this field is invalid.
 When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields, or use the command `terraform apply` to perform a modification operation.
 * `port` - (Optional, ForceNew) The port of custom define private network address. The valid value range is `1024-65535`. The default value is `6379`.
-* `project_name` - (Optional, ForceNew) The project name to which the redis instance belongs, if this parameter is empty, the new redis instance will not be added to any project.
+* `project_name` - (Optional) The project name to which the redis instance belongs, if this parameter is empty, the new redis instance will be added to the `default` project.
 * `purchase_months` - (Optional) The purchase months of redis instance, the unit is month. the valid value range is as fallows: `1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36`. This field is valid and required when `ChargeType` is `Prepaid`. 
 When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `shard_number` - (Optional) The number of shards in redis instance, the valid value range is `2-256`. This field is valid and required when the value of `ShardedCluster` is 1.
-* `tags` - (Optional, ForceNew) Tags.
+* `tags` - (Optional) Tags.
 * `vpc_auth_mode` - (Optional) Whether to enable password-free access when connecting to an instance through a private network. Valid values: `open`, `close`.
 
 The `param_values` object supports the following:

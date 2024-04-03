@@ -17,6 +17,7 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/subnet"
 )
 
@@ -160,6 +161,18 @@ func (s *VolcengineEcsService) ReadResource(resourceData *schema.ResourceData, i
 				return data, fmt.Errorf("CpuOptions is not map ")
 			}
 			cpuOptions["NumaPerSocket"] = numa
+		}
+	}
+
+	if eipId := resourceData.Get("eip_id"); eipId != "" {
+		if v, exist := data["EipAddress"]; exist && v != nil {
+			eipMap, ok := v.(map[string]interface{})
+			if !ok {
+				return data, fmt.Errorf("DescribeInstances EipAddress is not map")
+			}
+			if id, ok := eipMap["AllocationId"]; ok && eipId.(string) != id.(string) {
+				return data, fmt.Errorf("The eip id of the instance is mismatched, specified id: %s, assigned id: %s ", eipId, id)
+			}
 		}
 	}
 
@@ -602,6 +615,45 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 	}
 	callbacks = append(callbacks, ipv6Callback)
 
+	// 绑定eip
+	eipCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AssociateEipAddress",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				eipId, ok := d.GetOk("eip_id")
+				if !ok {
+					return false, nil
+				}
+				(*call.SdkParam)["AllocationId"] = eipId.(string)
+				(*call.SdkParam)["InstanceId"] = d.Id()
+				(*call.SdkParam)["InstanceType"] = "EcsInstance"
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				output, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, *call.SdkParam, *output)
+				if err != nil {
+					d.Set("eip_id", nil)
+				}
+				return output, err
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"RUNNING"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				eip_address.NewEipAddressService(s.Client): {
+					Target:     []string{"Attached"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("eip_id").(string),
+				},
+			},
+		},
+	}
+	callbacks = append(callbacks, eipCallback)
+
 	return callbacks
 }
 
@@ -971,6 +1023,41 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 }
 
 func (s *VolcengineEcsService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
+	// 解绑eip
+	eipCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DisassociateEipAddress",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				eipId, ok := d.GetOk("eip_id")
+				if !ok {
+					return false, nil
+				}
+				(*call.SdkParam)["AllocationId"] = eipId.(string)
+				(*call.SdkParam)["InstanceId"] = d.Id()
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getVpcUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"RUNNING"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				eip_address.NewEipAddressService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
+					ResourceId: resourceData.Get("eip_id").(string),
+				},
+			},
+		},
+	}
+	callbacks = append(callbacks, eipCallback)
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteInstance",
@@ -1012,7 +1099,9 @@ func (s *VolcengineEcsService) RemoveResource(resourceData *schema.ResourceData,
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	return callbacks
 }
 
 func (s *VolcengineEcsService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
