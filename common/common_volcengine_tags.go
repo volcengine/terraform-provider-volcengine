@@ -163,7 +163,7 @@ func FilterSystemTags(tags []interface{}) []interface{} {
 }
 
 func tagIgnored(tagKey string, tagValue interface{}) bool {
-	filter := []string{"^volc:"}
+	filter := []string{"^volc:", "^sys:"}
 	for _, v := range filter {
 		ok, _ := regexp.MatchString(v, tagKey)
 		if ok {

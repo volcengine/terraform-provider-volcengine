@@ -20,6 +20,10 @@ func Test_FilterSystemTags(t *testing.T) {
 			"Key":   "volc:ecs:linkedresource",
 			"Value": "trn:ecs:cn-beijing:222222",
 		},
+		map[string]interface{}{
+			"Key":   "sys:ecs:linkedresource",
+			"Value": "trn:ecs:cn-beijing:222222",
+		},
 	}
 
 	res := FilterSystemTags(tags)
