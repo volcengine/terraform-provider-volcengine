@@ -12,7 +12,7 @@ fi
 
 if [ "$ARCH" == "" ]
 then
-  ARCH="arm64"
+  ARCH="amd64"
 fi
 
 CGO_ENABLED=0 GOOS=$OS GOARCH=$ARCH go build  -o $NAME

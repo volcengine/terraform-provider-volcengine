@@ -86,6 +86,8 @@ The following arguments are supported:
 * `data_volumes` - (Optional) The data volumes collection of  ECS instance.
 * `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
 * `description` - (Optional) The description of ECS instance.
+* `eip_id` - (Optional, ForceNew) The id of an existing Available EIP which will be automatically assigned to this instance. 
+It is not recommended to use this field, it is recommended to use `volcengine_eip_associate` resource to bind EIP.
 * `host_name` - (Optional, ForceNew) The host name of ECS instance.
 * `hpc_cluster_id` - (Optional, ForceNew) The hpc cluster ID of ECS instance.
 * `include_data_volumes` - (Optional) The include data volumes flag of ECS instance.Only effective when change instance charge type.include_data_volumes.
