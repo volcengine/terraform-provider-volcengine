@@ -1,9 +1,13 @@
 package volcengine
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"net/url"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization"
@@ -12,8 +16,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
-	"github.com/volcengine/volc-sdk-golang/base"
-	"github.com/volcengine/volc-sdk-golang/service/sts"
+	"github.com/volcengine/volcengine-go-sdk/volcengine"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/credentials"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/session"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineutil"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
@@ -950,53 +956,78 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 		if err != nil {
 			return nil, err
 		}
-		config.AccessKey = cred.AccessKeyId
-		config.SecretKey = cred.SecretAccessKey
-		config.SessionToken = cred.SessionToken
+		config.AccessKey = cred["AccessKeyId"].(string)
+		config.SecretKey = cred["SecretAccessKey"].(string)
+		config.SessionToken = cred["SessionToken"].(string)
 	}
 
 	client, err := config.Client()
 	return client, err
 }
 
-func assumeRole(c ve.Config, arTrn, arSessionName, arPolicy string, arDurationSeconds int) (*sts.Credentials, error) {
-	ins := sts.NewInstance()
-	if c.Region != "" {
-		ins.SetRegion(c.Region)
-	}
-	if c.Endpoint != "" {
-		ins.SetHost(c.Endpoint)
+func assumeRole(c ve.Config, arTrn, arSessionName, arPolicy string, arDurationSeconds int) (map[string]interface{}, error) {
+	version := fmt.Sprintf("%s/%s", ve.TerraformProviderName, ve.TerraformProviderVersion)
+	conf := volcengine.NewConfig().
+		WithRegion(c.Region).
+		WithExtraUserAgent(volcengine.String(version)).
+		WithCredentials(credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.SessionToken)).
+		WithDisableSSL(c.DisableSSL).
+		WithExtendHttpRequest(func(ctx context.Context, request *http.Request) {
+			if len(c.CustomerHeaders) > 0 {
+				for k, v := range c.CustomerHeaders {
+					request.Header.Add(k, v)
+				}
+			}
+		}).
+		WithEndpoint(volcengineutil.NewEndpoint().WithCustomerEndpoint(c.Endpoint).GetEndpoint())
+
+	if c.ProxyUrl != "" {
+		u, _ := url.Parse(c.ProxyUrl)
+		t := &http.Transport{
+			Proxy: http.ProxyURL(u),
+		}
+		httpClient := http.DefaultClient
+		httpClient.Transport = t
+		httpClient.Timeout = time.Duration(30000) * time.Millisecond
 	}
 
-	ins.Client.SetAccessKey(c.AccessKey)
-	ins.Client.SetSecretKey(c.SecretKey)
-	input := &sts.AssumeRoleRequest{
-		RoleTrn:         arTrn,
-		RoleSessionName: arSessionName,
-		DurationSeconds: arDurationSeconds,
-		Policy:          arPolicy,
-	}
-	output, statusCode, err := ins.AssumeRole(input)
-	var (
-		reqId  string
-		errObj *base.ErrorObj
-	)
-	if output != nil {
-		reqId = output.ResponseMetadata.RequestId
-		errObj = output.ResponseMetadata.Error
-	}
+	sess, err := session.NewSession(conf)
 	if err != nil {
-		return nil, fmt.Errorf("AssumeRole error, httpcode is %v and reqId is %s error is %s", statusCode, reqId, err.Error())
-	}
-	if errObj != nil {
-		return nil, fmt.Errorf("AssumeRole error, code is %v and reqId is %s error is %s", errObj.Code, reqId, errObj.Message)
+		return nil, err
 	}
 
-	if output.Result == nil || output.Result.Credentials == nil {
-		return nil, fmt.Errorf("assume role failed, result is nil")
-	}
+	universalClient := ve.NewUniversalClient(sess, c.CustomerEndpoints)
 
-	return output.Result.Credentials, nil
+	action := "AssumeRole"
+	req := map[string]interface{}{
+		"RoleTrn":         arTrn,
+		"RoleSessionName": arSessionName,
+		"DurationSeconds": arDurationSeconds,
+		"Policy":          arPolicy,
+	}
+	resp, err := universalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return nil, fmt.Errorf("AssumeRole failed, error: %s", err.Error())
+	}
+	results, err := ve.ObtainSdkValue("Result.Credentials", *resp)
+	if err != nil {
+		return nil, err
+	}
+	cred, ok := results.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("AssumeRole Result.Credentials is not Map")
+	}
+	return cred, nil
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "sts",
+		Version:     "2018-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }
 
 func defaultCustomerEndPoints() map[string]string {
