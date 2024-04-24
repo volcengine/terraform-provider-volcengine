@@ -65,16 +65,6 @@ func ResourceVolcengineCdnCertificate() *schema.Resource {
 					"`volc_cert_center`: indicates that the certificate will be stored in the certificate center." +
 					"`cdn_cert_hosting`: indicates that the certificate will be hosted on the content delivery network.",
 			},
-			"cert_info": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Object representing a certificate remark.",
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{},
-				},
-			},
 			"desc": {
 				Type:        schema.TypeString,
 				Required:    true,
