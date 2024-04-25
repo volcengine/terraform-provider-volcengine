@@ -33,13 +33,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
-	mssqlBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_backup"
-	mssqlInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_readonly_node"
-
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact_group"
@@ -56,8 +49,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
+	mssqlBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_backup"
+	mssqlInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_readonly_node"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_schema"
 	trEntry "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_entry"
 	trTable "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table_association"
@@ -618,6 +618,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policies": organization_service_control_policy.DataSourceVolcengineServiceControlPolicies(),
 			"volcengine_organization_accounts":                 organization_account.DataSourceVolcengineOrganizationAccounts(),
 			"volcengine_organizations":                         organization.DataSourceVolcengineOrganizations(),
+			"volcengine_rds_postgresql_schemas":                rds_postgresql_schema.DataSourceVolcengineRdsPostgresqlSchemas(),
 
 			// ================ CDN ================
 			"volcengine_cdn_certificates":   cdn_certificate.DataSourceVolcengineCdnCertificates(),
@@ -885,6 +886,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policy_attachment": organization_service_control_policy_attachment.ResourceVolcengineServiceControlPolicyAttachment(),
 			"volcengine_organization_account":                           organization_account.ResourceVolcengineOrganizationAccount(),
 			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
+			"volcengine_rds_postgresql_schema":                          rds_postgresql_schema.ResourceVolcengineRdsPostgresqlSchema(),
 
 			// ================ CDN ================
 			"volcengine_cdn_certificate":   cdn_certificate.ResourceVolcengineCdnCertificate(),
