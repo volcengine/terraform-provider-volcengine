@@ -156,6 +156,7 @@ var resourceKeys = map[string]string{
 	"rds_mssql":         "RDS_MSSQL",
 	"rds_postgresql":    "RDS_POSTGRESQL",
 	"organization":      "ORGANIZATION",
+	"cdn":               "CDN",
 }
 
 type Products struct {

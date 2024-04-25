@@ -16,10 +16,16 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
+
 	"github.com/volcengine/volcengine-go-sdk/volcengine"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/credentials"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/session"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineutil"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_certificate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_config"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_shared_config"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
@@ -613,6 +619,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_accounts":                 organization_account.DataSourceVolcengineOrganizationAccounts(),
 			"volcengine_organizations":                         organization.DataSourceVolcengineOrganizations(),
 			"volcengine_rds_postgresql_schemas":                rds_postgresql_schema.DataSourceVolcengineRdsPostgresqlSchemas(),
+
+			// ================ CDN ================
+			"volcengine_cdn_certificates":   cdn_certificate.DataSourceVolcengineCdnCertificates(),
+			"volcengine_cdn_domains":        cdn_domain.DataSourceVolcengineCdnDomains(),
+			"volcengine_cdn_configs":        cdn_config.DataSourceVolcengineCdnConfigs(),
+			"volcengine_cdn_shared_configs": cdn_shared_config.DataSourceVolcengineCdnSharedConfigs(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -875,6 +887,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_account":                           organization_account.ResourceVolcengineOrganizationAccount(),
 			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
 			"volcengine_rds_postgresql_schema":                          rds_postgresql_schema.ResourceVolcengineRdsPostgresqlSchema(),
+
+			// ================ CDN ================
+			"volcengine_cdn_certificate":   cdn_certificate.ResourceVolcengineCdnCertificate(),
+			"volcengine_cdn_domain":        cdn_domain.ResourceVolcengineCdnDomain(),
+			"volcengine_cdn_shared_config": cdn_shared_config.ResourceVolcengineCdnSharedConfig(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
