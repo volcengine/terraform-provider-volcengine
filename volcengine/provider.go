@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -33,6 +34,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact_group"
@@ -73,7 +75,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_resource_types"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip_associate"
-	"strings"
 
 	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
 
@@ -457,6 +458,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user_groups":                   iam_user_group.DataSourceVolcengineIamUserGroups(),
 			"volcengine_iam_user_group_policy_attachments": iam_user_group_policy_attachment.DataSourceVolcengineIamUserGroupPolicyAttachments(),
 			"volcengine_iam_saml_providers":                iam_saml_provider.DataSourceVolcengineIamSamlProviders(),
+			"volcengine_iam_access_keys":                   iam_access_key.DataSourceVolcengineIamAccessKeys(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),

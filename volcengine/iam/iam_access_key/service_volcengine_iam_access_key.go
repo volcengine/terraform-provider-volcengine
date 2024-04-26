@@ -271,7 +271,16 @@ func (s *VolcengineIamAccessKeyService) RemoveResource(resourceData *schema.Reso
 }
 
 func (s *VolcengineIamAccessKeyService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{}
+	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"user_name": {
+				TargetField: "UserName",
+			},
+		},
+		NameField:    "UserName",
+		IdField:      "UserName",
+		CollectField: "access_key_metadata",
+	}
 }
 
 func (s *VolcengineIamAccessKeyService) ReadResourceId(id string) string {
