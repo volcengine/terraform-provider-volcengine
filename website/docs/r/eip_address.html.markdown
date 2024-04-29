@@ -28,7 +28,7 @@ The following arguments are supported:
 * `billing_type` - (Required) The billing type of the EIP Address. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic` or `PrePaid`.
 * `bandwidth` - (Optional) The peek bandwidth of the EIP.
 * `description` - (Optional) The description of the EIP.
-* `isp` - (Optional, ForceNew) The ISP of the EIP, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom` or `SingleLine_BGP` or `Static_BGP`.
+* `isp` - (Optional, ForceNew) The ISP of the EIP, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom` or `SingleLine_BGP` or `Static_BGP` or `Fusion_BGP`.
 * `name` - (Optional) The name of the EIP Address.
 * `period` - (Optional) The period of the EIP Address, the valid value range in 1~9 or 12 or 36. Default value is 12. The period unit defaults to `Month`.This field is only effective when creating a PrePaid Eip or changing the billing_type from PostPaid to PrePaid.
 * `project_name` - (Optional) The ProjectName of the EIP.
