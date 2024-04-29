@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
@@ -16,10 +17,16 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
+
 	"github.com/volcengine/volcengine-go-sdk/volcengine"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/credentials"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/session"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineutil"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_certificate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_config"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cdn/cdn_shared_config"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_acl"
@@ -27,12 +34,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_server_group_server"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb_zone"
-	mssqlBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_backup"
-	mssqlInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_readonly_node"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_monitor/cloud_monitor_contact"
@@ -50,8 +51,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_snapshot"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
+	mssqlBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_backup"
+	mssqlInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_readonly_node"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_schema"
 	trEntry "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_entry"
 	trTable "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table_association"
@@ -67,7 +75,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_resource_types"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip_associate"
-	"strings"
 
 	regions "github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/region"
 
@@ -451,6 +458,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user_groups":                   iam_user_group.DataSourceVolcengineIamUserGroups(),
 			"volcengine_iam_user_group_policy_attachments": iam_user_group_policy_attachment.DataSourceVolcengineIamUserGroupPolicyAttachments(),
 			"volcengine_iam_saml_providers":                iam_saml_provider.DataSourceVolcengineIamSamlProviders(),
+			"volcengine_iam_access_keys":                   iam_access_key.DataSourceVolcengineIamAccessKeys(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),
@@ -612,6 +620,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policies": organization_service_control_policy.DataSourceVolcengineServiceControlPolicies(),
 			"volcengine_organization_accounts":                 organization_account.DataSourceVolcengineOrganizationAccounts(),
 			"volcengine_organizations":                         organization.DataSourceVolcengineOrganizations(),
+			"volcengine_rds_postgresql_schemas":                rds_postgresql_schema.DataSourceVolcengineRdsPostgresqlSchemas(),
+
+			// ================ CDN ================
+			"volcengine_cdn_certificates":   cdn_certificate.DataSourceVolcengineCdnCertificates(),
+			"volcengine_cdn_domains":        cdn_domain.DataSourceVolcengineCdnDomains(),
+			"volcengine_cdn_configs":        cdn_config.DataSourceVolcengineCdnConfigs(),
+			"volcengine_cdn_shared_configs": cdn_shared_config.DataSourceVolcengineCdnSharedConfigs(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -873,6 +888,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_organization_service_control_policy_attachment": organization_service_control_policy_attachment.ResourceVolcengineServiceControlPolicyAttachment(),
 			"volcengine_organization_account":                           organization_account.ResourceVolcengineOrganizationAccount(),
 			"volcengine_organization":                                   organization.ResourceVolcengineOrganization(),
+			"volcengine_rds_postgresql_schema":                          rds_postgresql_schema.ResourceVolcengineRdsPostgresqlSchema(),
+
+			// ================ CDN ================
+			"volcengine_cdn_certificate":   cdn_certificate.ResourceVolcengineCdnCertificate(),
+			"volcengine_cdn_domain":        cdn_domain.ResourceVolcengineCdnDomain(),
+			"volcengine_cdn_shared_config": cdn_shared_config.ResourceVolcengineCdnSharedConfig(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
