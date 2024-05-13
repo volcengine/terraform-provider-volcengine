@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -252,7 +253,7 @@ func (s *VolcengineTosObjectService) CreateResource(resourceData *schema.Resourc
 func (s *VolcengineTosObjectService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
-	if data.HasChange("file_path") || data.HasChanges("content_md5") {
+	if data.HasChange("file_path") || data.HasChanges("content_md5") || data.HasChanges("content") {
 		callbacks = append(callbacks, s.createOrReplaceObject(data, resource, true))
 		callbacks = append(callbacks, s.createOrUpdateObjectAcl(data, resource, true))
 	} else {
@@ -511,6 +512,7 @@ func (s *VolcengineTosObjectService) createOrUpdateObjectAcl(resourceData *schem
 }
 
 func (s *VolcengineTosObjectService) createOrReplaceObject(resourceData *schema.ResourceData, resource *schema.Resource, isUpdate bool) ve.Callback {
+	name := fmt.Sprintf("./%d-temp", time.Now().Unix())
 	return ve.Callback{
 		Call: ve.SdkCall{
 			ServiceCategory: ve.ServiceBypass,
@@ -558,6 +560,13 @@ func (s *VolcengineTosObjectService) createOrReplaceObject(resourceData *schema.
 					},
 					ForceGet: isUpdate,
 				},
+				"content": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "Content",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+				},
 				"content_md5": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "Content-MD5",
@@ -591,6 +600,15 @@ func (s *VolcengineTosObjectService) createOrReplaceObject(resourceData *schema.
 				if _, ok := (*call.SdkParam)[ve.BypassHeader].(map[string]string)["Content-MD5"]; ok {
 					(*call.SdkParam)[ve.BypassHeader].(map[string]string)["x-tos-meta-content-md5"] = d.Get("content_md5").(string)
 				}
+				if _, ok := (*call.SdkParam)[ve.BypassHeader].(map[string]string)["Content"]; ok {
+					content := []byte(d.Get("content").(string))
+					err := os.WriteFile(name, content, 0644)
+					if err != nil {
+						return false, err
+					}
+					(*call.SdkParam)[ve.BypassFilePath] = name
+					delete((*call.SdkParam)[ve.BypassHeader].(map[string]string), "Content")
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -606,7 +624,14 @@ func (s *VolcengineTosObjectService) createOrReplaceObject(resourceData *schema.
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				d.SetId((*call.SdkParam)[ve.BypassDomain].(string) + ":" + (*call.SdkParam)[ve.BypassPath].([]string)[0])
-				return nil
+				_, err := os.Stat(name)
+				if err == nil {
+					return os.Remove(name)
+				}
+				if os.IsNotExist(err) {
+					return nil
+				}
+				return err
 			},
 		},
 	}
