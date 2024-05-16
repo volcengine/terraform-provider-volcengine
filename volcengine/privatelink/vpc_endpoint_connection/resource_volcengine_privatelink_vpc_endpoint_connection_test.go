@@ -63,9 +63,16 @@ resource "volcengine_privatelink_vpc_endpoint" "foo" {
   description        = "acc-test"
 }
 
+resource "volcengine_privatelink_vpc_endpoint_zone" "foo" {
+  endpoint_id        = volcengine_privatelink_vpc_endpoint.foo.id
+  subnet_id          = volcengine_subnet.foo.id
+  private_ip_address = "172.16.0.251"
+}
+
 resource "volcengine_privatelink_vpc_endpoint_connection" "foo" {
   endpoint_id = volcengine_privatelink_vpc_endpoint.foo.id
   service_id  = volcengine_privatelink_vpc_endpoint_service.foo.id
+  depends_on  = [volcengine_privatelink_vpc_endpoint_zone.foo]
 }
 `
 

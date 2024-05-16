@@ -65,8 +65,8 @@ func ResourceVolcengineTosObject() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				//ForceNew:    true,
-				Description:   "The file path for upload.",
-				ConflictsWith: []string{"content"},
+				Description:  "The file path for upload. Only one of `file_path,content` can be specified.",
+				ExactlyOneOf: []string{"file_path", "content"},
 			},
 			"content_md5": {
 				Type:        schema.TypeString,
@@ -164,11 +164,11 @@ func ResourceVolcengineTosObject() *schema.Resource {
 				Description: "The flag of enable tos version.",
 			},
 			"content": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				Computed:      true,
-				ConflictsWith: []string{"file_path"},
-				Description:   "The content the TOS Object when content type is json or text and xml.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Computed:     true,
+				ExactlyOneOf: []string{"file_path", "content"},
+				Description:  "The content of the TOS Object when content type is json or text and xml. Only one of `file_path,content` can be specified.",
 			},
 		},
 	}
