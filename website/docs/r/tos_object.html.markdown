@@ -34,12 +34,13 @@ resource "volcengine_tos_object" "default" {
 ## Argument Reference
 The following arguments are supported:
 * `bucket_name` - (Required, ForceNew) The name of the bucket.
-* `file_path` - (Required) The file path for upload.
 * `object_name` - (Required, ForceNew) The name of the object.
 * `account_acl` - (Optional) The user set of grant full control.
 * `content_md5` - (Optional) The file md5 sum (32-bit hexadecimal string) for upload.
 * `content_type` - (Optional, ForceNew) The content type of the object.
+* `content` - (Optional) The content of the TOS Object when content type is json or text and xml. Only one of `file_path,content` can be specified.
 * `encryption` - (Optional, ForceNew) The encryption of the object.Valid value is AES256.
+* `file_path` - (Optional) The file path for upload. Only one of `file_path,content` can be specified.
 * `public_acl` - (Optional) The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.
 * `storage_class` - (Optional, ForceNew) The storage type of the object.Valid value is STANDARD|IA.
 
@@ -52,7 +53,6 @@ The `account_acl` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `content` - The content the TOS Object when content type is json or text and xml.
 * `enable_version` - The flag of enable tos version.
 * `version_ids` - The version ids of the object if exist.
 

@@ -134,11 +134,10 @@ func ResourceVolcengineClb() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"isp": {
-							Type:         schema.TypeString,
-							Required:     true,
-							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"BGP"}, false),
-							Description:  "The ISP of the EIP which automatically associated to CLB, the value can be `BGP`.",
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The ISP of the EIP which automatically associated to CLB, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom` or `SingleLine_BGP` or `Static_BGP` or `Fusion_BGP`.",
 						},
 						"eip_billing_type": {
 							Type:         schema.TypeString,

@@ -136,7 +136,7 @@ When the value of this field is `DualStack`, the type of the CLB must be `privat
 The `eip_billing_config` object supports the following:
 
 * `eip_billing_type` - (Required, ForceNew) The billing type of the EIP which automatically assigned to CLB. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic` or `PrePaid`.When creating a `PrePaid` public CLB, this field must be specified as `PrePaid` simultaneously.When the LoadBalancerBillingType changes from `PostPaid` to `PrePaid`, please manually modify the value of this field to `PrePaid` simultaneously.
-* `isp` - (Required, ForceNew) The ISP of the EIP which automatically associated to CLB, the value can be `BGP`.
+* `isp` - (Required, ForceNew) The ISP of the EIP which automatically associated to CLB, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom` or `SingleLine_BGP` or `Static_BGP` or `Fusion_BGP`.
 * `bandwidth` - (Optional) The peek bandwidth of the EIP which automatically assigned to CLB.
 
 The `tags` object supports the following:
