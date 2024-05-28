@@ -1,10 +1,12 @@
 package object
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -170,6 +172,26 @@ func ResourceVolcengineTosObject() *schema.Resource {
 				ExactlyOneOf: []string{"file_path", "content"},
 				Description:  "The content of the TOS Object when content type is json or text and xml. Only one of `file_path,content` can be specified.",
 			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "Tos Bucket Tags.",
+				Set:         TagsHash,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Value of Tags.",
+						},
+					},
+				},
+			},
 		},
 	}
 	return resource
@@ -209,4 +231,16 @@ func resourceVolcengineTosObjectDelete(d *schema.ResourceData, meta interface{})
 		return fmt.Errorf("error on deleting tos object %q, %s", d.Id(), err)
 	}
 	return err
+}
+
+var TagsHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
+	return hashcode.String(buf.String())
 }

@@ -81,6 +81,7 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Items is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 	if err != nil {
@@ -779,4 +780,25 @@ func ContainsInSlice(items []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }

@@ -194,6 +194,7 @@ func (s *VolcengineTosBucketPolicyService) RemoveResource(data *schema.ResourceD
 				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					HttpMethod: ve.DELETE,
 					Domain:     (*call.SdkParam)[ve.BypassDomain].(string),
+					Path:       []string{"?policy="},
 					UrlParam: map[string]string{
 						"policy": "",
 					},

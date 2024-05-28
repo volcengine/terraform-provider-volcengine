@@ -39,6 +39,7 @@ func DataSourceVolcengineTransitRouterPeerAttachments() *schema.Resource {
 				Optional:    true,
 				Description: "The region id of peer transit router.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -126,6 +127,7 @@ func DataSourceVolcengineTransitRouterPeerAttachments() *schema.Resource {
 							Computed:    true,
 							Description: "The update time of the transit router peer attachment.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

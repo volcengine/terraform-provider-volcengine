@@ -74,6 +74,7 @@ func ResourceVolcengineTransitRouterDirectConnectGatewayAttachment() *schema.Res
 				Computed:    true,
 				Description: "The name of the transit router direct connect gateway attachment.",
 			},
+			"tags": ve.TagsSchema(),
 			"transit_router_attachment_id": {
 				Type:        schema.TypeString,
 				Computed:    true,

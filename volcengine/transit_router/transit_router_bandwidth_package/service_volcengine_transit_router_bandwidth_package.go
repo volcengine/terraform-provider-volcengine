@@ -195,12 +195,16 @@ func (s *VolcengineTRBandwidthPackageService) CreateResource(resourceData *schem
 		Call: ve.SdkCall{
 			Action:      "CreateTransitRouterBandwidthPackage",
 			ConvertMode: ve.RequestConvertAll,
-			//Convert: map[string]ve.RequestConvert{
-			//	"billing_type": {
-			//		TargetField: "BillingType",
-			//		Convert:     billingTypeRequestConvert,
-			//	},
-			//},
+			Convert: map[string]ve.RequestConvert{
+				//"billing_type": {
+				//	TargetField: "BillingType",
+				//	Convert:     billingTypeRequestConvert,
+				//},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["LocalGeographicRegionSetId"] = "China"
 				(*call.SdkParam)["PeerGeographicRegionSetId"] = "China"
@@ -251,6 +255,7 @@ func (s *VolcengineTRBandwidthPackageService) ModifyResource(resourceData *schem
 					return false, nil
 				}
 				(*call.SdkParam)["TransitRouterBandwidthPackageId"] = d.Id()
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -290,6 +295,7 @@ func (s *VolcengineTRBandwidthPackageService) ModifyResource(resourceData *schem
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					if len(*call.SdkParam) > 0 {
 						(*call.SdkParam)["TransitRouterBandwidthPackageId"] = d.Id()
+						delete(*call.SdkParam, "Tags")
 						return true, nil
 					}
 					return false, nil
@@ -329,6 +335,7 @@ func (s *VolcengineTRBandwidthPackageService) ModifyResource(resourceData *schem
 						}
 						(*call.SdkParam)["PeriodUnit"] = "Month"
 						(*call.SdkParam)["TransitRouterBandwidthPackageId"] = d.Id()
+						delete(*call.SdkParam, "Tags")
 						return true, nil
 					}
 					return false, nil
@@ -345,6 +352,10 @@ func (s *VolcengineTRBandwidthPackageService) ModifyResource(resourceData *schem
 		}
 		callbacks = append(callbacks, periodCallback)
 	}
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "transitrouterbandwidthpackage", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
 
 	return callbacks
 }
@@ -390,6 +401,15 @@ func (s *VolcengineTRBandwidthPackageService) DatasourceResources(*schema.Resour
 				TargetField: "TransitRouterBandwidthPackageIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "TransitRouterBandwidthPackageName",
 		IdField:      "TransitRouterBandwidthPackageId",
@@ -418,6 +438,15 @@ func (s *VolcengineTRBandwidthPackageService) UnsubscribeInfo(resourceData *sche
 	info.NeedUnsubscribe = true
 	info.Products = []string{"TransitRouter_InterRegionBandwidth"}
 	return &info, nil
+}
+
+func (s *VolcengineTRBandwidthPackageService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "transitrouter",
+		ResourceType:         "transitrouterbandwidthpackage",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

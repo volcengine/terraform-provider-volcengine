@@ -92,7 +92,15 @@ func ResourceVolcengineTransitRouterBandwidthPackage() *schema.Resource {
 				Description: "The remaining renewal times of of the transit router bandwidth package. Valid values: -1 or 1~100. Default value is -1, means unlimited renewal." +
 					"This field is only effective when the value of the `renew_type` is `Auto`.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ProjectName of the transit router bandwidth package.",
+			},
+			"tags": ve.TagsSchema(),
 
+			// computed fields
 			"remaining_bandwidth": {
 				Type:        schema.TypeInt,
 				Computed:    true,

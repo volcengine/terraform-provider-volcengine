@@ -28,6 +28,12 @@ func DataSourceVolcengineTransitRouterBandwidthPackages() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the TransitRouter bandwidth package.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the TransitRouter bandwidth package.",
+			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -124,6 +130,12 @@ func DataSourceVolcengineTransitRouterBandwidthPackages() *schema.Resource {
 							Computed:    true,
 							Description: "The delete time of the transit router bandwidth package.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the transit router bandwidth package.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"allocations": {
 							Type:        schema.TypeList,
 							Computed:    true,

@@ -44,6 +44,13 @@ func ResourceVolcengineTransitRouter() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the transit router.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ProjectName of the transit router.",
+			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	dataSource := DataSourceVolcengineTransitRouters().Schema["transit_routers"].Elem.(*schema.Resource).Schema

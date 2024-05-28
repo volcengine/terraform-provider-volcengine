@@ -175,7 +175,7 @@ func (s *VolcengineEcsService) ReadResource(resourceData *schema.ResourceData, i
 			}
 		}
 	}
-
+	
 	return data, nil
 }
 
@@ -283,7 +283,8 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 				wg.Done()
 			}()
 			temp := map[string]interface{}{
-				"InstanceId": ecs["InstanceId"],
+				"InstanceId":  ecs["InstanceId"],
+				"ProjectName": ecs["ProjectName"],
 			}
 			_, ebsErr = s.readEbsVolumes([]interface{}{temp})
 			if ebsErr != nil {
@@ -328,19 +329,60 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 			var (
 				networkInterfaceParam *map[string]interface{}
 				networkInterfaceResp  *map[string]interface{}
-				networkInterface      interface{}
+				networkInterface      []interface{}
+				networkInterfaces     []interface{}
+				ok                    bool
+				next                  string
 			)
-			networkInterfaceParam = &map[string]interface{}{
-				"InstanceId": instanceId,
+
+			networkInterfaceParam = &map[string]interface{}{}
+			if networkInterfaces, ok = ecs["NetworkInterfaces"].([]interface{}); !ok {
+				return
 			}
-			networkInterfaceResp, networkInterfaceErr = s.Client.UniversalClient.DoCall(getVpcUniversalInfo("DescribeNetworkInterfaces"), networkInterfaceParam)
+			for index, networkInterface := range networkInterfaces {
+				if networkInterfaceMap, ok := networkInterface.(map[string]interface{}); ok {
+					(*networkInterfaceParam)[fmt.Sprintf("%s.%d", "NetworkInterfaceIds", index)] = networkInterfaceMap["NetworkInterfaceId"].(string)
+				}
+			}
+			networkInterface, networkInterfaceErr = ve.WithNextTokenQuery(*networkInterfaceParam, "MaxResults", "NextToken", 100, nil, func(condition map[string]interface{}) ([]interface{}, string, error) {
+				action := "DescribeNetworkInterfaces"
+				logger.Debug(logger.ReqFormat, action, condition)
+				networkInterfaceResp, networkInterfaceErr = s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &condition)
+				if networkInterfaceErr != nil {
+					return networkInterface, next, networkInterfaceErr
+				}
+				logger.Debug(logger.RespFormat, action, condition, *networkInterfaceResp)
+
+				results, networkInterfaceErr := ve.ObtainSdkValue("Result.NetworkInterfaceSets", *networkInterfaceResp)
+				if networkInterfaceErr != nil {
+					return networkInterface, next, networkInterfaceErr
+				}
+				nextToken, err := ve.ObtainSdkValue("Result.NextToken", *networkInterfaceResp)
+				if err != nil {
+					return networkInterface, next, err
+				}
+				next = nextToken.(string)
+				if results == nil {
+					results = []interface{}{}
+				}
+
+				if networkInterface, ok = results.([]interface{}); !ok {
+					return networkInterface, next, errors.New("Result.NetworkInterfaceSets is not Slice")
+				}
+				return networkInterface, next, networkInterfaceErr
+			})
+
+			//networkInterfaceParam = &map[string]interface{}{
+			//	"InstanceId": instanceId,
+			//}
+			//networkInterfaceResp, networkInterfaceErr = s.Client.UniversalClient.DoCall(getVpcUniversalInfo("DescribeNetworkInterfaces"), networkInterfaceParam)
 			if networkInterfaceErr != nil {
 				return
 			}
-			networkInterface, networkInterfaceErr = ve.ObtainSdkValue("Result.NetworkInterfaceSets", *networkInterfaceResp)
-			if networkInterfaceErr != nil {
-				return
-			}
+			//networkInterface, networkInterfaceErr = ve.ObtainSdkValue("Result.NetworkInterfaceSets", *networkInterfaceResp)
+			//if networkInterfaceErr != nil {
+			//	return
+			//}
 			syncMap.Store("NetworkInterfaces", networkInterface)
 		}()
 		wg.Wait()
@@ -1397,11 +1439,13 @@ func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraDa
 	for _, data := range sourceData {
 		instance := data
 		var (
-			instanceId interface{}
-			action     string
-			resp       *map[string]interface{}
-			results    interface{}
-			_err       error
+			instanceId  interface{}
+			projectName interface{}
+			action      string
+			resp        *map[string]interface{}
+			results     interface{}
+			volumes     []interface{}
+			_err        error
 		)
 		go func() {
 			defer func() {
@@ -1413,27 +1457,59 @@ func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraDa
 
 			instanceId, _err = ve.ObtainSdkValue("InstanceId", instance)
 			if _err != nil {
-				syncMap.Store(instanceId, err)
+				syncMap.Store(instanceId, _err)
 				return
 			}
+			projectName, _err = ve.ObtainSdkValue("ProjectName", instance)
+			if _err != nil {
+				syncMap.Store(instanceId, _err)
+				return
+			}
+
+			// query system volume
+			systemVolume, _err := s.describeSystemVolume(instanceId.(string), projectName.(string))
+			if _err != nil {
+				syncMap.Store(instanceId, _err)
+				return
+			}
+			volumes = append(volumes, systemVolume)
+
+			// query data volumes
 			action = "DescribeVolumes"
 			logger.Debug(logger.ReqFormat, action, instanceId)
 			volumeCondition := map[string]interface{}{
 				"InstanceId": instanceId,
+				"Kind":       "data",
 			}
 			logger.Debug(logger.ReqFormat, action, volumeCondition)
-			resp, _err = s.Client.EbsClient.DescribeVolumesCommon(&volumeCondition)
+			resp, _err = s.Client.UniversalClient.DoCall(getEbsUniversalInfo(action), &volumeCondition)
 			if _err != nil {
-				syncMap.Store(instanceId, err)
-				return
+				if ve.AccessDeniedError(_err) {
+					// 权限错误，直接返回
+					syncMap.Store(instanceId, volumes)
+					return
+				} else {
+					syncMap.Store(instanceId, _err)
+					return
+				}
 			}
 			logger.Debug(logger.RespFormat, action, volumeCondition, *resp)
 			results, _err = ve.ObtainSdkValue("Result.Volumes", *resp)
 			if _err != nil {
-				syncMap.Store(instanceId, err)
+				syncMap.Store(instanceId, _err)
 				return
 			}
-			syncMap.Store(instanceId, results)
+			if results == nil {
+				results = []interface{}{}
+			}
+			dataVolumes, ok := results.([]interface{})
+			if !ok {
+				syncMap.Store(instanceId, errors.New("Result.Volumes is not Slice"))
+				return
+			}
+			volumes = append(volumes, dataVolumes)
+
+			syncMap.Store(instanceId, volumes)
 		}()
 	}
 	wg.Wait()
@@ -1460,6 +1536,50 @@ func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraDa
 	return extraData, err
 }
 
+func (s *VolcengineEcsService) describeSystemVolume(instanceId, projectName string) (map[string]interface{}, error) {
+	var (
+		action       string
+		req          *map[string]interface{}
+		resp         *map[string]interface{}
+		results      interface{}
+		systemVolume map[string]interface{}
+		err          error
+	)
+
+	action = "DescribeVolumes"
+	req = &map[string]interface{}{
+		"InstanceId":  instanceId,
+		"ProjectName": projectName,
+		"Kind":        "system",
+	}
+	logger.Debug(logger.ReqFormat, action, *req)
+	resp, err = s.Client.UniversalClient.DoCall(getEbsUniversalInfo("DescribeVolumes"), req)
+	if err != nil {
+		return systemVolume, err
+	}
+	logger.Debug(logger.RespFormat, action, *req, *resp)
+	results, err = ve.ObtainSdkValue("Result.Volumes", *resp)
+	if err != nil {
+		return systemVolume, err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	volumes, ok := results.([]interface{})
+	if !ok {
+		return systemVolume, errors.New("Result.Volumes is not Slice")
+	}
+	for _, volume := range volumes {
+		if systemVolume, ok = volume.(map[string]interface{}); !ok {
+			return systemVolume, errors.New("Volumes Value is not map ")
+		}
+	}
+	if len(systemVolume) == 0 {
+		return systemVolume, fmt.Errorf("System Volume of %s is not exist ", instanceId)
+	}
+	return systemVolume, nil
+}
+
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "ecs",
@@ -1472,6 +1592,15 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
+}
+
+func getEbsUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "storage_ebs",
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,
 		Action:      actionName,

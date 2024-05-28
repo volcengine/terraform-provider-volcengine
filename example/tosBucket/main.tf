@@ -1,5 +1,5 @@
 resource "volcengine_tos_bucket" "default" {
-  bucket_name = "test-xym-1"
+  bucket_name = "tf-acc-test-bucket"
 #  storage_class ="IA"
   public_acl = "private"
   enable_version = true
@@ -10,5 +10,10 @@ resource "volcengine_tos_bucket" "default" {
   account_acl {
     account_id = "2001"
     permission = "WRITE_ACP"
+  }
+  project_name = "default"
+  tags {
+    key = "k1"
+    value = "v1"
   }
 }

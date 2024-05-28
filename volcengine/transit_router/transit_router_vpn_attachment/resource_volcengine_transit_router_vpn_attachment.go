@@ -80,7 +80,9 @@ func ResourceVolcengineTransitRouterVpnAttachment() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the transit router vpn attachment.",
 			},
+			"tags": ve.TagsSchema(),
 
+			// computed fields
 			"transit_router_attachment_id": {
 				Type:        schema.TypeString,
 				Computed:    true,

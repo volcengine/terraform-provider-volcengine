@@ -55,6 +55,10 @@ resource "volcengine_volume" "PreVolume" {
   instance_id = volcengine_ecs_instance.foo.id
   project_name = "default"
   delete_with_instance = true
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }
 
 resource "volcengine_volume" "PostVolume" {
@@ -66,4 +70,8 @@ resource "volcengine_volume" "PostVolume" {
   zone_id = data.volcengine_zones.foo.zones[0].id
   volume_charge_type = "PostPaid"
   project_name = "default"
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }
