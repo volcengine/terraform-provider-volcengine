@@ -35,6 +35,7 @@ func DataSourceVolcengineTransitRouterRouteTables() *schema.Resource {
 				}, false),
 				Description: "The type of the route table. The value can be System or Custom.",
 			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -88,6 +89,7 @@ func DataSourceVolcengineTransitRouterRouteTables() *schema.Resource {
 							Computed:    true,
 							Description: "The update time of the route table.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

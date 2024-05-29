@@ -21,8 +21,14 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `peer_transit_router_id` - (Optional) The id of peer transit router.
 * `peer_transit_router_region_id` - (Optional) The region id of peer transit router.
+* `tags` - (Optional) Tags.
 * `transit_router_attachment_name` - (Optional) The name of transit router peer attachment.
 * `transit_router_id` - (Optional) The id of local transit router.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -35,6 +41,9 @@ In addition to all arguments above, the following attributes are exported:
     * `peer_transit_router_id` - The id of the peer transit router.
     * `peer_transit_router_region_id` - The region id of the peer transit router.
     * `status` - The status of the transit router peer attachment.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `transit_router_attachment_id` - The id of the transit router peer attachment.
     * `transit_router_attachment_name` - The name of the transit router peer attachment.
     * `transit_router_bandwidth_package_id` - The bandwidth package id of the transit router peer attachment.

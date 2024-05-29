@@ -75,7 +75,11 @@ func (u *BypassSvc) DoBypassSvcCall(info BypassSvcInfo, input *map[string]interf
 
 	if len(info.Path) > 0 {
 		for _, v := range info.Path {
-			httpPath = httpPath + "/" + v
+			if strings.HasPrefix(v, "?") {
+				httpPath = httpPath + v
+			} else {
+				httpPath = httpPath + "/" + v
+			}
 		}
 	}
 

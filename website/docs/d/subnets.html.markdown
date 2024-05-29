@@ -21,8 +21,14 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `route_table_id` - (Optional) The ID of route table which subnet associated with.
 * `subnet_name` - (Optional) The subnet name to query.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The ID of VPC which subnet belongs to.
 * `zone_id` - (Optional) The ID of zone which subnet belongs to.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -42,6 +48,9 @@ In addition to all arguments above, the following attributes are exported:
         * `route_table_type` - The route table type.
     * `status` - The Status of Subnet.
     * `subnet_name` - The Name of Subnet.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `total_ipv4_count` - The Count of ipv4.
     * `update_time` - Update time of Subnet.
     * `vpc_id` - The Vpc ID of Subnet.

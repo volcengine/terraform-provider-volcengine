@@ -170,6 +170,10 @@ func (s *VolcengineSubnetService) CreateResource(resourceData *schema.ResourceDa
 				"ipv6_cidr_block": {
 					Ignore: true,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				ipv6CidrBlock, exists := d.GetOkExists("ipv6_cidr_block")
@@ -207,6 +211,8 @@ func (s *VolcengineSubnetService) CreateResource(resourceData *schema.ResourceDa
 }
 
 func (s *VolcengineSubnetService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifySubnetAttributes",
@@ -229,6 +235,7 @@ func (s *VolcengineSubnetService) ModifyResource(resourceData *schema.ResourceDa
 					}
 				}
 
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -241,7 +248,13 @@ func (s *VolcengineSubnetService) ModifyResource(resourceData *schema.ResourceDa
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "subnet", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineSubnetService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -292,6 +305,15 @@ func (s *VolcengineSubnetService) DatasourceResources(*schema.ResourceData, *sch
 			"ids": {
 				TargetField: "SubnetIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "SubnetName",

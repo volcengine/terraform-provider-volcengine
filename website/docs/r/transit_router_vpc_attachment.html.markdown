@@ -51,6 +51,10 @@ resource "volcengine_transit_router_vpc_attachment" "foo" {
   }
   transit_router_attachment_name = "tf-test-acc-name1"
   description                    = "tf-test-acc-description"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -59,12 +63,18 @@ The following arguments are supported:
 * `transit_router_id` - (Required, ForceNew) The id of the transit router.
 * `vpc_id` - (Required, ForceNew) The ID of vpc.
 * `description` - (Optional) The description of the transit router vpc attachment.
+* `tags` - (Optional) Tags.
 * `transit_router_attachment_name` - (Optional) The name of the transit router vpc attachment.
 
 The `attach_points` object supports the following:
 
 * `subnet_id` - (Required) The id of subnet.
 * `zone_id` - (Required) The id of zone.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -138,7 +138,12 @@ func (s *VolcengineTransitRouterPeerAttachmentService) CreateResource(resourceDa
 		Call: ve.SdkCall{
 			Action:      "CreateTransitRouterPeerAttachment",
 			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
@@ -164,6 +169,8 @@ func (s *VolcengineTransitRouterPeerAttachmentService) CreateResource(resourceDa
 }
 
 func (s *VolcengineTransitRouterPeerAttachmentService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyTransitRouterPeerAttachmentAttributes",
@@ -188,6 +195,7 @@ func (s *VolcengineTransitRouterPeerAttachmentService) ModifyResource(resourceDa
 					(*call.SdkParam)["TransitRouterBandwidthPackageId"] = ""
 				}
 				(*call.SdkParam)["TransitRouterAttachmentId"] = d.Id()
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -202,7 +210,13 @@ func (s *VolcengineTransitRouterPeerAttachmentService) ModifyResource(resourceDa
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "transitrouterattachment", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineTransitRouterPeerAttachmentService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -249,6 +263,15 @@ func (s *VolcengineTransitRouterPeerAttachmentService) DatasourceResources(*sche
 			"ids": {
 				TargetField: "TransitRouterAttachmentIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "TransitRouterAttachmentName",

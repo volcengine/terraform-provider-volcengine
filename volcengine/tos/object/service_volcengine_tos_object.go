@@ -1,9 +1,12 @@
 package object
 
 import (
+	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -64,6 +67,7 @@ func (s *VolcengineTosObjectService) ReadResource(resourceData *schema.ResourceD
 		header        http.Header
 		acl           map[string]interface{}
 		bucketVersion map[string]interface{}
+		tags          map[string]interface{}
 	)
 
 	if instanceId == "" {
@@ -203,6 +207,28 @@ func (s *VolcengineTosObjectService) ReadResource(resourceData *schema.ResourceD
 		data["EnableVersion"] = bucketVersion
 	}
 
+	action = "GetObjectTagging"
+	req = map[string]interface{}{
+		"tagging": "",
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err = tos.DoBypassSvcCall(ve.BypassSvcInfo{
+		HttpMethod: ve.GET,
+		Domain:     bucketName,
+		//Path:       []string{instanceId, "?tagging="},
+		Path: []string{instanceId},
+	}, &req)
+	if err != nil && !ve.ResourceNotFoundError(err) {
+		return data, err
+	}
+	if tags, ok = (*resp)[ve.BypassResponse].(map[string]interface{}); ok {
+		if tagSet, exist := tags["TagSet"]; exist {
+			if tagMap, ok := tagSet.(map[string]interface{}); ok {
+				data["Tags"] = tagMap["Tags"]
+			}
+		}
+	}
+
 	if len(data) == 0 {
 		return data, fmt.Errorf("object %s not exist ", instanceId)
 	}
@@ -243,11 +269,51 @@ func (VolcengineTosObjectService) WithResourceResponseHandlers(m map[string]inte
 }
 
 func (s *VolcengineTosObjectService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	//create object
 	callback := s.createOrReplaceObject(resourceData, resource, false)
+	callbacks = append(callbacks, callback)
+
 	//acl
 	callbackAcl := s.createOrUpdateObjectAcl(resourceData, resource, false)
-	return []ve.Callback{callback, callbackAcl}
+	callbacks = append(callbacks, callbackAcl)
+
+	//tags
+	if _, ok := resourceData.GetOk("tags"); ok {
+		callbackTags := ve.Callback{
+			Call: ve.SdkCall{
+				ServiceCategory: ve.ServiceBypass,
+				Action:          "PutObjectTagging",
+				ConvertMode:     ve.RequestConvertInConvert,
+				ContentType:     ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"bucket_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.DomainParam,
+						},
+					},
+					"object_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "ObjectName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type:  ve.PathParam,
+							Index: 0,
+						},
+					},
+				},
+				BeforeCall:  s.beforePutObjectTagging(),
+				ExecuteCall: s.executePutObjectTagging(),
+			},
+		}
+		callbacks = append(callbacks, callbackTags)
+	}
+
+	return callbacks
 }
 
 func (s *VolcengineTosObjectService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -256,6 +322,7 @@ func (s *VolcengineTosObjectService) ModifyResource(data *schema.ResourceData, r
 	if data.HasChange("file_path") || data.HasChanges("content_md5") || data.HasChanges("content") {
 		callbacks = append(callbacks, s.createOrReplaceObject(data, resource, true))
 		callbacks = append(callbacks, s.createOrUpdateObjectAcl(data, resource, true))
+		callbacks = s.setResourceTags(data, callbacks)
 	} else {
 		var grant = []string{
 			"public_acl",
@@ -268,6 +335,89 @@ func (s *VolcengineTosObjectService) ModifyResource(data *schema.ResourceData, r
 				break
 			}
 		}
+
+		if data.HasChange("tags") {
+			callbacks = s.setResourceTags(data, callbacks)
+		}
+	}
+
+	return callbacks
+}
+
+func (s *VolcengineTosObjectService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	if _, ok := resourceData.GetOk("tags"); ok {
+		addCallback := ve.Callback{
+			Call: ve.SdkCall{
+				ServiceCategory: ve.ServiceBypass,
+				Action:          "PutObjectTagging",
+				ConvertMode:     ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"bucket_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.DomainParam,
+						},
+					},
+					"object_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "ObjectName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type:  ve.PathParam,
+							Index: 0,
+						},
+					},
+				},
+				BeforeCall:  s.beforePutObjectTagging(),
+				ExecuteCall: s.executePutObjectTagging(),
+			},
+		}
+		callbacks = append(callbacks, addCallback)
+	} else {
+		removeCallback := ve.Callback{
+			Call: ve.SdkCall{
+				ServiceCategory: ve.ServiceBypass,
+				Action:          "DeleteObjectTagging",
+				ConvertMode:     ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"bucket_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.DomainParam,
+						},
+					},
+					"object_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "ObjectName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type:  ve.PathParam,
+							Index: 0,
+						},
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)[ve.BypassPath] = append((*call.SdkParam)[ve.BypassPath].([]string), "?tagging=")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+						HttpMethod: ve.DELETE,
+						Domain:     (*call.SdkParam)[ve.BypassDomain].(string),
+						Path:       (*call.SdkParam)[ve.BypassPath].([]string),
+						UrlParam: map[string]string{
+							"tagging": "",
+						},
+					}, nil)
+				},
+			},
+		}
+		callbacks = append(callbacks, removeCallback)
 	}
 
 	return callbacks
@@ -293,7 +443,7 @@ func (s *VolcengineTosObjectService) RemoveResource(resourceData *schema.Resourc
 						_, err := s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 							HttpMethod: ve.DELETE,
 							Domain:     (*call.SdkParam)["BucketName"].(string),
-							Path:       []string{(*call.SdkParam)["ObjectName"].(string)},
+							Path:       []string{(*call.SdkParam)["ObjectName"].(string), fmt.Sprintf("?versionId=%s", vv.(string))},
 						}, &condition)
 						if err != nil {
 							return nil, err
@@ -634,5 +784,61 @@ func (s *VolcengineTosObjectService) createOrReplaceObject(resourceData *schema.
 				return err
 			},
 		},
+	}
+}
+
+func (s *VolcengineTosObjectService) beforePutObjectTagging() ve.BeforeCallFunc {
+	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+		var tagsArr []interface{}
+		tags := d.Get("tags")
+		tagSet, ok := tags.(*schema.Set)
+		if !ok {
+			return false, fmt.Errorf("tags is not set")
+		}
+		for _, v := range tagSet.List() {
+			tagMap, ok := v.(map[string]interface{})
+			if !ok {
+				return false, fmt.Errorf("tags value is not set")
+			}
+			tagsArr = append(tagsArr, map[string]interface{}{
+				"Key":   tagMap["key"],
+				"Value": tagMap["value"],
+			})
+		}
+		tagsParam := make(map[string]interface{})
+		tagsParam["Tags"] = tagsArr
+
+		(*call.SdkParam)[ve.BypassParam].(map[string]interface{})["TagSet"] = tagsParam
+
+		bytes, err := json.Marshal((*call.SdkParam)[ve.BypassParam].(map[string]interface{}))
+		if err != nil {
+			return false, err
+		}
+		hash := md5.New()
+		io.WriteString(hash, string(bytes))
+		contentMd5 := base64.StdEncoding.EncodeToString(hash.Sum(nil))
+
+		(*call.SdkParam)[ve.BypassHeader].(map[string]string)["Content-MD5"] = contentMd5
+
+		//(*call.SdkParam)[ve.BypassPath] = append((*call.SdkParam)[ve.BypassPath].([]string), "?tagging=")
+		return true, nil
+	}
+}
+
+func (s *VolcengineTosObjectService) executePutObjectTagging() ve.ExecuteCallFunc {
+	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+		logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+		//PutObjectTagging
+		condition := (*call.SdkParam)[ve.BypassParam].(map[string]interface{})
+		return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+			ContentType: ve.ApplicationJSON,
+			HttpMethod:  ve.PUT,
+			Domain:      (*call.SdkParam)[ve.BypassDomain].(string),
+			Header:      (*call.SdkParam)[ve.BypassHeader].(map[string]string),
+			Path:        (*call.SdkParam)[ve.BypassPath].([]string),
+			UrlParam: map[string]string{
+				"tagging": "",
+			},
+		}, &condition)
 	}
 }

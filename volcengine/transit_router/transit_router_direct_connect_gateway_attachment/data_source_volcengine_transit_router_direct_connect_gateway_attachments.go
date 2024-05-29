@@ -28,6 +28,7 @@ func DataSourceVolcengineTransitRouterDirectConnectGatewayAttachments() *schema.
 				Optional:    true,
 				Description: "ID of the direct connection gateway.",
 			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -89,6 +90,7 @@ func DataSourceVolcengineTransitRouterDirectConnectGatewayAttachments() *schema.
 							Computed:    true,
 							Description: "The account id.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

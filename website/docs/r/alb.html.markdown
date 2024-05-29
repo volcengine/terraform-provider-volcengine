@@ -91,7 +91,7 @@ The following arguments are supported:
 * `eip_billing_config` - (Optional, ForceNew) The billing configuration of the EIP which automatically associated to the Alb. This field is valid when the type of the Alb is `public`.When the type of the Alb is `private`, suggest using a combination of resource `volcengine_eip_address` and `volcengine_eip_associate` to achieve public network access function.
 * `ipv6_eip_billing_config` - (Optional, ForceNew) The billing configuration of the Ipv6 EIP which automatically associated to the Alb. This field is required when the type of the Alb is `public`.When the type of the Alb is `private`, suggest using a combination of resource `volcengine_vpc_ipv6_gateway` and `volcengine_vpc_ipv6_address_bandwidth` to achieve ipv6 public network access function.
 * `load_balancer_name` - (Optional) The name of the Alb.
-* `project_name` - (Optional, ForceNew) The ProjectName of the Alb.
+* `project_name` - (Optional) The ProjectName of the Alb.
 * `tags` - (Optional) Tags.
 
 The `eip_billing_config` object supports the following:

@@ -39,4 +39,8 @@ resource "volcengine_transit_router_vpc_attachment" "foo" {
   }
   transit_router_attachment_name = "tf-test-acc-name1"
   description = "tf-test-acc-description"
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }

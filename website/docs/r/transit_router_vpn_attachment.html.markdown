@@ -77,6 +77,10 @@ resource "volcengine_transit_router_vpn_attachment" "foo" {
   description                    = "tf-test-acc-desc"
   transit_router_id              = volcengine_transit_router.foo.id
   vpn_connection_id              = volcengine_vpn_connection.foo.id
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -85,7 +89,13 @@ The following arguments are supported:
 * `vpn_connection_id` - (Required, ForceNew) The ID of the IPSec connection.
 * `zone_id` - (Required, ForceNew) The ID of the availability zone.
 * `description` - (Optional) The description of the transit router vpn attachment.
+* `tags` - (Optional) Tags.
 * `transit_router_attachment_name` - (Optional) The name of the transit router vpn attachment.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

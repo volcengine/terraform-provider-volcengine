@@ -62,8 +62,19 @@ func (p *Project) ModifyProject(trn *ProjectTrn, resourceData *schema.ResourceDa
 					if err != nil {
 						return false, err
 					}
-					trnStr := fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, p.Client.Region, int(accountId.(float64)),
-						trn.ResourceType, id)
+
+					var trnStr string
+					if trn.ServiceName == "tos" && trn.ResourceType == "bucket" {
+						// tos bucket 特殊处理
+						trnStr = fmt.Sprintf("trn:%s:%s:%d:%s", trn.ServiceName, p.Client.Region, int(accountId.(float64)), id)
+					} else if trn.ServiceName == "transitrouter" && trn.ResourceType == "transitrouterbandwidthpackage" {
+						// transit router bandwidth package 特殊处理
+						trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, "", int(accountId.(float64)),
+							trn.ResourceType, id)
+					} else {
+						trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, p.Client.Region, int(accountId.(float64)),
+							trn.ResourceType, id)
+					}
 					(*call.SdkParam)["ResourceTrn.1"] = trnStr
 					return true, nil
 				},

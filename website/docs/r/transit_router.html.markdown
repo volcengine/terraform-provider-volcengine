@@ -13,12 +13,24 @@ Provides a resource to manage transit router
 resource "volcengine_transit_router" "foo" {
   transit_router_name = "acc-test-tr"
   description         = "acc-test"
+  project_name        = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `description` - (Optional) The description of the transit router.
+* `project_name` - (Optional) The ProjectName of the transit router.
+* `tags` - (Optional) Tags.
 * `transit_router_name` - (Optional) The name of the transit router.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

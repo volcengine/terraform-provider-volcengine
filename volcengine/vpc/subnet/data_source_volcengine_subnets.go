@@ -19,6 +19,8 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of Subnet IDs.",
 			},
+			"tags": ve.TagsSchema(),
+
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -161,6 +163,7 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 								},
 							},
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},
