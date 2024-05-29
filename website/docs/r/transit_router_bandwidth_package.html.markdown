@@ -16,6 +16,11 @@ resource "volcengine_transit_router_bandwidth_package" "foo" {
   bandwidth                             = 2
   period                                = 1
   renew_type                            = "Manual"
+  project_name                          = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -23,10 +28,17 @@ The following arguments are supported:
 * `bandwidth` - (Optional) The bandwidth peak of the transit router bandwidth package. Unit: Mbps. Valid values: 2-10000. Default is 2 Mbps.
 * `description` - (Optional) The description of the transit router bandwidth package.
 * `period` - (Optional) The period of the transit router bandwidth package, the valid value range in 1~9 or 12 or 36. Default value is 12. The period unit defaults to `Month`.The modification of this field only takes effect when the value of the `renew_type` is `Manual`.
+* `project_name` - (Optional) The ProjectName of the transit router bandwidth package.
 * `remain_renew_times` - (Optional) The remaining renewal times of of the transit router bandwidth package. Valid values: -1 or 1~100. Default value is -1, means unlimited renewal.This field is only effective when the value of the `renew_type` is `Auto`.
 * `renew_period` - (Optional) The auto renewal period of the transit router bandwidth package. Valid values: 1,2,3,6,12. Default value is 1. Unit: Month.This field is only effective when the value of the `renew_type` is `Auto`. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `renew_type` - (Optional) The renewal type of the transit router bandwidth package. Valid values: `Manual`, `Auto`, `NoRenew`. Default is `Manual`.This field is only effective when modifying the bandwidth package.
+* `tags` - (Optional) Tags.
 * `transit_router_bandwidth_package_name` - (Optional) The name of the transit router bandwidth package.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

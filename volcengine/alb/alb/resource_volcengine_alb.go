@@ -86,10 +86,9 @@ func ResourceVolcengineAlb() *schema.Resource {
 				Description:  "Whether to enable the delete protection function of the Alb. Valid values: `on`, `off`. Default is `off`.",
 			},
 			"project_name": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-				//ForceNew:    true, // alb 修改 project 时会清空 tags, 故暂时不开放修改功能
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
 				Description: "The ProjectName of the Alb.",
 			},
 			"tags": ve.TagsSchema(),

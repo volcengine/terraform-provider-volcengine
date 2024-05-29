@@ -26,8 +26,15 @@ data "volcengine_transit_router_bandwidth_packages" "foo" {
 The following arguments are supported:
 * `ids` - (Optional) The ID list of the TransitRouter bandwidth package.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The ProjectName of the TransitRouter bandwidth package.
+* `tags` - (Optional) Tags.
 * `transit_router_bandwidth_package_name` - (Optional) The name of the TransitRouter bandwidth package.
 * `transit_router_peer_attachment_id` - (Optional) The ID of the peer attachment.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -48,8 +55,12 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The id of the transit router bandwidth package.
     * `local_geographic_region_set_id` - The local geographic region set ID.
     * `peer_geographic_region_set_id` - The peer geographic region set ID.
+    * `project_name` - The ProjectName of the transit router bandwidth package.
     * `remaining_bandwidth` - The remaining bandwidth of the transit router bandwidth package. Unit: Mbps.
     * `status` - The status of the transit router bandwidth package.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `transit_router_bandwidth_package_id` - The id of the transit router attachment.
     * `transit_router_bandwidth_package_name` - The name of the transit router bandwidth package.
     * `update_time` - The update time of the transit router bandwidth package.

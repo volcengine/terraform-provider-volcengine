@@ -19,13 +19,23 @@ resource "volcengine_transit_router_route_table" "foo" {
   description                     = "tf-test-acc-description"
   transit_router_route_table_name = "tf-table-test-acc"
   transit_router_id               = volcengine_transit_router.foo.id
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `transit_router_id` - (Required, ForceNew) Id of the transit router.
 * `description` - (Optional) Description of the transit router route table.
+* `tags` - (Optional) Tags.
 * `transit_router_route_table_name` - (Optional) The name of the route table.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

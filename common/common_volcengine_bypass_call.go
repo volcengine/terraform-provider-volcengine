@@ -80,7 +80,6 @@ func (u *BypassSvc) DoBypassSvcCall(info BypassSvcInfo, input *map[string]interf
 			} else {
 				httpPath = httpPath + "/" + v
 			}
-			//httpPath = httpPath + "/" + v
 		}
 	}
 

@@ -24,7 +24,14 @@ data "volcengine_transit_routers" "default" {
 The following arguments are supported:
 * `ids` - (Optional) A list of Transit Router ids.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The ProjectName of the transit router.
+* `tags` - (Optional) Tags.
 * `transit_router_name` - (Optional) The name info.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -36,7 +43,11 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description info.
     * `id` - The ID of the transit router.
     * `overdue_time` - The overdue time.
+    * `project_name` - The ProjectName of the transit router.
     * `status` - The status of the transit router.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `transit_router_attachments` - The attachments of transit router.
         * `creation_time` - The create time.
         * `resource_id` - The id of resource.

@@ -33,7 +33,13 @@ The following arguments are supported:
 * `transit_router_id` - (Required) The id of the transit router.
 * `ids` - (Optional) The ids of the transit router route table.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
 * `transit_router_route_table_type` - (Optional) The type of the route table. The value can be System or Custom.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -41,6 +47,9 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - The creation time of the route table.
     * `description` - The description.
     * `status` - The status of the route table.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `transit_router_route_table_id` - The id of the route table.
     * `transit_router_route_table_name` - The name of the route table.
     * `transit_router_route_table_type` - The type of route table.

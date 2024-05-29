@@ -175,7 +175,7 @@ func (s *VolcengineEcsService) ReadResource(resourceData *schema.ResourceData, i
 			}
 		}
 	}
-	
+
 	return data, nil
 }
 
@@ -371,18 +371,9 @@ func (s *VolcengineEcsService) WithResourceResponseHandlers(ecs map[string]inter
 				}
 				return networkInterface, next, networkInterfaceErr
 			})
-
-			//networkInterfaceParam = &map[string]interface{}{
-			//	"InstanceId": instanceId,
-			//}
-			//networkInterfaceResp, networkInterfaceErr = s.Client.UniversalClient.DoCall(getVpcUniversalInfo("DescribeNetworkInterfaces"), networkInterfaceParam)
 			if networkInterfaceErr != nil {
 				return
 			}
-			//networkInterface, networkInterfaceErr = ve.ObtainSdkValue("Result.NetworkInterfaceSets", *networkInterfaceResp)
-			//if networkInterfaceErr != nil {
-			//	return
-			//}
 			syncMap.Store("NetworkInterfaces", networkInterface)
 		}()
 		wg.Wait()
@@ -1575,7 +1566,7 @@ func (s *VolcengineEcsService) describeSystemVolume(instanceId, projectName stri
 		}
 	}
 	if len(systemVolume) == 0 {
-		return systemVolume, fmt.Errorf("System Volume of %s is not exist ", instanceId)
+		return systemVolume, fmt.Errorf("System Volume of %s is empty ", instanceId)
 	}
 	return systemVolume, nil
 }

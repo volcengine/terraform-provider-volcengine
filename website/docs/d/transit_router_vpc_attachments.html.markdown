@@ -19,8 +19,14 @@ data "volcengine_transit_router_vpc_attachments" "default" {
 The following arguments are supported:
 * `transit_router_id` - (Required) The id of transit router.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
 * `transit_router_attachment_ids` - (Optional) A list of Transit Router Attachment ids.
 * `vpc_id` - (Optional) The id of vpc.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -32,6 +38,9 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - The create time.
     * `description` - The description info.
     * `status` - The status of the transit router.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `transit_router_attachment_id` - The id of the transit router attachment.
     * `transit_router_attachment_name` - The name of the transit router attachment.
     * `transit_router_id` - The id of the transit router.
