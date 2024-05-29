@@ -26,6 +26,12 @@ The following arguments are supported:
 * `enable_ipv6` - (Optional) Specifies whether to enable the IPv6 CIDR block of the Subnet. This field is only valid when modifying the Subnet.
 * `ipv6_cidr_block` - (Optional) The last eight bits of the IPv6 CIDR block of the Subnet. Valid values: 0 - 255.
 * `subnet_name` - (Optional) The name of the Subnet.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -21,4 +21,8 @@ resource "volcengine_transit_router_peer_attachment" "foo" {
   peer_transit_router_region_id = "cn-xx"
   transit_router_bandwidth_package_id = volcengine_transit_router_bandwidth_package.foo.id
   bandwidth = 2
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }

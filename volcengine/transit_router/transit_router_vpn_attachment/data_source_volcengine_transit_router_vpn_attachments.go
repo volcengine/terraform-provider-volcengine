@@ -28,6 +28,7 @@ func DataSourceVolcengineTransitRouterVpnAttachments() *schema.Resource {
 				Optional:    true,
 				Description: "The ID of the IPSec connection.",
 			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -89,6 +90,7 @@ func DataSourceVolcengineTransitRouterVpnAttachments() *schema.Resource {
 							Computed:    true,
 							Description: "The ID of the availability zone.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

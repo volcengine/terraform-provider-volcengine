@@ -28,6 +28,7 @@ func DataSourceVolcengineTransitRouterVpcAttachments() *schema.Resource {
 				Optional:    true,
 				Description: "The id of vpc.",
 			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -84,6 +85,7 @@ func DataSourceVolcengineTransitRouterVpcAttachments() *schema.Resource {
 							Computed:    true,
 							Description: "The description info.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 						"attach_points": {
 							Description: "The collection of attach points.",
 							Type:        schema.TypeList,

@@ -3,6 +3,7 @@ package route_table
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -132,6 +133,12 @@ func (v *VolcengineTRRouteTableService) CreateResource(data *schema.ResourceData
 		Call: ve.SdkCall{
 			Action:      "CreateTransitRouterRouteTable",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return v.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -154,6 +161,8 @@ func (v *VolcengineTRRouteTableService) CreateResource(data *schema.ResourceData
 }
 
 func (v *VolcengineTRRouteTableService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyTransitRouterRouteTableAttributes",
@@ -169,6 +178,7 @@ func (v *VolcengineTRRouteTableService) ModifyResource(data *schema.ResourceData
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				ids := strings.Split(data.Id(), ":")
 				(*call.SdkParam)["TransitRouterRouteTableId"] = ids[1]
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -184,7 +194,12 @@ func (v *VolcengineTRRouteTableService) ModifyResource(data *schema.ResourceData
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	callbacks = v.setResourceTags(data, callbacks)
+
+	return callbacks
 }
 
 func (v *VolcengineTRRouteTableService) RemoveResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -236,6 +251,15 @@ func (v *VolcengineTRRouteTableService) DatasourceResources(data *schema.Resourc
 				TargetField: "TransitRouterRouteTableIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		CollectField: "route_tables",
 	}
@@ -243,6 +267,75 @@ func (v *VolcengineTRRouteTableService) DatasourceResources(data *schema.Resourc
 
 func (v *VolcengineTRRouteTableService) ReadResourceId(s string) string {
 	return s
+}
+
+func (v *VolcengineTRRouteTableService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					ids := strings.Split(resourceData.Id(), ":")
+					if len(ids) != 2 {
+						return false, fmt.Errorf("invalid route table id")
+					}
+					(*call.SdkParam)["ResourceIds.1"] = ids[1]
+					(*call.SdkParam)["ResourceType"] = "transitrouterroutetable"
+					for index, v := range removedTags.List() {
+						tag, ok := v.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("Tags is not map ")
+						}
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = tag["key"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return v.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					ids := strings.Split(resourceData.Id(), ":")
+					if len(ids) != 2 {
+						return false, fmt.Errorf("invalid route table id")
+					}
+					(*call.SdkParam)["ResourceIds.1"] = ids[1]
+					(*call.SdkParam)["ResourceType"] = "transitrouterroutetable"
+					for index, v := range addedTags.List() {
+						tag, ok := v.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("Tags is not map ")
+						}
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tag["key"].(string)
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tag["value"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return v.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func NewTRRouteTableService(c *ve.SdkClient) *VolcengineTRRouteTableService {

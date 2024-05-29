@@ -23,6 +23,12 @@ func DataSourceVolcengineTransitRouters() *schema.Resource {
 				Optional:    true,
 				Description: "The name info.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ProjectName of the transit router.",
+			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -89,6 +95,12 @@ func DataSourceVolcengineTransitRouters() *schema.Resource {
 							Computed:    true,
 							Description: "The business status of the transit router.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the transit router.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"transit_router_attachments": {
 							Description: "The attachments of transit router.",
 							Type:        schema.TypeList,

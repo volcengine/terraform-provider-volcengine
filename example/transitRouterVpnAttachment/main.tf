@@ -65,4 +65,8 @@ resource "volcengine_transit_router_vpn_attachment" "foo" {
   description = "tf-test-acc-desc"
   transit_router_id = volcengine_transit_router.foo.id
   vpn_connection_id = volcengine_vpn_connection.foo.id
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }

@@ -57,6 +57,7 @@ func ResourceVolcengineTransitRouterRouteTable() *schema.Resource {
 				Computed:    true,
 				Description: "The id of the route table.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	dataSource := DataSourceVolcengineTransitRouterRouteTables().Schema["route_tables"].Elem.(*schema.Resource).Schema

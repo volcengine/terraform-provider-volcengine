@@ -75,6 +75,7 @@ func ResourceVolcengineTransitRouterVpcAttachment() *schema.Resource {
 				Computed:    true,
 				Description: "The name of the transit router vpc attachment.",
 			},
+			"tags": ve.TagsSchema(),
 			"attach_points": {
 				Type:        schema.TypeSet,
 				Required:    true,

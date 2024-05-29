@@ -33,6 +33,10 @@ resource "volcengine_transit_router_peer_attachment" "foo" {
   peer_transit_router_region_id       = "cn-xx"
   transit_router_bandwidth_package_id = volcengine_transit_router_bandwidth_package.foo.id
   bandwidth                           = 2
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -42,8 +46,14 @@ The following arguments are supported:
 * `transit_router_id` - (Required, ForceNew) The id of the local transit router.
 * `bandwidth` - (Optional) The bandwidth of the transit router peer attachment. Unit: Mbps.
 * `description` - (Optional) The description of the transit router peer attachment.
+* `tags` - (Optional) Tags.
 * `transit_router_attachment_name` - (Optional) The name of the transit router peer attachment.
 * `transit_router_bandwidth_package_id` - (Optional) The bandwidth package id of the transit router peer attachment. When specifying this field, the field `bandwidth` must also be specified.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -1,5 +1,5 @@
 resource "volcengine_tos_bucket_policy" "default" {
-  bucket_name = "bucket-20230418"
+  bucket_name = "tf-acc-test-bucket"
   policy = jsonencode({
     Statement = [
       {
@@ -12,7 +12,7 @@ resource "volcengine_tos_bucket_policy" "default" {
           "tos:List*"
         ]
         Resource = [
-          "trn:tos:::bucket-20230418"
+          "trn:tos:::tf-acc-test-bucket"
         ]
       }
     ]

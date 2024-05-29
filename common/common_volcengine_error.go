@@ -31,3 +31,7 @@ func UnsubscribeProductError(err error) bool {
 func UnsubscribeProductConflictError(err error) bool {
 	return strings.Contains(err.Error(), "RequestConflict")
 }
+
+func AccessDeniedError(err error) bool {
+	return strings.Contains(err.Error(), "AccessDenied: User is not authorized to perform")
+}

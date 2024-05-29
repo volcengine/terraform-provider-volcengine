@@ -159,6 +159,12 @@ func (s *VolcengineVolumeService) CreateResource(resourceData *schema.ResourceDa
 		Call: ve.SdkCall{
 			Action:      "CreateVolume",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.EbsClient.CreateVolumeCommon(call.SdkParam)
@@ -198,6 +204,7 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					(*call.SdkParam)["VolumeId"] = d.Id()
+					delete(*call.SdkParam, "Tags")
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -294,6 +301,11 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 			},
 		})
 	}
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "CreateTags", "DeleteTags", "volume", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -358,6 +370,15 @@ func (s *VolcengineVolumeService) DatasourceResources(*schema.ResourceData, *sch
 			"ids": {
 				TargetField: "VolumeIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "VolumeName",

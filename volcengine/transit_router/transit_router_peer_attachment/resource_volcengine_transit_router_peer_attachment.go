@@ -76,7 +76,9 @@ func ResourceVolcengineTransitRouterPeerAttachment() *schema.Resource {
 				},
 				Description: "The bandwidth of the transit router peer attachment. Unit: Mbps.",
 			},
+			"tags": ve.TagsSchema(),
 
+			// computed fields
 			"status": {
 				Type:        schema.TypeString,
 				Computed:    true,

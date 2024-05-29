@@ -196,6 +196,12 @@ func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *sc
 		Call: ve.SdkCall{
 			Action:      "CreateTransitRouter",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -232,6 +238,7 @@ func (s *Service) ModifyResource(resourceData *schema.ResourceData, resource *sc
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["TransitRouterId"] = d.Id()
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -245,6 +252,11 @@ func (s *Service) ModifyResource(resourceData *schema.ResourceData, resource *sc
 		},
 	}
 	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "transitrouter", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -290,6 +302,15 @@ func (s *Service) DatasourceResources(*schema.ResourceData, *schema.Resource) ve
 				TargetField: "TransitRouterIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "TransitRouterName",
 		IdField:      "TransitRouterId",
@@ -305,6 +326,15 @@ func (s *Service) DatasourceResources(*schema.ResourceData, *schema.Resource) ve
 
 func (s *Service) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *Service) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "transitrouter",
+		ResourceType:         "transitrouter",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

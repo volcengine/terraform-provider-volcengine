@@ -36,14 +36,23 @@ The following arguments are supported:
 * `kind` - (Optional) The Kind of Volume.
 * `name_regex` - (Optional) A Name Regex of Volume.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
 * `volume_name` - (Optional) The name of Volume.
 * `volume_status` - (Optional) The Status of Volume, the value can be `available` or `attaching` or `attached` or `detaching` or `creating` or `deleting` or `error` or `extending`.
 * `volume_type` - (Optional) The type of Volume.
 * `zone_id` - (Optional) The Id of Zone.
 
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
+
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `total_count` - The total count of Volume query.
 * `volumes` - The collection of Volume query.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
 
 

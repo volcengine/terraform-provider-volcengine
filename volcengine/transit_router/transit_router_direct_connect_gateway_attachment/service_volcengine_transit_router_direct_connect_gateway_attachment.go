@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router"
+	"strconv"
 	"strings"
 	"time"
 
@@ -133,6 +134,12 @@ func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) CreateRes
 		Call: ve.SdkCall{
 			Action:      "CreateTransitRouterDirectConnectGatewayAttachment",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -164,6 +171,8 @@ func (VolcengineTransitRouterDirectConnectGatewayAttachmentService) WithResource
 }
 
 func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyTransitRouterDirectConnectGatewayAttachmentAttributes",
@@ -178,6 +187,7 @@ func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) ModifyRes
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["TransitRouterAttachmentId"] = d.Get("transit_router_attachment_id")
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			LockId: func(d *schema.ResourceData) string {
@@ -195,7 +205,12 @@ func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) ModifyRes
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, callbacks)
+
+	return callbacks
 }
 
 func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -236,6 +251,15 @@ func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) Datasourc
 				TargetField: "TransitRouterAttachmentIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "TransitRouterAttachmentName",
 		IdField:      "TransitRouterAttachmentId",
@@ -245,6 +269,75 @@ func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) Datasourc
 
 func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineTransitRouterDirectConnectGatewayAttachmentService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					ids := strings.Split(resourceData.Id(), ":")
+					if len(ids) != 2 {
+						return false, fmt.Errorf("invalid route table id")
+					}
+					(*call.SdkParam)["ResourceIds.1"] = ids[1]
+					(*call.SdkParam)["ResourceType"] = "transitrouterattachment"
+					for index, v := range removedTags.List() {
+						tag, ok := v.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("Tags is not map ")
+						}
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = tag["key"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					ids := strings.Split(resourceData.Id(), ":")
+					if len(ids) != 2 {
+						return false, fmt.Errorf("invalid route table id")
+					}
+					(*call.SdkParam)["ResourceIds.1"] = ids[1]
+					(*call.SdkParam)["ResourceType"] = "transitrouterattachment"
+					for index, v := range addedTags.List() {
+						tag, ok := v.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("Tags is not map ")
+						}
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tag["key"].(string)
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tag["value"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
