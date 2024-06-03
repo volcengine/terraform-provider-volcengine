@@ -55,6 +55,12 @@ func ResourceVolcengineOrganizationAccount() *schema.Resource {
 				Computed:    true,
 				Description: "The id of the organization unit. Default is root organization.",
 			},
+			"verification_relation_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The verification relation id of the account. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
 			"tags": ve.TagsSchema(),
 
 			// computed fields
