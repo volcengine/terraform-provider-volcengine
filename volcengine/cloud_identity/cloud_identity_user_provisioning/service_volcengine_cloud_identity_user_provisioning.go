@@ -111,6 +111,9 @@ func (s *VolcengineCloudIdentityUserProvisioningService) ReadResource(resourceDa
 	}
 	logger.Debug(logger.RespFormat, policyAction, *policyResp)
 	policy, err = ve.ObtainSdkValue("Result.Policy", *policyResp)
+	if err != nil {
+		return data, err
+	}
 	if policy == nil {
 		policy = []interface{}{}
 	}
