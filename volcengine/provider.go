@@ -11,6 +11,14 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_permission_set"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_permission_set_assignment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_permission_set_provisioning"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_user"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_user_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_user_provisioning"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/financial_relation/financial_relation"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy"
@@ -627,6 +635,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cdn_domains":        cdn_domain.DataSourceVolcengineCdnDomains(),
 			"volcengine_cdn_configs":        cdn_config.DataSourceVolcengineCdnConfigs(),
 			"volcengine_cdn_shared_configs": cdn_shared_config.DataSourceVolcengineCdnSharedConfigs(),
+
+			// ================ Financial Relation ================
+			"volcengine_financial_relations": financial_relation.DataSourceVolcengineFinancialRelations(),
+
+			// ================ Cloud Identity ================
+			"volcengine_cloud_identity_users":                        cloud_identity_user.DataSourceVolcengineCloudIdentityUsers(),
+			"volcengine_cloud_identity_groups":                       cloud_identity_group.DataSourceVolcengineCloudIdentityGroups(),
+			"volcengine_cloud_identity_user_provisionings":           cloud_identity_user_provisioning.DataSourceVolcengineCloudIdentityUserProvisionings(),
+			"volcengine_cloud_identity_permission_sets":              cloud_identity_permission_set.DataSourceVolcengineCloudIdentityPermissionSets(),
+			"volcengine_cloud_identity_permission_set_assignments":   cloud_identity_permission_set_assignment.DataSourceVolcengineCloudIdentityPermissionSetAssignments(),
+			"volcengine_cloud_identity_permission_set_provisionings": cloud_identity_permission_set_provisioning.DataSourceVolcengineCloudIdentityPermissionSetProvisionings(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -894,6 +913,18 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cdn_certificate":   cdn_certificate.ResourceVolcengineCdnCertificate(),
 			"volcengine_cdn_domain":        cdn_domain.ResourceVolcengineCdnDomain(),
 			"volcengine_cdn_shared_config": cdn_shared_config.ResourceVolcengineCdnSharedConfig(),
+
+			// ================ Financial Relation ================
+			"volcengine_financial_relation": financial_relation.ResourceVolcengineFinancialRelation(),
+
+			// ================ Cloud Identity ================
+			"volcengine_cloud_identity_user":                        cloud_identity_user.ResourceVolcengineCloudIdentityUser(),
+			"volcengine_cloud_identity_group":                       cloud_identity_group.ResourceVolcengineCloudIdentityGroup(),
+			"volcengine_cloud_identity_user_attachment":             cloud_identity_user_attachment.ResourceVolcengineCloudIdentityUserAttachment(),
+			"volcengine_cloud_identity_user_provisioning":           cloud_identity_user_provisioning.ResourceVolcengineCloudIdentityUserProvisioning(),
+			"volcengine_cloud_identity_permission_set":              cloud_identity_permission_set.ResourceVolcengineCloudIdentityPermissionSet(),
+			"volcengine_cloud_identity_permission_set_assignment":   cloud_identity_permission_set_assignment.ResourceVolcengineCloudIdentityPermissionSetAssignment(),
+			"volcengine_cloud_identity_permission_set_provisioning": cloud_identity_permission_set_provisioning.ResourceVolcengineCloudIdentityPermissionSetProvisioning(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
