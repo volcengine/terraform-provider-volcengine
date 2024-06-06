@@ -9,6 +9,7 @@ resource "volcengine_organization_account" "foo" {
   show_name    = "acc-test-account"
   description  = "acc-test"
   org_unit_id  = volcengine_organization_unit.foo.id
+  verification_relation_id = "210026****"
 
   tags {
     key   = "k1"

@@ -17,10 +17,11 @@ resource "volcengine_organization_unit" "foo" {
 }
 
 resource "volcengine_organization_account" "foo" {
-  account_name = "acc-test-account"
-  show_name    = "acc-test-account"
-  description  = "acc-test"
-  org_unit_id  = volcengine_organization_unit.foo.id
+  account_name             = "acc-test-account"
+  show_name                = "acc-test-account"
+  description              = "acc-test"
+  org_unit_id              = volcengine_organization_unit.foo.id
+  verification_relation_id = "210026****"
 
   tags {
     key   = "k1"
@@ -35,6 +36,7 @@ The following arguments are supported:
 * `description` - (Optional) The description of the account.
 * `org_unit_id` - (Optional) The id of the organization unit. Default is root organization.
 * `tags` - (Optional) Tags.
+* `verification_relation_id` - (Optional, ForceNew) The verification relation id of the account. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 
 The `tags` object supports the following:
 
