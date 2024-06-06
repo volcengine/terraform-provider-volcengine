@@ -192,6 +192,11 @@ func (s *VolcengineVpcService) ModifyResource(resourceData *schema.ResourceData,
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["VpcId"] = d.Id()
+				if d.HasChange("dns_servers") {
+					if _, exist := d.GetOk("dns_servers"); !exist {
+						(*call.SdkParam)["DnsServers.1"] = ""
+					}
+				}
 				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
