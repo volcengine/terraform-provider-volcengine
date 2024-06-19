@@ -49,25 +49,25 @@ func ResourceVolcengineKafkaSaslUser() *schema.Resource {
 			"instance_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of instance",
+				Description: "The id of instance.",
 				ForceNew:    true,
 			},
 			"user_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The name of user",
+				Description: "The name of user.",
 				ForceNew:    true,
 			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The description of user",
+				Description: "The description of user.",
 				ForceNew:    true, // 不支持修改
 			},
 			"user_password": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The password of user",
+				Description: "The password of user.",
 				Sensitive:   true,
 				ForceNew:    true,
 			},
@@ -75,7 +75,7 @@ func ResourceVolcengineKafkaSaslUser() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				Description: "Whether this user has read and write permissions for all topics. Default is true",
+				Description: "Whether this user has read and write permissions for all topics. Default is true.",
 			},
 			"password_type": {
 				Type:        schema.TypeString,
