@@ -330,6 +330,7 @@ func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 		}
 		keyValue["Key"] = kMap["key"]
 		valueMap["ValueType"] = kMap["value_type"]
+		sqlFlag := false
 		if v, ok := kMap["case_sensitive"]; ok {
 			valueMap["CaseSensitive"] = v
 		}
@@ -339,8 +340,12 @@ func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 		if v, ok := kMap["delimiter"]; ok {
 			valueMap["Delimiter"] = v
 		}
+		if v, ok := kMap["index_all"]; ok {
+			valueMap["IndexAll"] = v
+		}
 		if v, ok := kMap["sql_flag"]; ok {
 			valueMap["SqlFlag"] = v
+			sqlFlag = v.(bool)
 		}
 		if v, ok := kMap["json_keys"]; ok {
 			jsonKeys := make([]interface{}, 0)
@@ -360,6 +365,7 @@ func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 				if v, ok = keyMap["value_type"]; ok {
 					jsonValue := make(map[string]interface{})
 					jsonValue["ValueType"] = v
+					jsonValue["SqlFlag"] = sqlFlag
 					jsonKey["Value"] = jsonValue
 				}
 				jsonKeys = append(jsonKeys, jsonKey)

@@ -10,6 +10,17 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_partition"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_topic"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_public_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_sasl_user"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic_partition"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_zone"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_identity/cloud_identity_permission_set"
@@ -646,6 +657,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloud_identity_permission_sets":              cloud_identity_permission_set.DataSourceVolcengineCloudIdentityPermissionSets(),
 			"volcengine_cloud_identity_permission_set_assignments":   cloud_identity_permission_set_assignment.DataSourceVolcengineCloudIdentityPermissionSetAssignments(),
 			"volcengine_cloud_identity_permission_set_provisionings": cloud_identity_permission_set_provisioning.DataSourceVolcengineCloudIdentityPermissionSetProvisionings(),
+
+			// ================ Kafka ================
+			"volcengine_kafka_sasl_users":          kafka_sasl_user.DataSourceVolcengineKafkaSaslUsers(),
+			"volcengine_kafka_topic_partitions":    kafka_topic_partition.DataSourceVolcengineKafkaTopicPartitions(),
+			"volcengine_kafka_groups":              kafka_group.DataSourceVolcengineKafkaGroups(),
+			"volcengine_kafka_topics":              kafka_topic.DataSourceVolcengineKafkaTopics(),
+			"volcengine_kafka_instances":           kafka_instance.DataSourceVolcengineKafkaInstances(),
+			"volcengine_kafka_regions":             kafka_region.DataSourceVolcengineRegions(),
+			"volcengine_kafka_zones":               kafka_zone.DataSourceVolcengineZones(),
+			"volcengine_kafka_consumed_topics":     kafka_consumed_topic.DataSourceVolcengineKafkaConsumedTopics(),
+			"volcengine_kafka_consumed_partitions": kafka_consumed_partition.DataSourceVolcengineKafkaConsumedPartitions(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -925,6 +947,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloud_identity_permission_set":              cloud_identity_permission_set.ResourceVolcengineCloudIdentityPermissionSet(),
 			"volcengine_cloud_identity_permission_set_assignment":   cloud_identity_permission_set_assignment.ResourceVolcengineCloudIdentityPermissionSetAssignment(),
 			"volcengine_cloud_identity_permission_set_provisioning": cloud_identity_permission_set_provisioning.ResourceVolcengineCloudIdentityPermissionSetProvisioning(),
+
+			// ================ Kafka ================
+			"volcengine_kafka_sasl_user":      kafka_sasl_user.ResourceVolcengineKafkaSaslUser(),
+			"volcengine_kafka_group":          kafka_group.ResourceVolcengineKafkaGroup(),
+			"volcengine_kafka_topic":          kafka_topic.ResourceVolcengineKafkaTopic(),
+			"volcengine_kafka_instance":       kafka_instance.ResourceVolcengineKafkaInstance(),
+			"volcengine_kafka_public_address": kafka_public_address.ResourceVolcengineKafkaPublicAddress(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

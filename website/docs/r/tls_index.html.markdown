@@ -11,7 +11,7 @@ Provides a resource to manage tls index
 ## Example Usage
 ```hcl
 resource "volcengine_tls_index" "foo" {
-  topic_id = "7ce12237-6670-44a7-9d79-2e36961586e6"
+  topic_id = "227a8d0c-b85b-48df-bee1-0927a595****"
 
   #  full_text {
   #    case_sensitive = true
@@ -25,7 +25,8 @@ resource "volcengine_tls_index" "foo" {
     case_sensitive  = true
     delimiter       = "!"
     include_chinese = false
-    sql_flag        = false
+    sql_flag        = true
+    index_all       = true
     json_keys {
       key        = "class"
       value_type = "text"
@@ -88,6 +89,7 @@ The `key_value` object supports the following:
 * `case_sensitive` - (Optional) Whether the value is case sensitive.
 * `delimiter` - (Optional) The delimiter of the value.
 * `include_chinese` - (Optional) Whether the value include chinese.
+* `index_all` - (Optional) Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
 * `json_keys` - (Optional) The JSON subfield key value index.
 * `sql_flag` - (Optional) Whether the filed is enabled for analysis.
 
