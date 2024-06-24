@@ -108,6 +108,12 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 							Default:     false,
 							Description: "Whether the filed is enabled for analysis.",
 						},
+						"index_all": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+						},
 						"json_keys": {
 							Type:     schema.TypeSet,
 							Optional: true,
