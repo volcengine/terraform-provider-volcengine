@@ -115,6 +115,11 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 										Computed:    true,
 										Description: "Whether the filed is enabled for analysis.",
 									},
+									"index_all": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to create indexes for all fields in JSON fields with text values.",
+									},
 									"json_keys": {
 										Type:        schema.TypeList,
 										Computed:    true,
