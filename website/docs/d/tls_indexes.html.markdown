@@ -32,6 +32,7 @@ In addition to all arguments above, the following attributes are exported:
         * `case_sensitive` - Whether the value is case sensitive.
         * `delimiter` - The delimiter of the value.
         * `include_chinese` - Whether the value include chinese.
+        * `index_all` - Whether to create indexes for all fields in JSON fields with text values.
         * `json_keys` - The JSON subfield key value index.
             * `case_sensitive` - Whether the value is case sensitive.
             * `delimiter` - The delimiter of the value.
