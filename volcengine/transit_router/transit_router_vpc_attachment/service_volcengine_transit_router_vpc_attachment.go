@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -159,6 +160,10 @@ func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *sc
 					ConvertType: ve.ConvertListN,
 				},
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["ClientToken"] = uuid.New().String()
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -194,6 +199,9 @@ func (s *Service) ModifyResource(resourceData *schema.ResourceData, resource *sc
 				},
 				"transit_router_attachment_name": {
 					TargetField: "TransitRouterAttachmentName",
+				},
+				"auto_publish_route_enabled": {
+					TargetField: "AutoPublishRouteEnabled",
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {

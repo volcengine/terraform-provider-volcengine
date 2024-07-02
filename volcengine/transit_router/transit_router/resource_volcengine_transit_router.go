@@ -44,6 +44,13 @@ func ResourceVolcengineTransitRouter() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the transit router.",
 			},
+			"asn": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "The asn of the transit router. Valid value range in 64512-65534 and 4200000000-4294967294. Default is 64512.",
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,

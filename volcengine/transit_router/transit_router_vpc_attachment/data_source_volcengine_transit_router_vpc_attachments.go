@@ -85,6 +85,11 @@ func DataSourceVolcengineTransitRouterVpcAttachments() *schema.Resource {
 							Computed:    true,
 							Description: "The description info.",
 						},
+						"auto_publish_route_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to auto publish route of the transit router to vpc instance.",
+						},
 						"tags": ve.TagsSchemaComputed(),
 						"attach_points": {
 							Description: "The collection of attach points.",

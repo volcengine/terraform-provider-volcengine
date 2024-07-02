@@ -180,6 +180,7 @@ func ResourceVolcengineScalingConfiguration() *schema.Resource {
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The project to which the instance created by the scaling configuration belongs.",
 			},
 			"hpc_cluster_id": {

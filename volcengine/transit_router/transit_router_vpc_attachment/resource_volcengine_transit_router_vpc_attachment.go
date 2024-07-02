@@ -75,6 +75,12 @@ func ResourceVolcengineTransitRouterVpcAttachment() *schema.Resource {
 				Computed:    true,
 				Description: "The name of the transit router vpc attachment.",
 			},
+			"auto_publish_route_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to auto publish route of the transit router to vpc instance. Default is false.",
+			},
 			"tags": ve.TagsSchema(),
 			"attach_points": {
 				Type:        schema.TypeSet,
