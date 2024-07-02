@@ -60,6 +60,11 @@ func DataSourceVolcengineTransitRouters() *schema.Resource {
 							Computed:    true,
 							Description: "The name of the transit router.",
 						},
+						"asn": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The asn of the transit router.",
+						},
 						"account_id": {
 							Type:        schema.TypeString,
 							Computed:    true,

@@ -45,6 +45,18 @@ func (s *VolcengineInstanceStateService) CreateResource(resourceData *schema.Res
 		targetStatus = []string{"STOPPED"}
 	}
 
+	// 根据实例当前状态判断是否执行操作
+	update, err := s.describeCurrentStatus(resourceData, targetStatus)
+	if err != nil {
+		return []ve.Callback{{
+			Err: err,
+		}}
+	}
+	if !update {
+		resourceData.SetId(fmt.Sprintf("state:%v", resourceData.Get("instance_id")))
+		return []ve.Callback{}
+	}
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      action,
@@ -215,6 +227,17 @@ func (s *VolcengineInstanceStateService) ModifyResource(resourceData *schema.Res
 		targetStatus = []string{"STOPPED"}
 	}
 
+	// 根据实例当前状态判断是否执行操作
+	update, err := s.describeCurrentStatus(resourceData, targetStatus)
+	if err != nil {
+		return []ve.Callback{{
+			Err: err,
+		}}
+	}
+	if !update {
+		return []ve.Callback{}
+	}
+
 	strs := strings.Split(resourceData.Id(), ":")
 
 	callback := ve.Callback{
@@ -263,4 +286,23 @@ func (s *VolcengineInstanceStateService) DatasourceResources(*schema.ResourceDat
 
 func (s *VolcengineInstanceStateService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineInstanceStateService) describeCurrentStatus(resourceData *schema.ResourceData, targetStatus []string) (bool, error) {
+	instanceId := resourceData.Get("instance_id").(string)
+	data, err := s.ReadResource(resourceData, "state:"+instanceId)
+	if err != nil {
+		return false, err
+	}
+	status, err := ve.ObtainSdkValue("Status", data)
+	if err != nil {
+		return false, err
+	}
+	for _, v := range targetStatus {
+		// 目标状态和当前状态相同时，不执行操作
+		if v == status.(string) {
+			return false, nil
+		}
+	}
+	return true, nil
 }

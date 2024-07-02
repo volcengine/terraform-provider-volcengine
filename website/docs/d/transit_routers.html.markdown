@@ -38,6 +38,7 @@ In addition to all arguments above, the following attributes are exported:
 * `total_count` - The total count of query.
 * `transit_routers` - The collection of query.
     * `account_id` - The ID of account.
+    * `asn` - The asn of the transit router.
     * `business_status` - The business status of the transit router.
     * `creation_time` - The create time.
     * `description` - The description info.

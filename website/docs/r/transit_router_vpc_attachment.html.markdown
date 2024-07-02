@@ -13,6 +13,7 @@ Provides a resource to manage transit router vpc attachment
 resource "volcengine_transit_router" "foo" {
   transit_router_name = "test-tf-acc"
   description         = "test-tf-acc"
+  asn                 = 4294967293
 }
 
 data "volcengine_zones" "foo" {
@@ -37,7 +38,6 @@ resource "volcengine_subnet" "foo2" {
   subnet_name = "acc-test-subnet2"
 }
 
-
 resource "volcengine_transit_router_vpc_attachment" "foo" {
   transit_router_id = volcengine_transit_router.foo.id
   vpc_id            = volcengine_vpc.foo.id
@@ -49,8 +49,9 @@ resource "volcengine_transit_router_vpc_attachment" "foo" {
     subnet_id = volcengine_subnet.foo2.id
     zone_id   = "cn-beijing-b"
   }
-  transit_router_attachment_name = "tf-test-acc-name1"
+  transit_router_attachment_name = "tf-test-acc-vpc-attach"
   description                    = "tf-test-acc-description"
+  auto_publish_route_enabled     = true
   tags {
     key   = "k1"
     value = "v1"
@@ -62,6 +63,7 @@ The following arguments are supported:
 * `attach_points` - (Required) The attach points of transit router vpc attachment.
 * `transit_router_id` - (Required, ForceNew) The id of the transit router.
 * `vpc_id` - (Required, ForceNew) The ID of vpc.
+* `auto_publish_route_enabled` - (Optional) Whether to auto publish route of the transit router to vpc instance. Default is false.
 * `description` - (Optional) The description of the transit router vpc attachment.
 * `tags` - (Optional) Tags.
 * `transit_router_attachment_name` - (Optional) The name of the transit router vpc attachment.

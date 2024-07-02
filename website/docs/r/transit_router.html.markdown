@@ -13,6 +13,7 @@ Provides a resource to manage transit router
 resource "volcengine_transit_router" "foo" {
   transit_router_name = "acc-test-tr"
   description         = "acc-test"
+  asn                 = 4294967294
   project_name        = "default"
   tags {
     key   = "k1"
@@ -22,6 +23,7 @@ resource "volcengine_transit_router" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
+* `asn` - (Optional, ForceNew) The asn of the transit router. Valid value range in 64512-65534 and 4200000000-4294967294. Default is 64512.
 * `description` - (Optional) The description of the transit router.
 * `project_name` - (Optional) The ProjectName of the transit router.
 * `tags` - (Optional) Tags.

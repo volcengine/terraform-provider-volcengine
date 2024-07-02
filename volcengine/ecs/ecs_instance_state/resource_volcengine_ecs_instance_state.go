@@ -38,7 +38,8 @@ func ResourceVolcengineEcsInstanceState() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"Start", "Stop", "ForceStop"}, false),
-				Description:  "Start or Stop of Instance Action, the value can be `Start`, `Stop` or `ForceStop`.",
+				Description: "Start or Stop of Instance Action, the value can be `Start`, `Stop` or `ForceStop`. \n" +
+					"If the target status of the action is consistent with the current status of the instance, the action will not actually be executed.",
 			},
 			"instance_id": {
 				Type:        schema.TypeString,

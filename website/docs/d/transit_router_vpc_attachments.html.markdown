@@ -35,6 +35,7 @@ In addition to all arguments above, the following attributes are exported:
         * `network_interface_id` - The ID of network interface.
         * `subnet_id` - The ID of subnet.
         * `zone_id` - The ID of zone.
+    * `auto_publish_route_enabled` - Whether to auto publish route of the transit router to vpc instance.
     * `creation_time` - The create time.
     * `description` - The description info.
     * `status` - The status of the transit router.

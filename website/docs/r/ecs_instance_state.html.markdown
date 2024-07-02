@@ -56,7 +56,8 @@ resource "volcengine_ecs_instance_state" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `action` - (Required) Start or Stop of Instance Action, the value can be `Start`, `Stop` or `ForceStop`.
+* `action` - (Required) Start or Stop of Instance Action, the value can be `Start`, `Stop` or `ForceStop`. 
+If the target status of the action is consistent with the current status of the instance, the action will not actually be executed.
 * `instance_id` - (Required, ForceNew) Id of Instance.
 * `stopped_mode` - (Optional) Stop Mode of Instance, the value can be `KeepCharging` or `StopCharging`.
 

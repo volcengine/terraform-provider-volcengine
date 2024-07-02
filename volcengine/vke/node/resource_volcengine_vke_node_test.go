@@ -339,7 +339,7 @@ resource "volcengine_vke_node" "foo" {
         }
         cordon = true
     }
-	depends_on = ["volcengine_vke_default_node_pool.foo"]
+	depends_on = [volcengine_vke_default_node_pool.foo]
 }
 `
 
