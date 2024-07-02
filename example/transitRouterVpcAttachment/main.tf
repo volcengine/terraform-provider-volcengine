@@ -1,14 +1,15 @@
 resource "volcengine_transit_router" "foo" {
   transit_router_name = "test-tf-acc"
   description         = "test-tf-acc"
+  asn                 = 4294967293
 }
 
 data "volcengine_zones" "foo" {
 }
 
 resource "volcengine_vpc" "foo" {
-  vpc_name     = "acc-test-vpc-acc"
-  cidr_block   = "172.16.0.0/16"
+  vpc_name   = "acc-test-vpc-acc"
+  cidr_block = "172.16.0.0/16"
 }
 
 resource "volcengine_subnet" "foo" {
@@ -25,7 +26,6 @@ resource "volcengine_subnet" "foo2" {
   subnet_name = "acc-test-subnet2"
 }
 
-
 resource "volcengine_transit_router_vpc_attachment" "foo" {
   transit_router_id = volcengine_transit_router.foo.id
   vpc_id            = volcengine_vpc.foo.id
@@ -37,10 +37,11 @@ resource "volcengine_transit_router_vpc_attachment" "foo" {
     subnet_id = volcengine_subnet.foo2.id
     zone_id   = "cn-beijing-b"
   }
-  transit_router_attachment_name = "tf-test-acc-name1"
-  description = "tf-test-acc-description"
+  transit_router_attachment_name = "tf-test-acc-vpc-attach"
+  description                    = "tf-test-acc-description"
+  auto_publish_route_enabled     = true
   tags {
-    key = "k1"
+    key   = "k1"
     value = "v1"
   }
 }

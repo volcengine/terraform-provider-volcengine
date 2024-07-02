@@ -46,5 +46,5 @@ resource "volcengine_snat_entry" "foo" {
   nat_gateway_id = volcengine_nat_gateway.foo.id
   eip_id = volcengine_eip_address.foo.id
   source_cidr = "172.16.0.0/24"
-  depends_on = ["volcengine_eip_associate.foo"]
+  depends_on = [volcengine_eip_associate.foo]
 }
