@@ -76,7 +76,7 @@ func ResourceVolcenginePrivateZone() *schema.Resource {
 						"vpc_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "The id of the bind vpc",
+							Description: "The id of the bind vpc.",
 						},
 					},
 				},

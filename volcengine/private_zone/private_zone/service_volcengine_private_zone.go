@@ -75,10 +75,11 @@ func (s *VolcenginePrivateZoneService) ReadResources(m map[string]interface{}) (
 		if !ok {
 			return data, fmt.Errorf("Value is not map ")
 		}
+		zone["ZoneId"] = strconv.Itoa(int(zone["ZID"].(float64)))
 
 		action := "QueryPrivateZone"
 		req := map[string]interface{}{
-			"ZID": zone["ZID"].(string),
+			"ZID": zone["ZID"],
 		}
 		logger.Debug(logger.ReqFormat, action, req)
 		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
@@ -191,7 +192,7 @@ func (s *VolcenginePrivateZoneService) CreateResource(resourceData *schema.Resou
 						return false, fmt.Errorf(" vpcs value is not map ")
 					}
 					vpcId = vpcMap["vpc_id"].(string)
-					if regionId, exist := vpcMap["region"]; exist {
+					if regionId, exist := vpcMap["region"]; exist && regionId != "" {
 						region = regionId.(string)
 					} else {
 						region = client.Region
@@ -210,7 +211,7 @@ func (s *VolcenginePrivateZoneService) CreateResource(resourceData *schema.Resou
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id, _ := ve.ObtainSdkValue("Result.ZID", *resp)
-				d.SetId(strconv.Itoa(id.(int)))
+				d.SetId(strconv.Itoa(int(id.(float64))))
 				return nil
 			},
 		},
@@ -363,18 +364,21 @@ func (s *VolcenginePrivateZoneService) RemoveResource(resourceData *schema.Resou
 func (s *VolcenginePrivateZoneService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
+			"zid": {
 				TargetField: "ZIDs",
-				ConvertType: ve.ConvertWithN,
+				//ConvertType: ve.ConvertWithN,
 			},
 			"vpc_id": {
 				TargetField: "VpcID",
 			},
 		},
 		NameField:    "ZoneName",
-		IdField:      "ZID",
+		IdField:      "ZoneId",
 		CollectField: "private_zones",
 		ResponseConverts: map[string]ve.ResponseConvert{
+			"ZoneId": {
+				TargetField: "id",
+			},
 			"ZID": {
 				TargetField: "zid",
 			},

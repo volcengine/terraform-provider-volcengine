@@ -10,14 +10,19 @@ func DataSourceVolcenginePrivateZones() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcenginePrivateZonesRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of Private Zone IDs.",
+			//"ids": {
+			//	Type:     schema.TypeSet,
+			//	Optional: true,
+			//	Elem: &schema.Schema{
+			//		Type: schema.TypeInt,
+			//	},
+			//	Set:         schema.HashInt,
+			//	Description: "A list of Private Zone IDs.",
+			//},
+			"zid": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The zid of Private Zone.",
 			},
 			"zone_name": {
 				Type:        schema.TypeString,
@@ -74,13 +79,13 @@ func DataSourceVolcenginePrivateZones() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						//"id": {
-						//	Type:        schema.TypeString,
-						//	Computed:    true,
-						//	Description: "The id of the private zone.",
-						//},
-						"zid": {
+						"id": {
 							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the private zone.",
+						},
+						"zid": {
+							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: "The id of the private zone.",
 						},
@@ -127,7 +132,7 @@ func DataSourceVolcenginePrivateZones() *schema.Resource {
 						"region": {
 							Type:     schema.TypeList,
 							Computed: true,
-							Elem: schema.Schema{
+							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 							Description: "The region of the private zone.",
@@ -136,7 +141,7 @@ func DataSourceVolcenginePrivateZones() *schema.Resource {
 							Type:        schema.TypeList,
 							Computed:    true,
 							Description: "The Bind vpc info of the private zone.",
-							Elem: schema.Resource{
+							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"id": {
 										Type:        schema.TypeString,
