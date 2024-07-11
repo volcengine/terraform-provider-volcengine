@@ -10,15 +10,6 @@ func DataSourceVolcenginePrivateZoneResolverEndpoints() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcenginePrivateZoneResolverEndpointsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of Private Zone Resolver Endpoint IDs.",
-			},
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -61,6 +52,11 @@ func DataSourceVolcenginePrivateZoneResolverEndpoints() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the endpoint.",
+						},
 						"endpoint_id": {
 							Type:        schema.TypeInt,
 							Computed:    true,

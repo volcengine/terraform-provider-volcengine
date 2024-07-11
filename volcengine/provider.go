@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_resolver_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_resolver_rule"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_partition"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_topic"
@@ -672,7 +674,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kafka_consumed_partitions": kafka_consumed_partition.DataSourceVolcengineKafkaConsumedPartitions(),
 
 			// ================ PrivateZone ================
-			"volcengine_private_zones": private_zone.DataSourceVolcenginePrivateZones(),
+			"volcengine_private_zones":                   private_zone.DataSourceVolcenginePrivateZones(),
+			"volcengine_private_zone_resolver_endpoints": private_zone_resolver_endpoint.DataSourceVolcenginePrivateZoneResolverEndpoints(),
+			"volcengine_private_zone_resolver_rules":     private_zone_resolver_rule.DataSourceVolcenginePrivateZoneResolverRules(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -961,7 +965,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kafka_public_address": kafka_public_address.ResourceVolcengineKafkaPublicAddress(),
 
 			// ================ PrivateZone ================
-			"volcengine_private_zone": private_zone.ResourceVolcenginePrivateZone(),
+			"volcengine_private_zone":                   private_zone.ResourceVolcenginePrivateZone(),
+			"volcengine_private_zone_resolver_endpoint": private_zone_resolver_endpoint.ResourceVolcenginePrivateZoneResolverEndpoint(),
+			"volcengine_private_zone_resolver_rule":     private_zone_resolver_rule.ResourceVolcenginePrivateZoneResolverRule(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

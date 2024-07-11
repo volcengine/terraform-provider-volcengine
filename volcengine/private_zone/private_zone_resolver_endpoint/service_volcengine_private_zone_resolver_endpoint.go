@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -35,8 +36,7 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ReadResources(m map[strin
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-	    // TODO: modify list resource action
-		action := "ListResources"
+		action := "ListResolverEndpoints"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -53,17 +53,26 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ReadResources(m map[strin
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-		// TODO: replace result items
-		results, err = ve.ObtainSdkValue("Result.Items", *resp)
+		results, err = ve.ObtainSdkValue("Result.Endpoints", *resp)
 		if err != nil {
 			return data, err
 		}
 		if results == nil {
 			results = []interface{}{}
 		}
+		logger.Debug(logger.RespFormat, action, condition, results)
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Items is not Slice")
+			return data, errors.New("Result.Endpoints is not Slice")
 		}
+
+		for _, v := range data {
+			endpoint, ok := v.(map[string]interface{})
+			if !ok {
+				return data, errors.New("Value is not map ")
+			}
+			endpoint["EndpointId"] = strconv.Itoa(int(endpoint["ID"].(float64)))
+		}
+
 		return data, err
 	})
 }
@@ -71,22 +80,27 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ReadResources(m map[strin
 func (s *VolcenginePrivateZoneResolverEndpointService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
-		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	// TODO: add request info
+	endpointId, err := strconv.Atoi(id)
+	if err != nil {
+		return data, errors.New("endpoint id is not a integer")
+	}
 	req := map[string]interface{}{
-		"Id": id,
+		//"Id": id,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		tmpData, ok := v.(map[string]interface{})
+		if !ok {
 			return data, errors.New("Value is not map ")
+		} else if endpointId == int(tmpData["ID"].(float64)) {
+			data = tmpData
 		}
 	}
 	if len(data) == 0 {
@@ -104,8 +118,8 @@ func (s *VolcenginePrivateZoneResolverEndpointService) RefreshResourceState(reso
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d      map[string]interface{}
-				status interface{}
+				d          map[string]interface{}
+				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -130,22 +144,41 @@ func (s *VolcenginePrivateZoneResolverEndpointService) RefreshResourceState(reso
 func (s *VolcenginePrivateZoneResolverEndpointService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace create action
-			Action:      "CreateResource",
+			Action:      "CreateResolverEndpoint",
 			ConvertMode: ve.RequestConvertAll,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-
+				"vpc_id": {
+					TargetField: "VpcID",
+				},
+				"security_group_id": {
+					TargetField: "SecurityGroupID",
+				},
+				"ip_configs": {
+					TargetField: "IpConfigs",
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"az_id": {
+							TargetField: "AzID",
+						},
+						"subnet_id": {
+							TargetField: "SubnetID",
+						},
+						"ip": {
+							TargetField: "IP",
+						},
+					},
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// TODO: replace id fields
-				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
-				d.SetId(id.(string))
+				id, _ := ve.ObtainSdkValue("Result.EndpointID", *resp)
+				d.SetId(strconv.Itoa(int(id.(float64))))
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
@@ -159,7 +192,23 @@ func (s *VolcenginePrivateZoneResolverEndpointService) CreateResource(resourceDa
 
 func (VolcenginePrivateZoneResolverEndpointService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		return d, map[string]ve.ResponseConvert{
+			"VpcID": {
+				TargetField: "vpc_id",
+			},
+			"SecurityGroupID": {
+				TargetField: "security_group_id",
+			},
+			"AzID": {
+				TargetField: "az_id",
+			},
+			"SubnetID": {
+				TargetField: "subnet_id",
+			},
+			"IP": {
+				TargetField: "ip",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -167,25 +216,46 @@ func (VolcenginePrivateZoneResolverEndpointService) WithResourceResponseHandlers
 func (s *VolcenginePrivateZoneResolverEndpointService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace modify action
-			Action:      "ModifyResource",
-			ConvertMode: ve.RequestConvertAll,
+			Action:      "UpdateResolverEndpoint",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-
+				"name": {
+					TargetField: "Name",
+				},
+				"ip_configs": {
+					TargetField: "IpConfigs",
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"az_id": {
+							TargetField: "AzID",
+						},
+						"subnet_id": {
+							TargetField: "SubnetID",
+						},
+						"ip": {
+							TargetField: "IP",
+						},
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Id"] = d.Id()
+				id, err := strconv.Atoi(d.Id())
+				if err != nil {
+					return false, err
+				}
+				(*call.SdkParam)["EndpointID"] = id
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
 	}
@@ -195,19 +265,41 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ModifyResource(resourceDa
 func (s *VolcenginePrivateZoneResolverEndpointService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace delete action
-			Action:      "DeleteResource",
+			Action:      "DeleteResolverEndpoint",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
-			SdkParam: &map[string]interface{}{
-				"Id": resourceData.Id(),
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				id, err := strconv.Atoi(d.Id())
+				if err != nil {
+					return false, err
+				}
+				(*call.SdkParam)["EndpointID"] = id
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading private zone resolver endpoint on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
 			},
 		},
 	}
@@ -217,18 +309,34 @@ func (s *VolcenginePrivateZoneResolverEndpointService) RemoveResource(resourceDa
 func (s *VolcenginePrivateZoneResolverEndpointService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "Ids",
-				ConvertType: ve.ConvertWithN,
+			"vpc_id": {
+				TargetField: "VpcID",
 			},
 		},
 		NameField:    "Name",
-		IdField:      "Id",
-		CollectField: "instances",
+		IdField:      "EndpointId",
+		CollectField: "endpoints",
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"Id": {
+				TargetField: "endpoint_id",
+			},
+			"EndpointId": {
 				TargetField: "id",
-				KeepDefault: true,
+			},
+			"VpcID": {
+				TargetField: "vpc_id",
+			},
+			"SecurityGroupID": {
+				TargetField: "security_group_id",
+			},
+			"AzID": {
+				TargetField: "az_id",
+			},
+			"SubnetID": {
+				TargetField: "subnet_id",
+			},
+			"IP": {
+				TargetField: "ip",
 			},
 		},
 	}
@@ -242,8 +350,18 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "private_zone",
 		Version:     "2022-06-01",
-		HttpMethod:  ve.GET, 
-		ContentType: ve.Default, 
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
+}
+
+func getPostUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "private_zone",
+		Version:     "2022-06-01",
+		HttpMethod:  ve.POST,
+		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
 	}
 }

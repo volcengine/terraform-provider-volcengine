@@ -66,9 +66,20 @@ func ResourceVolcenginePrivateZoneResolverEndpoint() *schema.Resource {
 				Description: "The security group ID of the endpoint.",
 			},
 			"ip_configs": {
-				Type:        schema.TypeSet,
-				Required:    true,
-				MinItems:    1,
+				Type:     schema.TypeSet,
+				Required: true,
+				MinItems: 1,
+				//Set: func(i interface{}) int {
+				//	if i == nil {
+				//		return hashcode.String("")
+				//	}
+				//	m := i.(map[string]interface{})
+				//	var (
+				//		buf bytes.Buffer
+				//	)
+				//	buf.WriteString(fmt.Sprintf("%v#%v#%v", m["az_id"], m["subnet_id"], m["ip"]))
+				//	return hashcode.String(buf.String())
+				//},
 				Description: "Availability zones, subnets, and IP configurations of terminal nodes.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -84,10 +95,8 @@ func ResourceVolcenginePrivateZoneResolverEndpoint() *schema.Resource {
 						},
 						"ip": {
 							Type:     schema.TypeString,
-							Optional: true,
-							Computed: true,
-							Description: "Source IP address of traffic. If you do not set this parameter, " +
-								"the system will automatically assign an IP address. You can add up to 6 IP addresses at most. " +
+							Required: true,
+							Description: "Source IP address of traffic. You can add up to 6 IP addresses at most. " +
 								"To ensure high availability, you must add at least two IP addresses.",
 						},
 					},

@@ -1,0 +1,1 @@
+data "volcengine_private_zone_resolver_rules" "foo" {}
