@@ -224,19 +224,7 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ModifyResource(resourceDa
 					TargetField: "Name",
 				},
 				"ip_configs": {
-					TargetField: "IpConfigs",
-					ConvertType: ve.ConvertJsonObjectArray,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"az_id": {
-							TargetField: "AzID",
-						},
-						"subnet_id": {
-							TargetField: "SubnetID",
-						},
-						"ip": {
-							TargetField: "IP",
-						},
-					},
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -245,6 +233,31 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ModifyResource(resourceDa
 					return false, err
 				}
 				(*call.SdkParam)["EndpointID"] = id
+
+				if d.HasChange("ip_configs") {
+					ipConfigs, ok := d.GetOk("ip_configs")
+					if ok {
+						var results []interface{}
+						for _, ipConfig := range ipConfigs.(*schema.Set).List() {
+							ipMap := ipConfig.(map[string]interface{})
+							result := make(map[string]interface{})
+							if _, ok = ipMap["az_id"]; ok {
+								result["AzID"] = ipMap["az_id"]
+							}
+							if _, ok = ipMap["subnet_id"]; ok {
+								result["SubnetID"] = ipMap["subnet_id"]
+							}
+							if _, ok = ipMap["ip"]; ok {
+								result["IP"] = ipMap["ip"]
+							}
+							if len(result) > 0 {
+								results = append(results, result)
+							}
+						}
+						(*call.SdkParam)["IpConfigs"] = results
+					}
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

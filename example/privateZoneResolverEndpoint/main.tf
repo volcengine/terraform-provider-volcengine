@@ -13,4 +13,14 @@ resource "volcengine_private_zone_resolver_endpoint" "foo" {
     subnet_id = "subnet-mj2o4co2m2v45smt1bx1a68j"
     ip = "172.16.0.3"
   }
+  ip_configs {
+    az_id = "cn-beijing-a"
+    subnet_id = "subnet-mj2o4co2m2v45smt1bx1a68j"
+    ip = "172.16.0.4"
+  }
+  ip_configs {
+    az_id = "cn-beijing-a"
+    subnet_id = "subnet-mj2o4co2m2v45smt1bx1a68j"
+    ip = "172.16.0.5"
+  }
 }

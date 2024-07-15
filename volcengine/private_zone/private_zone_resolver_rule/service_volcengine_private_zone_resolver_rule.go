@@ -295,16 +295,7 @@ func (s *VolcenginePrivateZoneResolverRuleService) ModifyResource(resourceData *
 					TargetField: "Line",
 				},
 				"forward_ips": {
-					TargetField: "ForwardIPs",
-					ConvertType: ve.ConvertJsonObjectArray,
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"ip": {
-							TargetField: "IP",
-						},
-						"port": {
-							TargetField: "Port",
-						},
-					},
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -313,6 +304,28 @@ func (s *VolcenginePrivateZoneResolverRuleService) ModifyResource(resourceData *
 					return false, err
 				}
 				(*call.SdkParam)["RuleID"] = id
+
+				if d.HasChange("forward_ips") {
+					ips, ok := d.GetOk("forward_ips")
+					if ok {
+						var results []interface{}
+						for _, ip := range ips.(*schema.Set).List() {
+							ipMap := ip.(map[string]interface{})
+							result := make(map[string]interface{})
+							if _, ok = ipMap["ip"]; ok {
+								result["IP"] = ipMap["ip"]
+							}
+							if _, ok = ipMap["port"]; ok {
+								result["Port"] = ipMap["port"]
+							}
+							if len(result) > 0 {
+								results = append(results, result)
+							}
+						}
+						(*call.SdkParam)["ForwardIPs"] = results
+					}
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
