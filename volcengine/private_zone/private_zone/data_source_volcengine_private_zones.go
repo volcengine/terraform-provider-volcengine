@@ -10,15 +10,6 @@ func DataSourceVolcenginePrivateZones() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcenginePrivateZonesRead,
 		Schema: map[string]*schema.Schema{
-			//"ids": {
-			//	Type:     schema.TypeSet,
-			//	Optional: true,
-			//	Elem: &schema.Schema{
-			//		Type: schema.TypeInt,
-			//	},
-			//	Set:         schema.HashInt,
-			//	Description: "A list of Private Zone IDs.",
-			//},
 			"zid": {
 				Type:        schema.TypeInt,
 				Optional:    true,

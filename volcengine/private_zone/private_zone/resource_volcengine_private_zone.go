@@ -64,7 +64,7 @@ func ResourceVolcenginePrivateZone() *schema.Resource {
 				Type:        schema.TypeSet,
 				Required:    true,
 				MinItems:    1,
-				Description: "The bind vpc object of the private zone.",
+				Description: "The bind vpc object of the private zone. If you want to bind another account's VPC, you need to first use resource volcengine_private_zone_user_vpc_authorization to complete the authorization.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"region": {

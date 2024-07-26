@@ -242,12 +242,15 @@ func (s *VolcenginePrivateZoneService) ModifyResource(resourceData *schema.Resou
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				zid, err := strconv.Atoi(d.Id())
-				if err != nil {
-					return false, fmt.Errorf(" ZID cannot convert to int ")
+				if len(*call.SdkParam) > 0 {
+					zid, err := strconv.Atoi(d.Id())
+					if err != nil {
+						return false, fmt.Errorf(" ZID cannot convert to int ")
+					}
+					(*call.SdkParam)["ZID"] = zid
+					return true, nil
 				}
-				(*call.SdkParam)["ZID"] = zid
-				return true, nil
+				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -366,7 +369,6 @@ func (s *VolcenginePrivateZoneService) DatasourceResources(*schema.ResourceData,
 		RequestConverts: map[string]ve.RequestConvert{
 			"zid": {
 				TargetField: "ZIDs",
-				//ConvertType: ve.ConvertWithN,
 			},
 			"vpc_id": {
 				TargetField: "VpcID",
