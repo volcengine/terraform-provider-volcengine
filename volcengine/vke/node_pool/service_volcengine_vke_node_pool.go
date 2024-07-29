@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -198,6 +199,10 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 		logger.Debug(logger.RespFormat, "filteredSecurityGroupIds", tmpSecurityGroupIds, filteredSecurityGroupIds)
 	}
 
+	if instanceIds, ok := resourceData.GetOk("instance_ids"); ok {
+		result["InstanceIds"] = instanceIds.(*schema.Set).List()
+	}
+
 	if ecsTags, ok := result["NodeConfig"].(map[string]interface{})["Tags"]; ok {
 		result["NodeConfig"].(map[string]interface{})["EcsTags"] = ecsTags
 		delete(result["NodeConfig"].(map[string]interface{}), "Tags")
@@ -271,6 +276,8 @@ func (VolcengineNodePoolService) WithResourceResponseHandlers(nodePool map[strin
 }
 
 func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateNodePool",
@@ -285,6 +292,12 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 				},
 				"name": {
 					TargetField: "Name",
+				},
+				"instance_ids": {
+					Ignore: true,
+				},
+				"keep_instance_name": {
+					Ignore: true,
 				},
 				"node_config": {
 					ConvertType: ve.ConvertJsonObject,
@@ -460,7 +473,53 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 添加已有实例到自定义节点池
+	nodeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "CreateNodes",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"cluster_id": {
+					TargetField: "ClusterId",
+				},
+				"keep_instance_name": {
+					TargetField: "KeepInstanceName",
+				},
+				"instance_ids": {
+					TargetField: "InstanceIds",
+					ConvertType: ve.ConvertJsonArray,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if _, ok := d.GetOk("instance_ids"); ok {
+					(*call.SdkParam)["NodePoolId"] = d.Id()
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			//AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+			//	tmpIds, _ := ve.ObtainSdkValue("Result.Ids", *resp)
+			//	ids := tmpIds.([]interface{})
+			//	d.Set("node_ids", ids)
+			//	return nil
+			//},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	callbacks = append(callbacks, nodeCallback)
+
+	return callbacks
 }
 
 func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -480,6 +539,12 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 				},
 				"name": {
 					TargetField: "Name",
+				},
+				"instance_ids": {
+					Ignore: true,
+				},
+				"keep_instance_name": {
+					Ignore: true,
 				},
 				"node_config": {
 					ConvertType: ve.ConvertJsonObject,
@@ -745,6 +810,10 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 			},
 		}
 		callbacks = append(callbacks, desiredReplicasCallback)
+	}
+
+	if resourceData.HasChange("instance_ids") {
+		callbacks = s.updateNodes(resourceData, callbacks)
 	}
 
 	// 更新Tags
@@ -1091,6 +1160,124 @@ func (s *VolcengineNodePoolService) setResourceTags(resourceData *schema.Resourc
 	callbacks = append(callbacks, addCallback)
 
 	return callbacks
+}
+
+func (s *VolcengineNodePoolService) updateNodes(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedNodes, removedNodes, _, _ := ve.GetSetDifference("instance_ids", resourceData, schema.HashString, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DeleteNodes",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"cluster_id": {
+					TargetField: "ClusterId",
+					ForceGet:    true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedNodes != nil && len(removedNodes.List()) > 0 {
+					nodes, err := s.getAllNodeIds(resourceData.Id())
+					if err != nil {
+						return false, err
+					}
+					var removeNodeList []string
+					for _, v := range nodes {
+						nodeMap, ok := v.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("getAllNodeIds Node is not map")
+						}
+						for _, instanceId := range removedNodes.List() {
+							if nodeMap["InstanceId"] == instanceId {
+								removeNodeList = append(removeNodeList, nodeMap["Id"].(string))
+							}
+						}
+					}
+
+					(*call.SdkParam)["NodePoolId"] = resourceData.Id()
+					(*call.SdkParam)["Ids"] = removeNodeList
+					(*call.SdkParam)["RetainResources"] = []string{"Ecs"}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "CreateNodes",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"cluster_id": {
+					TargetField: "ClusterId",
+					ForceGet:    true,
+				},
+				"keep_instance_name": {
+					TargetField: "KeepInstanceName",
+					ForceGet:    true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedNodes != nil && len(addedNodes.List()) > 0 {
+					(*call.SdkParam)["NodePoolId"] = resourceData.Id()
+					(*call.SdkParam)["InstanceIds"] = addedNodes.List()
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
+}
+
+func (s *VolcengineNodePoolService) getAllNodeIds(nodePoolId string) (nodes []interface{}, err error) {
+	// describe nodes
+	req := map[string]interface{}{
+		"Filter": map[string]interface{}{
+			"NodePoolIds": []string{nodePoolId},
+		},
+	}
+	action := "ListNodes"
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return nodes, err
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
+	results, err := ve.ObtainSdkValue("Result.Items", *resp)
+	if err != nil {
+		return nodes, err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	nodes, ok := results.([]interface{})
+	if !ok {
+		return nodes, errors.New("Result.Items is not Slice")
+	}
+	return nodes, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
