@@ -247,18 +247,17 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 				Action:      "ModifyVolumeChargeType",
 				ConvertMode: ve.RequestConvertIgnore,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					oldV, newV := resourceData.GetChange("volume_charge_type")
-					if oldV == "PrePaid" && newV == "PostPaid" {
-						return false, errors.New("cannot convert PrePaid volume to PostPaid")
-					}
 					if d.Get("instance_id").(string) == "" {
 						return false, errors.New("instance id cannot be empty")
 					}
 
+					chargeType := resourceData.Get("volume_charge_type")
 					(*call.SdkParam)["VolumeIds.1"] = d.Id()
-					(*call.SdkParam)["DiskChargeType"] = "PrePaid"
-					(*call.SdkParam)["AutoPay"] = true
+					(*call.SdkParam)["DiskChargeType"] = chargeType
 					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					if chargeType == "PrePaid" {
+						(*call.SdkParam)["AutoPay"] = true
+					}
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -269,10 +268,7 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 					return resp, err
 				},
 				CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
-					oldV, newV := resourceData.GetChange("volume_charge_type")
-					if oldV == "PrePaid" && newV == "PostPaid" {
-						return errors.New("cannot convert PrePaid volume to PostPaid")
-					}
+					chargeType := resourceData.Get("volume_charge_type")
 					if d.Get("instance_id").(string) == "" {
 						return errors.New("instance id cannot be empty")
 					}
@@ -283,7 +279,7 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 							return re.NonRetryableError(fmt.Errorf("error on reading volume %q: %w", d.Id(), callErr))
 						}
 						// 计费方式已经转变成功
-						if data["PayType"] == "pre" {
+						if (chargeType == "PrePaid" && data["PayType"] == "pre") || (chargeType == "PostPaid" && data["PayType"] == "post") {
 							return nil
 						}
 						// 计费方式还没有转换成功，尝试重新转换
