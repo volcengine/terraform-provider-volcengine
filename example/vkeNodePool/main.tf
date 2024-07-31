@@ -152,20 +152,15 @@ resource "volcengine_vke_node_pool" "foo1" {
         instance_type_ids = ["ecs.g1ie.xlarge"]
         subnet_ids        = [volcengine_subnet.foo.id]
         image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
-        system_volume {
-            type = "ESSD_PL0"
-            size = 80
-        }
-        data_volumes {
-            type        = "ESSD_PL0"
-            size        = 80
-            mount_point = "/tf1"
-        }
-        data_volumes {
-            type        = "ESSD_PL0"
-            size        = 60
-            mount_point = "/tf2"
-        }
+      system_volume {
+        type = "ESSD_PL0"
+        size = "50"
+      }
+      data_volumes {
+        type = "ESSD_PL0"
+        size = "50"
+        mount_point = "/tf"
+      }
         initialize_script = "ZWNobyBoZWxsbyB0ZXJyYWZvcm0h"
         security {
             login {
