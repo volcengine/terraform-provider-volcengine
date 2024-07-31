@@ -153,14 +153,14 @@ resource "volcengine_vke_node" "foo" {
 The following arguments are supported:
 * `cluster_id` - (Required, ForceNew) The cluster id.
 * `instance_id` - (Required, ForceNew) The instance id.
-* `additional_container_storage_enabled` - (Optional, ForceNew) The flag of additional container storage enable, the value is `true` or `false`.
+* `additional_container_storage_enabled` - (Optional, ForceNew) The flag of additional container storage enable, the value is `true` or `false`. This field is valid only when adding an existing instance to the default node pool.
 * `client_token` - (Optional, ForceNew) The client token.
-* `container_storage_path` - (Optional, ForceNew) The container storage path.
-* `image_id` - (Optional, ForceNew) The ImageId of NodeConfig.
-* `initialize_script` - (Optional, ForceNew) The initializeScript of Node.
+* `container_storage_path` - (Optional, ForceNew) The container storage path. This field is valid only when adding an existing instance to the default node pool.
+* `image_id` - (Optional, ForceNew) The ImageId of NodeConfig. This field is valid only when adding an existing instance to the default node pool.
+* `initialize_script` - (Optional, ForceNew) The initializeScript of Node. This field is valid only when adding an existing instance to the default node pool.
 * `keep_instance_name` - (Optional) The flag of keep instance name, the value is `true` or `false`.
-* `kubernetes_config` - (Optional, ForceNew) The KubernetesConfig of Node.
-* `node_pool_id` - (Optional, ForceNew) The node pool id.
+* `kubernetes_config` - (Optional, ForceNew) The KubernetesConfig of Node. This field is valid only when adding an existing instance to the default node pool.
+* `node_pool_id` - (Optional, ForceNew) The node pool id. This field is used to specify the custom node pool to which you want to add nodes. If not filled in, it means added to the default node pool.
 
 The `kubernetes_config` object supports the following:
 
