@@ -66,7 +66,7 @@ The following arguments are supported:
 * `client_token` - (Optional) ClientToken is a case-sensitive string of no more than 64 ASCII characters passed in by the caller.
 * `delete_protection_enabled` - (Optional) The delete protection of the cluster, the value is `true` or `false`.
 * `description` - (Optional) The description of the cluster.
-* `kubernetes_version` - (Optional, ForceNew) The version of Kubernetes specified when creating a VKE cluster (specified to patch version), with an example value of `v1.24`. If not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.
+* `kubernetes_version` - (Optional, ForceNew) The version of Kubernetes specified when creating a VKE cluster (specified to patch version), with an example value of `1.24`. If not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.
 * `logging_config` - (Optional) Cluster log configuration information.
 * `tags` - (Optional) Tags.
 
@@ -76,7 +76,9 @@ The `api_server_public_access_config` object supports the following:
 
 The `cluster_config` object supports the following:
 
-* `subnet_ids` - (Required, ForceNew) The subnet ID for the cluster control plane to communicate within the private network.
+* `subnet_ids` - (Required) The subnet ID for the cluster control plane to communicate within the private network.
+Up to 3 subnets can be selected from each available zone, and a maximum of 2 subnets can be added to each available zone.
+Cannot support deleting configured subnets.
 * `api_server_public_access_config` - (Optional) Cluster API Server public network access configuration.
 * `api_server_public_access_enabled` - (Optional) Cluster API Server public network access configuration, the value is `true` or `false`.
 * `resource_public_access_default_enabled` - (Optional, ForceNew) Node public network access configuration, the value is `true` or `false`.

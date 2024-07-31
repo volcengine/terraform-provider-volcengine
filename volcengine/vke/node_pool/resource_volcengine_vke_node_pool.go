@@ -51,11 +51,32 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Description: "The ClientToken of NodePool.",
 			},
 			"tags": ve.TagsSchema(),
-			"auto_scaling": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
+			"instance_ids": {
+				Type:     schema.TypeSet,
 				Optional: true,
-				Computed: true,
+				MaxItems: 100,
+				Set:      schema.HashString,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				ConflictsWith: []string{"auto_scaling"},
+				Description: "The list of existing ECS instance ids. Add existing instances with same type of security group under the same cluster VPC to the custom node pool.\n" +
+					"Note that removing instance ids from the list will only remove the nodes from cluster and not release the ECS instances. But deleting node pool will release the ECS instances in it.\n" +
+					"It is not recommended to use this field, it is recommended to use `volcengine_vke_node` resource to add an existing instance to a custom node pool.",
+			},
+			"keep_instance_name": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				Description: "Whether to keep instance name when adding an existing instance to a custom node pool, the value is `true` or `false`.\n" +
+					"This field is valid only when adding new instances to the custom node pool.",
+			},
+			"auto_scaling": {
+				Type:          schema.TypeList,
+				MaxItems:      1,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"instance_ids"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
