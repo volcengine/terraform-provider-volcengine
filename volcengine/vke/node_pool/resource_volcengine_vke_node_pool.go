@@ -69,7 +69,7 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Optional: true,
 				Default:  false,
 				Description: "Whether to keep instance name when adding an existing instance to a custom node pool, the value is `true` or `false`.\n" +
-					"This field is valid only when adding an new instance to the custom node pool.",
+					"This field is valid only when adding new instances to the custom node pool.",
 			},
 			"auto_scaling": {
 				Type:          schema.TypeList,

@@ -87,7 +87,7 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 							},
 							Set: schema.HashString,
 							Description: "The subnet ID for the cluster control plane to communicate within the private network.\n" +
-								"Up to 3 subnets can be selected from each available zone, and a maximum of 2 subnets can be added to each available zone\n" +
+								"Up to 3 subnets can be selected from each available zone, and a maximum of 2 subnets can be added to each available zone.\n" +
 								"Cannot support deleting configured subnets.",
 						},
 						"api_server_public_access_enabled": {
