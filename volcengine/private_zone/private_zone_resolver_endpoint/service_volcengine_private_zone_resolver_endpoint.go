@@ -122,7 +122,7 @@ func (s *VolcenginePrivateZoneResolverEndpointService) RefreshResourceState(reso
 				status     interface{}
 				failStates []string
 			)
-			failStates = append(failStates, "Failed")
+			failStates = append(failStates, "Error")
 			d, err = s.ReadResource(resourceData, id)
 			if err != nil {
 				return nil, "", err

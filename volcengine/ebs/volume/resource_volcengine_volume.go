@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -45,24 +44,21 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Description: "The name of Volume.",
 			},
 			"volume_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
-				ValidateFunc: validation.StringInSlice([]string{"ESSD_PL0", "ESSD_PL1", "ESSD_PL2", "PTSSD", "ESSD_FlexPL"}, false),
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 			},
 			"kind": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.StringInSlice([]string{"data"}, false),
-				Description:  "The kind of Volume, the value is `data`.",
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The kind of Volume, the value is `data`.",
 			},
 			"size": {
-				Type:         schema.TypeInt,
-				Required:     true,
-				ValidateFunc: validation.IntAtLeast(20), // 最小20GB
-				Description:  "The size of Volume.",
+				Type:        schema.TypeInt,
+				Required:    true,
+				Description: "The size of Volume.",
 			},
 			"description": {
 				Type:        schema.TypeString,
@@ -79,10 +75,9 @@ func ResourceVolcengineVolume() *schema.Resource {
 					"When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.",
 			},
 			"volume_charge_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
-				Default:      "PostPaid",
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "PostPaid",
 				Description: "The charge type of the Volume, the value is `PostPaid` or `PrePaid`. " +
 					"The `PrePaid` volume cannot be detached. " +
 					"Cannot convert `PrePaid` volume to `PostPaid`." +

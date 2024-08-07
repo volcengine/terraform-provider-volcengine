@@ -74,6 +74,8 @@ func ResourceVolcenginePrivateZoneResolverRule() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MinItems: 1,
+				Description: "IP address and port of external DNS server. You can add up to 10 IP addresses. " +
+					"This parameter is only valid when the Type parameter is OUTBOUND and is a required parameter.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"ip": {
