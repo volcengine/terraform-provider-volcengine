@@ -80,7 +80,6 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Default:  "PostPaid",
 				Description: "The charge type of the Volume, the value is `PostPaid` or `PrePaid`. " +
 					"The `PrePaid` volume cannot be detached. " +
-					"Cannot convert `PrePaid` volume to `PostPaid`." +
 					"Please note that `PrePaid` type needs to ask the system administrator to apply for a whitelist.",
 			},
 			"status": {

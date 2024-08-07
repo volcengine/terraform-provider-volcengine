@@ -66,21 +66,21 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 				Optional:    true,
 				Default:     false,
 				ForceNew:    true,
-				Description: "The flag of additional container storage enable, the value is `true` or `false`.",
+				Description: "The flag of additional container storage enable, the value is `true` or `false`. This field is valid only when adding an existing instance to the default node pool.",
 			},
 			"image_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The ImageId of NodeConfig.",
+				Description: "The ImageId of NodeConfig. This field is valid only when adding an existing instance to the default node pool.",
 			},
 			"initialize_script": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The initializeScript of Node.",
+				Description: "The initializeScript of Node. This field is valid only when adding an existing instance to the default node pool.",
 			},
 			"kubernetes_config": {
 				Type:        schema.TypeList,
@@ -88,7 +88,7 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The KubernetesConfig of Node.",
+				Description: "The KubernetesConfig of Node. This field is valid only when adding an existing instance to the default node pool.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
@@ -161,14 +161,14 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 					flag := d.Get("additional_container_storage_enabled")
 					return flag == nil || !flag.(bool)
 				},
-				Description: "The container storage path.",
+				Description: "The container storage path. This field is valid only when adding an existing instance to the default node pool.",
 			},
 			"node_pool_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
 				Computed:    true,
-				Description: "The node pool id.",
+				Description: "The node pool id. This field is used to specify the custom node pool to which you want to add nodes. If not filled in, it means added to the default node pool.",
 			},
 		},
 	}
