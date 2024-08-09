@@ -190,7 +190,7 @@ func (s *VolcenginePrivateZoneResolverEndpointService) CreateResource(resourceDa
 	return []ve.Callback{callback}
 }
 
-func (VolcenginePrivateZoneResolverEndpointService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (s *VolcenginePrivateZoneResolverEndpointService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, map[string]ve.ResponseConvert{
 			"VpcID": {

@@ -256,7 +256,7 @@ func (s *VolcenginePrivateZoneResolverRuleService) CreateResource(resourceData *
 	return []ve.Callback{callback}
 }
 
-func (VolcenginePrivateZoneResolverRuleService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (s *VolcenginePrivateZoneResolverRuleService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, map[string]ve.ResponseConvert{
 			"ID": {
