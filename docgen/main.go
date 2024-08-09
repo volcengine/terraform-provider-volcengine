@@ -160,6 +160,7 @@ var resourceKeys = map[string]string{
 	"financial_relation": "FINANCIAL_RELATION",
 	"cloud_identity":     "CLOUD_IDENTITY",
 	"kafka":              "KAFKA",
+	"private_zone":       "PRIVATE_ZONE",
 }
 
 type Products struct {
