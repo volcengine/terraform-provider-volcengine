@@ -10,6 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_file_system"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_fileset"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_mount_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_mount_service_attachment"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record_set"
@@ -683,6 +688,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_private_zone_resolver_rules":     private_zone_resolver_rule.DataSourceVolcenginePrivateZoneResolverRules(),
 			"volcengine_private_zone_records":            private_zone_record.DataSourceVolcenginePrivateZoneRecords(),
 			"volcengine_private_zone_record_sets":        private_zone_record_set.DataSourceVolcenginePrivateZoneRecordSets(),
+
+			// ================ Vepfs ================
+			"volcengine_vepfs_file_systems":   vepfs_file_system.DataSourceVolcengineVepfsFileSystems(),
+			"volcengine_vepfs_mount_services": vepfs_mount_service.DataSourceVolcengineVepfsMountServices(),
+			"volcengine_vepfs_filesets":       vepfs_fileset.DataSourceVolcengineVepfsFilesets(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -977,6 +987,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_private_zone_record":                 private_zone_record.ResourceVolcenginePrivateZoneRecord(),
 			"volcengine_private_zone_record_weight_enabler":  private_zone_record_weight_enabler.ResourceVolcenginePrivateZoneRecordWeightEnabler(),
 			"volcengine_private_zone_user_vpc_authorization": private_zone_user_vpc_authorization.ResourceVolcenginePrivateZoneUserVpcAuthorization(),
+
+			// ================ Vepfs ================
+			"volcengine_vepfs_file_system":              vepfs_file_system.ResourceVolcengineVepfsFileSystem(),
+			"volcengine_vepfs_mount_service":            vepfs_mount_service.ResourceVolcengineVepfsMountService(),
+			"volcengine_vepfs_mount_service_attachment": vepfs_mount_service_attachment.ResourceVolcengineVepfsMountServiceAttachment(),
+			"volcengine_vepfs_fileset":                  vepfs_fileset.ResourceVolcengineVepfsFileset(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
