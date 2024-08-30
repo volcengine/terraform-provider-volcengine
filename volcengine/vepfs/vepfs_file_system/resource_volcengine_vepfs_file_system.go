@@ -48,7 +48,7 @@ func ResourceVolcengineVepfsFileSystem() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The store type of the vepfs file system. Valid values: `Advance_100`, `Performance` , `Intelligent_Computing`.",
+				Description: "The store type of the vepfs file system. Valid values: `Advance_100`, `Performance`, `Intelligent_Computing`.",
 			},
 			"description": {
 				Type:        schema.TypeString,

@@ -161,6 +161,7 @@ var resourceKeys = map[string]string{
 	"cloud_identity":     "CLOUD_IDENTITY",
 	"kafka":              "KAFKA",
 	"private_zone":       "PRIVATE_ZONE",
+	"vepfs":              "VEPFS",
 }
 
 type Products struct {
