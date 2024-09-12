@@ -88,6 +88,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mssql/rds_mssql_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_readonly_node"
@@ -643,9 +645,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mssql_backups":   mssqlBackup.DataSourceVolcengineRdsMssqlBackups(),
 
 			// ================ Postgresql ================
-			"volcengine_rds_postgresql_databases": rds_postgresql_database.DataSourceVolcengineRdsPostgresqlDatabases(),
-			"volcengine_rds_postgresql_accounts":  rds_postgresql_account.DataSourceVolcengineRdsPostgresqlAccounts(),
-			"volcengine_rds_postgresql_instances": rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
+			"volcengine_rds_postgresql_databases":  rds_postgresql_database.DataSourceVolcengineRdsPostgresqlDatabases(),
+			"volcengine_rds_postgresql_accounts":   rds_postgresql_account.DataSourceVolcengineRdsPostgresqlAccounts(),
+			"volcengine_rds_postgresql_instances":  rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
+			"volcengine_rds_postgresql_allowlists": rds_postgresql_allowlist.DataSourceVolcengineRdsPostgresqlAllowlists(),
 
 			// ================ Organization ================
 			"volcengine_organization_units":                    organization_unit.DataSourceVolcengineOrganizationUnits(),
@@ -946,6 +949,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_postgresql_account":                rds_postgresql_account.ResourceVolcengineRdsPostgresqlAccount(),
 			"volcengine_rds_postgresql_instance":               rds_postgresql_instance.ResourceVolcengineRdsPostgresqlInstance(),
 			"volcengine_rds_postgresql_instance_readonly_node": rds_postgresql_instance_readonly_node.ResourceVolcengineRdsPostgresqlInstanceReadonlyNode(),
+			"volcengine_rds_postgresql_allowlist":              rds_postgresql_allowlist.ResourceVolcengineRdsPostgresqlAllowlist(),
+			"volcengine_rds_postgresql_allowlist_associate":    rds_postgresql_allowlist_associate.ResourceVolcengineRdsPostgresqlAllowlistAssociate(),
 
 			// ================ Organization ================
 			"volcengine_organization_unit":                              organization_unit.ResourceVolcengineOrganizationUnit(),

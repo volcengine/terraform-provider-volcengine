@@ -71,6 +71,7 @@ The following arguments are supported:
 * `hpc_cluster_id` - (Optional) The hpc cluster ID of ECS instance.
 * `ids` - (Optional) A list of ECS instance IDs.
 * `instance_charge_type` - (Optional) The charge type of ECS instance.
+* `instance_name` - (Optional) The name of ECS instance. This field support fuzzy query.
 * `key_pair_name` - (Optional) The key pair name of ECS instance.
 * `name_regex` - (Optional) A Name Regex of ECS instance.
 * `output_file` - (Optional) File name where to save data source results.

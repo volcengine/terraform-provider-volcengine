@@ -53,7 +53,7 @@ func ResourceVolcengineTosBucketPolicy() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if k == "policy" {
+					if k == "policy" && d.Id() != "" {
 						om := map[string]interface{}{}
 						nm := map[string]interface{}{}
 						_ = json.Unmarshal([]byte(old), &om)

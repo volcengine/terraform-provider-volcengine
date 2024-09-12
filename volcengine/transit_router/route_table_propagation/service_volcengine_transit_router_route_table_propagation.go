@@ -144,6 +144,15 @@ func (v *VolcengineTRRouteTablePropagationService) CreateResource(data *schema.R
 				Target:  []string{"Available"},
 				Timeout: data.Timeout(schema.TimeoutCreate),
 			},
+			LockId: func(d *schema.ResourceData) string {
+				attachmentId := d.Get("transit_router_attachment_id").(string)
+				trId, err := v.describeTransitRouterId(attachmentId)
+				if err != nil {
+					logger.DebugInfo("LockId get transit_router_id error: ", err)
+					return ""
+				}
+				return trId
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -187,6 +196,15 @@ func (v *VolcengineTRRouteTablePropagationService) RemoveResource(data *schema.R
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, v.ReadResource, 3*time.Minute)
 			},
+			LockId: func(d *schema.ResourceData) string {
+				attachmentId := d.Get("transit_router_attachment_id").(string)
+				trId, err := v.describeTransitRouterId(attachmentId)
+				if err != nil {
+					logger.DebugInfo("LockId get transit_router_id error: ", err)
+					return ""
+				}
+				return trId
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -200,6 +218,38 @@ func (v *VolcengineTRRouteTablePropagationService) DatasourceResources(data *sch
 
 func (v *VolcengineTRRouteTablePropagationService) ReadResourceId(s string) string {
 	return s
+}
+
+func (v *VolcengineTRRouteTablePropagationService) describeTransitRouterId(attachmentId string) (string, error) {
+	action := "DescribeTransitRouterAttachments"
+	req := map[string]interface{}{
+		"TransitRouterAttachmentIds.1": attachmentId,
+	}
+	resp, err := v.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return "", err
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
+	results, err := ve.ObtainSdkValue("Result.TransitRouterAttachments", *resp)
+	if err != nil {
+		return "", err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	trAttachments, ok := results.([]interface{})
+	if !ok {
+		return "", errors.New("Result.TransitRouterAttachments is not Slice")
+	}
+	if len(trAttachments) == 0 {
+		return "", fmt.Errorf("TransitRouterAttachments %s not exist", attachmentId)
+	}
+	trAttachment, ok := trAttachments[0].(map[string]interface{})
+	if !ok {
+		return "", errors.New("The value of Result.TransitRouterAttachments is not map ")
+	}
+	trId := trAttachment["TransitRouterId"].(string)
+	return trId, nil
 }
 
 func NewTRRouteTablePropagationService(c *ve.SdkClient) *VolcengineTRRouteTablePropagationService {

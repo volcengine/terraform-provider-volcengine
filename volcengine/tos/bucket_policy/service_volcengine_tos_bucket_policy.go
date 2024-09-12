@@ -133,7 +133,7 @@ func (s *VolcengineTosBucketPolicyService) putBucketPolicy(data *schema.Resource
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				j := (*call.SdkParam)[ve.BypassParam].(map[string]interface{})["Policy"]
+				j := d.Get("policy")
 				data := map[string]interface{}{}
 				err := json.Unmarshal([]byte(j.(string)), &data)
 				if err != nil {

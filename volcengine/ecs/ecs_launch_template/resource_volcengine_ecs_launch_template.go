@@ -85,6 +85,7 @@ func ResourceVolcengineEcsLaunchTemplate() *schema.Resource {
 			"suffix_index": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				Computed:    true,
 				Description: "The index of the ordered suffix.",
 			},
 			"key_pair_name": {
