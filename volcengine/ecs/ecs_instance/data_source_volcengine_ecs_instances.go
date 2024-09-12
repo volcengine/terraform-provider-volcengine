@@ -54,6 +54,11 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 				Optional:    true,
 				Description: "The charge type of ECS instance.",
 			},
+			"instance_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of ECS instance. This field support fuzzy query.",
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
