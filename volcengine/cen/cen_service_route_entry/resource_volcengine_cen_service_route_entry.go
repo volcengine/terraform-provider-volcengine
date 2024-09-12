@@ -76,7 +76,7 @@ func ResourceVolcengineCenServiceRouteEntry() *schema.Resource {
 				Description: "Publishing scope of cloud service access routes. Valid values are `LocalDCGW`(default), `Custom`.",
 			},
 			"publish_to_instances": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				MaxItems:    100,
 				Description: "The publish instances. A maximum of 100 can be uploaded in one request. This field needs to be filled in when the `publish_mode` is `Custom`.",

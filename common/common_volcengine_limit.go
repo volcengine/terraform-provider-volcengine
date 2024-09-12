@@ -43,6 +43,10 @@ func init() {
 			Limiter:   rate.NewLimiter(4, 10),
 			Semaphore: semaphore.NewWeighted(10),
 		},
+		"storage_ebs.DescribeVolumes.2020-04-01": {
+			Limiter:   rate.NewLimiter(10, 30),
+			Semaphore: semaphore.NewWeighted(30),
+		},
 	}
 }
 

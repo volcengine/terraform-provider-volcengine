@@ -95,7 +95,8 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResource(resourceData *schema.R
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
-		"RegionId": s.Client.Region,
+		"RegionId":    s.Client.Region,
+		"AllowListId": id,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -108,6 +109,7 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResource(resourceData *schema.R
 		}
 		if result["AllowListId"].(string) == id {
 			data = result
+			break
 		}
 	}
 	if len(data) == 0 {
