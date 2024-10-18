@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_database"
 )
 
 type VolcengineVedbMysqlAccountService struct {
@@ -35,26 +37,23 @@ func (s *VolcengineVedbMysqlAccountService) ReadResources(m map[string]interface
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-	    // TODO: modify list resource action
-		action := "ListResources"
-
-		bytes, _ := json.Marshal(condition)
-		logger.Debug(logger.ReqFormat, action, string(bytes))
+		universalClient := s.Client.UniversalClient
+		action := "DescribeDBAccounts"
+		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-		// TODO: replace result items
-		results, err = ve.ObtainSdkValue("Result.Items", *resp)
+		results, err = ve.ObtainSdkValue("Result.Accounts", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -62,7 +61,7 @@ func (s *VolcengineVedbMysqlAccountService) ReadResources(m map[string]interface
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Items is not Slice")
+			return data, errors.New("Result.Accounts is not Slice")
 		}
 		return data, err
 	})
@@ -71,27 +70,44 @@ func (s *VolcengineVedbMysqlAccountService) ReadResources(m map[string]interface
 func (s *VolcengineVedbMysqlAccountService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
+		account map[string]interface{}
 		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	// TODO: add request info
+	ids := strings.Split(id, ":")
+	if len(ids) != 2 {
+		return map[string]interface{}{}, fmt.Errorf("invalid veDB mysql account id")
+	}
+
+	instanceId := ids[0]
+	accountName := ids[1]
+
 	req := map[string]interface{}{
-		"Id": id,
+		"InstanceId":  instanceId,
+		"AccountName": accountName,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
-	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+
+	for _, r := range results {
+		account, ok = r.(map[string]interface{})
+		if !ok {
 			return data, errors.New("Value is not map ")
 		}
+		if accountName == account["AccountName"].(string) {
+			data = account
+			break
+		}
 	}
+
 	if len(data) == 0 {
-		return data, fmt.Errorf("vedb_mysql_account %s not exist ", id)
+		return data, fmt.Errorf("veDB account %s not exist ", id)
 	}
+
 	return data, err
 }
 
@@ -104,8 +120,8 @@ func (s *VolcengineVedbMysqlAccountService) RefreshResourceState(resourceData *s
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d      map[string]interface{}
-				status interface{}
+				d          map[string]interface{}
+				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -130,27 +146,46 @@ func (s *VolcengineVedbMysqlAccountService) RefreshResourceState(resourceData *s
 func (s *VolcengineVedbMysqlAccountService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace create action
-			Action:      "CreateResource",
+			Action:      "CreateDBAccount",
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
-
+				"account_privileges": {
+					TargetField: "AccountPrivileges",
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"db_name": {
+							TargetField: "DBName",
+						},
+					},
+				},
+			},
+			ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				privileges := d.Get("account_privileges")
+				if privileges == nil || privileges.(*schema.Set).Len() == 0 {
+					return true, nil
+				}
+				for _, privilege := range privileges.(*schema.Set).List() {
+					privilegeMap, ok := privilege.(map[string]interface{})
+					if !ok {
+						return false, fmt.Errorf("account_privilege is not map")
+					}
+					id := fmt.Sprintf("%s:%s", d.Get("instance_id"), privilegeMap["db_name"])
+					_, err := vedb_mysql_database.NewVedbMysqlDatabaseService(client).ReadResource(d, id)
+					if err != nil {
+						return false, err
+					}
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// TODO: replace id fields
-				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
-				d.SetId(id.(string))
+				id := fmt.Sprintf("%s:%s", d.Get("instance_id"), d.Get("account_name"))
+				d.SetId(id)
 				return nil
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
 		},
 	}
@@ -159,55 +194,165 @@ func (s *VolcengineVedbMysqlAccountService) CreateResource(resourceData *schema.
 
 func (VolcengineVedbMysqlAccountService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		return d, map[string]ve.ResponseConvert{
+			"DBName": {
+				TargetField: "db_name",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
 func (s *VolcengineVedbMysqlAccountService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-		    // TODO: replace modify action
-			Action:      "ModifyResource",
-			ConvertMode: ve.RequestConvertAll,
-			Convert: map[string]ve.RequestConvert{
-
+	var callbacks []ve.Callback
+	if resourceData.HasChange("account_password") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ResetDBAccount",
+				ConvertMode: ve.RequestConvertIgnore,
+				SdkParam: &map[string]interface{}{
+					"InstanceId":      resourceData.Get("instance_id"),
+					"AccountName":     resourceData.Get("account_name"),
+					"AccountPassword": resourceData.Get("account_password"),
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
 			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Id"] = d.Id()
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			},
-		},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	return []ve.Callback{callback}
+	if resourceData.HasChange("account_privileges") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "GrantDBAccountPrivilege",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"account_privileges": {
+						TargetField: "AccountPrivileges",
+						ForceGet:    true,
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"db_name": {
+								TargetField: "DBName",
+							},
+						},
+						ConvertType: ve.ConvertJsonObjectArray,
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					(*call.SdkParam)["AccountName"] = d.Get("account_name")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+
+		add, remove, _, _ := ve.GetSetDifference("account_privileges", resourceData, veDBMysqlAccountPrivilegeHash, false)
+		if remove != nil && remove.Len() > 0 {
+			removeCallback := ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "RevokeDBAccountPrivilege",
+					ConvertMode: ve.RequestConvertIgnore,
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+						(*call.SdkParam)["AccountName"] = d.Get("account_name")
+						dbNames := make([]string, 0)
+						for _, item := range remove.List() {
+							m, ok := item.(map[string]interface{})
+							if !ok {
+								continue
+							}
+							removeDbName := m["db_name"].(string)
+							// 过滤掉有Grant操作的db_name,Grant权限方式为覆盖，先取消原有权限，再赋新权限，此处无需再取消一次。
+							if add != nil && add.Len() > 0 && hasDbNameInSet(removeDbName, add) {
+								continue
+							}
+							dbNames = append(dbNames, removeDbName)
+						}
+						if len(dbNames) == 0 {
+							return false, nil
+						}
+						(*call.SdkParam)["DBNames"] = strings.Join(dbNames, ",")
+						return true, nil
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					},
+				},
+			}
+			callbacks = append(callbacks, removeCallback)
+		}
+	}
+	return callbacks
+}
+
+func hasDbNameInSet(dbName string, set *schema.Set) bool {
+	for _, item := range set.List() {
+		if m, ok := item.(map[string]interface{}); ok {
+			if v, ok := m["db_name"]; ok && v.(string) == dbName {
+				if detail, ok := m["account_privilege_detail"].(string); ok {
+					if len(detail) == 0 {
+						return false
+					}
+				} else {
+					return false
+				}
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (s *VolcengineVedbMysqlAccountService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace delete action
-			Action:      "DeleteResource",
-			ConvertMode: ve.RequestConvertIgnore,
+			Action:      "DeleteDBAccount",
 			ContentType: ve.ContentTypeJson,
-			SdkParam: &map[string]interface{}{
-				"Id": resourceData.Id(),
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				rdsAccountId := d.Id()
+				ids := strings.Split(rdsAccountId, ":")
+				if len(ids) != 2 {
+					return false, fmt.Errorf("invalid veDB mysql account id")
+				}
+				(*call.SdkParam)["InstanceId"] = ids[0]
+				(*call.SdkParam)["AccountName"] = ids[1]
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				//删除RdsMysqlAccount
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading veDB mysql account on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
 			},
 		},
 	}
@@ -216,19 +361,12 @@ func (s *VolcengineVedbMysqlAccountService) RemoveResource(resourceData *schema.
 
 func (s *VolcengineVedbMysqlAccountService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "Ids",
-				ConvertType: ve.ConvertWithN,
-			},
-		},
-		NameField:    "Name",
-		IdField:      "Id",
-		CollectField: "instances",
+		NameField:    "AccountName",
+		CollectField: "accounts",
+		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
-			"Id": {
-				TargetField: "id",
-				KeepDefault: true,
+			"DBName": {
+				TargetField: "db_name",
 			},
 		},
 	}

@@ -1,7 +1,6 @@
 package vedb_mysql_allowlist_associate
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -11,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_instance"
 )
 
@@ -32,87 +30,59 @@ func (s *VolcengineVedbMysqlAllowlistAssociateService) GetClient() *ve.SdkClient
 }
 
 func (s *VolcengineVedbMysqlAllowlistAssociateService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
-	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
-	)
-	return ve.WithSimpleQuery(m, func(condition map[string]interface{}) ([]interface{}, error) {
-		action := "DescribeDBEndpoint"
-
-		bytes, _ := json.Marshal(condition)
-		logger.Debug(logger.ReqFormat, action, string(bytes))
-		if condition == nil {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
-			if err != nil {
-				return data, err
-			}
-		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
-			if err != nil {
-				return data, err
-			}
-		}
-		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-
-		results, err = ve.ObtainSdkValue("Result.Endpoints", *resp)
-		if err != nil {
-			return data, err
-		}
-		if results == nil {
-			results = []interface{}{}
-		}
-		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Endpoints is not Slice")
-		}
-		return data, err
-	})
+	return nil, nil
 }
 
 func (s *VolcengineVedbMysqlAllowlistAssociateService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		results []interface{}
-		tmpData map[string]interface{}
-		ok      bool
+		results     interface{}
+		resultsMap  map[string]interface{}
+		instanceMap map[string]interface{}
+		instances   []interface{}
+		ok          bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	ids := strings.Split(id, ":")
-	if len(ids) != 3 {
-		return nil, errors.New("ids length is not correct")
+	if len(ids) != 2 {
+		return data, err
 	}
 	req := map[string]interface{}{
-		"InstanceId": ids[0],
-		"EndpointId": ids[1],
+		"AllowListId": ids[1],
 	}
-	results, err = s.ReadResources(req)
+	action := "DescribeAllowListDetail"
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
 	if err != nil {
 		return data, err
 	}
-	for _, v := range results {
-		if tmpData, ok = v.(map[string]interface{}); !ok {
-			return tmpData, errors.New("Value is not map ")
+	results, err = ve.ObtainSdkValue("Result", *resp)
+	if err != nil {
+		return data, err
+	}
+	if resultsMap, ok = results.(map[string]interface{}); !ok {
+		return resultsMap, errors.New("Value is not map ")
+	}
+	if len(resultsMap) == 0 {
+		return resultsMap, fmt.Errorf("veDB allowlist %s not exist ", ids[1])
+	}
+	logger.Debug(logger.ReqFormat, action, resultsMap)
+	instances = resultsMap["AssociatedInstances"].([]interface{})
+	logger.Debug(logger.ReqFormat, action, instances)
+	for _, instance := range instances {
+		if instanceMap, ok = instance.(map[string]interface{}); !ok {
+			return data, errors.New("instance is not map ")
 		}
-	}
-	if len(tmpData) == 0 {
-		return data, fmt.Errorf("vedb_mysql_allowlist_associate %s not exist ", id)
-	}
-	addresses := tmpData["Addresses"]
-	if a, ok := addresses.([]interface{}); ok && len(addresses.([]interface{})) > 0 {
-		for _, add := range a {
-			addMap := add.(map[string]interface{})
-			if addMap["EipId"] == ids[2] {
-				data = addMap
-			}
+		if len(instanceMap) == 0 {
+			continue
+		}
+		if instanceMap["InstanceId"].(string) == ids[0] {
+			data = resultsMap
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("vedb_mysql_allowlist_associate %s not exist ", id)
+		return data, fmt.Errorf("veDB allowlist associate %s not exist ", id)
 	}
-	data["EndpointId"] = ids[1]
-	data["InstanceId"] = ids[0]
 	return data, err
 }
 
@@ -149,35 +119,32 @@ func (s *VolcengineVedbMysqlAllowlistAssociateService) RefreshResourceState(reso
 }
 
 func (s *VolcengineVedbMysqlAllowlistAssociateService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	instanceId := resourceData.Get("instance_id").(string)
+	allowListId := resourceData.Get("allow_list_id").(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateDBEndpointPublicAddress",
-			ConvertMode: ve.RequestConvertAll,
+			Action:      "AssociateAllowList",
 			ContentType: ve.ContentTypeJson,
-			Convert:     map[string]ve.RequestConvert{},
+			SdkParam: &map[string]interface{}{
+				"InstanceIds":  []string{instanceId},
+				"AllowListIds": []string{allowListId},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(fmt.Sprint((*call.SdkParam)["InstanceId"], ":", (*call.SdkParam)["EndpointId"], ":", (*call.SdkParam)["EipId"]))
+				d.SetId(fmt.Sprint(instanceId, ":", allowListId))
 				return nil
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("instance_id").(string)
+				return instanceId
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
 					Target:     []string{"Running"},
-					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
-					ResourceId: resourceData.Get("instance_id").(string),
-				},
-				eip_address.NewEipAddressService(s.Client): {
-					Target:     []string{"Attached"},
-					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
-					ResourceId: resourceData.Get("eip_id").(string),
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: instanceId,
 				},
 			},
 		},
@@ -198,37 +165,32 @@ func (s *VolcengineVedbMysqlAllowlistAssociateService) ModifyResource(resourceDa
 }
 
 func (s *VolcengineVedbMysqlAllowlistAssociateService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	instanceId := resourceData.Get("instance_id").(string)
+	allowListId := resourceData.Get("allow_list_id").(string)
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DeleteDBEndpointPublicAddress",
-			ConvertMode: ve.RequestConvertIgnore,
+			Action:      "DisassociateAllowList",
 			ContentType: ve.ContentTypeJson,
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				ids := strings.Split(d.Id(), ":")
-				(*call.SdkParam)["InstanceId"] = ids[0]
-				(*call.SdkParam)["EndpointId"] = ids[1]
-				return true, nil
+			SdkParam: &map[string]interface{}{
+				"InstanceIds":  []string{instanceId},
+				"AllowListIds": []string{allowListId},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+				err := ve.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
+				return err
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("instance_id").(string)
+				return instanceId
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
 					Target:     []string{"Running"},
 					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
-					ResourceId: resourceData.Get("instance_id").(string),
-				},
-				eip_address.NewEipAddressService(s.Client): {
-					Target:     []string{"Available"},
-					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
-					ResourceId: resourceData.Get("eip_id").(string),
+					ResourceId: instanceId,
 				},
 			},
 		},

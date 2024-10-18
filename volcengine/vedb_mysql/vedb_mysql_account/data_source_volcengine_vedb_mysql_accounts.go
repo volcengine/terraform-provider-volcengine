@@ -10,14 +10,15 @@ func DataSourceVolcengineVedbMysqlAccounts() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineVedbMysqlAccountsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of IDs.",
+			"instance_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The id of the veDB Mysql instance.",
+			},
+			"account_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the database account. This field supports fuzzy query.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -35,14 +36,46 @@ func DataSourceVolcengineVedbMysqlAccounts() *schema.Resource {
 				Computed:    true,
 				Description: "The total count of query.",
 			},
-			// TODO: change this field to the target datasource
-			"instances": {
+			"accounts": {
 				Description: "The collection of query.",
 				Type:        schema.TypeList,
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-
+						"account_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the database account.",
+						},
+						"account_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The type of the database account.",
+						},
+						"account_privileges": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The privilege detail list of RDS mysql instance account.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"db_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of database.",
+									},
+									"account_privilege": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The privilege type of the account.",
+									},
+									"account_privilege_detail": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The privilege detail of the account.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

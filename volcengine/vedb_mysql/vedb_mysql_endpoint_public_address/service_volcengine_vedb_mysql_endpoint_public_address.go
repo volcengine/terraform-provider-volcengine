@@ -4,12 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_instance"
 )
 
 type VolcengineVedbMysqlEndpointPublicAddressService struct {
@@ -34,9 +37,8 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) ReadResources(m map[st
 		results interface{}
 		ok      bool
 	)
-	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-	    // TODO: modify list resource action
-		action := "ListResources"
+	return ve.WithSimpleQuery(m, func(condition map[string]interface{}) ([]interface{}, error) {
+		action := "DescribeDBEndpoint"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -53,8 +55,8 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) ReadResources(m map[st
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-		// TODO: replace result items
-		results, err = ve.ObtainSdkValue("Result.Items", *resp)
+
+		results, err = ve.ObtainSdkValue("Result.Endpoints", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -62,7 +64,7 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) ReadResources(m map[st
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Items is not Slice")
+			return data, errors.New("Result.Endpoints is not Slice")
 		}
 		return data, err
 	})
@@ -71,27 +73,46 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) ReadResources(m map[st
 func (s *VolcengineVedbMysqlEndpointPublicAddressService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
+		tmpData map[string]interface{}
 		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	// TODO: add request info
+	ids := strings.Split(id, ":")
+	if len(ids) != 3 {
+		return nil, errors.New("ids length is not correct")
+	}
 	req := map[string]interface{}{
-		"Id": id,
+		"InstanceId": ids[0],
+		"EndpointId": ids[1],
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
-			return data, errors.New("Value is not map ")
+		if tmpData, ok = v.(map[string]interface{}); !ok {
+			return tmpData, errors.New("Value is not map ")
+		}
+	}
+	if len(tmpData) == 0 {
+		return data, fmt.Errorf("vedb_mysql_allowlist_associate %s not exist ", id)
+	}
+	addresses := tmpData["Addresses"]
+	if a, ok := addresses.([]interface{}); ok && len(addresses.([]interface{})) > 0 {
+		for _, add := range a {
+			addMap := add.(map[string]interface{})
+			if addMap["EipId"] == ids[2] {
+				data = addMap
+			}
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("vedb_mysql_endpoint_public_address %s not exist ", id)
+		return data, fmt.Errorf("vedb_mysql_allowlist_associate %s not exist ", id)
 	}
+	data["EndpointId"] = ids[1]
+	data["InstanceId"] = ids[0]
 	return data, err
 }
 
@@ -104,8 +125,8 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) RefreshResourceState(r
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d      map[string]interface{}
-				status interface{}
+				d          map[string]interface{}
+				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -130,12 +151,10 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) RefreshResourceState(r
 func (s *VolcengineVedbMysqlEndpointPublicAddressService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace create action
-			Action:      "CreateResource",
+			Action:      "CreateDBEndpointPublicAddress",
 			ConvertMode: ve.RequestConvertAll,
-			Convert: map[string]ve.RequestConvert{
-
-			},
+			ContentType: ve.ContentTypeJson,
+			Convert:     map[string]ve.RequestConvert{},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -143,14 +162,23 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) CreateResource(resourc
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// TODO: replace id fields
-				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
-				d.SetId(id.(string))
+				d.SetId(fmt.Sprint((*call.SdkParam)["InstanceId"], ":", (*call.SdkParam)["EndpointId"], ":", (*call.SdkParam)["EipId"]))
 				return nil
 			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
+					ResourceId: resourceData.Get("instance_id").(string),
+				},
+				eip_address.NewEipAddressService(s.Client): {
+					Target:     []string{"Attached"},
+					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
+					ResourceId: resourceData.Get("eip_id").(string),
+				},
 			},
 		},
 	}
@@ -165,42 +193,21 @@ func (VolcengineVedbMysqlEndpointPublicAddressService) WithResourceResponseHandl
 }
 
 func (s *VolcengineVedbMysqlEndpointPublicAddressService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-		    // TODO: replace modify action
-			Action:      "ModifyResource",
-			ConvertMode: ve.RequestConvertAll,
-			Convert: map[string]ve.RequestConvert{
-
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Id"] = d.Id()
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			},
-		},
-	}
+	callback := ve.Callback{}
 	return []ve.Callback{callback}
 }
 
 func (s *VolcengineVedbMysqlEndpointPublicAddressService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace delete action
-			Action:      "DeleteResource",
+			Action:      "DeleteDBEndpointPublicAddress",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
-			SdkParam: &map[string]interface{}{
-				"Id": resourceData.Id(),
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				ids := strings.Split(d.Id(), ":")
+				(*call.SdkParam)["InstanceId"] = ids[0]
+				(*call.SdkParam)["EndpointId"] = ids[1]
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -209,29 +216,28 @@ func (s *VolcengineVedbMysqlEndpointPublicAddressService) RemoveResource(resourc
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
+					ResourceId: resourceData.Get("instance_id").(string),
+				},
+				eip_address.NewEipAddressService(s.Client): {
+					Target:     []string{"Available"},
+					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
+					ResourceId: resourceData.Get("eip_id").(string),
+				},
+			},
 		},
 	}
 	return []ve.Callback{callback}
 }
 
 func (s *VolcengineVedbMysqlEndpointPublicAddressService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{
-		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "Ids",
-				ConvertType: ve.ConvertWithN,
-			},
-		},
-		NameField:    "Name",
-		IdField:      "Id",
-		CollectField: "instances",
-		ResponseConverts: map[string]ve.ResponseConvert{
-			"Id": {
-				TargetField: "id",
-				KeepDefault: true,
-			},
-		},
-	}
+	return ve.DataSourceInfo{}
 }
 
 func (s *VolcengineVedbMysqlEndpointPublicAddressService) ReadResourceId(id string) string {

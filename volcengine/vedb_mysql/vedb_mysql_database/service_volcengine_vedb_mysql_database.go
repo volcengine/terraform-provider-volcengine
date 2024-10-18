@@ -144,31 +144,6 @@ func (s *VolcengineVedbMysqlDatabaseService) CreateResource(resourceData *schema
 				"db_name": {
 					TargetField: "DBName",
 				},
-				"databases_privileges": {
-					ConvertType: ve.ConvertJsonObjectArray,
-				},
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				privileges, ok := d.GetOk("databases_privileges")
-				if ok {
-					pList := privileges.(*schema.Set).List()
-					for _, p := range pList {
-						pMap := p.(map[string]interface{})
-						accountPrivilege := pMap["account_privilege"].(string)
-						if accountPrivilege == "Custom" {
-							continue
-						}
-						// 非custom情况，拒绝带detail的请求
-						detail, ok := pMap["account_privilege_detail"]
-						if ok {
-							detailStr := detail.(string)
-							if detailStr != "" {
-								return false, fmt.Errorf("Passing account_privilege_detail is not allowed when account_privilege is not Custom ")
-							}
-						}
-					}
-				}
-				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)

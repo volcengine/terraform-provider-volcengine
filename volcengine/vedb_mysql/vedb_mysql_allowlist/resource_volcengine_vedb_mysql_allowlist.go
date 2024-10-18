@@ -33,28 +33,35 @@ func ResourceVolcengineVedbMysqlAllowlist() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-		    // TODO: Add all your arguments and attributes.
-			"replace_with_arguments": {
-				Type:     schema.TypeString,
-				Optional: true,
+			"allow_list_name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The name of the allow list.",
 			},
-			// TODO: See setting, getting, flattening, expanding examples below for this complex argument.
-			"complex_argument": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"sub_field_one": {
-							Type:         schema.TypeString,
-							Required:     true,
-						},
-						"sub_field_two": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
+			"allow_list_desc": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The description of the allow list.",
+			},
+			"allow_list_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The type of IP address in the whitelist. Currently only IPv4 addresses are supported.",
+			},
+			"allow_list": {
+				Type:     schema.TypeSet,
+				Required: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
 				},
+				Set:         schema.HashString,
+				Description: "Enter an IP address or a range of IP addresses in CIDR format.",
+			},
+			"allow_list_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The id of the allow list.",
 			},
 		},
 	}

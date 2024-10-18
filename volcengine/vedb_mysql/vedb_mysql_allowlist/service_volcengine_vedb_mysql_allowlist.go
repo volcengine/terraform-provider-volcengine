@@ -1,9 +1,9 @@
 package vedb_mysql_allowlist
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -28,18 +28,16 @@ func (s *VolcengineVedbMysqlAllowlistService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineVedbMysqlAllowlistService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineVedbMysqlAllowlistService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		resp        *map[string]interface{}
+		results     interface{}
+		ok          bool
+		allowListId string
 	)
-	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-	    // TODO: modify list resource action
-		action := "ListResources"
-
-		bytes, _ := json.Marshal(condition)
-		logger.Debug(logger.ReqFormat, action, string(bytes))
+	return ve.WithSimpleQuery(condition, func(m map[string]interface{}) ([]interface{}, error) {
+		action := "DescribeAllowLists"
+		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
@@ -51,10 +49,7 @@ func (s *VolcengineVedbMysqlAllowlistService) ReadResources(m map[string]interfa
 				return data, err
 			}
 		}
-		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-		// TODO: replace result items
-		results, err = ve.ObtainSdkValue("Result.Items", *resp)
+		results, err = ve.ObtainSdkValue("Result.AllowLists", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -62,7 +57,38 @@ func (s *VolcengineVedbMysqlAllowlistService) ReadResources(m map[string]interfa
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Items is not Slice")
+			return data, errors.New("Result.AllowLists is not slice ")
+		}
+
+		if id, exist := condition["AllowListId"]; exist {
+			allowListId = id.(string)
+		}
+		for index, ele := range data {
+			allowList := ele.(map[string]interface{})
+
+			if allowListId == "" || allowListId == allowList["AllowListId"].(string) {
+				query := map[string]interface{}{
+					"AllowListId": allowList["AllowListId"],
+				}
+				action = "DescribeAllowListDetail"
+				logger.Debug(logger.ReqFormat, action, query)
+				resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &query)
+				if err != nil {
+					return data, err
+				}
+				logger.Debug(logger.RespFormat, action, query, *resp)
+				instances, err := ve.ObtainSdkValue("Result.AssociatedInstances", *resp)
+				if err != nil {
+					return data, err
+				}
+				data[index].(map[string]interface{})["AssociatedInstances"] = instances
+				allowListIp, err := ve.ObtainSdkValue("Result.AllowList", *resp)
+				if err != nil {
+					return data, err
+				}
+				allowListIpArr := strings.Split(allowListIp.(string), ",")
+				data[index].(map[string]interface{})["AllowList"] = allowListIpArr
+			}
 		}
 		return data, err
 	})
@@ -71,26 +97,30 @@ func (s *VolcengineVedbMysqlAllowlistService) ReadResources(m map[string]interfa
 func (s *VolcengineVedbMysqlAllowlistService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
-		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	// TODO: add request info
 	req := map[string]interface{}{
-		"Id": id,
+		"RegionId":    s.Client.Region,
+		"AllowListId": id,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		result, ok := v.(map[string]interface{})
+		if !ok {
 			return data, errors.New("Value is not map ")
+		}
+		if result["AllowListId"].(string) == id {
+			data = result
+			break
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("vedb_mysql_allowlist %s not exist ", id)
+		return data, fmt.Errorf("vedb mysql allowlist %s not exist ", id)
 	}
 	return data, err
 }
@@ -104,8 +134,8 @@ func (s *VolcengineVedbMysqlAllowlistService) RefreshResourceState(resourceData 
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d      map[string]interface{}
-				status interface{}
+				d          map[string]interface{}
+				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -130,27 +160,34 @@ func (s *VolcengineVedbMysqlAllowlistService) RefreshResourceState(resourceData 
 func (s *VolcengineVedbMysqlAllowlistService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace create action
-			Action:      "CreateResource",
+			Action:      "CreateAllowList",
 			ConvertMode: ve.RequestConvertAll,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-
+				"allow_list": {
+					Ignore: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				var allowStrings []string
+				allowListsSet := d.Get("allow_list").(*schema.Set)
+				allowLists := allowListsSet.List()
+				for _, list := range allowLists {
+					allowStrings = append(allowStrings, list.(string))
+				}
+				lists := strings.Join(allowStrings, ",")
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
+				(*call.SdkParam)["AllowList"] = lists
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// TODO: replace id fields
-				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
+				id, _ := ve.ObtainSdkValue("Result.AllowListId", *resp)
 				d.SetId(id.(string))
 				return nil
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
 			},
 		},
 	}
@@ -167,25 +204,46 @@ func (VolcengineVedbMysqlAllowlistService) WithResourceResponseHandlers(d map[st
 func (s *VolcengineVedbMysqlAllowlistService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace modify action
-			Action:      "ModifyResource",
-			ConvertMode: ve.RequestConvertAll,
+			Action:      "ModifyAllowList",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-
+				"allow_list": {
+					Ignore: true,
+				},
+				"apply_instance_num": {
+					Ignore: true,
+				},
+				"allow_list_desc": {
+					ForceGet: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Id"] = d.Id()
+				var allowStrings []string
+				// 修改allowList必须传ApplyInstanceNum
+				resp, err := s.ReadResource(d, d.Id())
+				if err != nil {
+					return false, err
+				}
+				num := resp["AssociatedInstanceNum"].(float64)
+				(*call.SdkParam)["ApplyInstanceNum"] = int(num)
+				allowListsSet := d.Get("allow_list").(*schema.Set)
+				allowLists := allowListsSet.List()
+				for _, list := range allowLists {
+					allowStrings = append(allowStrings, list.(string))
+				}
+				lists := strings.Join(allowStrings, ",")
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
+				(*call.SdkParam)["AllowList"] = lists
 				return true, nil
+			},
+			SdkParam: &map[string]interface{}{
+				"AllowListId":   resourceData.Id(),
+				"AllowListName": resourceData.Get("allow_list_name").(string),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
@@ -195,12 +253,11 @@ func (s *VolcengineVedbMysqlAllowlistService) ModifyResource(resourceData *schem
 func (s *VolcengineVedbMysqlAllowlistService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace delete action
-			Action:      "DeleteResource",
+			Action:      "DeleteAllowList",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"Id": resourceData.Id(),
+				"AllowListId": resourceData.Id(),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -216,19 +273,16 @@ func (s *VolcengineVedbMysqlAllowlistService) RemoveResource(resourceData *schem
 
 func (s *VolcengineVedbMysqlAllowlistService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "Ids",
-				ConvertType: ve.ConvertWithN,
-			},
-		},
-		NameField:    "Name",
-		IdField:      "Id",
-		CollectField: "instances",
+		ContentType:  ve.ContentTypeJson,
+		NameField:    "AllowListName",
+		IdField:      "AllowListId",
+		CollectField: "allow_lists",
 		ResponseConverts: map[string]ve.ResponseConvert{
-			"Id": {
-				TargetField: "id",
-				KeepDefault: true,
+			"AllowListIPNum": {
+				TargetField: "allow_list_ip_num",
+			},
+			"VPC": {
+				TargetField: "vpc",
 			},
 		},
 	}
