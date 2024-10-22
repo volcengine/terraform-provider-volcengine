@@ -24,7 +24,6 @@ func ResourceVolcengineVedbMysqlDatabase() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineVedbMysqlDatabaseCreate,
 		Read:   resourceVolcengineVedbMysqlDatabaseRead,
-		Update: resourceVolcengineVedbMysqlDatabaseUpdate,
 		Delete: resourceVolcengineVedbMysqlDatabaseDelete,
 		Importer: &schema.ResourceImporter{
 			State: vedbMysqlDatabaseImporter,
@@ -78,15 +77,6 @@ func resourceVolcengineVedbMysqlDatabaseRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("error on reading vedb_mysql_database %q, %s", d.Id(), err)
 	}
 	return err
-}
-
-func resourceVolcengineVedbMysqlDatabaseUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewVedbMysqlDatabaseService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineVedbMysqlDatabase())
-	if err != nil {
-		return fmt.Errorf("error on updating vedb_mysql_database %q, %s", d.Id(), err)
-	}
-	return resourceVolcengineVedbMysqlDatabaseRead(d, meta)
 }
 
 func resourceVolcengineVedbMysqlDatabaseDelete(d *schema.ResourceData, meta interface{}) (err error) {

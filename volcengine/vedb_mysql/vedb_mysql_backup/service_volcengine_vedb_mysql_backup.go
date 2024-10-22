@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_instance"
 )
 
 type VolcengineVedbMysqlBackupService struct {
@@ -35,8 +37,7 @@ func (s *VolcengineVedbMysqlBackupService) ReadResources(m map[string]interface{
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-	    // TODO: modify list resource action
-		action := "ListResources"
+		action := "DescribeBackups"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -53,8 +54,7 @@ func (s *VolcengineVedbMysqlBackupService) ReadResources(m map[string]interface{
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-		// TODO: replace result items
-		results, err = ve.ObtainSdkValue("Result.Items", *resp)
+		results, err = ve.ObtainSdkValue("Result.BackupsInfo", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -62,7 +62,29 @@ func (s *VolcengineVedbMysqlBackupService) ReadResources(m map[string]interface{
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.Items is not Slice")
+			return data, errors.New("Result.BackupsInfo is not Slice")
+		}
+		for _, v := range data {
+			backup := v.(map[string]interface{})
+			instanceId := condition["InstanceId"]
+			action = "DescribeBackupPolicy"
+			req := map[string]interface{}{
+				"InstanceId": instanceId,
+			}
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if err != nil {
+				logger.Info("DescribeBackupPolicy error : ", err)
+				continue
+			}
+			respBytes, _ = json.Marshal(resp)
+			logger.Debug(logger.RespFormat, action, req, string(respBytes))
+
+			result, err := ve.ObtainSdkValue("Result", *resp)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result error:", err)
+				continue
+			}
+			backup["BackupPolicy"] = result
 		}
 		return data, err
 	})
@@ -71,22 +93,25 @@ func (s *VolcengineVedbMysqlBackupService) ReadResources(m map[string]interface{
 func (s *VolcengineVedbMysqlBackupService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
+		tmpData map[string]interface{}
 		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	// TODO: add request info
+	ids := strings.Split(id, ":")
 	req := map[string]interface{}{
-		"Id": id,
+		"InstanceId": ids[0],
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		if tmpData, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
+		} else if tmpData["BackupId"].(string) == ids[1] {
+			data = tmpData
 		}
 	}
 	if len(data) == 0 {
@@ -104,8 +129,8 @@ func (s *VolcengineVedbMysqlBackupService) RefreshResourceState(resourceData *sc
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d      map[string]interface{}
-				status interface{}
+				d          map[string]interface{}
+				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -113,7 +138,7 @@ func (s *VolcengineVedbMysqlBackupService) RefreshResourceState(resourceData *sc
 			if err != nil {
 				return nil, "", err
 			}
-			status, err = ve.ObtainSdkValue("Status", d)
+			status, err = ve.ObtainSdkValue("BackupStatus", d)
 			if err != nil {
 				return nil, "", err
 			}
@@ -128,13 +153,16 @@ func (s *VolcengineVedbMysqlBackupService) RefreshResourceState(resourceData *sc
 }
 
 func (s *VolcengineVedbMysqlBackupService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace create action
-			Action:      "CreateResource",
+			Action:      "CreateBackup",
 			ConvertMode: ve.RequestConvertAll,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-
+				"backup_policy": {
+					Ignore: true,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -143,18 +171,72 @@ func (s *VolcengineVedbMysqlBackupService) CreateResource(resourceData *schema.R
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// TODO: replace id fields
-				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
-				d.SetId(id.(string))
+				instanceId := (*call.SdkParam)["InstanceId"]
+				backupId, _ := ve.ObtainSdkValue("Result.BackupId", *resp)
+				d.SetId(fmt.Sprintf("%s:%s", instanceId, backupId))
 				return nil
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
+				Target:  []string{"Success"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("instance_id").(string),
+				},
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	policy, ok := resourceData.GetOk("backup_policy")
+	if ok {
+		policyCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyBackupPolicy",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					policyList, ok := policy.([]interface{})
+					if !ok {
+						return false, fmt.Errorf("policy is not a list")
+					}
+					p := policyList[0].(map[string]interface{})
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id").(string)
+					(*call.SdkParam)["BackupTime"] = p["backup_time"]
+					(*call.SdkParam)["FullBackupPeriod"] = p["full_backup_period"]
+					(*call.SdkParam)["BackupRetentionPeriod"] = p["backup_retention_period"]
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Success"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
+						Target:     []string{"Running"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: resourceData.Get("instance_id").(string),
+					},
+				},
+			},
+		}
+		callbacks = append(callbacks, policyCallback)
+	}
+	return callbacks
 }
 
 func (VolcengineVedbMysqlBackupService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
@@ -167,14 +249,22 @@ func (VolcengineVedbMysqlBackupService) WithResourceResponseHandlers(d map[strin
 func (s *VolcengineVedbMysqlBackupService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace modify action
-			Action:      "ModifyResource",
-			ConvertMode: ve.RequestConvertAll,
-			Convert: map[string]ve.RequestConvert{
-
-			},
+			Action:      "ModifyBackupPolicy",
+			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Id"] = d.Id()
+				policy, ok := resourceData.GetOk("backup_policy")
+				if !ok {
+					return false, nil
+				}
+				policyList, ok := policy.([]interface{})
+				if !ok {
+					return false, fmt.Errorf("policy is not a list")
+				}
+				p := policyList[0].(map[string]interface{})
+				(*call.SdkParam)["InstanceId"] = d.Get("instance_id").(string)
+				(*call.SdkParam)["BackupTime"] = p["backup_time"]
+				(*call.SdkParam)["FullBackupPeriod"] = p["full_backup_period"]
+				(*call.SdkParam)["BackupRetentionPeriod"] = p["backup_retention_period"]
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -184,8 +274,18 @@ func (s *VolcengineVedbMysqlBackupService) ModifyResource(resourceData *schema.R
 				return resp, err
 			},
 			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
+				Target:  []string{"Success"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: resourceData.Get("instance_id").(string),
+				},
 			},
 		},
 	}
@@ -193,14 +293,15 @@ func (s *VolcengineVedbMysqlBackupService) ModifyResource(resourceData *schema.R
 }
 
 func (s *VolcengineVedbMysqlBackupService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	ids := strings.Split(resourceData.Id(), ":")
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace delete action
-			Action:      "DeleteResource",
+			Action:      "DeleteBackup",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"Id": resourceData.Id(),
+				"InstanceId": ids[0],
+				"BackupId":   ids[1],
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -216,17 +317,10 @@ func (s *VolcengineVedbMysqlBackupService) RemoveResource(resourceData *schema.R
 
 func (s *VolcengineVedbMysqlBackupService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "Ids",
-				ConvertType: ve.ConvertWithN,
-			},
-		},
-		NameField:    "Name",
-		IdField:      "Id",
-		CollectField: "instances",
+		IdField:      "BackupId",
+		CollectField: "backups",
 		ResponseConverts: map[string]ve.ResponseConvert{
-			"Id": {
+			"BackupId": {
 				TargetField: "id",
 				KeepDefault: true,
 			},

@@ -66,6 +66,11 @@ func (s *VolcengineVedbMysqlInstanceService) ReadResources(m map[string]interfac
 		// 拆charge信息出来
 		// append detail
 		for _, v := range data {
+			var (
+				detailErr    error
+				endpointInfo interface{}
+				detailInfo   interface{}
+			)
 			instance := v.(map[string]interface{})
 			charge, ok := instance["ChargeDetail"]
 			if !ok {
@@ -93,18 +98,18 @@ func (s *VolcengineVedbMysqlInstanceService) ReadResources(m map[string]interfac
 			req := map[string]interface{}{
 				"InstanceId": instance["InstanceId"],
 			}
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
-			if err != nil {
-				logger.Info("DescribeDBInstanceDetail error:", err)
+			resp, detailErr = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if detailErr != nil {
+				logger.Info("DescribeDBInstanceDetail error:", detailErr)
 				continue
 			}
 			respBytes, _ = json.Marshal(resp)
 			logger.Debug(logger.RespFormat, action, req, string(respBytes))
 
 			// append endpoint info
-			endpointInfo, err := ve.ObtainSdkValue("Result.Endpoints", *resp)
-			if err != nil {
-				logger.Info("ObtainSdkValue Result.Endpoints error:", err)
+			endpointInfo, detailErr = ve.ObtainSdkValue("Result.Endpoints", *resp)
+			if detailErr != nil {
+				logger.Info("ObtainSdkValue Result.Endpoints error:", detailErr)
 				continue
 			}
 			if infos, ok := endpointInfo.([]interface{}); ok {
@@ -114,9 +119,9 @@ func (s *VolcengineVedbMysqlInstanceService) ReadResources(m map[string]interfac
 				instance["Endpoints"] = []interface{}{}
 			}
 
-			detailInfo, err := ve.ObtainSdkValue("Result.InstanceDetail", *resp)
-			if err != nil {
-				logger.Info("ObtainSdkValue Result.InstanceDetail error:", err)
+			detailInfo, detailErr = ve.ObtainSdkValue("Result.InstanceDetail", *resp)
+			if detailErr != nil {
+				logger.Info("ObtainSdkValue Result.InstanceDetail error:", detailErr)
 				continue
 			}
 			if infos, ok := detailInfo.(map[string]interface{}); ok {
@@ -153,6 +158,15 @@ func (s *VolcengineVedbMysqlInstanceService) ReadResource(resourceData *schema.R
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("vedb_mysql_instance %s not exist ", id)
+	}
+	// 接口有问题，实例running后一段时间还是查不到subnet
+	if subnet, ok := data["SubnetId"]; !ok || subnet == nil || subnet.(string) == "" {
+		subnetId, ok := resourceData.GetOk("subnet_id")
+		if !ok {
+			data["SubnetId"] = ""
+		} else {
+			data["SubnetId"] = subnetId.(string)
+		}
 	}
 	return data, err
 }

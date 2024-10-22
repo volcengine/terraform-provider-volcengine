@@ -137,7 +137,7 @@ func (s *VolcengineVedbMysqlDatabaseService) RefreshResourceState(resourceData *
 func (s *VolcengineVedbMysqlDatabaseService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateResource",
+			Action:      "CreateDatabase",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{

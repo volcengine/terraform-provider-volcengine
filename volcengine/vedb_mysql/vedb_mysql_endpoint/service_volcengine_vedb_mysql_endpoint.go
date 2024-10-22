@@ -171,7 +171,7 @@ func (s *VolcengineVedbMysqlEndpointService) CreateResource(resourceData *schema
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				vedb_mysql_instance.NewVedbMysqlInstanceService(s.Client): {
 					Target:     []string{"Running"},
-					Timeout:    resourceData.Timeout(schema.TimeoutDelete),
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
 					ResourceId: resourceData.Get("instance_id").(string),
 				},
 			},
@@ -206,9 +206,9 @@ func (s *VolcengineVedbMysqlEndpointService) ModifyResource(resourceData *schema
 				"node_ids": {
 					Ignore: true,
 				},
-				"auto_add_new_nodes": {
-					TargetField: "AutoAddNewNodes",
-				},
+				//"auto_add_new_nodes": {
+				//	TargetField: "AutoAddNewNodes",
+				//},
 				"master_accept_read_requests": {
 					TargetField: "MasterAcceptReadRequests",
 				},

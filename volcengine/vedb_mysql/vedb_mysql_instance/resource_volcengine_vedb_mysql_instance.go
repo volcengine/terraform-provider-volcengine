@@ -178,6 +178,7 @@ func ResourceVolcengineVedbMysqlInstance() *schema.Resource {
 				//PrePaidStorageInGB
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if d.Get("storage_charge_type").(string) == "PostPaid" && k == "pre_paid_storage_in_gb" {
 						return true

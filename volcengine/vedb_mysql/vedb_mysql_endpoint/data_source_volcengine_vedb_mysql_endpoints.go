@@ -127,13 +127,6 @@ func DataSourceVolcengineVedbMysqlEndpoints() *schema.Resource {
 						"consist_timeout": {
 							Type:     schema.TypeInt,
 							Computed: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								//当 ConsistLevel 取值为 Global 或 Session 时，该参数才生效。
-								if d.Get("consist_level").(string) != "Global" && d.Get("consist_level").(string) != "Session" {
-									return true
-								}
-								return false
-							},
 							Description: "When there is a large delay, " +
 								"the timeout period for read-only nodes to synchronize the latest data, in us. " +
 								"The value range is from 1us to 100000000us, and the default value is 10000us.\n" +
@@ -142,13 +135,6 @@ func DataSourceVolcengineVedbMysqlEndpoints() *schema.Resource {
 						"consist_timeout_action": {
 							Type:     schema.TypeString,
 							Computed: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								//当 ConsistLevel 取值为 Global 或 Session 时，该参数才生效。
-								if d.Get("consist_level").(string) != "Global" && d.Get("consist_level").(string) != "Session" {
-									return true
-								}
-								return false
-							},
 							Description: "Timeout policy after data synchronization timeout of read-only nodes supports the following two policies:" +
 								"\nReturnError: Return SQL error (wait replication complete timeout, please retry)." +
 								"\nReadMaster: Send a request to the master node (default).\n" +

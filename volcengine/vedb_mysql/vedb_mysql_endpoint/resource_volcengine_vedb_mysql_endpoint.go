@@ -83,13 +83,14 @@ func ResourceVolcengineVedbMysqlEndpoint() *schema.Resource {
 					"When the value of ReadWriteMode is ReadWrite, at least two nodes must be passed in, and the master node must be passed in.\n" +
 					"When the value of ReadWriteMode is ReadOnly, one or more read-only nodes can be passed in.",
 			},
-			"auto_add_new_nodes": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-				Description: "Set whether newly created read-only nodes will automatically join this connection endpoint." +
-					" Values:\ntrue: Automatically join.\nfalse: Do not automatically join (default).",
-			},
+			// 这个不能暴露出去，要不会触发node ids变更
+			//"auto_add_new_nodes": {
+			//	Type:     schema.TypeBool,
+			//	Optional: true,
+			//	Default:  false,
+			//	Description: "Set whether newly created read-only nodes will automatically join this connection endpoint." +
+			//		" Values:\ntrue: Automatically join.\nfalse: Do not automatically join (default).",
+			//},
 			"master_accept_read_requests": {
 				Type:     schema.TypeBool,
 				Optional: true,
