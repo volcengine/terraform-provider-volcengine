@@ -97,6 +97,15 @@ func (s *VolcengineVedbMysqlEndpointService) ReadResource(resourceData *schema.R
 	if len(data) == 0 {
 		return data, fmt.Errorf("vedb_mysql_endpoint %s not exist ", id)
 	}
+	// 接口有问题，endpoint创建完一段时间查询不到node ids
+	if nodeIds, ok := data["NodeIds"]; !ok || nodeIds == nil || len(nodeIds.([]interface{})) == 0 {
+		nodes, ok := resourceData.GetOk("node_ids")
+		if !ok {
+			data["NodeIds"] = []string{}
+		} else {
+			data["NodeIds"] = nodes.(*schema.Set).List()
+		}
+	}
 	return data, err
 }
 
