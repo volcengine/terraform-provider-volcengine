@@ -33,6 +33,18 @@ var tagsHash = func(v interface{}) int {
 	return hashcode.String(buf.String())
 }
 
+var configNodesHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v", m["az"], m["az"]))
+	return hashcode.String(buf.String())
+}
+
 func redisInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
 	// 不启用分片集群时，忽略 shard_number 的修改
 	if k == "shard_number" {
@@ -61,4 +73,11 @@ func redisInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData)
 	}
 
 	return false
+}
+
+func abs(num int) int {
+	if num < 0 {
+		return -num
+	}
+	return num
 }

@@ -90,6 +90,11 @@ In addition to all arguments above, the following attributes are exported:
     * `instance_id` - The id of the redis instance.
     * `instance_name` - The name of the redis instance.
     * `maintenance_time` - The maintainable time of the redis instance.
+    * `multi_az` - Set the availability zone deployment scheme for the instance. The value range is as follows: 
+disabled: Single availability zone deployment scheme.
+ enabled: Multi-availability zone deployment scheme.
+ Description:
+ When the newly created instance is a single-node instance (that is, when the value of NodeNumber is 1), only the single availability zone deployment scheme is allowed. At this time, the value of MultiAZ must be disabled.
     * `node_ids` - The list of redis instance node IDs.
     * `node_number` - The number of nodes in each shard.
     * `params` - The list of params.

@@ -373,6 +373,17 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"multi_az": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Description: "Set the availability zone deployment scheme for the instance. " +
+								"The value range is as follows: \n" +
+								"disabled: Single availability zone deployment scheme.\n " +
+								"enabled: Multi-availability zone deployment scheme.\n " +
+								"Description:\n When the newly created instance is a single-node instance" +
+								" (that is, when the value of NodeNumber is 1), only the single availability zone deployment scheme is allowed. " +
+								"At this time, the value of MultiAZ must be disabled.",
+						},
 					},
 				},
 			},
