@@ -15,11 +15,10 @@ resource "volcengine_subnet" "foo" {
 
 
 resource "volcengine_redis_instance" "foo" {
-  zone_ids            = [data.volcengine_zones.foo.zones[0].id]
-  instance_name       = "tf-test"
+  instance_name       = "tf-test2"
   sharded_cluster     = 1
   password            = "1qaz!QAZ12"
-  node_number         = 2
+  node_number         = 3
   shard_capacity      = 1024
   shard_number        = 2
   engine_version      = "5.0"
@@ -53,4 +52,16 @@ resource "volcengine_redis_instance" "foo" {
 
   create_backup     = false
   apply_immediately = true
+
+  multi_az = "enabled"
+  configure_nodes {
+    az = "cn-guilin-a"
+  }
+  configure_nodes {
+    az = "cn-guilin-b"
+  }
+  configure_nodes {
+    az = "cn-guilin-c"
+  }
+  #additional_bandwidth = 12
 }

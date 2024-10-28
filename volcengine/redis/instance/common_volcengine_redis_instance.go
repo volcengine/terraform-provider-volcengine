@@ -63,6 +63,9 @@ func redisInstanceImportDiffSuppress(k, old, new string, d *schema.ResourceData)
 
 	// 只在修改实例规格时需要这些参数，其它情况均忽略修改
 	if k == "create_backup" || k == "apply_immediately" {
+		if d.HasChanges("configure_nodes", "multi_az", "node_number") {
+			return false
+		}
 		if d.HasChanges("node_number", "shard_number", "shard_capacity") {
 			oldNum, _ := d.GetChange("shard_number")
 			if oldNum.(int) == 1 {
@@ -80,4 +83,43 @@ func abs(num int) int {
 		return -num
 	}
 	return num
+}
+
+func compareMaps(oldArr, newArr []interface{}) (added, removed []map[string]interface{}) {
+	oldCount := make(map[string]int)
+	newCount := make(map[string]int)
+
+	// 统计 oldArr 中每个 "az" 值的出现次数
+	for _, i := range oldArr {
+		item := i.(map[string]interface{})
+		if azValue, ok := item["az"].(string); ok {
+			oldCount[azValue]++
+		}
+	}
+
+	// 统计 newArr 中每个 "az" 值的出现次数
+	for _, i := range newArr {
+		item := i.(map[string]interface{})
+		if azValue, ok := item["az"].(string); ok {
+			newCount[azValue]++
+		}
+	}
+
+	// 查找新增的元素
+	for azValue, count := range newCount {
+		if oldCount[azValue] < count {
+			// 如果新的计数超过旧的计数，表示新增
+			added = append(added, map[string]interface{}{"az": azValue})
+		}
+	}
+
+	// 查找移除的元素
+	for azValue, count := range oldCount {
+		if newCount[azValue] < count {
+			// 如果旧的计数超过新的计数，表示移除
+			removed = append(removed, map[string]interface{}{"az": azValue})
+		}
+	}
+
+	return added, removed
 }

@@ -33,15 +33,6 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
-			"zone_ids": {
-				Type:        schema.TypeList,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The list of zone IDs of instance. When creating a single node instance, only one zone id can be specified.",
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-			},
 			"subnet_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -102,12 +93,11 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 					"At this time, the value of MultiAZ must be disabled.",
 			},
 			"configure_nodes": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				// 新增required字段不兼容了
 				// 改为optional，兼容改动
 				Description: "Set the list of available zones to which the node belongs.",
-				Set:         configNodesHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"az": {
@@ -222,7 +212,6 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"apply_immediately": {
 				Type:             schema.TypeBool,
 				Optional:         true,
-				Default:          false,
 				Description:      "Whether to apply the instance configuration change operation immediately. The value of this field is false, means that the change operation will be applied within maintenance time.",
 				DiffSuppressFunc: redisInstanceImportDiffSuppress,
 			},

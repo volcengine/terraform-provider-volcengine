@@ -31,11 +31,10 @@ resource "volcengine_subnet" "foo" {
 
 
 resource "volcengine_redis_instance" "foo" {
-  zone_ids            = [data.volcengine_zones.foo.zones[0].id]
-  instance_name       = "tf-test"
+  instance_name       = "tf-test2"
   sharded_cluster     = 1
   password            = "1qaz!QAZ12"
-  node_number         = 2
+  node_number         = 3
   shard_capacity      = 1024
   shard_number        = 2
   engine_version      = "5.0"
@@ -69,6 +68,18 @@ resource "volcengine_redis_instance" "foo" {
 
   create_backup     = false
   apply_immediately = true
+
+  multi_az = "enabled"
+  configure_nodes {
+    az = "cn-guilin-a"
+  }
+  configure_nodes {
+    az = "cn-guilin-b"
+  }
+  configure_nodes {
+    az = "cn-guilin-c"
+  }
+  #additional_bandwidth = 12
 }
 ```
 ## Argument Reference
@@ -78,7 +89,6 @@ The following arguments are supported:
 * `shard_capacity` - (Required) The memory capacity of each shard, unit is MiB. The valid value range is as fallows: When the value of `ShardedCluster` is 0: 256, 1024, 2048, 4096, 8192, 16384, 32768, 65536. When the value of `ShardedCluster` is 1: 1024, 2048, 4096, 8192, 16384. When the value of `node_number` is 1, the value of this field can not be 256.
 * `sharded_cluster` - (Required) Whether enable sharded cluster for the current redis instance. Valid values: 0, 1. 0 means disable, 1 means enable.
 * `subnet_id` - (Required) The subnet id of the redis instance. The specified subnet id must belong to the zone ids.
-* `zone_ids` - (Required, ForceNew) The list of zone IDs of instance. When creating a single node instance, only one zone id can be specified.
 * `additional_bandwidth` - (Optional) Modify the single-shard additional bandwidth of the target Redis instance. Set the additional bandwidth of a single shard, that is, the bandwidth that needs to be additionally increased on the basis of the default bandwidth. Unit: MB/s. The value of additional bandwidth needs to meet the following conditions at the same time: It must be greater than or equal to 0. When the value is 0, it means that no additional bandwidth is added, and the bandwidth of a single shard is the default bandwidth. The sum of additional bandwidth and default bandwidth cannot exceed the upper limit of bandwidth that can be modified for the current instance. Different specification nodes have different upper limits of bandwidth that can be modified. For more details, please refer to bandwidth modification range. The upper limits of the total write bandwidth and the total read bandwidth of an instance are both 2048MB/s.
 * `apply_immediately` - (Optional) Whether to apply the instance configuration change operation immediately. The value of this field is false, means that the change operation will be applied within maintenance time.
 * `auto_renew` - (Optional) Whether to enable automatic renewal. This field is valid only when `ChargeType` is `PrePaid`, the default value is false. 

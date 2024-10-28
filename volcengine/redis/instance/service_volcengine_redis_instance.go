@@ -35,7 +35,7 @@ func (s *VolcengineRedisDbInstanceService) readInstanceDetails(id string) (insta
 	}
 	logger.Debug(logger.RespFormat, action, cond)
 	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &cond)
-	logger.Debug(logger.RespFormat, action, resp)
+	logger.Debug(logger.RespFormat, action, *resp)
 	if err != nil {
 		return instance, err
 	}
@@ -105,7 +105,7 @@ func (s *VolcengineRedisDbInstanceService) readInstanceBackupPlan(id string) (ba
 	if err != nil {
 		return backupPlan, err
 	}
-	logger.Debug(logger.RespFormat, action, cond, *resp)
+	logger.Debug(logger.RespFormat, action, *resp)
 
 	backupPlan, err = ve.ObtainSdkValue("Result", *resp)
 	if err != nil {
@@ -272,6 +272,10 @@ func (s *VolcengineRedisDbInstanceService) ReadResource(resourceData *schema.Res
 		data["ParamValues"] = parameterSet.(*schema.Set).List()
 	}
 
+	if configNodes, ok := resourceData.GetOk("configure_nodes"); ok {
+		data["ConfigureNodes"] = configNodes
+	}
+
 	return data, err
 }
 
@@ -341,10 +345,6 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
-				},
-				"zone_ids": {
-					TargetField: "ZoneIds",
-					ConvertType: ve.ConvertJsonArray,
 				},
 				"multi_az": {
 					TargetField: "MultiAZ",
@@ -845,27 +845,29 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 					(*call.SdkParam)["InstanceId"] = d.Id()
 					(*call.SdkParam)["ClientToken"] = uuid.New().String()
 					multiAZ := d.Get("multi_az").(string)
-					addNodes, removeNodes, _, _ := ve.GetSetDifference("configure_nodes", d, configNodesHash, false)
+					oldNodeList, newNodeList := d.GetChange("configure_nodes")
+					addNodes, removeNodes := compareMaps(oldNodeList.([]interface{}), newNodeList.([]interface{}))
+					if multiAZ == "enabled" && len(addNodes) != 0 && len(removeNodes) != 0 {
+						return false, fmt.Errorf("A single operation can only add or reduce nodes, and cannot add and reduce nodes simultaneously")
+					}
 					if action == "IncreaseDBInstanceNodeNumber" {
 						(*call.SdkParam)["NodesNumberToIncrease"] = changeNum
-						if multiAZ == "enable" {
+						if multiAZ == "enabled" && len(addNodes) > 0 {
 							nodes := make([]map[string]interface{}, 0)
-							for _, n := range addNodes.List() {
-								node := n.(map[string]interface{})
+							for _, n := range addNodes {
 								nodes = append(nodes, map[string]interface{}{
-									"AZ": node["az"],
+									"AZ": n["az"],
 								})
 							}
 							(*call.SdkParam)["ConfigureNewNodes"] = nodes
 						}
 					} else {
 						(*call.SdkParam)["NodesNumberToDecrease"] = changeNum
-						if multiAZ == "enable" {
+						if multiAZ == "enabled" && len(removeNodes) > 0 {
 							nodes := make([]map[string]interface{}, 0)
-							for _, n := range removeNodes.List() {
-								node := n.(map[string]interface{})
+							for _, n := range removeNodes {
 								nodes = append(nodes, map[string]interface{}{
-									"AZ": node["az"],
+									"AZ": n["az"],
 								})
 							}
 							(*call.SdkParam)["NodesToRemove"] = nodes
@@ -998,10 +1000,6 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 							},
 						},
 					},
-					"apply_immediately": {
-						TargetField: "ApplyImmediately",
-						ForceGet:    true,
-					},
 					"create_backup": {
 						TargetField: "CreateBackup",
 						ForceGet:    true,
@@ -1014,9 +1012,12 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 					}
 					_, ok1 := d.GetOkExists("multi_az")
 					_, ok2 := d.GetOkExists("configure_nodes")
+					// 这俩字段是必填字段，即使关闭多可用区，configure nodes也需要传入node number对应的相同az
 					if !ok1 || !ok2 {
 						return false, fmt.Errorf("MultiAZ and ConfigureNodes are required parameters ")
 					}
+					apply := d.Get("apply_immediately").(bool)
+					(*call.SdkParam)["ApplyImmediately"] = apply
 					(*call.SdkParam)["InstanceId"] = d.Id()
 					(*call.SdkParam)["ClientToken"] = uuid.New().String()
 					return true, nil
