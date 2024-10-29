@@ -118,6 +118,7 @@ When importing resources, this attribute will not be imported. If this attribute
 * `shard_number` - (Optional) The number of shards in redis instance, the valid value range is `2-256`. This field is valid and required when the value of `ShardedCluster` is 1.
 * `tags` - (Optional) Tags.
 * `vpc_auth_mode` - (Optional) Whether to enable password-free access when connecting to an instance through a private network. Valid values: `open`, `close`.
+* `zone_ids` - (Optional, **Deprecated**) This field has been deprecated after version-0.0.152. Please use multi_az and configure_nodes to specify the availability zone. The list of zone IDs of instance. When creating a single node instance, only one zone id can be specified.
 
 The `configure_nodes` object supports the following:
 

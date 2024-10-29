@@ -33,6 +33,18 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			Delete: schema.DefaultTimeout(1 * time.Hour),
 		},
 		Schema: map[string]*schema.Schema{
+			"zone_ids": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Deprecated:  "This field has been deprecated after version-0.0.152. Please use multi_az and configure_nodes to specify the availability zone.",
+				Description: "The list of zone IDs of instance. When creating a single node instance, only one zone id can be specified.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return true
+				},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"subnet_id": {
 				Type:        schema.TypeString,
 				Required:    true,
