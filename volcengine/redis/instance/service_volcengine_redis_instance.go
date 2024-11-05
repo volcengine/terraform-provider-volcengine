@@ -1156,7 +1156,10 @@ func (s *VolcengineRedisDbInstanceService) RemoveResource(resourceData *schema.R
 					return false, fmt.Errorf("can not delete protected redis instance")
 				}
 				(*call.SdkParam)["InstanceId"] = d.Id()
-				(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+				nodeNumber := d.Get("node_number").(int)
+				if nodeNumber > 1 {
+					(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+				}
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
 			},
