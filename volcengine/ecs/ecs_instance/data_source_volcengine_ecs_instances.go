@@ -80,6 +80,42 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of DeploymentSet IDs.",
 			},
+			"eip_addresses": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of Eip addresses.",
+			},
+			"ipv6_addresses": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of ipv6 addresses.",
+			},
+			"instance_type_families": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of instance type families.",
+			},
+			"instance_type_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of instance type IDs.",
+			},
 
 			"output_file": {
 				Type:        schema.TypeString,

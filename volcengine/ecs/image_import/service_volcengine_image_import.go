@@ -1,4 +1,4 @@
-package image
+package image_import
 
 import (
 	"errors"
@@ -11,27 +11,29 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineImageService struct {
-	Client *ve.SdkClient
+type VolcengineImageImportService struct {
+	Client     *ve.SdkClient
+	Dispatcher *ve.Dispatcher
 }
 
-func NewImageService(c *ve.SdkClient) *VolcengineImageService {
-	return &VolcengineImageService{
-		Client: c,
+func NewImageImportService(c *ve.SdkClient) *VolcengineImageImportService {
+	return &VolcengineImageImportService{
+		Client:     c,
+		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineImageService) GetClient() *ve.SdkClient {
+func (s *VolcengineImageImportService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineImageService) ReadResources(condition map[string]interface{}) ([]interface{}, error) {
+func (s *VolcengineImageImportService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
 		ok      bool
 	)
-	return ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 20, nil, func(m map[string]interface{}) (data []interface{}, next string, err error) {
+	return ve.WithNextTokenQuery(m, "MaxResults", "NextToken", 20, nil, func(condition map[string]interface{}) (data []interface{}, next string, err error) {
 		action := "DescribeImages"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
@@ -68,34 +70,34 @@ func (s *VolcengineImageService) ReadResources(condition map[string]interface{})
 	})
 }
 
-func (s *VolcengineImageService) ReadResource(resourceData *schema.ResourceData, imageId string) (data map[string]interface{}, err error) {
+func (s *VolcengineImageImportService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
 	)
-	if imageId == "" {
-		imageId = s.ReadResourceId(resourceData.Id())
+	if id == "" {
+		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
-		"ImageIds.1": imageId,
+		"ImageIds.1": id,
 	}
 
 	results, err = s.ReadResources(req)
 	if err != nil {
-		return nil, err
+		return data, err
 	}
 	for _, v := range results {
 		if data, ok = v.(map[string]interface{}); !ok {
-			return nil, errors.New("Value is not map ")
+			return data, errors.New("Value is not map ")
 		}
 	}
 	if len(data) == 0 {
-		return nil, fmt.Errorf("Image %s not exist ", imageId)
+		return data, fmt.Errorf("image_import %s not exist ", id)
 	}
 	return data, err
 }
 
-func (s *VolcengineImageService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineImageImportService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -130,7 +132,7 @@ func (s *VolcengineImageService) RefreshResourceState(resourceData *schema.Resou
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("image status error, status: %s", status.(string))
+					return nil, "", fmt.Errorf("image_import status error, status: %s", status.(string))
 				}
 			}
 			return d, status.(string), err
@@ -138,7 +140,7 @@ func (s *VolcengineImageService) RefreshResourceState(resourceData *schema.Resou
 	}
 }
 
-func (s *VolcengineImageService) describeTasks(resourceId string) (task map[string]interface{}, err error) {
+func (s *VolcengineImageImportService) describeTasks(resourceId string) (task map[string]interface{}, err error) {
 	action := "DescribeTasks"
 	req := map[string]interface{}{
 		"ResourceIds.1": resourceId,
@@ -173,23 +175,19 @@ func (s *VolcengineImageService) describeTasks(resourceId string) (task map[stri
 	return task, nil
 }
 
-func (s *VolcengineImageService) WithResourceResponseHandlers(image map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineImageImportService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return image, nil, nil
+		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineImageService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineImageImportService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateImage",
+			Action:      "ImportImage",
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
-				"create_whole_image": {
-					TargetField: "CreateWholeImage",
-					ForceGet:    true,
-				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
@@ -215,7 +213,7 @@ func (s *VolcengineImageService) CreateResource(resourceData *schema.ResourceDat
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineImageService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineImageImportService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
 	callback := ve.Callback{
@@ -257,7 +255,7 @@ func (s *VolcengineImageService) ModifyResource(resourceData *schema.ResourceDat
 	return callbacks
 }
 
-func (s *VolcengineImageService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineImageImportService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteImages",
@@ -295,34 +293,15 @@ func (s *VolcengineImageService) RemoveResource(resourceData *schema.ResourceDat
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineImageService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{
-		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "ImageIds",
-				ConvertType: ve.ConvertWithN,
-			},
-			"tags": {
-				TargetField: "TagFilters",
-				ConvertType: ve.ConvertListN,
-				NextLevelConvert: map[string]ve.RequestConvert{
-					"value": {
-						TargetField: "Values.1",
-					},
-				},
-			},
-		},
-		NameField:    "ImageName",
-		IdField:      "ImageId",
-		CollectField: "images",
-	}
+func (s *VolcengineImageImportService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+	return ve.DataSourceInfo{}
 }
 
-func (s *VolcengineImageService) ReadResourceId(id string) string {
+func (s *VolcengineImageImportService) ReadResourceId(id string) string {
 	return id
 }
 
-func (s *VolcengineImageService) ProjectTrn() *ve.ProjectTrn {
+func (s *VolcengineImageImportService) ProjectTrn() *ve.ProjectTrn {
 	return &ve.ProjectTrn{
 		ServiceName:          "ecs",
 		ResourceType:         "image",

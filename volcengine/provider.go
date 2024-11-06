@@ -202,6 +202,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_launch_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image_import"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image_share_permission"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_associate"
@@ -446,6 +448,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_invocation_results":  ecs_invocation_result.DataSourceVolcengineEcsInvocationResults(),
 			"volcengine_ecs_available_resources": ecs_available_resource.DataSourceVolcengineEcsAvailableResources(),
 			"volcengine_ecs_instance_types":      ecs_instance_type.DataSourceVolcengineEcsInstanceTypes(),
+			"volcengine_image_share_permissions": image_share_permission.DataSourceVolcengineImageSharePermissions(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
@@ -744,6 +747,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_command":                  ecs_command.ResourceVolcengineEcsCommand(),
 			"volcengine_ecs_invocation":               ecs_invocation.ResourceVolcengineEcsInvocation(),
 			"volcengine_iam_role_attachment":          ecs_iam_role_attachment.ResourceVolcengineIamRoleAttachment(),
+			"volcengine_image":                        image.ResourceVolcengineImage(),
+			"volcengine_image_import":                 image_import.ResourceVolcengineImageImport(),
+			"volcengine_image_share_permission":       image_share_permission.ResourceVolcengineImageSharePermission(),
 
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
