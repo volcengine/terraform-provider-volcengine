@@ -213,6 +213,9 @@ func (s *VolcengineRedisDbInstanceService) ReadResources(condition map[string]in
 			ins["SubnetId"] = detail.(map[string]interface{})["SubnetId"]
 			ins["VisitAddrs"] = detail.(map[string]interface{})["VisitAddrs"]
 			ins["VpcAuthMode"] = detail.(map[string]interface{})["VpcAuthMode"]
+			if nodes, ok := detail.(map[string]interface{})["ConfigureNodes"]; ok {
+				ins["ConfigureNodes"] = nodes
+			}
 
 			data = append(data, ins)
 		}
@@ -272,8 +275,15 @@ func (s *VolcengineRedisDbInstanceService) ReadResource(resourceData *schema.Res
 		data["ParamValues"] = parameterSet.(*schema.Set).List()
 	}
 
-	if configNodes, ok := resourceData.GetOk("configure_nodes"); ok {
-		data["ConfigureNodes"] = configNodes
+	// 接口返回会乱序，所以这里只能兼容处理一下
+	if nodes, ok := data["ConfigureNodes"]; ok {
+		configNodes, ok := resourceData.GetOk("configure_nodes")
+		if ok {
+			if len(nodes.([]interface{})) == len(configNodes.([]interface{})) {
+				// 数量相等则用本地的
+				data["ConfigureNodes"] = configNodes
+			}
+		}
 	}
 
 	return data, err
@@ -328,7 +338,14 @@ func (s *VolcengineRedisDbInstanceService) RefreshResourceState(resourceData *sc
 
 func (s *VolcengineRedisDbInstanceService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+		return instance, map[string]ve.ResponseConvert{
+			"MultiAZ": {
+				TargetField: "multi_az",
+			},
+			"AZ": {
+				TargetField: "az",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -569,6 +586,68 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 					if nodeNumber > 1 {
 						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
 					}
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
+
+	if resourceData.HasChanges("multi_az", "configure_nodes") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceAZConfigure",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"multi_az": {
+						TargetField: "MultiAZ",
+						ForceGet:    true,
+					},
+					"configure_nodes": {
+						TargetField: "ConfigureNodes",
+						ForceGet:    true,
+						ConvertType: ve.ConvertJsonObjectArray,
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"az": {
+								TargetField: "AZ",
+								ForceGet:    true,
+							},
+						},
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if d.HasChange("node_number") && d.HasChange("configure_nodes") &&
+						!d.HasChange("multi_az") && d.Get("multi_az").(string) != "disabled" {
+						// 特殊情况，node number 已经修改了configure nodes，并且multi_az没有发生变更，那么就不执行这个callback，避免报错
+						// 单可用区情况要允许修改configure nodes
+						return false, nil
+					}
+					if len(*call.SdkParam) == 0 {
+						return false, nil
+					}
+					_, ok1 := d.GetOkExists("multi_az")
+					_, ok2 := d.GetOkExists("configure_nodes")
+					// 这俩字段是必填字段，即使关闭多可用区，configure nodes也需要传入node number对应的相同az
+					if !ok1 || !ok2 {
+						return false, fmt.Errorf("MultiAZ and ConfigureNodes are required parameters ")
+					}
+					apply := d.Get("apply_immediately").(bool)
+					nodeNumber := d.Get("node_number").(int)
+					if nodeNumber > 1 {
+						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+					}
+					(*call.SdkParam)["ApplyImmediately"] = apply
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -978,65 +1057,6 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 		callbacks = append(callbacks, callback)
 	}
 
-	if resourceData.HasChanges("multi_az", "configure_nodes") {
-		callback := ve.Callback{
-			Call: ve.SdkCall{
-				Action:      "ModifyDBInstanceAZConfigure",
-				ConvertMode: ve.RequestConvertInConvert,
-				ContentType: ve.ContentTypeJson,
-				Convert: map[string]ve.RequestConvert{
-					"multi_az": {
-						TargetField: "MultiAZ",
-						ForceGet:    true,
-					},
-					"configure_nodes": {
-						TargetField: "ConfigureNodes",
-						ForceGet:    true,
-						ConvertType: ve.ConvertJsonObjectArray,
-						NextLevelConvert: map[string]ve.RequestConvert{
-							"az": {
-								TargetField: "AZ",
-								ForceGet:    true,
-							},
-						},
-					},
-				},
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					if d.HasChanges("node_number", "configure_nodes") && !d.HasChange("multi_az") {
-						return false, nil
-					}
-					if len(*call.SdkParam) == 0 {
-						return false, nil
-					}
-					_, ok1 := d.GetOkExists("multi_az")
-					_, ok2 := d.GetOkExists("configure_nodes")
-					// 这俩字段是必填字段，即使关闭多可用区，configure nodes也需要传入node number对应的相同az
-					if !ok1 || !ok2 {
-						return false, fmt.Errorf("MultiAZ and ConfigureNodes are required parameters ")
-					}
-					apply := d.Get("apply_immediately").(bool)
-					nodeNumber := d.Get("node_number").(int)
-					if nodeNumber > 1 {
-						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
-					}
-					(*call.SdkParam)["ApplyImmediately"] = apply
-					(*call.SdkParam)["InstanceId"] = d.Id()
-					(*call.SdkParam)["ClientToken"] = uuid.New().String()
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-				Refresh: &ve.StateRefresh{
-					Target:  []string{"Running"},
-					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
-				},
-			},
-		}
-		callbacks = append(callbacks, callback)
-	}
-
 	if resourceData.HasChange("additional_bandwidth") {
 		callback := ve.Callback{
 			Call: ve.SdkCall{
@@ -1221,6 +1241,9 @@ func (s *VolcengineRedisDbInstanceService) DatasourceResources(data *schema.Reso
 			},
 			"MultiAZ": {
 				TargetField: "multi_az",
+			},
+			"AZ": {
+				TargetField: "az",
 			},
 		},
 	}

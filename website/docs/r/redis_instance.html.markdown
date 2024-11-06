@@ -34,7 +34,7 @@ resource "volcengine_redis_instance" "foo" {
   instance_name       = "tf-test2"
   sharded_cluster     = 1
   password            = "1qaz!QAZ12"
-  node_number         = 3
+  node_number         = 4
   shard_capacity      = 1024
   shard_number        = 2
   engine_version      = "5.0"
@@ -78,6 +78,9 @@ resource "volcengine_redis_instance" "foo" {
   }
   configure_nodes {
     az = "cn-guilin-c"
+  }
+  configure_nodes {
+    az = "cn-guilin-b"
   }
   #additional_bandwidth = 12
 }

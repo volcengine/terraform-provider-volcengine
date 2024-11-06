@@ -109,6 +109,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 				Optional: true,
 				// 新增required字段不兼容了
 				// 改为optional，兼容改动
+				Computed:    true,
 				Description: "Set the list of available zones to which the node belongs.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

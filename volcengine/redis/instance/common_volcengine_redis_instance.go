@@ -106,18 +106,22 @@ func compareMaps(oldArr, newArr []interface{}) (added, removed []map[string]inte
 	}
 
 	// 查找新增的元素
-	for azValue, count := range newCount {
-		if oldCount[azValue] < count {
+	for azValue, newCountValue := range newCount {
+		if oldCountValue, exists := oldCount[azValue]; !exists || newCountValue > oldCountValue {
 			// 如果新的计数超过旧的计数，表示新增
-			added = append(added, map[string]interface{}{"az": azValue})
+			for i := 0; i < newCountValue-oldCountValue; i++ {
+				added = append(added, map[string]interface{}{"az": azValue})
+			}
 		}
 	}
 
 	// 查找移除的元素
-	for azValue, count := range oldCount {
-		if newCount[azValue] < count {
+	for azValue, oldCountValue := range oldCount {
+		if newCountValue, exists := newCount[azValue]; !exists || oldCountValue > newCountValue {
 			// 如果旧的计数超过新的计数，表示移除
-			removed = append(removed, map[string]interface{}{"az": azValue})
+			for i := 0; i < oldCountValue-newCountValue; i++ {
+				removed = append(removed, map[string]interface{}{"az": azValue})
+			}
 		}
 	}
 
