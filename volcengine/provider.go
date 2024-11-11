@@ -187,6 +187,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_gateway_route"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_virtual_interface"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_auto_snapshot_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_auto_snapshot_policy_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_snapshot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_snapshot_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_available_resource"
@@ -433,7 +437,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_clb_zones":            clbZone.DataSourceVolcengineClbZones(),
 
 			// ================ EBS ================
-			"volcengine_volumes": volume.DataSourceVolcengineVolumes(),
+			"volcengine_volumes":                    volume.DataSourceVolcengineVolumes(),
+			"volcengine_ebs_snapshots":              ebs_snapshot.DataSourceVolcengineEbsSnapshots(),
+			"volcengine_ebs_snapshot_groups":        ebs_snapshot_group.DataSourceVolcengineEbsSnapshotGroups(),
+			"volcengine_ebs_auto_snapshot_policies": ebs_auto_snapshot_policy.DataSourceVolcengineEbsAutoSnapshotPolicies(),
 
 			// ================ ECS ================
 			"volcengine_ecs_instances":           ecs_instance.DataSourceVolcengineEcsInstances(),
@@ -733,8 +740,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_acl_entry":           acl_entry.ResourceVolcengineAclEntry(),
 
 			// ================ EBS ================
-			"volcengine_volume":        volume.ResourceVolcengineVolume(),
-			"volcengine_volume_attach": volume_attach.ResourceVolcengineVolumeAttach(),
+			"volcengine_volume":                              volume.ResourceVolcengineVolume(),
+			"volcengine_volume_attach":                       volume_attach.ResourceVolcengineVolumeAttach(),
+			"volcengine_ebs_snapshot":                        ebs_snapshot.ResourceVolcengineEbsSnapshot(),
+			"volcengine_ebs_snapshot_group":                  ebs_snapshot_group.ResourceVolcengineEbsSnapshotGroup(),
+			"volcengine_ebs_auto_snapshot_policy":            ebs_auto_snapshot_policy.ResourceVolcengineEbsAutoSnapshotPolicy(),
+			"volcengine_ebs_auto_snapshot_policy_attachment": ebs_auto_snapshot_policy_attachment.ResourceVolcengineEbsAutoSnapshotPolicyAttachment(),
 
 			// ================ ECS ================
 			"volcengine_ecs_instance":                 ecs_instance.ResourceVolcengineEcsInstance(),

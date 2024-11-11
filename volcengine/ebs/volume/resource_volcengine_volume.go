@@ -44,9 +44,9 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Description: "The name of Volume.",
 			},
 			"volume_type": {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Required: true,
+				//ForceNew:    true,
 				Description: "The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
 			},
 			"kind": {
@@ -82,20 +82,30 @@ func ResourceVolcengineVolume() *schema.Resource {
 					"The `PrePaid` volume cannot be detached. " +
 					"Please note that `PrePaid` type needs to ask the system administrator to apply for a whitelist.",
 			},
-			"status": {
+			"extra_performance_type_id": {
 				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Status of Volume.",
+				Optional:    true,
+				Description: "The type of extra performance for volume. The valid values for ESSD FlexPL volume are `Throughput`, `Balance`, `IOPS`. The valid value for TSSD_TL0 volume is `Throughput`.",
 			},
-			"trade_status": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "Status of Trade.",
+			"extra_performance_iops": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					_, ok := d.GetOk("extra_performance_type_id")
+					return !ok
+				},
+				Description: "The extra IOPS performance size for volume. Unit: times per second. The valid values for `Balance` and `IOPS` is 0~50000.",
 			},
-			"created_at": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "Creation time of Volume.",
+			"extra_performance_throughput_mb": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					_, ok := d.GetOk("extra_performance_type_id")
+					return !ok
+				},
+				Description: "The extra Throughput performance size for volume. Unit: MB/s. The valid values for ESSD FlexPL volume is 0~650.",
 			},
 			"delete_with_instance": {
 				Type:        schema.TypeBool,
@@ -114,6 +124,23 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Description: "The ProjectName of the Volume.",
 			},
 			"tags": ve.TagsSchema(),
+
+			// computed fields
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Status of Volume.",
+			},
+			"trade_status": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Status of Trade.",
+			},
+			"created_at": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Creation time of Volume.",
+			},
 		},
 	}
 }
