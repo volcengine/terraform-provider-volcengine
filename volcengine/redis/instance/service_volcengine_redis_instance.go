@@ -35,7 +35,7 @@ func (s *VolcengineRedisDbInstanceService) readInstanceDetails(id string) (insta
 	}
 	logger.Debug(logger.RespFormat, action, cond)
 	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &cond)
-	logger.Debug(logger.RespFormat, action, resp)
+	logger.Debug(logger.RespFormat, action, *resp)
 	if err != nil {
 		return instance, err
 	}
@@ -105,7 +105,7 @@ func (s *VolcengineRedisDbInstanceService) readInstanceBackupPlan(id string) (ba
 	if err != nil {
 		return backupPlan, err
 	}
-	logger.Debug(logger.RespFormat, action, cond, *resp)
+	logger.Debug(logger.RespFormat, action, *resp)
 
 	backupPlan, err = ve.ObtainSdkValue("Result", *resp)
 	if err != nil {
@@ -213,6 +213,9 @@ func (s *VolcengineRedisDbInstanceService) ReadResources(condition map[string]in
 			ins["SubnetId"] = detail.(map[string]interface{})["SubnetId"]
 			ins["VisitAddrs"] = detail.(map[string]interface{})["VisitAddrs"]
 			ins["VpcAuthMode"] = detail.(map[string]interface{})["VpcAuthMode"]
+			if nodes, ok := detail.(map[string]interface{})["ConfigureNodes"]; ok {
+				ins["ConfigureNodes"] = nodes
+			}
 
 			data = append(data, ins)
 		}
@@ -272,6 +275,17 @@ func (s *VolcengineRedisDbInstanceService) ReadResource(resourceData *schema.Res
 		data["ParamValues"] = parameterSet.(*schema.Set).List()
 	}
 
+	// 接口返回会乱序，所以这里只能兼容处理一下
+	if nodes, ok := data["ConfigureNodes"]; ok {
+		configNodes, ok := resourceData.GetOk("configure_nodes")
+		if ok {
+			if len(nodes.([]interface{})) == len(configNodes.([]interface{})) {
+				// 数量相等则用本地的
+				data["ConfigureNodes"] = configNodes
+			}
+		}
+	}
+
 	return data, err
 }
 
@@ -324,7 +338,14 @@ func (s *VolcengineRedisDbInstanceService) RefreshResourceState(resourceData *sc
 
 func (s *VolcengineRedisDbInstanceService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+		return instance, map[string]ve.ResponseConvert{
+			"MultiAZ": {
+				TargetField: "multi_az",
+			},
+			"AZ": {
+				TargetField: "az",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -342,9 +363,17 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
-				"zone_ids": {
-					TargetField: "ZoneIds",
-					ConvertType: ve.ConvertJsonArray,
+				"multi_az": {
+					TargetField: "MultiAZ",
+				},
+				"configure_nodes": {
+					TargetField: "ConfigureNodes",
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"az": {
+							TargetField: "AZ",
+						},
+					},
 				},
 				"param_values": {
 					Ignore: true,
@@ -522,6 +551,117 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 
 func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
+
+	// 调用 EnableShardedCluster 接口将目标 Redis 实例变更为启用分片集群实例。
+	if resourceData.HasChange("sharded_cluster") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "EnableShardedCluster",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"sharded_cluster": {
+						TargetField: "ShardedCluster",
+					},
+					"apply_immediately": {
+						TargetField: "ApplyImmediately",
+						ForceGet:    true,
+					},
+					"shard_number": {
+						TargetField: "ShardNumber",
+						ForceGet:    true,
+					},
+					"shard_capacity": {
+						TargetField: "ShardCapacity",
+						ForceGet:    true,
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) == 0 {
+						return false, nil
+					}
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					nodeNumber := d.Get("node_number").(int)
+					if nodeNumber > 1 {
+						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+					}
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
+
+	if resourceData.HasChanges("multi_az", "configure_nodes") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceAZConfigure",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"multi_az": {
+						TargetField: "MultiAZ",
+						ForceGet:    true,
+					},
+					"configure_nodes": {
+						TargetField: "ConfigureNodes",
+						ForceGet:    true,
+						ConvertType: ve.ConvertJsonObjectArray,
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"az": {
+								TargetField: "AZ",
+								ForceGet:    true,
+							},
+						},
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if d.HasChange("node_number") && d.HasChange("configure_nodes") &&
+						!d.HasChange("multi_az") && d.Get("multi_az").(string) != "disabled" {
+						// 特殊情况，node number 已经修改了configure nodes，并且multi_az没有发生变更，那么就不执行这个callback，避免报错
+						// 单可用区情况要允许修改configure nodes
+						return false, nil
+					}
+					if len(*call.SdkParam) == 0 {
+						return false, nil
+					}
+					_, ok1 := d.GetOkExists("multi_az")
+					_, ok2 := d.GetOkExists("configure_nodes")
+					// 这俩字段是必填字段，即使关闭多可用区，configure nodes也需要传入node number对应的相同az
+					if !ok1 || !ok2 {
+						return false, fmt.Errorf("MultiAZ and ConfigureNodes are required parameters ")
+					}
+					apply := d.Get("apply_immediately").(bool)
+					nodeNumber := d.Get("node_number").(int)
+					if nodeNumber > 1 {
+						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+					}
+					(*call.SdkParam)["ApplyImmediately"] = apply
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
 
 	if resourceData.HasChange("instance_name") {
 		callback := ve.Callback{
@@ -766,21 +906,59 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 	}
 
 	if resourceData.HasChange("node_number") {
+		// ModifyDBInstanceNodeNumber 接口废弃，使用IncreaseDBInstanceNodeNumber和DecreaseDBInstanceNodeNumber代替
+		//callback := ve.Callback{
+		//	Call: ve.SdkCall{
+		//		Action:      "ModifyDBInstanceNodeNumber",
+		//		ConvertMode: ve.RequestConvertInConvert,
+		//		ContentType: ve.ContentTypeJson,
+		//		Convert: map[string]ve.RequestConvert{
+		//			"node_number": {
+		//				TargetField: "NodeNumber",
+		//			},
+		//			"apply_immediately": {
+		//				TargetField: "ApplyImmediately",
+		//				ForceGet:    true,
+		//			},
+		//			"create_backup": {
+		//				TargetField: "CreateBackup",
+		//				ForceGet:    true,
+		//			},
+		//		},
+		//		BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+		//			if len(*call.SdkParam) == 0 {
+		//				return false, nil
+		//			}
+		//			(*call.SdkParam)["InstanceId"] = d.Id()
+		//			(*call.SdkParam)["ClientToken"] = uuid.New().String()
+		//			return true, nil
+		//		},
+		//		ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+		//			logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+		//			return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+		//		},
+		//		Refresh: &ve.StateRefresh{
+		//			Target:  []string{"Running"},
+		//			Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+		//		},
+		//	},
+		//}
+		var action string
+		oldNum, newNum := resourceData.GetChange("node_number")
+		if oldNum.(int) > newNum.(int) {
+			action = "DecreaseDBInstanceNodeNumber"
+		} else {
+			action = "IncreaseDBInstanceNodeNumber"
+		}
+		changeNum := abs(oldNum.(int) - newNum.(int))
 		callback := ve.Callback{
 			Call: ve.SdkCall{
-				Action:      "ModifyDBInstanceNodeNumber",
+				Action:      action,
 				ConvertMode: ve.RequestConvertInConvert,
 				ContentType: ve.ContentTypeJson,
 				Convert: map[string]ve.RequestConvert{
-					"node_number": {
-						TargetField: "NodeNumber",
-					},
 					"apply_immediately": {
 						TargetField: "ApplyImmediately",
-						ForceGet:    true,
-					},
-					"create_backup": {
-						TargetField: "CreateBackup",
 						ForceGet:    true,
 					},
 				},
@@ -789,6 +967,80 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 						return false, nil
 					}
 					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+					nodeNumber := d.Get("node_number").(int)
+					if nodeNumber > 1 {
+						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+					}
+					multiAZ := d.Get("multi_az").(string)
+					oldNodeList, newNodeList := d.GetChange("configure_nodes")
+					addNodes, removeNodes := compareMaps(oldNodeList.([]interface{}), newNodeList.([]interface{}))
+					if multiAZ == "enabled" && len(addNodes) != 0 && len(removeNodes) != 0 {
+						return false, fmt.Errorf("A single operation can only add or reduce nodes, and cannot add and reduce nodes simultaneously")
+					}
+					if action == "IncreaseDBInstanceNodeNumber" {
+						(*call.SdkParam)["NodesNumberToIncrease"] = changeNum
+						if multiAZ == "enabled" && len(addNodes) > 0 {
+							nodes := make([]map[string]interface{}, 0)
+							for _, n := range addNodes {
+								nodes = append(nodes, map[string]interface{}{
+									"AZ": n["az"],
+								})
+							}
+							(*call.SdkParam)["ConfigureNewNodes"] = nodes
+						}
+					} else {
+						(*call.SdkParam)["NodesNumberToDecrease"] = changeNum
+						if multiAZ == "enabled" && len(removeNodes) > 0 {
+							nodes := make([]map[string]interface{}, 0)
+							for _, n := range removeNodes {
+								nodes = append(nodes, map[string]interface{}{
+									"AZ": n["az"],
+								})
+							}
+							(*call.SdkParam)["NodesToRemove"] = nodes
+						}
+					}
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
+
+	if resourceData.HasChange("shard_number") && !resourceData.HasChange("sharded_cluster") {
+		// 如果触发了EnableShardedCluster，就不用调用ModifyDBInstanceShardNumber了，因为EnableShardedCluster会同步修改shard_number
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceShardNumber",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"shard_number": {
+						TargetField: "ShardNumber",
+					},
+					"apply_immediately": {
+						TargetField: "ApplyImmediately",
+						ForceGet:    true,
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) == 0 {
+						return false, nil
+					}
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					nodeNumber := d.Get("node_number").(int)
+					if nodeNumber > 1 {
+						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+					}
 					(*call.SdkParam)["ClientToken"] = uuid.New().String()
 					return true, nil
 				},
@@ -805,23 +1057,15 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 		callbacks = append(callbacks, callback)
 	}
 
-	if resourceData.HasChange("shard_number") {
+	if resourceData.HasChange("additional_bandwidth") {
 		callback := ve.Callback{
 			Call: ve.SdkCall{
-				Action:      "ModifyDBInstanceShardNumber",
+				Action:      "ModifyDBInstanceAdditionalBandwidthPerShard",
 				ConvertMode: ve.RequestConvertInConvert,
 				ContentType: ve.ContentTypeJson,
 				Convert: map[string]ve.RequestConvert{
-					"shard_number": {
-						TargetField: "ShardNumber",
-					},
-					"apply_immediately": {
-						TargetField: "ApplyImmediately",
-						ForceGet:    true,
-					},
-					"create_backup": {
-						TargetField: "CreateBackup",
-						ForceGet:    true,
+					"additional_bandwidth": {
+						TargetField: "AdditionalBandwidth",
 					},
 				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -859,16 +1103,16 @@ func (s *VolcengineRedisDbInstanceService) ModifyResource(resourceData *schema.R
 						TargetField: "ApplyImmediately",
 						ForceGet:    true,
 					},
-					"create_backup": {
-						TargetField: "CreateBackup",
-						ForceGet:    true,
-					},
 				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					if len(*call.SdkParam) == 0 {
 						return false, nil
 					}
 					(*call.SdkParam)["InstanceId"] = d.Id()
+					nodeNumber := d.Get("node_number").(int)
+					if nodeNumber > 1 {
+						(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+					}
 					(*call.SdkParam)["ClientToken"] = uuid.New().String()
 					return true, nil
 				},
@@ -934,7 +1178,10 @@ func (s *VolcengineRedisDbInstanceService) RemoveResource(resourceData *schema.R
 					return false, fmt.Errorf("can not delete protected redis instance")
 				}
 				(*call.SdkParam)["InstanceId"] = d.Id()
-				(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+				nodeNumber := d.Get("node_number").(int)
+				if nodeNumber > 1 {
+					(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
+				}
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
 			},
@@ -991,6 +1238,12 @@ func (s *VolcengineRedisDbInstanceService) DatasourceResources(data *schema.Reso
 			},
 			"TTL": {
 				TargetField: "ttl",
+			},
+			"MultiAZ": {
+				TargetField: "multi_az",
+			},
+			"AZ": {
+				TargetField: "az",
 			},
 		},
 	}
