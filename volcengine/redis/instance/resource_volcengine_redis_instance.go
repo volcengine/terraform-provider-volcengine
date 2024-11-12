@@ -15,7 +15,7 @@ redis instance can be imported using the id, e.g.
 ```
 $ terraform import volcengine_redis_instance.default redis-n769ewmjjqyqh5dv
 ```
-
+Adding or removing nodes and migrating availability zones for multiple AZ instances are not supported to be orchestrated simultaneously, but it is possible for single AZ instances.
 */
 
 func ResourceVolcengineRedisDbInstance() *schema.Resource {
