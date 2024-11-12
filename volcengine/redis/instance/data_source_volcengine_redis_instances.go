@@ -373,6 +373,42 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"multi_az": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Description: "Set the availability zone deployment scheme for the instance. " +
+								"The value range is as follows: \n" +
+								"disabled: Single availability zone deployment scheme.\n " +
+								"enabled: Multi-availability zone deployment scheme.\n " +
+								"Description:\n When the newly created instance is a single-node instance" +
+								" (that is, when the value of NodeNumber is 1), only the single availability zone deployment scheme is allowed. " +
+								"At this time, the value of MultiAZ must be disabled.",
+						},
+						"configure_nodes": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Set the list of available zones to which the node belongs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"az": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Description: "Set the availability zone to which the node belongs. " +
+											"The number of nodes of an instance (i.e., NodeNumber) and the availability zone deployment scheme (i.e., the value of the MultiAZ parameter) will affect the filling of the current parameter." +
+											" Among them:\n When a new instance is a single-node instance (i.e., the value of NodeNumber is 1), " +
+											"only a single availability zone deployment scheme is allowed (i.e., the value of MultiAZ must be disabled). " +
+											"At this time, only one availability zone needs to be passed in AZ, " +
+											"and all nodes in the instance will be deployed in this availability zone. " +
+											"When creating a new instance as a primary-standby instance (that is, when the value of NodeNumber is greater than or equal to 2), " +
+											"the number of availability zones passed in must be equal to the number of nodes in a single shard (that is, the value of the NodeNumber parameter), " +
+											"and the value of AZ must comply with the multi-availability zone deployment scheme rules. " +
+											"The specific rules are as follows: If the primary-standby instance selects the multi-availability zone deployment scheme (that is, the value of MultiAZ is enabled), " +
+											"then at least two different availability zone IDs must be passed in in AZ, and the first availability zone is the availability zone where the primary node is located." +
+											" If the primary and standby instances choose a single availability zone deployment scheme (that is, the value of MultiAZ is disabled), then the availability zones passed in for each node must be the same.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
