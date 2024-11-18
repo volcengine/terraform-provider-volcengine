@@ -50,10 +50,31 @@ func ResourceVolcengineTlsTopic() *schema.Resource {
 				Description: "The data storage time of the tls topic. Unit: Day. Valid value range: 1-3650.",
 			},
 			"shard_count": {
-				Type:        schema.TypeInt,
-				Required:    true,
-				ForceNew:    true,
-				Description: "The count of shards in the tls topic. Valid value range: 1-10.",
+				Type:     schema.TypeInt,
+				Required: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
+				Description: "The count of shards in the tls topic. Valid value range: 1-10. This field is only valid when creating tls topic.",
+			},
+			"manual_split_shard_id": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "The id of shard to be manually split. This field is valid only when modifying the topic." +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields. \n",
+			},
+			"manual_split_shard_number": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "The split number of shard. The valid number should be a non-zero even number, such as 2, 4, 8, or 16. The total number of read-write status shards after splitting cannot exceed 50. \n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"auto_split": {
 				Type:     schema.TypeBool,

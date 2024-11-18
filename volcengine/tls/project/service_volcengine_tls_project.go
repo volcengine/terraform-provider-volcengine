@@ -338,3 +338,12 @@ func (s *VolcengineTlsProjectService) setResourceTags(resourceData *schema.Resou
 
 	return callbacks
 }
+
+func (s *VolcengineTlsProjectService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "tls",
+		ResourceType:         "project",
+		ProjectSchemaField:   "iam_project_name",
+		ProjectResponseField: "IamProjectName",
+	}
+}

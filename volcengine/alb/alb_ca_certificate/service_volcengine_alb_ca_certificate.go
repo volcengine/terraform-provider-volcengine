@@ -105,10 +105,21 @@ func (s *VolcengineAlbCaCertificateService) RefreshResourceState(resourceData *s
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
-			d, err = s.ReadResource(resourceData, id)
-			if err != nil {
+
+			if err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+				d, err = s.ReadResource(resourceData, id)
+				if err != nil {
+					if ve.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
 				return nil, "", err
 			}
+
 			status, err = ve.ObtainSdkValue("Status", d)
 			if err != nil {
 				return nil, "", err

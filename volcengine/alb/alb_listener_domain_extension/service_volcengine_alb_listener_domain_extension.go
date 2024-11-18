@@ -142,7 +142,15 @@ func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceDat
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				alb.NewAlbService(s.Client): {
+					Target:     []string{"Active", "Inactive"},
+					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					ResourceId: loadBalancerId,
+				},
+			},
+			AfterRefresh: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) error {
+				// 先刷新 alb 到指定状态，再查询 DomainExtensionId
 				extensionId, err := s.GetDomainExtensionId(d.Get("listener_id").(string),
 					d.Get("domain").(string), d.Get("certificate_id").(string))
 				if err != nil {
@@ -151,13 +159,6 @@ func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceDat
 				id := fmt.Sprint(d.Get("listener_id").(string) + ":" + extensionId)
 				d.SetId(id)
 				return nil
-			},
-			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				alb.NewAlbService(s.Client): {
-					Target:     []string{"Active", "Inactive"},
-					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-					ResourceId: loadBalancerId,
-				},
 			},
 		},
 	}

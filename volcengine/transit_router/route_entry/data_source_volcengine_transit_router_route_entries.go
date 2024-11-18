@@ -105,6 +105,11 @@ func DataSourceVolcengineTransitRouterRouteEntries() *schema.Resource {
 							Computed:    true,
 							Description: "The type of the route entry.",
 						},
+						"as_path": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The as path of the route entry.",
+						},
 						"creation_time": {
 							Type:        schema.TypeString,
 							Computed:    true,

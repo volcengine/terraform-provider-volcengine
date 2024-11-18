@@ -35,6 +35,16 @@ func DataSourceVolcengineVpnGatewayRoutes() *schema.Resource {
 				ValidateFunc: validation.IsCIDR,
 				Description:  "A destination cidr block.",
 			},
+			"route_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The type of the VPN gateway route. Valid values: `Static`, `BGP`, `Cloud`.",
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The status of the VPN gateway route.",
+			},
 
 			"output_file": {
 				Type:        schema.TypeString,

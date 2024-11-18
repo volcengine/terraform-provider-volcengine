@@ -3,7 +3,6 @@ package vpn_gateway
 import (
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -268,7 +267,9 @@ func (s *VolcengineVpnGatewayService) CreateResource(resourceData *schema.Resour
 				if len(*call.SdkParam) < 1 {
 					return false, nil
 				}
-				(*call.SdkParam)["PeriodUnit"] = "Month"
+				if d.Get("billing_type") == "PrePaid" {
+					(*call.SdkParam)["PeriodUnit"] = "Month"
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -396,10 +397,9 @@ func (s *VolcengineVpnGatewayService) RemoveResource(resourceData *schema.Resour
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				// todo 打印前台提示日志
-				log.Println("[WARN] Terraform will unsubscribe the resource.")
-				//return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				return nil, nil
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -489,7 +489,9 @@ func (s *VolcengineVpnGatewayService) UnsubscribeInfo(resourceData *schema.Resou
 	info := ve.UnsubscribeInfo{
 		InstanceId: s.ReadResourceId(resourceData.Id()),
 	}
-	info.NeedUnsubscribe = true
-	info.Products = []string{"VPN"}
+	if resourceData.Get("billing_type").(string) == "PrePaid" {
+		info.NeedUnsubscribe = true
+		info.Products = []string{"VPN"}
+	}
 	return &info, nil
 }

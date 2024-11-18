@@ -161,6 +161,28 @@ func (v *VolcengineSslVpnServerService) ModifyResource(data *schema.ResourceData
 				"description": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"client_ip_pool": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"protocol": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"cipher": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"auth": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"compress": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"port": {
+					ConvertType: ve.ConvertDefault,
+				},
+				"local_subnets": {
+					ConvertType: ve.ConvertWithN,
+					ForceGet:    true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["SslVpnServerId"] = d.Id()
@@ -239,6 +261,15 @@ func (v *VolcengineSslVpnServerService) DatasourceResources(data *schema.Resourc
 
 func (v *VolcengineSslVpnServerService) ReadResourceId(s string) string {
 	return s
+}
+
+func (v *VolcengineSslVpnServerService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpn",
+		ResourceType:         "sslvpnserver",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func NewSslVpnServerService(client *ve.SdkClient) *VolcengineSslVpnServerService {

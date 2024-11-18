@@ -54,7 +54,7 @@ func (s *VolcengineTlsTopicService) ReadResources(condition map[string]interface
 			Path:        []string{action},
 			Client:      s.Client.BypassSvcClient.NewTlsClient(),
 		}, &condition)
-		logger.Debug(logger.RespFormat, action, condition, resp)
+		logger.Debug(logger.RespFormat, action, condition, *resp)
 		results, err = ve.ObtainSdkValue("RESPONSE.Topics", *resp)
 		if err != nil {
 			return data, err
@@ -231,6 +231,43 @@ func (s *VolcengineTlsTopicService) ModifyResource(resourceData *schema.Resource
 		},
 	}
 	callbacks = append(callbacks, topicCallback)
+
+	if resourceData.HasChanges("manual_split_shard_id", "manual_split_shard_number") {
+		shardCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ManualShardSplit",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"manual_split_shard_id": {
+						TargetField: "ShardId",
+						ForceGet:    true,
+					},
+					"manual_split_shard_number": {
+						TargetField: "Number",
+						ForceGet:    true,
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["TopicId"] = d.Id()
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+						ContentType: ve.ApplicationJSON,
+						HttpMethod:  ve.POST,
+						Path:        []string{call.Action},
+						Client:      s.Client.BypassSvcClient.NewTlsClient(),
+					}, call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, shardCallback)
+	}
 
 	// 更新Tags
 	callbacks = s.setResourceTags(resourceData, callbacks)

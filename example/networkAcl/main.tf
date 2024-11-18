@@ -1,5 +1,10 @@
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-vpc"
+  cidr_block = "172.16.0.0/16"
+}
+
 resource "volcengine_network_acl" "foo" {
-  vpc_id           = "vpc-2d6jskar243k058ozfdae13ne"
+  vpc_id           = volcengine_vpc.foo.id
   network_acl_name = "tf-test-acl"
 
   ingress_acl_entries {
@@ -25,4 +30,8 @@ resource "volcengine_network_acl" "foo" {
   }
 
   project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }

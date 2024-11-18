@@ -65,13 +65,11 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				Description: "The description of the VPN gateway.",
 			},
 			"billing_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "PrePaid",
-				ValidateFunc: validation.StringInSlice([]string{"PrePaid"}, false),
-				Description: "The BillingType of the VPN gateway. Only support `PrePaid`.\n" +
-					"Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "PrePaid",
+				Description: "The BillingType of the VPN gateway. Valid values: `PrePaid`, `PostPaid`.",
 			},
 			//"period_unit": {
 			//	Type:         schema.TypeString,
@@ -109,13 +107,13 @@ func ResourceVolcengineVpnGateway() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				Description: "Whether ipsec is enabled.",
+				Description: "Whether ipsec is enabled. Default is true.",
 			},
 			"ssl_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     false,
-				Description: "Whether ssl is enabled.",
+				Description: "Whether ssl is enabled. Default is false.",
 			},
 			"ssl_max_connections": {
 				Type:     schema.TypeInt,
