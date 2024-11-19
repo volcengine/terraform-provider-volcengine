@@ -96,6 +96,16 @@ func (s *VolcengineVolumeService) ReadResource(resourceData *schema.ResourceData
 		data["VolumeChargeType"] = "PrePaid"
 	}
 
+	if extraPerformance, exist := data["ExtraPerformance"]; exist {
+		extraPerformanceMap, ok := extraPerformance.(map[string]interface{})
+		if !ok {
+			return data, fmt.Errorf("The ExtraPerformance of volume is not map ")
+		}
+		data["ExtraPerformanceTypeId"] = extraPerformanceMap["ExtraPerformanceTypeId"]
+		data["ExtraPerformanceIops"] = extraPerformanceMap["IOPS"]
+		data["ExtraPerformanceThroughputMb"] = extraPerformanceMap["Throughput"]
+	}
+
 	return data, err
 }
 
@@ -163,6 +173,12 @@ func (s *VolcengineVolumeService) CreateResource(resourceData *schema.ResourceDa
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
+				},
+				"extra_performance_iops": {
+					TargetField: "ExtraPerformanceIOPS",
+				},
+				"extra_performance_throughput_mb": {
+					TargetField: "ExtraPerformanceThroughputMB",
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -298,6 +314,62 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 		})
 	}
 
+	if resourceData.HasChange("volume_type") {
+		callbacks = append(callbacks, ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyVolumeSpec",
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["VolumeId"] = d.Id()
+					(*call.SdkParam)["TargetVolumeType"] = d.Get("volume_type")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp)
+					return resp, err
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"available", "attached"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		})
+	}
+
+	if resourceData.HasChanges("extra_performance_type_id", "extra_performance_iops", "extra_performance_throughput_mb") {
+		callbacks = append(callbacks, ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyVolumeExtraPerformance",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"extra_performance_iops": {
+						TargetField: "ExtraPerformanceIOPS",
+					},
+					"extra_performance_throughput_mb": {
+						TargetField: "ExtraPerformanceThroughputMB",
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["VolumeId"] = d.Id()
+					(*call.SdkParam)["ExtraPerformanceTypeId"] = d.Get("extra_performance_type_id")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp)
+					return resp, err
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"available", "attached"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		})
+	}
+
 	// 更新Tags
 	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "CreateTags", "DeleteTags", "volume", resourceData, getUniversalInfo)
 	callbacks = append(callbacks, setResourceTagsCallbacks...)
@@ -388,6 +460,9 @@ func (s *VolcengineVolumeService) DatasourceResources(*schema.ResourceData, *sch
 			"Size": {
 				TargetField: "size",
 				Convert:     sizeConvertFunc,
+			},
+			"IOPS": {
+				TargetField: "iops",
 			},
 		},
 	}

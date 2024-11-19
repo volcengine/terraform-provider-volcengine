@@ -40,6 +40,7 @@ In addition to all arguments above, the following attributes are exported:
 * `account_id` - The ID of account.
 * `business_status` - The business status of the transit router.
 * `creation_time` - The create time.
+* `grant_status` - The grant status of the transit router.
 * `overdue_time` - The overdue time.
 * `status` - The status of the transit router.
 * `transit_router_attachments` - The attachments of transit router.

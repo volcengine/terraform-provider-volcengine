@@ -10,30 +10,6 @@ description: |-
 Provides a resource to manage transit router route entry
 ## Example Usage
 ```hcl
-data "volcengine_zones" "foo" {
-}
-
-resource "volcengine_vpc" "foo" {
-  vpc_name   = "acc-test-vpc"
-  cidr_block = "172.16.0.0/16"
-}
-
-resource "volcengine_subnet" "foo" {
-  subnet_name = "acc-test-subnet"
-  cidr_block  = "172.16.0.0/24"
-  zone_id     = data.volcengine_zones.foo.zones[0].id
-  vpc_id      = volcengine_vpc.foo.id
-}
-
-resource "volcengine_vpn_gateway" "foo" {
-  vpc_id           = volcengine_vpc.foo.id
-  subnet_id        = volcengine_subnet.foo.id
-  bandwidth        = 20
-  vpn_gateway_name = "acc-test"
-  description      = "acc-test"
-  period           = 2
-}
-
 resource "volcengine_customer_gateway" "foo" {
   ip_address            = "192.0.1.3"
   customer_gateway_name = "acc-test"
@@ -44,7 +20,6 @@ resource "volcengine_vpn_connection" "foo" {
   vpn_connection_name   = "acc-tf-test"
   description           = "acc-tf-test"
   attach_type           = "TransitRouter"
-  vpn_gateway_id        = volcengine_vpn_gateway.foo.id
   customer_gateway_id   = volcengine_customer_gateway.foo.id
   local_subnet          = ["192.168.0.0/22"]
   remote_subnet         = ["192.161.0.0/20"]
@@ -106,6 +81,7 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `as_path` - The as path of the route entry.
 * `creation_time` - The creation time of the route entry.
 * `status` - The status of the route entry.
 * `transit_router_route_entry_id` - The id of the route entry.

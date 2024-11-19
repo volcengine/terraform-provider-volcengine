@@ -163,6 +163,10 @@ func (s *VolcengineNetworkAclService) CreateResource(resourceData *schema.Resour
 				"resources": {
 					Ignore: true,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -253,6 +257,9 @@ func (s *VolcengineNetworkAclService) ModifyResource(resourceData *schema.Resour
 					Ignore: true,
 				},
 				"resources": {
+					Ignore: true,
+				},
+				"tags": {
 					Ignore: true,
 				},
 			},
@@ -364,6 +371,10 @@ func (s *VolcengineNetworkAclService) ModifyResource(resourceData *schema.Resour
 		callbacks = append(callbacks, ingressUpdateCallback)
 	}
 
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "networkacl", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -422,6 +433,15 @@ func (s *VolcengineNetworkAclService) DatasourceResources(*schema.ResourceData, 
 			"ids": {
 				TargetField: "NetworkAclIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "NetworkAclName",

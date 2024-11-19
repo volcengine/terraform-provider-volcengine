@@ -23,8 +23,15 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of Network Acl.
 * `network_acl_name` - (Optional) The name of Network Acl.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the network acl.
 * `subnet_id` - (Optional) The subnet id of Network Acl.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The vpc id of Network Acl.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -53,10 +60,14 @@ In addition to all arguments above, the following attributes are exported:
         * `source_cidr_ip` - The SourceCidrIp of entry.
     * `network_acl_id` - The ID of Network Acl.
     * `network_acl_name` - The Name of Network Acl.
+    * `project_name` - The project name of the network acl.
     * `resources` - The resources info of Network Acl.
         * `resource_id` - The resource id of Network Acl.
         * `status` - The resource status of Network Acl.
     * `status` - The Status of Network Acl.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - Update time of Network Acl.
     * `vpc_id` - The vpc id of Network Acl.
 * `total_count` - The total count of Network Acl query.

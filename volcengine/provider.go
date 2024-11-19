@@ -187,12 +187,17 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_gateway_route"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_virtual_interface"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_auto_snapshot_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_auto_snapshot_policy_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_snapshot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_snapshot_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume_attach"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_available_resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_command"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_hpc_cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_type"
@@ -202,6 +207,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_key_pair_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_launch_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image_import"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/image_share_permission"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_associate"
@@ -431,7 +438,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_clb_zones":            clbZone.DataSourceVolcengineClbZones(),
 
 			// ================ EBS ================
-			"volcengine_volumes": volume.DataSourceVolcengineVolumes(),
+			"volcengine_volumes":                    volume.DataSourceVolcengineVolumes(),
+			"volcengine_ebs_snapshots":              ebs_snapshot.DataSourceVolcengineEbsSnapshots(),
+			"volcengine_ebs_snapshot_groups":        ebs_snapshot_group.DataSourceVolcengineEbsSnapshotGroups(),
+			"volcengine_ebs_auto_snapshot_policies": ebs_auto_snapshot_policy.DataSourceVolcengineEbsAutoSnapshotPolicies(),
 
 			// ================ ECS ================
 			"volcengine_ecs_instances":           ecs_instance.DataSourceVolcengineEcsInstances(),
@@ -446,6 +456,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_invocation_results":  ecs_invocation_result.DataSourceVolcengineEcsInvocationResults(),
 			"volcengine_ecs_available_resources": ecs_available_resource.DataSourceVolcengineEcsAvailableResources(),
 			"volcengine_ecs_instance_types":      ecs_instance_type.DataSourceVolcengineEcsInstanceTypes(),
+			"volcengine_image_share_permissions": image_share_permission.DataSourceVolcengineImageSharePermissions(),
+			"volcengine_ecs_hpc_clusters":        ecs_hpc_cluster.DataSourceVolcengineEcsHpcClusters(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
@@ -730,8 +742,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_acl_entry":           acl_entry.ResourceVolcengineAclEntry(),
 
 			// ================ EBS ================
-			"volcengine_volume":        volume.ResourceVolcengineVolume(),
-			"volcengine_volume_attach": volume_attach.ResourceVolcengineVolumeAttach(),
+			"volcengine_volume":                              volume.ResourceVolcengineVolume(),
+			"volcengine_volume_attach":                       volume_attach.ResourceVolcengineVolumeAttach(),
+			"volcengine_ebs_snapshot":                        ebs_snapshot.ResourceVolcengineEbsSnapshot(),
+			"volcengine_ebs_snapshot_group":                  ebs_snapshot_group.ResourceVolcengineEbsSnapshotGroup(),
+			"volcengine_ebs_auto_snapshot_policy":            ebs_auto_snapshot_policy.ResourceVolcengineEbsAutoSnapshotPolicy(),
+			"volcengine_ebs_auto_snapshot_policy_attachment": ebs_auto_snapshot_policy_attachment.ResourceVolcengineEbsAutoSnapshotPolicyAttachment(),
 
 			// ================ ECS ================
 			"volcengine_ecs_instance":                 ecs_instance.ResourceVolcengineEcsInstance(),
@@ -744,6 +760,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_command":                  ecs_command.ResourceVolcengineEcsCommand(),
 			"volcengine_ecs_invocation":               ecs_invocation.ResourceVolcengineEcsInvocation(),
 			"volcengine_iam_role_attachment":          ecs_iam_role_attachment.ResourceVolcengineIamRoleAttachment(),
+			"volcengine_image":                        image.ResourceVolcengineImage(),
+			"volcengine_image_import":                 image_import.ResourceVolcengineImageImport(),
+			"volcengine_image_share_permission":       image_share_permission.ResourceVolcengineImageSharePermission(),
+			"volcengine_ecs_hpc_cluster":              ecs_hpc_cluster.ResourceVolcengineEcsHpcCluster(),
 
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),

@@ -46,6 +46,18 @@ func ResourceVolcengineTransitRouterBandwidthPackage() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the transit router bandwidth package.",
 			},
+			"local_geographic_region_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "China",
+				Description: "The local geographic region set ID. Valid values: `China`, `Asia`. Default is China.",
+			},
+			"peer_geographic_region_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "China",
+				Description: "The peer geographic region set ID. Valid values: `China`, `Asia`. Default is China.",
+			},
 			"bandwidth": {
 				Type:        schema.TypeInt,
 				Optional:    true,

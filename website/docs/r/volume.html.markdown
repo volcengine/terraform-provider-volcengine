@@ -97,10 +97,13 @@ The following arguments are supported:
 * `kind` - (Required, ForceNew) The kind of Volume, the value is `data`.
 * `size` - (Required) The size of Volume.
 * `volume_name` - (Required) The name of Volume.
-* `volume_type` - (Required, ForceNew) The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
+* `volume_type` - (Required) The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `zone_id` - (Required, ForceNew) The id of the Zone.
 * `delete_with_instance` - (Optional) Delete Volume with Attached Instance.
 * `description` - (Optional) The description of the Volume.
+* `extra_performance_iops` - (Optional) The extra IOPS performance size for volume. Unit: times per second. The valid values for `Balance` and `IOPS` is 0~50000.
+* `extra_performance_throughput_mb` - (Optional) The extra Throughput performance size for volume. Unit: MB/s. The valid values for ESSD FlexPL volume is 0~650.
+* `extra_performance_type_id` - (Optional) The type of extra performance for volume. The valid values for ESSD FlexPL volume are `Throughput`, `Balance`, `IOPS`. The valid value for TSSD_TL0 volume is `Throughput`.
 * `instance_id` - (Optional, ForceNew) The ID of the instance to which the created volume is automatically attached. Please note this field needs to ask the system administrator to apply for a whitelist.
 When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.
 * `project_name` - (Optional) The ProjectName of the Volume.

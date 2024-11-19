@@ -30,7 +30,7 @@ resource "volcengine_tls_topic" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `project_id` - (Required, ForceNew) The project id of the tls topic.
-* `shard_count` - (Required, ForceNew) The count of shards in the tls topic. Valid value range: 1-10.
+* `shard_count` - (Required, ForceNew) The count of shards in the tls topic. Valid value range: 1-10. This field is only valid when creating tls topic.
 * `topic_name` - (Required) The name of the tls topic.
 * `ttl` - (Required) The data storage time of the tls topic. Unit: Day. Valid value range: 1-3650.
 * `auto_split` - (Optional) Whether to enable automatic partition splitting function of the tls topic.
@@ -38,6 +38,10 @@ true: (default) When the amount of data written exceeds the capacity of existing
 false: Disables automatic partition splitting.
 * `description` - (Optional) The description of the tls project.
 * `enable_tracking` - (Optional) Whether to enable WebTracking function of the tls topic.
+* `manual_split_shard_id` - (Optional) The id of shard to be manually split. This field is valid only when modifying the topic. 
+When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `manual_split_shard_number` - (Optional) The split number of shard. The valid number should be a non-zero even number, such as 2, 4, 8, or 16. The total number of read-write status shards after splitting cannot exceed 50. 
+When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `max_split_shard` - (Optional) The maximum number of partitions, which is the maximum number of partitions after partition splitting. The value range is 1 to 10, with a default of 10.
 * `tags` - (Optional) Tags.
 * `time_format` - (Optional) The format of the time field.

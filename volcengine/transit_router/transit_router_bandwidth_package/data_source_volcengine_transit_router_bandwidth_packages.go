@@ -28,6 +28,16 @@ func DataSourceVolcengineTransitRouterBandwidthPackages() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the TransitRouter bandwidth package.",
 			},
+			"local_geographic_region_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The local geographic region set ID.",
+			},
+			"peer_geographic_region_set_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The peer geographic region set ID.",
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,

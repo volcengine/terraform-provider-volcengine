@@ -203,7 +203,7 @@ func ResourceVolcengineListener() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return (d.Get("protocol").(string) != "TCP" && d.Get("protocol").(string) != "UDP") || d.Get("connection_drain_enabled").(string) != "on"
 				},
-				Description: "The connection drain timeout of the Listener. Valid value range is `1-900`.\n" +
+				Description: "The connection drain timeout of the Listener. Valid value range is `0-900`.\n" +
 					"This filed is required when the value of field `connection_drain_enabled` is `on`.",
 			},
 			"health_check": {

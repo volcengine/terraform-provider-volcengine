@@ -214,6 +214,15 @@ func (s *VolcengineDirectConnectVirtualInterfaceService) DatasourceResources(*sc
 				TargetField: "VirtualInterfaceIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tag_filters": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "VirtualInterfaceName",
 		IdField:      "VirtualInterfaceId",

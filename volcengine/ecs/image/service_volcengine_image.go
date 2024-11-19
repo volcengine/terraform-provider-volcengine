@@ -32,16 +32,15 @@ func (s *VolcengineImageService) ReadResources(condition map[string]interface{})
 		ok      bool
 	)
 	return ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 20, nil, func(m map[string]interface{}) (data []interface{}, next string, err error) {
-		ecs := s.Client.EcsClient
-		action := "DescribeInstances"
+		action := "DescribeImages"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = ecs.DescribeImagesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, next, err
 			}
 		} else {
-			resp, err = ecs.DescribeImagesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, next, err
 			}
@@ -97,7 +96,81 @@ func (s *VolcengineImageService) ReadResource(resourceData *schema.ResourceData,
 }
 
 func (s *VolcengineImageService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
-	return nil
+	return &resource.StateChangeConf{
+		Pending:    []string{},
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Target:     target,
+		Timeout:    timeout,
+		Refresh: func() (result interface{}, state string, err error) {
+			var (
+				d          map[string]interface{}
+				status     interface{}
+				failStates []string
+			)
+			failStates = append(failStates, "Failed")
+
+			if err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+				d, err = s.describeTasks(id)
+				if err != nil {
+					if ve.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
+				return nil, "", err
+			}
+
+			status, err = ve.ObtainSdkValue("Status", d)
+			if err != nil {
+				return nil, "", err
+			}
+			for _, v := range failStates {
+				if v == status.(string) {
+					return nil, "", fmt.Errorf("image status error, status: %s", status.(string))
+				}
+			}
+			return d, status.(string), err
+		},
+	}
+}
+
+func (s *VolcengineImageService) describeTasks(resourceId string) (task map[string]interface{}, err error) {
+	action := "DescribeTasks"
+	req := map[string]interface{}{
+		"ResourceIds.1": resourceId,
+	}
+
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return task, err
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
+
+	results, err := ve.ObtainSdkValue("Result.Tasks", *resp)
+	if err != nil {
+		return task, err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	tasks, ok := results.([]interface{})
+	if !ok {
+		return task, errors.New("Result.Tasks is not Slice")
+	}
+	for _, v := range tasks {
+		if task, ok = v.(map[string]interface{}); !ok {
+			return nil, errors.New("The value of Result.Tasks is not map ")
+		}
+	}
+	if len(task) == 0 {
+		return task, fmt.Errorf("task with resource %s not exist", resourceId)
+	}
+	return task, nil
 }
 
 func (s *VolcengineImageService) WithResourceResponseHandlers(image map[string]interface{}) []ve.ResourceResponseHandler {
@@ -108,15 +181,118 @@ func (s *VolcengineImageService) WithResourceResponseHandlers(image map[string]i
 }
 
 func (s *VolcengineImageService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "CreateImage",
+			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"create_whole_image": {
+					TargetField: "CreateWholeImage",
+					ForceGet:    true,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				id, _ := ve.ObtainSdkValue("Result.ImageId", *resp)
+				d.SetId(id.(string))
+				return nil
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Succeeded"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineImageService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	var callbacks []ve.Callback
+
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ModifyImageAttribute",
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"image_name": {
+					TargetField: "ImageName",
+				},
+				"description": {
+					TargetField: "Description",
+				},
+				"boot_mode": {
+					TargetField: "BootMode",
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) > 0 {
+					(*call.SdkParam)["ImageId"] = d.Id()
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+		},
+	}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "CreateTags", "DeleteTags", "image", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineImageService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "DeleteImages",
+			ConvertMode: ve.RequestConvertIgnore,
+			SdkParam: &map[string]interface{}{
+				"ImageIds.1": resourceData.Id(),
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(15*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading image on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineImageService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
@@ -125,6 +301,15 @@ func (s *VolcengineImageService) DatasourceResources(data *schema.ResourceData, 
 			"ids": {
 				TargetField: "ImageIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "ImageName",
@@ -135,4 +320,23 @@ func (s *VolcengineImageService) DatasourceResources(data *schema.ResourceData, 
 
 func (s *VolcengineImageService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineImageService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "image",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "ecs",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

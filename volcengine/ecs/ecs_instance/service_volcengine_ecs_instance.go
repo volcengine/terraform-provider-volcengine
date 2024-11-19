@@ -757,9 +757,16 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 					ConvertType: ve.ConvertDefault,
 					ForceGet:    true,
 				},
+				"auto_renew": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
+				},
+				"auto_renew_period": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) > 2 {
+				if len(*call.SdkParam) > 3 {
 					(*call.SdkParam)["AutoPay"] = true
 					if (*call.SdkParam)["InstanceChargeType"].(string) == "PostPaid" {
 						//后付费
@@ -992,6 +999,13 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 						ForceGet:    true,
 					},
 				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					keyPairName, exist := d.GetOkExists("key_pair_name")
+					if !exist || keyPairName == "" {
+						delete(*call.SdkParam, "KeyPairName")
+					}
+					return true, nil
+				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo("ReplaceSystemVolume"), call.SdkParam)
@@ -1155,6 +1169,22 @@ func (s *VolcengineEcsService) DatasourceResources(data *schema.ResourceData, re
 			},
 			"deployment_set_ids": {
 				TargetField: "DeploymentSetIds",
+				ConvertType: ve.ConvertWithN,
+			},
+			"eip_addresses": {
+				TargetField: "EipAddresses",
+				ConvertType: ve.ConvertWithN,
+			},
+			"ipv6_addresses": {
+				TargetField: "Ipv6Addresses",
+				ConvertType: ve.ConvertWithN,
+			},
+			"instance_type_families": {
+				TargetField: "InstanceTypeFamilies",
+				ConvertType: ve.ConvertWithN,
+			},
+			"instance_type_ids": {
+				TargetField: "InstanceTypeIds",
 				ConvertType: ve.ConvertWithN,
 			},
 		},

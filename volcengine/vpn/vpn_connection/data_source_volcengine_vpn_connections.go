@@ -38,6 +38,36 @@ func DataSourceVolcengineVpnConnections() *schema.Resource {
 				Optional:    true,
 				Description: "An ID of customer gateway.",
 			},
+			"transit_router_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "An ID of transit router.",
+			},
+			"attach_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The attach type of VPN connection. Valid values: `VpnGateway`, `TransitRouter`.",
+			},
+			"attach_status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The attach status of VPN connection.",
+			},
+			"spec": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The spec of IPSec connection. Valid values: `default`, `large`.",
+			},
+			"status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The status of IPSec connection. Valid values: `Creating`, `Deleting`, `Pending`, `Available`.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of VPN connection.",
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,

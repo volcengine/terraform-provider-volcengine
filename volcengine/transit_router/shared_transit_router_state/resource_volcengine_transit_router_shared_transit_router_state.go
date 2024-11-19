@@ -48,7 +48,7 @@ func ResourceVolcengineSharedTransitRouterState() *schema.Resource {
 					"Accept",
 					"Reject",
 				}, false),
-				Description: "`Accept` or `Reject` the shared transit router.",
+				Description: "`Accept` or `Reject` the shared transit router. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 		},
 	}

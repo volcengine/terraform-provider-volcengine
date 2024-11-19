@@ -81,6 +81,8 @@ The following arguments are supported:
 * `ids` - (Optional) A list of VPN gateway route ids.
 * `next_hop_id` - (Optional) An ID of next hop.
 * `output_file` - (Optional) File name where to save data source results.
+* `route_type` - (Optional) The type of the VPN gateway route. Valid values: `Static`, `BGP`, `Cloud`.
+* `status` - (Optional) The status of the VPN gateway route.
 * `vpn_gateway_id` - (Optional) An ID of VPN gateway.
 
 ## Attributes Reference

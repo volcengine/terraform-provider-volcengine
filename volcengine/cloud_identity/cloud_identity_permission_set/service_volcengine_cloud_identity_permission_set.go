@@ -291,6 +291,9 @@ func (s *VolcengineCloudIdentityPermissionSetService) ModifyResource(resourceDat
 
 	if resourceData.HasChange("permission_policies") {
 		add, remove, _, _ := ve.GetSetDifference("permission_policies", resourceData, PermissionPolicyHash, false)
+		for _, element := range remove.List() {
+			callbacks = append(callbacks, s.policyActionCallback(resourceData, "RemovePermissionPolicyFromPermissionSet", element))
+		}
 		for _, element := range add.List() {
 			if policy, ok := element.(map[string]interface{}); ok {
 				policyType := policy["permission_policy_type"].(string)
@@ -300,9 +303,6 @@ func (s *VolcengineCloudIdentityPermissionSetService) ModifyResource(resourceDat
 					callbacks = append(callbacks, s.policyActionCallback(resourceData, "AddInlinePolicyToPermissionSet", element))
 				}
 			}
-		}
-		for _, element := range remove.List() {
-			callbacks = append(callbacks, s.policyActionCallback(resourceData, "RemovePermissionPolicyFromPermissionSet", element))
 		}
 	}
 

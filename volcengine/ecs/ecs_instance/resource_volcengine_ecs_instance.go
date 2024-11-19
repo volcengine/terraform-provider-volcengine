@@ -80,11 +80,14 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description: "The password of ECS instance.",
 			},
 			"key_pair_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Computed:    true,
-				Description: "The ssh key name of ECS instance.",
+				Type:     schema.TypeString,
+				Optional: true,
+				//ForceNew: true,
+				//Computed: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return !d.HasChange("image_id")
+				},
+				Description: "The ssh key name of ECS instance. This field can be modified only when the `image_id` is modified.",
 			},
 			"keep_image_credential": {
 				Type:     schema.TypeBool,
@@ -199,6 +202,15 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				Description:      "The include data volumes flag of ECS instance.Only effective when change instance charge type.include_data_volumes.",
 			},
 
+			//"vpc_id": {
+			//	Type:     schema.TypeString,
+			//	Optional: true,
+			//	Computed: true,
+			//	DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			//		return d.Id() == ""
+			//	},
+			//	Description: "The vpc ID of primary networkInterface. This field is only effective when modifying the instance.",
+			//},
 			"subnet_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -225,10 +237,13 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			},
 
 			"primary_ip_address": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+				//	return !d.HasChange("subnet_id")
+				//},
 				Description: "The private ip address of primary networkInterface.",
 			},
 
@@ -405,7 +420,9 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 						},
 						"primary_ip_address": {
 							Type:        schema.TypeString,
+							Optional:    true,
 							Computed:    true,
+							ForceNew:    true,
 							Description: "The private ip address of secondary networkInterface.",
 						},
 					},

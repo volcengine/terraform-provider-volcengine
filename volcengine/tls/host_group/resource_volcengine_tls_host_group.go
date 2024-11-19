@@ -97,7 +97,7 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 			"iam_project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
+				Computed:    true,
 				Description: "The project name of iam.",
 			},
 

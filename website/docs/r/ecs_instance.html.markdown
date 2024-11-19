@@ -99,7 +99,7 @@ It is not recommended to use this field, it is recommended to use `volcengine_ei
 * `keep_image_credential` - (Optional) Whether to keep the mirror settings. Only custom images and shared images support this field.
  When the value of this field is true, the Password and KeyPairName cannot be specified.
  When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
-* `key_pair_name` - (Optional, ForceNew) The ssh key name of ECS instance.
+* `key_pair_name` - (Optional) The ssh key name of ECS instance. This field can be modified only when the `image_id` is modified.
 * `password` - (Optional) The password of ECS instance.
 * `period` - (Optional) The period of ECS instance.Only effective when instance_charge_type is PrePaid. Default is 12. Unit is Month.
 * `primary_ip_address` - (Optional, ForceNew) The private ip address of primary networkInterface.
@@ -130,6 +130,7 @@ The `secondary_network_interfaces` object supports the following:
 
 * `security_group_ids` - (Required, ForceNew) The security group ID set of secondary networkInterface.
 * `subnet_id` - (Required, ForceNew) The subnet ID of secondary networkInterface.
+* `primary_ip_address` - (Optional, ForceNew) The private ip address of secondary networkInterface.
 
 The `tags` object supports the following:
 
