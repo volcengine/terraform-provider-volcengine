@@ -80,6 +80,8 @@ Values:
     * `description` - The description of the ssl server.
     * `id` - The SSL VPN server id.
     * `local_subnets` - The local network segment of the SSL server. The local network segment is the address segment that the client accesses through the SSL VPN connection.
+    * `port` - The port of the ssl server.
+    * `project_name` - The project name of the ssl server.
     * `protocol` - The protocol used by the SSL server. Valid values are `TCP`, `UDP`. Default Value: `UDP`.
     * `ssl_vpn_server_id` - The id of the ssl vpn server.
     * `ssl_vpn_server_name` - The name of the SSL server.

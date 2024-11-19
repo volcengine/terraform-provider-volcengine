@@ -41,14 +41,13 @@ The following arguments are supported:
 * `bandwidth` - (Required) The bandwidth of the VPN gateway. Unit: Mbps. Values: 5, 10, 20, 50, 100, 200, 500.
 * `subnet_id` - (Required, ForceNew) The ID of the subnet where you want to create the VPN gateway.
 * `vpc_id` - (Required, ForceNew) The ID of the VPC where you want to create the VPN gateway.
-* `billing_type` - (Optional, ForceNew) The BillingType of the VPN gateway. Only support `PrePaid`.
-Terraform will only remove the PrePaid VPN gateway from the state file, not actually remove.
+* `billing_type` - (Optional, ForceNew) The BillingType of the VPN gateway. Valid values: `PrePaid`, `PostPaid`.
 * `description` - (Optional) The description of the VPN gateway.
-* `ipsec_enabled` - (Optional) Whether ipsec is enabled.
+* `ipsec_enabled` - (Optional) Whether ipsec is enabled. Default is true.
 * `period` - (Optional) The Period of the VPN gateway. Default value is 12. This parameter is only useful when creating vpn gateway. Default period unit is Month.
 Value range: 1~9, 12, 24, 36. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `project_name` - (Optional) The project name of the VPN gateway.
-* `ssl_enabled` - (Optional) Whether ssl is enabled.
+* `ssl_enabled` - (Optional) Whether ssl is enabled. Default is false.
 * `ssl_max_connections` - (Optional) The max connections of ssl. This parameter can only be passed in when ssl_enabled is true. Default is 5.
 * `tags` - (Optional) Tags.
 * `vpn_gateway_name` - (Optional) The name of the VPN gateway.

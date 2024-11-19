@@ -91,7 +91,7 @@ The following arguments are supported:
 * `certificate_id` - (Optional) The certificate id associated with the listener.
 * `connection_drain_enabled` - (Optional) Whether to enable connection drain of the Listener. Valid values: `off`, `on`. Default is `off`.
 This filed is valid only when the value of field `protocol` is `TCP` or `UDP`.
-* `connection_drain_timeout` - (Optional) The connection drain timeout of the Listener. Valid value range is `1-900`.
+* `connection_drain_timeout` - (Optional) The connection drain timeout of the Listener. Valid value range is `0-900`.
 This filed is required when the value of field `connection_drain_enabled` is `on`.
 * `cookie` - (Optional) The name of the cookie for session persistence configured on the backend server. When PersistenceType is configured as `server`, this parameter is required. When PersistenceType is configured as any other value, this parameter is not effective.
 * `description` - (Optional) The description of the Listener.

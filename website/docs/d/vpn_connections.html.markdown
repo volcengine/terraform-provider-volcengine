@@ -70,10 +70,16 @@ data "volcengine_vpn_connections" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
+* `attach_status` - (Optional) The attach status of VPN connection.
+* `attach_type` - (Optional) The attach type of VPN connection. Valid values: `VpnGateway`, `TransitRouter`.
 * `customer_gateway_id` - (Optional) An ID of customer gateway.
 * `ids` - (Optional) A list of VPN connection ids.
 * `name_regex` - (Optional) A Name Regex of VPN connection.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of VPN connection.
+* `spec` - (Optional) The spec of IPSec connection. Valid values: `default`, `large`.
+* `status` - (Optional) The status of IPSec connection. Valid values: `Creating`, `Deleting`, `Pending`, `Available`.
+* `transit_router_id` - (Optional) An ID of transit router.
 * `vpn_connection_names` - (Optional) A list of VPN connection names.
 * `vpn_gateway_id` - (Optional) An ID of VPN gateway.
 

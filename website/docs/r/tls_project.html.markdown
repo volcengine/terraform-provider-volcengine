@@ -24,7 +24,7 @@ resource "volcengine_tls_project" "foo" {
 The following arguments are supported:
 * `project_name` - (Required) The name of the tls project.
 * `description` - (Optional) The description of the tls project.
-* `iam_project_name` - (Optional, ForceNew) The IAM project name of the tls project.
+* `iam_project_name` - (Optional) The IAM project name of the tls project.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:

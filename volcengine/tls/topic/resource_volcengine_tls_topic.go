@@ -64,8 +64,8 @@ func ResourceVolcengineTlsTopic() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},
-				Description: "The id of shard to be manually split. This field is valid only when modifying the topic." +
-					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields. \n",
+				Description: "The id of shard to be manually split. This field is valid only when modifying the topic. \n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"manual_split_shard_number": {
 				Type:     schema.TypeInt,

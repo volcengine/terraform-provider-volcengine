@@ -27,6 +27,7 @@ The following arguments are supported:
 * `ip_address` - (Optional) A IP address of the customer gateway.
 * `name_regex` - (Optional) A Name Regex of customer gateway.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the VPN customer gateway.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

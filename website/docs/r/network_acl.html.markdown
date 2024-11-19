@@ -10,8 +10,13 @@ description: |-
 Provides a resource to manage network acl
 ## Example Usage
 ```hcl
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-vpc"
+  cidr_block = "172.16.0.0/16"
+}
+
 resource "volcengine_network_acl" "foo" {
-  vpc_id           = "vpc-2d6jskar243k058ozfdae13ne"
+  vpc_id           = volcengine_vpc.foo.id
   network_acl_name = "tf-test-acl"
 
   ingress_acl_entries {
@@ -37,6 +42,10 @@ resource "volcengine_network_acl" "foo" {
   }
 
   project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -47,6 +56,7 @@ The following arguments are supported:
 * `ingress_acl_entries` - (Optional) The ingress entries of Network Acl.
 * `network_acl_name` - (Optional) The name of Network Acl.
 * `project_name` - (Optional) The project name of the network acl.
+* `tags` - (Optional) Tags.
 
 The `egress_acl_entries` object supports the following:
 
@@ -65,6 +75,11 @@ The `ingress_acl_entries` object supports the following:
 * `port` - (Optional) The port of entry. Default is `-1/-1`. When Protocol is `all`, `icmp` or `gre`, the port range is `-1/-1`, which means no port restriction. When the Protocol is `tcp` or `udp`, the port range is `1~65535`, and the format is `1/200`, `80/80`, which means port 1 to port 200, port 80.
 * `protocol` - (Optional) The protocol of entry, default is `all`. The value can be `icmp` or `gre` or `tcp` or `udp` or `all`.
 * `source_cidr_ip` - (Optional) The SourceCidrIp of entry.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

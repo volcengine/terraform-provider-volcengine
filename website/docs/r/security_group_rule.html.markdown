@@ -67,14 +67,14 @@ resource "volcengine_security_group_rule" "g1test06" {
 ## Argument Reference
 The following arguments are supported:
 * `direction` - (Required, ForceNew) Direction of rule, ingress (inbound) or egress (outbound).
-* `port_end` - (Required, ForceNew) Port end of egress/ingress Rule.
-* `port_start` - (Required, ForceNew) Port start of egress/ingress Rule.
+* `port_end` - (Required, ForceNew) Port end of egress/ingress Rule. When the `protocol` is `tcp` or `udp`, the valid value range is 1~65535. When the `protocol` is `icmp` or `all` or `icmpv6`, the valid value is -1, indicating no restriction on port values.
+* `port_start` - (Required, ForceNew) Port start of egress/ingress Rule. When the `protocol` is `tcp` or `udp`, the valid value range is 1~65535. When the `protocol` is `icmp` or `all` or `icmpv6`, the valid value is -1, indicating no restriction on port values.
 * `protocol` - (Required, ForceNew) Protocol of the SecurityGroup, the value can be `tcp` or `udp` or `icmp` or `all` or `icmpv6`.
 * `security_group_id` - (Required, ForceNew) Id of SecurityGroup.
 * `cidr_ip` - (Optional, ForceNew) Cidr ip of egress/ingress Rule.
 * `description` - (Optional) description of a egress rule.
-* `policy` - (Optional, ForceNew) Access strategy.
-* `priority` - (Optional, ForceNew) Priority of a security group rule.
+* `policy` - (Optional, ForceNew) Access strategy. Valid values: `accept`, `drop`. Default is `accept`.
+* `priority` - (Optional, ForceNew) Priority of a security group rule. Valid value range: 1~100. Default is 1.
 * `source_group_id` - (Optional, ForceNew) ID of the source security group whose access permission you want to set.
 
 ## Attributes Reference

@@ -42,6 +42,7 @@ In addition to all arguments above, the following attributes are exported:
     * `business_status` - The business status of the transit router.
     * `creation_time` - The create time.
     * `description` - The description info.
+    * `grant_status` - The grant status of the transit router.
     * `id` - The ID of the transit router.
     * `overdue_time` - The overdue time.
     * `project_name` - The ProjectName of the transit router.
