@@ -197,6 +197,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_command"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_deployment_set_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_hpc_cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_state"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ecs/ecs_instance_type"
@@ -456,6 +457,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ecs_available_resources": ecs_available_resource.DataSourceVolcengineEcsAvailableResources(),
 			"volcengine_ecs_instance_types":      ecs_instance_type.DataSourceVolcengineEcsInstanceTypes(),
 			"volcengine_image_share_permissions": image_share_permission.DataSourceVolcengineImageSharePermissions(),
+			"volcengine_ecs_hpc_clusters":        ecs_hpc_cluster.DataSourceVolcengineEcsHpcClusters(),
 
 			// ================ NAT ================
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
@@ -761,6 +763,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_image":                        image.ResourceVolcengineImage(),
 			"volcengine_image_import":                 image_import.ResourceVolcengineImageImport(),
 			"volcengine_image_share_permission":       image_share_permission.ResourceVolcengineImageSharePermission(),
+			"volcengine_ecs_hpc_cluster":              ecs_hpc_cluster.ResourceVolcengineEcsHpcCluster(),
 
 			// ================ NAT ================
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
