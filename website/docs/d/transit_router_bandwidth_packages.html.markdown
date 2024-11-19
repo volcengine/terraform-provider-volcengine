@@ -25,7 +25,9 @@ data "volcengine_transit_router_bandwidth_packages" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `ids` - (Optional) The ID list of the TransitRouter bandwidth package.
+* `local_geographic_region_set_id` - (Optional) The local geographic region set ID.
 * `output_file` - (Optional) File name where to save data source results.
+* `peer_geographic_region_set_id` - (Optional) The peer geographic region set ID.
 * `project_name` - (Optional) The ProjectName of the TransitRouter bandwidth package.
 * `tags` - (Optional) Tags.
 * `transit_router_bandwidth_package_name` - (Optional) The name of the TransitRouter bandwidth package.

@@ -34,6 +34,12 @@ func DataSourceVolcengineNetworkAcls() *schema.Resource {
 				Optional:    true,
 				Description: "The subnet id of Network Acl.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the network acl.",
+			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -101,6 +107,12 @@ func DataSourceVolcengineNetworkAcls() *schema.Resource {
 							Computed:    true,
 							Description: "The count of Network acl entry.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the network acl.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"ingress_acl_entries": {
 							Type:        schema.TypeList,
 							Computed:    true,

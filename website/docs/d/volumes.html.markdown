@@ -51,8 +51,18 @@ The `tags` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `total_count` - The total count of Volume query.
 * `volumes` - The collection of Volume query.
+    * `baseline_performance` - The baseline performance of the volume.
+        * `iops` - The baseline IOPS performance size for volume.
+        * `throughput` - The baseline Throughput performance size for volume. Unit: MB/s.
+    * `extra_performance` - The extra performance of the volume.
+        * `extra_performance_type_id` - The type of extra performance for volume.
+        * `iops` - The extra IOPS performance size for volume.
+        * `throughput` - The extra Throughput performance size for volume. Unit: MB/s.
     * `tags` - Tags.
         * `key` - The Key of Tags.
         * `value` - The Value of Tags.
+    * `total_performance` - The baseline performance of the volume.
+        * `iops` - The total IOPS performance size for volume.
+        * `throughput` - The total Throughput performance size for volume. Unit: MB/s.
 
 

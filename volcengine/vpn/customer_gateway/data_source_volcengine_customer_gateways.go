@@ -34,6 +34,11 @@ func DataSourceVolcengineCustomerGateways() *schema.Resource {
 				ValidateFunc: validation.IsIPAddress,
 				Description:  "A IP address of the customer gateway.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the VPN customer gateway.",
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,

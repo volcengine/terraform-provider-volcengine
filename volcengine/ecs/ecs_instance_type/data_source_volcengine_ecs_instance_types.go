@@ -19,6 +19,11 @@ func DataSourceVolcengineEcsInstanceTypes() *schema.Resource {
 				Description: "A list of instance type IDs. " +
 					"When the number of ids is greater than 10, only the first 10 are effective.",
 			},
+			"image_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The id of image.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,

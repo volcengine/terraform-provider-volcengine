@@ -217,6 +217,11 @@ func (s *VolcengineDirectConnectConnectionService) DatasourceResources(*schema.R
 			"tag_filters": {
 				TargetField: "TagFilters",
 				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "DirectConnectConnectionName",

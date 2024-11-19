@@ -25,7 +25,7 @@ The following arguments are supported:
 * `auto_update` - (Optional) Whether enable auto update.
 * `host_identifier` - (Optional) The identifier of host.
 * `host_ip_list` - (Optional) The ip list of host group.
-* `iam_project_name` - (Optional, ForceNew) The project name of iam.
+* `iam_project_name` - (Optional) The project name of iam.
 * `service_logging` - (Optional) Whether enable service logging.
 * `update_end_time` - (Optional) The update end time of log collector.
 * `update_start_time` - (Optional) The update start time of log collector.

@@ -13,6 +13,8 @@ Provides a resource to manage transit router bandwidth package
 resource "volcengine_transit_router_bandwidth_package" "foo" {
   transit_router_bandwidth_package_name = "acc-tf-test"
   description                           = "acc-test"
+  local_geographic_region_set_id        = "China"
+  peer_geographic_region_set_id         = "China"
   bandwidth                             = 2
   period                                = 1
   renew_type                            = "Manual"
@@ -27,6 +29,8 @@ resource "volcengine_transit_router_bandwidth_package" "foo" {
 The following arguments are supported:
 * `bandwidth` - (Optional) The bandwidth peak of the transit router bandwidth package. Unit: Mbps. Valid values: 2-10000. Default is 2 Mbps.
 * `description` - (Optional) The description of the transit router bandwidth package.
+* `local_geographic_region_set_id` - (Optional) The local geographic region set ID. Valid values: `China`, `Asia`. Default is China.
+* `peer_geographic_region_set_id` - (Optional) The peer geographic region set ID. Valid values: `China`, `Asia`. Default is China.
 * `period` - (Optional) The period of the transit router bandwidth package, the valid value range in 1~9 or 12 or 36. Default value is 12. The period unit defaults to `Month`.The modification of this field only takes effect when the value of the `renew_type` is `Manual`.
 * `project_name` - (Optional) The ProjectName of the transit router bandwidth package.
 * `remain_renew_times` - (Optional) The remaining renewal times of of the transit router bandwidth package. Valid values: -1 or 1~100. Default value is -1, means unlimited renewal.This field is only effective when the value of the `renew_type` is `Auto`.

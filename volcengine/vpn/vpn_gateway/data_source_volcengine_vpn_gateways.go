@@ -44,6 +44,26 @@ func DataSourceVolcengineVpnGateways() *schema.Resource {
 				ValidateFunc: validation.IsIPAddress,
 				Description:  "A IP address of the VPN gateway.",
 			},
+			"status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The status of the VPN gateway.",
+			},
+			"ssl_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether ssl is enabled.",
+			},
+			"ipsec_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether IPSec is enabled.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the VPN gateway.",
+			},
 			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,

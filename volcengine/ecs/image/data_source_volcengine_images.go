@@ -39,6 +39,21 @@ func DataSourceVolcengineImages() *schema.Resource {
 				Optional:    true,
 				Description: "Whether the Image support cloud-init.",
 			},
+			"image_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of Image.",
+			},
+			"platform": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The platform of Image.",
+			},
+			"is_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether the Image maintained for a long time.",
+			},
 			"status": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -48,6 +63,7 @@ func DataSourceVolcengineImages() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of Image status, the value can be `available` or `creating` or `error`.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -147,6 +163,12 @@ func DataSourceVolcengineImages() *schema.Resource {
 							Computed:    true,
 							Description: "The size(GiB) of Image.",
 						},
+						"boot_mode": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The boot mode of Image.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

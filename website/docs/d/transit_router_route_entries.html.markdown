@@ -30,6 +30,7 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `entries` - The list of route entries.
+    * `as_path` - The as path of the route entry.
     * `creation_time` - The creation time of the route entry.
     * `description` - Description of the transit router route entry.
     * `destination_cidr_block` - The target network segment of the route entry.

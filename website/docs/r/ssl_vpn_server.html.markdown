@@ -51,23 +51,25 @@ resource "volcengine_ssl_vpn_server" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `client_ip_pool` - (Required, ForceNew) SSL client network segment.
-* `local_subnets` - (Required, ForceNew) The local network segment of the SSL server. The local network segment is the address segment that the client accesses through the SSL VPN connection.
+* `client_ip_pool` - (Required) SSL client network segment.
+* `local_subnets` - (Required) The local network segment of the SSL server. The local network segment is the address segment that the client accesses through the SSL VPN connection.
 * `vpn_gateway_id` - (Required, ForceNew) The vpn gateway id.
-* `auth` - (Optional, ForceNew) The authentication algorithm of the SSL server.
+* `auth` - (Optional) The authentication algorithm of the SSL server.
 Values:
 `SHA1` (default)
 `MD5`
 `None` (do not use encryption).
-* `cipher` - (Optional, ForceNew) The encryption algorithm of the SSL server.
+* `cipher` - (Optional) The encryption algorithm of the SSL server.
 Values:
 `AES-128-CBC` (default)
 `AES-192-CBC`
 `AES-256-CBC`
 `None` (do not use encryption).
-* `compress` - (Optional, ForceNew) Whether to compress the transmitted data. The default value is false.
+* `compress` - (Optional) Whether to compress the transmitted data. The default value is false.
 * `description` - (Optional) The description of the ssl server.
-* `protocol` - (Optional, ForceNew) The protocol used by the SSL server. Valid values are `TCP`, `UDP`. Default Value: `UDP`.
+* `port` - (Optional) The port of the ssl server. Valid values: 1~65535. Default is 1194. The following ports are not supported: 22, 68, 179, 323, 500, 4500.
+* `project_name` - (Optional) The project name of the ssl server.
+* `protocol` - (Optional) The protocol used by the SSL server. Valid values are `TCP`, `UDP`. Default Value: `UDP`.
 * `ssl_vpn_server_name` - (Optional) The name of the SSL server.
 
 ## Attributes Reference

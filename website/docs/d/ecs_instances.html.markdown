@@ -68,10 +68,14 @@ data "volcengine_ecs_instances" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `deployment_set_ids` - (Optional) A list of DeploymentSet IDs.
+* `eip_addresses` - (Optional) A list of Eip addresses.
 * `hpc_cluster_id` - (Optional) The hpc cluster ID of ECS instance.
 * `ids` - (Optional) A list of ECS instance IDs.
 * `instance_charge_type` - (Optional) The charge type of ECS instance.
 * `instance_name` - (Optional) The name of ECS instance. This field support fuzzy query.
+* `instance_type_families` - (Optional) A list of instance type families.
+* `instance_type_ids` - (Optional) A list of instance type IDs.
+* `ipv6_addresses` - (Optional) A list of ipv6 addresses.
 * `key_pair_name` - (Optional) The key pair name of ECS instance.
 * `name_regex` - (Optional) A Name Regex of ECS instance.
 * `output_file` - (Optional) File name where to save data source results.

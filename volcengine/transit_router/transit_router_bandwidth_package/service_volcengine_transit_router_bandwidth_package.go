@@ -206,8 +206,6 @@ func (s *VolcengineTRBandwidthPackageService) CreateResource(resourceData *schem
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["LocalGeographicRegionSetId"] = "China"
-				(*call.SdkParam)["PeerGeographicRegionSetId"] = "China"
 				(*call.SdkParam)["BillingType"] = 1
 				(*call.SdkParam)["PeriodUnit"] = "Month"
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -436,7 +434,15 @@ func (s *VolcengineTRBandwidthPackageService) UnsubscribeInfo(resourceData *sche
 		InstanceId: s.ReadResourceId(resourceData.Id()),
 	}
 	info.NeedUnsubscribe = true
-	info.Products = []string{"TransitRouter_InterRegionBandwidth"}
+
+	localRegion := resourceData.Get("local_geographic_region_set_id")
+	peerRegion := resourceData.Get("peer_geographic_region_set_id")
+	if localRegion == peerRegion {
+		info.Products = []string{"TransitRouter_InterRegionBandwidth"}
+	} else {
+		info.Products = []string{"TransitRouter_CrossBorderBandwidth"}
+	}
+
 	return &info, nil
 }
 

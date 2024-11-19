@@ -11,6 +11,8 @@ var billingTypeRequestConvert = func(data *schema.ResourceData, old interface{})
 	switch old.(string) {
 	case "PrePaid":
 		ty = 1
+	case "PostPaid":
+		ty = 2
 	default:
 		ty = 0
 	}
@@ -22,6 +24,8 @@ var billingTypeResponseConvert = func(i interface{}) interface{} {
 	switch i.(float64) {
 	case 1:
 		ty = "PrePaid"
+	case 2:
+		ty = "PostPaid"
 	default:
 		ty = fmt.Sprintf("%v", i)
 	}
@@ -45,6 +49,9 @@ var renewTypeResponseConvert = func(v interface{}) interface{} {
 }
 
 var periodDiffSuppress = func(k, old, new string, d *schema.ResourceData) bool {
+	if d.Get("billing_type") != "PrePaid" {
+		return true
+	}
 	if len(d.Id()) != 0 {
 		return d.Get("renew_type").(string) != "ManualRenew"
 	}

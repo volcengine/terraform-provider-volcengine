@@ -95,6 +95,11 @@ func DataSourceVolcengineTransitRouters() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the transit router.",
 						},
+						"grant_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The grant status of the transit router.",
+						},
 						"business_status": {
 							Type:        schema.TypeString,
 							Computed:    true,

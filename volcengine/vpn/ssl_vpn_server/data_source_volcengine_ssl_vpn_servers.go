@@ -117,6 +117,16 @@ func DataSourceVolcengineSslVpnServers() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the ssl vpn server.",
 						},
+						"port": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The port of the ssl server.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the ssl server.",
+						},
 					},
 				},
 			},

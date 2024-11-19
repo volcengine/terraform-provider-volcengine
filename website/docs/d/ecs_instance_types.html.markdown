@@ -15,6 +15,7 @@ data "volcengine_ecs_instance_types" "foo" {}
 ## Argument Reference
 The following arguments are supported:
 * `ids` - (Optional) A list of instance type IDs. When the number of ids is greater than 10, only the first 10 are effective.
+* `image_id` - (Optional) The id of image.
 * `output_file` - (Optional) File name where to save data source results.
 
 ## Attributes Reference

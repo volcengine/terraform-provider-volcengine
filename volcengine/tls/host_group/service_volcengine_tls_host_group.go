@@ -231,3 +231,12 @@ func (s *Service) DatasourceResources(*schema.ResourceData, *schema.Resource) ve
 func (s *Service) ReadResourceId(id string) string {
 	return id
 }
+
+func (s *Service) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "tls",
+		ResourceType:         "hostgroup",
+		ProjectSchemaField:   "iam_project_name",
+		ProjectResponseField: "IamProjectName",
+	}
+}

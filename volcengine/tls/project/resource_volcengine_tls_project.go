@@ -48,7 +48,6 @@ func ResourceVolcengineTlsProject() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Description: "The IAM project name of the tls project.",
 			},
 			"tags": ve.TagsSchema(),

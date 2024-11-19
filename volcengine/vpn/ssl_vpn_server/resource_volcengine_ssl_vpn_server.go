@@ -43,7 +43,6 @@ func ResourceVolcengineSslVpnServer() *schema.Resource {
 			"local_subnets": {
 				Type:     schema.TypeSet,
 				Required: true,
-				ForceNew: true,
 				Set:      schema.HashString,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -53,7 +52,6 @@ func ResourceVolcengineSslVpnServer() *schema.Resource {
 			"client_ip_pool": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: "SSL client network segment.",
 			},
 			"ssl_vpn_server_name": {
@@ -72,7 +70,6 @@ func ResourceVolcengineSslVpnServer() *schema.Resource {
 				Type:         schema.TypeString,
 				Default:      "UDP",
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"UDP", "TCP"}, false),
 				Description:  "The protocol used by the SSL server. Valid values are `TCP`, `UDP`. Default Value: `UDP`.",
 			},
@@ -80,14 +77,12 @@ func ResourceVolcengineSslVpnServer() *schema.Resource {
 				Type:         schema.TypeString,
 				Default:      "AES-128-CBC",
 				Optional:     true,
-				ForceNew:     true,
 				ValidateFunc: validation.StringInSlice([]string{"AES-128-CBC", "AES-192-CBC", "AES-256-CBC", "None"}, false),
 				Description:  "The encryption algorithm of the SSL server.\nValues:\n`AES-128-CBC` (default)\n`AES-192-CBC`\n`AES-256-CBC`\n`None` (do not use encryption).",
 			},
 			"auth": {
 				Type:         schema.TypeString,
 				Optional:     true,
-				ForceNew:     true,
 				Default:      "SHA1",
 				ValidateFunc: validation.StringInSlice([]string{"SHA1", "MD5", "None"}, false),
 				Description:  "The authentication algorithm of the SSL server.\nValues:\n`SHA1` (default)\n`MD5`\n`None` (do not use encryption).",
@@ -95,9 +90,20 @@ func ResourceVolcengineSslVpnServer() *schema.Resource {
 			"compress": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				ForceNew:    true,
 				Default:     false,
 				Description: "Whether to compress the transmitted data. The default value is false.",
+			},
+			"port": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     1194,
+				Description: "The port of the ssl server. Valid values: 1~65535. Default is 1194. The following ports are not supported: 22, 68, 179, 323, 500, 4500.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the ssl server.",
 			},
 			"ssl_vpn_server_id": {
 				Type:        schema.TypeString,

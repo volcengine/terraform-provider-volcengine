@@ -40,8 +40,12 @@ data "volcengine_vpn_gateways" "foo" {
 The following arguments are supported:
 * `ids` - (Optional) A list of VPN gateway ids.
 * `ip_address` - (Optional) A IP address of the VPN gateway.
+* `ipsec_enabled` - (Optional) Whether IPSec is enabled.
 * `name_regex` - (Optional) A Name Regex of VPN gateway.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the VPN gateway.
+* `ssl_enabled` - (Optional) Whether ssl is enabled.
+* `status` - (Optional) The status of the VPN gateway.
 * `subnet_id` - (Optional) A subnet ID of the VPN gateway.
 * `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) A VPC ID of the VPN gateway.

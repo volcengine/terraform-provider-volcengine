@@ -181,6 +181,7 @@ func ResourceVolcengineNetworkAcl() *schema.Resource {
 				Computed:    true,
 				Description: "The project name of the network acl.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 }
