@@ -230,6 +230,16 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 										Computed:    true,
 										Description: "The connection port.",
 									},
+									"vip": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ipv4 address of the connection address.",
+									},
+									"vip_v6": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ipv6 address of the connection address.",
+									},
 								},
 							},
 						},
