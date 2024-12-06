@@ -1245,6 +1245,12 @@ func (s *VolcengineRedisDbInstanceService) DatasourceResources(data *schema.Reso
 			"AZ": {
 				TargetField: "az",
 			},
+			"VIP": {
+				TargetField: "vip",
+			},
+			"VIPv6": {
+				TargetField: "vip_v6",
+			},
 		},
 	}
 }
