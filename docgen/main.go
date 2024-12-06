@@ -162,6 +162,7 @@ var resourceKeys = map[string]string{
 	"kafka":              "KAFKA",
 	"private_zone":       "PRIVATE_ZONE",
 	"vepfs":              "VEPFS",
+	"vedb_mysql":         "VEDB_MYSQL",
 }
 
 type Products struct {

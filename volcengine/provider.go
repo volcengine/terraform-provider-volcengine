@@ -10,6 +10,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_backup"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_database"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_endpoint_public_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_instance"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_file_system"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_fileset"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_mount_service"
@@ -708,6 +717,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vepfs_file_systems":   vepfs_file_system.DataSourceVolcengineVepfsFileSystems(),
 			"volcengine_vepfs_mount_services": vepfs_mount_service.DataSourceVolcengineVepfsMountServices(),
 			"volcengine_vepfs_filesets":       vepfs_fileset.DataSourceVolcengineVepfsFilesets(),
+
+			// ================ veDB Mysql ================
+			"volcengine_vedb_mysql_accounts":   vedb_mysql_account.DataSourceVolcengineVedbMysqlAccounts(),
+			"volcengine_vedb_mysql_allowlists": vedb_mysql_allowlist.DataSourceVolcengineVedbMysqlAllowlists(),
+			"volcengine_vedb_mysql_backups":    vedb_mysql_backup.DataSourceVolcengineVedbMysqlBackups(),
+			"volcengine_vedb_mysql_databases":  vedb_mysql_database.DataSourceVolcengineVedbMysqlDatabases(),
+			"volcengine_vedb_mysql_endpoints":  vedb_mysql_endpoint.DataSourceVolcengineVedbMysqlEndpoints(),
+			"volcengine_vedb_mysql_instances":  vedb_mysql_instance.DataSourceVolcengineVedbMysqlInstances(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1018,6 +1035,16 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vepfs_mount_service":            vepfs_mount_service.ResourceVolcengineVepfsMountService(),
 			"volcengine_vepfs_mount_service_attachment": vepfs_mount_service_attachment.ResourceVolcengineVepfsMountServiceAttachment(),
 			"volcengine_vepfs_fileset":                  vepfs_fileset.ResourceVolcengineVepfsFileset(),
+
+			// ================ veDB Mysql ================
+			"volcengine_vedb_mysql_account":                 vedb_mysql_account.ResourceVolcengineVedbMysqlAccount(),
+			"volcengine_vedb_mysql_allowlist":               vedb_mysql_allowlist.ResourceVolcengineVedbMysqlAllowlist(),
+			"volcengine_vedb_mysql_backup":                  vedb_mysql_backup.ResourceVolcengineVedbMysqlBackup(),
+			"volcengine_vedb_mysql_database":                vedb_mysql_database.ResourceVolcengineVedbMysqlDatabase(),
+			"volcengine_vedb_mysql_endpoint":                vedb_mysql_endpoint.ResourceVolcengineVedbMysqlEndpoint(),
+			"volcengine_vedb_mysql_instance":                vedb_mysql_instance.ResourceVolcengineVedbMysqlInstance(),
+			"volcengine_vedb_mysql_allowlist_associate":     vedb_mysql_allowlist_associate.ResourceVolcengineVedbMysqlAllowlistAssociate(),
+			"volcengine_vedb_mysql_endpoint_public_address": vedb_mysql_endpoint_public_address.ResourceVolcengineVedbMysqlEndpointPublicAddress(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

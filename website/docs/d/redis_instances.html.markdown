@@ -128,6 +128,8 @@ disabled: Single availability zone deployment scheme.
         * `address` - The connection address.
         * `eip_id` - The EIP ID bound to the instance's public network address.
         * `port` - The connection port.
+        * `vip_v6` - The ipv6 address of the connection address.
+        * `vip` - The ipv4 address of the connection address.
     * `vpc_auth_mode` - Whether to enable password-free access when connecting to an instance through a private network.
     * `vpc_id` - The vpc ID of the redis instance.
     * `zone_ids` - The list of zone ID which the redis instance belongs.
