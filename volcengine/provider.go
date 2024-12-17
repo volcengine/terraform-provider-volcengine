@@ -899,6 +899,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_mongodb_instance_parameter":   instance_parameter.ResourceVolcengineMongoDBInstanceParameter(),
 			"volcengine_mongodb_allow_list_associate": allow_list_associate.ResourceVolcengineMongodbAllowListAssociate(),
 			"volcengine_mongodb_ssl_state":            ssl_state.ResourceVolcengineMongoDBSSLState(),
+			"volcengine_mongodb_account":              account.ResourceVolcengineMongoDBAccount(),
 
 			// ================ Bioos ================
 			"volcengine_bioos_cluster":      bioosCluster.ResourceVolcengineBioosCluster(),

@@ -58,7 +58,54 @@ func ResourceVolcengineMongoDBAllowList() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				DiffSuppressFunc: mongoDBAllowListImportDiffSuppress,
-				Description:      "IP address or IP address segment in CIDR format.",
+				Description:      "IP address or IP address segment in CIDR format. Duplicate addresses are not allowed, multiple addresses should be separated by commas (,) in English.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the allow list.",
+			},
+
+			// computed fields
+			"allow_list_ip_num": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The number of allow list IPs.",
+			},
+			"associated_instance_num": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The total number of instances bound under the allow list.",
+			},
+			"associated_instances": {
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "The list of associated instances.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"instance_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The instance id that bound to the allow list.",
+						},
+						"instance_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The instance name that bound to the allow list.",
+						},
+						"vpc": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The VPC ID.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the instance.",
+						},
+					},
+				},
 			},
 		},
 	}

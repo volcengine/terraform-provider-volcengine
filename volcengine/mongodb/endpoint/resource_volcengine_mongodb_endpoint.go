@@ -48,7 +48,7 @@ func ResourceVolcengineMongoDBEndpoint() *schema.Resource {
 				Optional:     true,
 				Default:      "Private",
 				ForceNew:     true,
-				Description:  "The network type of endpoint.",
+				Description:  "The network type of endpoint. Valid values: `Private`, `Public`. Default is `Private`.",
 				ValidateFunc: validation.StringInSlice([]string{"Private", "Public"}, false),
 			},
 			"mongos_node_ids": {

@@ -44,7 +44,7 @@ func ResourceVolcengineMongoDBInstanceParameter() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The name of parameter.",
+				Description: "The name of parameter. The parameter resource can only be added or modified, deleting this resource will not actually execute any operation.",
 			},
 			"parameter_role": {
 				Type:        schema.TypeString,

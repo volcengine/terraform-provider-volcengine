@@ -3,6 +3,7 @@ package instance
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -195,6 +196,15 @@ func (s *VolcengineMongoDBInstanceService) readResource(resourceData *schema.Res
 		return data, fmt.Errorf("instance %s is not exist", id)
 	}
 
+	if zoneId, ok := data["ZoneId"]; ok {
+		zoneIds := strings.Split(zoneId.(string), ",")
+		data["ZoneIds"] = zoneIds
+	}
+
+	if nodeZoneSet, ok := resourceData.GetOk("node_availability_zone"); ok {
+		data["NodeAvailabilityZone"] = nodeZoneSet.(*schema.Set).List()
+	}
+
 	if withoutDetail {
 		return data, nil
 	}
@@ -358,6 +368,16 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"node_availability_zone": {
+					TargetField: "NodeAvailabilityZone",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"zone_id": {
+					Ignore: true,
+				},
+				"zone_ids": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				// describe subnet
@@ -377,8 +397,21 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 						return false, fmt.Errorf("zone ID does not match")
 					}
 				}
+
+				var zoneIdsStr string
+				zoneIdsArr := d.Get("zone_ids").(*schema.Set).List()
+				if len(zoneIdsArr) > 0 {
+					zoneIds := make([]string, 0)
+					for _, id := range zoneIdsArr {
+						zoneIds = append(zoneIds, id.(string))
+					}
+					zoneIdsStr = strings.Join(zoneIds, ",")
+				} else {
+					zoneIdsStr = zoneId
+				}
+
 				(*call.SdkParam)["VpcId"] = vpcId
-				(*call.SdkParam)["ZoneId"] = zoneId
+				(*call.SdkParam)["ZoneId"] = zoneIdsStr
 				// (*call.SdkParam)["DBEngine"] = "MongoDB"
 				// (*call.SdkParam)["DBEngineVersion"] = "MongoDB_4_0"
 				// (*call.SdkParam)["NodeNumber"] = 3
