@@ -163,6 +163,7 @@ var resourceKeys = map[string]string{
 	"private_zone":       "PRIVATE_ZONE",
 	"vepfs":              "VEPFS",
 	"vedb_mysql":         "VEDB_MYSQL",
+	"rocketmq":           "ROCKETMQ",
 }
 
 type Products struct {

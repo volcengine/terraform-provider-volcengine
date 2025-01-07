@@ -25,7 +25,7 @@ func ResourceVolcengineRocketmqPublicAddress() *schema.Resource {
 		Read:   resourceVolcengineRocketmqPublicAddressRead,
 		Delete: resourceVolcengineRocketmqPublicAddressDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: importRocketmqPublicAddress,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -92,7 +92,7 @@ func resourceVolcengineRocketmqPublicAddressDelete(d *schema.ResourceData, meta 
 	return err
 }
 
-func importRocketmqTopic(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
+func importRocketmqPublicAddress(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
 	var err error
 	items := strings.Split(data.Id(), ":")
 	if len(items) != 2 {

@@ -58,6 +58,7 @@ In addition to all arguments above, the following attributes are exported:
     * `sub_namespace` - The sub namespace of the cloud monitor rule.
     * `updated_at` - The updated time of the cloud monitor rule.
     * `web_hook` - The web hook of the cloud monitor rule.
+    * `webhook_ids` - The webhook id list of the cloud monitor rule.
 * `total_count` - The total count of query.
 
 
