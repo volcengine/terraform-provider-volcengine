@@ -11,22 +11,23 @@ Provides a resource to manage cloud monitor rule
 ## Example Usage
 ```hcl
 resource "volcengine_cloud_monitor_rule" "foo" {
-  rule_name           = "acc-test-rule"
-  description         = "acc-test"
-  namespace           = "VCM_ECS"
-  sub_namespace       = "Storage"
-  level               = "warning"
-  enable_state        = "disable"
-  evaluation_count    = 5
-  effect_start_at     = "00:15"
-  effect_end_at       = "22:55"
-  silence_time        = 5
-  alert_methods       = ["Email", "Webhook"]
-  web_hook            = "http://alert.volc.com/callback"
+  rule_name        = "acc-test-rule"
+  description      = "acc-test"
+  namespace        = "VCM_ECS"
+  sub_namespace    = "Storage"
+  level            = "warning"
+  enable_state     = "disable"
+  evaluation_count = 5
+  effect_start_at  = "00:15"
+  effect_end_at    = "22:55"
+  silence_time     = 5
+  alert_methods    = ["Email", "Webhook"]
+  #  web_hook = "http://alert.volc.com/callback"
+  webhook_ids         = ["187655704106731****", "187655712542447****"]
   contact_group_ids   = ["174284616403161****"]
   multiple_conditions = true
   condition_operator  = "||"
-  regions             = ["cn-beijing"]
+  regions             = ["cn-beijing", "cn-shanghai"]
   original_dimensions {
     key   = "ResourceID"
     value = ["*"]
@@ -65,7 +66,7 @@ The following arguments are supported:
 * `level` - (Required) The level of the cloud monitor rule. Valid values: `critical`, `warning`, `notice`.
 * `namespace` - (Required, ForceNew) The namespace of the cloud monitor rule.
 * `original_dimensions` - (Required) The original dimensions of the cloud monitor rule.
-* `regions` - (Required, ForceNew) The region ids of the cloud monitor rule. Only one region id can be specified currently.
+* `regions` - (Required, ForceNew) The region ids of the cloud monitor rule.
 * `rule_name` - (Required) The name of the cloud monitor rule.
 * `silence_time` - (Required) The silence time of the cloud monitor rule. Unit in minutes. Valid values: 5, 30, 60, 180, 360, 720, 1440.
 * `sub_namespace` - (Required, ForceNew) The sub namespace of the cloud monitor rule.
@@ -74,7 +75,8 @@ The following arguments are supported:
 * `description` - (Optional) The description of the cloud monitor rule.
 * `multiple_conditions` - (Optional) Whether to enable the multiple conditions function of the cloud monitor rule.
 * `recovery_notify` - (Optional) The recovery notify of the cloud monitor rule.
-* `web_hook` - (Optional) The web hook of the cloud monitor rule. When the alert method is `Webhook`, This field must be specified.
+* `web_hook` - (Optional) The web hook of the cloud monitor rule. When the alert method is `Webhook`, one of `web_hook` and `webhook_ids` must be specified.
+* `webhook_ids` - (Optional) The web hook id list of the cloud monitor rule. When the alert method is `Webhook`, one of `web_hook` and `webhook_ids` must be specified.
 
 The `conditions` object supports the following:
 
