@@ -71,7 +71,6 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 				Description: "The ID of the instance to which the created volume is automatically attached. " +
-					"Please note this field needs to ask the system administrator to apply for a whitelist.\n" +
 					"When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.",
 			},
 			"volume_charge_type": {
@@ -79,8 +78,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Optional: true,
 				Default:  "PostPaid",
 				Description: "The charge type of the Volume, the value is `PostPaid` or `PrePaid`. " +
-					"The `PrePaid` volume cannot be detached. " +
-					"Please note that `PrePaid` type needs to ask the system administrator to apply for a whitelist.",
+					"The `PrePaid` volume cannot be detached. ",
 			},
 			"extra_performance_type_id": {
 				Type:        schema.TypeString,

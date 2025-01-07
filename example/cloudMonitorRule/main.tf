@@ -10,11 +10,12 @@ resource "volcengine_cloud_monitor_rule" "foo" {
   effect_end_at = "22:55"
   silence_time = 5
   alert_methods = ["Email", "Webhook"]
-  web_hook = "http://alert.volc.com/callback"
+#  web_hook = "http://alert.volc.com/callback"
+  webhook_ids = ["187655704106731****", "187655712542447****"]
   contact_group_ids = ["174284616403161****"]
   multiple_conditions = true
   condition_operator = "||"
-  regions = ["cn-beijing"]
+  regions = ["cn-beijing", "cn-shanghai"]
   original_dimensions {
     key = "ResourceID"
     value = ["*"]

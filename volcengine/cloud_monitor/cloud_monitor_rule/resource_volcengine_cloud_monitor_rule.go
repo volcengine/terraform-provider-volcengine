@@ -39,6 +39,13 @@ func ResourceVolcengineCloudMonitorRule() *schema.Resource {
 				Required:    true,
 				Description: "The name of the cloud monitor rule.",
 			},
+			//"rule_type": {
+			//	Type:        schema.TypeString,
+			//	Optional:    true,
+			//	ForceNew:    true,
+			//	Default:     "static",
+			//	Description: "The type of the cloud monitor rule. Default is `static`. Valid values: `static`, `dynamic`.",
+			//},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -111,9 +118,10 @@ func ResourceVolcengineCloudMonitorRule() *schema.Resource {
 				Description: "The alert methods of the cloud monitor rule. Valid values: `Email`, `Phone`, `SMS`, `Webhook`.",
 			},
 			"web_hook": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				AtLeastOneOf: []string{"web_hook", "contact_group_ids"},
+				Type:          schema.TypeString,
+				Optional:      true,
+				AtLeastOneOf:  []string{"web_hook", "contact_group_ids", "webhook_ids"},
+				ConflictsWith: []string{"webhook_ids"},
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if methods, ok := d.GetOk("alert_methods"); ok {
 						methodArr := methods.(*schema.Set).List()
@@ -123,7 +131,27 @@ func ResourceVolcengineCloudMonitorRule() *schema.Resource {
 					}
 					return true
 				},
-				Description: "The web hook of the cloud monitor rule. When the alert method is `Webhook`, This field must be specified.",
+				Description: "The web hook of the cloud monitor rule. When the alert method is `Webhook`, one of `web_hook` and `webhook_ids` must be specified.",
+			},
+			"webhook_ids": {
+				Type:          schema.TypeSet,
+				Optional:      true,
+				AtLeastOneOf:  []string{"web_hook", "contact_group_ids", "webhook_ids"},
+				ConflictsWith: []string{"web_hook"},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set: schema.HashString,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					if methods, ok := d.GetOk("alert_methods"); ok {
+						methodArr := methods.(*schema.Set).List()
+						if contains("Webhook", methodArr) {
+							return false
+						}
+					}
+					return true
+				},
+				Description: "The web hook id list of the cloud monitor rule. When the alert method is `Webhook`, one of `web_hook` and `webhook_ids` must be specified.",
 			},
 			"contact_group_ids": {
 				Type:     schema.TypeSet,
@@ -132,7 +160,7 @@ func ResourceVolcengineCloudMonitorRule() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set:          schema.HashString,
-				AtLeastOneOf: []string{"web_hook", "contact_group_ids"},
+				AtLeastOneOf: []string{"web_hook", "contact_group_ids", "webhook_ids"},
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if methods, ok := d.GetOk("alert_methods"); ok {
 						methodsArr := methods.(*schema.Set).List()
@@ -166,12 +194,11 @@ func ResourceVolcengineCloudMonitorRule() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: true,
-				MaxItems: 1,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 				Set:         schema.HashString,
-				Description: "The region ids of the cloud monitor rule. Only one region id can be specified currently.",
+				Description: "The region ids of the cloud monitor rule.",
 			},
 			"conditions": {
 				Type:        schema.TypeSet,
