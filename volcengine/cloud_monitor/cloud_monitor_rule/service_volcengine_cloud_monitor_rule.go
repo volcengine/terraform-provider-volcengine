@@ -210,6 +210,10 @@ func (s *VolcengineCloudMonitorRuleService) CreateResource(resourceData *schema.
 				"original_dimensions": {
 					Ignore: true,
 				},
+				"webhook_ids": {
+					TargetField: "WebhookIds",
+					ConvertType: ve.ConvertJsonArray,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["RuleType"] = "static"
@@ -358,6 +362,10 @@ func (s *VolcengineCloudMonitorRuleService) ModifyResource(resourceData *schema.
 				},
 				"original_dimensions": {
 					Ignore: true,
+				},
+				"webhook_ids": {
+					TargetField: "WebhookIds",
+					ConvertType: ve.ConvertJsonArray,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {

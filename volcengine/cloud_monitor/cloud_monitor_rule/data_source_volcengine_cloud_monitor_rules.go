@@ -118,6 +118,14 @@ func DataSourceVolcengineCloudMonitorRules() *schema.Resource {
 							Computed:    true,
 							Description: "The web hook of the cloud monitor rule.",
 						},
+						"webhook_ids": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The webhook id list of the cloud monitor rule.",
+						},
 						"alert_state": {
 							Type:        schema.TypeString,
 							Computed:    true,
