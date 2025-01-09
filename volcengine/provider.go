@@ -14,6 +14,11 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/address_book"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/control_policy_priority"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/dns_control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/vpc_firewall_acl_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/vpc_firewall_acl_rule_priority"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list"
@@ -756,7 +761,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rabbitmq_instance_plugins": rabbitmq_instance_plugin.DataSourceVolcengineRabbitmqInstancePlugins(),
 
 			// ================ CloudFirewall ================
-			"volcengine_cfw_address_books": address_book.DataSourceVolcengineAddressBooks(),
+			"volcengine_cfw_address_books":          address_book.DataSourceVolcengineAddressBooks(),
+			"volcengine_cfw_control_policies":       control_policy.DataSourceVolcengineControlPolicies(),
+			"volcengine_cfw_vpc_firewall_acl_rules": vpc_firewall_acl_rule.DataSourceVolcengineVpcFirewallAclRules(),
+			"volcengine_cfw_dns_control_policies":   dns_control_policy.DataSourceVolcengineDnsControlPolicies(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1096,7 +1104,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rabbitmq_public_address":  rabbitmq_public_address.ResourceVolcengineRabbitmqPublicAddress(),
 
 			// ================ CloudFirewall ================
-			"volcengine_cfw_address_book": address_book.ResourceVolcengineAddressBook(),
+			"volcengine_cfw_address_book":                   address_book.ResourceVolcengineAddressBook(),
+			"volcengine_cfw_control_policy":                 control_policy.ResourceVolcengineControlPolicy(),
+			"volcengine_cfw_control_policy_priority":        control_policy_priority.ResourceVolcengineControlPolicyPriority(),
+			"volcengine_cfw_vpc_firewall_acl_rule":          vpc_firewall_acl_rule.ResourceVolcengineVpcFirewallAclRule(),
+			"volcengine_cfw_vpc_firewall_acl_rule_priority": vpc_firewall_acl_rule_priority.ResourceVolcengineVpcFirewallAclRulePriority(),
+			"volcengine_cfw_dns_control_policy":             dns_control_policy.ResourceVolcengineDnsControlPolicy(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

@@ -18,19 +18,19 @@ func DataSourceVolcengineAddressBooks() *schema.Resource {
 			"group_name": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"group_name", "description", "address"},
+				ConflictsWith: []string{"description", "address"},
 				Description:   "The group name of address book. This field support fuzzy query.",
 			},
 			"description": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"group_name", "description", "address"},
+				ConflictsWith: []string{"group_name", "address"},
 				Description:   "The group type of address book. This field support fuzzy query.",
 			},
 			"address": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				ConflictsWith: []string{"group_name", "description", "address"},
+				ConflictsWith: []string{"group_name", "description"},
 				Description:   "The group type of address book. This field support fuzzy query.",
 			},
 			"name_regex": {
