@@ -203,7 +203,23 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResource(resourceData *schema.Re
 
 	// DescribeDBInstances 不再返回 MaintenanceWindow 字段，需手动赋值为空数组
 	if _, ok := data["MaintenanceWindow"]; !ok {
-		data["MaintenanceWindow"] = []interface{}{}
+		if mainWindow, ok := resourceData.GetOk("maintenance_window"); ok {
+			windowMap := mainWindow.([]interface{})[0].(map[string]interface{})
+			maintenanceWindow := make(map[string]interface{})
+
+			if time, ok := windowMap["maintenance_time"]; ok {
+				maintenanceWindow["MaintenanceTime"] = time
+			}
+			if dayKind, ok := windowMap["day_kind"]; ok {
+				maintenanceWindow["DayKind"] = dayKind
+			}
+			if weekDay, ok := windowMap["day_of_week"]; ok {
+				maintenanceWindow["WeekDay"] = weekDay.(*schema.Set).List()
+			}
+			data["MaintenanceWindow"] = maintenanceWindow
+		} else {
+			data["MaintenanceWindow"] = []interface{}{}
+		}
 	}
 
 	data["ChargeInfo"] = data["ChargeDetail"]
@@ -265,6 +281,15 @@ func (*VolcengineRdsMysqlInstanceService) WithResourceResponseHandlers(rdsInstan
 			"TimeZone": {
 				TargetField: "db_time_zone",
 			},
+			"NodeCPUUsedPercentage": {
+				TargetField: "node_cpu_used_percentage",
+			},
+			"NodeMemoryUsedPercentage": {
+				TargetField: "node_memory_used_percentage",
+			},
+			"NodeSpaceUsedPercentage": {
+				TargetField: "node_space_used_percentage",
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -307,6 +332,9 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 				"tags": {
 					TargetField: "InstanceTags",
 					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"maintenance_window": {
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -359,6 +387,23 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 				(*call.SdkParam)["NodeInfo"] = nodeInfos
 				(*call.SdkParam)["StorageType"] = "LocalSSD"
 				(*call.SdkParam)["VpcId"] = vpcId
+
+				if mainWindow, ok := d.GetOk("maintenance_window"); ok {
+					windowMap := mainWindow.([]interface{})[0].(map[string]interface{})
+					maintenanceWindow := make(map[string]interface{})
+
+					if time, ok := windowMap["maintenance_time"]; ok {
+						maintenanceWindow["MaintenanceTime"] = time
+					}
+					if dayKind, ok := windowMap["day_kind"]; ok {
+						maintenanceWindow["DayKind"] = dayKind
+					}
+					if weekDay, ok := windowMap["day_of_week"]; ok {
+						maintenanceWindow["WeekDay"] = weekDay.(*schema.Set).List()
+					}
+
+					(*call.SdkParam)["MaintenanceWindow"] = maintenanceWindow
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -665,6 +710,46 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 	// 更新Tags
 	callbacks = s.setResourceTags(resourceData, callbacks)
 
+	// MaintenanceWindow
+	if resourceData.HasChange("maintenance_window") {
+		maintenanceWindowCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceMaintenanceWindow",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					if mainWindow, ok := d.GetOk("maintenance_window"); ok {
+						windowMap := mainWindow.([]interface{})[0].(map[string]interface{})
+						maintenanceWindow := make(map[string]interface{})
+
+						if time, ok := windowMap["maintenance_time"]; ok {
+							maintenanceWindow["MaintenanceTime"] = time
+						}
+						if dayKind, ok := windowMap["day_kind"]; ok {
+							maintenanceWindow["DayKind"] = dayKind
+						}
+						if weekDay, ok := windowMap["day_of_week"]; ok {
+							maintenanceWindow["WeekDay"] = weekDay.(*schema.Set).List()
+						}
+
+						(*call.SdkParam)["MaintenanceWindow"] = maintenanceWindow
+					}
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, maintenanceWindowCallback)
+	}
+
 	return callbacks
 }
 
@@ -770,6 +855,15 @@ func (s *VolcengineRdsMysqlInstanceService) DatasourceResources(*schema.Resource
 			},
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
+			},
+			"NodeCPUUsedPercentage": {
+				TargetField: "node_cpu_used_percentage",
+			},
+			"NodeMemoryUsedPercentage": {
+				TargetField: "node_memory_used_percentage",
+			},
+			"NodeSpaceUsedPercentage": {
+				TargetField: "node_space_used_percentage",
 			},
 		},
 	}

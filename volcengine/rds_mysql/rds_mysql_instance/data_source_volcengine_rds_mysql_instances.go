@@ -130,6 +130,29 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The number of nodes.",
 						},
+						"zone_ids": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "List of availability zones where each node of the instance is located.",
+						},
+						"node_cpu_used_percentage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "Average CPU usage of the instance master node in nearly one minute.",
+						},
+						"node_memory_used_percentage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "Average memory usage of the instance master node in nearly one minute.",
+						},
+						"node_space_used_percentage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "Average disk usage of the instance master node in nearly one minute.",
+						},
 						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -249,6 +272,16 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 										Computed:    true,
 										Description: "Estimated release time when arrears are closed (pay-as-you-go & monthly subscription).",
 									},
+									"temp_modify_start_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Temporary upgrade start time.",
+									},
+									"temp_modify_end_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Restore time of temporary upgrade.",
+									},
 								},
 							},
 						},
@@ -332,6 +365,11 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "Whether global read-only is enabled, value: Enable: Enable. Disable: Disabled.",
+									},
+									"idle_connection_reclaim": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the idle connection reclaim function is enabled. true: Enabled. false: Disabled.",
 									},
 									"node_weight": {
 										Type:        schema.TypeList,
