@@ -96,6 +96,8 @@ PrePaid - Yearly and monthly (default).
 Month - monthly subscription (default)
 Year - Package year.
         * `period` - Purchase duration in prepaid scenarios. Default: 1.
+        * `temp_modify_end_time` - Restore time of temporary upgrade.
+        * `temp_modify_start_time` - Temporary upgrade start time.
     * `create_time` - The create time of the RDS instance.
     * `data_sync_mode` - Data synchronization mode.
     * `db_engine_version` - The engine version of the RDS instance.
@@ -120,6 +122,7 @@ Primary: Primary node terminal.
 Custom: Custom terminal.
 Direct: Direct connection to the terminal. (Only the operation and maintenance side)
 AllNode: All node terminals. (Only the operation and maintenance side).
+        * `idle_connection_reclaim` - Whether the idle connection reclaim function is enabled. true: Enabled. false: Disabled.
         * `node_weight` - The list of nodes configured by the connection terminal and the corresponding read-only weights.
             * `node_id` - The ID of the node.
             * `node_type` - The type of the node.
@@ -141,7 +144,10 @@ Ranges:
         * `day_of_week` - Days of maintainable window of the week.
         * `maintenance_time` - The maintainable time of the RDS instance.
     * `memory` - Memory size.
+    * `node_cpu_used_percentage` - Average CPU usage of the instance master node in nearly one minute.
+    * `node_memory_used_percentage` - Average memory usage of the instance master node in nearly one minute.
     * `node_number` - The number of nodes.
+    * `node_space_used_percentage` - Average disk usage of the instance master node in nearly one minute.
     * `node_spec` - The specification of primary node.
     * `nodes` - Instance node information.
         * `create_time` - Node creation local time.
@@ -171,6 +177,7 @@ ReadOnly: Read-only node.
     * `v_cpu` - CPU size.
     * `vpc_id` - The vpc ID of the RDS instance.
     * `zone_id` - The available zone of the RDS instance.
+    * `zone_ids` - List of availability zones where each node of the instance is located.
 * `total_count` - The total count of RDS instance query.
 
 
