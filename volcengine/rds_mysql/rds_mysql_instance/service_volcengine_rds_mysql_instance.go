@@ -155,6 +155,28 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResources(m map[string]interface
 				allowListIds = append(allowListIds, allowListMap["AllowListId"])
 			}
 			rdsInstance["AllowListIds"] = allowListIds
+
+			dbProxyConfig, err := s.Client.UniversalClient.DoCall(
+				getUniversalInfo("DescribeDBProxyConfig"),
+				&map[string]interface{}{
+					"InstanceId": rdsInstance["InstanceId"],
+				})
+			if err != nil {
+				logger.Info("DescribeDBProxyConfig error:", err)
+				continue
+			}
+			proxyConfig, err := ve.ObtainSdkValue("Result", *dbProxyConfig)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result error:", err)
+				continue
+			}
+			proxyMap := proxyConfig.(map[string]interface{})
+			rdsInstance["ConnectionPoolType"] = proxyMap["ConnectionPoolType"]
+			rdsInstance["BinlogDump"] = proxyMap["BinlogDump"]
+			rdsInstance["GlobalReadOnly"] = proxyMap["GlobalReadOnly"]
+			rdsInstance["DBProxyStatus"] = proxyMap["DBProxyStatus"]
+			rdsInstance["CheckModifyDBProxyAllowed"] = proxyMap["CheckModifyDBProxyAllowed"]
+			rdsInstance["FeatureStates"] = proxyMap["FeatureStates"]
 		}
 	}
 
@@ -485,6 +507,33 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 	}
 	callbacks = append(callbacks, parameterCallback)
 
+	if connectionPool, ok := resourceData.GetOk("connection_pool_type"); ok {
+		connectionPoolCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBProxyConfig",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["InstanceId"] = d.Id()
+						(*call.SdkParam)["ConnectionPoolType"] = connectionPool
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, connectionPoolCallback)
+	}
+
 	return callbacks
 }
 
@@ -750,6 +799,33 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 		callbacks = append(callbacks, maintenanceWindowCallback)
 	}
 
+	if resourceData.HasChange("connection_pool_type") {
+		connectionPoolCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBProxyConfig",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["InstanceId"] = d.Id()
+						(*call.SdkParam)["ConnectionPoolType"] = d.Get("connection_pool_type")
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, connectionPoolCallback)
+	}
+
 	return callbacks
 }
 
@@ -864,6 +940,12 @@ func (s *VolcengineRdsMysqlInstanceService) DatasourceResources(*schema.Resource
 			},
 			"NodeSpaceUsedPercentage": {
 				TargetField: "node_space_used_percentage",
+			},
+			"DBProxyStatus": {
+				TargetField: "db_proxy_status",
+			},
+			"CheckModifyDBProxyAllowed": {
+				TargetField: "check_modify_db_proxy_allowed",
 			},
 		},
 	}

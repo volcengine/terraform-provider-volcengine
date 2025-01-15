@@ -320,6 +320,77 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 								},
 							},
 						},
+						"connection_pool_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Connection pool type.",
+						},
+						"binlog_dump": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:\ntrue: Yes.\nfalse: No.",
+						},
+						"global_read_only": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable global read-only.\ntrue: Yes.\nfalse: No.",
+						},
+						"db_proxy_status": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Description: "The running status of the proxy instance. " +
+								"This parameter is returned only when the database proxy is enabled. " +
+								"Values:\nCreating: The proxy is being started.\n" +
+								"Running: The proxy is running.\nShutdown: The proxy is closed.\n" +
+								"Deleting: The proxy is being closed.",
+						},
+						"check_modify_db_proxy_allowed": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Description: "Is execution of the ModifyDBProxy interface allowed:\n" +
+								"Allowed: If it is closed, return whether the proxy can be enabled. " +
+								"If it is enabled, return whether the proxy can be disabled. Values: " +
+								"true (yes); false (no).\nReason: When Allowed is false, " +
+								"return the specific reason.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"allowed": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the ModifyDBProxy interface can be executed.",
+									},
+									"reason": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The reason why the ModifyDBProxy interface cannot be executed.",
+									},
+								},
+							},
+						},
+						"feature_states": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Feature status.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"feature_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Feature name.",
+									},
+									"enable": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether it is enabled. Values:\ntrue: Enabled.\nfalse: Disabled.",
+									},
+									"support": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether it support this function. Value:\ntrue: Supported.\nfalse: Not supported.",
+									},
+								},
+							},
+						},
 						"endpoints": {
 							Type:        schema.TypeList,
 							Computed:    true,

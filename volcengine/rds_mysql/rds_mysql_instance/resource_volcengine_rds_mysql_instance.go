@@ -94,6 +94,12 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 				Description: "The project name of the RDS instance.",
 			},
 			"tags": ve.TagsSchema(),
+			"connection_pool_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Connection pool type. Value range:\nDirect: Direct connection mode.\nTransaction: Transaction-level connection pool (default).",
+			},
 			"charge_info": {
 				Type:        schema.TypeList,
 				MaxItems:    1,

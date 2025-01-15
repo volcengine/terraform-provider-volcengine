@@ -3,6 +3,7 @@ package volcengine
 import (
 	"context"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_backup"
 	"net/http"
 	"net/url"
 	"os"
@@ -586,6 +587,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_zones":          rds_mysql_zone.DataSourceVolcengineRdsMysqlZones(),
 			"volcengine_rds_mysql_instance_specs": rds_mysql_instance_spec.DataSourceVolcengineRdsMysqlInstanceSpecs(),
 			"volcengine_rds_mysql_endpoints":      rds_mysql_endpoint.DataSourceVolcengineRdsMysqlEndpoints(),
+			"volcengine_rds_mysql_backups":        rds_mysql_backup.DataSourceVolcengineRdsMysqlBackups(),
 
 			// ================ TLS ================
 			"volcengine_tls_rules":               tlsRule.DataSourceVolcengineTlsRules(),
@@ -918,6 +920,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_allowlist_associate":     allowlist_associate.ResourceVolcengineRdsMysqlAllowlistAssociate(),
 			"volcengine_rds_mysql_endpoint":                rds_mysql_endpoint.ResourceVolcengineRdsMysqlEndpoint(),
 			"volcengine_rds_mysql_endpoint_public_address": rds_mysql_endpoint_public_address.ResourceVolcengineRdsMysqlEndpointPublicAddress(),
+			"volcengine_rds_mysql_backup":                  rds_mysql_backup.ResourceVolcengineRdsMysqlBackup(),
 
 			// ================ TLS ================
 			"volcengine_tls_kafka_consumer":     kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
