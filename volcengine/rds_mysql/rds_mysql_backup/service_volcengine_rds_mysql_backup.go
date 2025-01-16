@@ -148,6 +148,7 @@ func (s *VolcengineRdsMysqlBackupService) CreateResource(resourceData *schema.Re
 		Call: ve.SdkCall{
 			Action:      "CreateBackup",
 			ConvertMode: ve.RequestConvertAll,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"backup_meta": {
 					Ignore: true,

@@ -3,7 +3,6 @@ package volcengine
 import (
 	"context"
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_backup"
 	"net/http"
 	"net/url"
 	"os"
@@ -222,12 +221,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_database"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_endpoint_public_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_readonly_node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_spec"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist_associate"
@@ -579,15 +581,16 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
 
 			// ================ RdsMysql ================
-			"volcengine_rds_mysql_instances":      rds_mysql_instance.DataSourceVolcengineRdsMysqlInstances(),
-			"volcengine_rds_mysql_accounts":       rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
-			"volcengine_rds_mysql_databases":      rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
-			"volcengine_rds_mysql_allowlists":     allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
-			"volcengine_rds_mysql_regions":        rds_mysql_region.DataSourceVolcengineRdsMysqlRegions(),
-			"volcengine_rds_mysql_zones":          rds_mysql_zone.DataSourceVolcengineRdsMysqlZones(),
-			"volcengine_rds_mysql_instance_specs": rds_mysql_instance_spec.DataSourceVolcengineRdsMysqlInstanceSpecs(),
-			"volcengine_rds_mysql_endpoints":      rds_mysql_endpoint.DataSourceVolcengineRdsMysqlEndpoints(),
-			"volcengine_rds_mysql_backups":        rds_mysql_backup.DataSourceVolcengineRdsMysqlBackups(),
+			"volcengine_rds_mysql_instances":           rds_mysql_instance.DataSourceVolcengineRdsMysqlInstances(),
+			"volcengine_rds_mysql_accounts":            rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
+			"volcengine_rds_mysql_databases":           rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
+			"volcengine_rds_mysql_allowlists":          allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
+			"volcengine_rds_mysql_regions":             rds_mysql_region.DataSourceVolcengineRdsMysqlRegions(),
+			"volcengine_rds_mysql_zones":               rds_mysql_zone.DataSourceVolcengineRdsMysqlZones(),
+			"volcengine_rds_mysql_instance_specs":      rds_mysql_instance_spec.DataSourceVolcengineRdsMysqlInstanceSpecs(),
+			"volcengine_rds_mysql_endpoints":           rds_mysql_endpoint.DataSourceVolcengineRdsMysqlEndpoints(),
+			"volcengine_rds_mysql_backups":             rds_mysql_backup.DataSourceVolcengineRdsMysqlBackups(),
+			"volcengine_rds_mysql_parameter_templates": rds_mysql_parameter_template.DataSourceVolcengineRdsMysqlParameterTemplates(),
 
 			// ================ TLS ================
 			"volcengine_tls_rules":               tlsRule.DataSourceVolcengineTlsRules(),
@@ -921,6 +924,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_endpoint":                rds_mysql_endpoint.ResourceVolcengineRdsMysqlEndpoint(),
 			"volcengine_rds_mysql_endpoint_public_address": rds_mysql_endpoint_public_address.ResourceVolcengineRdsMysqlEndpointPublicAddress(),
 			"volcengine_rds_mysql_backup":                  rds_mysql_backup.ResourceVolcengineRdsMysqlBackup(),
+			"volcengine_rds_mysql_parameter_template":      rds_mysql_parameter_template.ResourceVolcengineRdsMysqlParameterTemplate(),
 
 			// ================ TLS ================
 			"volcengine_tls_kafka_consumer":     kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
