@@ -862,7 +862,7 @@ func (s *VolcengineEcsService) ModifyResource(resourceData *schema.ResourceData,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.EbsClient.ExtendVolumeCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getEbsUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return nil

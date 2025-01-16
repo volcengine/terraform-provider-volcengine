@@ -130,7 +130,7 @@ func (s *VolcengineTlsProjectService) CreateResource(resourceData *schema.Resour
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Region"] = *s.Client.ClbClient.Config.Region
+				(*call.SdkParam)["Region"] = s.Client.Region
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

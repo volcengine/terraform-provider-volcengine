@@ -196,7 +196,7 @@ func (s *VolcengineSubnetService) CreateResource(resourceData *schema.ResourceDa
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.VpcClient.CreateSubnetCommon(call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
@@ -251,7 +251,7 @@ func (s *VolcengineSubnetService) ModifyResource(resourceData *schema.ResourceDa
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.ModifySubnetAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
@@ -282,7 +282,7 @@ func (s *VolcengineSubnetService) RemoveResource(resourceData *schema.ResourceDa
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.DeleteSubnetCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 3*time.Minute)

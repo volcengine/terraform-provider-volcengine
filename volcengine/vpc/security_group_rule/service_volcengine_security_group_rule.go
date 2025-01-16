@@ -70,9 +70,9 @@ func (s *VolcengineSecurityGroupRuleService) CreateResource(resourceData *schema
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				if direction == string(DirectionEgress) {
-					return s.Client.VpcClient.AuthorizeSecurityGroupEgressCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				} else {
-					return s.Client.VpcClient.AuthorizeSecurityGroupIngressCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				}
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
@@ -106,16 +106,15 @@ func (s *VolcengineSecurityGroupRuleService) ReadResources(condition map[string]
 		ok      bool
 	)
 
-	vpcClient := s.Client.VpcClient
 	action := "DescribeSecurityGroupAttributes"
 	logger.Debug(logger.ReqFormat, action, condition)
 	if condition == nil {
-		resp, err = vpcClient.DescribeSecurityGroupAttributesCommon(nil)
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 		if err != nil {
 			return data, err
 		}
 	} else {
-		resp, err = vpcClient.DescribeSecurityGroupAttributesCommon(&condition)
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 		if err != nil {
 			return data, err
 		}
@@ -262,9 +261,9 @@ func (s *VolcengineSecurityGroupRuleService) ModifyResource(resourceData *schema
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				if direction == string(DirectionEgress) {
-					return s.Client.VpcClient.ModifySecurityGroupRuleDescriptionsEgressCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				} else {
-					return s.Client.VpcClient.ModifySecurityGroupRuleDescriptionsIngressCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				}
 
 			},
@@ -304,9 +303,9 @@ func (s *VolcengineSecurityGroupRuleService) RemoveResource(resourceData *schema
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				if direction == string(DirectionEgress) {
-					return s.Client.VpcClient.RevokeSecurityGroupEgressCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				} else {
-					return s.Client.VpcClient.RevokeSecurityGroupIngressCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				}
 
 			},
@@ -353,4 +352,14 @@ func validateProtocol(protocol string, start, end int) error {
 		}
 	}
 	return nil
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

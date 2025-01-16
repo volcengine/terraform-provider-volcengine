@@ -38,16 +38,15 @@ func (s *VolcengineServerGroupServerService) ReadResources(condition map[string]
 			err     error
 			results interface{}
 		)
-		clb := s.Client.ClbClient
 		action := "DescribeServerGroupAttributes"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = clb.DescribeServerGroupAttributesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action, "clb"), nil)
 			if err != nil {
 				return []interface{}{}, err
 			}
 		} else {
-			resp, err = clb.DescribeServerGroupAttributesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action, "clb"), &condition)
 			if err != nil {
 				return []interface{}{}, err
 			}
@@ -167,7 +166,7 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				// 创建 server group server
-				return s.Client.ClbClient.AddServerGroupBackendServersCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action, "clb"), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				// 注意 获取内容 这个地方不能是指针 需要转一次
@@ -389,7 +388,7 @@ func (s *VolcengineServerGroupServerService) ModifyResource(resourceData *schema
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				// 修改 server group server 属性
-				return s.Client.ClbClient.ModifyServerGroupAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action, "clb"), call.SdkParam)
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				clb.NewClbService(s.Client): {
@@ -427,7 +426,7 @@ func (s *VolcengineServerGroupServerService) RemoveResource(resourceData *schema
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除 Server Group
-				return s.Client.ClbClient.RemoveServerGroupBackendServersCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action, "clb"), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

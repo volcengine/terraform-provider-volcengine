@@ -32,16 +32,15 @@ func (s *VolcengineCertificateService) ReadResources(condition map[string]interf
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		clbClient := s.Client.ClbClient
 		action := "DescribeCertificates"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = clbClient.DescribeCertificatesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = clbClient.DescribeCertificatesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -113,7 +112,7 @@ func (s *VolcengineCertificateService) CreateResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建certificate
-				return s.Client.ClbClient.UploadCertificateCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -175,7 +174,7 @@ func (s *VolcengineCertificateService) RemoveResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除Certificate
-				return s.Client.ClbClient.DeleteCertificateCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

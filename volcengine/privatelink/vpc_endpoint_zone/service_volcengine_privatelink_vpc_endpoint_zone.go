@@ -232,7 +232,7 @@ func (s *VolcengineVpcEndpointZoneService) getZoneIdBySubnet(subnetId string) (z
 	req := map[string]interface{}{
 		"SubnetIds.1": subnetId,
 	}
-	resp, err := s.Client.VpcClient.DescribeSubnetsCommon(&req)
+	resp, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
 	if err != nil {
 		return "", err
 	}
@@ -262,5 +262,15 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		Action:      actionName,
 		ContentType: ve.Default,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
 	}
 }

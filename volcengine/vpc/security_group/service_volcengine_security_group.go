@@ -33,16 +33,15 @@ func (s *VolcengineSecurityGroupService) ReadResources(m map[string]interface{})
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		vpcClient := s.Client.UniversalClient
 		action := "DescribeSecurityGroups"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = vpcClient.DoCall(getUniversalInfo(action), nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = vpcClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -59,7 +58,7 @@ func (s *VolcengineSecurityGroupService) ReadResources(m map[string]interface{})
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.SecurityGroups is not Slice")
 		}
-		logger.Debug(logger.ReqFormat, "", data)
+		logger.Debug(logger.ReqFormat, "DescribeSecurityGroups", data)
 
 		return data, err
 	})
@@ -149,7 +148,7 @@ func (s *VolcengineSecurityGroupService) CreateResource(resourceData *schema.Res
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.VpcClient.CreateSecurityGroupCommon(call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
@@ -191,7 +190,7 @@ func (s *VolcengineSecurityGroupService) ModifyResource(resourceData *schema.Res
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.ModifySecurityGroupAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
@@ -228,7 +227,7 @@ func (s *VolcengineSecurityGroupService) RemoveResource(resourceData *schema.Res
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.DeleteSecurityGroupCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

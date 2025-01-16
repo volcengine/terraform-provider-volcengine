@@ -153,7 +153,7 @@ func (s *VolcengineRedisDbInstanceService) ReadResources(condition map[string]in
 		results interface{}
 	)
 
-	regionId := *s.Client.ClbClient.Config.Region
+	regionId := s.Client.Region
 	condition["RegionId"] = regionId
 
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
@@ -416,7 +416,7 @@ func (s *VolcengineRedisDbInstanceService) CreateResource(resourceData *schema.R
 					return false, fmt.Errorf("get vpc ID by subnet ID %s failed", subnetId)
 				}
 				(*call.SdkParam)["VpcId"] = vpcId
-				(*call.SdkParam)["RegionId"] = *s.Client.ClbClient.Config.Region
+				(*call.SdkParam)["RegionId"] = s.Client.Region
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 
 				return true, nil
@@ -1265,7 +1265,7 @@ func (s *VolcengineRedisDbInstanceService) getVpcIdAndZoneIdBySubnet(subnetId st
 		"SubnetIds.1": subnetId,
 	}
 	action := "DescribeSubnets"
-	resp, err := s.Client.VpcClient.DescribeSubnetsCommon(&req)
+	resp, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
 	if err != nil {
 		return "", "", err
 	}
@@ -1359,5 +1359,15 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2020-12-07",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
 	}
 }

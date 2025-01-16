@@ -33,16 +33,15 @@ func (s *VolcengineServerGroupService) ReadResources(condition map[string]interf
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		clb := s.Client.ClbClient
 		action := "DescribeServerGroups"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = clb.DescribeServerGroupsCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = clb.DescribeServerGroupsCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -124,7 +123,7 @@ func (s *VolcengineServerGroupService) CreateResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				// 创建 server group
-				return s.Client.ClbClient.CreateServerGroupCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				// 注意 获取内容 这个地方不能是指针 需要转一次
@@ -167,7 +166,7 @@ func (s *VolcengineServerGroupService) ModifyResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				// 修改 server group 属性
-				return s.Client.ClbClient.ModifyServerGroupAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				clb.NewClbService(s.Client): {
@@ -202,7 +201,7 @@ func (s *VolcengineServerGroupService) RemoveResource(resourceData *schema.Resou
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除 Server Group
-				return s.Client.ClbClient.DeleteServerGroupCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -267,7 +266,8 @@ func (s *VolcengineServerGroupService) queryLoadBalancerId(serverGroupId string)
 	}
 
 	// 查询 LoadBalancerId
-	serverGroupResp, err := s.Client.ClbClient.DescribeServerGroupAttributesCommon(&map[string]interface{}{
+	action := "DescribeServerGroupAttributes"
+	serverGroupResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &map[string]interface{}{
 		"ServerGroupId": serverGroupId,
 	})
 	if err != nil {
@@ -278,4 +278,14 @@ func (s *VolcengineServerGroupService) queryLoadBalancerId(serverGroupId string)
 		return "", err
 	}
 	return clbId.(string), nil
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "clb",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

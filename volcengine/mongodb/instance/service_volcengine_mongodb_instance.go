@@ -314,7 +314,7 @@ func (s *VolcengineMongoDBInstanceService) getVpcIdAndZoneIdBySubnet(subnetId st
 		"SubnetIds.1": subnetId,
 	}
 	action := "DescribeSubnets"
-	resp, err := s.Client.VpcClient.DescribeSubnetsCommon(&req)
+	resp, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
 	if err != nil {
 		return "", "", err
 	}
@@ -715,5 +715,15 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2022-01-01",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
 	}
 }

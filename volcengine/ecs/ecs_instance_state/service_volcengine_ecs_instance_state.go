@@ -79,9 +79,9 @@ func (s *VolcengineInstanceStateService) CreateResource(resourceData *schema.Res
 				)
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				if instanceAction == string(StartAction) {
-					resp, err = s.Client.EcsClient.StartInstanceCommon(call.SdkParam)
+					resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				} else {
-					resp, err = s.Client.EcsClient.StopInstanceCommon(call.SdkParam)
+					resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				}
 				logger.Debug(logger.RespFormat, call.Action, resp)
 				return resp, err
@@ -109,16 +109,15 @@ func (s *VolcengineInstanceStateService) ReadResources(condition map[string]inte
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) (data []interface{}, err error) {
-		ecs := s.Client.EcsClient
 		action := "DescribeInstances"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = ecs.DescribeInstancesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = ecs.DescribeInstancesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -262,9 +261,9 @@ func (s *VolcengineInstanceStateService) ModifyResource(resourceData *schema.Res
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				if instanceAction == string(StartAction) {
-					return s.Client.EcsClient.StartInstanceCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				} else {
-					return s.Client.EcsClient.StopInstanceCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				}
 			},
 			Refresh: &ve.StateRefresh{
@@ -305,4 +304,13 @@ func (s *VolcengineInstanceStateService) describeCurrentStatus(resourceData *sch
 		}
 	}
 	return true, nil
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "ecs",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		Action:      actionName,
+	}
 }
