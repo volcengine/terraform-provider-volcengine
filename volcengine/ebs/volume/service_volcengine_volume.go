@@ -35,16 +35,15 @@ func (s *VolcengineVolumeService) ReadResources(condition map[string]interface{}
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		ebs := s.Client.EbsClient
 		action := "DescribeVolumes"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = ebs.DescribeVolumesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = ebs.DescribeVolumesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -183,7 +182,7 @@ func (s *VolcengineVolumeService) CreateResource(resourceData *schema.ResourceDa
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.EbsClient.CreateVolumeCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id, _ := ve.ObtainSdkValue("Result.VolumeId", *resp)
@@ -225,7 +224,7 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.EbsClient.ModifyVolumeAttributeCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"available", "attached"},
@@ -247,7 +246,7 @@ func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceDa
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-					return s.Client.EbsClient.ExtendVolumeCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 				Refresh: &ve.StateRefresh{
 					Target:  []string{"available", "attached"},
@@ -401,7 +400,7 @@ func (s *VolcengineVolumeService) RemoveResource(resourceData *schema.ResourceDa
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.EbsClient.DeleteVolumeCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				// 不能删除已挂载云盘

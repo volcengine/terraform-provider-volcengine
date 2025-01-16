@@ -51,10 +51,9 @@ func (s *VolcengineEipAssociateService) ReadResource(resourceData *schema.Resour
 	req := map[string]interface{}{
 		"AllocationId": allocationId,
 	}
-	vpc := s.Client.VpcClient
 	action := "DescribeEipAddressAttributes"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err = vpc.DescribeEipAddressAttributesCommon(&req)
+	resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
 	if err != nil {
 		return data, err
 	}
@@ -131,7 +130,7 @@ func (s *VolcengineEipAssociateService) CreateResource(resourceData *schema.Reso
 			ConvertMode: ve.RequestConvertAll,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.AssociateEipAddressCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				d.SetId(fmt.Sprint((*call.SdkParam)["AllocationId"], ":", (*call.SdkParam)["InstanceId"]))
@@ -162,7 +161,7 @@ func (s *VolcengineEipAssociateService) RemoveResource(resourceData *schema.Reso
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.DisassociateEipAddressCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
@@ -197,4 +196,14 @@ func (s *VolcengineEipAssociateService) DatasourceResources(*schema.ResourceData
 
 func (s *VolcengineEipAssociateService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

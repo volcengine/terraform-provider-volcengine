@@ -112,10 +112,11 @@ func (s *VolcengineVpnGatewayService) ReadResource(resourceData *schema.Resource
 	}
 
 	// 计费信息
+	action := "DescribeVpnGatewaysBilling"
 	params := &map[string]interface{}{
 		"VpnGatewayIds.1": id,
 	}
-	billingRes, err := s.Client.VpnClient.DescribeVpnGatewaysBillingCommon(params)
+	billingRes, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), params)
 	if err != nil {
 		return data, err
 	}

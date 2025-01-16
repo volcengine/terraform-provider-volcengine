@@ -157,7 +157,7 @@ func (s *VolcengineNetworkInterfaceService) CreateResource(resourceData *schema.
 			ConvertMode: ve.RequestConvertAll,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.CreateNetworkInterfaceCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id, _ := ve.ObtainSdkValue("Result.NetworkInterfaceId", *resp)
@@ -205,7 +205,7 @@ func (s *VolcengineNetworkInterfaceService) ModifyResource(resourceData *schema.
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.ModifyNetworkInterfaceAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Convert: map[string]ve.RequestConvert{
 				"security_group_ids": {
@@ -488,7 +488,7 @@ func (s *VolcengineNetworkInterfaceService) RemoveResource(resourceData *schema.
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.DeleteNetworkInterfaceCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

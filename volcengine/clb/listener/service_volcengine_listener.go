@@ -3,6 +3,7 @@ package listener
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -11,8 +12,6 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/clb"
-	clbSDK "github.com/volcengine/volcengine-go-sdk/service/clb"
-	"github.com/volcengine/volcengine-go-sdk/volcengine"
 )
 
 type VolcengineListenerService struct {
@@ -36,16 +35,15 @@ func (s *VolcengineListenerService) ReadResources(condition map[string]interface
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		clbClient := s.Client.ClbClient
 		action := "DescribeListeners"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = clbClient.DescribeListenersCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = clbClient.DescribeListenersCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
@@ -89,9 +87,8 @@ func (s *VolcengineListenerService) ReadResource(resourceData *schema.ResourceDa
 		return data, fmt.Errorf("Listener %s not exist ", listenerId)
 	}
 
-	clbClient := s.Client.ClbClient
-
-	listenerResp, err := clbClient.DescribeListenerAttributesCommon(&map[string]interface{}{
+	action := "DescribeListenerAttributes"
+	listenerResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &map[string]interface{}{
 		"ListenerId": listenerId,
 	})
 	if err != nil {
@@ -183,13 +180,14 @@ func (s *VolcengineListenerService) refreshAclStatus() ve.CallFunc {
 
 func (s *VolcengineListenerService) checkAcl(aclIds []string) error {
 	return resource.Retry(20*time.Minute, func() *resource.RetryError {
+		action := "DescribeAcls"
+		req := make(map[string]interface{})
+		for index, id := range aclIds {
+			req["AclIds."+strconv.Itoa(index+1)] = id
+		}
 		logger.Debug(logger.ReqFormat, "DescribeAcls", aclIds)
 		// create 的时候上限为5个，无需翻页
-		resp, err := s.Client.ClbClient.DescribeAcls(&clbSDK.DescribeAclsInput{
-			AclIds:     volcengine.StringSlice(aclIds),
-			PageNumber: volcengine.Int64(1),
-			PageSize:   volcengine.Int64(100),
-		})
+		resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
 		if err != nil {
 			return resource.NonRetryableError(err)
 		}
@@ -197,11 +195,23 @@ func (s *VolcengineListenerService) checkAcl(aclIds []string) error {
 
 		statusOK := true
 		aclIdMap := make(map[string]bool)
-		for _, element := range resp.Acls {
-			aclIdMap[*element.AclId] = true
-			if *element.Status == "Deleting" {
+		results, err := ve.ObtainSdkValue("Result.Acls", *resp)
+		if err != nil {
+			return resource.NonRetryableError(err)
+		}
+		acls, ok := results.([]interface{})
+		if !ok {
+			return resource.NonRetryableError(fmt.Errorf("checkAcl Result.Acls is not Slice"))
+		}
+		for _, element := range acls {
+			aclMap, ok := element.(map[string]interface{})
+			if !ok {
+				return resource.NonRetryableError(fmt.Errorf("checkAcl Acl is not map"))
+			}
+			aclIdMap[aclMap["AclId"].(string)] = true
+			if aclMap["Status"] == "Deleting" {
 				return resource.NonRetryableError(fmt.Errorf("acl is in deleting status"))
-			} else if *element.Status != "Active" { // Creating / Configuring
+			} else if aclMap["Status"] != "Active" { // Creating / Configuring
 				statusOK = false
 				break
 			}
@@ -258,7 +268,7 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建listener
-				return s.Client.ClbClient.CreateListenerCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -348,7 +358,7 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改 listener 属性
-				return s.Client.ClbClient.ModifyListenerAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Active", "Disabled"},
@@ -388,7 +398,7 @@ func (s *VolcengineListenerService) RemoveResource(resourceData *schema.Resource
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除 Listener
-				return s.Client.ClbClient.DeleteListenerCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -486,7 +496,8 @@ func (s *VolcengineListenerService) queryLoadBalancerId(listenerId string) (stri
 	}
 
 	// 查询 LoadBalancerId
-	serverGroupResp, err := s.Client.ClbClient.DescribeListenerAttributesCommon(&map[string]interface{}{
+	action := "DescribeListenerAttributes"
+	serverGroupResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &map[string]interface{}{
 		"ListenerId": listenerId,
 	})
 	if err != nil {
@@ -497,4 +508,14 @@ func (s *VolcengineListenerService) queryLoadBalancerId(listenerId string) (stri
 		return "", err
 	}
 	return clbId.(string), nil
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "clb",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

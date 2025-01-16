@@ -33,16 +33,15 @@ func (s *VolcengineAclService) ReadResources(condition map[string]interface{}) (
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		clb := s.Client.ClbClient
 		action := "DescribeAcls"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = clb.DescribeAclsCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = clb.DescribeAclsCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -90,9 +89,8 @@ func (s *VolcengineAclService) ReadResource(resourceData *schema.ResourceData, a
 	action := "DescribeAclAttributes"
 	condition := make(map[string]interface{})
 	condition["AclId"] = aclId
-	clb := s.Client.ClbClient
 	logger.Debug(logger.ReqFormat, action, condition)
-	resp, err = clb.DescribeAclAttributesCommon(&condition)
+	resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 	entries, _ := ve.ObtainSdkValue("Result.AclEntries", *resp)
 	logger.Debug(logger.ReqFormat, action, condition, entries)
 	logger.Debug(logger.ReqFormat, action, condition, data)
@@ -150,7 +148,7 @@ func (s *VolcengineAclService) CreateResource(resourceData *schema.ResourceData,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.CreateAclCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id, _ := ve.ObtainSdkValue("Result.AclId", *resp)
@@ -185,7 +183,7 @@ func (s *VolcengineAclService) CreateResource(resourceData *schema.ResourceData,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.AddAclEntriesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Active"},
@@ -216,7 +214,7 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.ModifyAclAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Active"},
@@ -245,7 +243,7 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.RemoveAclEntriesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//假如需要异步状态 这里需要等一下
@@ -277,7 +275,7 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.AddAclEntriesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Active"},
@@ -300,7 +298,7 @@ func (s *VolcengineAclService) RemoveResource(resourceData *schema.ResourceData,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.DeleteAclCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -355,5 +353,15 @@ func (s *VolcengineAclService) ProjectTrn() *ve.ProjectTrn {
 		ResourceType:         "acl",
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
+	}
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "clb",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
 	}
 }

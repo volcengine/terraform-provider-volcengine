@@ -2,8 +2,10 @@ package common
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
+	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/client/metadata"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/corehandlers"
@@ -30,6 +32,17 @@ const (
 	ApplicationJSON
 )
 
+type RegionType int
+
+const (
+	Regional RegionType = iota
+	Global
+)
+
+var tobRegion = map[string]bool{
+	"cn-beijing-autodriving": true,
+}
+
 type Universal struct {
 	Session   *session.Session
 	endpoints map[string]string
@@ -41,6 +54,7 @@ type UniversalInfo struct {
 	Version     string
 	HttpMethod  HttpMethod
 	ContentType ContentType
+	RegionType  RegionType
 }
 
 func NewUniversalClient(session *session.Session, endpoints map[string]string) *Universal {
@@ -50,14 +64,42 @@ func NewUniversalClient(session *session.Session, endpoints map[string]string) *
 	}
 }
 
-func (u *Universal) newTargetClient(info UniversalInfo) *client.Client {
-	config := u.Session.ClientConfig(info.ServiceName)
-	endpoint := config.Endpoint
+func (u *Universal) loadEndpoint(info UniversalInfo, defaultEndpoint, region string) string {
+	var endpoint string
+	// firstly, load endpoint from customer_endpoints
 	if len(u.endpoints) > 0 {
-		if end, ok := u.endpoints[info.ServiceName]; ok {
-			endpoint = endpoint[0:strings.Index(config.Endpoint, "//")] + "//" + end
+		if value, ok := u.endpoints[info.ServiceName]; ok && value != "" {
+			endpoint = defaultEndpoint[0:strings.Index(defaultEndpoint, "//")] + "//" + value
 		}
 	}
+
+	// todo: secondly, query endpoint by location DescribeOpenAPIEndpoints
+
+	// thirdly, combine standard endpoint for target region
+	if v, exist := tobRegion[region]; exist && v {
+		serviceName := strings.ReplaceAll(strings.ToLower(info.ServiceName), "_", "-")
+		regionType := getRegionType(info.RegionType)
+		var standardEndpoint string
+		if regionType == RegionalService {
+			standardEndpoint = fmt.Sprintf("%s.%s.%s", serviceName, region, VolcengineIpv4EndpointSuffix)
+		} else if regionType == GlobalService {
+			standardEndpoint = fmt.Sprintf("%s.%s", serviceName, VolcengineIpv4EndpointSuffix)
+		}
+		endpoint = defaultEndpoint[0:strings.Index(defaultEndpoint, "//")] + "//" + standardEndpoint
+	}
+
+	// lastly, use defaultEndpoint
+	if endpoint == "" {
+		endpoint = defaultEndpoint
+	}
+	logger.DebugInfo("service: %s, endpoint: %s", info.ServiceName, endpoint)
+	return endpoint
+}
+
+func (u *Universal) newTargetClient(info UniversalInfo) *client.Client {
+	config := u.Session.ClientConfig(info.ServiceName)
+	endpoint := u.loadEndpoint(info, config.Endpoint, config.SigningRegion)
+
 	c := client.New(
 		*config.Config,
 		metadata.ClientInfo{
@@ -104,6 +146,15 @@ func getContentType(m ContentType) string {
 		return "application/json"
 	default:
 		return ""
+	}
+}
+
+func getRegionType(m RegionType) string {
+	switch m {
+	case Global:
+		return "Global"
+	default:
+		return "Regional"
 	}
 }
 

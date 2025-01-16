@@ -319,8 +319,10 @@ func (s *VolcengineIamPolicyService) MergeAttachedPolicies(attached []interface{
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
+		Action:      actionName,
 		Version:     "2018-01-01",
 		HttpMethod:  ve.GET,
-		Action:      actionName,
+		ContentType: ve.Default,
+		RegionType:  ve.Global,
 	}
 }

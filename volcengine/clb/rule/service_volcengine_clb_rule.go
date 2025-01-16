@@ -34,7 +34,6 @@ func (s *VolcengineRuleService) ReadResources(condition map[string]interface{}) 
 		ok      bool
 	)
 	return ve.WithSimpleQuery(condition, func(m map[string]interface{}) ([]interface{}, error) {
-		client := s.Client.ClbClient
 		action := "DescribeRules"
 		logger.Debug(logger.ReqFormat, action, condition)
 		// 检查 RuleIds 是否存在
@@ -58,12 +57,12 @@ func (s *VolcengineRuleService) ReadResources(condition map[string]interface{}) 
 
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = client.DescribeRulesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = client.DescribeRulesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -168,7 +167,7 @@ func (s *VolcengineRuleService) CreateResource(resourceData *schema.ResourceData
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.CreateRulesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				ids, _ := ve.ObtainSdkValue("Result.RuleIds", *resp)
@@ -218,7 +217,7 @@ func (s *VolcengineRuleService) ModifyResource(resourceData *schema.ResourceData
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.ModifyRulesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 				clb.NewClbService(s.Client): {
@@ -254,7 +253,7 @@ func (s *VolcengineRuleService) RemoveResource(resourceData *schema.ResourceData
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.DeleteRulesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				return resource.Retry(15*time.Minute, func() *resource.RetryError {
@@ -312,7 +311,8 @@ func (s *VolcengineRuleService) ReadResourceId(id string) string {
 
 func (s *VolcengineRuleService) queryLoadBalancerId(serverGroupId string) (string, error) {
 	// 查询 LoadBalancerId
-	serverGroupResp, err := s.Client.ClbClient.DescribeServerGroupAttributesCommon(&map[string]interface{}{
+	action := "DescribeServerGroupAttributes"
+	serverGroupResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &map[string]interface{}{
 		"ServerGroupId": serverGroupId,
 	})
 	if err != nil {
@@ -323,4 +323,14 @@ func (s *VolcengineRuleService) queryLoadBalancerId(serverGroupId string) (strin
 		return "", err
 	}
 	return clbId.(string), nil
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "clb",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

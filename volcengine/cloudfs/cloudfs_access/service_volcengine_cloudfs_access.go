@@ -3,8 +3,6 @@ package cloudfs_access
 import (
 	"errors"
 	"fmt"
-	"github.com/volcengine/volcengine-go-sdk/service/vpc"
-	"github.com/volcengine/volcengine-go-sdk/volcengine"
 	"strings"
 	"time"
 
@@ -153,12 +151,20 @@ func (s *VolcengineCloudfsAccessService) CreateResource(resourceData *schema.Res
 			ContentType: ve.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if v, ok := (*call.SdkParam)["SubnetId"]; ok {
-					subnetAttr, err := client.VpcClient.DescribeSubnetAttributes(&vpc.DescribeSubnetAttributesInput{
-						SubnetId: volcengine.String(v.(string))})
+					action := "DescribeSubnetAttributes"
+					req := map[string]interface{}{
+						"SubnetId": v.(string),
+					}
+					resp, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
 					if err != nil {
 						return false, err
 					}
-					(*call.SdkParam)["VpcId"] = *subnetAttr.VpcId
+					logger.Debug(logger.RespFormat, action, req, *resp)
+					vpcId, err := ve.ObtainSdkValue("Result.VpcId", *resp)
+					if err != nil {
+						return false, err
+					}
+					(*call.SdkParam)["VpcId"] = vpcId
 				}
 				return true, nil
 			},
@@ -279,6 +285,16 @@ func getPostUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2022-02-02",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 		Action:      actionName,
 	}
 }

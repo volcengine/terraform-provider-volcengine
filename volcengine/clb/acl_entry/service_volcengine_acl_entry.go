@@ -40,16 +40,15 @@ func (s *VolcengineAclEntryService) ReadResources(condition map[string]interface
 			err     error
 			results interface{}
 		)
-		clb := s.Client.ClbClient
 		action := "DescribeAclAttributes"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = clb.DescribeAclAttributesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return []interface{}{}, err
 			}
 		} else {
-			resp, err = clb.DescribeAclAttributesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return []interface{}{}, err
 			}
@@ -154,7 +153,7 @@ func (s *VolcengineAclEntryService) CreateResource(resourceData *schema.Resource
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.AddAclEntriesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id := fmt.Sprintf("%s:%s", d.Get("acl_id"), d.Get("entry"))
@@ -198,7 +197,7 @@ func (s *VolcengineAclEntryService) RemoveResource(resourceData *schema.Resource
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.ClbClient.RemoveAclEntriesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -239,4 +238,14 @@ func (s *VolcengineAclEntryService) DatasourceResources(*schema.ResourceData, *s
 
 func (s *VolcengineAclEntryService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "clb",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }

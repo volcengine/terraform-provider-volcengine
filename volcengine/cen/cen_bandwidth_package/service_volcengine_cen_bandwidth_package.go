@@ -400,9 +400,11 @@ func (s *VolcengineCenBandwidthPackageService) ModifyProject(resourceData *schem
 func (s *VolcengineCenBandwidthPackageService) getIAMUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
-		Version:     "2021-08-01",
-		HttpMethod:  ve.GET,
 		Action:      actionName,
+		Version:     "2018-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		RegionType:  ve.Global,
 	}
 }
 

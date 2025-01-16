@@ -125,7 +125,7 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResources(m map[string]interface
 			// query rds instance allow list ids
 			allowListInfo, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeAllowLists"), &map[string]interface{}{
 				"InstanceId": rdsInstance["InstanceId"],
-				"RegionId":   *(s.Client.ClbClient.Config.Region),
+				"RegionId":   s.Client.Region,
 			})
 			if err != nil {
 				logger.Info("DescribeAllowLists error:", err)
@@ -336,7 +336,7 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 					"SubnetIds.1": subnetId,
 				}
 				action := "DescribeSubnets"
-				resp, err := s.Client.VpcClient.DescribeSubnetsCommon(&req)
+				resp, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
 				if err != nil {
 					return false, err
 				}
@@ -866,6 +866,16 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2022-01-01",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 		Action:      actionName,
 	}
 }

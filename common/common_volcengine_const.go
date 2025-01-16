@@ -46,3 +46,10 @@ const (
 	UrlParam
 	FilePathParam
 )
+
+const (
+	RegionalService = "Regional"
+	GlobalService   = "Global"
+
+	VolcengineIpv4EndpointSuffix = "volcengineapi.com"
+)
