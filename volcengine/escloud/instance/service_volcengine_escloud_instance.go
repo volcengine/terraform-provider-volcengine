@@ -387,7 +387,7 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 				}
 
 				// check region
-				regionId := *(s.Client.ClbClient.Config.Region)
+				regionId := s.Client.Region
 				if regionCustom, ok := (*call.SdkParam)["InstanceConfiguration.RegionId"]; ok {
 					if regionId != regionCustom.(string) {
 						return false, fmt.Errorf("region does not match")
@@ -400,7 +400,7 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 					"SubnetIds.1": subnetId,
 				}
 				action := "DescribeSubnets"
-				resp, err := s.Client.VpcClient.DescribeSubnetsCommon(&req)
+				resp, err := s.Client.UniversalClient.DoCall(getVPCUniversalInfo(action), &req)
 				if err != nil {
 					return false, err
 				}
@@ -434,7 +434,7 @@ func (s *VolcengineESCloudInstanceService) CreateResource(resourceData *schema.R
 					"VpcIds.1": vpcId,
 				}
 				action = "DescribeVpcs"
-				resp, err = s.Client.VpcClient.DescribeVpcsCommon(&req)
+				resp, err = s.Client.UniversalClient.DoCall(getVPCUniversalInfo(action), &req)
 				if err != nil {
 					return false, err
 				}
@@ -853,7 +853,18 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 func getIamUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
-		Version:     "2021-08-01",
+		Action:      actionName,
+		Version:     "2018-01-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		RegionType:  ve.Global,
+	}
+}
+
+func getVPCUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,
 		Action:      actionName,
 	}

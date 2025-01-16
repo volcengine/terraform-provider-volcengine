@@ -32,16 +32,15 @@ func (s *VolcengineNatGatewayService) ReadResources(condition map[string]interfa
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		natGateway := s.Client.NatClient
 		action := "DescribeNatGateways"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = natGateway.DescribeNatGatewaysCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = natGateway.DescribeNatGatewaysCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -197,7 +196,7 @@ func (s *VolcengineNatGatewayService) CreateResource(resourceData *schema.Resour
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建natGateway
-				return s.Client.NatClient.CreateNatGatewayCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -241,7 +240,7 @@ func (s *VolcengineNatGatewayService) ModifyResource(resourceData *schema.Resour
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改natGateway属性
-				return s.Client.NatClient.ModifyNatGatewayAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
@@ -252,7 +251,7 @@ func (s *VolcengineNatGatewayService) ModifyResource(resourceData *schema.Resour
 	callbacks = append(callbacks, callback)
 
 	// 更新Tags
-	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "ngw", resourceData, getUniversalInfo)
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "ngw", resourceData, getVpcUniversalInfo)
 	callbacks = append(callbacks, setResourceTagsCallbacks...)
 
 	return callbacks
@@ -270,7 +269,7 @@ func (s *VolcengineNatGatewayService) RemoveResource(resourceData *schema.Resour
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除NatGateway
-				return s.Client.NatClient.DeleteNatGatewayCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//由于异步删除问题 这里补充一个轮询查询(临时解决方案)
@@ -363,6 +362,16 @@ func (s *VolcengineNatGatewayService) ReadResourceId(id string) string {
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "natgateway",
+		Action:      actionName,
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "vpc",
 		Version:     "2020-04-01",

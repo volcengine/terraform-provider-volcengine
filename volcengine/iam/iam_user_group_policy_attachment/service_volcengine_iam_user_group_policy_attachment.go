@@ -170,9 +170,10 @@ func (s *VolcengineIamUserGroupPolicyAttachmentService) ReadResourceId(id string
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
+		Action:      actionName,
 		Version:     "2018-01-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
-		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }

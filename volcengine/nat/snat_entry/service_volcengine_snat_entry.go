@@ -32,16 +32,15 @@ func (s *VolcengineSnatEntryService) ReadResources(m map[string]interface{}) (da
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		natClient := s.Client.NatClient
 		action := "DescribeSnatEntries"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = natClient.DescribeSnatEntriesCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = natClient.DescribeSnatEntriesCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -138,7 +137,7 @@ func (s *VolcengineSnatEntryService) CreateResource(resourceData *schema.Resourc
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.NatClient.CreateSnatEntryCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id, _ := ve.ObtainSdkValue("Result.SnatEntryId", *resp)
@@ -168,7 +167,7 @@ func (s *VolcengineSnatEntryService) ModifyResource(resourceData *schema.Resourc
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.NatClient.ModifySnatEntryAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
@@ -192,7 +191,7 @@ func (s *VolcengineSnatEntryService) RemoveResource(resourceData *schema.Resourc
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.NatClient.DeleteSnatEntryCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -242,4 +241,14 @@ func (s *VolcengineSnatEntryService) DatasourceResources(*schema.ResourceData, *
 
 func (s *VolcengineSnatEntryService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "natgateway",
+		Action:      actionName,
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+	}
 }

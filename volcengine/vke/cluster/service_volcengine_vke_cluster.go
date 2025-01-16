@@ -130,9 +130,11 @@ func (s *VolcengineVkeClusterService) ReadResources(condition map[string]interfa
 					}
 
 					// b. get eip data
-					eipAddressResp, err := s.Client.VpcClient.DescribeEipAddressesCommon(&map[string]interface{}{
+					action := "DescribeEipAddresses"
+					req := map[string]interface{}{
 						"EipAddresses.1": publicIp,
-					})
+					}
+					eipAddressResp, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
 					if err != nil {
 						return data, err
 					}
@@ -521,7 +523,7 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					//修改eip属性
-					return s.Client.VpcClient.ModifyEipAddressAttributesCommon(call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getVpcUniversalInfo(call.Action), call.SdkParam)
 				},
 				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
 					eip_address.NewEipAddressService(s.Client): {
@@ -723,6 +725,16 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2022-05-12",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 		Action:      actionName,
 	}
 }

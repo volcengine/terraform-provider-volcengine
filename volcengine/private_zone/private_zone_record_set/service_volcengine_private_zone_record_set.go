@@ -126,6 +126,7 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2022-06-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
+		RegionType:  ve.Global,
 		Action:      actionName,
 	}
 }

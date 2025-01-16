@@ -118,5 +118,6 @@ func (u *UnsubscribeService) getUniversalInfo(actionName string) UniversalInfo {
 		HttpMethod:  POST,
 		Action:      actionName,
 		ContentType: ApplicationJSON,
+		RegionType:  Global,
 	}
 }

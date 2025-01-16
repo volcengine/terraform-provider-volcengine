@@ -135,7 +135,7 @@ func (s *VolcengineIamSamlProviderService) CreateResource(resourceData *schema.R
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.IamClient.CreateSAMLProviderCommon(call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
@@ -181,7 +181,7 @@ func (s *VolcengineIamSamlProviderService) ModifyResource(resourceData *schema.R
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.IamClient.UpdateSAMLProviderCommon(call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
@@ -236,9 +236,10 @@ func (s *VolcengineIamSamlProviderService) ReadResourceId(id string) string {
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
+		Action:      actionName,
 		Version:     "2018-01-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
-		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }

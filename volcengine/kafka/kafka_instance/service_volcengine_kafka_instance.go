@@ -10,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"github.com/volcengine/volcengine-go-sdk/service/vpc"
 )
 
 type VolcengineKafkaInstanceService struct {
@@ -219,12 +218,25 @@ func (s *VolcengineKafkaInstanceService) CreateResource(resourceData *schema.Res
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				subnetId := (*call.SdkParam)["SubnetId"].(string)
-				subnet, err := s.Client.VpcClient.DescribeSubnetAttributes(&vpc.DescribeSubnetAttributesInput{SubnetId: &subnetId})
+				action := "DescribeSubnetAttributes"
+				req := map[string]interface{}{
+					"SubnetId": subnetId,
+				}
+				resp, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
 				if err != nil {
 					return false, err
 				}
-				(*call.SdkParam)["ZoneId"] = *subnet.ZoneId
-				(*call.SdkParam)["VpcId"] = *subnet.VpcId
+				logger.Debug(logger.RespFormat, action, req, *resp)
+				vpcId, err := ve.ObtainSdkValue("Result.VpcId", *resp)
+				if err != nil {
+					return false, err
+				}
+				(*call.SdkParam)["VpcId"] = vpcId
+				zoneId, err := ve.ObtainSdkValue("Result.ZoneId", *resp)
+				if err != nil {
+					return false, err
+				}
+				(*call.SdkParam)["ZoneId"] = zoneId
 				// update charge info
 				charge := make(map[string]interface{})
 				if (*call.SdkParam)["ChargeType"] == "PrePaid" {
@@ -604,6 +616,16 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2022-05-01",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+		Action:      actionName,
+	}
+}
+
+func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
 		Action:      actionName,
 	}
 }

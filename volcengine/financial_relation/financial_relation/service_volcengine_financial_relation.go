@@ -332,6 +332,7 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2022-01-01",
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
+		RegionType:  ve.Global,
 		Action:      actionName,
 	}
 }

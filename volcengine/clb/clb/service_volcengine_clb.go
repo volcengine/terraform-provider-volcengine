@@ -32,16 +32,15 @@ func (s *VolcengineClbService) ReadResources(condition map[string]interface{}) (
 		ok      bool
 	)
 	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
-		clb := s.Client.ClbClient
 		action := "DescribeLoadBalancers"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
-			resp, err = clb.DescribeLoadBalancersCommon(nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = clb.DescribeLoadBalancersCommon(&condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -158,7 +157,7 @@ func (s *VolcengineClbService) ReadResource(resourceData *schema.ResourceData, c
 		return data, fmt.Errorf("Clb %s not exist ", clbId)
 	}
 
-	data["RegionId"] = *s.Client.ClbClient.Config.Region
+	data["RegionId"] = s.Client.Region
 
 	return data, err
 }
@@ -302,9 +301,9 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if regionId, ok := (*call.SdkParam)["RegionId"]; !ok {
-					(*call.SdkParam)["RegionId"] = *s.Client.ClbClient.Config.Region
-				} else if regionId.(string) != *s.Client.ClbClient.Config.Region {
-					return false, fmt.Errorf("region_id is not equal to provider region config(%s)", *s.Client.ClbClient.Config.Region)
+					(*call.SdkParam)["RegionId"] = s.Client.Region
+				} else if regionId.(string) != s.Client.Region {
+					return false, fmt.Errorf("region_id is not equal to provider region config(%s)", s.Client.Region)
 				}
 
 				// private 类型不传 eip_billing_config
@@ -335,7 +334,7 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//创建clb
-				return s.Client.ClbClient.CreateLoadBalancerCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
@@ -387,7 +386,7 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//修改clb属性
-				return s.Client.ClbClient.ModifyLoadBalancerAttributesCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Active"},
@@ -509,7 +508,7 @@ func (s *VolcengineClbService) RemoveResource(resourceData *schema.ResourceData,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				//删除Clb
-				return s.Client.ClbClient.DeleteLoadBalancerCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

@@ -287,7 +287,7 @@ func (s *VolcengineAlbService) CreateResource(resourceData *schema.ResourceData,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["RegionId"] = *s.Client.ClbClient.Config.Region
+				(*call.SdkParam)["RegionId"] = s.Client.Region
 				(*call.SdkParam)["LoadBalancerBillingType"] = 1
 
 				subnetIds, ok := d.Get("subnet_ids").(*schema.Set)

@@ -56,10 +56,9 @@ func (s *VolcengineNetworkInterfaceAttachService) ReadResource(resourceData *sch
 	req := map[string]interface{}{
 		"NetworkInterfaceId": networkInterfaceId,
 	}
-	vpc := s.Client.VpcClient
 	action := "DescribeNetworkInterfaceAttributes"
 	logger.Debug(logger.ReqFormat, action, req)
-	resp, err = vpc.DescribeNetworkInterfaceAttributesCommon(&req)
+	resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
 	if err != nil {
 		return data, err
 	}
@@ -149,7 +148,7 @@ func (s *VolcengineNetworkInterfaceAttachService) CreateResource(resourceData *s
 			ConvertMode: ve.RequestConvertAll,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.AttachNetworkInterfaceCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				d.SetId(fmt.Sprint((*call.SdkParam)["NetworkInterfaceId"], ":", (*call.SdkParam)["InstanceId"]))
@@ -180,7 +179,7 @@ func (s *VolcengineNetworkInterfaceAttachService) RemoveResource(resourceData *s
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.VpcClient.DetachNetworkInterfaceCommon(call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -211,4 +210,14 @@ func (s *VolcengineNetworkInterfaceAttachService) DatasourceResources(*schema.Re
 
 func (s *VolcengineNetworkInterfaceAttachService) ReadResourceId(id string) string {
 	return id
+}
+
+func getUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "vpc",
+		Version:     "2020-04-01",
+		HttpMethod:  ve.GET,
+		ContentType: ve.Default,
+		Action:      actionName,
+	}
 }
