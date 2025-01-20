@@ -63,6 +63,30 @@ func (s *VolcengineRdsMysqlParameterTemplateService) ReadResources(m map[string]
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.TemplateInfos is not Slice")
 		}
+		for _, value := range data {
+			parameterTemplate, ok := value.(map[string]interface{})
+			if !ok {
+				return data, errors.New("Value is not map ")
+			}
+
+			action = "DescribeParameterTemplate"
+			req := map[string]interface{}{
+				"TemplateId": parameterTemplate["TemplateId"],
+			}
+
+			logger.Debug(logger.ReqFormat, action, req)
+			detailResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if err != nil {
+				return data, err
+			}
+			logger.Debug(logger.RespFormat, action, *detailResp)
+
+			templateParams, err := ve.ObtainSdkValue("Result.TemplateInfo.TemplateParams", *detailResp)
+			if err != nil {
+				return data, err
+			}
+			parameterTemplate["TemplateParams"] = templateParams
+		}
 		return data, err
 	})
 }

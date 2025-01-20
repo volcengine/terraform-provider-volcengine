@@ -23,7 +23,6 @@ func ResourceVolcengineRdsMysqlBackup() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineRdsMysqlBackupCreate,
 		Read:   resourceVolcengineRdsMysqlBackupRead,
-		Update: resourceVolcengineRdsMysqlBackupUpdate,
 		Delete: resourceVolcengineRdsMysqlBackupDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
@@ -42,7 +41,6 @@ func ResourceVolcengineRdsMysqlBackup() *schema.Resource {
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -248,15 +246,6 @@ func resourceVolcengineRdsMysqlBackupRead(d *schema.ResourceData, meta interface
 		return fmt.Errorf("error on reading rds_mysql_backup %q, %s", d.Id(), err)
 	}
 	return err
-}
-
-func resourceVolcengineRdsMysqlBackupUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewRdsMysqlBackupService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineRdsMysqlBackup())
-	if err != nil {
-		return fmt.Errorf("error on updating rds_mysql_backup %q, %s", d.Id(), err)
-	}
-	return resourceVolcengineRdsMysqlBackupRead(d, meta)
 }
 
 func resourceVolcengineRdsMysqlBackupDelete(d *schema.ResourceData, meta interface{}) (err error) {
