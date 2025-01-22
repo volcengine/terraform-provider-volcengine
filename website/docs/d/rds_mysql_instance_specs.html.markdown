@@ -11,10 +11,10 @@ Use this data source to query detailed information of rds mysql instance specs
 ## Example Usage
 ```hcl
 data "volcengine_rds_mysql_instance_specs" "foo" {
-  db_engine_version = ""
-  instance_type     = ""
-  spec_code         = ""
-  zone_id           = ""
+  db_engine_version = "MySQL_8_0"
+  instance_type     = "DoubleNode"
+  #spec_code = ""
+  #zone_id = ""
 }
 ```
 ## Argument Reference

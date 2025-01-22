@@ -944,9 +944,9 @@ func (s *VolcengineRdsMysqlInstanceService) DatasourceResources(*schema.Resource
 			"DBProxyStatus": {
 				TargetField: "db_proxy_status",
 			},
-			"CheckModifyDBProxyAllowed": {
-				TargetField: "check_modify_db_proxy_allowed",
-			},
+			//"CheckModifyDBProxyAllowed": {
+			//	TargetField: "check_modify_db_proxy_allowed",
+			//},
 		},
 	}
 }

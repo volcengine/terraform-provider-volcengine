@@ -344,29 +344,29 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 								"Running: The proxy is running.\nShutdown: The proxy is closed.\n" +
 								"Deleting: The proxy is being closed.",
 						},
-						"check_modify_db_proxy_allowed": {
-							Type:     schema.TypeList,
-							Computed: true,
-							Description: "Is execution of the ModifyDBProxy interface allowed:\n" +
-								"Allowed: If it is closed, return whether the proxy can be enabled. " +
-								"If it is enabled, return whether the proxy can be disabled. Values: " +
-								"true (yes); false (no).\nReason: When Allowed is false, " +
-								"return the specific reason.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"allowed": {
-										Type:        schema.TypeBool,
-										Computed:    true,
-										Description: "Whether the ModifyDBProxy interface can be executed.",
-									},
-									"reason": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The reason why the ModifyDBProxy interface cannot be executed.",
-									},
-								},
-							},
-						},
+						//"check_modify_db_proxy_allowed": {
+						//	Type:     schema.TypeList,
+						//	Computed: true,
+						//	Description: "Is execution of the ModifyDBProxy interface allowed:\n" +
+						//		"Allowed: If it is closed, return whether the proxy can be enabled. " +
+						//		"If it is enabled, return whether the proxy can be disabled. Values: " +
+						//		"true (yes); false (no).\nReason: When Allowed is false, " +
+						//		"return the specific reason.",
+						//	Elem: &schema.Resource{
+						//		Schema: map[string]*schema.Schema{
+						//			"allowed": {
+						//				Type:        schema.TypeBool,
+						//				Computed:    true,
+						//				Description: "Whether the ModifyDBProxy interface can be executed.",
+						//			},
+						//			"reason": {
+						//				Type:        schema.TypeString,
+						//				Computed:    true,
+						//				Description: "The reason why the ModifyDBProxy interface cannot be executed.",
+						//			},
+						//		},
+						//	},
+						//},
 						"feature_states": {
 							Type:        schema.TypeList,
 							Computed:    true,

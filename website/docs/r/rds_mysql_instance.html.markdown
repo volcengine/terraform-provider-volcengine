@@ -66,6 +66,9 @@ MySQL_8_0.
 * `secondary_zone_id` - (Required, ForceNew) The available zone of secondary node.
 * `subnet_id` - (Required, ForceNew) Subnet ID of the RDS instance.
 * `allow_list_ids` - (Optional) Allow list Ids of the RDS instance.
+* `connection_pool_type` - (Optional) Connection pool type. Value range:
+Direct: Direct connection mode.
+Transaction: Transaction-level connection pool (default).
 * `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `instance_name` - (Optional) Instance name. Cannot start with a number or a dash
 Can only contain Chinese characters, letters, numbers, underscores and dashes
@@ -113,6 +116,9 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `allow_list_version` - The version of allow list.
 * `backup_use` - The instance has used backup space. Unit: GB.
+* `binlog_dump` - Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:
+true: Yes.
+false: No.
 * `charge_detail` - Payment methods.
     * `auto_renew` - Whether to automatically renew in prepaid scenarios.
 Autorenew_Enable
@@ -136,6 +142,11 @@ Year - Package year.
     * `temp_modify_start_time` - Temporary upgrade start time.
 * `create_time` - The create time of the RDS instance.
 * `data_sync_mode` - Data synchronization mode.
+* `db_proxy_status` - The running status of the proxy instance. This parameter is returned only when the database proxy is enabled. Values:
+Creating: The proxy is being started.
+Running: The proxy is running.
+Shutdown: The proxy is closed.
+Deleting: The proxy is being closed.
 * `endpoints` - The endpoint info of the RDS instance.
     * `addresses` - Address list.
         * `dns_visibility` - DNS Visibility.
@@ -165,6 +176,17 @@ AllNode: All node terminals. (Only the operation and maintenance side).
     * `read_write_mode` - Read and write mode:
 ReadWrite: read and write
 ReadOnly: read only (default).
+* `feature_states` - Feature status.
+    * `enable` - Whether it is enabled. Values:
+true: Enabled.
+false: Disabled.
+    * `feature_name` - Feature name.
+    * `support` - Whether it support this function. Value:
+true: Supported.
+false: Not supported.
+* `global_read_only` - Whether to enable global read-only.
+true: Yes.
+false: No.
 * `instance_id` - The ID of the RDS instance.
 * `instance_status` - The status of the RDS instance.
 * `memory` - Memory size.

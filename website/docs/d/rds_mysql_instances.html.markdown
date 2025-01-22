@@ -77,6 +77,9 @@ In addition to all arguments above, the following attributes are exported:
 * `rds_mysql_instances` - The collection of RDS instance query.
     * `allow_list_version` - The version of allow list.
     * `backup_use` - The instance has used backup space. Unit: GB.
+    * `binlog_dump` - Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:
+true: Yes.
+false: No.
     * `charge_detail` - Payment methods.
         * `auto_renew` - Whether to automatically renew in prepaid scenarios.
 Autorenew_Enable
@@ -98,9 +101,15 @@ Year - Package year.
         * `period` - Purchase duration in prepaid scenarios. Default: 1.
         * `temp_modify_end_time` - Restore time of temporary upgrade.
         * `temp_modify_start_time` - Temporary upgrade start time.
+    * `connection_pool_type` - Connection pool type.
     * `create_time` - The create time of the RDS instance.
     * `data_sync_mode` - Data synchronization mode.
     * `db_engine_version` - The engine version of the RDS instance.
+    * `db_proxy_status` - The running status of the proxy instance. This parameter is returned only when the database proxy is enabled. Values:
+Creating: The proxy is being started.
+Running: The proxy is running.
+Shutdown: The proxy is closed.
+Deleting: The proxy is being closed.
     * `endpoints` - The endpoint info of the RDS instance.
         * `addresses` - Address list.
             * `dns_visibility` - DNS Visibility.
@@ -130,6 +139,17 @@ AllNode: All node terminals. (Only the operation and maintenance side).
         * `read_write_mode` - Read and write mode:
 ReadWrite: read and write
 ReadOnly: read only (default).
+    * `feature_states` - Feature status.
+        * `enable` - Whether it is enabled. Values:
+true: Enabled.
+false: Disabled.
+        * `feature_name` - Feature name.
+        * `support` - Whether it support this function. Value:
+true: Supported.
+false: Not supported.
+    * `global_read_only` - Whether to enable global read-only.
+true: Yes.
+false: No.
     * `id` - The ID of the RDS instance.
     * `instance_id` - The ID of the RDS instance.
     * `instance_name` - The name of the RDS instance.
