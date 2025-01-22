@@ -12,7 +12,7 @@ func DataSourceVolcengineVpcFirewallAclRules() *schema.Resource {
 			"vpc_firewall_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The vpc firewall id of the vpc firewall acl rule. Valid values: `in`, `out`.",
+				Description: "The vpc firewall id of the vpc firewall acl rule.",
 			},
 			"rule_id": {
 				Type:        schema.TypeString,

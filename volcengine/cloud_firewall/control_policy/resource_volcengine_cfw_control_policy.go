@@ -78,16 +78,19 @@ func ResourceVolcengineControlPolicy() *schema.Resource {
 			"dest_port_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The dest port type of the control policy. Valid values: `port`, `group`.",
 			},
 			"dest_port": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The dest port of the control policy.",
 			},
 			"repeat_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "The repeat type of the control policy. Valid values: `Permanent`, `Once`, `Daily`, `Weekly`, `Monthly`.",
 			},
 			"repeat_start_time": {
@@ -129,7 +132,9 @@ func ResourceVolcengineControlPolicy() *schema.Resource {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  0,
-				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
 				Description: "The priority of the control policy. Default is 0. This field is only effective when creating a control policy." +
 					"0 means lowest priority, 1 means highest priority. The priority increases in order from 1, with lower priority indicating higher priority.",
 			},

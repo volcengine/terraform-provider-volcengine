@@ -1,4 +1,4 @@
-package vpc_firewall_acl_rule
+package nat_firewall_control_policy
 
 import (
 	"encoding/json"
@@ -13,30 +13,30 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineVpcFirewallAclRuleService struct {
+type VolcengineNatFirewallControlPolicyService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewVpcFirewallAclRuleService(c *ve.SdkClient) *VolcengineVpcFirewallAclRuleService {
-	return &VolcengineVpcFirewallAclRuleService{
+func NewNatFirewallControlPolicyService(c *ve.SdkClient) *VolcengineNatFirewallControlPolicyService {
+	return &VolcengineNatFirewallControlPolicyService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) GetClient() *ve.SdkClient {
+func (s *VolcengineNatFirewallControlPolicyService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineNatFirewallControlPolicyService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-		action := "DescribeVpcFirewallAclRuleList"
+		action := "DescribeNatFirewallControlPolicy"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -68,7 +68,7 @@ func (s *VolcengineVpcFirewallAclRuleService) ReadResources(m map[string]interfa
 	})
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineNatFirewallControlPolicyService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -77,13 +77,16 @@ func (s *VolcengineVpcFirewallAclRuleService) ReadResource(resourceData *schema.
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	ids := strings.Split(id, ":")
-	if len(ids) != 2 {
-		return data, fmt.Errorf("Invalid vpc firewall acl rule id: %s ", id)
+	if len(ids) != 3 {
+		return data, fmt.Errorf("Invalid nat firewall control policy id: %s ", id)
 	}
 
 	req := map[string]interface{}{
-		"VpcFirewallId": ids[0],
-		"RuleId":        ids[1],
+		"Direction":     ids[0],
+		"NatFirewallId": ids[1],
+		"RuleId": []interface{}{
+			ids[2],
+		},
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -95,26 +98,26 @@ func (s *VolcengineVpcFirewallAclRuleService) ReadResource(resourceData *schema.
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("vpc_firewall_acl_rule %s not exist ", id)
+		return data, fmt.Errorf("nat_firewall_control_policy %s not exist ", id)
 	}
 	return data, err
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineNatFirewallControlPolicyService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{}
 }
 
-func (VolcengineVpcFirewallAclRuleService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineNatFirewallControlPolicyService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineNatFirewallControlPolicyService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "AddVpcFirewallAclRule",
+			Action:      "AddNatFirewallControlPolicy",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
@@ -134,8 +137,9 @@ func (s *VolcengineVpcFirewallAclRuleService) CreateResource(resourceData *schem
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				ruleId, _ := ve.ObtainSdkValue("Result.RuleId", *resp)
-				vpcFirewallId := d.Get("vpc_firewall_id").(string)
-				d.SetId(vpcFirewallId + ":" + ruleId.(string))
+				direction := d.Get("direction").(string)
+				natFirewallId := d.Get("nat_firewall_id").(string)
+				d.SetId(direction + ":" + natFirewallId + ":" + ruleId.(string))
 				return nil
 			},
 		},
@@ -143,12 +147,12 @@ func (s *VolcengineVpcFirewallAclRuleService) CreateResource(resourceData *schem
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineNatFirewallControlPolicyService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "ModifyVpcFirewallAclRule",
+			Action:      "ModifyNatFirewallControlPolicy",
 			ConvertMode: ve.RequestConvertInConvert,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
@@ -223,12 +227,12 @@ func (s *VolcengineVpcFirewallAclRuleService) ModifyResource(resourceData *schem
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				ids := strings.Split(d.Id(), ":")
-				if len(ids) != 2 {
-					return false, fmt.Errorf("Invalid vpc firewall acl rule id: %s ", d.Id())
+				if len(ids) != 3 {
+					return false, fmt.Errorf("Invalid nat firewall control policy id: %s ", d.Id())
 				}
-				(*call.SdkParam)["VpcFirewallId"] = ids[0]
-				(*call.SdkParam)["RuleId"] = ids[1]
-
+				(*call.SdkParam)["Direction"] = ids[0]
+				(*call.SdkParam)["NatFirewallId"] = ids[1]
+				(*call.SdkParam)["RuleId"] = ids[2]
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -244,19 +248,20 @@ func (s *VolcengineVpcFirewallAclRuleService) ModifyResource(resourceData *schem
 	return callbacks
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineNatFirewallControlPolicyService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DeleteVpcFirewallAclRule",
+			Action:      "DeleteNatFirewallControlPolicy",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				ids := strings.Split(d.Id(), ":")
-				if len(ids) != 2 {
-					return false, fmt.Errorf("Invalid vpc firewall acl rule id: %s ", d.Id())
+				if len(ids) != 3 {
+					return false, fmt.Errorf("Invalid nat firewall control policy id: %s ", d.Id())
 				}
-				(*call.SdkParam)["VpcFirewallId"] = ids[0]
-				(*call.SdkParam)["RuleIds"] = []string{ids[1]}
+				(*call.SdkParam)["Direction"] = ids[0]
+				(*call.SdkParam)["NatFirewallId"] = ids[1]
+				(*call.SdkParam)["RuleId"] = ids[2]
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -276,7 +281,7 @@ func (s *VolcengineVpcFirewallAclRuleService) RemoveResource(resourceData *schem
 						if ve.ResourceNotFoundError(callErr) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on reading vpc firewall acl rule on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading nat firewall control policy on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
@@ -291,9 +296,13 @@ func (s *VolcengineVpcFirewallAclRuleService) RemoveResource(resourceData *schem
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineNatFirewallControlPolicyService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
+			"rule_id": {
+				TargetField: "RuleId",
+				ConvertType: ve.ConvertJsonArray,
+			},
 			"action": {
 				TargetField: "Action",
 				ConvertType: ve.ConvertJsonArray,
@@ -310,9 +319,21 @@ func (s *VolcengineVpcFirewallAclRuleService) DatasourceResources(*schema.Resour
 				TargetField: "Status",
 				ConvertType: ve.ConvertJsonArray,
 			},
+			"dest_port": {
+				TargetField: "DestPort",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"destination": {
+				TargetField: "Destination",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"source": {
+				TargetField: "Source",
+				ConvertType: ve.ConvertJsonArray,
+			},
 		},
 		IdField:      "RuleId",
-		CollectField: "vpc_firewall_acl_rules",
+		CollectField: "nat_firewall_control_policies",
 		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"RuleId": {
@@ -323,7 +344,7 @@ func (s *VolcengineVpcFirewallAclRuleService) DatasourceResources(*schema.Resour
 	}
 }
 
-func (s *VolcengineVpcFirewallAclRuleService) ReadResourceId(id string) string {
+func (s *VolcengineNatFirewallControlPolicyService) ReadResourceId(id string) string {
 	return id
 }
 
