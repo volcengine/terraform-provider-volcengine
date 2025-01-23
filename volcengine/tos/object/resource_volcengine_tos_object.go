@@ -100,9 +100,10 @@ func ResourceVolcengineTosObject() *schema.Resource {
 					"public-read-write",
 					"authenticated-read",
 					"bucket-owner-read",
+					"default",
 				}, false),
 				Default:     "private",
-				Description: "The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.",
+				Description: "The public acl control of object. Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read|default. `default` means to enable the default inheritance bucket ACL function for the object.",
 			},
 			"storage_class": {
 				Type:     schema.TypeString,
@@ -123,6 +124,12 @@ func ResourceVolcengineTosObject() *schema.Resource {
 				},
 				Set:         schema.HashString,
 				Description: "The version ids of the object if exist.",
+			},
+			"is_default": {
+				Type: schema.TypeBool,
+				//Optional:    true,
+				Computed:    true,
+				Description: "Whether to enable the default inheritance bucket ACL function for the object.",
 			},
 			"account_acl": {
 				Type:        schema.TypeSet,

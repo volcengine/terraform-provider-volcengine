@@ -73,6 +73,13 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Description: "The ID of the instance to which the created volume is automatically attached. " +
 					"When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.",
 			},
+			"snapshot_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Description: "The id of the snapshot. When creating a volume using snapshots, this field is required.\n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
 			"volume_charge_type": {
 				Type:     schema.TypeString,
 				Optional: true,

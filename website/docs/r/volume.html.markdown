@@ -78,11 +78,12 @@ resource "volcengine_volume" "PreVolume" {
 }
 
 resource "volcengine_volume" "PostVolume" {
-  volume_name        = "acc-test-volume"
-  volume_type        = "ESSD_PL0"
-  description        = "acc-test"
-  kind               = "data"
-  size               = 40
+  volume_name = "acc-test-volume"
+  volume_type = "ESSD_PL0"
+  description = "acc-test"
+  kind        = "data"
+  size        = 40
+  #  snapshot_id        = "snap-3vydtmc0fl3qunm4****"
   zone_id            = data.volcengine_zones.foo.zones[0].id
   volume_charge_type = "PostPaid"
   project_name       = "default"
@@ -106,6 +107,8 @@ The following arguments are supported:
 * `extra_performance_type_id` - (Optional) The type of extra performance for volume. The valid values for ESSD FlexPL volume are `Throughput`, `Balance`, `IOPS`. The valid value for TSSD_TL0 volume is `Throughput`.
 * `instance_id` - (Optional, ForceNew) The ID of the instance to which the created volume is automatically attached. When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.
 * `project_name` - (Optional) The ProjectName of the Volume.
+* `snapshot_id` - (Optional, ForceNew) The id of the snapshot. When creating a volume using snapshots, this field is required.
+When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `tags` - (Optional) Tags.
 * `volume_charge_type` - (Optional) The charge type of the Volume, the value is `PostPaid` or `PrePaid`. The `PrePaid` volume cannot be detached.
 
