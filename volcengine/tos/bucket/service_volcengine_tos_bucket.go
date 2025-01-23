@@ -112,6 +112,9 @@ func (s *VolcengineTosBucketService) ReadResource(resourceData *schema.ResourceD
 		if header.Get("X-Tos-Storage-Class") != "" {
 			data["StorageClass"] = header.Get("X-Tos-Storage-Class")
 		}
+		if header.Get("X-Tos-Az-Redundancy") != "" {
+			data["AzRedundancy"] = header.Get("X-Tos-Az-Redundancy")
+		}
 	}
 
 	action = "GetBucketAcl"
@@ -129,6 +132,7 @@ func (s *VolcengineTosBucketService) ReadResource(resourceData *schema.ResourceD
 	if acl, ok = (*resp)[ve.BypassResponse].(map[string]interface{}); ok {
 		data["PublicAcl"] = acl
 		data["AccountAcl"] = acl
+		data["BucketAclDelivered"] = acl["BucketAclDelivered"]
 	}
 
 	action = "GetBucketVersioning"
@@ -251,6 +255,13 @@ func (s *VolcengineTosBucketService) CreateResource(resourceData *schema.Resourc
 						Type: ve.HeaderParam,
 					},
 				},
+				"az_redundancy": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "x-tos-az-redundancy",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+				},
 				"project_name": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "x-tos-project-name",
@@ -347,6 +358,10 @@ func (s *VolcengineTosBucketService) CreateResource(resourceData *schema.Resourc
 						},
 					},
 				},
+				"bucket_acl_delivered": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "BucketAclDelivered",
+				},
 			},
 			BeforeCall:  s.beforePutBucketAcl(),
 			ExecuteCall: s.executePutBucketAcl(),
@@ -425,6 +440,7 @@ func (s *VolcengineTosBucketService) ModifyResource(data *schema.ResourceData, r
 	var grant = []string{
 		"public_acl",
 		"account_acl",
+		"bucket_acl_delivered",
 	}
 	for _, v := range grant {
 		if data.HasChange(v) {
@@ -463,6 +479,11 @@ func (s *VolcengineTosBucketService) ModifyResource(data *schema.ResourceData, r
 								},
 							},
 							ForceGet: true,
+						},
+						"bucket_acl_delivered": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "BucketAclDelivered",
+							ForceGet:    true,
 						},
 					},
 					BeforeCall:  s.beforePutBucketAcl(),

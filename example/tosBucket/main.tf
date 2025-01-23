@@ -1,8 +1,10 @@
 resource "volcengine_tos_bucket" "default" {
-  bucket_name = "tf-acc-test-bucket"
-#  storage_class ="IA"
-  public_acl = "private"
-  enable_version = true
+  bucket_name          = "tf-acc-test-bucket-0123-3"
+#  storage_class        = "IA"
+  public_acl           = "private"
+  az_redundancy        = "multi-az"
+  enable_version       = true
+  bucket_acl_delivered = true
   account_acl {
     account_id = "1"
     permission = "READ"
@@ -13,7 +15,7 @@ resource "volcengine_tos_bucket" "default" {
   }
   project_name = "default"
   tags {
-    key = "k1"
+    key   = "k1"
     value = "v1"
   }
 }

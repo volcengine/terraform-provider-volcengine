@@ -19,6 +19,9 @@ func mergeTosPublicAcl(acl string, param *map[string]interface{}, ownerId string
 	}()
 
 	switch acl {
+	case "default":
+		(*param)["IsDefault"] = true
+		return
 	case "private":
 		m := map[string]interface{}{
 			"Grantee": map[string]interface{}{
@@ -136,6 +139,11 @@ func ConvertTosPublicAcl() FieldResponseConvert {
 	return func(i interface{}) interface{} {
 		owner, _ := ObtainSdkValue("Owner.ID", i)
 		grants, _ := ObtainSdkValue("Grants", i)
+		isDefault, _ := ObtainSdkValue("IsDefault", i)
+		if isDefault != nil && isDefault.(bool) {
+			return "default"
+		}
+
 		var (
 			read  bool
 			write bool

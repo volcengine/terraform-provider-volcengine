@@ -80,6 +80,13 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 				Optional:    true,
 				Description: "The flag of enable tos version.",
 			},
+			"az_redundancy": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "single-az",
+				Description: "The AZ redundancy of the Tos Bucket. Default is `single-az`. Valid values: `single-az`, `multi-az`.",
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -143,6 +150,14 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 				},
 				Set: ve.TosAccountAclHash,
 			},
+			"bucket_acl_delivered": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to enable the default inheritance bucket ACL function for objects. Default is false.",
+			},
+
+			// computed fields
 			"creation_date": {
 				Type:        schema.TypeString,
 				Computed:    true,

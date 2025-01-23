@@ -189,6 +189,7 @@ func (s *VolcengineTosObjectService) ReadResource(resourceData *schema.ResourceD
 	if acl, ok = (*resp)[ve.BypassResponse].(map[string]interface{}); ok {
 		data["PublicAcl"] = acl
 		data["AccountAcl"] = acl
+		data["IsDefault"] = acl["IsDefault"]
 	}
 
 	action = "GetBucketVersioning"
@@ -327,6 +328,7 @@ func (s *VolcengineTosObjectService) ModifyResource(data *schema.ResourceData, r
 		var grant = []string{
 			"public_acl",
 			"account_acl",
+			//"is_default",
 		}
 		for _, v := range grant {
 			if data.HasChange(v) {
@@ -642,6 +644,11 @@ func (s *VolcengineTosObjectService) createOrUpdateObjectAcl(resourceData *schem
 						},
 					},
 				},
+				//"is_default": {
+				//	ConvertType: ve.ConvertDefault,
+				//	TargetField: "IsDefault",
+				//	ForceGet:    true,
+				//},
 			},
 			BeforeCall:  s.beforePutObjectAcl(),
 			ExecuteCall: s.executePutObjectAcl(),
