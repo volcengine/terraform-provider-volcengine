@@ -45,7 +45,7 @@ The following arguments are supported:
 * `content` - (Optional) The content of the TOS Object when content type is json or text and xml. Only one of `file_path,content` can be specified.
 * `encryption` - (Optional, ForceNew) The encryption of the object.Valid value is AES256.
 * `file_path` - (Optional) The file path for upload. Only one of `file_path,content` can be specified.
-* `public_acl` - (Optional) The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.
+* `public_acl` - (Optional) The public acl control of object. Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read|default. `default` means to enable the default inheritance bucket ACL function for the object.
 * `storage_class` - (Optional, ForceNew) The storage type of the object.Valid value is STANDARD|IA.
 * `tags` - (Optional) Tos Bucket Tags.
 
@@ -64,6 +64,7 @@ The `tags` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `enable_version` - The flag of enable tos version.
+* `is_default` - Whether to enable the default inheritance bucket ACL function for the object.
 * `version_ids` - The version ids of the object if exist.
 
 

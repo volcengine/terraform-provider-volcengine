@@ -11,10 +11,12 @@ Provides a resource to manage tos bucket
 ## Example Usage
 ```hcl
 resource "volcengine_tos_bucket" "default" {
-  bucket_name = "tf-acc-test-bucket"
-  #  storage_class ="IA"
-  public_acl     = "private"
-  enable_version = true
+  bucket_name = "tf-acc-test-bucket-0123-3"
+  #  storage_class        = "IA"
+  public_acl           = "private"
+  az_redundancy        = "multi-az"
+  enable_version       = true
+  bucket_acl_delivered = true
   account_acl {
     account_id = "1"
     permission = "READ"
@@ -34,6 +36,8 @@ resource "volcengine_tos_bucket" "default" {
 The following arguments are supported:
 * `bucket_name` - (Required, ForceNew) The name of the bucket.
 * `account_acl` - (Optional) The user set of grant full control.
+* `az_redundancy` - (Optional, ForceNew) The AZ redundancy of the Tos Bucket. Default is `single-az`. Valid values: `single-az`, `multi-az`.
+* `bucket_acl_delivered` - (Optional) Whether to enable the default inheritance bucket ACL function for objects. Default is false.
 * `enable_version` - (Optional) The flag of enable tos version.
 * `project_name` - (Optional) The ProjectName of the Tos Bucket. Default is `default`.
 * `public_acl` - (Optional) The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.

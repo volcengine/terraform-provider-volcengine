@@ -140,7 +140,7 @@ func ConvertTosPublicAcl() FieldResponseConvert {
 		owner, _ := ObtainSdkValue("Owner.ID", i)
 		grants, _ := ObtainSdkValue("Grants", i)
 		isDefault, _ := ObtainSdkValue("IsDefault", i)
-		if isDefault != nil && isDefault.(bool) {
+		if isDefaultAcl, ok := isDefault.(bool); ok && isDefaultAcl {
 			return "default"
 		}
 
