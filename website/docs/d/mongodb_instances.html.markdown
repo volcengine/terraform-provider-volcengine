@@ -26,6 +26,7 @@ The following arguments are supported:
 * `instance_type` - (Optional) The type of instance to query, the valid value contains `ReplicaSet` or `ShardedCluster`.
 * `name_regex` - (Optional) A Name Regex of DB instance.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name to query.
 * `tags` - (Optional) Tags.
 * `update_end_time` - (Optional) The end time of update to query.
 * `update_start_time` - (Optional) The start time of update to query.
@@ -86,7 +87,9 @@ In addition to all arguments above, the following attributes are exported:
         * `used_storage_gb` - The used storage in GB.
         * `used_vcpu` - The used vCPU.
         * `zone_id` - The zone ID of node.
+    * `private_endpoint` - The private endpoint address of instance.
     * `project_name` - The project name to which the instance belongs.
+    * `read_only_node_number` - The number of readonly node in instance.
     * `reclaim_time` - The planned reclaim time of instance.
     * `shards` - The list of shards.
         * `nodes` - The node information.
