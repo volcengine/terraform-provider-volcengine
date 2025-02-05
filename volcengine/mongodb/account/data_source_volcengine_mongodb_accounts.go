@@ -2,7 +2,6 @@ package account
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -13,13 +12,17 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 			"instance_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Target query mongo instance id.",
+				Description: "Target query mongodb instance id.",
 			},
 			"account_name": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  "The name of account, current support only `root`.",
-				ValidateFunc: validation.StringInSlice([]string{"root"}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of account. This field support fuzzy query.",
+			},
+			"auth_db": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The database of account. This field support fuzzy query.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -46,6 +49,26 @@ func DataSourceVolcengineMongoDBAccounts() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The type of account.",
+						},
+						"auth_db": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The database of account.",
+						},
+						"account_desc": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The description of account.",
+						},
+						"create_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The create time of account.",
+						},
+						"modify_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The modify time of account.",
 						},
 						"account_privileges": {
 							Type:        schema.TypeList,

@@ -112,7 +112,6 @@ resource "volcengine_vpc_ipv6_address_bandwidth" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `load_balancer_spec` - (Required) The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`.
 * `subnet_id` - (Required, ForceNew) The id of the Subnet.
 * `type` - (Required, ForceNew) The type of the CLB. And optional choice contains `public` or `private`.
 * `address_ip_version` - (Optional, ForceNew) The address ip version of the Clb. Valid values: `ipv4`, `DualStack`. Default is `ipv4`.
@@ -121,8 +120,9 @@ When the value of this field is `DualStack`, the type of the CLB must be `privat
 * `eip_billing_config` - (Optional, ForceNew) The billing configuration of the EIP which automatically associated to CLB. This field is valid when the type of CLB is `public`.When the type of the CLB is `private`, suggest using a combination of resource `volcengine_eip_address` and `volcengine_eip_associate` to achieve public network access function.
 * `eni_address` - (Optional, ForceNew) The eni address of the CLB.
 * `eni_ipv6_address` - (Optional, ForceNew) The eni ipv6 address of the Clb.
-* `load_balancer_billing_type` - (Optional) The billing type of the CLB, the value can be `PostPaid` or `PrePaid`.
+* `load_balancer_billing_type` - (Optional) The billing type of the CLB, valid values: `PostPaid`, `PrePaid`, `PostPaidByLCU`. Default is `PostPaid`.
 * `load_balancer_name` - (Optional) The name of the CLB.
+* `load_balancer_spec` - (Optional) The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`. When the value of the `load_balancer_billing_type` is `PostPaidByLCU`, this field does not need to be specified.
 * `master_zone_id` - (Optional) The master zone ID of the CLB.
 * `modification_protection_reason` - (Optional) The reason of the console modification protection.
 * `modification_protection_status` - (Optional) The status of the console modification protection, the value can be `NonProtection` or `ConsoleProtection`.

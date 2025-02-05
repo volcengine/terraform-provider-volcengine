@@ -92,7 +92,7 @@ The following arguments are supported:
 * `instance_id` - (Required, ForceNew) The instance where the endpoint resides.
 * `eip_ids` - (Optional, ForceNew) A list of EIP IDs that need to be bound when applying for endpoint.
 * `mongos_node_ids` - (Optional, ForceNew) A list of the Mongos node that needs to apply for the endpoint.
-* `network_type` - (Optional, ForceNew) The network type of endpoint.
+* `network_type` - (Optional, ForceNew) The network type of endpoint. Valid values: `Private`, `Public`. Default is `Private`.
 * `object_id` - (Optional, ForceNew) The object ID corresponding to the endpoint.
 
 ## Attributes Reference

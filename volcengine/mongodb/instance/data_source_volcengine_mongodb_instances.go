@@ -73,6 +73,11 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 				Optional:    true,
 				Description: "The vpc id of instance to query.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name to query.",
+			},
 			"tags": ve.TagsSchema(),
 
 			"name_regex": {
@@ -472,6 +477,16 @@ func DataSourceVolcengineMongoDBInstances() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The storage type of instance.",
+						},
+						"private_endpoint": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The private endpoint address of instance.",
+						},
+						"read_only_node_number": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of readonly node in instance.",
 						},
 						"tags": ve.TagsSchemaComputed(),
 					},

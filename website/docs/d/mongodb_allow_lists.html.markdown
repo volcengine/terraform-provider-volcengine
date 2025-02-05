@@ -28,6 +28,7 @@ The following arguments are supported:
 * `allow_list_ids` - (Optional) The allow list IDs to query.
 * `instance_id` - (Optional) The instance ID to query.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the allow list.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -42,7 +43,9 @@ In addition to all arguments above, the following attributes are exported:
     * `associated_instances` - The list of associated instances.
         * `instance_id` - The instance id that bound to the allow list.
         * `instance_name` - The instance name that bound to the allow list.
+        * `project_name` - The project name of the instance.
         * `vpc` - The VPC ID.
+    * `project_name` - The project name of the allow list.
 * `total_count` - The total count of mongodb allow lists query.
 
 

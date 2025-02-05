@@ -19,6 +19,11 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 				Optional:    true,
 				Description: "The instance ID to query.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the allow list.",
+			},
 			"allow_list_ids": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -75,6 +80,11 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 							Computed:    true,
 							Description: "The total number of instances bound under the allow list.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the allow list.",
+						},
 						"allow_list": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -100,6 +110,11 @@ func DataSourceVolcengineMongoDBAllowLists() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The VPC ID.",
+									},
+									"project_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The project name of the instance.",
 									},
 								},
 							},

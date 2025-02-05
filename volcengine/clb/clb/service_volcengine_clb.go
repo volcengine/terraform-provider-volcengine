@@ -211,6 +211,8 @@ func (VolcengineClbService) WithResourceResponseHandlers(clb map[string]interfac
 						return "PrePaid"
 					case 2:
 						return "PostPaid"
+					case 3:
+						return "PostPaidByLCU"
 					}
 					return i
 				},
@@ -281,6 +283,8 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 							return 1
 						case "PostPaid":
 							return 2
+						case "PostPaidByLCU":
+							return 3
 						}
 						return i
 					},
@@ -377,6 +381,10 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				oldType, _ := d.GetChange("load_balancer_billing_type")
+				if oldType == "PostPaidByLCU" {
+					delete(*call.SdkParam, "LoadBalancerSpec")
+				}
 				if len(*call.SdkParam) > 0 {
 					(*call.SdkParam)["LoadBalancerId"] = d.Id()
 					return true, nil
@@ -414,6 +422,8 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 								return 1
 							case "PostPaid":
 								return 2
+							case "PostPaidByLCU":
+								return 3
 							}
 							return i
 						},
@@ -422,9 +432,12 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					if len(*call.SdkParam) > 0 {
 						(*call.SdkParam)["LoadBalancerId"] = d.Id()
-						if (*call.SdkParam)["LoadBalancerBillingType"].(int) == 2 {
-							return true, nil
-						} else {
+						oldType, newType := d.GetChange("load_balancer_billing_type")
+						if oldType == "PostPaidByLCU" && newType == "PostPaid" {
+							(*call.SdkParam)["LoadBalancerSpec"] = d.Get("load_balancer_spec")
+						}
+
+						if (*call.SdkParam)["LoadBalancerBillingType"].(int) == 1 {
 							// PeriodUnit 默认传 Month
 							(*call.SdkParam)["PeriodUnit"] = "Month"
 							(*call.SdkParam)["Period"] = d.Get("period")
@@ -576,6 +589,8 @@ func (s *VolcengineClbService) DatasourceResources(*schema.ResourceData, *schema
 						return "PrePaid"
 					case 2:
 						return "PostPaid"
+					case 3:
+						return "PostPaidByLCU"
 					}
 					return i
 				},
