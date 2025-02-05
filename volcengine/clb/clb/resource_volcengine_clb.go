@@ -92,18 +92,21 @@ func ResourceVolcengineClb() *schema.Resource {
 			},
 			"load_balancer_spec": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("load_balancer_billing_type") == "PostPaidByLCU"
+				},
 				ValidateFunc: validation.StringInSlice([]string{
 					"small_1", "small_2", "medium_1", "medium_2", "large_1", "large_2",
 				}, false),
-				Description: "The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`.",
+				Description: "The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`. When the value of the `load_balancer_billing_type` is `PostPaidByLCU`, this field does not need to be specified.",
 			},
 			"load_balancer_billing_type": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
-				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
-				Description:  "The billing type of the CLB, the value can be `PostPaid` or `PrePaid`.",
+				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid", "PostPaidByLCU"}, false),
+				Description:  "The billing type of the CLB, valid values: `PostPaid`, `PrePaid`, `PostPaidByLCU`. Default is `PostPaid`.",
 			},
 			"period": {
 				Type:     schema.TypeInt,

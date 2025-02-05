@@ -55,16 +55,16 @@ resource "volcengine_redis_instance" "foo" {
 
   multi_az = "enabled"
   configure_nodes {
-    az = "cn-guilin-a"
+    az = "cn-beijing-a"
   }
   configure_nodes {
-    az = "cn-guilin-b"
+    az = "cn-beijing-b"
   }
   configure_nodes {
-    az = "cn-guilin-c"
+    az = "cn-beijing-c"
   }
   configure_nodes {
-    az = "cn-guilin-b"
+    az = "cn-beijing-b"
   }
   #additional_bandwidth = 12
 }

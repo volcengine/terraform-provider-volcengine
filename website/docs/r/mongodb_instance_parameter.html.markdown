@@ -55,7 +55,7 @@ resource "volcengine_mongodb_instance_parameter" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `instance_id` - (Required, ForceNew) The instance ID.
-* `parameter_name` - (Required, ForceNew) The name of parameter.
+* `parameter_name` - (Required, ForceNew) The name of parameter. The parameter resource can only be added or modified, deleting this resource will not actually execute any operation.
 * `parameter_role` - (Required, ForceNew) The node type to which the parameter belongs. The value range is as follows: Node, Shard, ConfigServer, Mongos.
 * `parameter_value` - (Required) The value of parameter.
 

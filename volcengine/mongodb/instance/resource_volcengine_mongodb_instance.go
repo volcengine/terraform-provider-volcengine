@@ -40,7 +40,19 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
+				Deprecated:  "This field has been deprecated after version-0.0.156. Please use `zone_ids` to deploy multiple availability zones.",
 				Description: "The zone ID of instance.",
+			},
+			"zone_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				Set:      schema.HashString,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The list of zone ids. If you need to deploy multiple availability zones for a newly created instance, you can specify three availability zone IDs at the same time. By default, the first available zone passed in is the primary available zone, and the two available zones passed in afterwards are the backup available zones.",
 			},
 			// 固定值，暂时不开放
 			// "db_engine": {
@@ -55,12 +67,12 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The version of db engine, valid value contains `MongoDB_4_0`, `MongoDB_5_0`.",
+				Description: "The version of db engine, valid value contains `MongoDB_4_0`, `MongoDB_4_2`, `MongoDB_4_4`, `MongoDB_5_0`, `MongoDB_6_0`.",
 			},
 			"node_spec": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The spec of node.",
+				Description: "The spec of node. When the instance_type is ReplicaSet, this parameter represents the computing node specification of the replica set instance. When the instance_type is ShardedCluster, this parameter represents the specification of the Shard node.",
 			},
 			// 固定值，暂时不开放
 			// "node_number": {
@@ -75,7 +87,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed: true,
 				ForceNew: true,
 				//Default:      "ReplicaSet",
-				Description:  "The type of instance,the valid value contains `ReplicaSet` or `ShardedCluster`.",
+				Description:  "The type of instance, the valid value contains `ReplicaSet` or `ShardedCluster`. Default is `ReplicaSet`.",
 				ValidateFunc: validation.StringInSlice([]string{"ReplicaSet", "ShardedCluster"}, false),
 			},
 			"mongos_node_spec": {
@@ -85,7 +97,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 					// 当实例类型为分片集群（即InstanceType取值为ShardedCluster）时，该参数必填。
 					return d.Get("instance_type") == "ReplicaSet"
 				},
-				Description: "The mongos node spec of shard cluster, this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Description: "The mongos node spec of shard cluster, this parameter is required when the `InstanceType` is `ShardedCluster`.",
 			},
 			"mongos_node_number": {
 				Type:     schema.TypeInt,
@@ -93,7 +105,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("instance_type") == "ReplicaSet"
 				},
-				Description: "The mongos node number of shard cluster,value range is `2~23`, this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Description: "The mongos node number of shard cluster, value range is `2~23`, this parameter is required when the `InstanceType` is `ShardedCluster`.",
 			},
 			"shard_number": {
 				Type:     schema.TypeInt,
@@ -101,12 +113,12 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("instance_type") == "ReplicaSet"
 				},
-				Description: "The number of shards in shard cluster,value range is `2~32`, this parameter is required when `InstanceType` is `ShardedCluster`.",
+				Description: "The number of shards in shard cluster, value range is `2~32`, this parameter is required when the `InstanceType` is `ShardedCluster`.",
 			},
 			"storage_space_gb": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "The total storage space of a replica set instance, or the storage space of a single shard in a sharded cluster, in GiB.",
+				Description: "The total storage space of a replica set instance, or the storage space of a single shard in a sharded cluster. Unit: GiB.",
 			},
 			"vpc_id": {
 				Type:        schema.TypeString,
@@ -135,7 +147,7 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
-				Description: "The password of database account.",
+				Description: "The password of database account. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"instance_name": {
 				Type:        schema.TypeString,
@@ -149,14 +161,14 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed: true,
 				//Default:      "PostPaid",
 				ValidateFunc: validation.StringInSlice([]string{"Prepaid", "PostPaid"}, false),
-				Description:  "The charge type of instance, valid value contains `Prepaid` or `PostPaid`.",
+				Description:  "The charge type of instance, valid value contains `Prepaid` or `PostPaid`. Default is `PostPaid`.",
 			},
 			"auto_renew": {
 				Type:             schema.TypeBool,
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
-				Description:      "Whether to enable automatic renewal.",
+				Description:      "Whether to enable automatic renewal. This parameter is required when the `ChargeType` is `Prepaid`.",
 			},
 			"period_unit": {
 				Type:             schema.TypeString,
@@ -164,14 +176,38 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Computed:         true,
 				ValidateFunc:     validation.StringInSlice([]string{"Year", "Month"}, false),
 				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
-				Description:      "The period unit,valid value contains `Year` or `Month`, this parameter is required when `ChargeType` is `Prepaid`.",
+				Description:      "The period unit, valid value contains `Year` or `Month`. This parameter is required when the `ChargeType` is `Prepaid`.",
 			},
 			"period": {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: MongoDBInstanceImportDiffSuppress,
-				Description:      "The instance purchase duration,the value range is `1~3` when `PeriodUtil` is `Year`, the value range is `1~9` when `PeriodUtil` is `Month`, this parameter is required when `ChargeType` is `Prepaid`.",
+				Description:      "The instance purchase duration, the value range is `1~3` when `PeriodUtil` is `Year`, the value range is `1~9` when `PeriodUtil` is `Month`. This parameter is required when the `ChargeType` is `Prepaid`.",
+			},
+			"node_availability_zone": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The readonly node of the instance. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"zone_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The zone id of readonly nodes.",
+						},
+						"node_number": {
+							Type:     schema.TypeInt,
+							Required: true,
+							ForceNew: true,
+							Description: "The number of readonly nodes in current zone. Currently, only ReplicaSet instances and Shard in ShardedCluster instances support adding readonly nodes.\n" +
+								"When the instance_type is ReplicaSet, this value represents the total number of readonly nodes in a single replica set instance. Each instance of the replica set supports adding up to 5 readonly nodes.\n" +
+								"When the instance_type is ShardedCluster, this value represents the number of readonly nodes in each shard. Each shard can add up to 5 readonly nodes.",
+						},
+					},
+				},
 			},
 			"project_name": {
 				Type:        schema.TypeString,
@@ -182,6 +218,16 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 			"tags": ve.TagsSchema(),
 
 			// computed fields
+			"private_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The private endpoint address of instance.",
+			},
+			"read_only_node_number": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The number of readonly node in instance.",
+			},
 			"shards": {
 				Type:        schema.TypeList,
 				Computed:    true,

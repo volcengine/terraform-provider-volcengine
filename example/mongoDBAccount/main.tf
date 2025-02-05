@@ -18,9 +18,6 @@ resource "volcengine_mongodb_instance" "foo" {
   db_engine_version = "MongoDB_4_0"
   instance_type     = "ReplicaSet"
   node_spec         = "mongo.2c4g"
-  #  mongos_node_spec       = "mongo.mongos.2c4g"
-  #  mongos_node_number     = 3
-  #  shard_number           = 3
   storage_space_gb       = 20
   subnet_id              = volcengine_subnet.foo.id
   instance_name          = "acc-test-mongodb-replica"
@@ -31,17 +28,24 @@ resource "volcengine_mongodb_instance" "foo" {
     key   = "k1"
     value = "v1"
   }
-  node_availability_zone {
-    zone_id     = data.volcengine_zones.foo.zones[0].id
-    node_number = 2
+}
+
+resource "volcengine_mongodb_account" "foo" {
+  instance_id      = volcengine_mongodb_instance.foo.id
+  account_name     = "acc-test-mongodb-account"
+  auth_db          = "admin"
+  account_password = "93f0cb0614Aab12"
+  account_desc     = "acc-test"
+  account_privileges {
+    db_name    = "admin"
+    role_names = ["userAdmin", "clusterMonitor"]
   }
-  #  period_unit = "Month"
-  #  period      = 1
-  #  auto_renew  = false
-  #  ssl_action  = "Close"
-  #  lifecycle {
-  #    ignore_changes = [
-  #      super_account_password,
-  #    ]
-  #  }
+  account_privileges {
+    db_name    = "config"
+    role_names = ["read"]
+  }
+  account_privileges {
+    db_name    = "local"
+    role_names = ["read"]
+  }
 }

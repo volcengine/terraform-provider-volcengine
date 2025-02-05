@@ -60,7 +60,6 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 								},
 							},
 						},
-
 						"node_specs": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -81,6 +80,11 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 										Type:        schema.TypeInt,
 										Computed:    true,
 										Description: "The max storage.",
+									},
+									"min_storage": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The min storage.",
 									},
 									"mem_in_db": {
 										Type:        schema.TypeFloat,
@@ -115,6 +119,50 @@ func DataSourceVolcengineMongoDBSpecs() *schema.Resource {
 										Type:        schema.TypeInt,
 										Computed:    true,
 										Description: "The max storage.",
+									},
+									"min_storage": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The min storage.",
+									},
+									"mem_in_gb": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The memory in GB.",
+									},
+									"spec_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The shard node spec name.",
+									},
+								},
+							},
+						},
+						"config_server_node_specs": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The collection of config server node specs.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"cpu_num": {
+										Type:        schema.TypeFloat,
+										Computed:    true,
+										Description: "The cpu cores.",
+									},
+									"max_conn": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The max connections.",
+									},
+									"max_storage": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The max storage.",
+									},
+									"min_storage": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The min storage.",
 									},
 									"mem_in_gb": {
 										Type:        schema.TypeInt,

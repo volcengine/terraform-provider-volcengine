@@ -22,6 +22,13 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `specs` - A list of supported node specification information for MongoDB instances.
+    * `config_server_node_specs` - The collection of config server node specs.
+        * `cpu_num` - The cpu cores.
+        * `max_conn` - The max connections.
+        * `max_storage` - The max storage.
+        * `mem_in_gb` - The memory in GB.
+        * `min_storage` - The min storage.
+        * `spec_name` - The shard node spec name.
     * `mongos_node_specs` - The collection of mongos node specs.
         * `cpu_num` - The max cpu cores.
         * `max_conn` - The max connections.
@@ -32,12 +39,14 @@ In addition to all arguments above, the following attributes are exported:
         * `max_conn` - The max connections.
         * `max_storage` - The max storage.
         * `mem_in_db` - The memory in GB.
+        * `min_storage` - The min storage.
         * `spec_name` - The node spec name.
     * `shard_node_specs` - The collection of shard node specs.
         * `cpu_num` - The cpu cores.
         * `max_conn` - The max connections.
         * `max_storage` - The max storage.
         * `mem_in_gb` - The memory in GB.
+        * `min_storage` - The min storage.
         * `spec_name` - The shard node spec name.
 * `total_count` - The total count of region query.
 

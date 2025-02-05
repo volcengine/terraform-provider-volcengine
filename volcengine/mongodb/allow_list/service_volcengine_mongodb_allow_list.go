@@ -171,7 +171,14 @@ func (s *VolcengineMongoDBAllowListService) RefreshResourceState(resourceData *s
 
 func (s *VolcengineMongoDBAllowListService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+		return instance, map[string]ve.ResponseConvert{
+			"AllowListIPNum": {
+				TargetField: "allow_list_ip_num",
+			},
+			"VPC": {
+				TargetField: "vpc",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -248,7 +255,7 @@ func (s *VolcengineMongoDBAllowListService) ModifyResource(resourceData *schema.
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineMongoDBAllowListService) RemoveResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineMongoDBAllowListService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteAllowList",
@@ -261,6 +268,27 @@ func (s *VolcengineMongoDBAllowListService) RemoveResource(resourceData *schema.
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(5*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading mongodb allow list on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
 		},
 	}
 	return []ve.Callback{callback}
@@ -268,6 +296,15 @@ func (s *VolcengineMongoDBAllowListService) RemoveResource(resourceData *schema.
 
 func (s *VolcengineMongoDBAllowListService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineMongoDBAllowListService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "mongodb",
+		ResourceType:         "allowlist",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
