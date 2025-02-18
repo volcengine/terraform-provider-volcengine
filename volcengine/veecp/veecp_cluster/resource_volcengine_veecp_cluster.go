@@ -39,6 +39,7 @@ func ResourceVolcengineVeecpCluster() *schema.Resource {
 			"client_token": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "ClientToken is a case-sensitive string of no more than 64 ASCII characters passed in by the caller.",
 			},
 			"name": {
@@ -113,13 +114,11 @@ func ResourceVolcengineVeecpCluster() *schema.Resource {
 							Description: "Cluster API Server public network access configuration, values:\nfalse: (default value). closed\ntrue: opened.",
 						},
 						"api_server_public_access_config": {
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Optional: true,
-							ForceNew: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return !d.Get("cluster_config.0.api_server_public_access_enabled").(bool)
-							},
+							Type:             schema.TypeList,
+							MaxItems:         1,
+							Optional:         true,
+							ForceNew:         true,
+							DiffSuppressFunc: ApiServerPublicAccessConfigFieldDiffSuppress,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"public_access_network_config": {
@@ -185,13 +184,11 @@ func ResourceVolcengineVeecpCluster() *schema.Resource {
 								" Please configure it reasonably.",
 						},
 						"flannel_config": {
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							ForceNew: true,
-							Optional: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return d.Get("pods_config.0.pod_network_mode").(string) != "Flannel"
-							},
+							Type:             schema.TypeList,
+							MaxItems:         1,
+							ForceNew:         true,
+							Optional:         true,
+							DiffSuppressFunc: FlannelFieldDiffSuppress,
 							Description: "Flannel network configuration." +
 								" It can be configured only when PodNetworkMode=Flannel, but it is not mandatory.",
 							Elem: &schema.Resource{
@@ -224,13 +221,11 @@ func ResourceVolcengineVeecpCluster() *schema.Resource {
 							},
 						},
 						"vpc_cni_config": {
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							ForceNew: true,
-							Optional: true,
-							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-								return d.Get("pods_config.0.pod_network_mode").(string) != "VpcCniShared"
-							},
+							Type:             schema.TypeList,
+							MaxItems:         1,
+							ForceNew:         true,
+							Optional:         true,
+							DiffSuppressFunc: VpcCniConfigFieldDiffSuppress,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"subnet_ids": {
@@ -383,4 +378,19 @@ func logSetupsHash(i interface{}) int {
 	)
 	buf.WriteString(fmt.Sprintf("%v#%v#%v", m["log_type"], m["log_ttl"], m["enabled"]))
 	return hashcode.String(buf.String())
+}
+
+func ApiServerPublicAccessConfigFieldDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	apiServerPublicAccessEnabled := d.Get("cluster_config").([]interface{})[0].(map[string]interface{})["api_server_public_access_enabled"].(bool)
+	return !apiServerPublicAccessEnabled
+}
+
+func FlannelFieldDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	podNetworkMode := d.Get("pods_config").([]interface{})[0].(map[string]interface{})["pod_network_mode"].(string)
+	return podNetworkMode != "Flannel"
+}
+
+func VpcCniConfigFieldDiffSuppress(k, old, new string, d *schema.ResourceData) bool {
+	podNetworkMode := d.Get("pods_config").([]interface{})[0].(map[string]interface{})["pod_network_mode"].(string)
+	return podNetworkMode != "VpcCniShared"
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -12,69 +13,74 @@ func DataSourceVolcengineVeecpClusters() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineVeecpClustersRead,
 		Schema: map[string]*schema.Schema{
-			"filter": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
+			"ids": {
+				Type:     schema.TypeSet,
 				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Cluster ID. Supports exact matching." +
+					" A maximum of 100 array elements can be filled in at a time." +
+					" Note: When this parameter is an empty array, filtering is based on all clusters in the specified region under the account.",
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Cluster name.",
+			},
+			"name_regex": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringIsValidRegExp,
+				Description:  "A Name Regex of Cluster.",
+			},
+			"profiles": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Filter by cluster scenario: Cloud: non-edge cluster; Edge: edge cluster.",
+			},
+			"delete_protection_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Description: "Cluster deletion protection. Values: " +
+					"true: Enable deletion protection. false: Disable deletion protection",
+			},
+			"pods_config_pod_network_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.",
+			},
+			"create_client_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "ClientToken when the cluster is created successfully. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
+			},
+			"update_client_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ClientToken when the last cluster update succeeded. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
+			},
+			"statuses": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Array of cluster states to filter. (The elements of the array are logically ORed. A maximum of 15 state array elements can be filled at a time).",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"ids": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-							Description: "Cluster ID. Supports exact matching." +
-								" A maximum of 100 array elements can be filled in at a time." +
-								" Note: When this parameter is an empty array, filtering is based on all clusters in the specified region under the account.",
-						},
-						"name": {
+						"phase": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "Cluster name.",
+							Description: "The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.",
 						},
-						"profiles": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-							Description: "Filter by cluster scenario: Cloud: non-edge cluster; Edge: edge cluster.",
-						},
-						"delete_protection_enabled": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Description: "Cluster deletion protection. Values: " +
-								"true: Enable deletion protection. false: Disable deletion protection",
-						},
-						"pods_config_pod_network_mode": {
+						"conditions_type": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.",
-						},
-						"statuses": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "Array of cluster states to filter. (The elements of the array are logically ORed. A maximum of 15 state array elements can be filled at a time).",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"phase": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.",
-									},
-									"conditions_type": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Degraded`, `SetByProvider`, `Balance`, `Security`, `CreateError`, `ResourceCleanupFailed`, `LimitedByQuota`, `StockOut`,`Unknown`.",
-									},
-								},
-							},
+							Description: "The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Degraded`, `SetByProvider`, `Balance`, `Security`, `CreateError`, `ResourceCleanupFailed`, `LimitedByQuota`, `StockOut`,`Unknown`.",
 						},
 					},
 				},
-				Description: "Filtering conditions for the cluster to be queried." +
-					" For detailed explanations, please refer to ClusterFilterRequest.",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
