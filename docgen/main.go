@@ -164,6 +164,7 @@ var resourceKeys = map[string]string{
 	"vepfs":              "VEPFS",
 	"vedb_mysql":         "VEDB_MYSQL",
 	"rocketmq":           "ROCKETMQ",
+	"rabbitmq":           "RABBITMQ",
 }
 
 type Products struct {

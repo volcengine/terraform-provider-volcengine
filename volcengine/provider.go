@@ -18,6 +18,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_public_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_topic"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_instance_plugin"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_public_address"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist_associate"
@@ -740,6 +744,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_groups":      rocketmq_group.DataSourceVolcengineRocketmqGroups(),
 			"volcengine_rocketmq_access_keys": rocketmq_access_key.DataSourceVolcengineRocketmqAccessKeys(),
 			"volcengine_rocketmq_allow_lists": rocketmq_allow_list.DataSourceVolcengineRocketmqAllowLists(),
+
+			// ================ RabbitMQ ================
+			"volcengine_rabbitmq_instances":        rabbitmq_instance.DataSourceVolcengineRabbitmqInstances(),
+			"volcengine_rabbitmq_instance_plugins": rabbitmq_instance_plugin.DataSourceVolcengineRabbitmqInstancePlugins(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1051,7 +1059,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vepfs_mount_service":            vepfs_mount_service.ResourceVolcengineVepfsMountService(),
 			"volcengine_vepfs_mount_service_attachment": vepfs_mount_service_attachment.ResourceVolcengineVepfsMountServiceAttachment(),
 			"volcengine_vepfs_fileset":                  vepfs_fileset.ResourceVolcengineVepfsFileset(),
-			
+
 			// ================ veDB Mysql ================
 			"volcengine_vedb_mysql_account":                 vedb_mysql_account.ResourceVolcengineVedbMysqlAccount(),
 			"volcengine_vedb_mysql_allowlist":               vedb_mysql_allowlist.ResourceVolcengineVedbMysqlAllowlist(),
@@ -1061,7 +1069,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vedb_mysql_instance":                vedb_mysql_instance.ResourceVolcengineVedbMysqlInstance(),
 			"volcengine_vedb_mysql_allowlist_associate":     vedb_mysql_allowlist_associate.ResourceVolcengineVedbMysqlAllowlistAssociate(),
 			"volcengine_vedb_mysql_endpoint_public_address": vedb_mysql_endpoint_public_address.ResourceVolcengineVedbMysqlEndpointPublicAddress(),
-
+			
 			// ================ Rocketmq ================
 			"volcengine_rocketmq_instance":             rocketmq_instance.ResourceVolcengineRocketmqInstance(),
 			"volcengine_rocketmq_topic":                rocketmq_topic.ResourceVolcengineRocketmqTopic(),
@@ -1070,6 +1078,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_public_address":       rocketmq_public_address.ResourceVolcengineRocketmqPublicAddress(),
 			"volcengine_rocketmq_allow_list":           rocketmq_allow_list.ResourceVolcengineRocketmqAllowList(),
 			"volcengine_rocketmq_allow_list_associate": rocketmq_allow_list_associate.ResourceVolcengineRocketmqAllowListAssociate(),
+
+			// ================ RabbitMQ ================
+			"volcengine_rabbitmq_instance":        rabbitmq_instance.ResourceVolcengineRabbitmqInstance(),
+			"volcengine_rabbitmq_instance_plugin": rabbitmq_instance_plugin.ResourceVolcengineRabbitmqInstancePlugin(),
+			"volcengine_rabbitmq_public_address":  rabbitmq_public_address.ResourceVolcengineRabbitmqPublicAddress(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
