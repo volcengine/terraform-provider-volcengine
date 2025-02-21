@@ -107,7 +107,8 @@ resource "volcengine_vke_node_pool" "foo" {
       value  = "taint-value"
       effect = "NoSchedule"
     }
-    cordon = true
+    cordon             = true
+    auto_sync_disabled = false
   }
   tags {
     key   = "node-pool-k1"
@@ -117,80 +118,80 @@ resource "volcengine_vke_node_pool" "foo" {
 
 // add existing instances to a custom node pool
 resource "volcengine_ecs_instance" "foo" {
-    instance_name = "acc-test-ecs-${count.index}"
-    host_name = "tf-acc-test"
-    image_id = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
-    instance_type = "ecs.g1ie.xlarge"
-    password = "93f0cb0614Aab12"
-    instance_charge_type = "PostPaid"
-    system_volume_type = "ESSD_PL0"
-    system_volume_size = 50
-    data_volumes {
-        volume_type = "ESSD_PL0"
-        size = 50
-        delete_with_instance = true
-    }
-    subnet_id = volcengine_subnet.foo.id
-    security_group_ids = [volcengine_security_group.foo.id]
-    project_name = "default"
-    tags {
-        key = "k1"
-        value = "v1"
-    }
-    lifecycle {
-        ignore_changes = [security_group_ids, tags]
-    }
-    count = 2
+  instance_name        = "acc-test-ecs-${count.index}"
+  host_name            = "tf-acc-test"
+  image_id             = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
+  instance_type        = "ecs.g1ie.xlarge"
+  password             = "93f0cb0614Aab12"
+  instance_charge_type = "PostPaid"
+  system_volume_type   = "ESSD_PL0"
+  system_volume_size   = 50
+  data_volumes {
+    volume_type          = "ESSD_PL0"
+    size                 = 50
+    delete_with_instance = true
+  }
+  subnet_id          = volcengine_subnet.foo.id
+  security_group_ids = [volcengine_security_group.foo.id]
+  project_name       = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
+  lifecycle {
+    ignore_changes = [security_group_ids, tags]
+  }
+  count = 2
 }
 
 resource "volcengine_vke_node_pool" "foo1" {
-    cluster_id = volcengine_vke_cluster.foo.id
-    name       = "acc-test-node-pool"
-    instance_ids = volcengine_ecs_instance.foo[*].id
-    keep_instance_name = true
-    node_config {
-        instance_type_ids = ["ecs.g1ie.xlarge"]
-        subnet_ids        = [volcengine_subnet.foo.id]
-        image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
-        system_volume {
-            type = "ESSD_PL0"
-            size = 50
-        }
-        data_volumes {
-            type        = "ESSD_PL0"
-            size        = 50
-            mount_point = "/tf1"
-        }
-        initialize_script = "ZWNobyBoZWxsbyB0ZXJyYWZvcm0h"
-        security {
-            login {
-                password = "UHdkMTIzNDU2"
-            }
-            security_strategies = ["Hids"]
-            security_group_ids  = [volcengine_security_group.foo.id]
-        }
-        additional_container_storage_enabled = false
-        instance_charge_type                 = "PostPaid"
-        name_prefix                          = "acc-test"
-        ecs_tags {
-            key   = "ecs_k1"
-            value = "ecs_v1"
-        }
+  cluster_id         = volcengine_vke_cluster.foo.id
+  name               = "acc-test-node-pool"
+  instance_ids       = volcengine_ecs_instance.foo[*].id
+  keep_instance_name = true
+  node_config {
+    instance_type_ids = ["ecs.g1ie.xlarge"]
+    subnet_ids        = [volcengine_subnet.foo.id]
+    image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
+    system_volume {
+      type = "ESSD_PL0"
+      size = 50
     }
-    kubernetes_config {
-        labels {
-            key   = "label1"
-            value = "value1"
-        }
-        taints {
-            key    = "taint-key/node-type"
-            value  = "taint-value"
-            effect = "NoSchedule"
-        }
-        cordon = true
+    data_volumes {
+      type        = "ESSD_PL0"
+      size        = 50
+      mount_point = "/tf1"
     }
-    tags {
-        key   = "node-pool-k1"
-        value = "node-pool-v1"
+    initialize_script = "ZWNobyBoZWxsbyB0ZXJyYWZvcm0h"
+    security {
+      login {
+        password = "UHdkMTIzNDU2"
+      }
+      security_strategies = ["Hids"]
+      security_group_ids  = [volcengine_security_group.foo.id]
     }
+    additional_container_storage_enabled = false
+    instance_charge_type                 = "PostPaid"
+    name_prefix                          = "acc-test"
+    ecs_tags {
+      key   = "ecs_k1"
+      value = "ecs_v1"
+    }
+  }
+  kubernetes_config {
+    labels {
+      key   = "label1"
+      value = "value1"
+    }
+    taints {
+      key    = "taint-key/node-type"
+      value  = "taint-value"
+      effect = "NoSchedule"
+    }
+    cordon = true
+  }
+  tags {
+    key   = "node-pool-k1"
+    value = "node-pool-v1"
+  }
 }

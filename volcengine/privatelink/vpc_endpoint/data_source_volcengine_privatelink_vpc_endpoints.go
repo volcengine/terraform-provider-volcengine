@@ -137,6 +137,16 @@ func DataSourceVolcenginePrivatelinkVpcEndpoints() *schema.Resource {
 							Computed:    true,
 							Description: "The delete time of vpc endpoint.",
 						},
+						"private_dns_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable private dns name.",
+						},
+						"private_dns_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The private dns name of vpc endpoint.",
+						},
 					},
 				},
 			},
