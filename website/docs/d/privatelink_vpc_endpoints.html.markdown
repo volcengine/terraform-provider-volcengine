@@ -93,6 +93,8 @@ In addition to all arguments above, the following attributes are exported:
     * `endpoint_name` - The name of vpc endpoint.
     * `endpoint_type` - The type of vpc endpoint.
     * `id` - The Id of vpc endpoint.
+    * `private_dns_enabled` - Whether to enable private dns name.
+    * `private_dns_name` - The private dns name of vpc endpoint.
     * `service_id` - The Id of vpc endpoint service.
     * `service_name` - The name of vpc endpoint service.
     * `status` - The status of vpc endpoint.
