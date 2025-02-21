@@ -145,7 +145,14 @@ func (s *VolcengineVpcEndpointService) RefreshResourceState(resourceData *schema
 
 func (s *VolcengineVpcEndpointService) WithResourceResponseHandlers(data map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return data, nil, nil
+		return data, map[string]ve.ResponseConvert{
+			"PrivateDNSEnabled": {
+				TargetField: "private_dns_enabled",
+			},
+			"PrivateDNSName": {
+				TargetField: "private_dns_name",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -159,6 +166,9 @@ func (s *VolcengineVpcEndpointService) CreateResource(resourceData *schema.Resou
 				"security_group_ids": {
 					TargetField: "SecurityGroupIds",
 					ConvertType: ve.ConvertWithN,
+				},
+				"private_dns_enabled": {
+					TargetField: "PrivateDNSEnabled",
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -231,6 +241,9 @@ func (s *VolcengineVpcEndpointService) ModifyResource(resourceData *schema.Resou
 					},
 					"description": {
 						TargetField: "Description",
+					},
+					"private_dns_enabled": {
+						TargetField: "PrivateDNSEnabled",
 					},
 				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -345,6 +358,12 @@ func (VolcengineVpcEndpointService) DatasourceResources(data *schema.ResourceDat
 			"EndpointId": {
 				TargetField: "id",
 				KeepDefault: true,
+			},
+			"PrivateDNSEnabled": {
+				TargetField: "private_dns_enabled",
+			},
+			"PrivateDNSName": {
+				TargetField: "private_dns_name",
 			},
 		},
 	}
