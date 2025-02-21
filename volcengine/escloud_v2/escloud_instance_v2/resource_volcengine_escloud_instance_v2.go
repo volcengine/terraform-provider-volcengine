@@ -111,13 +111,6 @@ func ResourceVolcengineEscloudInstanceV2() *schema.Resource {
 				ForceNew:    true,
 				Description: "Whether the Master node is independent.",
 			},
-			"enable_cerebro": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Computed:    true,
-				ForceNew:    true,
-				Description: "Whether to enable cerebro.",
-			},
 			"deletion_protection": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -168,6 +161,7 @@ func ResourceVolcengineEscloudInstanceV2() *schema.Resource {
 			"node_specs_assigns": {
 				Type:        schema.TypeSet,
 				Required:    true,
+				MinItems:    1,
 				Description: "The number and configuration of various ESCloud instance node. Kibana NodeSpecsAssign should not be modified.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

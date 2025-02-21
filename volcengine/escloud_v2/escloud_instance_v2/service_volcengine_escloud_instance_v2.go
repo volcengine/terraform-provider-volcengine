@@ -238,9 +238,6 @@ func (s *VolcengineEscloudInstanceV2Service) RefreshResourceState(resourceData *
 func (VolcengineEscloudInstanceV2Service) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, map[string]ve.ResponseConvert{
-			"CerebroEnabled": {
-				TargetField: "enable_cerebro",
-			},
 			"EnableESPublicNetwork": {
 				TargetField: "enable_es_public_network",
 			},
@@ -292,6 +289,10 @@ func (s *VolcengineEscloudInstanceV2Service) CreateResource(resourceData *schema
 				"zone_ids": {
 					Ignore: true,
 				},
+				"enable_https": {
+					TargetField: "EnableHttps",
+					ForceGet:    true,
+				},
 				"network_specs": {
 					TargetField: "NetworkSpecs",
 					ConvertType: ve.ConvertJsonObjectArray,
@@ -307,6 +308,7 @@ func (s *VolcengineEscloudInstanceV2Service) CreateResource(resourceData *schema
 							ForceGet: true,
 						},
 						"extra_performance": {
+							ForceGet:    true,
 							ConvertType: ve.ConvertJsonObject,
 						},
 					},
@@ -541,6 +543,7 @@ func (s *VolcengineEscloudInstanceV2Service) ModifyResource(resourceData *schema
 								ForceGet: true,
 							},
 							"extra_performance": {
+								ForceGet:    true,
 								ConvertType: ve.ConvertJsonObject,
 							},
 						},
