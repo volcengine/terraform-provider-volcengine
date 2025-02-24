@@ -2,6 +2,7 @@ package veecp_addon
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -16,6 +17,13 @@ VeecpAddon can be imported using the id, e.g.
 $ terraform import volcengine_veecp_addon.default resource_id
 ```
 
+Notice
+Some kind of VeecpAddon can not be removed from volcengine, and it will make a forbidden error when try to destroy.
+If you want to remove it from terraform state, please use command
+```
+$ terraform state rm volcengine_veecp_addon.${name}
+```
+
 */
 
 func ResourceVolcengineVeecpAddon() *schema.Resource {
@@ -24,8 +32,28 @@ func ResourceVolcengineVeecpAddon() *schema.Resource {
 		Read:   resourceVolcengineVeecpAddonRead,
 		Update: resourceVolcengineVeecpAddonUpdate,
 		Delete: resourceVolcengineVeecpAddonDelete,
+		CustomizeDiff: func(diff *schema.ResourceDiff, i interface{}) error {
+			if diff.HasChange("config") {
+				if n, ok := diff.Get("name").(string); ok && !checkSupportUpdate(n) {
+					return diff.ForceNew("config")
+				}
+			}
+			return nil
+		},
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
+				items := strings.Split(data.Id(), ":")
+				if len(items) != 2 {
+					return []*schema.ResourceData{data}, fmt.Errorf("import id must split with ':'")
+				}
+				if err := data.Set("cluster_id", items[0]); err != nil {
+					return []*schema.ResourceData{data}, err
+				}
+				if err := data.Set("name", items[1]); err != nil {
+					return []*schema.ResourceData{data}, err
+				}
+				return []*schema.ResourceData{data}, nil
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -33,28 +61,45 @@ func ResourceVolcengineVeecpAddon() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-		    // TODO: Add all your arguments and attributes.
-			"replace_with_arguments": {
+			"cluster_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The cluster id of the addon.",
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The name of the addon.",
+			},
+			"version": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
+				//ForceNew:    true,
+				Description: "The version info of the cluster.",
 			},
-			// TODO: See setting, getting, flattening, expanding examples below for this complex argument.
-			"complex_argument": {
-				Type:     schema.TypeList,
+			"deploy_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The deploy mode.",
+			},
+			"deploy_node_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The deploy node type.",
+			},
+			"config": {
+				Type:     schema.TypeString,
 				Optional: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"sub_field_one": {
-							Type:         schema.TypeString,
-							Required:     true,
-						},
-						"sub_field_two": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
+				Computed: true,
+				Description: "The config info of addon. " +
+					"Please notice that `ingress-nginx` component prohibits updating config, can only works on the web console.",
 			},
 		},
 	}
