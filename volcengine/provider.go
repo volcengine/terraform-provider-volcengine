@@ -3,6 +3,12 @@ package volcengine
 import (
 	"context"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_cluster"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_deployment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_support_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_support_resource_type"
 	"net/http"
 	"net/url"
 	"os"
@@ -740,6 +746,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_groups":      rocketmq_group.DataSourceVolcengineRocketmqGroups(),
 			"volcengine_rocketmq_access_keys": rocketmq_access_key.DataSourceVolcengineRocketmqAccessKeys(),
 			"volcengine_rocketmq_allow_lists": rocketmq_allow_list.DataSourceVolcengineRocketmqAllowLists(),
+
+			// =============== Veecp ==================
+			"volcengine_veecp_support_resource_types": veecp_support_resource_type.DataSourceVolcengineVeecpSupportResourceTypes(),
+			"volcengine_veecp_support_addons":         veecp_support_addon.DataSourceVolcengineVeecpSupportAddons(),
+			"volcengine_veecp_node_pools":             veecp_node_pool.DataSourceVolcengineVeecpNodePools(),
+			"volcengine_veecp_deployments":            veecp_deployment.DataSourceVolcengineVeecpDeployments(),
+			"volcengine_veecp_clusters":               veecp_cluster.DataSourceVolcengineVeecpClusters(),
+			"volcengine_veecp_addons":                 veecp_addon.DataSourceVolcengineVeecpAddons(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1051,7 +1065,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vepfs_mount_service":            vepfs_mount_service.ResourceVolcengineVepfsMountService(),
 			"volcengine_vepfs_mount_service_attachment": vepfs_mount_service_attachment.ResourceVolcengineVepfsMountServiceAttachment(),
 			"volcengine_vepfs_fileset":                  vepfs_fileset.ResourceVolcengineVepfsFileset(),
-			
+
 			// ================ veDB Mysql ================
 			"volcengine_vedb_mysql_account":                 vedb_mysql_account.ResourceVolcengineVedbMysqlAccount(),
 			"volcengine_vedb_mysql_allowlist":               vedb_mysql_allowlist.ResourceVolcengineVedbMysqlAllowlist(),
@@ -1070,6 +1084,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_public_address":       rocketmq_public_address.ResourceVolcengineRocketmqPublicAddress(),
 			"volcengine_rocketmq_allow_list":           rocketmq_allow_list.ResourceVolcengineRocketmqAllowList(),
 			"volcengine_rocketmq_allow_list_associate": rocketmq_allow_list_associate.ResourceVolcengineRocketmqAllowListAssociate(),
+
+			// =============== Veecp ==================
+			"volcengine_veecp_node_pool":  veecp_node_pool.ResourceVolcengineVeecpNodePool(),
+			"volcengine_veecp_deployment": veecp_deployment.ResourceVolcengineVeecpDeployment(),
+			"volcengine_veecp_cluster":    veecp_cluster.ResourceVolcengineVeecpCluster(),
+			"volcengine_veecp_addon":      veecp_addon.ResourceVolcengineVeecpAddon(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
