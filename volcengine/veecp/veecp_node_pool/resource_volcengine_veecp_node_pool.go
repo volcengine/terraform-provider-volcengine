@@ -30,9 +30,9 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 			State: schema.ImportStatePassthrough,
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(60 * time.Minute),
-			Update: schema.DefaultTimeout(60 * time.Minute),
-			Delete: schema.DefaultTimeout(60 * time.Minute),
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -42,7 +42,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 			},
 			"cluster_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The ClusterId of NodePool.",
 			},
@@ -52,90 +52,77 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 				Description: "The ClientToken of NodePool.",
 			},
 			"tags": ve.TagsSchema(),
-
-			// TODO: 再考虑下这里怎么实现，三种节点池类型 ：https://www.volcengine.com/docs/6499/1122268
-			"node_pool_type": {
-				Type:     schema.TypeString,
+			"instance_ids": {
+				Type:     schema.TypeSet,
 				Optional: true,
-				Description: "If you want to create a control node pool, please ignore this field. If you want to create an edge node pool, please fill in this field correctly. " +
-					"Node pool type, with the default being a static node pool. " +
-					"edge - machine - set: Static node pool. " +
-					"edge - machine - pool: Elastic node poolNode pool type, which is static node pool by default. " +
-					"edge-machine-set: static node pool\nedge-machine-pool: elastic node pool.",
+				MaxItems: 100,
+				Set:      schema.HashString,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The list of existing ECS instance ids. Add existing instances with same type of security group under the same cluster VPC to the custom node pool.\n" +
+					"Note that removing instance ids from the list will only remove the nodes from cluster and not release the ECS instances. But deleting node pool will release the ECS instances in it.\n" +
+					"It is not recommended to use this field, it is recommended to use `volcengine_veecp_node` resource to add an existing instance to a custom node pool.",
 			},
-			"kubernetes_config": {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Required: true,
+			"keep_instance_name": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				Description: "Whether to keep instance name when adding an existing instance to a custom node pool, the value is `true` or `false`.\n" +
+					"This field is valid only when adding new instances to the custom node pool.",
+			},
+			"auto_scaling": {
+				Type:          schema.TypeList,
+				MaxItems:      1,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"instance_ids"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"labels": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"key": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The Key of Labels.",
-									},
-									"value": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The Value of Labels.",
-									},
-								},
-							},
-							Set:         kubernetesConfigLabelHash,
-							Description: "The Labels of KubernetesConfig.",
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Whether to enable the auto scaling function of the node pool. When a node needs to be manually added to the node pool, the value of this field must be `false`.",
 						},
-						"taints": {
-							Type:     schema.TypeList,
-							Optional: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"key": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The Key of Taints.",
-									},
-									"value": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "The Value of Taints.",
-									},
-									"effect": {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "NoSchedule",
-										Description: "The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.",
-									},
-								},
-							},
-							Description: "The Taints of KubernetesConfig.",
+						"max_replicas": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Default:     10,
+							Description: "The MaxReplicas of AutoScaling, default 10, range in 1~2000. This field is valid when the value of `enabled` is `true`.",
 						},
-						//"cordon": {
-						//	Type:        schema.TypeBool,
-						//	Required:    true,
-						//	Description: "The Cordon of KubernetesConfig.",
-						//},
-						//"name_prefix": {
-						//	Type:        schema.TypeString,
-						//	Optional:    true,
-						//	Description: "The NamePrefix of node metadata.",
-						//},
+						"min_replicas": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The MinReplicas of AutoScaling, default 0. This field is valid when the value of `enabled` is `true`.",
+						},
+						"desired_replicas": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.",
+						},
+						"priority": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The Priority of AutoScaling, default 10, rang in 0~100. This field is valid when the value of `enabled` is `true` and the value of `subnet_policy` is `Priority`.",
+						},
+						"subnet_policy": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "Multi-subnet scheduling strategy for nodes. The value can be `ZoneBalance` or `Priority`.",
+						},
 					},
 				},
-				Description: "The KubernetesConfig of NodeConfig.",
+				Description: "The node pool elastic scaling configuration information.",
 			},
 			"node_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				//Required: true,
-				Optional: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("node_pool_type").(string) != ""
-				},
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"instance_type_ids": {
@@ -242,11 +229,11 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 										Default:     20,
 										Description: "The Size of DataVolumes, the value range in 20~32768. Default value is `20`.",
 									},
-									//"mount_point": {
-									//	Type:        schema.TypeString,
-									//	Optional:    true,
-									//	Description: "The target mount directory of the disk. Must start with `/`.",
-									//},
+									"mount_point": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The target mount directory of the disk. Must start with `/`.",
+									},
 								},
 							},
 							Description: "The DataVolumes of NodeConfig.",
@@ -331,130 +318,131 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 						},
 					},
 				},
-				Description: "The Config of NodePool. If you want to create a control node pool, this field is mandatory.",
+				Description: "The Config of NodePool.",
 			},
-			"elastic_config": {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "Elastic scaling configuration. This field takes effect only when the node_pool_type is edge-machine-pool.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("node_pool_type").(string) != ""
-				},
+			"kubernetes_config": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"cloud_server_identity": {
-							Type:     schema.TypeString,
-							Required: true,
-							Description: "The ID of the edge service corresponding to the elastic node. " +
-								"On the edge computing node's edge service page, obtain the edge service ID.",
-						},
-						"auto_scaling": {
-							Type:     schema.TypeList,
-							MaxItems: 1,
+						"labels": {
+							Type:     schema.TypeSet,
 							Optional: true,
-							Computed: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"enabled": {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Computed: true,
-										Description: "Whether to enable the auto scaling function of the node pool. " +
-											"When a node needs to be manually added to the node pool, the value of this field must be `false`.",
-									},
-									"max_replicas": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										Default:  10,
-										Description: "The MaxReplicas of AutoScaling, default 10, range in 1~2000. " +
-											"This field is valid when the value of `enabled` is `true`.",
-									},
-									"min_replicas": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										Computed: true,
-										Description: "The MinReplicas of AutoScaling, default 0. " +
-											"This field is valid when the value of `enabled` is `true`.",
-									},
-									"desired_replicas": {
-										Type:        schema.TypeInt,
-										Optional:    true,
-										Computed:    true,
-										Description: "The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.",
-									},
-									"priority": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										Computed: true,
-										Description: "The Priority of AutoScaling, default 10, rang in 0~100. " +
-											"This field is valid when the value of `enabled` is `true` and the value of `subnet_policy` is `Priority`.",
-									},
-								},
-							},
-							Description: "The node pool elastic scaling configuration information.",
-						},
-						"instance_area": {
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Optional: true,
-							Computed: true,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"area_name": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-										Description: "Region name. " +
-											"You can obtain the regions and operators supported by instance specifications through the ListAvailableResourceInfo interface.",
-									},
-									"isp": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-										Description: "Operator. " +
-											"You can obtain the regions and operators supported by instance specifications through the ListAvailableResourceInfo interface.",
-									},
-									"cluster_name": {
+									"key": {
 										Type:        schema.TypeString,
 										Optional:    true,
-										Computed:    true,
-										Description: "The cluster name.",
+										Description: "The Key of Labels.",
 									},
-									"default_isp": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-										Description: "Default operator." +
-											" When using three-line nodes, this parameter can be configured. " +
-											"After configuration, this operator will be used as the default export.",
-									},
-									"external_network_mode": {
-										Type:     schema.TypeString,
-										Optional: true,
-										Computed: true,
-										Description: "Public network configuration of three-line nodes. " +
-											"If it is a single-line node, this parameter will be ignored." +
-											" Value range: single_interface_multi_ip: Single network card with multiple IPs. " +
-											"single_interface_cmcc_ip: Single network card with China Mobile IP." +
-											" Relevant permissions need to be opened by submitting a work order. " +
-											"single_interface_cucc_ip: Single network card with China Unicom IP. " +
-											"Relevant permissions need to be opened by submitting a work order. " +
-											"single_interface_ctcc_ip: Single network card with China Telecom IP. " +
-											"Relevant permissions need to be opened by submitting a work order. " +
-											"multi_interface_multi_ip: Multiple network cards with multiple IPs. " +
-											"Relevant permissions need to be opened by submitting a work order." +
-											" no_interface: No public network network card. " +
-											"Relevant permissions need to be opened by submitting a work order. " +
-											"If this parameter is not configured: " +
-											"When there is a public network network card, single_interface_multi_ip is used by default. " +
-											"When there is no public network network card, no_interface is used by default.",
+									"value": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Value of Labels.",
 									},
 								},
 							},
+							Set:         kubernetesConfigLabelHash,
+							Description: "The Labels of KubernetesConfig.",
+						},
+						"taints": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Key of Taints.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The Value of Taints.",
+									},
+									"effect": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Default:     "NoSchedule",
+										Description: "The Effect of Taints, the value can be `NoSchedule` or `NoExecute` or `PreferNoSchedule`.",
+									},
+								},
+							},
+							Description: "The Taints of KubernetesConfig.",
+						},
+						"cordon": {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: "The Cordon of KubernetesConfig.",
+						},
+						"name_prefix": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The NamePrefix of node metadata.",
 						},
 					},
 				},
+				Description: "The KubernetesConfig of NodeConfig.",
+			},
+
+			// computed fields
+			"node_statistics": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"total_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The TotalCount of Node.",
+						},
+						"creating_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The CreatingCount of Node.",
+						},
+						"running_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The RunningCount of Node.",
+						},
+						"updating_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The UpdatingCount of Node.",
+						},
+						"deleting_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The DeletingCount of Node.",
+						},
+						"failed_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The FailedCount of Node.",
+						},
+						"stopped_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Deprecated:  "This field has been deprecated and is not recommended for use.",
+							Description: "The StoppedCount of Node.",
+						},
+						"stopping_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Deprecated:  "This field has been deprecated and is not recommended for use.",
+							Description: "The StoppingCount of Node.",
+						},
+						"starting_count": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Deprecated:  "This field has been deprecated and is not recommended for use.",
+							Description: "The StartingCount of Node.",
+						},
+					},
+				},
+				Description: "The NodeStatistics of NodeConfig.",
 			},
 		},
 	}
@@ -497,18 +485,6 @@ func resourceVolcengineVeecpNodePoolDelete(d *schema.ResourceData, meta interfac
 	return err
 }
 
-var kubernetesConfigLabelHash = func(v interface{}) int {
-	if v == nil {
-		return hashcode.String("")
-	}
-	m := v.(map[string]interface{})
-	var (
-		buf bytes.Buffer
-	)
-	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
-	return hashcode.String(buf.String())
-}
-
 var prePaidDiffSuppressFunc = func(k, old, new string, d *schema.ResourceData) bool {
 	chargeType := d.Get("node_config").([]interface{})[0].(map[string]interface{})["instance_charge_type"].(string)
 	return chargeType != "PrePaid"
@@ -519,4 +495,16 @@ var prePaidAndAutoNewDiffSuppressFunc = func(k, old, new string, d *schema.Resou
 	chargeType := nodeConfig["instance_charge_type"].(string)
 	autoRenew := nodeConfig["auto_renew"].(bool)
 	return chargeType != "PrePaid" || !autoRenew
+}
+
+var kubernetesConfigLabelHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
+	return hashcode.String(buf.String())
 }

@@ -1,4 +1,4 @@
-package veecp_node
+package veecp_edge_node
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ func ResourceVolcengineVeecpNode() *schema.Resource {
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-		    // TODO: Add all your arguments and attributes.
+			// TODO: Add all your arguments and attributes.
 			"replace_with_arguments": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -46,8 +46,8 @@ func ResourceVolcengineVeecpNode() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"sub_field_one": {
-							Type:         schema.TypeString,
-							Required:     true,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"sub_field_two": {
 							Type:     schema.TypeString,

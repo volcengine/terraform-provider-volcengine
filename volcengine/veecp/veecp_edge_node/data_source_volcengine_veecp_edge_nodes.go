@@ -1,4 +1,4 @@
-package veecp_node
+package veecp_edge_node
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -41,9 +41,7 @@ func DataSourceVolcengineVeecpNodes() *schema.Resource {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-
-					},
+					Schema: map[string]*schema.Schema{},
 				},
 			},
 		},

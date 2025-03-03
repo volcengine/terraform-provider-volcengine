@@ -1,4 +1,4 @@
-package veecp_node
+package veecp_batch_edge_machine
 
 import (
 	"encoding/json"
@@ -12,23 +12,23 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineVeecpNodeService struct {
+type VolcengineVeecpBatchEdgeMachineService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewVeecpNodeService(c *ve.SdkClient) *VolcengineVeecpNodeService {
-	return &VolcengineVeecpNodeService{
+func NewVeecpBatchEdgeMachineService(c *ve.SdkClient) *VolcengineVeecpBatchEdgeMachineService {
+	return &VolcengineVeecpBatchEdgeMachineService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineVeecpNodeService) GetClient() *ve.SdkClient {
+func (s *VolcengineVeecpBatchEdgeMachineService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineVeecpNodeService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineVeecpBatchEdgeMachineService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -68,7 +68,7 @@ func (s *VolcengineVeecpNodeService) ReadResources(m map[string]interface{}) (da
 	})
 }
 
-func (s *VolcengineVeecpNodeService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineVeecpBatchEdgeMachineService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -90,12 +90,12 @@ func (s *VolcengineVeecpNodeService) ReadResource(resourceData *schema.ResourceD
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("veecp_node %s not exist ", id)
+		return data, fmt.Errorf("veecp_batch_edge_machine %s not exist ", id)
 	}
 	return data, err
 }
 
-func (s *VolcengineVeecpNodeService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineVeecpBatchEdgeMachineService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -119,7 +119,7 @@ func (s *VolcengineVeecpNodeService) RefreshResourceState(resourceData *schema.R
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("veecp_node status error, status: %s", status.(string))
+					return nil, "", fmt.Errorf("veecp_batch_edge_machine status error, status: %s", status.(string))
 				}
 			}
 			return d, status.(string), err
@@ -127,7 +127,7 @@ func (s *VolcengineVeecpNodeService) RefreshResourceState(resourceData *schema.R
 	}
 }
 
-func (s *VolcengineVeecpNodeService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineVeecpBatchEdgeMachineService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 		    // TODO: replace create action
@@ -157,14 +157,14 @@ func (s *VolcengineVeecpNodeService) CreateResource(resourceData *schema.Resourc
 	return []ve.Callback{callback}
 }
 
-func (VolcengineVeecpNodeService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineVeecpBatchEdgeMachineService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineVeecpNodeService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineVeecpBatchEdgeMachineService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 		    // TODO: replace modify action
@@ -192,7 +192,7 @@ func (s *VolcengineVeecpNodeService) ModifyResource(resourceData *schema.Resourc
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVeecpNodeService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineVeecpBatchEdgeMachineService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			// TODO: replace delete action
@@ -214,7 +214,7 @@ func (s *VolcengineVeecpNodeService) RemoveResource(resourceData *schema.Resourc
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVeecpNodeService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineVeecpBatchEdgeMachineService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
 			"ids": {
@@ -234,7 +234,7 @@ func (s *VolcengineVeecpNodeService) DatasourceResources(*schema.ResourceData, *
 	}
 }
 
-func (s *VolcengineVeecpNodeService) ReadResourceId(id string) string {
+func (s *VolcengineVeecpBatchEdgeMachineService) ReadResourceId(id string) string {
 	return id
 }
 

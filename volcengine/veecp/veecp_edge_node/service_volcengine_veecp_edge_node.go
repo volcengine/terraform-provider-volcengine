@@ -1,4 +1,4 @@
-package veecp_deployment
+package veecp_edge_node
 
 import (
 	"encoding/json"
@@ -12,30 +12,30 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineVeecpDeploymentService struct {
+type VolcengineVeecpNodeService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewVeecpDeploymentService(c *ve.SdkClient) *VolcengineVeecpDeploymentService {
-	return &VolcengineVeecpDeploymentService{
+func NewVeecpNodeService(c *ve.SdkClient) *VolcengineVeecpNodeService {
+	return &VolcengineVeecpNodeService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineVeecpDeploymentService) GetClient() *ve.SdkClient {
+func (s *VolcengineVeecpNodeService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineVeecpDeploymentService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineVeecpNodeService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-	    // TODO: modify list resource action
+		// TODO: modify list resource action
 		action := "ListResources"
 
 		bytes, _ := json.Marshal(condition)
@@ -68,7 +68,7 @@ func (s *VolcengineVeecpDeploymentService) ReadResources(m map[string]interface{
 	})
 }
 
-func (s *VolcengineVeecpDeploymentService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineVeecpNodeService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -90,12 +90,12 @@ func (s *VolcengineVeecpDeploymentService) ReadResource(resourceData *schema.Res
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("veecp_deployment %s not exist ", id)
+		return data, fmt.Errorf("veecp_node %s not exist ", id)
 	}
 	return data, err
 }
 
-func (s *VolcengineVeecpDeploymentService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineVeecpNodeService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -104,8 +104,8 @@ func (s *VolcengineVeecpDeploymentService) RefreshResourceState(resourceData *sc
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d      map[string]interface{}
-				status interface{}
+				d          map[string]interface{}
+				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -119,7 +119,7 @@ func (s *VolcengineVeecpDeploymentService) RefreshResourceState(resourceData *sc
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("veecp_deployment status error, status: %s", status.(string))
+					return nil, "", fmt.Errorf("veecp_node status error, status: %s", status.(string))
 				}
 			}
 			return d, status.(string), err
@@ -127,15 +127,13 @@ func (s *VolcengineVeecpDeploymentService) RefreshResourceState(resourceData *sc
 	}
 }
 
-func (s *VolcengineVeecpDeploymentService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineVeecpNodeService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace create action
+			// TODO: replace create action
 			Action:      "CreateResource",
 			ConvertMode: ve.RequestConvertAll,
-			Convert: map[string]ve.RequestConvert{
-
-			},
+			Convert:     map[string]ve.RequestConvert{},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -157,22 +155,20 @@ func (s *VolcengineVeecpDeploymentService) CreateResource(resourceData *schema.R
 	return []ve.Callback{callback}
 }
 
-func (VolcengineVeecpDeploymentService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineVeecpNodeService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineVeecpDeploymentService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineVeecpNodeService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace modify action
+			// TODO: replace modify action
 			Action:      "ModifyResource",
 			ConvertMode: ve.RequestConvertAll,
-			Convert: map[string]ve.RequestConvert{
-
-			},
+			Convert:     map[string]ve.RequestConvert{},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
 				return true, nil
@@ -192,7 +188,7 @@ func (s *VolcengineVeecpDeploymentService) ModifyResource(resourceData *schema.R
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVeecpDeploymentService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineVeecpNodeService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			// TODO: replace delete action
@@ -214,7 +210,7 @@ func (s *VolcengineVeecpDeploymentService) RemoveResource(resourceData *schema.R
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVeecpDeploymentService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineVeecpNodeService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
 			"ids": {
@@ -234,7 +230,7 @@ func (s *VolcengineVeecpDeploymentService) DatasourceResources(*schema.ResourceD
 	}
 }
 
-func (s *VolcengineVeecpDeploymentService) ReadResourceId(id string) string {
+func (s *VolcengineVeecpNodeService) ReadResourceId(id string) string {
 	return id
 }
 
