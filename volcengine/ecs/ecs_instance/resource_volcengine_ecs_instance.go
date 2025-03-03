@@ -248,11 +248,52 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			},
 
 			"eip_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"eip_address"},
 				Description: "The id of an existing Available EIP which will be automatically assigned to this instance. \n" +
 					"It is not recommended to use this field, it is recommended to use `volcengine_eip_associate` resource to bind EIP.",
+			},
+			"eip_address": {
+				Type:          schema.TypeList,
+				Optional:      true,
+				ForceNew:      true,
+				MaxItems:      1,
+				ConflictsWith: []string{"eip_id"},
+				Description:   "The config of the eip which will be automatically created and assigned to this instance. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"charge_type": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							Default:      "PayByBandwidth",
+							ForceNew:     true,
+							ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PayByBandwidth", "PayByTraffic"}, false),
+							Description:  "The billing type of the EIP Address. Valid values: `PayByBandwidth`, `PayByTraffic`, `PrePaid`. Default is `PayByBandwidth`.",
+						},
+						"isp": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Default:     "BGP",
+							ForceNew:    true,
+							Description: "The ISP of the EIP. Valid values: `BGP`, `ChinaMobile`, `ChinaUnicom`, `ChinaTelecom`, `SingleLine_BGP`, `Static_BGP`.",
+						},
+						"bandwidth_package_id": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							ForceNew:    true,
+							Description: "The id of the bandwidth package, indicates that the public IP address will be added to the bandwidth package.",
+						},
+						"bandwidth_mbps": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Default:     1,
+							ForceNew:    true,
+							Description: "The peek bandwidth of the EIP. The value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic. Default is 1.",
+						},
+					},
+				},
 			},
 
 			"system_volume_type": {
