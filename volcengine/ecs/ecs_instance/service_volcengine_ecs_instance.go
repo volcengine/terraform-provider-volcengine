@@ -47,7 +47,7 @@ func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (
 		networkInterfaces  []interface{}
 		networkInterfaceId string
 	)
-	data, err = ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 20, nil, func(m map[string]interface{}) ([]interface{}, string, error) {
+	data, err = ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 100, nil, func(m map[string]interface{}) ([]interface{}, string, error) {
 		action := "DescribeInstances"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
@@ -512,6 +512,15 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 					},
 					StartIndex: 1,
 				},
+				"eip_address": {
+					TargetField: "EipAddress",
+					ConvertType: ve.ConvertListUnique,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"isp": {
+							TargetField: "ISP",
+						},
+					},
+				},
 				"user_data": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "UserData",
@@ -569,6 +578,12 @@ func (s *VolcengineEcsService) CreateResource(resourceData *schema.ResourceData,
 					}
 					(*call.SdkParam)["PeriodUnit"] = "Month"
 				}
+
+				// 随实例自动创出来的 eip, 随实例删除
+				if _, exist := (*call.SdkParam)["EipAddress.BandwidthMbps"]; exist {
+					(*call.SdkParam)["EipAddress.ReleaseWithInstance"] = true
+				}
+
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return true, nil
 			},
