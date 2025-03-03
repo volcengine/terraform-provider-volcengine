@@ -10,6 +10,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_inventory"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list_associate"
@@ -540,8 +543,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_zones":     esZone.DataSourceVolcengineESCloudZones(),
 
 			// ================ TOS ================
-			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
-			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
+			"volcengine_tos_buckets":            bucket.DataSourceVolcengineTosBuckets(),
+			"volcengine_tos_objects":            object.DataSourceVolcengineTosObjects(),
+			"volcengine_tos_bucket_inventories": tos_bucket_inventory.DataSourceVolcengineTosBucketInventories(),
 
 			// ================ Redis =============
 			"volcengine_redis_allow_lists":       redis_allow_list.DataSourceVolcengineRedisAllowLists(),
@@ -871,9 +875,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 
 			//================= TOS =================
-			"volcengine_tos_bucket":        bucket.ResourceVolcengineTosBucket(),
-			"volcengine_tos_object":        object.ResourceVolcengineTosObject(),
-			"volcengine_tos_bucket_policy": bucket_policy.ResourceVolcengineTosBucketPolicy(),
+			"volcengine_tos_bucket":              bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object":              object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket_policy":       bucket_policy.ResourceVolcengineTosBucketPolicy(),
+			"volcengine_tos_bucket_inventory":    tos_bucket_inventory.ResourceVolcengineTosBucketInventory(),
+			"volcengine_tos_bucket_realtime_log": tos_bucket_realtime_log.ResourceVolcengineTosBucketRealtimeLog(),
 
 			// ================ Redis ==============
 			"volcengine_redis_allow_list":           redis_allow_list.ResourceVolcengineRedisAllowList(),
@@ -1069,7 +1075,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vedb_mysql_instance":                vedb_mysql_instance.ResourceVolcengineVedbMysqlInstance(),
 			"volcengine_vedb_mysql_allowlist_associate":     vedb_mysql_allowlist_associate.ResourceVolcengineVedbMysqlAllowlistAssociate(),
 			"volcengine_vedb_mysql_endpoint_public_address": vedb_mysql_endpoint_public_address.ResourceVolcengineVedbMysqlEndpointPublicAddress(),
-			
+
 			// ================ Rocketmq ================
 			"volcengine_rocketmq_instance":             rocketmq_instance.ResourceVolcengineRocketmqInstance(),
 			"volcengine_rocketmq_topic":                rocketmq_topic.ResourceVolcengineRocketmqTopic(),
