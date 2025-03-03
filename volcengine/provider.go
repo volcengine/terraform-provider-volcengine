@@ -13,6 +13,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_inventory"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/address_book"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/control_policy_priority"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/dns_control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/nat_firewall_control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/nat_firewall_control_policy_priority"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/vpc_firewall_acl_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/vpc_firewall_acl_rule_priority"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list_associate"
@@ -752,6 +761,13 @@ func Provider() terraform.ResourceProvider {
 			// ================ RabbitMQ ================
 			"volcengine_rabbitmq_instances":        rabbitmq_instance.DataSourceVolcengineRabbitmqInstances(),
 			"volcengine_rabbitmq_instance_plugins": rabbitmq_instance_plugin.DataSourceVolcengineRabbitmqInstancePlugins(),
+
+			// ================ CloudFirewall ================
+			"volcengine_cfw_address_books":                 address_book.DataSourceVolcengineAddressBooks(),
+			"volcengine_cfw_control_policies":              control_policy.DataSourceVolcengineControlPolicies(),
+			"volcengine_cfw_vpc_firewall_acl_rules":        vpc_firewall_acl_rule.DataSourceVolcengineVpcFirewallAclRules(),
+			"volcengine_cfw_dns_control_policies":          dns_control_policy.DataSourceVolcengineDnsControlPolicies(),
+			"volcengine_cfw_nat_firewall_control_policies": nat_firewall_control_policy.DataSourceVolcengineNatFirewallControlPolicys(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1084,11 +1100,21 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_public_address":       rocketmq_public_address.ResourceVolcengineRocketmqPublicAddress(),
 			"volcengine_rocketmq_allow_list":           rocketmq_allow_list.ResourceVolcengineRocketmqAllowList(),
 			"volcengine_rocketmq_allow_list_associate": rocketmq_allow_list_associate.ResourceVolcengineRocketmqAllowListAssociate(),
-
+			
 			// ================ RabbitMQ ================
 			"volcengine_rabbitmq_instance":        rabbitmq_instance.ResourceVolcengineRabbitmqInstance(),
 			"volcengine_rabbitmq_instance_plugin": rabbitmq_instance_plugin.ResourceVolcengineRabbitmqInstancePlugin(),
 			"volcengine_rabbitmq_public_address":  rabbitmq_public_address.ResourceVolcengineRabbitmqPublicAddress(),
+
+			// ================ CloudFirewall ================
+			"volcengine_cfw_address_book":                         address_book.ResourceVolcengineAddressBook(),
+			"volcengine_cfw_control_policy":                       control_policy.ResourceVolcengineControlPolicy(),
+			"volcengine_cfw_control_policy_priority":              control_policy_priority.ResourceVolcengineControlPolicyPriority(),
+			"volcengine_cfw_vpc_firewall_acl_rule":                vpc_firewall_acl_rule.ResourceVolcengineVpcFirewallAclRule(),
+			"volcengine_cfw_vpc_firewall_acl_rule_priority":       vpc_firewall_acl_rule_priority.ResourceVolcengineVpcFirewallAclRulePriority(),
+			"volcengine_cfw_dns_control_policy":                   dns_control_policy.ResourceVolcengineDnsControlPolicy(),
+			"volcengine_cfw_nat_firewall_control_policy":          nat_firewall_control_policy.ResourceVolcengineNatFirewallControlPolicy(),
+			"volcengine_cfw_nat_firewall_control_policy_priority": nat_firewall_control_policy_priority.ResourceVolcengineNatFirewallControlPolicyPriority(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
