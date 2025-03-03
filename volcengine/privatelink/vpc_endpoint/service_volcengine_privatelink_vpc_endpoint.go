@@ -230,7 +230,7 @@ func (s *VolcengineVpcEndpointService) CreateResource(resourceData *schema.Resou
 func (s *VolcengineVpcEndpointService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
-	if resourceData.HasChange("endpoint_name") || resourceData.HasChange("description") {
+	if resourceData.HasChanges("endpoint_name", "description", "private_dns_enabled") {
 		callback := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "ModifyVpcEndpointAttributes",
