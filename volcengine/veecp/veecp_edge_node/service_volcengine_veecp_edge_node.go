@@ -221,6 +221,7 @@ func (s *VolcengineVeecpNodeService) DatasourceResources(*schema.ResourceData, *
 		NameField:    "Name",
 		IdField:      "Id",
 		CollectField: "instances",
+		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"Id": {
 				TargetField: "id",

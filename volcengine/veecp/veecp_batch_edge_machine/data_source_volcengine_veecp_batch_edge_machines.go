@@ -125,33 +125,18 @@ func DataSourceVolcengineVeecpBatchEdgeMachines() *schema.Resource {
 							Computed:    true,
 							Description: "The UpdateTime time of NodePool.",
 						},
-						"status": {
-							Type:        schema.TypeList,
+						"phase": {
+							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The Status of NodePool.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"phase": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The Phase of Status. The value can be `Creating` or `Running` or `Updating` or `Deleting` or `Failed` or `Scaling`.",
-									},
-									"conditions": {
-										Type:        schema.TypeList,
-										Computed:    true,
-										Description: "Condition state.",
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												"type": {
-													Type:        schema.TypeString,
-													Computed:    true,
-													Description: "Indicates the status condition of the node pool in the active state.",
-												},
-											},
-										},
-									},
-								},
+							Description: "The Phase of Status.",
+						},
+						"condition_types": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
 							},
+							Computed:    true,
+							Description: "The Condition of Status.",
 						},
 						"bootstrap_script": {
 							Type:        schema.TypeString,

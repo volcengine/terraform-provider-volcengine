@@ -35,8 +35,7 @@ func (s *VolcengineVeecpBatchEdgeMachineService) ReadResources(m map[string]inte
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-	    // TODO: modify list resource action
-		action := "ListResources"
+		action := "ListBatchEdgeMachine"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -53,7 +52,7 @@ func (s *VolcengineVeecpBatchEdgeMachineService) ReadResources(m map[string]inte
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-		// TODO: replace result items
+
 		results, err = ve.ObtainSdkValue("Result.Items", *resp)
 		if err != nil {
 			return data, err
@@ -76,9 +75,11 @@ func (s *VolcengineVeecpBatchEdgeMachineService) ReadResource(resourceData *sche
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
-	// TODO: add request info
+
 	req := map[string]interface{}{
-		"Id": id,
+		"Filter": map[string]interface{}{
+			"Ids": []string{id},
+		},
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -104,8 +105,8 @@ func (s *VolcengineVeecpBatchEdgeMachineService) RefreshResourceState(resourceDa
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d      map[string]interface{}
-				status interface{}
+				d          map[string]interface{}
+				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
@@ -113,7 +114,7 @@ func (s *VolcengineVeecpBatchEdgeMachineService) RefreshResourceState(resourceDa
 			if err != nil {
 				return nil, "", err
 			}
-			status, err = ve.ObtainSdkValue("Status", d)
+			status = d["Status"].(map[string]interface{})["Phase"]
 			if err != nil {
 				return nil, "", err
 			}
@@ -130,11 +131,13 @@ func (s *VolcengineVeecpBatchEdgeMachineService) RefreshResourceState(resourceDa
 func (s *VolcengineVeecpBatchEdgeMachineService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace create action
-			Action:      "CreateResource",
+			Action:      "CreateBatchEdgeMachine",
 			ConvertMode: ve.RequestConvertAll,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-
+				"ttl_hours": {
+					TargetField: "TTLHours",
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -143,8 +146,12 @@ func (s *VolcengineVeecpBatchEdgeMachineService) CreateResource(resourceData *sc
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// TODO: replace id fields
-				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
+				ids, _ := ve.ObtainSdkValue("Result.Ids", *resp)
+				res, ok := ids.([]interface{})
+				if !ok || len(res) == 0 {
+					return fmt.Errorf("create veecp_batch_edge_machine failed")
+				}
+				id := res[0]
 				d.SetId(id.(string))
 				return nil
 			},
@@ -167,14 +174,20 @@ func (VolcengineVeecpBatchEdgeMachineService) WithResourceResponseHandlers(d map
 func (s *VolcengineVeecpBatchEdgeMachineService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-		    // TODO: replace modify action
-			Action:      "ModifyResource",
-			ConvertMode: ve.RequestConvertAll,
+			Action:      "UpdateBatchEdgeMachine",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-
+				"client_token": {
+					TargetField: "ClientToken",
+				},
+				"expiration_date": {
+					TargetField: "ExpirationDate",
+					ForceGet:    true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Id"] = d.Id()
+				(*call.SdkParam)["NodeId"] = d.Id()
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -195,12 +208,13 @@ func (s *VolcengineVeecpBatchEdgeMachineService) ModifyResource(resourceData *sc
 func (s *VolcengineVeecpBatchEdgeMachineService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace delete action
-			Action:      "DeleteResource",
+			Action:      "DeleteBatchEdgeMachine",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"Id": resourceData.Id(),
+				"Ids":        []string{resourceData.Id()},
+				"ClusterId":  resourceData.Get("cluster_id"),
+				"NodePoolId": resourceData.Get("node_pool_id"),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -218,17 +232,70 @@ func (s *VolcengineVeecpBatchEdgeMachineService) DatasourceResources(*schema.Res
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
 			"ids": {
-				TargetField: "Ids",
-				ConvertType: ve.ConvertWithN,
+				TargetField: "Filter.Ids",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"statuses": {
+				TargetField: "Filter.Statuses",
+				ConvertType: ve.ConvertJsonObjectArray,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"phase": {
+						TargetField: "Phase",
+					},
+					"edge_node_status_condition_type": {
+						TargetField: "EdgeNodeStatusConditionType",
+					},
+				},
+			},
+			"create_client_token": {
+				TargetField: "Filter.CreateClientToken",
+			},
+			"ips": {
+				TargetField: "Filter.Ips",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"cluster_ids": {
+				TargetField: "Filter.ClusterIds",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"node_pool_ids": {
+				TargetField: "Filter.NodePoolIds",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"zone_ids": {
+				TargetField: "Filter.ZoneIds",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"need_boostrap_script": {
+				TargetField: "Filter.NeedBoostrapScript",
 			},
 		},
 		NameField:    "Name",
 		IdField:      "Id",
-		CollectField: "instances",
+		CollectField: "machines",
+		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"Id": {
 				TargetField: "id",
 				KeepDefault: true,
+			},
+			"TTLTime": {
+				TargetField: "ttl_time",
+			},
+			"Status.Phase": {
+				TargetField: "phase",
+			},
+			"Status.Conditions": {
+				TargetField: "condition_types",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						for _, _data := range dd {
+							results = append(results, _data.(map[string]interface{})["Type"])
+						}
+					}
+					return results
+				},
 			},
 		},
 	}
