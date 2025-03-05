@@ -1,4 +1,4 @@
-package veecp_edge_node
+package veecp_node
 
 import (
 	"encoding/json"
@@ -11,20 +11,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_edge_node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke"
 )
 
 type VolcengineVeecpNodeService struct {
 	Client          *ve.SdkClient
 	Dispatcher      *ve.Dispatcher
-	nodePoolService *veecp_edge_node_pool.VolcengineVeecpNodePoolService
+	nodePoolService *veecp_node_pool.VolcengineVeecpNodePoolService
 }
 
 func NewVeecpNodeService(c *ve.SdkClient) *VolcengineVeecpNodeService {
 	return &VolcengineVeecpNodeService{
 		Client:          c,
 		Dispatcher:      &ve.Dispatcher{},
-		nodePoolService: veecp_edge_node_pool.NewVeecpNodePoolService(c),
+		nodePoolService: veecp_node_pool.NewVeecpNodePoolService(c),
 	}
 }
 
@@ -39,19 +40,18 @@ func (s *VolcengineVeecpNodeService) ReadResources(m map[string]interface{}) (da
 		ok      bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
-
-		action := "ListEdgeNodes"
-
-		//if filter, filterExist := condition["Filter"]; filterExist {
-		//	if statuses, exist := filter.(map[string]interface{})["Statuses"]; exist {
-		//		for index, status := range statuses.([]interface{}) {
-		//			if ty, ex := status.(map[string]interface{})["ConditionsType"]; ex {
-		//				condition["Filter"].(map[string]interface{})["Statuses"].([]interface{})[index].(map[string]interface{})["Conditions.Type"] = ty
-		//				delete(condition["Filter"].(map[string]interface{})["Statuses"].([]interface{})[index].(map[string]interface{}), "ConditionsType")
-		//			}
-		//		}
-		//	}
-		//}
+		action := "ListNodes"
+		// 单独适配VKE Conditions.Type 字段，该字段 API 表示不规范
+		if filter, filterExist := condition["Filter"]; filterExist {
+			if statuses, exist := filter.(map[string]interface{})["Statuses"]; exist {
+				for index, status := range statuses.([]interface{}) {
+					if ty, ex := status.(map[string]interface{})["ConditionsType"]; ex {
+						condition["Filter"].(map[string]interface{})["Statuses"].([]interface{})[index].(map[string]interface{})["Conditions.Type"] = ty
+						delete(condition["Filter"].(map[string]interface{})["Statuses"].([]interface{})[index].(map[string]interface{}), "ConditionsType")
+					}
+				}
+			}
+		}
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -68,7 +68,6 @@ func (s *VolcengineVeecpNodeService) ReadResources(m map[string]interface{}) (da
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-
 		results, err = ve.ObtainSdkValue("Result.Items", *resp)
 		if err != nil {
 			return data, err
@@ -106,7 +105,11 @@ func (s *VolcengineVeecpNodeService) ReadResource(resourceData *schema.ResourceD
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("veecp_node %s not exist ", id)
+		return data, fmt.Errorf("Vke node %s not exist ", id)
+	}
+	kubernetesConfig := vke.TransKubernetesConfig(resourceData)
+	if kubernetesConfig != nil {
+		data["KubernetesConfig"] = kubernetesConfig
 	}
 	return data, err
 }
@@ -120,25 +123,26 @@ func (s *VolcengineVeecpNodeService) RefreshResourceState(resourceData *schema.R
 		Timeout:    timeout,
 		Refresh: func() (result interface{}, state string, err error) {
 			var (
-				d          map[string]interface{}
+				demo       map[string]interface{}
 				status     interface{}
 				failStates []string
 			)
 			failStates = append(failStates, "Failed")
-			d, err = s.ReadResource(resourceData, id)
+			demo, err = s.ReadResource(resourceData, id)
 			if err != nil {
 				return nil, "", err
 			}
-			status, err = ve.ObtainSdkValue("Status.Phase", d)
+			status, err = ve.ObtainSdkValue("Status.Phase", demo)
 			if err != nil {
 				return nil, "", err
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("veecp_node status error, status: %s", status.(string))
+					return nil, "", fmt.Errorf("veecp node status error, status: %s", status.(string))
 				}
 			}
-			return d, status.(string), err
+			//注意 返回的第一个参数不能为空 否则会一直等下去
+			return demo, status.(string), err
 		},
 	}
 }
@@ -146,8 +150,8 @@ func (s *VolcengineVeecpNodeService) RefreshResourceState(resourceData *schema.R
 func (s *VolcengineVeecpNodeService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "CreateEdgeNode",
-			ConvertMode: ve.RequestConvertAll,
+			Action:      "CreateNodes",
+			ConvertMode: ve.RequestConvertInConvert,
 			ContentType: ve.ContentTypeJson,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -164,24 +168,49 @@ func (s *VolcengineVeecpNodeService) CreateResource(resourceData *schema.Resourc
 				Timeout: 2 * time.Hour,
 			},
 			Convert: map[string]ve.RequestConvert{
-				"auto_complete_config": {
-					TargetField: "AutoCompleteConfig",
+				"client_token": {
+					TargetField: "ClientToken",
+				},
+				"cluster_id": {
+					TargetField: "ClusterId",
+				},
+				"keep_instance_name": {
+					TargetField: "KeepInstanceName",
+				},
+				"additional_container_storage_enabled": {
+					TargetField: "AdditionalContainerStorageEnabled",
+				},
+				"container_storage_path": {
+					TargetField: "ContainerStoragePath",
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						return i
+					},
+				},
+				"instance_id": {
+					TargetField: "InstanceIds.1",
+				},
+				"image_id": {
+					TargetField: "ImageId",
+				},
+				"initialize_script": {
+					TargetField: "InitializeScript",
+				},
+				"kubernetes_config": {
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
-						"machine_auth": {
-							TargetField: "MachineAuth",
-							ConvertType: ve.ConvertJsonObject,
-							NextLevelConvert: map[string]ve.RequestConvert{
-								"ssh_port": {
-									TargetField: "SSHPort",
-								},
-							},
-						},
-						"direct_add_instances": {
-							TargetField: "DirectAddInstances",
+						"labels": {
 							ConvertType: ve.ConvertJsonObjectArray,
 						},
+						"taints": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+						"cordon": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
+				},
+				"node_pool_id": {
+					ConvertType: ve.ConvertDefault,
 				},
 			},
 			LockId: func(d *schema.ResourceData) string {
@@ -211,14 +240,14 @@ func (s *VolcengineVeecpNodeService) ModifyResource(resourceData *schema.Resourc
 func (s *VolcengineVeecpNodeService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DeleteEdgeNodes",
+			Action:      "DeleteNodes",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"ClusterId":                resourceData.Get("cluster_id"),
-				"NodePoolId":               resourceData.Get("node_pool_id"),
-				"Ids.1":                    resourceData.Id(),
-				"CascadingDeleteResources": []string{"Ecs"},
+				"ClusterId":       resourceData.Get("cluster_id"),
+				"NodePoolId":      resourceData.Get("node_pool_id"),
+				"Ids.1":           resourceData.Id(),
+				"RetainResources": []string{"Ecs"},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				nodePool, err := s.nodePoolService.ReadResources(map[string]interface{}{
@@ -246,7 +275,7 @@ func (s *VolcengineVeecpNodeService) RemoveResource(resourceData *schema.Resourc
 						if ve.ResourceNotFoundError(callErr) && strings.Contains(callErr.Error(), strings.Join(strings.Split(resourceData.Id(), ":"), ",")) {
 							return nil
 						} else {
-							return resource.NonRetryableError(fmt.Errorf("error on reading veecp edge node on delete %q, %w", d.Id(), callErr))
+							return resource.NonRetryableError(fmt.Errorf("error on reading veecp node on delete %q, %w", d.Id(), callErr))
 						}
 					}
 					_, callErr = call.ExecuteCall(d, client, call)
@@ -301,17 +330,10 @@ func (s *VolcengineVeecpNodeService) DatasourceResources(*schema.ResourceData, *
 					"phase": {
 						TargetField: "Phase",
 					},
-					"edge_node_status_condition_type": {
-						TargetField: "EdgeNodeStatusConditionType",
+					"conditions_type": {
+						TargetField: "ConditionsType",
 					},
 				},
-			},
-			"ips": {
-				TargetField: "Filter.Ips",
-				ConvertType: ve.ConvertJsonArray,
-			},
-			"need_bootstrap_script": {
-				TargetField: "Filter.NeedBootstrapScript",
 			},
 		},
 		ContentType:  ve.ContentTypeJson,
@@ -337,6 +359,40 @@ func (s *VolcengineVeecpNodeService) DatasourceResources(*schema.ResourceData, *
 					}
 					return results
 				},
+			},
+			"KubernetesConfig.Labels": {
+				TargetField: "labels",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						for _, data := range dd {
+							label := make(map[string]string)
+							label["key"] = data.(map[string]interface{})["Key"].(string)
+							label["value"] = data.(map[string]interface{})["Value"].(string)
+							results = append(results, label)
+						}
+					}
+					return results
+				},
+			},
+			"KubernetesConfig.Taints": {
+				TargetField: "taints",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if dd, ok := i.([]interface{}); ok {
+						for _, data := range dd {
+							label := make(map[string]string)
+							label["key"] = data.(map[string]interface{})["Key"].(string)
+							label["value"] = data.(map[string]interface{})["Value"].(string)
+							label["effect"] = data.(map[string]interface{})["Effect"].(string)
+							results = append(results, label)
+						}
+					}
+					return results
+				},
+			},
+			"KubernetesConfig.Cordon": {
+				TargetField: "cordon",
 			},
 		},
 	}

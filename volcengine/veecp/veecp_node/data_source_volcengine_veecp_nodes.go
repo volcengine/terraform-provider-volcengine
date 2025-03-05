@@ -1,4 +1,4 @@
-package veecp_edge_node
+package veecp_node
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -67,7 +67,7 @@ func DataSourceVolcengineVeecpNodes() *schema.Resource {
 							Optional:    true,
 							Description: "The Phase of Node, the value is `Creating` or `Running` or `Updating` or `Deleting` or `Failed` or `Starting` or `Stopping` or `Stopped`.",
 						},
-						"edge_node_status_condition_type": {
+						"conditions_type": {
 							Type:     schema.TypeString,
 							Optional: true,
 							Description: "The Type of Node Condition, the value is `Progressing` or `Ok` or `Unschedulable` or `InitilizeFailed` or `Unknown`" +
@@ -75,20 +75,6 @@ func DataSourceVolcengineVeecpNodes() *schema.Resource {
 						},
 					},
 				},
-			},
-			"ips": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "The node ips.",
-			},
-			"need_bootstrap_script": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Whether to query the node management script is needed.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -107,7 +93,7 @@ func DataSourceVolcengineVeecpNodes() *schema.Resource {
 				Description: "The total count of Node query.",
 			},
 			"nodes": {
-				Description: "The collection of query.",
+				Description: "The collection of Node query.",
 				Type:        schema.TypeList,
 				Computed:    true,
 				Elem: &schema.Resource{
@@ -160,30 +146,94 @@ func DataSourceVolcengineVeecpNodes() *schema.Resource {
 							Computed:    true,
 							Description: "The node pool id.",
 						},
+						"zone_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The zone id.",
+						},
+						"roles": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Description: "The roles of node.",
+						},
 						"create_client_token": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The create client token of node.",
 						},
-						"bootstrap_script": {
-							Type:        schema.TypeString,
+						"is_virtual": {
+							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "The bootstrap script of node.",
+							Description: "Is virtual node.",
 						},
-						"profile": {
-							Type:        schema.TypeString,
+						"additional_container_storage_enabled": {
+							Type:        schema.TypeBool,
 							Computed:    true,
-							Description: "The profile of node. Distinguish between edge and central nodes.",
+							Description: "Is Additional Container storage enables.",
 						},
-						"edge_node_type": {
+						"container_storage_path": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The edge node type of node.",
+							Description: "The Storage Path.",
 						},
-						"provider_id": {
+						"image_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The provider id of node.",
+							Description: "The ImageId of NodeConfig.",
+						},
+						"initialize_script": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The InitializeScript of NodeConfig.",
+						},
+						"labels": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The Label of KubernetesConfig.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of KubernetesConfig.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of KubernetesConfig.",
+									},
+								},
+							},
+						},
+						"taints": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The Taint of KubernetesConfig.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Key of Taint.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Value of Taint.",
+									},
+									"effect": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The Effect of Taint.",
+									},
+								},
+							},
+						},
+						"cordon": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "The Cordon of KubernetesConfig.",
 						},
 					},
 				},

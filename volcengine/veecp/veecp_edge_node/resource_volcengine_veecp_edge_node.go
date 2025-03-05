@@ -22,36 +22,122 @@ func ResourceVolcengineVeecpNode() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineVeecpNodeCreate,
 		Read:   resourceVolcengineVeecpNodeRead,
-		Update: resourceVolcengineVeecpNodeUpdate,
 		Delete: resourceVolcengineVeecpNodeDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
-			// TODO: Add all your arguments and attributes.
-			"replace_with_arguments": {
-				Type:     schema.TypeString,
-				Optional: true,
+			"client_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "The client token.",
 			},
-			// TODO: See setting, getting, flattening, expanding examples below for this complex argument.
-			"complex_argument": {
-				Type:     schema.TypeList,
-				Optional: true,
-				MaxItems: 1,
+			"cluster_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The cluster id.",
+			},
+			"node_pool_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The node pool id.",
+			},
+			"name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The name of node.",
+			},
+			"auto_complete_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Machine information to be managed.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"sub_field_one": {
-							Type:     schema.TypeString,
-							Required: true,
+						"enable": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "Enable/Disable automatic management.",
 						},
-						"sub_field_two": {
-							Type:     schema.TypeString,
-							Optional: true,
+						"address": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "The address of the machine to be managed.",
+						},
+						"machine_auth": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "Login credentials.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"auth_type": {
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
+										Description: "Authentication method. Currently only Password is open.",
+									},
+									"user": {
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
+										Description: "Login username.",
+									},
+									"ssh_port": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										ForceNew:    true,
+										Description: "SSH port, default 22.",
+									},
+								},
+							},
+						},
+						"direct_add": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "Directly managed through the edge computing instance ID. When it is true, there is no need to provide Address. Only DirectAddInstances needs to be provided.",
+						},
+						"direct_add_instances": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "Edge computing instance ID on Volcano Engine.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"instance_identity": {
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
+										Description: "Edge computing instance ID.",
+									},
+									"cloud_server_identity": {
+										Type:        schema.TypeString,
+										Required:    true,
+										ForceNew:    true,
+										Description: "Edge service ID.",
+									},
+								},
+							},
 						},
 					},
 				},
@@ -77,15 +163,6 @@ func resourceVolcengineVeecpNodeRead(d *schema.ResourceData, meta interface{}) (
 		return fmt.Errorf("error on reading veecp_node %q, %s", d.Id(), err)
 	}
 	return err
-}
-
-func resourceVolcengineVeecpNodeUpdate(d *schema.ResourceData, meta interface{}) (err error) {
-	service := NewVeecpNodeService(meta.(*ve.SdkClient))
-	err = service.Dispatcher.Update(service, d, ResourceVolcengineVeecpNode())
-	if err != nil {
-		return fmt.Errorf("error on updating veecp_node %q, %s", d.Id(), err)
-	}
-	return resourceVolcengineVeecpNodeRead(d, meta)
 }
 
 func resourceVolcengineVeecpNodeDelete(d *schema.ResourceData, meta interface{}) (err error) {
