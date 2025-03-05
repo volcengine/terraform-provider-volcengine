@@ -68,11 +68,10 @@ func DataSourceVolcengineEscloudInstanceV2s() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of instance.",
 			},
-			"tag_filter": {
+			"tags": {
 				Type:        schema.TypeList,
 				Optional:    true,
-				MaxItems:    1,
-				Description: "Tags.",
+				Description: "The tags of instance.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {

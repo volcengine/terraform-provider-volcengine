@@ -50,6 +50,12 @@ func (s *VolcengineEscloudInstanceV2Service) ReadResources(m map[string]interfac
 			}
 			condition["Filters"] = newFilter
 		}
+		if tags, tagsExist := condition["Tags"]; tagsExist {
+			tagFilter := make(map[string]interface{})
+			tagFilter["Tags"] = tags
+			condition["TagFilter"] = tagFilter
+			delete(condition, "Tags")
+		}
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -557,6 +563,9 @@ func (s *VolcengineEscloudInstanceV2Service) ModifyResource(resourceData *schema
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 					logger.Debug(logger.RespFormat, call.Action, resp, err)
+
+					// 异步任务，等待 5s
+					time.Sleep(5 * time.Second)
 					return resp, err
 				},
 				Refresh: &ve.StateRefresh{
@@ -710,7 +719,7 @@ func (s *VolcengineEscloudInstanceV2Service) DatasourceResources(*schema.Resourc
 				TargetField: "Filters.ChargeType",
 				ConvertType: ve.ConvertJsonArray,
 			},
-			"names": {
+			"instance_names": {
 				TargetField: "Filters.InstanceName",
 				ConvertType: ve.ConvertJsonArray,
 			},
@@ -722,10 +731,13 @@ func (s *VolcengineEscloudInstanceV2Service) DatasourceResources(*schema.Resourc
 				TargetField: "Filters.ZoneId",
 				ConvertType: ve.ConvertJsonArray,
 			},
-			"tag_filter": {
-				TargetField: "TagFilter",
-				ConvertType: ve.ConvertJsonObject,
+			"tags": {
+				TargetField: "Tags",
+				ConvertType: ve.ConvertJsonObjectArray,
 				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
 					"values": {
 						TargetField: "Values",
 						ConvertType: ve.ConvertJsonArray,
