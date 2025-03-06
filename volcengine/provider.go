@@ -3,6 +3,7 @@ package volcengine
 import (
 	"context"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_batch_edge_machine"
 	"net/http"
 	"net/url"
 	"os"
@@ -261,7 +262,10 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_cluster"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_edge_node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_edge_node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_node"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_node_pool"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_support_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_support_resource_type"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/available_resource"
@@ -729,6 +733,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_veecp_edge_node_pools":        veecp_edge_node_pool.DataSourceVolcengineVeecpNodePools(),
 			"volcengine_veecp_clusters":               veecp_cluster.DataSourceVolcengineVeecpClusters(),
 			"volcengine_veecp_addons":                 veecp_addon.DataSourceVolcengineVeecpAddons(),
+			"volcengine_veecp_edge_nodes":             veecp_edge_node.DataSourceVolcengineVeecpNodes(),
+			"volcengine_veecp_nodes":                  veecp_node.DataSourceVolcengineVeecpNodes(),
+			"volcengine_veecp_node_pools":             veecp_node_pool.DataSourceVolcengineVeecpNodePools(),
+			"volcengine_veecp_batch_edge_machines":    veecp_batch_edge_machine.DataSourceVolcengineVeecpBatchEdgeMachines(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1061,9 +1069,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_allow_list_associate": rocketmq_allow_list_associate.ResourceVolcengineRocketmqAllowListAssociate(),
 
 			// =============== Veecp ==================
-			"volcengine_veecp_edge_node_pool": veecp_edge_node_pool.ResourceVolcengineVeecpNodePool(),
-			"volcengine_veecp_cluster":        veecp_cluster.ResourceVolcengineVeecpCluster(),
-			"volcengine_veecp_addon":          veecp_addon.ResourceVolcengineVeecpAddon(),
+			"volcengine_veecp_edge_node_pool":     veecp_edge_node_pool.ResourceVolcengineVeecpNodePool(),
+			"volcengine_veecp_cluster":            veecp_cluster.ResourceVolcengineVeecpCluster(),
+			"volcengine_veecp_addon":              veecp_addon.ResourceVolcengineVeecpAddon(),
+			"volcengine_veecp_edge_node":          veecp_edge_node.ResourceVolcengineVeecpNode(),
+			"volcengine_veecp_node":               veecp_node.ResourceVolcengineVeecpNode(),
+			"volcengine_veecp_node_pool":          veecp_node_pool.ResourceVolcengineVeecpNodePool(),
+			"volcengine_veecp_batch_edge_machine": veecp_batch_edge_machine.ResourceVolcengineVeecpBatchEdgeMachine(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
