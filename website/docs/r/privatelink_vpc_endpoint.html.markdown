@@ -71,6 +71,7 @@ For operations that jointly use this resource and `volcengine_privatelink_securi
 * `service_id` - (Required, ForceNew) The id of vpc endpoint service.
 * `description` - (Optional) The description of vpc endpoint.
 * `endpoint_name` - (Optional) The name of vpc endpoint.
+* `private_dns_enabled` - (Optional) Whether to enable private dns name. Default is false.
 * `service_name` - (Optional, ForceNew) The name of vpc endpoint service.
 
 ## Attributes Reference
@@ -82,6 +83,7 @@ In addition to all arguments above, the following attributes are exported:
 * `deleted_time` - The delete time of vpc endpoint.
 * `endpoint_domain` - The domain of vpc endpoint.
 * `endpoint_type` - The type of vpc endpoint.
+* `private_dns_name` - The private dns name of vpc endpoint.
 * `status` - The status of vpc endpoint.
 * `update_time` - The update time of vpc endpoint.
 * `vpc_id` - The vpc id of vpc endpoint.

@@ -182,6 +182,7 @@ In addition to all arguments above, the following attributes are exported:
     * `initialize_script` - The InitializeScript of NodeConfig.
     * `instance_charge_type` - The InstanceChargeType of NodeConfig.
     * `instance_type_ids` - The InstanceTypeIds of NodeConfig.
+    * `kube_config_auto_sync_disabled` - Whether to disable the function of automatically synchronizing labels and taints to existing nodes.
     * `kube_config_name_prefix` - The NamePrefix of node metadata.
     * `label_content` - The LabelContent of KubernetesConfig.
         * `key` - The Key of KubernetesConfig.

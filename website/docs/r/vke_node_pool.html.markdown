@@ -119,7 +119,8 @@ resource "volcengine_vke_node_pool" "foo" {
       value  = "taint-value"
       effect = "NoSchedule"
     }
-    cordon = true
+    cordon             = true
+    auto_sync_disabled = false
   }
   tags {
     key   = "node-pool-k1"
@@ -245,6 +246,7 @@ The `ecs_tags` object supports the following:
 The `kubernetes_config` object supports the following:
 
 * `cordon` - (Required) The Cordon of KubernetesConfig.
+* `auto_sync_disabled` - (Optional) Whether to disable the function of automatically synchronizing labels and taints to existing nodes. Default is false.
 * `labels` - (Optional) The Labels of KubernetesConfig.
 * `name_prefix` - (Optional) The NamePrefix of node metadata.
 * `taints` - (Optional) The Taints of KubernetesConfig.

@@ -308,6 +308,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The NamePrefix of node metadata.",
 						},
+						"kube_config_auto_sync_disabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to disable the function of automatically synchronizing labels and taints to existing nodes.",
+						},
 						"label_content": {
 							Type:        schema.TypeList,
 							Computed:    true,
