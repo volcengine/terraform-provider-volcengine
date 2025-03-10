@@ -11,6 +11,64 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_inventory"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/address_book"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/control_policy_priority"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/dns_control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/nat_firewall_control_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/nat_firewall_control_policy_priority"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/vpc_firewall_acl_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/vpc_firewall_acl_rule_priority"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_access_key"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_public_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_topic"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_instance_plugin"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_public_address"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_account"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_backup"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_database"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_endpoint_public_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_instance"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_file_system"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_fileset"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_mount_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_mount_service_attachment"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record_set"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record_weight_enabler"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_resolver_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_resolver_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_user_vpc_authorization"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_partition"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_topic"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_public_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_sasl_user"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic_partition"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_zone"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -132,16 +190,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_policy_attachment"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_partition"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_topic"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_group"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_public_address"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_region"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_sasl_user"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic_partition"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/allow_list"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/allow_list_associate"
@@ -168,13 +216,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record_set"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_record_weight_enabler"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_resolver_endpoint"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_resolver_rule"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_user_vpc_authorization"
 	plSecurityGroup "github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/security_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_connection"
@@ -226,13 +267,6 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/pitr_time_period"
 	redisRegion "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/region"
 	redisZone "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/zone"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_access_key"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_allow_list_associate"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_group"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_instance"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_public_address"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rocketmq/rocketmq_topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_notify_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host"
@@ -259,23 +293,11 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_peer_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpc_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpn_attachment"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_account"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist_associate"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_backup"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_database"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_endpoint"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_endpoint_public_address"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/available_resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/cloud_server"
 	veInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/instance_types"
 	veVpc "github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/vpc"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_file_system"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_fileset"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_mount_service"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vepfs/vepfs_mount_service_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/cluster"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/default_node_pool"
@@ -521,8 +543,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_zones":     esZone.DataSourceVolcengineESCloudZones(),
 
 			// ================ TOS ================
-			"volcengine_tos_buckets": bucket.DataSourceVolcengineTosBuckets(),
-			"volcengine_tos_objects": object.DataSourceVolcengineTosObjects(),
+			"volcengine_tos_buckets":            bucket.DataSourceVolcengineTosBuckets(),
+			"volcengine_tos_objects":            object.DataSourceVolcengineTosObjects(),
+			"volcengine_tos_bucket_inventories": tos_bucket_inventory.DataSourceVolcengineTosBucketInventories(),
 
 			// ================ Redis =============
 			"volcengine_redis_allow_lists":       redis_allow_list.DataSourceVolcengineRedisAllowLists(),
@@ -731,6 +754,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_groups":      rocketmq_group.DataSourceVolcengineRocketmqGroups(),
 			"volcengine_rocketmq_access_keys": rocketmq_access_key.DataSourceVolcengineRocketmqAccessKeys(),
 			"volcengine_rocketmq_allow_lists": rocketmq_allow_list.DataSourceVolcengineRocketmqAllowLists(),
+
+			// ================ RabbitMQ ================
+			"volcengine_rabbitmq_instances":        rabbitmq_instance.DataSourceVolcengineRabbitmqInstances(),
+			"volcengine_rabbitmq_instance_plugins": rabbitmq_instance_plugin.DataSourceVolcengineRabbitmqInstancePlugins(),
+
+			// ================ CloudFirewall ================
+			"volcengine_cfw_address_books":                 address_book.DataSourceVolcengineAddressBooks(),
+			"volcengine_cfw_control_policies":              control_policy.DataSourceVolcengineControlPolicies(),
+			"volcengine_cfw_vpc_firewall_acl_rules":        vpc_firewall_acl_rule.DataSourceVolcengineVpcFirewallAclRules(),
+			"volcengine_cfw_dns_control_policies":          dns_control_policy.DataSourceVolcengineDnsControlPolicies(),
+			"volcengine_cfw_nat_firewall_control_policies": nat_firewall_control_policy.DataSourceVolcengineNatFirewallControlPolicys(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -854,9 +888,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 
 			//================= TOS =================
-			"volcengine_tos_bucket":        bucket.ResourceVolcengineTosBucket(),
-			"volcengine_tos_object":        object.ResourceVolcengineTosObject(),
-			"volcengine_tos_bucket_policy": bucket_policy.ResourceVolcengineTosBucketPolicy(),
+			"volcengine_tos_bucket":              bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object":              object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket_policy":       bucket_policy.ResourceVolcengineTosBucketPolicy(),
+			"volcengine_tos_bucket_inventory":    tos_bucket_inventory.ResourceVolcengineTosBucketInventory(),
+			"volcengine_tos_bucket_realtime_log": tos_bucket_realtime_log.ResourceVolcengineTosBucketRealtimeLog(),
 
 			// ================ Redis ==============
 			"volcengine_redis_allow_list":           redis_allow_list.ResourceVolcengineRedisAllowList(),
@@ -1066,6 +1102,21 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rocketmq_public_address":       rocketmq_public_address.ResourceVolcengineRocketmqPublicAddress(),
 			"volcengine_rocketmq_allow_list":           rocketmq_allow_list.ResourceVolcengineRocketmqAllowList(),
 			"volcengine_rocketmq_allow_list_associate": rocketmq_allow_list_associate.ResourceVolcengineRocketmqAllowListAssociate(),
+
+			// ================ RabbitMQ ================
+			"volcengine_rabbitmq_instance":        rabbitmq_instance.ResourceVolcengineRabbitmqInstance(),
+			"volcengine_rabbitmq_instance_plugin": rabbitmq_instance_plugin.ResourceVolcengineRabbitmqInstancePlugin(),
+			"volcengine_rabbitmq_public_address":  rabbitmq_public_address.ResourceVolcengineRabbitmqPublicAddress(),
+
+			// ================ CloudFirewall ================
+			"volcengine_cfw_address_book":                         address_book.ResourceVolcengineAddressBook(),
+			"volcengine_cfw_control_policy":                       control_policy.ResourceVolcengineControlPolicy(),
+			"volcengine_cfw_control_policy_priority":              control_policy_priority.ResourceVolcengineControlPolicyPriority(),
+			"volcengine_cfw_vpc_firewall_acl_rule":                vpc_firewall_acl_rule.ResourceVolcengineVpcFirewallAclRule(),
+			"volcengine_cfw_vpc_firewall_acl_rule_priority":       vpc_firewall_acl_rule_priority.ResourceVolcengineVpcFirewallAclRulePriority(),
+			"volcengine_cfw_dns_control_policy":                   dns_control_policy.ResourceVolcengineDnsControlPolicy(),
+			"volcengine_cfw_nat_firewall_control_policy":          nat_firewall_control_policy.ResourceVolcengineNatFirewallControlPolicy(),
+			"volcengine_cfw_nat_firewall_control_policy_priority": nat_firewall_control_policy_priority.ResourceVolcengineNatFirewallControlPolicyPriority(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

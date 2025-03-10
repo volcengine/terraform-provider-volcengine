@@ -385,6 +385,9 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						"name_prefix": {
 							ConvertType: ve.ConvertJsonObject,
 						},
+						"auto_sync_disabled": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 					},
 				},
 				"auto_scaling": {
@@ -623,6 +626,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"name_prefix": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"auto_sync_disabled": {
 							ConvertType: ve.ConvertJsonObject,
 						},
 					},
@@ -926,6 +932,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"KubernetesConfig.NamePrefix": {
 				TargetField: "kube_config_name_prefix",
+			},
+			"KubernetesConfig.AutoSyncDisabled": {
+				TargetField: "kube_config_auto_sync_disabled",
 			},
 			"KubernetesConfig.Cordon": {
 				TargetField: "cordon",

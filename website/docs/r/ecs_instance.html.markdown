@@ -86,6 +86,7 @@ The following arguments are supported:
 * `data_volumes` - (Optional) The data volumes collection of  ECS instance.
 * `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
 * `description` - (Optional) The description of ECS instance.
+* `eip_address` - (Optional, ForceNew) The config of the eip which will be automatically created and assigned to this instance. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `eip_id` - (Optional, ForceNew) The id of an existing Available EIP which will be automatically assigned to this instance. 
 It is not recommended to use this field, it is recommended to use `volcengine_eip_associate` resource to bind EIP.
 * `host_name` - (Optional, ForceNew) The host name of ECS instance.
@@ -125,6 +126,13 @@ The `data_volumes` object supports the following:
 * `size` - (Required, ForceNew) The size of volume. The value range of the data volume size is ESSD_PL0: 10~32768, ESSD_FlexPL: 10~32768, PTSSD: 20~8192.
 * `volume_type` - (Required, ForceNew) The type of volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
 * `delete_with_instance` - (Optional, ForceNew) The delete with instance flag of volume.
+
+The `eip_address` object supports the following:
+
+* `bandwidth_mbps` - (Optional, ForceNew) The peek bandwidth of the EIP. The value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic. Default is 1.
+* `bandwidth_package_id` - (Optional, ForceNew) The id of the bandwidth package, indicates that the public IP address will be added to the bandwidth package.
+* `charge_type` - (Optional, ForceNew) The billing type of the EIP Address. Valid values: `PayByBandwidth`, `PayByTraffic`, `PrePaid`. Default is `PayByBandwidth`.
+* `isp` - (Optional, ForceNew) The ISP of the EIP. Valid values: `BGP`, `ChinaMobile`, `ChinaUnicom`, `ChinaTelecom`, `SingleLine_BGP`, `Static_BGP`.
 
 The `secondary_network_interfaces` object supports the following:
 
