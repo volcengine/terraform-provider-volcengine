@@ -166,6 +166,7 @@ var resourceKeys = map[string]string{
 	"rocketmq":           "ROCKETMQ",
 	"rabbitmq":           "RABBITMQ",
 	"cloud_firewall":     "CLOUD_FIREWALL",
+	"veecp":              "VEECP",
 }
 
 type Products struct {

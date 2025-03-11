@@ -46,7 +46,7 @@ func DataSourceVolcengineVeecpClusters() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Description: "Cluster deletion protection. Values: " +
-					"true: Enable deletion protection. false: Disable deletion protection",
+					"true: Enable deletion protection. false: Disable deletion protection.",
 			},
 			"pods_config_pod_network_mode": {
 				Type:        schema.TypeString,
