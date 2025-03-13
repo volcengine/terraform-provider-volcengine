@@ -158,12 +158,56 @@ func (s *VolcengineVeecpNodePoolService) RefreshResourceState(resourceData *sche
 }
 
 func (s *VolcengineVeecpNodePoolService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace create action
-			Action:      "CreateResource",
+			Action:      "CreateEdgeNodePool",
 			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"cluster_id": {
+					TargetField: "ClusterId",
+				},
+				"client_token": {
+					TargetField: "ClientToken",
+				},
+				"name": {
+					TargetField: "Name",
+				},
+				"kubernetes_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"labels": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+						"taints": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+						//"cordon": {
+						//	ConvertType: ve.ConvertJsonObject,
+						//},
+						//"name_prefix": {
+						//	ConvertType: ve.ConvertJsonObject,
+						//},
+					},
+				},
+				"elastic_config": {
+					TargetField: "ElasticConfig",
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"auto_scale_config": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"instance_area": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+				"billing_configs": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -171,7 +215,6 @@ func (s *VolcengineVeecpNodePoolService) CreateResource(resourceData *schema.Res
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				// TODO: replace id fields
 				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
 				d.SetId(id.(string))
 				return nil
@@ -182,7 +225,9 @@ func (s *VolcengineVeecpNodePoolService) CreateResource(resourceData *schema.Res
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	return callbacks
 }
 
 func (VolcengineVeecpNodePoolService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
@@ -195,15 +240,66 @@ func (VolcengineVeecpNodePoolService) WithResourceResponseHandlers(d map[string]
 func (s *VolcengineVeecpNodePoolService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			// TODO: replace modify action
-			Action:      "ModifyResource",
-			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			Action:      "UpdateEdgeNodePoolConfig",
+			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"cluster_id": {
+					TargetField: "ClusterId",
+				},
+				"client_token": {
+					TargetField: "ClientToken",
+				},
+				"name": {
+					TargetField: "Name",
+				},
+				"kubernetes_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"labels": {
+							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
+						},
+						"taints": {
+							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
+						},
+						//"cordon": {
+						//	ConvertType: ve.ConvertJsonObject,
+						//},
+						//"name_prefix": {
+						//	ConvertType: ve.ConvertJsonObject,
+						//},
+					},
+				},
+				"elastic_config": {
+					TargetField: "ElasticConfig",
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"auto_scale_config": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"instance_area": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+					},
+				},
+				"billing_configs": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
+				(*call.SdkParam)["ClusterId"] = d.Get("cluster_id")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				// 当列表被删除时，入参添加空列表来置空
+				ve.DefaultMapValue(call.SdkParam, "KubernetesConfig", map[string]interface{}{
+					"Labels": []interface{}{},
+					"Taints": []interface{}{},
+				})
+
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
@@ -276,10 +372,6 @@ func (s *VolcengineVeecpNodePoolService) DatasourceResources(*schema.ResourceDat
 			},
 			"update_client_token": {
 				TargetField: "Filter.UpdateClientToken",
-			},
-			"tags": {
-				TargetField: "Tags",
-				ConvertType: ve.ConvertJsonObjectArray,
 			},
 			"node_pool_types": {
 				TargetField: "Filter.NodePoolTypes",

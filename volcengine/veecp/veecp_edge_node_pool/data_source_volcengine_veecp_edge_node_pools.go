@@ -77,6 +77,21 @@ func DataSourceVolcengineVeecpNodePools() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The NodePoolTypes of NodePool.",
 			},
+			"add_by_script": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Managed by script.",
+			},
+			"add_by_list": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Managed by list.",
+			},
+			"add_by_auto": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Managed by auto.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -141,71 +156,6 @@ func DataSourceVolcengineVeecpNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The Condition of Status.",
 						},
-						"enabled": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "Is Enabled of AutoScaling.",
-						},
-						"desired_replicas": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "The DesiredReplicas of AutoScaling.",
-						},
-						"min_replicas": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "The MinReplicas of AutoScaling.",
-						},
-						"max_replicas": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "The MaxReplicas of AutoScaling.",
-						},
-						"priority": {
-							Type:        schema.TypeInt,
-							Computed:    true,
-							Description: "The Priority of AutoScaling.",
-						},
-						"subnet_policy": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "Multi-subnet scheduling strategy for nodes. The value can be `ZoneBalance` or `Priority`.",
-						},
-						"cordon": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "The Cordon of KubernetesConfig.",
-						},
-						"kube_config_name_prefix": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The NamePrefix of node metadata.",
-						},
-						"tags": {
-							Type:        schema.TypeSet,
-							Computed:    true,
-							Description: "Tags of the NodePool.",
-							Set:         ve.VkeTagsResponseHash,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"key": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The Key of Tags.",
-									},
-									"value": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The Value of Tags.",
-									},
-									"type": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The Type of Tags.",
-									},
-								},
-							},
-						},
 						"label_content": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -248,11 +198,6 @@ func DataSourceVolcengineVeecpNodePools() *schema.Resource {
 								},
 							},
 							Description: "The TaintContent of NodeConfig.",
-						},
-						"node_pool_type": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The NodePoolType of NodePool.",
 						},
 						"type": {
 							Type:        schema.TypeString,
