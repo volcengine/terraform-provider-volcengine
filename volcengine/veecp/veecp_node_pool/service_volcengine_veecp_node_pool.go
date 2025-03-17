@@ -380,10 +380,10 @@ func (s *VolcengineVeecpNodePoolService) CreateResource(resourceData *schema.Res
 						},
 					},
 				},
-				"tags": {
-					TargetField: "Tags",
-					ConvertType: ve.ConvertJsonObjectArray,
-				},
+				//"tags": {
+				//	TargetField: "Tags",
+				//	ConvertType: ve.ConvertJsonObjectArray,
+				//},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if chargeType, ok := (*call.SdkParam)["NodeConfig.InstanceChargeType"]; ok {
@@ -815,7 +815,7 @@ func (s *VolcengineVeecpNodePoolService) ModifyResource(resourceData *schema.Res
 	}
 
 	// 更新Tags
-	callbacks = s.setResourceTags(resourceData, "NodePool", callbacks)
+	//callbacks = s.setResourceTags(resourceData, "NodePool", callbacks)
 
 	return callbacks
 }
@@ -879,10 +879,10 @@ func (s *VolcengineVeecpNodePoolService) DatasourceResources(*schema.ResourceDat
 			"update_client_token": {
 				TargetField: "Filter.UpdateClientToken",
 			},
-			"tags": {
-				TargetField: "Tags",
-				ConvertType: ve.ConvertJsonObjectArray,
-			},
+			//"tags": {
+			//	TargetField: "Tags",
+			//	ConvertType: ve.ConvertJsonObjectArray,
+			//},
 		},
 		NameField:    "Name",
 		IdField:      "Id",

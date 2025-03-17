@@ -10,8 +10,52 @@ description: |-
 Provides a resource to manage veecp cluster
 ## Example Usage
 ```hcl
+data "volcengine_zones" "foo" {
+}
+
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-project1"
+  cidr_block = "172.16.0.0/16"
+}
+
+resource "volcengine_subnet" "foo" {
+  subnet_name = "acc-subnet-test-2"
+  cidr_block  = "172.16.0.0/24"
+  zone_id     = data.volcengine_zones.foo.zones[0].id
+  vpc_id      = volcengine_vpc.foo.id
+}
+
+resource "volcengine_security_group" "foo" {
+  vpc_id              = volcengine_vpc.foo.id
+  security_group_name = "acc-test-security-group2"
+}
+
 resource "volcengine_veecp_cluster" "foo" {
-  name = ""
+  name                      = "acc-test-1"
+  description               = "created by terraform"
+  delete_protection_enabled = false
+  profile                   = "Edge"
+  cluster_config {
+    subnet_ids                       = [volcengine_subnet.foo.id]
+    api_server_public_access_enabled = true
+    api_server_public_access_config {
+      public_access_network_config {
+        billing_type = "PostPaidByBandwidth"
+        bandwidth    = 1
+      }
+    }
+    resource_public_access_default_enabled = true
+  }
+  pods_config {
+    pod_network_mode = "Flannel"
+    flannel_config {
+      pod_cidrs         = ["172.22.224.0/20"]
+      max_pods_per_node = 64
+    }
+  }
+  services_config {
+    service_cidrsv4 = ["172.30.0.0/18"]
+  }
 }
 ```
 ## Argument Reference
@@ -19,13 +63,14 @@ The following arguments are supported:
 * `cluster_config` - (Required, ForceNew) Network configuration of cluster control plane and nodes.
 * `name` - (Required, ForceNew) Cluster name. Under the same region, the name must be unique. Supports upper and lower case English letters, Chinese characters, numbers, and hyphens (-). Numbers cannot be at the first position, and hyphens (-) cannot be at the first or last position. The length is limited to 2 to 64 characters.
 * `pods_config` - (Required, ForceNew) Container (Pod) network configuration of the cluster.
+* `profile` - (Required, ForceNew) Edge cluster: Edge. Non-edge cluster: Cloud. When using edge hosting, set this item to Edge.
 * `services_config` - (Required, ForceNew) Cluster service (Service) network configuration.
 * `client_token` - (Optional, ForceNew) ClientToken is a case-sensitive string of no more than 64 ASCII characters passed in by the caller.
+* `delete_protection_enabled` - (Optional, ForceNew) Cluster deletion protection. Values: false: (default value) Deletion protection is off. true: Enable deletion protection. The cluster cannot be directly deleted. After creating a cluster, when calling Delete edge cluster, configure the Force parameter and choose to forcibly delete the cluster.
 * `description` - (Optional, ForceNew) Cluster description. Length is limited to within 300 characters.
+* `edge_tunnel_enabled` - (Optional) Whether to enable the edge tunnel. Values: false: (default value) Edge tunnel is off. true: Enable edge tunnel. Note: This parameter is not supported to be modified after the cluster is created.
 * `kubernetes_version` - (Optional, ForceNew) Specify the Kubernetes version when creating a cluster. The format is x.xx. The default value is the latest version in the supported Kubernetes version list (currently 1.20).
 * `logging_config` - (Optional, ForceNew) Cluster log configuration information.
-* `profile` - (Optional, ForceNew) Edge cluster: Edge. Non-edge cluster: Cloud. When using edge hosting, set this item to Edge.
-* `tags` - (Optional) Tags.
 
 The `api_server_public_access_config` object supports the following:
 
@@ -76,11 +121,6 @@ The `services_config` object supports the following:
 
 * `service_cidrsv4` - (Required, ForceNew) CIDR used by services within the cluster. It cannot conflict with the following network segments: FlannelConfig.PodCidrs. SubnetIds of all clusters within the same private network or FlannelConfig.VpcConfig.SubnetIds. ServiceConfig.ServiceCidrsv4 of all clusters within the same private network (this parameter).It is stated that currently only one array element is supported. When multiple values are specified, only the first value takes effect.
 
-The `tags` object supports the following:
-
-* `key` - (Required) The Key of Tags.
-* `value` - (Required) The Value of Tags.
-
 The `vpc_cni_config` object supports the following:
 
 * `subnet_ids` - (Required, ForceNew) A list of Pod subnet IDs for the VPC-CNI container network.
@@ -88,7 +128,7 @@ The `vpc_cni_config` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `delete_protection_enabled` - Cluster deletion protection. Values: false: (default value) Deletion protection is off. true: Enable deletion protection. The cluster cannot be directly deleted. After creating a cluster, when calling Delete edge cluster, configure the Force parameter and choose to forcibly delete the cluster.
+
 
 
 ## Import

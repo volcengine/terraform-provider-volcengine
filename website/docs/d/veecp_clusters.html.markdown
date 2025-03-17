@@ -10,20 +10,63 @@ description: |-
 Use this data source to query detailed information of veecp clusters
 ## Example Usage
 ```hcl
+data "volcengine_zones" "foo" {
+}
+
+resource "volcengine_vpc" "foo" {
+  vpc_name   = "acc-test-project1"
+  cidr_block = "172.16.0.0/16"
+}
+
+resource "volcengine_subnet" "foo" {
+  subnet_name = "acc-subnet-test-2"
+  cidr_block  = "172.16.0.0/24"
+  zone_id     = data.volcengine_zones.foo.zones[0].id
+  vpc_id      = volcengine_vpc.foo.id
+}
+
+resource "volcengine_security_group" "foo" {
+  vpc_id              = volcengine_vpc.foo.id
+  security_group_name = "acc-test-security-group2"
+}
+
+resource "volcengine_veecp_cluster" "foo" {
+  name                      = "acc-test-1"
+  description               = "created by terraform"
+  delete_protection_enabled = false
+  profile                   = "Edge"
+  cluster_config {
+    subnet_ids                       = [volcengine_subnet.foo.id]
+    api_server_public_access_enabled = true
+    api_server_public_access_config {
+      public_access_network_config {
+        billing_type = "PostPaidByBandwidth"
+        bandwidth    = 1
+      }
+    }
+    resource_public_access_default_enabled = true
+  }
+  pods_config {
+    pod_network_mode = "Flannel"
+    flannel_config {
+      pod_cidrs         = ["172.22.224.0/20"]
+      max_pods_per_node = 64
+    }
+  }
+  services_config {
+    service_cidrsv4 = ["172.30.0.0/18"]
+  }
+}
+
 data "volcengine_veecp_clusters" "foo" {
-  create_client_token          = ""
-  delete_protection_enabled    = true
-  ids                          = []
-  name                         = ""
-  pods_config_pod_network_mode = ""
-  profiles                     = []
-  update_client_token          = ""
+  ids = [volcengine_veecp_cluster.foo.id]
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `create_client_token` - (Optional) ClientToken when the cluster is created successfully. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.
 * `delete_protection_enabled` - (Optional) Cluster deletion protection. Values: true: Enable deletion protection. false: Disable deletion protection.
+* `edge_tunnel_enabled` - (Optional) Whether to enable the edge tunnel. The value is `true` or `false`.
 * `ids` - (Optional) Cluster ID. Supports exact matching. A maximum of 100 array elements can be filled in at a time. Note: When this parameter is an empty array, filtering is based on all clusters in the specified region under the account.
 * `name_regex` - (Optional) A Name Regex of Cluster.
 * `name` - (Optional) Cluster name.
@@ -31,18 +74,12 @@ The following arguments are supported:
 * `pods_config_pod_network_mode` - (Optional) The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.
 * `profiles` - (Optional) Filter by cluster scenario: Cloud: non-edge cluster; Edge: edge cluster.
 * `statuses` - (Optional) Array of cluster states to filter. (The elements of the array are logically ORed. A maximum of 15 state array elements can be filled at a time).
-* `tags` - (Optional) Tags.
 * `update_client_token` - (Optional) The ClientToken when the last cluster update succeeded. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.
 
 The `statuses` object supports the following:
 
 * `conditions_type` - (Optional) The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Degraded`, `SetByProvider`, `Balance`, `Security`, `CreateError`, `ResourceCleanupFailed`, `LimitedByQuota`, `StockOut`,`Unknown`.
 * `phase` - (Optional) The status of cluster. the value contains `Creating`, `Running`, `Updating`, `Deleting`, `Stopped`, `Failed`.
-
-The `tags` object supports the following:
-
-* `key` - (Required) The Key of Tags.
-* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -101,10 +138,6 @@ In addition to all arguments above, the following attributes are exported:
         * `conditions` - The state condition in the current primary state of the cluster, that is, the reason for entering the primary state.
             * `type` - The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Balance`, `CreateError`, `ResourceCleanupFailed`, `Unknown`.
         * `phase` - Cluster status. The value contains `Creating`, `Running`, `Updating`, `Deleting`, `Failed`.
-    * `tags` - Tags of the Cluster.
-        * `key` - The Key of Tags.
-        * `type` - The Type of Tags.
-        * `value` - The Value of Tags.
     * `update_client_token` - ClientToken when the last update was successful. ClientToken is a string that guarantees request idempotency. This string is passed in by the caller.
     * `update_time` - The time when the cluster last accepted a request and executed or completed execution. UTC+0 time in standard RFC3339 format.
 * `total_count` - The total count of query.

@@ -51,7 +51,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 				Optional:    true,
 				Description: "The ClientToken of NodePool.",
 			},
-			"tags": ve.TagsSchema(),
+			//"tags": ve.TagsSchema(),
 
 			"node_pool_type": {
 				Type:     schema.TypeString,

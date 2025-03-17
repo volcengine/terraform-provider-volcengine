@@ -21,6 +21,9 @@ data "volcengine_veecp_edge_node_pools" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
+* `add_by_auto` - (Optional) Managed by auto.
+* `add_by_list` - (Optional) Managed by list.
+* `add_by_script` - (Optional) Managed by script.
 * `auto_scaling_enabled` - (Optional) Is enabled of AutoScaling.
 * `cluster_ids` - (Optional) The ClusterIds of NodePool IDs.
 * `create_client_token` - (Optional) The ClientToken when successfully created.
@@ -45,10 +48,8 @@ In addition to all arguments above, the following attributes are exported:
         * `pre_paid_period` - The pre-paid period of the node pool, in months. The value range is 1-9. This parameter takes effect only when the billing_type is PrePaid.
     * `cluster_id` - The ClusterId of NodePool.
     * `condition_types` - The Condition of Status.
-    * `cordon` - The Cordon of KubernetesConfig.
     * `create_client_token` - The ClientToken when successfully created.
     * `create_time` - The CreateTime of NodePool.
-    * `desired_replicas` - The DesiredReplicas of AutoScaling.
     * `elastic_config` - Elastic scaling configuration of node pool.
         * `auto_scale_config` - The auto scaling configuration.
             * `desired_replicas` - The DesiredReplicas of AutoScaling.
@@ -65,17 +66,12 @@ In addition to all arguments above, the following attributes are exported:
             * `isp` - Operator. You can obtain the regions and operators supported by the instance specification through the ListAvailableResourceInfo interface.
             * `subnet_identity` - Subnet ID.
             * `vpc_identity` - VPC ID.
-    * `enabled` - Is Enabled of AutoScaling.
     * `id` - The Id of NodePool.
-    * `kube_config_name_prefix` - The NamePrefix of node metadata.
     * `label_content` - The LabelContent of KubernetesConfig.
         * `key` - The Key of KubernetesConfig.
         * `value` - The Value of KubernetesConfig.
-    * `max_replicas` - The MaxReplicas of AutoScaling.
-    * `min_replicas` - The MinReplicas of AutoScaling.
     * `name` - The Name of NodePool.
     * `node_add_methods` - The method of adding nodes to the node pool.
-    * `node_pool_type` - The NodePoolType of NodePool.
     * `node_statistics` - The NodeStatistics of NodeConfig.
         * `creating_count` - The CreatingCount of Node.
         * `deleting_count` - The DeletingCount of Node.
@@ -87,13 +83,7 @@ In addition to all arguments above, the following attributes are exported:
         * `total_count` - The TotalCount of Node.
         * `updating_count` - The UpdatingCount of Node.
     * `phase` - The Phase of Status.
-    * `priority` - The Priority of AutoScaling.
     * `profile` - Edge: Edge node pool. If the return value is empty, it is the central node pool.
-    * `subnet_policy` - Multi-subnet scheduling strategy for nodes. The value can be `ZoneBalance` or `Priority`.
-    * `tags` - Tags of the NodePool.
-        * `key` - The Key of Tags.
-        * `type` - The Type of Tags.
-        * `value` - The Value of Tags.
     * `taint_content` - The TaintContent of NodeConfig.
         * `effect` - The Effect of Taint.
         * `key` - The Key of Taint.

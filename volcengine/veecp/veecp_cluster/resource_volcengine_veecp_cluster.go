@@ -61,13 +61,13 @@ func ResourceVolcengineVeecpCluster() *schema.Resource {
 			},
 			"profile": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Computed:    true,
+				Required:    true,
 				ForceNew:    true,
 				Description: "Edge cluster: Edge. Non-edge cluster: Cloud. When using edge hosting, set this item to Edge.",
 			},
 			"delete_protection_enabled": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
 				ForceNew: true,
 				Description: "Cluster deletion protection. " +
@@ -75,6 +75,15 @@ func ResourceVolcengineVeecpCluster() *schema.Resource {
 					"true: Enable deletion protection. The cluster cannot be directly deleted. " +
 					"After creating a cluster, when calling Delete edge cluster, " +
 					"configure the Force parameter and choose to forcibly delete the cluster.",
+			},
+			"edge_tunnel_enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Computed: true,
+				Description: "Whether to enable the edge tunnel. " +
+					"Values: false: (default value) Edge tunnel is off. " +
+					"true: Enable edge tunnel. " +
+					"Note: This parameter is not supported to be modified after the cluster is created.",
 			},
 			"kubernetes_version": {
 				Type:     schema.TypeString,
@@ -272,7 +281,7 @@ func ResourceVolcengineVeecpCluster() *schema.Resource {
 					},
 				},
 			},
-			"tags": ve.TagsSchema(),
+			//"tags": ve.TagsSchema(),
 			"logging_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,

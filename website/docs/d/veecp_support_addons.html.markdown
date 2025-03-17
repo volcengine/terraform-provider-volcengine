@@ -11,13 +11,13 @@ Use this data source to query detailed information of veecp support addons
 ## Example Usage
 ```hcl
 data "volcengine_veecp_support_addons" "foo" {
-  categories          = []
-  deploy_modes        = []
-  deploy_node_types   = []
-  kubernetes_versions = []
-  name                = ""
-  necessaries         = []
-  pod_network_modes   = []
+  #    categories = []
+  #    deploy_modes = []
+  #    deploy_node_types = []
+  #    kubernetes_versions = []
+  #    name = ""
+  #    necessaries = []
+  #    pod_network_modes = []
 }
 ```
 ## Argument Reference

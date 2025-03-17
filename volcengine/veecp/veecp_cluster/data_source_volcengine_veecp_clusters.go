@@ -42,6 +42,11 @@ func DataSourceVolcengineVeecpClusters() *schema.Resource {
 				},
 				Description: "Filter by cluster scenario: Cloud: non-edge cluster; Edge: edge cluster.",
 			},
+			"edge_tunnel_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to enable the edge tunnel. The value is `true` or `false`.",
+			},
 			"delete_protection_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -78,26 +83,6 @@ func DataSourceVolcengineVeecpClusters() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "The state condition in the current main state of the cluster, that is, the reason for entering the main state, there can be multiple reasons, the value contains `Progressing`, `Ok`, `Degraded`, `SetByProvider`, `Balance`, `Security`, `CreateError`, `ResourceCleanupFailed`, `LimitedByQuota`, `StockOut`,`Unknown`.",
-						},
-					},
-				},
-			},
-			"tags": {
-				Type:        schema.TypeSet,
-				Optional:    true,
-				Description: "Tags.",
-				Set:         tagsHash,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"key": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The Key of Tags.",
-						},
-						"value": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "The Value of Tags.",
 						},
 					},
 				},
@@ -507,31 +492,31 @@ func DataSourceVolcengineVeecpClusters() *schema.Resource {
 								},
 							},
 						},
-						"tags": {
-							Type:        schema.TypeSet,
-							Computed:    true,
-							Description: "Tags of the Cluster.",
-							Set:         ve.VkeTagsResponseHash,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"key": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The Key of Tags.",
-									},
-									"value": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The Value of Tags.",
-									},
-									"type": {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "The Type of Tags.",
-									},
-								},
-							},
-						},
+						//"tags": {
+						//	Type:        schema.TypeSet,
+						//	Computed:    true,
+						//	Description: "Tags of the Cluster.",
+						//	Set:         ve.VkeTagsResponseHash,
+						//	Elem: &schema.Resource{
+						//		Schema: map[string]*schema.Schema{
+						//			"key": {
+						//				Type:        schema.TypeString,
+						//				Computed:    true,
+						//				Description: "The Key of Tags.",
+						//			},
+						//			"value": {
+						//				Type:        schema.TypeString,
+						//				Computed:    true,
+						//				Description: "The Value of Tags.",
+						//			},
+						//			"type": {
+						//				Type:        schema.TypeString,
+						//				Computed:    true,
+						//				Description: "The Type of Tags.",
+						//			},
+						//		},
+						//	},
+						//},
 					},
 				},
 			},

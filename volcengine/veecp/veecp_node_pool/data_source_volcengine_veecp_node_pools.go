@@ -88,7 +88,7 @@ func DataSourceVolcengineVeecpNodePools() *schema.Resource {
 				Optional:    true,
 				Description: "Is enabled of AutoScaling.",
 			},
-			"tags": ve.TagsSchema(),
+			//"tags": ve.TagsSchema(),
 			"node_pools": {
 				Description: "The collection of NodePools query.",
 				Type:        schema.TypeList,

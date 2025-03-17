@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/eip/eip_address"
 	"reflect"
 	"sort"
 	"time"
@@ -312,6 +313,9 @@ func (s *VolcengineVeecpClusterService) CreateResource(resourceData *schema.Reso
 						},
 					},
 				},
+				"edge_tunnel_enabled": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
@@ -389,7 +393,143 @@ func (VolcengineVeecpClusterService) WithResourceResponseHandlers(cluster map[st
 func (s *VolcengineVeecpClusterService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
-	callbacks = s.setResourceTags(resourceData, "Cluster", callbacks)
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UpdateClusterConfig",
+			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"edge_tunnel_enabled": {
+					TargetField: "EdgeTunnelEnabled",
+				},
+				"cluster_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"subnet_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"api_server_public_access_config": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"public_access_network_config": {
+									ConvertType: ve.ConvertJsonObject,
+								},
+							},
+						},
+					},
+				},
+				"pods_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"flannel_config": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"pod_cidrs": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+							},
+						},
+						"vpc_cni_config": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"subnet_ids": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"vpc_id": {
+									Ignore: true,
+								},
+							},
+						},
+					},
+				},
+				"services_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"service_cidrsv4": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+					},
+				},
+				"logging_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"log_setups": {
+							ConvertType: ve.ConvertJsonObjectArray,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"log_type": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"log_ttl": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"enabled": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+							},
+						},
+					},
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
+					realBillingType := billingTypeRequestConvert(d, billingType)
+					(*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"] = realBillingType
+				}
+				(*call.SdkParam)["Id"] = d.Id()
+
+				delete(*call.SdkParam, "Tags")
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				err := validateLogSetups(d)
+				if err != nil {
+					return nil, err
+				}
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				//修改cluster属性
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+		},
+	}
+	callbacks = append(callbacks, callback)
+
+	if resourceData.HasChange("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth") &&
+		!resourceData.HasChange("cluster_config.0.api_server_public_access_enabled") {
+		// enable public access, vke will create eip automatic
+		eipAllocationId := resourceData.Get("eip_allocation_id").(string)
+		modifyEipCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyEipAddresses",
+				ContentType: ve.ContentTypeDefault,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["AllocationId"] = eipAllocationId
+					(*call.SdkParam)["Bandwidth"] = d.Get("cluster_config.0.api_server_public_access_config.0.public_access_network_config.0.bandwidth")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					//修改eip属性
+					return s.Client.UniversalClient.DoCall(getVpcUniversalInfo(call.Action), call.SdkParam)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					eip_address.NewEipAddressService(s.Client): {
+						Target:     []string{"Available", "Attached", "Attaching", "Detaching"},
+						Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
+						ResourceId: eipAllocationId,
+					},
+				},
+			},
+		}
+		callbacks = append(callbacks, modifyEipCallback)
+	}
+
+	//callbacks = s.setResourceTags(resourceData, "Cluster", callbacks)
 
 	return callbacks
 }
@@ -476,10 +616,10 @@ func (s *VolcengineVeecpClusterService) DatasourceResources(*schema.ResourceData
 			"update_client_token": {
 				TargetField: "Filter.UpdateClientToken",
 			},
-			"tags": {
-				TargetField: "Tags",
-				ConvertType: ve.ConvertJsonObjectArray,
-			},
+			//"tags": {
+			//	TargetField: "Tags",
+			//	ConvertType: ve.ConvertJsonObjectArray,
+			//},
 		},
 		ContentType:  ve.ContentTypeJson,
 		NameField:    "Name",

@@ -11,8 +11,8 @@ Use this data source to query detailed information of veecp support resource typ
 ## Example Usage
 ```hcl
 data "volcengine_veecp_support_resource_types" "foo" {
-  resource_types = []
-  zone_ids       = []
+  #    resource_types = []
+  #    zone_ids = []
 }
 ```
 ## Argument Reference
