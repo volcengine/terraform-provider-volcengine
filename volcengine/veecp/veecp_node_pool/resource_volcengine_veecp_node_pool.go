@@ -381,6 +381,12 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 							Optional:    true,
 							Description: "The NamePrefix of node metadata.",
 						},
+						"auto_sync_disabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Whether to disable the function of automatically synchronizing labels and taints to existing nodes. Default is false.",
+						},
 					},
 				},
 				Description: "The KubernetesConfig of NodeConfig.",

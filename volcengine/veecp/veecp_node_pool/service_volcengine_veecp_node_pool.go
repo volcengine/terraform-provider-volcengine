@@ -427,6 +427,10 @@ func (s *VolcengineVeecpNodePoolService) CreateResource(resourceData *schema.Res
 					}
 					(*call.SdkParam)["NodeConfig"].(map[string]interface{})["SystemVolume"] = systemVolume
 				}
+				clientToken := d.Get("client_token").(string)
+				if clientToken == "" {
+					(*call.SdkParam)["ClientToken"] = uuid.New().String()
+				}
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)

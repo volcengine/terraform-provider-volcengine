@@ -48,7 +48,8 @@ resource "volcengine_veecp_cluster" "foo" {
 
 resource "volcengine_veecp_node_pool" "foo" {
   cluster_id = volcengine_veecp_cluster.foo.id
-  name       = "acc-test-node-pool"
+  name       = "acc-test-node-pool-9505"
+  client_token = "FGAHIxa23412FGAIOHioj"
   auto_scaling {
     enabled          = true
     min_replicas     = 0
@@ -58,9 +59,9 @@ resource "volcengine_veecp_node_pool" "foo" {
     subnet_policy    = "ZoneBalance"
   }
   node_config {
-    instance_type_ids = ["ecs.g1ie.xlarge"]
+    instance_type_ids = ["ecs.c1ie.xlarge"]
     subnet_ids        = [volcengine_subnet.foo.id]
-    image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
+    image_id          = ""
     system_volume {
       type = "ESSD_PL0"
       size = 80
@@ -102,6 +103,6 @@ resource "volcengine_veecp_node_pool" "foo" {
       effect = "NoSchedule"
     }
     cordon             = true
-    auto_sync_disabled = false
+    #auto_sync_disabled = false
   }
 }
