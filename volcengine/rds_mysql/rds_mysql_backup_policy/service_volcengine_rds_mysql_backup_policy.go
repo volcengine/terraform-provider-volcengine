@@ -184,6 +184,7 @@ func (s *VolcengineRdsMysqlBackupPolicyService) ModifyResource(resourceData *sch
 		Call: ve.SdkCall{
 			Action:      "ModifyBackupPolicy",
 			ConvertMode: ve.RequestConvertAll,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"data_full_backup_periods": {
 					TargetField: "DataFullBackupPeriods",

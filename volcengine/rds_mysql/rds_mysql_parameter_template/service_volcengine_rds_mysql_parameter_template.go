@@ -194,6 +194,7 @@ func (s *VolcengineRdsMysqlParameterTemplateService) ModifyResource(resourceData
 		Call: ve.SdkCall{
 			Action:      "ModifyParameterTemplate",
 			ConvertMode: ve.RequestConvertInConvert,
+			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"template_name": {
 					TargetField: "TemplateName",
@@ -203,6 +204,16 @@ func (s *VolcengineRdsMysqlParameterTemplateService) ModifyResource(resourceData
 				},
 				"template_params": {
 					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"name": {
+							TargetField: "Name",
+							ForceGet:    true,
+						},
+						"running_value": {
+							TargetField: "RunningValue",
+							ForceGet:    true,
+						},
+					},
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
