@@ -236,7 +236,7 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResource(resourceData *schema.Re
 				maintenanceWindow["DayKind"] = dayKind
 			}
 			if weekDay, ok := windowMap["day_of_week"]; ok {
-				maintenanceWindow["WeekDay"] = weekDay.(*schema.Set).List()
+				maintenanceWindow["DayOfWeek"] = weekDay.(*schema.Set).List()
 			}
 			data["MaintenanceWindow"] = maintenanceWindow
 		} else {
@@ -421,7 +421,7 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 						maintenanceWindow["DayKind"] = dayKind
 					}
 					if weekDay, ok := windowMap["day_of_week"]; ok {
-						maintenanceWindow["WeekDay"] = weekDay.(*schema.Set).List()
+						maintenanceWindow["DayOfWeek"] = weekDay.(*schema.Set).List()
 					}
 
 					(*call.SdkParam)["MaintenanceWindow"] = maintenanceWindow
@@ -770,19 +770,16 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 					(*call.SdkParam)["InstanceId"] = d.Id()
 					if mainWindow, ok := d.GetOk("maintenance_window"); ok {
 						windowMap := mainWindow.([]interface{})[0].(map[string]interface{})
-						maintenanceWindow := make(map[string]interface{})
 
 						if time, ok := windowMap["maintenance_time"]; ok {
-							maintenanceWindow["MaintenanceTime"] = time
+							(*call.SdkParam)["MaintenanceTime"] = time
 						}
 						if dayKind, ok := windowMap["day_kind"]; ok {
-							maintenanceWindow["DayKind"] = dayKind
+							(*call.SdkParam)["DayKind"] = dayKind
 						}
 						if weekDay, ok := windowMap["day_of_week"]; ok {
-							maintenanceWindow["WeekDay"] = weekDay.(*schema.Set).List()
+							(*call.SdkParam)["DayOfWeek"] = weekDay.(*schema.Set).List()
 						}
-
-						(*call.SdkParam)["MaintenanceWindow"] = maintenanceWindow
 					}
 					return true, nil
 				},
