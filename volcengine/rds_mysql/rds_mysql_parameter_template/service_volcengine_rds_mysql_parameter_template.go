@@ -173,6 +173,8 @@ func (s *VolcengineRdsMysqlParameterTemplateService) CreateResource(resourceData
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id, _ := ve.ObtainSdkValue("Result.TemplateId", *resp)
 				d.SetId(id.(string))
+				//异步操作 这里需要等5s
+				time.Sleep(time.Duration(5) * time.Second)
 				return nil
 			},
 		},
