@@ -18,8 +18,12 @@ resource "volcengine_security_group" "foo" {
     security_group_name = "acc-test-security-group2"
 }
 
+data "volcengine_images" "foo" {
+    name_regex = "veLinux 1.0 CentOS兼容版 64位"
+}
+
 resource "volcengine_veecp_cluster" "foo" {
-    name = "acc-test-1"
+    name = "acc-test-22"
     description = "created by terraform"
     delete_protection_enabled = false
     profile = "Edge"
@@ -46,12 +50,61 @@ resource "volcengine_veecp_cluster" "foo" {
     }
 }
 
+resource "volcengine_veecp_node_pool" "foo" {
+    cluster_id   = volcengine_veecp_cluster.foo.id
+    name         = "acc-test-node-pool-9505"
+    auto_scaling {
+        enabled          = false
+    }
+    node_config {
+        instance_type_ids = ["ecs.c1ie.xlarge"]
+        subnet_ids        = [volcengine_subnet.foo.id]
+        image_id          = ""
+        system_volume {
+            type = "ESSD_PL0"
+            size = 80
+        }
+        data_volumes {
+            type = "ESSD_PL0"
+            size = "50"
+            mount_point = "/tf"
+        }
+        initialize_script = "ZWNobyBoZWxsbyB0ZXJyYWZvcm0h"
+        security {
+            login {
+                password = "UHdkMTIzNDU2"
+            }
+            security_strategies = ["Hids"]
+            security_group_ids  = [volcengine_security_group.foo.id]
+        }
+        additional_container_storage_enabled = true
+        instance_charge_type                 = "PostPaid"
+        name_prefix                          = "acc-test"
+        ecs_tags {
+            key   = "ecs_k1"
+            value = "ecs_v1"
+        }
+    }
+    kubernetes_config {
+        labels {
+            key   = "label1"
+            value = "value1"
+        }
+        taints {
+            key    = "taint-key/node-type"
+            value  = "taint-value"
+            effect = "NoSchedule"
+        }
+        cordon = true
+        #auto_sync_disabled = false
+    }
+}
 
 resource "volcengine_ecs_instance" "foo" {
     instance_name = "acc-test-ecs"
     host_name = "tf-acc-test"
     image_id = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
-    instance_type = "ecs.g1ie.xlarge"
+    instance_type = "ecs.c1ie.xlarge"
     password = "93f0cb0614Aab12"
     instance_charge_type = "PostPaid"
     system_volume_type = "ESSD_PL0"
@@ -77,4 +130,5 @@ resource "volcengine_ecs_instance" "foo" {
 resource "volcengine_veecp_node" "foo" {
     cluster_id = volcengine_veecp_cluster.foo.id
     instance_id = volcengine_ecs_instance.foo.id
+    node_pool_id = volcengine_veecp_node_pool.foo.id
 }

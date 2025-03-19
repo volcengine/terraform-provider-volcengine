@@ -153,12 +153,14 @@ func (s *VolcengineVeecpBatchEdgeMachineService) CreateResource(resourceData *sc
 				}
 				id := res[0]
 				d.SetId(id.(string))
+				time.Sleep(time.Second * 5)
 				return nil
 			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			},
+			// 服务端状态永远返回Creating，这里先不刷新
+			//Refresh: &ve.StateRefresh{
+			//	Target:  []string{"Running"},
+			//	Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			//},
 		},
 	}
 	return []ve.Callback{callback}
@@ -196,10 +198,11 @@ func (s *VolcengineVeecpBatchEdgeMachineService) ModifyResource(resourceData *sc
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running"},
-				Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			},
+			// 服务端状态永远返回Creating，这里先不刷新
+			//Refresh: &ve.StateRefresh{
+			//	Target:  []string{"Running"},
+			//	Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			//},
 		},
 	}
 	return []ve.Callback{callback}
@@ -208,6 +211,7 @@ func (s *VolcengineVeecpBatchEdgeMachineService) ModifyResource(resourceData *sc
 func (s *VolcengineVeecpBatchEdgeMachineService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
+			// 检查下接口开放了么
 			Action:      "DeleteBatchEdgeMachine",
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
