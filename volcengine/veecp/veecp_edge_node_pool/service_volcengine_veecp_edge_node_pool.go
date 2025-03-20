@@ -92,6 +92,17 @@ func (s *VolcengineVeecpNodePoolService) ReadResources(m map[string]interface{})
 			return data, errors.New("Result.Items is not Slice")
 		}
 
+		for _, d := range data {
+			dMap := d.(map[string]interface{})
+			if elasticConfig, ok := dMap["ElasticConfig"]; ok {
+				if eMap, ok := elasticConfig.(map[string]interface{}); ok {
+					eMap["AutoScaleConfig"] = []interface{}{eMap["AutoScaleConfig"]}
+					eMap["InstanceArea"] = []interface{}{eMap["InstanceArea"]}
+				} else {
+					return nil, fmt.Errorf("ElasticConfig is not map")
+				}
+			}
+		}
 		return data, err
 	})
 }
@@ -120,7 +131,7 @@ func (s *VolcengineVeecpNodePoolService) ReadResource(resourceData *schema.Resou
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("veecp_node_pool %s not exist ", id)
+		return data, fmt.Errorf("veecp_edge_node_pool %s not exist ", id)
 	}
 	return data, err
 }
@@ -149,7 +160,7 @@ func (s *VolcengineVeecpNodePoolService) RefreshResourceState(resourceData *sche
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("veecp_node_pool status error, status: %s", status.(string))
+					return nil, "", fmt.Errorf("veecp_edge_node_pool status error, status: %s", status.(string))
 				}
 			}
 			return d, status.(string), err

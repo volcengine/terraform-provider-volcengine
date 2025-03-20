@@ -57,8 +57,8 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: "Node pool type, with the default being a static node pool. " +
-					"edge - machine - set: Static node pool. " +
-					"edge - machine - pool: Elastic node poolNode pool type, which is static node pool by default. " +
+					"edge-machine-set: Static node pool. " +
+					"edge-machine-pool: Elastic node poolNode pool type, which is static node pool by default. " +
 					"edge-machine-set: static node pool\nedge-machine-pool: elastic node pool.",
 			},
 			"vpc_id": {
@@ -97,7 +97,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 			"kubernetes_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"labels": {
@@ -163,10 +163,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
-				Description: "Elastic scaling configuration. This field takes effect only when the node_pool_type is edge-machine-pool.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("node_pool_type").(string) != ""
-				},
+				Description: "Elastic scaling configuration.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"cloud_server_identity": {
