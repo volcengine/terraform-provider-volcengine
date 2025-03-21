@@ -121,6 +121,9 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResource(resourceData *schema.R
 	if len(data) == 0 {
 		return data, fmt.Errorf("Rds instance %s not exist ", id)
 	}
+	if sgIds, ok := resourceData.GetOk("security_group_ids"); ok {
+		data["SecurityGroupIds"] = sgIds.(*schema.Set).List()
+	}
 	return data, err
 }
 
@@ -192,12 +195,10 @@ func (s *VolcengineRdsMysqlAllowListService) CreateResource(data *schema.Resourc
 						result := make(map[string]interface{})
 						result["BindMode"] = securityGroupBindInfo["bind_mode"]
 						result["SecurityGroupId"] = securityGroupBindInfo["security_group_id"]
-						ipList := securityGroupBindInfo["ip_list"].(*schema.Set).List()
-						result["IpList"] = ipList
-						result["SecurityGroupName"] = securityGroupBindInfo["security_group_name"]
 						securityGroupBindInfos = append(securityGroupBindInfos, result)
 					}
 					(*call.SdkParam)["SecurityGroupBindInfos"] = securityGroupBindInfos
+					logger.Debug(logger.ReqFormat, call.Action+" SecurityGroupBindInfos", call.SdkParam, securityGroupBindInfoList)
 				}
 				return true, nil
 			},
@@ -285,9 +286,6 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 						result := make(map[string]interface{})
 						result["BindMode"] = securityGroupBindInfo["bind_mode"]
 						result["SecurityGroupId"] = securityGroupBindInfo["security_group_id"]
-						ipList := securityGroupBindInfo["ip_list"].(*schema.Set).List()
-						result["IpList"] = ipList
-						result["SecurityGroupName"] = securityGroupBindInfo["security_group_name"]
 						securityGroupBindInfos = append(securityGroupBindInfos, result)
 					}
 					(*call.SdkParam)["SecurityGroupBindInfos"] = securityGroupBindInfos

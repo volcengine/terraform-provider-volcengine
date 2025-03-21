@@ -50,19 +50,23 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 				Description: "The type of IP address in the whitelist. Currently only IPv4 addresses are supported.",
 			},
 			"allow_list": {
-				Type:         schema.TypeSet,
-				Optional:     true,
-				AtLeastOneOf: []string{"security_group_ids"},
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				AtLeastOneOf:  []string{"security_group_ids", "user_allow_list", "security_group_bind_infos"},
+				ConflictsWith: []string{"security_group_ids", "security_group_bind_infos"},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set:         schema.HashString,
-				Description: "Enter an IP address or a range of IP addresses in CIDR format.",
+				Set: schema.HashString,
+				// 不可与安全组相关参数一起使用，否则会有漂移
+				Description: "Enter an IP address or a range of IP addresses in CIDR format. Please note that if you want to use security group - related parameters, do not use this field. Instead, use the user_allow_list.",
 			},
 			"security_group_ids": {
 				Type:          schema.TypeSet,
 				Optional:      true,
-				ConflictsWith: []string{"security_group_bind_infos"},
+				AtLeastOneOf:  []string{"allow_list", "user_allow_list", "security_group_bind_infos"},
+				ConflictsWith: []string{"security_group_bind_infos", "allow_list"},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -71,7 +75,8 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 			"security_group_bind_infos": {
 				Type:          schema.TypeSet,
 				Optional:      true,
-				ConflictsWith: []string{"security_group_ids"},
+				Computed:      true,
+				ConflictsWith: []string{"security_group_ids", "allow_list"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"bind_mode": {
@@ -85,20 +90,6 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The security group id of the allow list.",
-						},
-						"ip_list": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeString,
-							},
-							Set:         schema.HashString,
-							Description: "The ip list of the security group.",
-						},
-						"security_group_name": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "The name of the security group.",
 						},
 					},
 				},
@@ -116,7 +107,9 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 			"user_allow_list": {
 				Type:          schema.TypeSet,
 				Optional:      true,
+				Computed:      true,
 				ConflictsWith: []string{"allow_list"},
+				AtLeastOneOf:  []string{"security_group_ids", "allow_list", "security_group_bind_infos"},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
