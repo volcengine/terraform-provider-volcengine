@@ -45,8 +45,14 @@ resource "volcengine_rds_mysql_instance" "foo" {
   }
   parameters {
     parameter_name  = "auto_increment_offset"
-    parameter_value = "4"
+    parameter_value = "5"
   }
+
+  #  maintenance_window {
+  #    maintenance_time = "18:00Z-21:59Z"
+  #    day_kind = "Week"
+  #    day_of_week = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+  #  }
 
   project_name = "default"
   tags {

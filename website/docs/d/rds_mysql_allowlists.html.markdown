@@ -71,6 +71,8 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `allow_lists` - The list of allowed list.
+    * `allow_list_category` - White list category. Values:
+ Ordinary: Ordinary white list. Default: Default white list. Description: When this parameter is used as a request parameter, the default value is Ordinary.
     * `allow_list_desc` - The description of the allow list.
     * `allow_list_id` - The id of the allow list.
     * `allow_list_ip_num` - The total number of IP addresses (or address ranges) in the whitelist.
@@ -82,6 +84,15 @@ In addition to all arguments above, the following attributes are exported:
         * `instance_id` - The id of the instance.
         * `instance_name` - The name of the instance.
         * `vpc` - The id of the vpc.
+    * `security_group_bind_infos` - Whitelist information for the associated security group.
+        * `bind_mode` - The schema for the associated security group.
+ IngressDirectionIp: Incoming Direction IP. 
+ AssociateEcsIp: Associate ECSIP. 
+explain: In the CreateAllowList interface, SecurityGroupBindInfoObject BindMode and SecurityGroupId fields are required.
+        * `ip_list` - The ip list of the security group.
+        * `security_group_id` - The security group id of the allow list.
+        * `security_group_name` - The name of the security group.
+    * `user_allow_list` - IP addresses outside the security group that need to be added to the whitelist. IP addresses or IP address segments in CIDR format can be entered. Note: This field cannot be used simultaneously with AllowList.
 * `total_count` - The total count of Scaling Activity query.
 
 
