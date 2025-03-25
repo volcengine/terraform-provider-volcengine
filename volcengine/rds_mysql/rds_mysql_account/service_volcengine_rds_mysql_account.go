@@ -278,11 +278,11 @@ func hasDbNameInSet(dbName string, set *schema.Set) bool {
 		if m, ok := item.(map[string]interface{}); ok {
 			if v, ok := m["db_name"]; ok && v.(string) == dbName {
 				if detail, ok := m["account_privilege_detail"].(string); ok {
-					if len(detail) == 0 {
+					if len(detail) == 0 && m["account_privilege"].(string) == "Custom" {
 						return false
 					}
 				} else {
-					return false
+					return true
 				}
 				return true
 			}

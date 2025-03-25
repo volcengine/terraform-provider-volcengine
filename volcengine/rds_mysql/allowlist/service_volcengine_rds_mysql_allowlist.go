@@ -233,7 +233,7 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 					ForceGet: true,
 				},
 				"security_group_ids": {
-					ConvertType: volc.ConvertListN,
+					Ignore: true,
 				},
 				"security_group_bind_infos": {
 					Ignore: true,
@@ -264,7 +264,9 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
 					(*call.SdkParam)["AllowList"] = lists
 				}
-				if d.HasChange("user_allow_list") {
+				// 这里逻辑需要改一下
+				// 接口逻辑是即使这里没改，也得把它和安全组信息传过去，否则会覆盖删除
+				if _, ok := d.GetOk("user_allow_list"); ok {
 					var userAllowStrings []string
 					userAllowListsSet := d.Get("user_allow_list").(*schema.Set)
 					userAllowLists := userAllowListsSet.List()
@@ -276,7 +278,13 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 					(*call.SdkParam)["UserAllowList"] = userLists
 				}
 
-				if d.HasChange("security_group_bind_infos") {
+				if securityGroupIdsInterface, ok := d.GetOk("security_group_ids"); ok {
+					securityGroupIdsSet := securityGroupIdsInterface.(*schema.Set)
+					securityGroupIds := securityGroupIdsSet.List()
+					(*call.SdkParam)["SecurityGroupIds"] = securityGroupIds
+				}
+
+				if _, ok := d.GetOk("security_group_bind_infos"); ok {
 					securityGroupBindInfoInterface := d.Get("security_group_bind_infos")
 					securityGroupBindInfoSet := securityGroupBindInfoInterface.(*schema.Set)
 					var securityGroupBindInfos []map[string]interface{}
