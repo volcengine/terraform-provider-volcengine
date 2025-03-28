@@ -184,6 +184,11 @@ In addition to all arguments above, the following attributes are exported:
     * `instance_type_ids` - The InstanceTypeIds of NodeConfig.
     * `kube_config_auto_sync_disabled` - Whether to disable the function of automatically synchronizing labels and taints to existing nodes.
     * `kube_config_name_prefix` - The NamePrefix of node metadata.
+    * `kubelet_config` - The KubeletConfig of KubernetesConfig.
+        * `feature_gates` - The FeatureGates of KubeletConfig.
+            * `qos_resource_manager` - Whether to enable QoSResourceManager.
+        * `topology_manager_policy` - The TopologyManagerPolicy of KubeletConfig.
+        * `topology_manager_scope` - The TopologyManagerScope of KubeletConfig.
     * `label_content` - The LabelContent of KubernetesConfig.
         * `key` - The Key of KubernetesConfig.
         * `value` - The Value of KubernetesConfig.
