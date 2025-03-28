@@ -243,5 +243,6 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2020-04-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
+		RegionType:  ve.Global,
 	}
 }

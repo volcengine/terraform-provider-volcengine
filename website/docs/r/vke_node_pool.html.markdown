@@ -243,10 +243,21 @@ The `ecs_tags` object supports the following:
 * `key` - (Required) The Key of Tags.
 * `value` - (Required) The Value of Tags.
 
+The `feature_gates` object supports the following:
+
+* `qos_resource_manager` - (Optional) Whether to enable QoSResourceManager. Default is false.
+
+The `kubelet_config` object supports the following:
+
+* `feature_gates` - (Optional) The FeatureGates of KubeletConfig.
+* `topology_manager_policy` - (Optional) The TopologyManagerPolicy of KubeletConfig. Valid values: `none`, `restricted`, `best-effort`, `single-numa-node`. Default is `none`.
+* `topology_manager_scope` - (Optional) The TopologyManagerScope of KubeletConfig. Valid values: `container`.
+
 The `kubernetes_config` object supports the following:
 
 * `cordon` - (Required) The Cordon of KubernetesConfig.
 * `auto_sync_disabled` - (Optional) Whether to disable the function of automatically synchronizing labels and taints to existing nodes. Default is false.
+* `kubelet_config` - (Optional) The KubeletConfig of KubernetesConfig. After adding parameters, deleting parameters does not take effect.
 * `labels` - (Optional) The Labels of KubernetesConfig.
 * `name_prefix` - (Optional) The NamePrefix of node metadata.
 * `taints` - (Optional) The Taints of KubernetesConfig.

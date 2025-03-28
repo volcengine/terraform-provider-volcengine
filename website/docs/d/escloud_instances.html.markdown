@@ -7,7 +7,7 @@ description: |-
   Use this data source to query detailed information of escloud instances
 ---
 # volcengine_escloud_instances
-Use this data source to query detailed information of escloud instances
+(Deprecated! Recommend use volcengine_escloud_instance_v2 replace) Use this data source to query detailed information of escloud instances
 ## Example Usage
 ```hcl
 data "volcengine_zones" "foo" {

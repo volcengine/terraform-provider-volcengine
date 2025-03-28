@@ -39,13 +39,12 @@ func (s *VolcengineEcsService) GetClient() *ve.SdkClient {
 
 func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp               *map[string]interface{}
-		results            interface{}
-		next               string
-		ok                 bool
-		ecsInstance        map[string]interface{}
-		networkInterfaces  []interface{}
-		networkInterfaceId string
+		resp              *map[string]interface{}
+		results           interface{}
+		next              string
+		ok                bool
+		ecsInstance       map[string]interface{}
+		networkInterfaces []interface{}
 	)
 	data, err = ve.WithNextTokenQuery(condition, "MaxResults", "NextToken", 100, nil, func(m map[string]interface{}) ([]interface{}, string, error) {
 		action := "DescribeInstances"
@@ -98,30 +97,11 @@ func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (
 			for _, networkInterface := range networkInterfaces {
 				if networkInterfaceMap, ok := networkInterface.(map[string]interface{}); ok &&
 					networkInterfaceMap["Type"] == "primary" {
-					networkInterfaceId = networkInterfaceMap["NetworkInterfaceId"].(string)
+					if ipv6Sets, ok := networkInterfaceMap["IPv6Sets"].([]interface{}); ok {
+						ecsInstance["Ipv6Addresses"] = ipv6Sets
+						ecsInstance["Ipv6AddressCount"] = len(ipv6Sets)
+					}
 				}
-			}
-
-			action := "DescribeNetworkInterfaces"
-			req := map[string]interface{}{
-				"NetworkInterfaceIds.1": networkInterfaceId,
-			}
-			logger.Debug(logger.ReqFormat, action, req)
-			res, err := s.Client.UniversalClient.DoCall(getVpcUniversalInfo(action), &req)
-			if err != nil {
-				logger.Info("DescribeNetworkInterfaces error:", err)
-				continue
-			}
-			logger.Debug(logger.RespFormat, action, condition, *res)
-
-			networkInterfaceInfos, err := ve.ObtainSdkValue("Result.NetworkInterfaceSets", *res)
-			if err != nil {
-				logger.Info("ObtainSdkValue Result.NetworkInterfaceSets error:", err)
-				continue
-			}
-			if ipv6Sets, ok := networkInterfaceInfos.([]interface{})[0].(map[string]interface{})["IPv6Sets"].([]interface{}); ok {
-				ecsInstance["Ipv6Addresses"] = ipv6Sets
-				ecsInstance["Ipv6AddressCount"] = len(ipv6Sets)
 			}
 		}
 	}
