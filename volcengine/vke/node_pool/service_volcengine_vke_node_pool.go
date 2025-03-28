@@ -269,7 +269,21 @@ func (VolcengineNodePoolService) WithResourceResponseHandlers(nodePool map[strin
 		delete(nodePool, "SystemVolume")
 		nodePool["NodeConfig"].(map[string]interface{})["SystemVolume"] = systemVolume
 
-		return nodePool, nil, nil
+		kubernetesConfig := nodePool["KubernetesConfig"].(map[string]interface{})
+		if kubeletConfig, ok := kubernetesConfig["KubeletConfig"]; ok {
+			if kubeletConfigMap, ok := kubeletConfig.(map[string]interface{}); ok {
+				if featureGates, ok := kubeletConfigMap["FeatureGates"]; ok {
+					kubeletConfigMap["FeatureGates"] = []interface{}{featureGates}
+				}
+				kubernetesConfig["KubeletConfig"] = []interface{}{kubeletConfigMap}
+			}
+		}
+
+		return nodePool, map[string]ve.ResponseConvert{
+			"QoSResourceManager": {
+				TargetField: "qos_resource_manager",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 
@@ -387,6 +401,21 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						},
 						"auto_sync_disabled": {
 							ConvertType: ve.ConvertJsonObject,
+						},
+						"kubelet_config": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"feature_gates": {
+									ConvertType: ve.ConvertJsonObject,
+									NextLevelConvert: map[string]ve.RequestConvert{
+										"qos_resource_manager": {
+											TargetField: "QoSResourceManager",
+											ConvertType: ve.ConvertJsonObject,
+											ForceGet:    true,
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -630,6 +659,21 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						},
 						"auto_sync_disabled": {
 							ConvertType: ve.ConvertJsonObject,
+						},
+						"kubelet_config": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"feature_gates": {
+									ConvertType: ve.ConvertJsonObject,
+									NextLevelConvert: map[string]ve.RequestConvert{
+										"qos_resource_manager": {
+											TargetField: "QoSResourceManager",
+											ConvertType: ve.ConvertJsonObject,
+											ForceGet:    true,
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -966,6 +1010,28 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 							label["effect"] = _data.(map[string]interface{})["Effect"].(string)
 							results = append(results, label)
 						}
+					}
+					return results
+				},
+			},
+			"KubernetesConfig.KubeletConfig": {
+				TargetField: "kubelet_config",
+				Convert: func(i interface{}) interface{} {
+					var results []interface{}
+					if _data, ok := i.(map[string]interface{}); ok {
+						label := make(map[string]interface{}, 0)
+						label["topology_manager_scope"] = _data["TopologyManagerScope"]
+						label["topology_manager_policy"] = _data["TopologyManagerPolicy"]
+						if v, exist := _data["FeatureGates"]; exist {
+							if featureGates, ok := v.(map[string]interface{}); ok {
+								if _, exist = featureGates["QoSResourceManager"]; exist {
+									featureGates["qos_resource_manager"] = featureGates["QoSResourceManager"]
+									delete(featureGates, "QoSResourceManager")
+								}
+							}
+						}
+						label["feature_gates"] = []interface{}{_data["FeatureGates"]}
+						results = append(results, label)
 					}
 					return results
 				},

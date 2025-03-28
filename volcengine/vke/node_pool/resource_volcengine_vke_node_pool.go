@@ -396,6 +396,41 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							Computed:    true,
 							Description: "Whether to disable the function of automatically synchronizing labels and taints to existing nodes. Default is false.",
 						},
+						"kubelet_config": {
+							Type:        schema.TypeList,
+							MaxItems:    1,
+							Optional:    true,
+							Description: "The KubeletConfig of KubernetesConfig. After adding parameters, deleting parameters does not take effect.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"topology_manager_scope": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The TopologyManagerScope of KubeletConfig. Valid values: `container`.",
+									},
+									"topology_manager_policy": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The TopologyManagerPolicy of KubeletConfig. Valid values: `none`, `restricted`, `best-effort`, `single-numa-node`. Default is `none`.",
+									},
+									"feature_gates": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "The FeatureGates of KubeletConfig.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"qos_resource_manager": {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Description: "Whether to enable QoSResourceManager. Default is false.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 				Description: "The KubernetesConfig of NodeConfig.",
