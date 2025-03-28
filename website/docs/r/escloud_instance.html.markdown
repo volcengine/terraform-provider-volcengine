@@ -7,7 +7,7 @@ description: |-
   Provides a resource to manage escloud instance
 ---
 # volcengine_escloud_instance
-Provides a resource to manage escloud instance
+(Deprecated! Recommend use volcengine_escloud_instance_v2 replace) Provides a resource to manage escloud instance
 ## Example Usage
 ```hcl
 data "volcengine_zones" "foo" {
