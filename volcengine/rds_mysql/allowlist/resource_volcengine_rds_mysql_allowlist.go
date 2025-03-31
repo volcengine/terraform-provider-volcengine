@@ -73,9 +73,9 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 				Description: "The security group ids of the allow list.",
 			},
 			"security_group_bind_infos": {
-				Type:          schema.TypeSet,
-				Optional:      true,
-				Computed:      true,
+				Type:     schema.TypeSet,
+				Optional: true,
+				//Computed:      true,
 				ConflictsWith: []string{"security_group_ids", "allow_list"},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{

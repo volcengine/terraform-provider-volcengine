@@ -47,6 +47,11 @@ resource "volcengine_rds_mysql_instance" "foo" {
   }
 }
 
+resource "volcengine_rds_mysql_database" "foo1" {
+  db_name     = "acc-test-db1"
+  instance_id = volcengine_rds_mysql_instance.foo.id
+}
+
 resource "volcengine_rds_mysql_database" "foo" {
   db_name     = "acc-test-db"
   instance_id = volcengine_rds_mysql_instance.foo.id
@@ -60,7 +65,11 @@ resource "volcengine_rds_mysql_account" "foo" {
   account_privileges {
     db_name                  = volcengine_rds_mysql_database.foo.db_name
     account_privilege        = "Custom"
-    account_privilege_detail = "SELECT,INSERT"
+    account_privilege_detail = "SELECT,INSERT,UPDATE"
+  }
+  account_privileges {
+    db_name           = volcengine_rds_mysql_database.foo1.db_name
+    account_privilege = "DDLOnly"
   }
 }
 ```

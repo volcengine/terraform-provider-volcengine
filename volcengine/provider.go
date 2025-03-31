@@ -178,7 +178,12 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/region"
 	esZone "github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/zone"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/financial_relation/financial_relation"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_instance_v2"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_ip_white_list"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy"
@@ -765,6 +770,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cfw_vpc_firewall_acl_rules":        vpc_firewall_acl_rule.DataSourceVolcengineVpcFirewallAclRules(),
 			"volcengine_cfw_dns_control_policies":          dns_control_policy.DataSourceVolcengineDnsControlPolicies(),
 			"volcengine_cfw_nat_firewall_control_policies": nat_firewall_control_policy.DataSourceVolcengineNatFirewallControlPolicys(),
+
+			// ================ ESCloud V2 ================
+			"volcengine_escloud_instances_v2": escloud_instance_v2.DataSourceVolcengineEscloudInstanceV2s(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1117,6 +1125,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cfw_dns_control_policy":                   dns_control_policy.ResourceVolcengineDnsControlPolicy(),
 			"volcengine_cfw_nat_firewall_control_policy":          nat_firewall_control_policy.ResourceVolcengineNatFirewallControlPolicy(),
 			"volcengine_cfw_nat_firewall_control_policy_priority": nat_firewall_control_policy_priority.ResourceVolcengineNatFirewallControlPolicyPriority(),
+
+			// ================ ESCloud V2 ================
+			"volcengine_escloud_instance_v2":   escloud_instance_v2.ResourceVolcengineEscloudInstanceV2(),
+			"volcengine_escloud_ip_white_list": escloud_ip_white_list.ResourceVolcengineEscloudIpWhiteList(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

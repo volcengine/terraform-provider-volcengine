@@ -7,7 +7,7 @@ description: |-
   Use this data source to query detailed information of escloud regions
 ---
 # volcengine_escloud_regions
-Use this data source to query detailed information of escloud regions
+(Deprecated! Recommend use volcengine_escloud_instance_v2 replace) Use this data source to query detailed information of escloud regions
 ## Example Usage
 ```hcl
 data "volcengine_escloud_regions" "default" {
