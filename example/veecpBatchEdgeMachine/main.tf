@@ -1,6 +1,6 @@
 resource "volcengine_veecp_batch_edge_machine" "foo" {
-    cluster_id = "ccvd7mte6t101fno98u60"
+    cluster_id = "ccvmb0c66t101fnob3dhg"
     name = "tf-test"
-    node_pool_id = "pcvd90uacnsr73g6bjic0"
+    node_pool_id = "pcvn3alfic26jjcjsa1r0"
     ttl_hours = 1
 }

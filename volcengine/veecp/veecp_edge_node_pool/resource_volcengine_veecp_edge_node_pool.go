@@ -56,6 +56,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 			"node_pool_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				Description: "Node pool type, with the default being a static node pool. " +
 					"edge-machine-set: Static node pool. " +
 					"edge-machine-pool: Elastic node poolNode pool type, which is static node pool by default. " +
@@ -97,6 +98,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 			"kubernetes_config": {
 				Type:     schema.TypeList,
 				MaxItems: 1,
+				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -163,6 +165,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Optional:    true,
+				Computed:    true,
 				Description: "Elastic scaling configuration.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -172,7 +175,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 							Description: "The ID of the edge service corresponding to the elastic node. " +
 								"On the edge computing node's edge service page, obtain the edge service ID.",
 						},
-						"auto_scaling": {
+						"auto_scale_config": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
@@ -181,35 +184,30 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"enabled": {
 										Type:     schema.TypeBool,
-										Optional: true,
-										Computed: true,
+										Required: true,
 										Description: "Whether to enable the auto scaling function of the node pool. " +
 											"When a node needs to be manually added to the node pool, the value of this field must be `false`.",
 									},
 									"max_replicas": {
 										Type:     schema.TypeInt,
-										Optional: true,
-										Default:  10,
+										Required: true,
 										Description: "The MaxReplicas of AutoScaling, default 10, range in 1~2000. " +
 											"This field is valid when the value of `enabled` is `true`.",
 									},
 									"min_replicas": {
 										Type:     schema.TypeInt,
-										Optional: true,
-										Computed: true,
+										Required: true,
 										Description: "The MinReplicas of AutoScaling, default 0. " +
 											"This field is valid when the value of `enabled` is `true`.",
 									},
 									"desired_replicas": {
 										Type:        schema.TypeInt,
-										Optional:    true,
-										Computed:    true,
+										Required:    true,
 										Description: "The DesiredReplicas of AutoScaling, default 0, range in min_replicas to max_replicas.",
 									},
 									"priority": {
 										Type:     schema.TypeInt,
-										Optional: true,
-										Computed: true,
+										Required: true,
 										Description: "The Priority of AutoScaling, default 10, rang in 0~100. " +
 											"This field is valid when the value of `enabled` is `true` and the value of `subnet_policy` is `Priority`.",
 									},
@@ -276,6 +274,7 @@ func ResourceVolcengineVeecpNodePool() *schema.Resource {
 									"vpc_identity": {
 										Type:        schema.TypeString,
 										Optional:    true,
+										Computed:    true,
 										Description: "The vpc id.",
 									},
 									"subnet_id": {

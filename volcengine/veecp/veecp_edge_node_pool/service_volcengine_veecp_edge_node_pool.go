@@ -209,6 +209,28 @@ func (s *VolcengineVeecpNodePoolService) CreateResource(resourceData *schema.Res
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"auto_scale_config": {
 							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"min_replicas": {
+									TargetField: "MinReplicas",
+									ForceGet:    true,
+								},
+								"max_replicas": {
+									TargetField: "MaxReplicas",
+									ForceGet:    true,
+								},
+								"desired_replicas": {
+									TargetField: "DesiredReplicas",
+									ForceGet:    true,
+								},
+								"priority": {
+									TargetField: "Priority",
+									ForceGet:    true,
+								},
+								"enabled": {
+									TargetField: "Enabled",
+									ForceGet:    true,
+								},
+							},
 						},
 						"instance_area": {
 							ConvertType: ve.ConvertJsonObject,
@@ -289,6 +311,28 @@ func (s *VolcengineVeecpNodePoolService) ModifyResource(resourceData *schema.Res
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"auto_scale_config": {
 							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"min_replicas": {
+									TargetField: "MinReplicas",
+									ForceGet:    true,
+								},
+								"max_replicas": {
+									TargetField: "MaxReplicas",
+									ForceGet:    true,
+								},
+								"desired_replicas": {
+									TargetField: "DesiredReplicas",
+									ForceGet:    true,
+								},
+								"enabled": {
+									TargetField: "Enabled",
+									ForceGet:    true,
+								},
+								"priority": {
+									TargetField: "Priority",
+									ForceGet:    true,
+								},
+							},
 						},
 						"instance_area": {
 							ConvertType: ve.ConvertJsonObject,
