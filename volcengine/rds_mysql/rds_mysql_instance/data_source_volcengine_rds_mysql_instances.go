@@ -130,6 +130,29 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 							Computed:    true,
 							Description: "The number of nodes.",
 						},
+						"zone_ids": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "List of availability zones where each node of the instance is located.",
+						},
+						"node_cpu_used_percentage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "Average CPU usage of the instance master node in nearly one minute.",
+						},
+						"node_memory_used_percentage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "Average memory usage of the instance master node in nearly one minute.",
+						},
+						"node_space_used_percentage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "Average disk usage of the instance master node in nearly one minute.",
+						},
 						"create_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -249,6 +272,16 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 										Computed:    true,
 										Description: "Estimated release time when arrears are closed (pay-as-you-go & monthly subscription).",
 									},
+									"temp_modify_start_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Temporary upgrade start time.",
+									},
+									"temp_modify_end_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Restore time of temporary upgrade.",
+									},
 								},
 							},
 						},
@@ -283,6 +316,77 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeInt,
 										},
+									},
+								},
+							},
+						},
+						"connection_pool_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Connection pool type.",
+						},
+						"binlog_dump": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:\ntrue: Yes.\nfalse: No.",
+						},
+						"global_read_only": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable global read-only.\ntrue: Yes.\nfalse: No.",
+						},
+						"db_proxy_status": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Description: "The running status of the proxy instance. " +
+								"This parameter is returned only when the database proxy is enabled. " +
+								"Values:\nCreating: The proxy is being started.\n" +
+								"Running: The proxy is running.\nShutdown: The proxy is closed.\n" +
+								"Deleting: The proxy is being closed.",
+						},
+						//"check_modify_db_proxy_allowed": {
+						//	Type:     schema.TypeList,
+						//	Computed: true,
+						//	Description: "Is execution of the ModifyDBProxy interface allowed:\n" +
+						//		"Allowed: If it is closed, return whether the proxy can be enabled. " +
+						//		"If it is enabled, return whether the proxy can be disabled. Values: " +
+						//		"true (yes); false (no).\nReason: When Allowed is false, " +
+						//		"return the specific reason.",
+						//	Elem: &schema.Resource{
+						//		Schema: map[string]*schema.Schema{
+						//			"allowed": {
+						//				Type:        schema.TypeBool,
+						//				Computed:    true,
+						//				Description: "Whether the ModifyDBProxy interface can be executed.",
+						//			},
+						//			"reason": {
+						//				Type:        schema.TypeString,
+						//				Computed:    true,
+						//				Description: "The reason why the ModifyDBProxy interface cannot be executed.",
+						//			},
+						//		},
+						//	},
+						//},
+						"feature_states": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Feature status.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"feature_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Feature name.",
+									},
+									"enable": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether it is enabled. Values:\ntrue: Enabled.\nfalse: Disabled.",
+									},
+									"support": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether it support this function. Value:\ntrue: Supported.\nfalse: Not supported.",
 									},
 								},
 							},
@@ -332,6 +436,11 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "Whether global read-only is enabled, value: Enable: Enable. Disable: Disabled.",
+									},
+									"idle_connection_reclaim": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the idle connection reclaim function is enabled. true: Enabled. false: Disabled.",
 									},
 									"node_weight": {
 										Type:        schema.TypeList,

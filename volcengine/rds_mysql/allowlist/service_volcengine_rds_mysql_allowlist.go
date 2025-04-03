@@ -81,6 +81,12 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResources(condition map[string]
 				}
 				allowListIpArr := strings.Split(allowListIp.(string), ",")
 				data[index].(map[string]interface{})["AllowList"] = allowListIpArr
+				userAllowList, err := volc.ObtainSdkValue("Result.UserAllowList", *resp)
+				if err != nil {
+					return data, err
+				}
+				userAllowListArr := strings.Split(userAllowList.(string), ",")
+				data[index].(map[string]interface{})["UserAllowList"] = userAllowListArr
 			}
 		}
 		return data, err
@@ -115,6 +121,9 @@ func (s *VolcengineRdsMysqlAllowListService) ReadResource(resourceData *schema.R
 	if len(data) == 0 {
 		return data, fmt.Errorf("Rds instance %s not exist ", id)
 	}
+	if sgIds, ok := resourceData.GetOk("security_group_ids"); ok {
+		data["SecurityGroupIds"] = sgIds.(*schema.Set).List()
+	}
 	return data, err
 }
 
@@ -139,17 +148,58 @@ func (s *VolcengineRdsMysqlAllowListService) CreateResource(data *schema.Resourc
 				"allow_list": {
 					Ignore: true,
 				},
+				"security_group_ids": {
+					ConvertType: volc.ConvertListN,
+				},
+				"security_group_bind_infos": {
+					Ignore: true,
+				},
+				"user_allow_list": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
-				var allowStrings []string
-				allowListsSet := d.Get("allow_list").(*schema.Set)
-				allowLists := allowListsSet.List()
-				for _, list := range allowLists {
-					allowStrings = append(allowStrings, list.(string))
+				allowListsInterface, ok := d.GetOk("allow_list")
+				if ok {
+					allowListsSet := allowListsInterface.(*schema.Set)
+					var allowStrings []string
+					allowLists := allowListsSet.List()
+					for _, list := range allowLists {
+						allowStrings = append(allowStrings, list.(string))
+					}
+					lists := strings.Join(allowStrings, ",")
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
+					(*call.SdkParam)["AllowList"] = lists
 				}
-				lists := strings.Join(allowStrings, ",")
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
-				(*call.SdkParam)["AllowList"] = lists
+
+				userAllowListsInterface, ok := d.GetOk("user_allow_list")
+				if ok {
+					userAllowListsSet := userAllowListsInterface.(*schema.Set)
+					var userAllowStrings []string
+					userAllowLists := userAllowListsSet.List()
+					for _, list := range userAllowLists {
+						userAllowStrings = append(userAllowStrings, list.(string))
+					}
+					userLists := strings.Join(userAllowStrings, ",")
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, userLists)
+					(*call.SdkParam)["UserAllowList"] = userLists
+				}
+
+				securityGroupBindInfoInterface, ok := d.GetOk("security_group_bind_infos")
+				if ok {
+					securityGroupBindInfoSet := securityGroupBindInfoInterface.(*schema.Set)
+					var securityGroupBindInfos []map[string]interface{}
+					securityGroupBindInfoList := securityGroupBindInfoSet.List()
+					for _, list := range securityGroupBindInfoList {
+						securityGroupBindInfo := list.(map[string]interface{})
+						result := make(map[string]interface{})
+						result["BindMode"] = securityGroupBindInfo["bind_mode"]
+						result["SecurityGroupId"] = securityGroupBindInfo["security_group_id"]
+						securityGroupBindInfos = append(securityGroupBindInfos, result)
+					}
+					(*call.SdkParam)["SecurityGroupBindInfos"] = securityGroupBindInfos
+					logger.Debug(logger.ReqFormat, call.Action+" SecurityGroupBindInfos", call.SdkParam, securityGroupBindInfoList)
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
@@ -182,9 +232,20 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 				"allow_list_desc": {
 					ForceGet: true,
 				},
+				"security_group_ids": {
+					Ignore: true,
+				},
+				"security_group_bind_infos": {
+					Ignore: true,
+				},
+				"allow_list_category": {
+					TargetField: "AllowListCategory",
+				},
+				"user_allow_list": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
-				var allowStrings []string
 				// 修改allowList必须传ApplyInstanceNum
 				resp, err := s.ReadResource(d, d.Id())
 				if err != nil {
@@ -192,14 +253,53 @@ func (s *VolcengineRdsMysqlAllowListService) ModifyResource(data *schema.Resourc
 				}
 				num := resp["AssociatedInstanceNum"].(float64)
 				(*call.SdkParam)["ApplyInstanceNum"] = int(num)
-				allowListsSet := d.Get("allow_list").(*schema.Set)
-				allowLists := allowListsSet.List()
-				for _, list := range allowLists {
-					allowStrings = append(allowStrings, list.(string))
+				if d.HasChange("allow_list") {
+					var allowStrings []string
+					allowListsSet := d.Get("allow_list").(*schema.Set)
+					allowLists := allowListsSet.List()
+					for _, list := range allowLists {
+						allowStrings = append(allowStrings, list.(string))
+					}
+					lists := strings.Join(allowStrings, ",")
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
+					(*call.SdkParam)["AllowList"] = lists
 				}
-				lists := strings.Join(allowStrings, ",")
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, lists)
-				(*call.SdkParam)["AllowList"] = lists
+				// 这里逻辑需要改一下
+				// 接口逻辑是即使这里没改，也得把它和安全组信息传过去，否则会覆盖删除
+				if _, ok := d.GetOk("user_allow_list"); ok {
+					var userAllowStrings []string
+					userAllowListsSet := d.Get("user_allow_list").(*schema.Set)
+					userAllowLists := userAllowListsSet.List()
+					for _, list := range userAllowLists {
+						userAllowStrings = append(userAllowStrings, list.(string))
+					}
+					userLists := strings.Join(userAllowStrings, ",")
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, userLists)
+					(*call.SdkParam)["UserAllowList"] = userLists
+				}
+
+				if securityGroupIdsInterface, ok := d.GetOk("security_group_ids"); ok {
+					securityGroupIdsSet := securityGroupIdsInterface.(*schema.Set)
+					securityGroupIds := securityGroupIdsSet.List()
+					(*call.SdkParam)["SecurityGroupIds"] = securityGroupIds
+				}
+
+				if _, ok := d.GetOk("security_group_bind_infos"); ok {
+					securityGroupBindInfoInterface := d.Get("security_group_bind_infos")
+					securityGroupBindInfoSet := securityGroupBindInfoInterface.(*schema.Set)
+					var securityGroupBindInfos []map[string]interface{}
+					securityGroupBindInfoList := securityGroupBindInfoSet.List()
+					for _, list := range securityGroupBindInfoList {
+						securityGroupBindInfo := list.(map[string]interface{})
+						result := make(map[string]interface{})
+						result["BindMode"] = securityGroupBindInfo["bind_mode"]
+						result["SecurityGroupId"] = securityGroupBindInfo["security_group_id"]
+						securityGroupBindInfos = append(securityGroupBindInfos, result)
+					}
+					(*call.SdkParam)["SecurityGroupBindInfos"] = securityGroupBindInfos
+				}
+
+				(*call.SdkParam)["UpdateSecurityGroup"] = true
 				return true, nil
 			},
 			SdkParam: &map[string]interface{}{
