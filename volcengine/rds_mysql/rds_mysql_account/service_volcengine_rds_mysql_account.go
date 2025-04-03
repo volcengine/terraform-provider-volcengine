@@ -154,10 +154,15 @@ func (s *VolcengineRdsMysqlAccountService) CreateResource(resourceData *schema.R
 					if !ok {
 						return false, fmt.Errorf("account_privilege is not map")
 					}
-					id := fmt.Sprintf("%s:%s", d.Get("instance_id"), privilegeMap["db_name"])
-					_, err := database.NewRdsMysqlDatabaseService(client).ReadResource(d, id)
-					if err != nil {
-						return false, err
+					if name, ok := privilegeMap["db_name"]; ok {
+						if len(name.(string)) > 0 {
+							// Global模式name可以为空，这里只检查不为空的情况
+							id := fmt.Sprintf("%s:%s", d.Get("instance_id"), name.(string))
+							_, err := database.NewRdsMysqlDatabaseService(client).ReadResource(d, id)
+							if err != nil {
+								return false, err
+							}
+						}
 					}
 				}
 				return true, nil
@@ -273,11 +278,11 @@ func hasDbNameInSet(dbName string, set *schema.Set) bool {
 		if m, ok := item.(map[string]interface{}); ok {
 			if v, ok := m["db_name"]; ok && v.(string) == dbName {
 				if detail, ok := m["account_privilege_detail"].(string); ok {
-					if len(detail) == 0 {
+					if len(detail) == 0 && m["account_privilege"].(string) == "Custom" {
 						return false
 					}
 				} else {
-					return false
+					return true
 				}
 				return true
 			}

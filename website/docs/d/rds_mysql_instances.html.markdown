@@ -77,6 +77,9 @@ In addition to all arguments above, the following attributes are exported:
 * `rds_mysql_instances` - The collection of RDS instance query.
     * `allow_list_version` - The version of allow list.
     * `backup_use` - The instance has used backup space. Unit: GB.
+    * `binlog_dump` - Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:
+true: Yes.
+false: No.
     * `charge_detail` - Payment methods.
         * `auto_renew` - Whether to automatically renew in prepaid scenarios.
 Autorenew_Enable
@@ -96,9 +99,17 @@ PrePaid - Yearly and monthly (default).
 Month - monthly subscription (default)
 Year - Package year.
         * `period` - Purchase duration in prepaid scenarios. Default: 1.
+        * `temp_modify_end_time` - Restore time of temporary upgrade.
+        * `temp_modify_start_time` - Temporary upgrade start time.
+    * `connection_pool_type` - Connection pool type.
     * `create_time` - The create time of the RDS instance.
     * `data_sync_mode` - Data synchronization mode.
     * `db_engine_version` - The engine version of the RDS instance.
+    * `db_proxy_status` - The running status of the proxy instance. This parameter is returned only when the database proxy is enabled. Values:
+Creating: The proxy is being started.
+Running: The proxy is running.
+Shutdown: The proxy is closed.
+Deleting: The proxy is being closed.
     * `endpoints` - The endpoint info of the RDS instance.
         * `addresses` - Address list.
             * `dns_visibility` - DNS Visibility.
@@ -120,6 +131,7 @@ Primary: Primary node terminal.
 Custom: Custom terminal.
 Direct: Direct connection to the terminal. (Only the operation and maintenance side)
 AllNode: All node terminals. (Only the operation and maintenance side).
+        * `idle_connection_reclaim` - Whether the idle connection reclaim function is enabled. true: Enabled. false: Disabled.
         * `node_weight` - The list of nodes configured by the connection terminal and the corresponding read-only weights.
             * `node_id` - The ID of the node.
             * `node_type` - The type of the node.
@@ -127,6 +139,17 @@ AllNode: All node terminals. (Only the operation and maintenance side).
         * `read_write_mode` - Read and write mode:
 ReadWrite: read and write
 ReadOnly: read only (default).
+    * `feature_states` - Feature status.
+        * `enable` - Whether it is enabled. Values:
+true: Enabled.
+false: Disabled.
+        * `feature_name` - Feature name.
+        * `support` - Whether it support this function. Value:
+true: Supported.
+false: Not supported.
+    * `global_read_only` - Whether to enable global read-only.
+true: Yes.
+false: No.
     * `id` - The ID of the RDS instance.
     * `instance_id` - The ID of the RDS instance.
     * `instance_name` - The name of the RDS instance.
@@ -141,7 +164,10 @@ Ranges:
         * `day_of_week` - Days of maintainable window of the week.
         * `maintenance_time` - The maintainable time of the RDS instance.
     * `memory` - Memory size.
+    * `node_cpu_used_percentage` - Average CPU usage of the instance master node in nearly one minute.
+    * `node_memory_used_percentage` - Average memory usage of the instance master node in nearly one minute.
     * `node_number` - The number of nodes.
+    * `node_space_used_percentage` - Average disk usage of the instance master node in nearly one minute.
     * `node_spec` - The specification of primary node.
     * `nodes` - Instance node information.
         * `create_time` - Node creation local time.
@@ -171,6 +197,7 @@ ReadOnly: Read-only node.
     * `v_cpu` - CPU size.
     * `vpc_id` - The vpc ID of the RDS instance.
     * `zone_id` - The available zone of the RDS instance.
+    * `zone_ids` - List of availability zones where each node of the instance is located.
 * `total_count` - The total count of RDS instance query.
 
 

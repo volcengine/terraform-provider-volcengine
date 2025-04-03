@@ -41,6 +41,7 @@ const (
 
 var tobRegion = map[string]bool{
 	"cn-beijing-autodriving": true,
+	"ap-southeast-3":         true,
 }
 
 type Universal struct {

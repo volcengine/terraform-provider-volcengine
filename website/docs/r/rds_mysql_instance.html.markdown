@@ -45,8 +45,14 @@ resource "volcengine_rds_mysql_instance" "foo" {
   }
   parameters {
     parameter_name  = "auto_increment_offset"
-    parameter_value = "4"
+    parameter_value = "5"
   }
+
+  #  maintenance_window {
+  #    maintenance_time = "18:00Z-21:59Z"
+  #    day_kind = "Week"
+  #    day_of_week = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]
+  #  }
 
   project_name = "default"
   tags {
@@ -66,6 +72,9 @@ MySQL_8_0.
 * `secondary_zone_id` - (Required, ForceNew) The available zone of secondary node.
 * `subnet_id` - (Required, ForceNew) Subnet ID of the RDS instance.
 * `allow_list_ids` - (Optional) Allow list Ids of the RDS instance.
+* `connection_pool_type` - (Optional) Connection pool type. Value range:
+Direct: Direct connection mode.
+Transaction: Transaction-level connection pool (default).
 * `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `instance_name` - (Optional) Instance name. Cannot start with a number or a dash
 Can only contain Chinese characters, letters, numbers, underscores and dashes
@@ -74,6 +83,7 @@ The length is limited between 1 ~ 128.
 Ranges:
 0: Table names are stored as fixed and table names are case-sensitive.
 1: Table names will be stored in lowercase and table names are not case sensitive.
+* `maintenance_window` - (Optional) Specify the maintainable time period of the instance when creating the instance. This field is optional. If not set, it defaults to 18:00Z - 21:59Z of every day within a week (that is, 02:00 - 05:59 Beijing time).
 * `parameters` - (Optional) Parameter of the RDS instance. This field can only be added or modified. Deleting this field is invalid.
 * `project_name` - (Optional) The project name of the RDS instance.
 * `storage_space` - (Optional) Instance storage space. Value range: [20, 3000], unit: GB, increments every 100GB. Default value: 100.
@@ -91,6 +101,12 @@ Month - monthly subscription (default)
 Year - Package year.
 * `period` - (Optional, ForceNew) Purchase duration in prepaid scenarios. Default: 1.
 
+The `maintenance_window` object supports the following:
+
+* `day_kind` - (Optional) Maintenance cycle granularity, values: Week: Week. Month: Month.
+* `day_of_week` - (Optional) Specify the maintainable time period of a certain day of the week. The values are: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday. Multiple selections are allowed. If this value is not specified or is empty, it defaults to specifying all seven days of the week.
+* `maintenance_time` - (Optional) Maintenance period of an instance. Format: HH:mmZ-HH:mmZ (UTC time).
+
 The `parameters` object supports the following:
 
 * `parameter_name` - (Required) Parameter name.
@@ -106,6 +122,9 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `allow_list_version` - The version of allow list.
 * `backup_use` - The instance has used backup space. Unit: GB.
+* `binlog_dump` - Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:
+true: Yes.
+false: No.
 * `charge_detail` - Payment methods.
     * `auto_renew` - Whether to automatically renew in prepaid scenarios.
 Autorenew_Enable
@@ -125,8 +144,15 @@ PrePaid - Yearly and monthly (default).
 Month - monthly subscription (default)
 Year - Package year.
     * `period` - Purchase duration in prepaid scenarios. Default: 1.
+    * `temp_modify_end_time` - Restore time of temporary upgrade.
+    * `temp_modify_start_time` - Temporary upgrade start time.
 * `create_time` - The create time of the RDS instance.
 * `data_sync_mode` - Data synchronization mode.
+* `db_proxy_status` - The running status of the proxy instance. This parameter is returned only when the database proxy is enabled. Values:
+Creating: The proxy is being started.
+Running: The proxy is running.
+Shutdown: The proxy is closed.
+Deleting: The proxy is being closed.
 * `endpoints` - The endpoint info of the RDS instance.
     * `addresses` - Address list.
         * `dns_visibility` - DNS Visibility.
@@ -148,6 +174,7 @@ Primary: Primary node terminal.
 Custom: Custom terminal.
 Direct: Direct connection to the terminal. (Only the operation and maintenance side)
 AllNode: All node terminals. (Only the operation and maintenance side).
+    * `idle_connection_reclaim` - Whether the idle connection reclaim function is enabled. true: Enabled. false: Disabled.
     * `node_weight` - The list of nodes configured by the connection terminal and the corresponding read-only weights.
         * `node_id` - The ID of the node.
         * `node_type` - The type of the node.
@@ -155,15 +182,24 @@ AllNode: All node terminals. (Only the operation and maintenance side).
     * `read_write_mode` - Read and write mode:
 ReadWrite: read and write
 ReadOnly: read only (default).
+* `feature_states` - Feature status.
+    * `enable` - Whether it is enabled. Values:
+true: Enabled.
+false: Disabled.
+    * `feature_name` - Feature name.
+    * `support` - Whether it support this function. Value:
+true: Supported.
+false: Not supported.
+* `global_read_only` - Whether to enable global read-only.
+true: Yes.
+false: No.
 * `instance_id` - The ID of the RDS instance.
 * `instance_status` - The status of the RDS instance.
-* `maintenance_window` - Maintenance Window.
-    * `day_kind` - DayKind of maintainable window. Value: Week. Month.
-    * `day_of_month` - Days of maintainable window of the month.
-    * `day_of_week` - Days of maintainable window of the week.
-    * `maintenance_time` - The maintainable time of the RDS instance.
 * `memory` - Memory size.
+* `node_cpu_used_percentage` - Average CPU usage of the instance master node in nearly one minute.
+* `node_memory_used_percentage` - Average memory usage of the instance master node in nearly one minute.
 * `node_number` - The number of nodes.
+* `node_space_used_percentage` - Average disk usage of the instance master node in nearly one minute.
 * `nodes` - Instance node information.
     * `create_time` - Node creation local time.
     * `instance_id` - Instance ID.
@@ -186,6 +222,7 @@ ReadOnly: Read-only node.
 * `v_cpu` - CPU size.
 * `vpc_id` - The vpc ID of the RDS instance.
 * `zone_id` - The available zone of the RDS instance.
+* `zone_ids` - List of availability zones where each node of the instance is located.
 
 
 ## Import
