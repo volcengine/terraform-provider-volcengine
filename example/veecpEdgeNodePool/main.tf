@@ -51,9 +51,6 @@ resource "volcengine_veecp_edge_node_pool" "foo" {
     name = "acc-test-tf"
     node_pool_type = "edge-machine-pool"
     vpc_id = "vpc-l9sz9qlf2t"
-#    billing_configs {
-#
-#    }
     elastic_config {
         cloud_server_identity = "cloudserver-47vz7k929cp9xqb"
         auto_scale_config {

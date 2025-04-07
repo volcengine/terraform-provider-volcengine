@@ -59,24 +59,21 @@ func ResourceVolcengineVeecpNode() *schema.Resource {
 			"auto_complete_config": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
-				Optional:    true,
+				Required:    true,
 				ForceNew:    true,
-				Computed:    true,
 				Description: "Machine information to be managed.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enable": {
 							Type:        schema.TypeBool,
-							Optional:    true,
+							Required:    true,
 							ForceNew:    true,
-							Computed:    true,
 							Description: "Enable/Disable automatic management.",
 						},
 						"address": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
-							Computed:    true,
 							Description: "The address of the machine to be managed.",
 						},
 						"machine_auth": {
@@ -84,7 +81,6 @@ func ResourceVolcengineVeecpNode() *schema.Resource {
 							MaxItems:    1,
 							Optional:    true,
 							ForceNew:    true,
-							Computed:    true,
 							Description: "Login credentials.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -113,14 +109,12 @@ func ResourceVolcengineVeecpNode() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							ForceNew:    true,
-							Computed:    true,
 							Description: "Directly managed through the edge computing instance ID. When it is true, there is no need to provide Address. Only DirectAddInstances needs to be provided.",
 						},
 						"direct_add_instances": {
 							Type:        schema.TypeList,
 							Optional:    true,
 							ForceNew:    true,
-							Computed:    true,
 							Description: "Edge computing instance ID on Volcano Engine.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{

@@ -149,25 +149,14 @@ func (s *VolcengineVeecpNodeService) CreateResource(resourceData *schema.Resourc
 			Action:      "CreateEdgeNode",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				tmpIds, _ := ve.ObtainSdkValue("Result.Ids", *resp)
-				ids := tmpIds.([]interface{})
-				d.SetId(ids[0].(string))
-				return nil
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Running", "Failed"},
-				Timeout: 2 * time.Hour,
-			},
 			Convert: map[string]ve.RequestConvert{
 				"auto_complete_config": {
 					TargetField: "AutoCompleteConfig",
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
+						"enable": {
+							ForceGet: true,
+						},
 						"machine_auth": {
 							TargetField: "MachineAuth",
 							ConvertType: ve.ConvertJsonObject,
@@ -183,6 +172,30 @@ func (s *VolcengineVeecpNodeService) CreateResource(resourceData *schema.Resourc
 						},
 					},
 				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				autoCompleteConfig := d.Get("auto_complete_config").([]interface{})
+				if !autoCompleteConfig[0].(map[string]interface{})["enable"].(bool) {
+					return false, fmt.Errorf("AutoCompleteConfig.Enable must be true")
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, *resp, err)
+				return resp, err
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				time.Sleep(time.Second * 5)
+				tmpIds, _ := ve.ObtainSdkValue("Result.Ids", *resp)
+				ids := tmpIds.([]interface{})
+				d.SetId(ids[0].(string))
+				return nil
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Running", "Failed"},
+				Timeout: 2 * time.Hour,
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("cluster_id").(string)
