@@ -31,9 +31,10 @@ resource "volcengine_security_group" "foo" {
 }
 
 resource "volcengine_veecp_cluster" "foo" {
-  name                      = "acc-test-1"
+  name                      = "acc-test-2"
   description               = "created by terraform"
   delete_protection_enabled = false
+  kubernetes_version        = "v1.24.15-veecp.1"
   profile                   = "Edge"
   cluster_config {
     subnet_ids                       = [volcengine_subnet.foo.id]

@@ -108,6 +108,8 @@ func (s *VolcengineVeecpNodeService) ReadResource(resourceData *schema.ResourceD
 	if len(data) == 0 {
 		return data, fmt.Errorf("veecp_node %s not exist ", id)
 	}
+	// name会被修改，这里只能从tf中获取
+	data["Name"] = resourceData.Get("name")
 	return data, err
 }
 
