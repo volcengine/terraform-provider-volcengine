@@ -313,6 +313,39 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "Whether to disable the function of automatically synchronizing labels and taints to existing nodes.",
 						},
+						"kubelet_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The KubeletConfig of KubernetesConfig.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"topology_manager_scope": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The TopologyManagerScope of KubeletConfig.",
+									},
+									"topology_manager_policy": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The TopologyManagerPolicy of KubeletConfig.",
+									},
+									"feature_gates": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "The FeatureGates of KubeletConfig.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"qos_resource_manager": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: "Whether to enable QoSResourceManager.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 						"label_content": {
 							Type:        schema.TypeList,
 							Computed:    true,

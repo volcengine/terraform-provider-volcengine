@@ -118,8 +118,9 @@ type Product struct {
 }
 
 var deprecatedMapping = map[string]string{
-	"rds":    "Recommend use volcengine_rds_mysql_*** replace",
-	"rds_v2": "Recommend use volcengine_rds_mysql_*** replace",
+	"rds":     "Recommend use volcengine_rds_mysql_*** replace",
+	"rds_v2":  "Recommend use volcengine_rds_mysql_*** replace",
+	"escloud": "Recommend use volcengine_escloud_instance_v2 replace",
 }
 
 var resourceKeys = map[string]string{
@@ -167,6 +168,7 @@ var resourceKeys = map[string]string{
 	"rabbitmq":           "RABBITMQ",
 	"cloud_firewall":     "CLOUD_FIREWALL",
 	"veecp":              "VEECP",
+	"escloud_v2":         "ESCLOUD",
 }
 
 type Products struct {

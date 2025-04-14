@@ -73,6 +73,59 @@ func DataSourceVolcengineRdsMysqlAllowLists() *schema.Resource {
 							},
 							Description: "The IP address or a range of IP addresses in CIDR format.",
 						},
+						"user_allow_list": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "IP addresses outside the security group that need to be added to the whitelist." +
+								" IP addresses or IP address segments in CIDR format can be entered. " +
+								"Note: This field cannot be used simultaneously with AllowList.",
+						},
+						"allow_list_category": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Description: "White list category. Values:\n " +
+								"Ordinary: Ordinary white list. " +
+								"Default: Default white list. " +
+								"Description: When this parameter is used as a request parameter, the default value is Ordinary.",
+						},
+						"security_group_bind_infos": {
+							Type:     schema.TypeSet,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"bind_mode": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Description: "The schema for the associated security group." +
+											"\n IngressDirectionIp: Incoming Direction IP. \n AssociateEcsIp: Associate ECSIP. " +
+											"\nexplain: In the CreateAllowList interface, SecurityGroupBindInfoObject BindMode and SecurityGroupId fields are required.",
+									},
+									"security_group_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The security group id of the allow list.",
+									},
+									"ip_list": {
+										Type:     schema.TypeSet,
+										Computed: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Set:         schema.HashString,
+										Description: "The ip list of the security group.",
+									},
+									"security_group_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the security group.",
+									},
+								},
+							},
+							Description: "Whitelist information for the associated security group.",
+						},
 						"associated_instances": {
 							Type:        schema.TypeList,
 							Computed:    true,

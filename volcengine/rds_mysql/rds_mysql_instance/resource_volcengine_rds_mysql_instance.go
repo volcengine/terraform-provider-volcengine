@@ -35,11 +35,10 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"db_engine_version": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "Instance type. Value:\nMySQL_5_7\nMySQL_8_0.",
-				ValidateFunc: validation.StringInSlice([]string{"MySQL_5_7", "MySQL_8_0"}, false),
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Instance type. Value:\nMySQL_5_7\nMySQL_8_0.",
 			},
 			"node_spec": {
 				Type:        schema.TypeString,
@@ -95,6 +94,12 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 				Description: "The project name of the RDS instance.",
 			},
 			"tags": ve.TagsSchema(),
+			"connection_pool_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Connection pool type. Value range:\nDirect: Direct connection mode.\nTransaction: Transaction-level connection pool (default).",
+			},
 			"charge_info": {
 				Type:        schema.TypeList,
 				MaxItems:    1,
@@ -168,6 +173,40 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Parameter value.",
+						},
+					},
+				},
+			},
+			"maintenance_window": {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Computed: true,
+				Description: "Specify the maintainable time period of the instance when creating the instance. " +
+					"This field is optional. If not set, " +
+					"it defaults to 18:00Z - 21:59Z of every day within a week (that is, 02:00 - 05:59 Beijing time).",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"maintenance_time": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Maintenance period of an instance. Format: HH:mmZ-HH:mmZ (UTC time).",
+						},
+						"day_kind": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Maintenance cycle granularity, values: Week: Week. Month: Month.",
+						},
+						"day_of_week": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "Specify the maintainable time period of a certain day of the week." +
+								" The values are: Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday." +
+								" Multiple selections are allowed. If this value is not specified or is empty, " +
+								"it defaults to specifying all seven days of the week.",
 						},
 					},
 				},

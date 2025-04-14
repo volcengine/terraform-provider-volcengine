@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -56,11 +55,10 @@ func ResourceVolcengineRdsMysqlAccount() *schema.Resource {
 				Description: "The password of the database account.\nIllustrate:\nCannot start with `!` or `@`.\nThe length is 8~32 characters.\nIt consists of any three of uppercase letters, lowercase letters, numbers, and special characters.\nThe special characters are `!@#$%^*()_+-=`. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"account_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "Database account type, value:\nSuper: A high-privilege account. Only one database account can be created for an instance.\nNormal: An account with ordinary privileges.",
-				ValidateFunc: validation.StringInSlice([]string{"Super", "Normal"}, false),
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Database account type, value:\nSuper: A high-privilege account. Only one database account can be created for an instance.\nNormal: An account with ordinary privileges.",
 			},
 			"account_privileges": {
 				Type:     schema.TypeSet,

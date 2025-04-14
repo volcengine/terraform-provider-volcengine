@@ -50,13 +50,72 @@ func ResourceVolcengineRdsMysqlAllowlist() *schema.Resource {
 				Description: "The type of IP address in the whitelist. Currently only IPv4 addresses are supported.",
 			},
 			"allow_list": {
-				Type:     schema.TypeSet,
-				Required: true,
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				AtLeastOneOf:  []string{"security_group_ids", "user_allow_list", "security_group_bind_infos"},
+				ConflictsWith: []string{"security_group_ids", "security_group_bind_infos"},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Set:         schema.HashString,
-				Description: "Enter an IP address or a range of IP addresses in CIDR format.",
+				Set: schema.HashString,
+				// 不可与安全组相关参数一起使用，否则会有漂移
+				Description: "Enter an IP address or a range of IP addresses in CIDR format. Please note that if you want to use security group - related parameters, do not use this field. Instead, use the user_allow_list.",
+			},
+			"security_group_ids": {
+				Type:          schema.TypeSet,
+				Optional:      true,
+				AtLeastOneOf:  []string{"allow_list", "user_allow_list", "security_group_bind_infos"},
+				ConflictsWith: []string{"security_group_bind_infos", "allow_list"},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The security group ids of the allow list.",
+			},
+			"security_group_bind_infos": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				//Computed:      true,
+				ConflictsWith: []string{"security_group_ids", "allow_list"},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"bind_mode": {
+							Type:     schema.TypeString,
+							Required: true,
+							Description: "The schema for the associated security group." +
+								"\n IngressDirectionIp: Incoming Direction IP. \n AssociateEcsIp: Associate ECSIP. " +
+								"\nexplain: In the CreateAllowList interface, SecurityGroupBindInfoObject BindMode and SecurityGroupId fields are required.",
+						},
+						"security_group_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The security group id of the allow list.",
+						},
+					},
+				},
+				Description: "Whitelist information for the associated security group.",
+			},
+			"allow_list_category": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				Description: "White list category. " +
+					"Values:\nOrdinary: Ordinary white list.\n" +
+					"Default: Default white list.\n " +
+					"Description: When this parameter is used as a request parameter, the default value is Ordinary.",
+			},
+			"user_allow_list": {
+				Type:          schema.TypeSet,
+				Optional:      true,
+				Computed:      true,
+				ConflictsWith: []string{"allow_list"},
+				AtLeastOneOf:  []string{"security_group_ids", "allow_list", "security_group_bind_infos"},
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "IP addresses outside the security group that need to be added to the whitelist." +
+					" IP addresses or IP address segments in CIDR format can be entered. " +
+					"Note: This field cannot be used simultaneously with AllowList.",
 			},
 			"allow_list_id": {
 				Type:        schema.TypeString,
