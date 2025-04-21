@@ -168,6 +168,7 @@ var resourceKeys = map[string]string{
 	"rabbitmq":           "RABBITMQ",
 	"cloud_firewall":     "CLOUD_FIREWALL",
 	"escloud_v2":         "ESCLOUD",
+	"dns":                "DNS",
 }
 
 type Products struct {
