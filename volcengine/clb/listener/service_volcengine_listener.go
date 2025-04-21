@@ -43,7 +43,7 @@ func (s *VolcengineListenerService) ReadResources(condition map[string]interface
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 			if err != nil {
 				return data, err
 			}

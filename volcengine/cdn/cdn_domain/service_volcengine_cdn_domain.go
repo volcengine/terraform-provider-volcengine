@@ -82,8 +82,13 @@ func (s *VolcengineCdnDomainService) ReadResource(resourceData *schema.ResourceD
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		var domain map[string]interface{}
+		if domain, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
+		}
+		if domain["Domain"].(string) == id {
+			data = domain
+			break
 		}
 	}
 	if len(data) == 0 {

@@ -19,12 +19,20 @@ func (u *BypassSvc) NewTlsClient() *client.Client {
 	svc := "TLS"
 	config := u.Session.ClientConfig(svc)
 	var (
-		endpoint string
+		endpoint       string
+		endpointSuffix string
 	)
+	endpointSuffix = VolcengineBypassEndpointSuffix
+	if len(u.endpointSuffix) > 0 {
+		if suffix, ok := u.endpointSuffix[svc]; ok {
+			endpointSuffix = suffix
+		}
+	}
+
 	if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
-		endpoint = fmt.Sprintf("%s://tls-%s.volces.com", "http", config.SigningRegion)
+		endpoint = fmt.Sprintf("%s://tls-%s.%s", "http", config.SigningRegion, endpointSuffix)
 	} else {
-		endpoint = fmt.Sprintf("%s://tls-%s.volces.com", "https", config.SigningRegion)
+		endpoint = fmt.Sprintf("%s://tls-%s.%s", "https", config.SigningRegion, endpointSuffix)
 	}
 
 	c := client.New(
