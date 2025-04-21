@@ -51,5 +51,6 @@ const (
 	RegionalService = "Regional"
 	GlobalService   = "Global"
 
-	VolcengineIpv4EndpointSuffix = "volcengineapi.com"
+	VolcengineIpv4EndpointSuffix   = "volcengineapi.com"
+	VolcengineBypassEndpointSuffix = "volces.com"
 )

@@ -71,6 +71,10 @@ func (p *Project) ModifyProject(trn *ProjectTrn, resourceData *schema.ResourceDa
 						// transit router bandwidth package 特殊处理
 						trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, "", int(accountId.(float64)),
 							trn.ResourceType, id)
+					} else if trn.ServiceName == "dns" && trn.ResourceType == "zone" {
+						// dns zone 特殊处理
+						trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, "", int(accountId.(float64)),
+							trn.ResourceType, id)
 					} else {
 						trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, p.Client.Region, int(accountId.(float64)),
 							trn.ResourceType, id)

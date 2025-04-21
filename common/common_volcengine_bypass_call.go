@@ -20,7 +20,8 @@ const (
 )
 
 type BypassSvc struct {
-	Session *session.Session
+	Session        *session.Session
+	endpointSuffix map[string]string
 }
 
 type BypassSvcInfo struct {
@@ -34,9 +35,10 @@ type BypassSvcInfo struct {
 	Client      *client.Client
 }
 
-func NewBypassClient(session *session.Session) *BypassSvc {
+func NewBypassClient(session *session.Session, endpointSuffix map[string]string) *BypassSvc {
 	return &BypassSvc{
-		Session: session,
+		Session:        session,
+		endpointSuffix: endpointSuffix,
 	}
 }
 
