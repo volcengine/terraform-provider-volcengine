@@ -12,6 +12,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record_sets"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_zone"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_inventory"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
 
@@ -392,6 +398,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_ENDPOINTS", nil),
 				Description: "CUSTOMER ENDPOINTS for Volcengine Provider",
 			},
+			"customer_endpoint_suffix": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_ENDPOINT_SUFFIX", nil),
+				Description: "CUSTOMER ENDPOINT SUFFIX for Volcengine Provider",
+			},
 			"proxy_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -771,6 +783,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cfw_dns_control_policies":          dns_control_policy.DataSourceVolcengineDnsControlPolicies(),
 			"volcengine_cfw_nat_firewall_control_policies": nat_firewall_control_policy.DataSourceVolcengineNatFirewallControlPolicys(),
 
+			// ================ DNS ================
+			"volcengine_dns_backups":     dns_backup.DataSourceVolcengineDnsBackups(),
+			"volcengine_dns_records":     dns_record.DataSourceVolcengineDnsRecords(),
+			"volcengine_dns_zones":       dns_zone.DataSourceVolcengineZones(),
+			"volcengine_dns_record_sets": dns_record_sets.DataSourceVolcengineDnsRecordSets(),
+
 			// ================ ESCloud V2 ================
 			"volcengine_escloud_instances_v2": escloud_instance_v2.DataSourceVolcengineEscloudInstanceV2s(),
 		},
@@ -1126,6 +1144,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cfw_nat_firewall_control_policy":          nat_firewall_control_policy.ResourceVolcengineNatFirewallControlPolicy(),
 			"volcengine_cfw_nat_firewall_control_policy_priority": nat_firewall_control_policy_priority.ResourceVolcengineNatFirewallControlPolicyPriority(),
 
+			// ================ DNS ================
+			"volcengine_dns_backup":          dns_backup.ResourceVolcengineDnsBackup(),
+			"volcengine_dns_backup_schedule": dns_backup_schedule.ResourceVolcengineDnsBackupSchedule(),
+			"volcengine_dns_record":          dns_record.ResourceVolcengineDnsRecord(),
+			"volcengine_dns_zone":            dns_zone.ResourceVolcengineZone(),
+
 			// ================ ESCloud V2 ================
 			"volcengine_escloud_instance_v2":   escloud_instance_v2.ResourceVolcengineEscloudInstanceV2(),
 			"volcengine_escloud_ip_white_list": escloud_ip_white_list.ResourceVolcengineEscloudIpWhiteList(),
@@ -1136,15 +1160,16 @@ func Provider() terraform.ResourceProvider {
 
 func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := ve.Config{
-		AccessKey:         d.Get("access_key").(string),
-		SecretKey:         d.Get("secret_key").(string),
-		SessionToken:      d.Get("session_token").(string),
-		Region:            d.Get("region").(string),
-		Endpoint:          d.Get("endpoint").(string),
-		DisableSSL:        d.Get("disable_ssl").(bool),
-		CustomerHeaders:   map[string]string{},
-		CustomerEndpoints: defaultCustomerEndPoints(),
-		ProxyUrl:          d.Get("proxy_url").(string),
+		AccessKey:              d.Get("access_key").(string),
+		SecretKey:              d.Get("secret_key").(string),
+		SessionToken:           d.Get("session_token").(string),
+		Region:                 d.Get("region").(string),
+		Endpoint:               d.Get("endpoint").(string),
+		DisableSSL:             d.Get("disable_ssl").(bool),
+		CustomerHeaders:        map[string]string{},
+		CustomerEndpoints:      defaultCustomerEndPoints(),
+		CustomerEndpointSuffix: map[string]string{},
+		ProxyUrl:               d.Get("proxy_url").(string),
 	}
 
 	headers := d.Get("customer_headers").(string)
@@ -1165,6 +1190,17 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 			point := strings.Split(end, ":")
 			if len(point) == 2 {
 				config.CustomerEndpoints[point[0]] = point[1]
+			}
+		}
+	}
+
+	endpointSuffix := d.Get("customer_endpoint_suffix").(string)
+	if endpointSuffix != "" {
+		ends := strings.Split(endpointSuffix, ",")
+		for _, end := range ends {
+			point := strings.Split(end, ":")
+			if len(point) == 2 {
+				config.CustomerEndpointSuffix[point[0]] = point[1]
 			}
 		}
 	}

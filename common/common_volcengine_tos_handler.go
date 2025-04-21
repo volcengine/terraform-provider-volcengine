@@ -29,19 +29,27 @@ func (u *BypassSvc) NewTosClient(info *BypassSvcInfo) *client.Client {
 	svc := "tos"
 	config := u.Session.ClientConfig(svc)
 	var (
-		endpoint string
+		endpoint       string
+		endpointSuffix string
 	)
+	endpointSuffix = VolcengineBypassEndpointSuffix
+	if len(u.endpointSuffix) > 0 {
+		if suffix, ok := u.endpointSuffix[svc]; ok {
+			endpointSuffix = suffix
+		}
+	}
+
 	if info.Domain == "" {
 		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
-			endpoint = fmt.Sprintf("%s://tos-%s.volces.com", "http", config.SigningRegion)
+			endpoint = fmt.Sprintf("%s://tos-%s.%s", "http", config.SigningRegion, endpointSuffix)
 		} else {
-			endpoint = fmt.Sprintf("%s://tos-%s.volces.com", "https", config.SigningRegion)
+			endpoint = fmt.Sprintf("%s://tos-%s.%s", "https", config.SigningRegion, endpointSuffix)
 		}
 	} else {
 		if config.Config.DisableSSL != nil && *config.Config.DisableSSL {
-			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "http", info.Domain, config.SigningRegion)
+			endpoint = fmt.Sprintf("%s://%s.tos-%s.%s", "http", info.Domain, config.SigningRegion, endpointSuffix)
 		} else {
-			endpoint = fmt.Sprintf("%s://%s.tos-%s.volces.com", "https", info.Domain, config.SigningRegion)
+			endpoint = fmt.Sprintf("%s://%s.tos-%s.%s", "https", info.Domain, config.SigningRegion, endpointSuffix)
 		}
 
 	}
