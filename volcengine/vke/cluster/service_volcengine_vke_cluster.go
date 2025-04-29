@@ -625,6 +625,9 @@ func (s *VolcengineVkeClusterService) DatasourceResources(*schema.ResourceData, 
 			"update_client_token": {
 				TargetField: "Filter.UpdateClientToken",
 			},
+			"project_name": {
+				TargetField: "ProjectName",
+			},
 			"tags": {
 				TargetField: "Tags",
 				ConvertType: ve.ConvertJsonObjectArray,
@@ -717,6 +720,15 @@ func (s *VolcengineVkeClusterService) setResourceTags(resourceData *schema.Resou
 	callbacks = append(callbacks, addCallback)
 
 	return callbacks
+}
+
+func (s *VolcengineVkeClusterService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vke",
+		ResourceType:         "cluster",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

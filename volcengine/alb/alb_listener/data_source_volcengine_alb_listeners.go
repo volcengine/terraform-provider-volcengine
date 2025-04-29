@@ -137,6 +137,16 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The description of listener.",
 						},
+						"certificate_source": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The source of the certificate.",
+						},
+						"cert_center_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The certificate id associated with the listener. Source is `cert_center`.",
+						},
 						"certificate_id": {
 							Type:        schema.TypeString,
 							Computed:    true,

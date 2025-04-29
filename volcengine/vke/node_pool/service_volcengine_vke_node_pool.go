@@ -382,6 +382,9 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						"hpc_cluster_ids": {
 							ConvertType: ve.ConvertJsonArray,
 						},
+						"project_name": {
+							TargetField: "ProjectName",
+						},
 					},
 				},
 				"kubernetes_config": {
@@ -637,6 +640,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 						},
 						"image_id": {
 							ConvertType: ve.ConvertJsonObject,
+						},
+						"project_name": {
+							TargetField: "ProjectName",
 						},
 					},
 				},
@@ -1143,6 +1149,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 			},
 			"NodeConfig.HpcClusterIds": {
 				TargetField: "hpc_cluster_ids",
+			},
+			"NodeConfig.ProjectName": {
+				TargetField: "project_name",
 			},
 			"NodeConfig.Tags": {
 				TargetField: "ecs_tags",

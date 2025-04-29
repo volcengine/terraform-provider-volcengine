@@ -216,8 +216,13 @@ func (s *VolcengineCrRegistryService) CreateResource(resourceData *schema.Resour
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateRegistry",
-			ConvertMode: ve.RequestConvertIgnore,
+			ConvertMode: ve.RequestConvertInConvert,
 			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"project": {
+					TargetField: "Project",
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Name"] = resourceData.Get("name")
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -340,12 +345,34 @@ func (s *VolcengineCrRegistryService) DatasourceResources(*schema.ResourceData, 
 				TargetField: "Filter.Statuses",
 				ConvertType: ve.ConvertJsonObjectArray,
 			},
+			"resource_tags": {
+				TargetField: "ResourceTagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"values": {
+						TargetField: "Values",
+						ConvertType: ve.ConvertJsonArray,
+					},
+				},
+			},
 		},
 	}
 }
 
 func (s *VolcengineCrRegistryService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineCrRegistryService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "cr",
+		ResourceType:         "instance",
+		ProjectResponseField: "Project",
+		ProjectSchemaField:   "project",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

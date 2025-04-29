@@ -37,6 +37,7 @@ func ResourceVolcengineCrNamespace() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineCrNamespaceCreate,
 		Read:   resourceVolcengineCrNamespaceRead,
+		Update: resourceVolcengineCrNamespaceUpdate,
 		Delete: resourceVolcengineCrNamespaceDelete,
 		Importer: &schema.ResourceImporter{
 			State: crNamespaceImporter,
@@ -58,6 +59,12 @@ func ResourceVolcengineCrNamespace() *schema.Resource {
 				ForceNew:    true,
 				Description: "The name of CrNamespace.",
 			},
+			"project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ProjectName of the CrNamespace.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineCrNamespaces().Schema["namespaces"].Elem.(*schema.Resource).Schema
@@ -70,6 +77,15 @@ func resourceVolcengineCrNamespaceCreate(d *schema.ResourceData, meta interface{
 	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineCrNamespace())
 	if err != nil {
 		return fmt.Errorf("error on creating CrNamespace %q,%s", d.Id(), err)
+	}
+	return resourceVolcengineCrNamespaceRead(d, meta)
+}
+
+func resourceVolcengineCrNamespaceUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewCrNamespaceService(meta.(*ve.SdkClient))
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineCrNamespace())
+	if err != nil {
+		return fmt.Errorf("error on updating CrNamespace  %q, %s", d.Id(), err)
 	}
 	return resourceVolcengineCrNamespaceRead(d, meta)
 }

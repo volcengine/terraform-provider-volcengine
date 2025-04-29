@@ -66,10 +66,15 @@ func (s *VolcengineCrEndpointService) ReadResources(condition map[string]interfa
 	if err != nil {
 		return data, err
 	}
+	aclPolicies, err := ve.ObtainSdkValue("Result.AclPolicies", *resp)
+	if err != nil {
+		return data, err
+	}
 	endpoint := map[string]interface{}{
-		"Registry": registry,
-		"Enabled":  enabled,
-		"Status":   status,
+		"Registry":    registry,
+		"Enabled":     enabled,
+		"Status":      status,
+		"AclPolicies": aclPolicies,
 	}
 
 	return []interface{}{endpoint}, err
