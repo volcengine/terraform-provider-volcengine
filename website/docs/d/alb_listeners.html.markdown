@@ -28,7 +28,9 @@ In addition to all arguments above, the following attributes are exported:
     * `acl_status` - Whether to enable the access control function,valid value is on or off.
     * `acl_type` - The access control type.
     * `ca_certificate_id` - CA certificate ID associated with HTTPS listener.
+    * `cert_center_certificate_id` - The certificate id associated with the listener. Source is `cert_center`.
     * `certificate_id` - The certificate ID associated with the HTTPS listener.
+    * `certificate_source` - The source of the certificate.
     * `create_time` - The create time of the Listener.
     * `customized_cfg_id` - The customized configuration ID, the value is empty string when not bound.
     * `description` - The description of listener.

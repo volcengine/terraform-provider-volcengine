@@ -10,11 +10,21 @@ description: |-
 Provides a resource to manage route table
 ## Example Usage
 ```hcl
+resource "volcengine_vpc" "foo" {
+  vpc_name     = "acc-test-vpc"
+  cidr_block   = "172.16.0.0/16"
+  project_name = "default"
+}
+
 resource "volcengine_route_table" "foo" {
-  vpc_id           = "vpc-2feppmy1ugt1c59gp688n1fld"
-  route_table_name = "tf-project-1"
-  description      = "tf-test1"
-  project_name     = "yuwao"
+  vpc_id           = volcengine_vpc.foo.id
+  route_table_name = "acc-test-route-table"
+  description      = "tf-test"
+  project_name     = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -23,6 +33,12 @@ The following arguments are supported:
 * `description` - (Optional) The description of the route table.
 * `project_name` - (Optional) The ProjectName of the route table.
 * `route_table_name` - (Optional) The name of the route table.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

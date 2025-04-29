@@ -72,6 +72,7 @@ The following arguments are supported:
 * `page_number` - (Optional) The page number of clusters query.
 * `page_size` - (Optional) The page size of clusters query.
 * `pods_config_pod_network_mode` - (Optional) The container network model of the cluster, the value is `Flannel` or `VpcCniShared`. Flannel: Flannel network model, an independent Underlay container network solution, combined with the global routing capability of VPC, to achieve a high-performance network experience for the cluster. VpcCniShared: VPC-CNI network model, an Underlay container network solution based on the ENI of the private network elastic network card, with high network communication performance.
+* `project_name` - (Optional) The project name of the cluster.
 * `statuses` - (Optional) Array of cluster states to filter. (The elements of the array are logically ORed. A maximum of 15 state array elements can be filled at a time).
 * `tags` - (Optional) Tags.
 * `update_client_token` - (Optional) The ClientToken when the last cluster update succeeded. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.
@@ -137,6 +138,7 @@ In addition to all arguments above, the following attributes are exported:
         * `vpc_cni_config` - VPC-CNI network configuration.
             * `subnet_ids` - A list of Pod subnet IDs for the VPC-CNI container network.
             * `vpc_id` - The private network where the cluster control plane network resides.
+    * `project_name` - The project name of the cluster.
     * `services_config` - The config of the services.
         * `service_cidrsv4` - The IPv4 private network address exposed by the service.
     * `status` - The status of the cluster.
