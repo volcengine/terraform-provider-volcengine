@@ -32,6 +32,7 @@ func DataSourceVolcengineRouteTables() *schema.Resource {
 				Optional:    true,
 				Description: "The ProjectName of the route table.",
 			},
+			"tags": ve.TagsSchema(),
 
 			"output_file": {
 				Type:        schema.TypeString,
@@ -112,6 +113,7 @@ func DataSourceVolcengineRouteTables() *schema.Resource {
 							Computed:    true,
 							Description: "The ProjectName of the route table.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

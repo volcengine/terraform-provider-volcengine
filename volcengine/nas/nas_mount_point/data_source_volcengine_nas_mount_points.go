@@ -24,7 +24,7 @@ func DataSourceVolcengineNasMountPoints() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the mount point.",
 			},
-			"vpcs_id": {
+			"vpc_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The id of the vpc.",

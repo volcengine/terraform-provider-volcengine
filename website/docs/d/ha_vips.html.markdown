@@ -46,7 +46,13 @@ The following arguments are supported:
 * `project_name` - (Optional) The project name of Ha Vip.
 * `status` - (Optional) The status of Ha Vip.
 * `subnet_id` - (Optional) The id of subnet.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The id of vpc.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -66,6 +72,9 @@ In addition to all arguments above, the following attributes are exported:
     * `project_name` - The project name of the Ha Vip.
     * `status` - The status of the Ha Vip.
     * `subnet_id` - The subnet id of the Ha Vip.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `updated_at` - The update time of the Ha Vip.
     * `vpc_id` - The vpc id of the Ha Vip.
 * `total_count` - The total count of query.

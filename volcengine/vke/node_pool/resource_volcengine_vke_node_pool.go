@@ -325,6 +325,12 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							},
 							Set: schema.HashString,
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The project name of the ecs instance.",
+						},
 					},
 				},
 				Description: "The Config of NodePool.",

@@ -51,6 +51,12 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 				Sensitive:   true,
 				Description: "The password of registry user.",
 			},
+			"project": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The ProjectName of the cr registry.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineCrRegistries().Schema["registries"].Elem.(*schema.Resource).Schema

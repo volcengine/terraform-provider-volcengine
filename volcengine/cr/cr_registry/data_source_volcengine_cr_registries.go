@@ -53,6 +53,28 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 					},
 				},
 			},
+			"resource_tags": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The tags of cr registry.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"values": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The Value of Tags.",
+						},
+					},
+				},
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -84,6 +106,12 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 							Computed:    true,
 							Description: "The charge type of registry.",
 						},
+						"project": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the cr registry.",
+						},
+						"resource_tags": ve.TagsSchemaComputed(),
 						"status": {
 							Type:        schema.TypeList,
 							MaxItems:    1,

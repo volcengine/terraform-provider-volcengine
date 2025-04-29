@@ -26,6 +26,7 @@ In addition to all arguments above, the following attributes are exported:
 * `namespaces` - The collection of namespaces query.
     * `create_time` - The time when namespace created.
     * `name` - The name of OCI repository.
+    * `project` - The ProjectName of the CrNamespace.
 * `total_count` - The total count of instance query.
 
 
