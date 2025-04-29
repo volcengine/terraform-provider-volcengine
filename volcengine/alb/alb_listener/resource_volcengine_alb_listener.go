@@ -64,13 +64,30 @@ func ResourceVolcengineAlbListener() *schema.Resource {
 				Default:     "on",
 				Description: "The enable status of the Listener. Optional choice contains `on`, `off`. Default is `on`.",
 			},
+			"certificate_source": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "alb",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) == "HTTP"
+				},
+				Description: "The source of the certificate. Valid values: `alb`, `cert_center`. Default is `alb`.",
+			},
+			"cert_center_certificate_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) == "HTTP"
+				},
+				Description: "The certificate id associated with the listener. Source is `cert_center`.",
+			},
 			"certificate_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("protocol").(string) == "HTTP"
 				},
-				Description: "The certificate id associated with the listener.",
+				Description: "The certificate id associated with the listener. Source is `alb`.",
 			},
 			"ca_certificate_id": {
 				Type:     schema.TypeString,

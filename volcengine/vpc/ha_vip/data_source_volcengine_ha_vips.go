@@ -39,6 +39,7 @@ func DataSourceVolcengineHaVips() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of Ha Vip.",
 			},
+			"tags": ve.TagsSchema(),
 			"vpc_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -131,6 +132,7 @@ func DataSourceVolcengineHaVips() *schema.Resource {
 							Computed:    true,
 							Description: "The project name of the Ha Vip.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 						"master_instance_id": {
 							Type:        schema.TypeString,
 							Computed:    true,

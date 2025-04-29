@@ -211,6 +211,7 @@ In addition to all arguments above, the following attributes are exported:
     * `period` - The period of the PrePaid instance of NodeConfig.
     * `phase` - The Phase of Status.
     * `priority` - The Priority of AutoScaling.
+    * `project_name` - The project name of NodeConfig.
     * `security_group_ids` - The SecurityGroupIds of NodeConfig.
     * `security_strategies` - The SecurityStrategies of NodeConfig.
     * `security_strategy_enabled` - The SecurityStrategyEnabled of NodeConfig.

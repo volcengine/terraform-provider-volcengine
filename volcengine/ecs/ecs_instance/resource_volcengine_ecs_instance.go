@@ -261,16 +261,16 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 				ForceNew:      true,
 				MaxItems:      1,
 				ConflictsWith: []string{"eip_id"},
-				Description:   "The config of the eip which will be automatically created and assigned to this instance. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+				Description: "The config of the eip which will be automatically created and assigned to this instance. `Prepaid` type eip cannot be created in this way, please use `volcengine_eip_address`.\n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"charge_type": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Default:      "PayByBandwidth",
-							ForceNew:     true,
-							ValidateFunc: validation.StringInSlice([]string{"PrePaid", "PayByBandwidth", "PayByTraffic"}, false),
-							Description:  "The billing type of the EIP Address. Valid values: `PayByBandwidth`, `PayByTraffic`, `PrePaid`. Default is `PayByBandwidth`.",
+							Type:        schema.TypeString,
+							Optional:    true,
+							Default:     "PayByBandwidth",
+							ForceNew:    true,
+							Description: "The billing type of the EIP Address. Valid values: `PayByBandwidth`, `PayByTraffic`. Default is `PayByBandwidth`.",
 						},
 						"isp": {
 							Type:        schema.TypeString,
@@ -280,7 +280,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 							Description: "The ISP of the EIP. Valid values: `BGP`, `ChinaMobile`, `ChinaUnicom`, `ChinaTelecom`, `SingleLine_BGP`, `Static_BGP`.",
 						},
 						"bandwidth_package_id": {
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Optional:    true,
 							ForceNew:    true,
 							Description: "The id of the bandwidth package, indicates that the public IP address will be added to the bandwidth package.",
@@ -317,10 +317,16 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 			},
 
 			"deployment_set_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				//Computed:    true,
+				Description: "The ID of Ecs Deployment Set. This field only used to associate a deployment set to the ECS instance. Setting this field to null means disassociating the instance from the deployment set. \n" +
+					"The current deployment set id of the ECS instance is the `deployment_set_id_computed` field.",
+			},
+			"deployment_set_id_computed": {
 				Type:        schema.TypeString,
-				Optional:    true,
 				Computed:    true,
-				Description: "The ID of Ecs Deployment Set.",
+				Description: "The ID of Ecs Deployment Set. Computed field.",
 			},
 
 			"ipv6_address_count": {

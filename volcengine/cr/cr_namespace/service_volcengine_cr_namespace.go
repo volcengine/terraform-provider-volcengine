@@ -131,6 +131,9 @@ func (s *VolcengineCrNamespaceService) CreateResource(resourceData *schema.Resou
 				"name": {
 					TargetField: "Name",
 				},
+				"project": {
+					TargetField: "Project",
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -199,6 +202,15 @@ func (s *VolcengineCrNamespaceService) DatasourceResources(*schema.ResourceData,
 
 func (s *VolcengineCrNamespaceService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineCrNamespaceService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "cr",
+		ResourceType:         "repository",
+		ProjectResponseField: "Project",
+		ProjectSchemaField:   "project",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

@@ -347,6 +347,12 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 				},
 				"charge_info": {
 					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"auto_renew": {
+							TargetField: "AutoRenew",
+							ForceGet:    true,
+						},
+					},
 				},
 				"project_name": {
 					TargetField: "ProjectName",
@@ -829,13 +835,6 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 func (s *VolcengineRdsMysqlInstanceService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
-	// 删除包年包月实例时报错
-	if chargeType := resourceData.Get("charge_info.0.charge_type"); chargeType.(string) == "PrePaid" {
-		return []ve.Callback{{
-			Err: fmt.Errorf("can not delete PrePaid mysql instance"),
-		}}
-	}
-
 	// 1. Disassociate Allow List
 	allowListCallback := ve.Callback{
 		Call: ve.SdkCall{
@@ -1051,4 +1050,15 @@ func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.Default,
 		Action:      actionName,
 	}
+}
+
+func (s *VolcengineRdsMysqlInstanceService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	if resourceData.Get("charge_info.0.charge_type").(string) == "PrePaid" {
+		info.NeedUnsubscribe = true
+		info.Products = []string{"RDS for MySQL"}
+	}
+	return &info, nil
 }

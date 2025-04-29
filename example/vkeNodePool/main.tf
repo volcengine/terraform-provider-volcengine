@@ -19,12 +19,13 @@ resource "volcengine_security_group" "foo" {
 }
 
 data "volcengine_images" "foo" {
-  name_regex = "veLinux 1.0 CentOS兼容版 64位"
+  name_regex = "veLinux 1.0 CentOS Compatible 64 bit"
 }
 
 resource "volcengine_vke_cluster" "foo" {
   name                      = "acc-test-cluster"
   description               = "created by terraform"
+  project_name              = "default"
   delete_protection_enabled = false
   cluster_config {
     subnet_ids                       = [volcengine_subnet.foo.id]
@@ -66,7 +67,7 @@ resource "volcengine_vke_node_pool" "foo" {
   node_config {
     instance_type_ids = ["ecs.g1ie.xlarge"]
     subnet_ids        = [volcengine_subnet.foo.id]
-    image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
+    image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS Compatible 64 bit"][0]
     system_volume {
       type = "ESSD_PL0"
       size = 80
@@ -92,6 +93,7 @@ resource "volcengine_vke_node_pool" "foo" {
     additional_container_storage_enabled = false
     instance_charge_type                 = "PostPaid"
     name_prefix                          = "acc-test"
+    project_name                         = "default"
     ecs_tags {
       key   = "ecs_k1"
       value = "ecs_v1"
@@ -120,7 +122,7 @@ resource "volcengine_vke_node_pool" "foo" {
 resource "volcengine_ecs_instance" "foo" {
   instance_name        = "acc-test-ecs-${count.index}"
   host_name            = "tf-acc-test"
-  image_id             = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
+  image_id             = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS Compatible 64 bit"][0]
   instance_type        = "ecs.g1ie.xlarge"
   password             = "93f0cb0614Aab12"
   instance_charge_type = "PostPaid"
@@ -152,7 +154,7 @@ resource "volcengine_vke_node_pool" "foo1" {
   node_config {
     instance_type_ids = ["ecs.g1ie.xlarge"]
     subnet_ids        = [volcengine_subnet.foo.id]
-    image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS兼容版 64位"][0]
+    image_id          = [for image in data.volcengine_images.foo.images : image.image_id if image.image_name == "veLinux 1.0 CentOS Compatible 64 bit"][0]
     system_volume {
       type = "ESSD_PL0"
       size = 50

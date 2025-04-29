@@ -143,6 +143,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint_acl_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
@@ -932,13 +933,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_redis_continuous_backup":    redisContinuousBackup.ResourceVolcengineRedisContinuousBackup(),
 
 			// ================ CR ================
-			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
-			"volcengine_cr_registry_state": cr_registry_state.ResourceVolcengineCrRegistryState(),
-			"volcengine_cr_namespace":      cr_namespace.ResourceVolcengineCrNamespace(),
-			"volcengine_cr_repository":     cr_repository.ResourceVolcengineCrRepository(),
-			"volcengine_cr_tag":            cr_tag.ResourceVolcengineCrTag(),
-			"volcengine_cr_endpoint":       cr_endpoint.ResourceVolcengineCrEndpoint(),
-			"volcengine_cr_vpc_endpoint":   cr_vpc_endpoint.ResourceVolcengineCrVpcEndpoint(),
+			"volcengine_cr_registry":            cr_registry.ResourceVolcengineCrRegistry(),
+			"volcengine_cr_registry_state":      cr_registry_state.ResourceVolcengineCrRegistryState(),
+			"volcengine_cr_namespace":           cr_namespace.ResourceVolcengineCrNamespace(),
+			"volcengine_cr_repository":          cr_repository.ResourceVolcengineCrRepository(),
+			"volcengine_cr_tag":                 cr_tag.ResourceVolcengineCrTag(),
+			"volcengine_cr_endpoint":            cr_endpoint.ResourceVolcengineCrEndpoint(),
+			"volcengine_cr_vpc_endpoint":        cr_vpc_endpoint.ResourceVolcengineCrVpcEndpoint(),
+			"volcengine_cr_endpoint_acl_policy": cr_endpoint_acl_policy.ResourceVolcengineCrEndpointAclPolicy(),
 
 			// ================ Veenedge ================
 			"volcengine_veenedge_cloud_server": cloud_server.ResourceVolcengineCloudServer(),

@@ -74,7 +74,7 @@ The following arguments are supported:
 * `mount_point_id` - (Optional) The id of the mount point.
 * `mount_point_name` - (Optional) The name of the mount point.
 * `output_file` - (Optional) File name where to save data source results.
-* `vpcs_id` - (Optional) The id of the vpc.
+* `vpc_id` - (Optional) The id of the vpc.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

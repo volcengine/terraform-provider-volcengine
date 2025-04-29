@@ -11,19 +11,22 @@ Provides a resource to manage cr namespace
 ## Example Usage
 ```hcl
 resource "volcengine_cr_namespace" "foo" {
-  registry = "tf-2"
-  name     = "namespace-1"
+  registry = "tf-test-cr"
+  name     = "test-namespace-1"
+  project  = "default"
 }
 
 resource "volcengine_cr_namespace" "foo1" {
-  registry = "tf-1"
-  name     = "namespace-2"
+  registry = "tf-test-cr"
+  name     = "test-namespace-2"
+  project  = "default"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `name` - (Required, ForceNew) The name of CrNamespace.
 * `registry` - (Required, ForceNew) The registry name.
+* `project` - (Optional) The ProjectName of the CrNamespace.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -451,6 +451,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The NamePrefix of NodeConfig.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of NodeConfig.",
+						},
 						"hpc_cluster_ids": {
 							Type:        schema.TypeSet,
 							Computed:    true,

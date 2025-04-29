@@ -86,6 +86,7 @@ The following arguments are supported:
 * `page_size` - (Optional) The page size of Kubeconfigs query.
 * `role_ids` - (Optional) A list of Role IDs.
 * `types` - (Optional) The type of Kubeconfigs query.
+* `user_ids` - (Optional) A list of User IDs.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

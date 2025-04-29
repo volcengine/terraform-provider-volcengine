@@ -227,6 +227,13 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				"enabled": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"certificate_source": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
+				},
+				"cert_center_certificate_id": {
+					ConvertType: ve.ConvertDefault,
+				},
 				"certificated_id": {
 					ConvertType: ve.ConvertDefault,
 				},

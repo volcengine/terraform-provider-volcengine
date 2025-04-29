@@ -22,6 +22,9 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `endpoints` - The collection of endpoint query.
+    * `acl_policies` - The list of acl policies.
+        * `description` - The description of the acl policy.
+        * `entry` - The ip of the acl policy.
     * `enabled` - Whether public endpoint is enabled.
     * `registry` - The name of CR instance.
     * `status` - The status of public endpoint.

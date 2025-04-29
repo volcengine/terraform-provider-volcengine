@@ -23,8 +23,14 @@ data "volcengine_cr_registries" "foo" {
 The following arguments are supported:
 * `names` - (Optional) The list of registry names to query.
 * `output_file` - (Optional) File name where to save data source results.
+* `resource_tags` - (Optional) The tags of cr registry.
 * `statuses` - (Optional) The list of registry statuses.
 * `types` - (Optional) The list of registry types to query.
+
+The `resource_tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `values` - (Required) The Value of Tags.
 
 The `statuses` object supports the following:
 
@@ -40,6 +46,10 @@ In addition to all arguments above, the following attributes are exported:
         * `domain` - The domain of registry.
         * `type` - The domain type of registry.
     * `name` - The name of registry.
+    * `project` - The ProjectName of the cr registry.
+    * `resource_tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `status` - The status of registry.
         * `conditions` - The condition of registry.
         * `phase` - The phase status of registry.
