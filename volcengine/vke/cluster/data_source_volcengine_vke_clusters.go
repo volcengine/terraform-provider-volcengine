@@ -93,6 +93,11 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 				Optional:    true,
 				Description: "The ClientToken when the last cluster update succeeded. ClientToken is a string that guarantees the idempotency of the request. This string is passed in by the caller.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the cluster.",
+			},
 			"tags": ve.TagsSchema(),
 			"clusters": {
 				Description: "The collection of VkeCluster query.",
@@ -144,6 +149,11 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The Kubernetes version information corresponding to the cluster, specific to the patch version.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the cluster.",
 						},
 						"status": {
 							Type:        schema.TypeList,

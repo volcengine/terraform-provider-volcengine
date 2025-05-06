@@ -169,6 +169,7 @@ var resourceKeys = map[string]string{
 	"cloud_firewall":     "CLOUD_FIREWALL",
 	"veecp":              "VEECP",
 	"escloud_v2":         "ESCLOUD",
+	"dns":                "DNS",
 }
 
 type Products struct {

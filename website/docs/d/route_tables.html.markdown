@@ -21,7 +21,13 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The ProjectName of the route table.
 * `route_table_name` - (Optional) A name of route table.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) An id of VPC.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -35,6 +41,9 @@ In addition to all arguments above, the following attributes are exported:
     * `route_table_name` - The name of the route table.
     * `route_table_type` - The type of the route table.
     * `subnet_ids` - The list of the subnet ids to which the entry table associates.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The last update time of the route table.
     * `vpc_id` - The id of the virtual private cloud (VPC) to which the route entry belongs.
     * `vpc_name` - The name of the virtual private cloud (VPC) to which the route entry belongs.

@@ -23,6 +23,9 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `acl_policies` - The list of acl policies.
+    * `description` - The description of the acl policy.
+    * `entry` - The ip of the acl policy.
 * `status` - The status of public endpoint.
 
 

@@ -11,9 +11,10 @@ Provides a resource to manage cr registry
 ## Example Usage
 ```hcl
 resource "volcengine_cr_registry" "foo" {
-  name               = "tf-1"
+  name               = "acc-test-cr"
   delete_immediately = false
   password           = "1qaz!QAZ"
+  project            = "default"
 }
 ```
 ## Argument Reference
@@ -21,6 +22,7 @@ The following arguments are supported:
 * `name` - (Required, ForceNew) The name of registry.
 * `delete_immediately` - (Optional) Whether delete registry immediately. Only effected in delete action.
 * `password` - (Optional) The password of registry user.
+* `project` - (Optional) The ProjectName of the cr registry.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -30,6 +32,9 @@ In addition to all arguments above, the following attributes are exported:
 * `domains` - The domain of registry.
     * `domain` - The domain of registry.
     * `type` - The domain type of registry.
+* `resource_tags` - Tags.
+    * `key` - The Key of Tags.
+    * `value` - The Value of Tags.
 * `status` - The status of registry.
     * `conditions` - The condition of registry.
     * `phase` - The phase status of registry.

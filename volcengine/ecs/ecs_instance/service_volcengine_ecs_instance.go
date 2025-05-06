@@ -156,6 +156,10 @@ func (s *VolcengineEcsService) ReadResource(resourceData *schema.ResourceData, i
 		}
 	}
 
+	// 特殊处理 deployment_set_id
+	data["DeploymentSetIdComputed"] = data["DeploymentSetId"]
+	data["DeploymentSetId"] = resourceData.Get("deployment_set_id")
+
 	return data, nil
 }
 

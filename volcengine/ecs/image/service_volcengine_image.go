@@ -302,6 +302,10 @@ func (s *VolcengineImageService) DatasourceResources(data *schema.ResourceData, 
 				TargetField: "ImageIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"status": {
+				TargetField: "Statuses",
+				ConvertType: ve.ConvertWithN,
+			},
 			"tags": {
 				TargetField: "TagFilters",
 				ConvertType: ve.ConvertListN,

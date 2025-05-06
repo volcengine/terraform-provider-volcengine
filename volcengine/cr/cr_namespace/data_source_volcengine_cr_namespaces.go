@@ -49,6 +49,11 @@ func DataSourceVolcengineCrNamespaces() *schema.Resource {
 							Computed:    true,
 							Description: "The time when namespace created.",
 						},
+						"project": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ProjectName of the CrNamespace.",
+						},
 					},
 				},
 			},

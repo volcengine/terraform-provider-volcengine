@@ -12,6 +12,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record_sets"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_zone"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_inventory"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
 
@@ -137,6 +143,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloudfs/cloudfs_quota"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_authorization_token"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_endpoint_acl_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_namespace"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cr/cr_registry_state"
@@ -406,6 +413,12 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_ENDPOINTS", nil),
 				Description: "CUSTOMER ENDPOINTS for Volcengine Provider",
+			},
+			"customer_endpoint_suffix": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_ENDPOINT_SUFFIX", nil),
+				Description: "CUSTOMER ENDPOINT SUFFIX for Volcengine Provider",
 			},
 			"proxy_url": {
 				Type:        schema.TypeString,
@@ -795,6 +808,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_veecp_edge_nodes":             veecp_edge_node.DataSourceVolcengineVeecpNodes(),
 			"volcengine_veecp_node_pools":             veecp_node_pool.DataSourceVolcengineVeecpNodePools(),
 			"volcengine_veecp_batch_edge_machines":    veecp_batch_edge_machine.DataSourceVolcengineVeecpBatchEdgeMachines(),
+
+			// ================ DNS ================
+			"volcengine_dns_backups":     dns_backup.DataSourceVolcengineDnsBackups(),
+			"volcengine_dns_records":     dns_record.DataSourceVolcengineDnsRecords(),
+			"volcengine_dns_zones":       dns_zone.DataSourceVolcengineZones(),
+			"volcengine_dns_record_sets": dns_record_sets.DataSourceVolcengineDnsRecordSets(),
 			// ================ ESCloud V2 ================
 			"volcengine_escloud_instances_v2": escloud_instance_v2.DataSourceVolcengineEscloudInstanceV2s(),
 		},
@@ -938,13 +957,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_redis_continuous_backup":    redisContinuousBackup.ResourceVolcengineRedisContinuousBackup(),
 
 			// ================ CR ================
-			"volcengine_cr_registry":       cr_registry.ResourceVolcengineCrRegistry(),
-			"volcengine_cr_registry_state": cr_registry_state.ResourceVolcengineCrRegistryState(),
-			"volcengine_cr_namespace":      cr_namespace.ResourceVolcengineCrNamespace(),
-			"volcengine_cr_repository":     cr_repository.ResourceVolcengineCrRepository(),
-			"volcengine_cr_tag":            cr_tag.ResourceVolcengineCrTag(),
-			"volcengine_cr_endpoint":       cr_endpoint.ResourceVolcengineCrEndpoint(),
-			"volcengine_cr_vpc_endpoint":   cr_vpc_endpoint.ResourceVolcengineCrVpcEndpoint(),
+			"volcengine_cr_registry":            cr_registry.ResourceVolcengineCrRegistry(),
+			"volcengine_cr_registry_state":      cr_registry_state.ResourceVolcengineCrRegistryState(),
+			"volcengine_cr_namespace":           cr_namespace.ResourceVolcengineCrNamespace(),
+			"volcengine_cr_repository":          cr_repository.ResourceVolcengineCrRepository(),
+			"volcengine_cr_tag":                 cr_tag.ResourceVolcengineCrTag(),
+			"volcengine_cr_endpoint":            cr_endpoint.ResourceVolcengineCrEndpoint(),
+			"volcengine_cr_vpc_endpoint":        cr_vpc_endpoint.ResourceVolcengineCrVpcEndpoint(),
+			"volcengine_cr_endpoint_acl_policy": cr_endpoint_acl_policy.ResourceVolcengineCrEndpointAclPolicy(),
 
 			// ================ Veenedge ================
 			"volcengine_veenedge_cloud_server": cloud_server.ResourceVolcengineCloudServer(),
@@ -1158,6 +1178,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_veecp_node_pool":          veecp_node_pool.ResourceVolcengineVeecpNodePool(),
 			"volcengine_veecp_batch_edge_machine": veecp_batch_edge_machine.ResourceVolcengineVeecpBatchEdgeMachine(),
 
+			// ================ DNS ================
+			"volcengine_dns_backup":          dns_backup.ResourceVolcengineDnsBackup(),
+			"volcengine_dns_backup_schedule": dns_backup_schedule.ResourceVolcengineDnsBackupSchedule(),
+			"volcengine_dns_record":          dns_record.ResourceVolcengineDnsRecord(),
+			"volcengine_dns_zone":            dns_zone.ResourceVolcengineZone(),
+
 			// ================ ESCloud V2 ================
 			"volcengine_escloud_instance_v2":   escloud_instance_v2.ResourceVolcengineEscloudInstanceV2(),
 			"volcengine_escloud_ip_white_list": escloud_ip_white_list.ResourceVolcengineEscloudIpWhiteList(),
@@ -1168,15 +1194,16 @@ func Provider() terraform.ResourceProvider {
 
 func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := ve.Config{
-		AccessKey:         d.Get("access_key").(string),
-		SecretKey:         d.Get("secret_key").(string),
-		SessionToken:      d.Get("session_token").(string),
-		Region:            d.Get("region").(string),
-		Endpoint:          d.Get("endpoint").(string),
-		DisableSSL:        d.Get("disable_ssl").(bool),
-		CustomerHeaders:   map[string]string{},
-		CustomerEndpoints: defaultCustomerEndPoints(),
-		ProxyUrl:          d.Get("proxy_url").(string),
+		AccessKey:              d.Get("access_key").(string),
+		SecretKey:              d.Get("secret_key").(string),
+		SessionToken:           d.Get("session_token").(string),
+		Region:                 d.Get("region").(string),
+		Endpoint:               d.Get("endpoint").(string),
+		DisableSSL:             d.Get("disable_ssl").(bool),
+		CustomerHeaders:        map[string]string{},
+		CustomerEndpoints:      defaultCustomerEndPoints(),
+		CustomerEndpointSuffix: map[string]string{},
+		ProxyUrl:               d.Get("proxy_url").(string),
 	}
 
 	headers := d.Get("customer_headers").(string)
@@ -1197,6 +1224,17 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 			point := strings.Split(end, ":")
 			if len(point) == 2 {
 				config.CustomerEndpoints[point[0]] = point[1]
+			}
+		}
+	}
+
+	endpointSuffix := d.Get("customer_endpoint_suffix").(string)
+	if endpointSuffix != "" {
+		ends := strings.Split(endpointSuffix, ",")
+		for _, end := range ends {
+			point := strings.Split(end, ":")
+			if len(point) == 2 {
+				config.CustomerEndpointSuffix[point[0]] = point[1]
 			}
 		}
 	}

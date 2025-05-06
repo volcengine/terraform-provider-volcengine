@@ -56,6 +56,7 @@ func ResourceVolcengineRouteTable() *schema.Resource {
 				Computed:    true,
 				Description: "The ProjectName of the route table.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 }

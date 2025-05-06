@@ -149,6 +149,12 @@ func (s *VolcengineRouteTableService) CreateResource(resourceData *schema.Resour
 		Call: ve.SdkCall{
 			Action:      "CreateRouteTable",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -178,12 +184,15 @@ func (s *VolcengineRouteTableService) CreateResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineRouteTableService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyRouteTableAttributes",
 			ConvertMode: ve.RequestConvertAll,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["RouteTableId"] = d.Id()
+				delete(*call.SdkParam, "Tags")
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -206,7 +215,13 @@ func (s *VolcengineRouteTableService) ModifyResource(resourceData *schema.Resour
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "routetable", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineRouteTableService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -255,6 +270,15 @@ func (s *VolcengineRouteTableService) DatasourceResources(*schema.ResourceData, 
 		RequestConverts: map[string]ve.RequestConvert{
 			"ids": {
 				TargetField: "RouteTableIds",
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "RouteTableName",

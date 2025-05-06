@@ -84,6 +84,7 @@ func ResourceVolcengineHaVip() *schema.Resource {
 				Computed:    true,
 				Description: "The project name of the Ha Vip.",
 			},
+			"tags": ve.TagsSchema(),
 			"master_instance_id": {
 				Type:        schema.TypeString,
 				Computed:    true,

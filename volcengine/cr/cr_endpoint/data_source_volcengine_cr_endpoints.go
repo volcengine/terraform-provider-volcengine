@@ -45,6 +45,25 @@ func DataSourceVolcengineCrEndpoints() *schema.Resource {
 							Computed:    true,
 							Description: "The status of public endpoint.",
 						},
+						"acl_policies": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The list of acl policies.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"entry": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ip of the acl policy.",
+									},
+									"description": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The description of the acl policy.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

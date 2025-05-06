@@ -30,6 +30,10 @@ resource "volcengine_ha_vip" "foo" {
   description = "acc-test"
   subnet_id   = volcengine_subnet.foo.id
   #  ip_address = "172.16.0.5"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 
 resource "volcengine_eip_address" "foo" {
@@ -48,6 +52,12 @@ The following arguments are supported:
 * `description` - (Optional) The description of the Ha Vip.
 * `ha_vip_name` - (Optional) The name of the Ha Vip.
 * `ip_address` - (Optional, ForceNew) The ip address of the Ha Vip.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -93,8 +93,7 @@ The `charge_info` object supports the following:
 
 * `charge_type` - (Required, ForceNew) Payment type. Value:
 PostPaid - Pay-As-You-Go
-PrePaid - Yearly and monthly (default). 
-When the value of this field is `PrePaid`, the mysql instance cannot be deleted through terraform. Please unsubscribe the instance from the Volcengine console first, and then use `terraform state rm volcengine_rds_mysql_instance.resource_name` command to remove it from terraform state file and management.
+PrePaid - Yearly and monthly (default).
 * `auto_renew` - (Optional, ForceNew) Whether to automatically renew in prepaid scenarios.
 * `period_unit` - (Optional, ForceNew) The purchase cycle in the prepaid scenario.
 Month - monthly subscription (default)

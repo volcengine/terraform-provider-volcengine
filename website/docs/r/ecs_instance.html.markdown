@@ -50,22 +50,9 @@ resource "volcengine_ecs_instance" "foo" {
   instance_charge_type = "PostPaid"
   system_volume_type   = "ESSD_PL0"
   system_volume_size   = 40
-  data_volumes {
-    volume_type          = "ESSD_PL0"
-    size                 = 50
-    delete_with_instance = true
-  }
-  subnet_id          = volcengine_subnet.foo.id
-  security_group_ids = [volcengine_security_group.foo.id]
-
-  #  deployment_set_id = ""
-  #  ipv6_address_count = 1
-  #  secondary_network_interfaces {
-  #    subnet_id = volcengine_subnet.foo.id
-  #    security_group_ids = [volcengine_security_group.foo.id]
-  #  }
-
-  project_name = "default"
+  subnet_id            = volcengine_subnet.foo.id
+  security_group_ids   = [volcengine_security_group.foo.id]
+  project_name         = "default"
   tags {
     key   = "k1"
     value = "v1"
@@ -84,9 +71,11 @@ The following arguments are supported:
 * `auto_renew` - (Optional) The auto renew flag of ECS instance.Only effective when instance_charge_type is PrePaid. Default is true.When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `cpu_options` - (Optional) The option of cpu,only support for ebm.
 * `data_volumes` - (Optional) The data volumes collection of  ECS instance.
-* `deployment_set_id` - (Optional) The ID of Ecs Deployment Set.
+* `deployment_set_id` - (Optional) The ID of Ecs Deployment Set. This field only used to associate a deployment set to the ECS instance. Setting this field to null means disassociating the instance from the deployment set. 
+The current deployment set id of the ECS instance is the `deployment_set_id_computed` field.
 * `description` - (Optional) The description of ECS instance.
-* `eip_address` - (Optional, ForceNew) The config of the eip which will be automatically created and assigned to this instance. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `eip_address` - (Optional, ForceNew) The config of the eip which will be automatically created and assigned to this instance. `Prepaid` type eip cannot be created in this way, please use `volcengine_eip_address`.
+When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `eip_id` - (Optional, ForceNew) The id of an existing Available EIP which will be automatically assigned to this instance. 
 It is not recommended to use this field, it is recommended to use `volcengine_eip_associate` resource to bind EIP.
 * `host_name` - (Optional, ForceNew) The host name of ECS instance.
@@ -131,7 +120,7 @@ The `eip_address` object supports the following:
 
 * `bandwidth_mbps` - (Optional, ForceNew) The peek bandwidth of the EIP. The value range in 1~500 for PostPaidByBandwidth, and 1~200 for PostPaidByTraffic. Default is 1.
 * `bandwidth_package_id` - (Optional, ForceNew) The id of the bandwidth package, indicates that the public IP address will be added to the bandwidth package.
-* `charge_type` - (Optional, ForceNew) The billing type of the EIP Address. Valid values: `PayByBandwidth`, `PayByTraffic`, `PrePaid`. Default is `PayByBandwidth`.
+* `charge_type` - (Optional, ForceNew) The billing type of the EIP Address. Valid values: `PayByBandwidth`, `PayByTraffic`. Default is `PayByBandwidth`.
 * `isp` - (Optional, ForceNew) The ISP of the EIP. Valid values: `BGP`, `ChinaMobile`, `ChinaUnicom`, `ChinaTelecom`, `SingleLine_BGP`, `Static_BGP`.
 
 The `secondary_network_interfaces` object supports the following:
@@ -150,6 +139,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `cpus` - The number of ECS instance CPU cores.
 * `created_at` - The create time of ECS instance.
+* `deployment_set_id_computed` - The ID of Ecs Deployment Set. Computed field.
 * `gpu_devices` - The GPU device info of Instance.
     * `count` - The Count of GPU device.
     * `encrypted_memory_size` - The Encrypted Memory Size of GPU device.
