@@ -14,14 +14,17 @@ in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),wh
 use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
+// query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
+// create vpc
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
+// create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -29,17 +32,20 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
+// create security group
 resource "volcengine_security_group" "foo" {
   security_group_name = "acc-test-security-group"
   vpc_id              = volcengine_vpc.foo.id
 }
 
+// query the image_id which match the specified instance_type
 data "volcengine_images" "foo" {
   os_type          = "Linux"
   visibility       = "public"
   instance_type_id = "ecs.g1.large"
 }
 
+// create ecs instance
 resource "volcengine_ecs_instance" "foo" {
   instance_name        = "acc-test-ecs"
   description          = "acc-test"
@@ -57,6 +63,36 @@ resource "volcengine_ecs_instance" "foo" {
     key   = "k1"
     value = "v1"
   }
+}
+
+// create ebs data volume
+resource "volcengine_volume" "foo" {
+  volume_name        = "acc-test-volume"
+  volume_type        = "ESSD_PL0"
+  description        = "acc-test"
+  kind               = "data"
+  size               = 40
+  zone_id            = data.volcengine_zones.foo.zones[0].id
+  volume_charge_type = "PostPaid"
+  project_name       = "default"
+}
+
+// attach ebs data volume to ecs instance
+resource "volcengine_volume_attach" "foo" {
+  instance_id = volcengine_ecs_instance.foo.id
+  volume_id   = volcengine_volume.foo.id
+}
+
+// create eip
+resource "volcengine_eip_address" "foo" {
+  billing_type = "PostPaidByTraffic"
+}
+
+// associate eip to ecs instance
+resource "volcengine_eip_associate" "foo" {
+  allocation_id = volcengine_eip_address.foo.id
+  instance_id   = volcengine_ecs_instance.foo.id
+  instance_type = "EcsInstance"
 }
 ```
 ## Argument Reference

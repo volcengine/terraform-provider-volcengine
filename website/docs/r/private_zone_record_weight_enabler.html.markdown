@@ -11,7 +11,7 @@ Provides a resource to manage private zone record weight enabler
 ## Example Usage
 ```hcl
 resource "volcengine_private_zone_record" "foo" {
-  zid    = 245 * * * *
+  zid    = 2450000
   host   = "www"
   type   = "A"
   value  = "10.1.1.158"

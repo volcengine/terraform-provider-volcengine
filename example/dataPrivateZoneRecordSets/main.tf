@@ -1,3 +1,3 @@
 data "volcengine_private_zone_record_sets" "foo" {
-  zid = 245****
+  zid = 2450000
 }
