@@ -303,7 +303,7 @@ func (s *VolcengineImageService) DatasourceResources(data *schema.ResourceData, 
 				ConvertType: ve.ConvertWithN,
 			},
 			"status": {
-				TargetField: "Statuses",
+				TargetField: "Status",
 				ConvertType: ve.ConvertWithN,
 			},
 			"tags": {

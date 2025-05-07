@@ -167,6 +167,7 @@ var resourceKeys = map[string]string{
 	"rocketmq":           "ROCKETMQ",
 	"rabbitmq":           "RABBITMQ",
 	"cloud_firewall":     "CLOUD_FIREWALL",
+	"veecp":              "VEECP",
 	"escloud_v2":         "ESCLOUD",
 	"dns":                "DNS",
 }

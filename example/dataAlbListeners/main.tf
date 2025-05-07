@@ -1,1 +1,1 @@
-data "volcengine_alb_listener" "foo" {}
+data "volcengine_alb_listeners" "foo" {}

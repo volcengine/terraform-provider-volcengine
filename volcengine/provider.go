@@ -228,6 +228,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_service_control_policy_enabler"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_unit"
+
 	plSecurityGroup "github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/security_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_connection"
@@ -248,17 +249,19 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/allowlist_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_backup"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_backup_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_database"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_endpoint"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_endpoint_public_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_readonly_node"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_backup"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_backup_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_endpoint"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_endpoint_public_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_instance_spec"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_parameter_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_zone"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist_associate"
@@ -279,6 +282,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/pitr_time_period"
 	redisRegion "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/region"
 	redisZone "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/zone"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_notify_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host"
@@ -291,6 +295,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
 	tlsTopic "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
 	trEntry "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_entry"
@@ -305,6 +310,16 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_peer_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpc_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpn_attachment"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_batch_edge_machine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_cluster"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_edge_node"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_edge_node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_support_addon"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_support_resource_type"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/available_resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/cloud_server"
 	veInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/veenedge/instance"
@@ -784,12 +799,21 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cfw_dns_control_policies":          dns_control_policy.DataSourceVolcengineDnsControlPolicies(),
 			"volcengine_cfw_nat_firewall_control_policies": nat_firewall_control_policy.DataSourceVolcengineNatFirewallControlPolicys(),
 
+			// =============== Veecp ==================
+			"volcengine_veecp_support_resource_types": veecp_support_resource_type.DataSourceVolcengineVeecpSupportResourceTypes(),
+			"volcengine_veecp_support_addons":         veecp_support_addon.DataSourceVolcengineVeecpSupportAddons(),
+			"volcengine_veecp_edge_node_pools":        veecp_edge_node_pool.DataSourceVolcengineVeecpNodePools(),
+			"volcengine_veecp_clusters":               veecp_cluster.DataSourceVolcengineVeecpClusters(),
+			"volcengine_veecp_addons":                 veecp_addon.DataSourceVolcengineVeecpAddons(),
+			"volcengine_veecp_edge_nodes":             veecp_edge_node.DataSourceVolcengineVeecpNodes(),
+			"volcengine_veecp_node_pools":             veecp_node_pool.DataSourceVolcengineVeecpNodePools(),
+			"volcengine_veecp_batch_edge_machines":    veecp_batch_edge_machine.DataSourceVolcengineVeecpBatchEdgeMachines(),
+
 			// ================ DNS ================
 			"volcengine_dns_backups":     dns_backup.DataSourceVolcengineDnsBackups(),
 			"volcengine_dns_records":     dns_record.DataSourceVolcengineDnsRecords(),
 			"volcengine_dns_zones":       dns_zone.DataSourceVolcengineZones(),
 			"volcengine_dns_record_sets": dns_record_sets.DataSourceVolcengineDnsRecordSets(),
-
 			// ================ ESCloud V2 ================
 			"volcengine_escloud_instances_v2": escloud_instance_v2.DataSourceVolcengineEscloudInstanceV2s(),
 		},
@@ -1145,6 +1169,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cfw_dns_control_policy":                   dns_control_policy.ResourceVolcengineDnsControlPolicy(),
 			"volcengine_cfw_nat_firewall_control_policy":          nat_firewall_control_policy.ResourceVolcengineNatFirewallControlPolicy(),
 			"volcengine_cfw_nat_firewall_control_policy_priority": nat_firewall_control_policy_priority.ResourceVolcengineNatFirewallControlPolicyPriority(),
+
+			// =============== Veecp ==================
+			"volcengine_veecp_edge_node_pool":     veecp_edge_node_pool.ResourceVolcengineVeecpNodePool(),
+			"volcengine_veecp_cluster":            veecp_cluster.ResourceVolcengineVeecpCluster(),
+			"volcengine_veecp_addon":              veecp_addon.ResourceVolcengineVeecpAddon(),
+			"volcengine_veecp_edge_node":          veecp_edge_node.ResourceVolcengineVeecpNode(),
+			"volcengine_veecp_node_pool":          veecp_node_pool.ResourceVolcengineVeecpNodePool(),
+			"volcengine_veecp_batch_edge_machine": veecp_batch_edge_machine.ResourceVolcengineVeecpBatchEdgeMachine(),
 
 			// ================ DNS ================
 			"volcengine_dns_backup":          dns_backup.ResourceVolcengineDnsBackup(),

@@ -11,7 +11,7 @@ Use this data source to query detailed information of private zone record sets
 ## Example Usage
 ```hcl
 data "volcengine_private_zone_record_sets" "foo" {
-  zid = 245 * * * *
+  zid = 2450000
 }
 ```
 ## Argument Reference

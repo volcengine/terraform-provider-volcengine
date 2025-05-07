@@ -1,4 +1,4 @@
 data "volcengine_private_zone_records" "foo" {
-  zid       = 245****
+  zid       = 2450000
   record_id = "907925684878276****"
 }

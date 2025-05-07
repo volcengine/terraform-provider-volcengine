@@ -1,5 +1,5 @@
 data "volcengine_private_zones" "foo" {
-  zid            = 77****
+  zid            = 770000
   zone_name      = "volces.com"
   search_mode    = "EXACT"
   recursion_mode = true
