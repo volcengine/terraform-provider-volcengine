@@ -513,7 +513,7 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 		eipAllocationId := resourceData.Get("eip_allocation_id").(string)
 		modifyEipCallback := ve.Callback{
 			Call: ve.SdkCall{
-				Action:      "ModifyEipAddresses",
+				Action:      "ModifyEipAddressAttributes",
 				ContentType: ve.ContentTypeDefault,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					(*call.SdkParam)["AllocationId"] = eipAllocationId

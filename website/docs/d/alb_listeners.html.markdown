@@ -10,7 +10,7 @@ description: |-
 Use this data source to query detailed information of alb listeners
 ## Example Usage
 ```hcl
-data "volcengine_alb_listener" "foo" {}
+data "volcengine_alb_listeners" "foo" {}
 ```
 ## Argument Reference
 The following arguments are supported:

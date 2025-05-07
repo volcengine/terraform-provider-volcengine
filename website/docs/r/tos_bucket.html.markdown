@@ -10,8 +10,9 @@ description: |-
 Provides a resource to manage tos bucket
 ## Example Usage
 ```hcl
-resource "volcengine_tos_bucket" "default" {
-  bucket_name = "tf-acc-test-bucket-0123-3"
+// create tos bucket
+resource "volcengine_tos_bucket" "foo" {
+  bucket_name = "tf-acc-test-bucket"
   #  storage_class        = "IA"
   public_acl           = "private"
   az_redundancy        = "multi-az"
@@ -30,6 +31,28 @@ resource "volcengine_tos_bucket" "default" {
     key   = "k1"
     value = "v1"
   }
+}
+
+// create tos bucket policy
+resource "volcengine_tos_bucket_policy" "foo" {
+  bucket_name = volcengine_tos_bucket.foo.id
+  policy = jsonencode({
+    Statement = [
+      {
+        Sid    = "test"
+        Effect = "Allow"
+        Principal = [
+          "AccountId/subUserName"
+        ]
+        Action = [
+          "tos:List*"
+        ]
+        Resource = [
+          "trn:tos:::${volcengine_tos_bucket.foo.id}"
+        ]
+      }
+    ]
+  })
 }
 ```
 ## Argument Reference

@@ -14,14 +14,17 @@ in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),wh
 use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
+// query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
+// create vpc
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
+// create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -29,17 +32,20 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
+// create security group
 resource "volcengine_security_group" "foo" {
   security_group_name = "acc-test-security-group"
   vpc_id              = volcengine_vpc.foo.id
 }
 
+// query the image_id which match the specified instance_type
 data "volcengine_images" "foo" {
   os_type          = "Linux"
   visibility       = "public"
   instance_type_id = "ecs.g1.large"
 }
 
+// create PrePaid ecs instance
 resource "volcengine_ecs_instance" "foo" {
   instance_name        = "acc-test-ecs"
   description          = "acc-test"
@@ -60,6 +66,7 @@ resource "volcengine_ecs_instance" "foo" {
   }
 }
 
+// create PrePaid data volume
 resource "volcengine_volume" "PreVolume" {
   volume_name          = "acc-test-volume"
   volume_type          = "ESSD_PL0"
@@ -77,6 +84,7 @@ resource "volcengine_volume" "PreVolume" {
   }
 }
 
+// create PostPaid data volume
 resource "volcengine_volume" "PostVolume" {
   volume_name = "acc-test-volume"
   volume_type = "ESSD_PL0"

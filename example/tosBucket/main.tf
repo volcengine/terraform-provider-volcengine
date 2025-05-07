@@ -1,6 +1,7 @@
-resource "volcengine_tos_bucket" "default" {
-  bucket_name          = "tf-acc-test-bucket-0123-3"
-#  storage_class        = "IA"
+// create tos bucket
+resource "volcengine_tos_bucket" "foo" {
+  bucket_name = "tf-acc-test-bucket"
+  #  storage_class        = "IA"
   public_acl           = "private"
   az_redundancy        = "multi-az"
   enable_version       = true
@@ -19,3 +20,26 @@ resource "volcengine_tos_bucket" "default" {
     value = "v1"
   }
 }
+
+// create tos bucket policy
+resource "volcengine_tos_bucket_policy" "foo" {
+  bucket_name = volcengine_tos_bucket.foo.id
+  policy = jsonencode({
+    Statement = [
+      {
+        Sid    = "test"
+        Effect = "Allow"
+        Principal = [
+          "AccountId/subUserName"
+        ]
+        Action = [
+          "tos:List*"
+        ]
+        Resource = [
+          "trn:tos:::${volcengine_tos_bucket.foo.id}"
+        ]
+      }
+    ]
+  })
+}
+
