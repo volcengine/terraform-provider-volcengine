@@ -24,6 +24,7 @@ func ResourceVolcengineCloudIdentityPermissionSetAssignment() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineCloudIdentityPermissionSetAssignmentCreate,
 		Read:   resourceVolcengineCloudIdentityPermissionSetAssignmentRead,
+		Update: resourceVolcengineCloudIdentityPermissionSetAssignmentUpdate,
 		Delete: resourceVolcengineCloudIdentityPermissionSetAssignmentDelete,
 		Importer: &schema.ResourceImporter{
 			State: permissionSetAssignmentImporter,
@@ -58,6 +59,14 @@ func ResourceVolcengineCloudIdentityPermissionSetAssignment() *schema.Resource {
 				ForceNew:    true,
 				Description: "The principal id of the cloud identity permission set. When the `principal_type` is `User`, this field is specified to `UserId`. When the `principal_type` is `Group`, this field is specified to `GroupId`.",
 			},
+			"deprovision_strategy": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "DeprovisionForLastPermissionSetOnAccount",
+				ValidateFunc: validation.StringInSlice([]string{"DeprovisionForLastPermissionSetOnAccount", "None"}, false),
+				Description: "The deprovision strategy when deleting the cloud identity permission set assignment. Valid values: `DeprovisionForLastPermissionSetOnAccount`, `None`. Default is `DeprovisionForLastPermissionSetOnAccount`. \n" +
+					"When the `deprovision_strategy` is `DeprovisionForLastPermissionSetOnAccount`, and the permission set assignment to be deleted is the last assignment for the same account, this option is used for the DeprovisionPermissionSet operation.",
+			},
 		},
 	}
 	return resource
@@ -79,6 +88,15 @@ func resourceVolcengineCloudIdentityPermissionSetAssignmentRead(d *schema.Resour
 		return fmt.Errorf("error on reading cloud_identity_permission_set_assignment %q, %s", d.Id(), err)
 	}
 	return err
+}
+
+func resourceVolcengineCloudIdentityPermissionSetAssignmentUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewCloudIdentityPermissionSetAssignmentService(meta.(*ve.SdkClient))
+	err = service.Dispatcher.Update(service, d, ResourceVolcengineCloudIdentityPermissionSetAssignment())
+	if err != nil {
+		return fmt.Errorf("error on updating cloud_identity_permission_set_provisioning %q, %s", d.Id(), err)
+	}
+	return resourceVolcengineCloudIdentityPermissionSetAssignmentRead(d, meta)
 }
 
 func resourceVolcengineCloudIdentityPermissionSetAssignmentDelete(d *schema.ResourceData, meta interface{}) (err error) {

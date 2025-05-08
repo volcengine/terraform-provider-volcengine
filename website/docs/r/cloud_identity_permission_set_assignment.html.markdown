@@ -51,6 +51,8 @@ The following arguments are supported:
 * `principal_id` - (Required, ForceNew) The principal id of the cloud identity permission set. When the `principal_type` is `User`, this field is specified to `UserId`. When the `principal_type` is `Group`, this field is specified to `GroupId`.
 * `principal_type` - (Required, ForceNew) The principal type of the cloud identity permission set. Valid values: `User`, `Group`.
 * `target_id` - (Required, ForceNew) The target account id of the cloud identity permission set assignment.
+* `deprovision_strategy` - (Optional) The deprovision strategy when deleting the cloud identity permission set assignment. Valid values: `DeprovisionForLastPermissionSetOnAccount`, `None`. Default is `DeprovisionForLastPermissionSetOnAccount`. 
+When the `deprovision_strategy` is `DeprovisionForLastPermissionSetOnAccount`, and the permission set assignment to be deleted is the last assignment for the same account, this option is used for the DeprovisionPermissionSet operation.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

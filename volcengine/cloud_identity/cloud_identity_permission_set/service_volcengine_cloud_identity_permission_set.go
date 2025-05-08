@@ -304,6 +304,42 @@ func (s *VolcengineCloudIdentityPermissionSetService) ModifyResource(resourceDat
 				}
 			}
 		}
+
+		provisionCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ProvisionPermissionSetForAllAccounts",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["PermissionSetId"] = d.Id()
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					// refresh request task status
+					requestId, err := ve.ObtainSdkValue("Result.RequestId", *resp)
+					if err != nil {
+						return err
+					}
+					stateConf := s.buildRequestStateConf(resourceData, requestId.(string))
+					_, err = stateConf.WaitForState()
+					if err != nil {
+						return err
+					}
+					return nil
+				},
+				// 必须顺序执行，否则并发失败
+				LockId: func(d *schema.ResourceData) string {
+					return "lock-CloudIdentity"
+				},
+			},
+		}
+		callbacks = append(callbacks, provisionCallback)
 	}
 
 	return callbacks
@@ -341,6 +377,67 @@ func (s *VolcengineCloudIdentityPermissionSetService) policyActionCallback(resou
 			},
 		},
 	}
+}
+
+func (s *VolcengineCloudIdentityPermissionSetService) buildRequestStateConf(resourceData *schema.ResourceData, taskId string) *resource.StateChangeConf {
+	return &resource.StateChangeConf{
+		Pending:    []string{},
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+		Target:     []string{"Success"},
+		Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+		Refresh: func() (result interface{}, state string, err error) {
+			var (
+				d          map[string]interface{}
+				status     interface{}
+				failStates []string
+			)
+			failStates = append(failStates, "Failure")
+			d, err = s.getRequestStatus(taskId)
+			if err != nil {
+				return nil, "", err
+			}
+			status, err = ve.ObtainSdkValue("Status", d)
+			if err != nil {
+				return nil, "", err
+			}
+			for _, v := range failStates {
+				if v == status.(string) {
+					return nil, "", fmt.Errorf("cloud_identity provision permission set for all account request task status error, status: %s", status.(string))
+				}
+			}
+			return d, status.(string), err
+		},
+	}
+}
+
+func (s *VolcengineCloudIdentityPermissionSetService) getRequestStatus(requestId string) (data map[string]interface{}, err error) {
+	var (
+		result interface{}
+		ok     bool
+	)
+
+	action := "DescribeProvisionRequestStatus"
+	req := map[string]interface{}{
+		"ProvisionPermissionSetRequestId": requestId,
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return data, err
+	}
+	logger.Debug(logger.RespFormat, action, resp)
+	result, err = ve.ObtainSdkValue("Result", *resp)
+	if err != nil {
+		return data, err
+	}
+	if data, ok = result.(map[string]interface{}); !ok {
+		return data, errors.New("Value is not map ")
+	}
+	if len(data) == 0 {
+		return data, fmt.Errorf("cloud_identity provision permission set for all account request task %s not exist ", requestId)
+	}
+	return data, nil
 }
 
 func (s *VolcengineCloudIdentityPermissionSetService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {

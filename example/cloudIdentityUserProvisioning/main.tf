@@ -13,7 +13,7 @@ resource "volcengine_cloud_identity_user_provisioning" "foo" {
   description              = "tf"
   identity_source_strategy = "Ignore"
   duplication_strategy     = "KeepBoth"
-  duplication_suffix       = "-tf"
+  duplication_suffix       = "tf_suffix"
   deletion_strategy        = "Delete"
   policy_name              = ["AdministratorAccess"]
 }
