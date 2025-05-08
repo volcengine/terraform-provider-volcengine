@@ -10,7 +10,8 @@ description: |-
 Use this data source to query detailed information of nas mount points
 ## Example Usage
 ```hcl
-data "volcengine_zones" "foo" {
+data "volcengine_nas_zones" "foo" {
+
 }
 
 resource "volcengine_vpc" "foo" {
@@ -21,7 +22,7 @@ resource "volcengine_vpc" "foo" {
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-subnet-test-2"
   cidr_block  = "172.16.0.0/24"
-  zone_id     = data.volcengine_zones.foo.zones[0].id
+  zone_id     = data.volcengine_nas_zones.foo.zones[0].id
   vpc_id      = volcengine_vpc.foo.id
 }
 
@@ -38,10 +39,6 @@ resource "volcengine_nas_permission_group" "foo" {
     rw_mode  = "RO"
     use_mode = "All_squash"
   }
-}
-
-data "volcengine_nas_zones" "foo" {
-
 }
 
 resource "volcengine_nas_file_system" "foo" {

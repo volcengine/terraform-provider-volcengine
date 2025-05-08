@@ -242,10 +242,11 @@ func (s *VolcengineCloudIdentityPermissionSetAssignmentService) RemoveResource(r
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
-				"PermissionSetId": permissionSetId,
-				"TargetId":        targetId,
-				"PrincipalType":   principalType,
-				"PrincipalId":     principalId,
+				"PermissionSetId":     permissionSetId,
+				"TargetId":            targetId,
+				"PrincipalType":       principalType,
+				"PrincipalId":         principalId,
+				"DeprovisionStrategy": "DeprovisionForLastAccessAssignmentOnAccount",
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
