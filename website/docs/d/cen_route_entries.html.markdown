@@ -33,7 +33,7 @@ resource "volcengine_nat_gateway" "foo" {
 }
 
 resource "volcengine_route_entry" "foo" {
-  route_table_id         = volcengine_vpc.foo.route_table_ids[0]
+  route_table_id         = tolist(volcengine_vpc.foo.route_table_ids)[0]
   destination_cidr_block = "172.16.1.0/24"
   next_hop_type          = "NatGW"
   next_hop_id            = volcengine_nat_gateway.foo.id
