@@ -235,6 +235,10 @@ func (s *VolcengineCloudIdentityPermissionSetAssignmentService) RemoveResource(r
 	targetId := resourceData.Get("target_id")
 	principalType := resourceData.Get("principal_type")
 	principalId := resourceData.Get("principal_id")
+	deprovisionStrategy := resourceData.Get("deprovision_strategy")
+	if deprovisionStrategy == "" {
+		deprovisionStrategy = "DeprovisionForLastPermissionSetOnAccount"
+	}
 
 	callback := ve.Callback{
 		Call: ve.SdkCall{
@@ -246,7 +250,7 @@ func (s *VolcengineCloudIdentityPermissionSetAssignmentService) RemoveResource(r
 				"TargetId":            targetId,
 				"PrincipalType":       principalType,
 				"PrincipalId":         principalId,
-				"DeprovisionStrategy": "DeprovisionForLastAccessAssignmentOnAccount",
+				"DeprovisionStrategy": deprovisionStrategy,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)

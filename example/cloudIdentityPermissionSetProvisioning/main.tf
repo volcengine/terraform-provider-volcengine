@@ -27,16 +27,18 @@ resource "volcengine_cloud_identity_user" "foo" {
 }
 
 resource "volcengine_cloud_identity_permission_set_assignment" "foo" {
-  permission_set_id = volcengine_cloud_identity_permission_set.foo.id
-  target_id         = "210026****"
-  principal_type    = "User"
-  principal_id      = volcengine_cloud_identity_user.foo.id
+  permission_set_id    = volcengine_cloud_identity_permission_set.foo.id
+  target_id            = "210005****"
+  principal_type       = "User"
+  principal_id         = volcengine_cloud_identity_user.foo.id
+  deprovision_strategy = "None"
 }
 
+# It is not recommended to use this resource to provision the permission_set.
 # When the `volcengine_cloud_identity_permission_set` is updated, you can use this resource to provision the permission set.
-# When deleting this resource, resource `volcengine_cloud_identity_permission_set_assignment` must be deleted first.
+# When deleting this resource, resource `volcengine_cloud_identity_permission_set_assignment` must be deleted first, and the `deprovision_strategy` of `volcengine_cloud_identity_permission_set_assignment` should be set as `None`.
 resource "volcengine_cloud_identity_permission_set_provisioning" "foo" {
   permission_set_id   = volcengine_cloud_identity_permission_set.foo.id
-  target_id           = "210026****"
+  target_id           = "210005****"
   provisioning_status = "Provisioned"
 }
