@@ -215,6 +215,10 @@ func (s *VolcengineVefaasKafkaTriggerService) ModifyResource(resourceData *schem
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"ready", "failed"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
 		},
 	}
 	return []ve.Callback{callback}

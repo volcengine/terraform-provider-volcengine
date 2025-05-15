@@ -347,11 +347,6 @@ func DataSourceVolcengineVefaasFunctions() *schema.Resource {
 							Computed:    true,
 							Description: "Function CPU charging policy.",
 						},
-						"project_name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The name of project.",
-						},
 					},
 				},
 			},

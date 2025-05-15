@@ -233,11 +233,11 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 	}
 }
 
-func (s *VolcengineVefaasFunctionService) ProjectTrn() *ve.ProjectTrn {
-	return &ve.ProjectTrn{
-		ServiceName:          "vefaas",
-		ResourceType:         "function",
-		ProjectResponseField: "ProjectName",
-		ProjectSchemaField:   "project_name",
-	}
-}
+//func (s *VolcengineVefaasFunctionService) ProjectTrn() *ve.ProjectTrn {
+//	return &ve.ProjectTrn{
+//		ServiceName:          "vefaas",
+//		ResourceType:         "function",
+//		ProjectResponseField: "ProjectName",
+//		ProjectSchemaField:   "project_name",
+//	}
+//}
