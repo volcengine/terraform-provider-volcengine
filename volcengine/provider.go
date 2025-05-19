@@ -3,10 +3,6 @@ package volcengine
 import (
 	"context"
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_function"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_kafka_trigger"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_timer"
 	"net/http"
 	"net/url"
 	"os"
@@ -15,6 +11,11 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_function"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_kafka_trigger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_timer"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"

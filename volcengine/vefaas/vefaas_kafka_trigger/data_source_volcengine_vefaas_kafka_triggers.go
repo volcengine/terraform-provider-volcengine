@@ -65,7 +65,7 @@ func DataSourceVolcengineVefaasKafkaTriggers() *schema.Resource {
 						"account_id": {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "The ID of Volcano Engine",
+							Description: "The ID of account.",
 						},
 						"description": {
 							Type:        schema.TypeString,
