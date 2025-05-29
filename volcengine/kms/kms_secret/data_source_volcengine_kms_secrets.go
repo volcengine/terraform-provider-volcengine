@@ -26,16 +26,84 @@ func DataSourceVolcengineKmsSecrets() *schema.Resource {
 				Computed:    true,
 				Description: "The total count of query.",
 			},
-			"filters": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The filters you can specify to query all the secrets that meet the criteria. This parameter is composed of key/value pairs.",
+			"secret_name": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The name of the secret.",
+			},
+			"trn": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The trn of the secret.",
+			},
+			"secret_type": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The type of the secret.",
+			},
+			"secret_state": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The state of the secret.",
+			},
+			"managed_state": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The state of the managed.",
+			},
+			"rotation_state": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The state of the rotation.",
+			},
+			"description": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The description of the secret.",
+			},
+			"creation_date_range": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The creation date of the secret.",
+			},
+			"update_date_range": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The update date of the secret.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of the project to which the secret belongs.",
 			},
+
 			"secrets": {
 				Description: "The information about the secret.",
 				Type:        schema.TypeList,

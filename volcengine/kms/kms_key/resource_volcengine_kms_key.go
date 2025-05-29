@@ -85,6 +85,11 @@ func ResourceVolcengineKmsKey() *schema.Resource {
 				Description: "Whether it is the master key of the Multi-region type.",
 			},
 			"tags": ve.TagsSchema(),
+			"pending_window_in_days": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The pre-deletion cycle of the key.",
+			},
 			// computed
 			"creation_date": {
 				Type:        schema.TypeInt,

@@ -179,6 +179,21 @@ func (s *VolcengineKmsKeyEnableService) RemoveResource(resourceData *schema.Reso
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return s.checkResourceUtilRemoved(d, 5*time.Minute)
 			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(5*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					logger.Debug(logger.RespFormat, call.Action, callErr)
+					if callErr != nil {
+						return resource.NonRetryableError(fmt.Errorf("error on reading key on Disable %q, %w", d.Id(), callErr))
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
 		},
 	}
 	return []ve.Callback{callback}

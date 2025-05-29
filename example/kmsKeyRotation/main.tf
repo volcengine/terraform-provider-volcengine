@@ -1,3 +1,3 @@
 resource "volcengine_kms_key_rotation" "foo" {
-  key_id = "f5bc3aa4-dd3f-4408-8758-f8841254xxxx"
+  key_id = "m_cn-guilin-boe_63c08fe9-42e8-4c10-a09e-8e8e6xxxxxx"
 }

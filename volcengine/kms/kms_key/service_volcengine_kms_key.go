@@ -184,7 +184,44 @@ func (s *VolcengineKmsKeyService) ModifyResource(resourceData *schema.ResourceDa
 }
 
 func (s *VolcengineKmsKeyService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ScheduleKeyDeletion",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if resourceData.Get("pending_window_in_days") != 0 {
+					(*call.SdkParam)["KeyID"] = d.Id()
+					(*call.SdkParam)["PendingWindowInDays"] = resourceData.Get("pending_window_in_days")
+				} else {
+					(*call.SdkParam)["KeyID"] = d.Id()
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return s.checkResourceUtilRemoved(d, 5*time.Minute)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				//出现错误后重试
+				return resource.Retry(5*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					logger.Debug(logger.RespFormat, call.Action, callErr)
+					if callErr != nil {
+						return resource.NonRetryableError(fmt.Errorf("error on reading key on PendingDelete %q, %w", d.Id(), callErr))
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineKmsKeyService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
@@ -290,4 +327,20 @@ func (s *VolcengineKmsKeyService) setResourceTags(resourceData *schema.ResourceD
 	callbacks = append(callbacks, addCallback)
 
 	return callbacks
+}
+
+func (s *VolcengineKmsKeyService) checkResourceUtilRemoved(d *schema.ResourceData, timeout time.Duration) error {
+	return resource.Retry(timeout, func() *resource.RetryError {
+		keyStatus, _ := s.ReadResource(d, d.Id())
+		// 能查询成功代表还在删除中，重试
+		if keyStatus["KeyState"] != "PendingDelete" {
+			return resource.RetryableError(fmt.Errorf("resource still in removing status "))
+		} else {
+			if keyStatus["KeyState"] == "PendingDelete" {
+				return nil
+			} else {
+				return resource.NonRetryableError(fmt.Errorf("kms key status is not PendingDelete "))
+			}
+		}
+	})
 }

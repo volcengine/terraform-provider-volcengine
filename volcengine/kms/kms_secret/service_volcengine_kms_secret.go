@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/copystructure"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -15,6 +16,11 @@ import (
 type VolcengineKmsSecretService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
+}
+
+type filter struct {
+	Key    string   `json:"Key"`
+	Values []string `json:"Values"`
 }
 
 func NewKmsSecretService(c *ve.SdkClient) *VolcengineKmsSecretService {
@@ -30,14 +36,184 @@ func (s *VolcengineKmsSecretService) GetClient() *ve.SdkClient {
 
 func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		filters      []interface{}
+		newCondition map[string]interface{}
+		resp         *map[string]interface{}
+		results      interface{}
+		ok           bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "CurrentPage", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeSecrets"
 
-		bytes, _ := json.Marshal(condition)
+		deepCopyValue, err := copystructure.Copy(condition)
+		if err != nil {
+			return data, fmt.Errorf(" DeepCopy condition error: %v ", err)
+		}
+		if newCondition, ok = deepCopyValue.(map[string]interface{}); !ok {
+			return data, fmt.Errorf(" DeepCopy condition error: newCondition is not map ")
+		}
+
+		if secretName, exists := condition["SecretName"]; exists {
+			secretNameSlice := make([]string, 0)
+			secretNameInter, ok := secretName.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" SecretName is not slice ")
+			}
+			for _, v := range secretNameInter {
+				secretNameSlice = append(secretNameSlice, v.(string))
+			}
+			secretNameFilter := filter{
+				Key:    "SecretName",
+				Values: secretNameSlice,
+			}
+			filters = append(filters, secretNameFilter)
+			delete(newCondition, "SecretName")
+		}
+
+		if trn, exists := condition["Trn"]; exists {
+			trnSlice := make([]string, 0)
+			trnInter, ok := trn.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" trn is not slice ")
+			}
+			for _, v := range trnInter {
+				trnSlice = append(trnSlice, v.(string))
+			}
+			trnFilter := filter{
+				Key:    "Trn",
+				Values: trnSlice,
+			}
+			filters = append(filters, trnFilter)
+			delete(newCondition, "Trn")
+		}
+
+		if secretType, exists := condition["SecretType"]; exists {
+			secretTypeSlice := make([]string, 0)
+			secretTypeInter, ok := secretType.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" SecretType is not slice ")
+			}
+			for _, v := range secretTypeInter {
+				secretTypeSlice = append(secretTypeSlice, v.(string))
+			}
+			secretTypeFilter := filter{
+				Key:    "SecretType",
+				Values: secretTypeSlice,
+			}
+			filters = append(filters, secretTypeFilter)
+			delete(newCondition, "SecretType")
+		}
+
+		if secretState, exists := condition["SecretState"]; exists {
+			secretStateSlice := make([]string, 0)
+			secretStateInter, ok := secretState.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" SecretState is not slice ")
+			}
+			for _, v := range secretStateInter {
+				secretStateSlice = append(secretStateSlice, v.(string))
+			}
+			secretStateFilter := filter{
+				Key:    "SecretState",
+				Values: secretStateSlice,
+			}
+			filters = append(filters, secretStateFilter)
+			delete(newCondition, "SecretState")
+		}
+
+		if managedState, exists := condition["ManagedState"]; exists {
+			managedStateSlice := make([]string, 0)
+			managedStateInter, ok := managedState.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" ManagedState is not slice ")
+			}
+			for _, v := range managedStateInter {
+				managedStateSlice = append(managedStateSlice, v.(string))
+			}
+			managedStateFilter := filter{
+				Key:    "ManagedState",
+				Values: managedStateSlice,
+			}
+			filters = append(filters, managedStateFilter)
+			delete(newCondition, "ManagedState")
+		}
+
+		if rotationState, exists := condition["RotationState"]; exists {
+			rotationStateSlice := make([]string, 0)
+			rotationStateInter, ok := rotationState.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" RotationState is not slice ")
+			}
+			for _, v := range rotationStateInter {
+				rotationStateSlice = append(rotationStateSlice, v.(string))
+			}
+			rotationStateFilter := filter{
+				Key:    "RotationState",
+				Values: rotationStateSlice,
+			}
+			filters = append(filters, rotationStateFilter)
+			delete(newCondition, "RotationState")
+		}
+
+		if description, exists := condition["Description"]; exists {
+			descriptionSlice := make([]string, 0)
+			descriptionInter, ok := description.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" description is not slice ")
+			}
+			for _, v := range descriptionInter {
+				descriptionSlice = append(descriptionSlice, v.(string))
+			}
+			descriptionFilter := filter{
+				Key:    "Description",
+				Values: descriptionSlice,
+			}
+			filters = append(filters, descriptionFilter)
+			delete(newCondition, "Description")
+		}
+
+		if creationDateRange, exists := condition["CreationDateRange"]; exists {
+			creationDateRangeSlice := make([]string, 0)
+			creationDateRangeInter, ok := creationDateRange.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" CreationDateRange is not slice ")
+			}
+			for _, v := range creationDateRangeInter {
+				creationDateRangeSlice = append(creationDateRangeSlice, v.(string))
+			}
+			creationDateRangeFilter := filter{
+				Key:    "CreationDateRange",
+				Values: creationDateRangeSlice,
+			}
+			filters = append(filters, creationDateRangeFilter)
+			delete(newCondition, "CreationDateRange")
+		}
+
+		if updateDateRange, exists := condition["UpdateDateRange"]; exists {
+			updateDateRangeSlice := make([]string, 0)
+			updateDateRangeInter, ok := updateDateRange.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" UpdateDateRange is not slice ")
+			}
+			for _, v := range updateDateRangeInter {
+				updateDateRangeSlice = append(updateDateRangeSlice, v.(string))
+			}
+			updateDateRangeFilter := filter{
+				Key:    "UpdateDateRange",
+				Values: updateDateRangeSlice,
+			}
+			filters = append(filters, updateDateRangeFilter)
+			delete(newCondition, "UpdateDateRange")
+		}
+
+		if len(filters) > 0 {
+			filtersBytes, _ := json.Marshal(filters)
+			newCondition["Filters"] = string(filtersBytes)
+		}
+
+		logger.Debug(logger.ReqFormat, action, &newCondition)
+
+		bytes, _ := json.Marshal(newCondition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getPostUniversalInfo(action), nil)
@@ -45,13 +221,13 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getPostUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getPostUniversalInfo(action), &newCondition)
 			if err != nil {
 				return data, err
 			}
 		}
 		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		logger.Debug(logger.RespFormat, action, newCondition, string(respBytes))
 		results, err = ve.ObtainSdkValue("Result.Secrets", *resp)
 		if err != nil {
 			return data, err
@@ -69,8 +245,10 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 
 func (s *VolcengineKmsSecretService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		ok   bool
-		resp *map[string]interface{}
+		ok                 bool
+		resp               *map[string]interface{}
+		getSecretValueResp *map[string]interface{}
+		secretValueData    map[string]interface{}
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
@@ -103,6 +281,31 @@ func (s *VolcengineKmsSecretService) ReadResource(resourceData *schema.ResourceD
 	data["RotationInterval"] = rotationIntervalDay
 
 	data["Uuid"] = data["ID"]
+
+	getSecretValueReq := map[string]interface{}{
+		"SecretName": id,
+	}
+	getSecretValueAction := "GetSecretValue"
+	getSecretValueResp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(getSecretValueAction), &getSecretValueReq)
+	if err != nil {
+		return data, err
+	}
+	logger.Debug(logger.RespFormat, getSecretValueAction, getSecretValueReq, *getSecretValueResp)
+
+	secretValue, err := ve.ObtainSdkValue("Result", *getSecretValueResp)
+	if err != nil {
+		return data, err
+	}
+
+	secretValueData, ok = secretValue.(map[string]interface{})
+	if !ok {
+		return data, fmt.Errorf(" Result is not Map ")
+	}
+
+	if len(secretValueData) == 0 {
+		return data, fmt.Errorf("secretValue %s not exist", resourceData.Get("secret_name"))
+	}
+	data["SecretValue"] = secretValueData["SecretValue"]
 
 	return data, err
 }

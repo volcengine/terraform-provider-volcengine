@@ -7,10 +7,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_archive"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_enable"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_rotation"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_schedule_deletion"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_keyring"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret_schedule_deletion"
 	"net/http"
 	"net/url"
 	"os"
@@ -1224,14 +1222,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vefaas_kafka_trigger": vefaas_kafka_trigger.ResourceVolcengineVefaasKafkaTrigger(),
 
 			// ================ KMS ================
-			"volcengine_kms_keyring":                  kms_keyring.ResourceVolcengineKmsKeyring(),
-			"volcengine_kms_key":                      kms_key.ResourceVolcengineKmsKey(),
-			"volcengine_kms_key_enable":               kms_key_enable.ResourceVolcengineKmsKeyEnable(),
-			"volcengine_kms_key_rotation":             kms_key_rotation.ResourceVolcengineKmsKeyRotation(),
-			"volcengine_kms_key_schedule_deletion":    kms_key_schedule_deletion.ResourceVolcengineKmsKeyScheduleDeletion(),
-			"volcengine_kms_key_archive":              kms_key_archive.ResourceVolcengineKmsKeyArchive(),
-			"volcengine_kms_secret":                   kms_secret.ResourceVolcengineKmsSecret(),
-			"volcengine_kms_secret_schedule_deletion": kms_secret_schedule_deletion.ResourceVolcengineKmsSecretScheduleDeletion(),
+			"volcengine_kms_keyring":      kms_keyring.ResourceVolcengineKmsKeyring(),
+			"volcengine_kms_key":          kms_key.ResourceVolcengineKmsKey(),
+			"volcengine_kms_key_enable":   kms_key_enable.ResourceVolcengineKmsKeyEnable(),
+			"volcengine_kms_key_rotation": kms_key_rotation.ResourceVolcengineKmsKeyRotation(),
+			"volcengine_kms_key_archive":  kms_key_archive.ResourceVolcengineKmsKeyArchive(),
+			"volcengine_kms_secret":       kms_secret.ResourceVolcengineKmsSecret(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

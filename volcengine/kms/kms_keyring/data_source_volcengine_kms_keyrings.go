@@ -26,10 +26,45 @@ func DataSourceVolcengineKmsKeyrings() *schema.Resource {
 				Computed:    true,
 				Description: "The total count of query.",
 			},
-			"filters": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Query the Key ring that meets the specified conditions, which is composed of key-value pairs.",
+			"keyring_name": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The name of the keyring.",
+			},
+			"keyring_type": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The type of the keyring.",
+			},
+			"description": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The description of the keyring.",
+			},
+			"creation_date_range": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The creation date of the keyring.",
+			},
+			"update_date_range": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The update date of the keyring.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/copystructure"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -15,6 +16,11 @@ import (
 type VolcengineKmsKeyringService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
+}
+
+type filter struct {
+	Key    string   `json:"Key"`
+	Values []string `json:"Values"`
 }
 
 func NewKmsKeyringService(c *ve.SdkClient) *VolcengineKmsKeyringService {
@@ -30,28 +36,127 @@ func (s *VolcengineKmsKeyringService) GetClient() *ve.SdkClient {
 
 func (s *VolcengineKmsKeyringService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		filters      []interface{}
+		newCondition map[string]interface{}
+		resp         *map[string]interface{}
+		results      interface{}
+		ok           bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "CurrentPage", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeKeyrings"
 
-		bytes, _ := json.Marshal(condition)
-		logger.Debug(logger.ReqFormat, action, string(bytes))
-		if condition == nil {
+		deepCopyValue, err := copystructure.Copy(condition)
+		if err != nil {
+			return data, fmt.Errorf(" DeepCopy condition error: %v ", err)
+		}
+		if newCondition, ok = deepCopyValue.(map[string]interface{}); !ok {
+			return data, fmt.Errorf(" DeepCopy condition error: newCondition is not map ")
+		}
+
+		if keyringName, exists := condition["KeyringName"]; exists {
+			keyringNameSlice := make([]string, 0)
+			keyringNameInter, ok := keyringName.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" KeyringName is not slice ")
+			}
+			for _, v := range keyringNameInter {
+				keyringNameSlice = append(keyringNameSlice, v.(string))
+			}
+			keyringNameFilter := filter{
+				Key:    "KeyringName",
+				Values: keyringNameSlice,
+			}
+			filters = append(filters, keyringNameFilter)
+			delete(newCondition, "KeyringName")
+		}
+
+		if keyringType, exists := condition["KeyringType"]; exists {
+			keyringTypeSlice := make([]string, 0)
+			keyringTypeInter, ok := keyringType.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" KeyringType is not slice ")
+			}
+			for _, v := range keyringTypeInter {
+				keyringTypeSlice = append(keyringTypeSlice, v.(string))
+			}
+			keyringTypeFilter := filter{
+				Key:    "KeyringType",
+				Values: keyringTypeSlice,
+			}
+			filters = append(filters, keyringTypeFilter)
+			delete(newCondition, "KeyringType")
+		}
+
+		if description, exists := condition["Description"]; exists {
+			descriptionSlice := make([]string, 0)
+			descriptionInter, ok := description.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" description is not slice ")
+			}
+			for _, v := range descriptionInter {
+				descriptionSlice = append(descriptionSlice, v.(string))
+			}
+			descriptionFilter := filter{
+				Key:    "Description",
+				Values: descriptionSlice,
+			}
+			filters = append(filters, descriptionFilter)
+			delete(newCondition, "Description")
+		}
+
+		if creationDateRange, exists := condition["CreationDateRange"]; exists {
+			creationDateRangeSlice := make([]string, 0)
+			creationDateRangeInter, ok := creationDateRange.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" CreationDateRange is not slice ")
+			}
+			for _, v := range creationDateRangeInter {
+				creationDateRangeSlice = append(creationDateRangeSlice, v.(string))
+			}
+			creationDateRangeFilter := filter{
+				Key:    "CreationDateRange",
+				Values: creationDateRangeSlice,
+			}
+			filters = append(filters, creationDateRangeFilter)
+			delete(newCondition, "CreationDateRange")
+		}
+
+		if updateDateRange, exists := condition["UpdateDateRange"]; exists {
+			updateDateRangeSlice := make([]string, 0)
+			updateDateRangeInter, ok := updateDateRange.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" UpdateDateRange is not slice ")
+			}
+			for _, v := range updateDateRangeInter {
+				updateDateRangeSlice = append(updateDateRangeSlice, v.(string))
+			}
+			updateDateRangeFilter := filter{
+				Key:    "UpdateDateRange",
+				Values: updateDateRangeSlice,
+			}
+			filters = append(filters, updateDateRangeFilter)
+			delete(newCondition, "UpdateDateRange")
+		}
+
+		if len(filters) > 0 {
+			filtersBytes, _ := json.Marshal(filters)
+			newCondition["Filters"] = string(filtersBytes)
+		}
+
+		logger.Debug(logger.ReqFormat, action, &newCondition)
+		if newCondition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &newCondition)
 			if err != nil {
 				return data, err
 			}
 		}
 		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		logger.Debug(logger.RespFormat, action, newCondition, string(respBytes))
 		results, err = ve.ObtainSdkValue("Result.Keyrings", *resp)
 		if err != nil {
 			return data, err

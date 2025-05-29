@@ -1,3 +1,19 @@
+resource "volcengine_kms_keyring" "foo" {
+  keyring_name   = "tf-test"
+  description = "tf-test"
+  project_name = "default"
+}
+
+resource "volcengine_kms_key" "foo" {
+  keyring_name   = volcengine_kms_keyring.foo.keyring_name
+  key_name = "mrk-tf-key-mod"
+  description = "tf test key-mod"
+  tags {
+    key = "tfkey3"
+    value = "tfvalue3"
+  }
+}
+
 resource "volcengine_kms_key_archive" "foo" {
-  key_id = "f5bc3aa4-dd3f-4408-8758-f8841254xxxx"
+  key_id = volcengine_kms_key.foo.id
 }
