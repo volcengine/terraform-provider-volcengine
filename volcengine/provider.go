@@ -3,12 +3,6 @@ package volcengine
 import (
 	"context"
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_archive"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_enable"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_rotation"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_keyring"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret"
 	"net/http"
 	"net/url"
 	"os"
@@ -22,6 +16,13 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_kafka_trigger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_timer"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_archive"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_enable"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_rotation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_keyring"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"

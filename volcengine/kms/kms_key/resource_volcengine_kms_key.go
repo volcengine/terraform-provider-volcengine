@@ -152,7 +152,7 @@ func ResourceVolcengineKmsKey() *schema.Resource {
 							Type:        schema.TypeList,
 							MaxItems:    1,
 							Computed:    true,
-							Description: "Trn and region id of the primary multi-region key",
+							Description: "Trn and region id of the primary multi-region key.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"trn": {
