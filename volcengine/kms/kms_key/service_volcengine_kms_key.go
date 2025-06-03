@@ -101,6 +101,8 @@ func (s *VolcengineKmsKeyService) ReadResource(resourceData *schema.ResourceData
 		return data, fmt.Errorf("kms key %s not exist", id)
 	}
 
+	data["State"] = data["KeyState"]
+
 	return data, err
 }
 

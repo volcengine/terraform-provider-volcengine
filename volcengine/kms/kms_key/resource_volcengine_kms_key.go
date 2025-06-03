@@ -101,7 +101,7 @@ func ResourceVolcengineKmsKey() *schema.Resource {
 				Computed:    true,
 				Description: "The date when the keyring was updated.",
 			},
-			"key_state": {
+			"state": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The state of the key.",

@@ -126,7 +126,7 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 			"last_rotation_time": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The rotation state of the secret.",
+				Description: "The last time the secret was rotated.",
 			},
 			"schedule_rotation_time": {
 				Type:        schema.TypeString,
@@ -138,7 +138,7 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 				Computed:    true,
 				Description: "The time when the secret will be deleted.",
 			},
-			"secret_state": {
+			"state": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The state of secret.",

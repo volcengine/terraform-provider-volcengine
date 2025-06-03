@@ -281,6 +281,7 @@ func (s *VolcengineKmsSecretService) ReadResource(resourceData *schema.ResourceD
 	data["RotationInterval"] = rotationIntervalDay
 
 	data["Uuid"] = data["ID"]
+	data["State"] = data["SecretState"]
 
 	getSecretValueReq := map[string]interface{}{
 		"SecretName": id,
