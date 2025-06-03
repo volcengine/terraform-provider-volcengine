@@ -11,14 +11,14 @@ Provides a resource to manage kms keyring
 ## Example Usage
 ```hcl
 resource "volcengine_kms_keyring" "foo" {
-  keyring_name = "tf-test-16"
+  keyring_name = "tf-test"
   description  = "tf-test"
   project_name = "default"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `keyring_name` - (Required) The name of the keyring.
+* `keyring_name` - (Required, ForceNew) The name of the keyring.
 * `description` - (Optional) The description of the keyring.
 * `keyring_type` - (Optional, ForceNew) The type of the keyring.
 * `project_name` - (Optional) The name of the project.

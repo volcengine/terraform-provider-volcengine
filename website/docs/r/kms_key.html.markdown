@@ -29,15 +29,15 @@ resource "volcengine_kms_key" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `key_name` - (Required) The name of the CMK.
-* `keyring_name` - (Required) The name of the keyring.
+* `keyring_name` - (Required, ForceNew) The name of the keyring.
 * `description` - (Optional) The description of the key.
-* `key_spec` - (Optional) The type of the keys.
-* `key_usage` - (Optional) The usage of the key.
-* `multi_region` - (Optional) Whether it is the master key of the Multi-region type.
-* `origin` - (Optional) The origin of the key.
-* `pending_window_in_days` - (Optional) The pre-deletion cycle of the key.
-* `protection_level` - (Optional) The protection level of the key.
-* `rotate_state` - (Optional) The rotation state of the key.
+* `key_spec` - (Optional, ForceNew) The type of the keys.
+* `key_usage` - (Optional, ForceNew) The usage of the key.
+* `multi_region` - (Optional, ForceNew) Whether it is the master key of the Multi-region type.
+* `origin` - (Optional, ForceNew) The origin of the key.
+* `pending_window_in_days` - (Optional, ForceNew) The pre-deletion cycle of the key.
+* `protection_level` - (Optional, ForceNew) The protection level of the key.
+* `rotate_state` - (Optional, ForceNew) The rotation state of the key.
 * `tags` - (Optional) Tags.
 
 The `tags` object supports the following:

@@ -22,12 +22,12 @@ The following arguments are supported:
 * `secret_name` - (Required, ForceNew) The name of the secret.
 * `secret_type` - (Required, ForceNew) The type of the secret.
 * `secret_value` - (Required, ForceNew) The value of the secret.
-* `automatic_rotation` - (Optional) The rotation state of the secret.
+* `automatic_rotation` - (Optional, ForceNew) The rotation state of the secret.
 * `description` - (Optional) The description of the secret.
 * `encryption_key` - (Optional, ForceNew) The TRN of the KMS key used to encrypt the secret value.
 * `extended_config` - (Optional, ForceNew) The extended configurations of the secret.
 * `project_name` - (Optional) The project name of the secret.
-* `rotation_interval` - (Optional) The interval at which automatic rotation is performed.
+* `rotation_interval` - (Optional, ForceNew) The interval at which automatic rotation is performed.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
