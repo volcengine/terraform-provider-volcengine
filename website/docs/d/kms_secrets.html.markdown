@@ -38,7 +38,7 @@ In addition to all arguments above, the following attributes are exported:
     * `encryption_key` - The TRN of the KMS key used to encrypt the secret value.
     * `extended_config` - The extended configurations of the secret.
     * `id` - The unique ID of the secret. The value is in the UUID format.
-    * `last_rotation_time` - The rotation state of the secret.
+    * `last_rotation_time` - The last time the secret was rotated.
     * `managed` - Indicates whether the secret is hosted.
     * `project_name` - The project name of the secret.
     * `rotation_interval` - The interval at which automatic rotation is performed.

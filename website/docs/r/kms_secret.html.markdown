@@ -33,13 +33,13 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `creation_date` - The date when the secret was created.
-* `last_rotation_time` - The rotation state of the secret.
+* `last_rotation_time` - The last time the secret was rotated.
 * `managed` - Indicates whether the secret is hosted.
 * `rotation_interval_second` - Rotation interval second.
 * `rotation_state` - The rotation state of the secret.
 * `schedule_delete_time` - The time when the secret will be deleted.
 * `schedule_rotation_time` - The next time the secret will be rotated.
-* `secret_state` - The state of secret.
+* `state` - The state of secret.
 * `trn` - The information about the tenant resource name (TRN).
 * `uid` - The tenant ID of the secret.
 * `update_date` - The date when the secret was updated.

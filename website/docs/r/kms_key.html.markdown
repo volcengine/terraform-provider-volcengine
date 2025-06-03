@@ -50,7 +50,6 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `creation_date` - The date when the keyring was created.
 * `key_material_expire_time` - The time when the key material will expire.
-* `key_state` - The state of the key.
 * `last_rotation_time` - The last time the key was rotated.
 * `multi_region_configuration` - The configuration of Multi-region key.
     * `multi_region_key_type` - The type of the multi-region key.
@@ -63,6 +62,7 @@ In addition to all arguments above, the following attributes are exported:
 * `rotation_state` - The rotation configuration of the key.
 * `schedule_delete_time` - The time when the key will be deleted.
 * `schedule_rotation_time` - The next time the key will be rotated.
+* `state` - The state of the key.
 * `trn` - The name of the resource.
 * `update_date` - The date when the keyring was updated.
 
