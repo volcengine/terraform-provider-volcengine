@@ -36,6 +36,7 @@ func ResourceVolcengineKmsKey() *schema.Resource {
 			"keyring_name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The name of the keyring.",
 			},
 			"key_name": {
@@ -46,6 +47,7 @@ func ResourceVolcengineKmsKey() *schema.Resource {
 			"key_spec": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The type of the keys.",
 			},
@@ -58,35 +60,41 @@ func ResourceVolcengineKmsKey() *schema.Resource {
 			"key_usage": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The usage of the key.",
 			},
 			"protection_level": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The protection level of the key.",
 			},
 			"rotate_state": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The rotation state of the key.",
 			},
 			"origin": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The origin of the key.",
 			},
 			"multi_region": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "Whether it is the master key of the Multi-region type.",
 			},
 			"tags": ve.TagsSchema(),
 			"pending_window_in_days": {
 				Type:        schema.TypeInt,
+				ForceNew:    true,
 				Optional:    true,
 				Description: "The pre-deletion cycle of the key.",
 			},

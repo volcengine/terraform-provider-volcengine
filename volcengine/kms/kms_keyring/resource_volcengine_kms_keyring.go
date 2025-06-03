@@ -36,6 +36,7 @@ func ResourceVolcengineKmsKeyring() *schema.Resource {
 			"keyring_name": {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "The name of the keyring.",
 			},
 			"keyring_type": {

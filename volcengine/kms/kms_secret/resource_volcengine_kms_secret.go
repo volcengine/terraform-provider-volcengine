@@ -80,11 +80,13 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 			"automatic_rotation": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The rotation state of the secret.",
 			},
 			"rotation_interval": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "The interval at which automatic rotation is performed.",
 			},

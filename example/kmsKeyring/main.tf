@@ -1,5 +1,5 @@
 resource "volcengine_kms_keyring" "foo" {
-  keyring_name   = "tf-test-16"
+  keyring_name   = "tf-test"
   description = "tf-test"
   project_name = "default"
 }
