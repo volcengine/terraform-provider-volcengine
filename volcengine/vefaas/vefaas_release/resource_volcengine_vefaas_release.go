@@ -42,6 +42,7 @@ func ResourceVolcengineVefaasRelease() *schema.Resource {
 			"revision_number": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 				Description: "When the RevisionNumber to be released is 0, " +
 					"the Latest code (Latest) will be released and a new version will be created. " +
 					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
@@ -55,6 +56,7 @@ func ResourceVolcengineVefaasRelease() *schema.Resource {
 			"rolling_step": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Percentage of grayscale step size.",
 			},
 			"description": {
@@ -65,6 +67,7 @@ func ResourceVolcengineVefaasRelease() *schema.Resource {
 			"max_instance": {
 				Type:        schema.TypeInt,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Upper limit of the number of function instances.",
 			},
 			"status": {

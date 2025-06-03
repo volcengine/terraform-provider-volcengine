@@ -72,6 +72,7 @@ func ResourceVolcengineVefaasKafkaTrigger() *schema.Resource {
 			"starting_position": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Computed:    true,
 				Description: "Specify the location where the messages in the Topic start to be consumed.",
 			},
