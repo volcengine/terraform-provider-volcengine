@@ -39,7 +39,7 @@ The following arguments are supported:
 * `description` - (Optional) The description of the Kafka trigger.
 * `enabled` - (Optional) Whether to enable triggers at the same time as creating them.
 * `maximum_retry_attempts` - (Optional) The maximum number of retries when a function has a runtime error.
-* `starting_position` - (Optional) Specify the location where the messages in the Topic start to be consumed.
+* `starting_position` - (Optional, ForceNew) Specify the location where the messages in the Topic start to be consumed.
 
 The `kafka_credentials` object supports the following:
 

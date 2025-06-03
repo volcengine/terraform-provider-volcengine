@@ -22,10 +22,10 @@ resource "volcengine_vefaas_release" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `function_id` - (Required, ForceNew) The ID of Function.
-* `revision_number` - (Required) When the RevisionNumber to be released is 0, the Latest code (Latest) will be released and a new version will be created. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `revision_number` - (Required, ForceNew) When the RevisionNumber to be released is 0, the Latest code (Latest) will be released and a new version will be created. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `description` - (Optional) The description of released this time.
-* `max_instance` - (Optional) Upper limit of the number of function instances.
-* `rolling_step` - (Optional) Percentage of grayscale step size.
+* `max_instance` - (Optional, ForceNew) Upper limit of the number of function instances.
+* `rolling_step` - (Optional, ForceNew) Percentage of grayscale step size.
 * `target_traffic_weight` - (Optional) Target percentage of published traffic.
 
 ## Attributes Reference
