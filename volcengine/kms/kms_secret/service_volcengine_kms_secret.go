@@ -60,7 +60,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" SecretName is not slice ")
 			}
 			for _, v := range secretNameInter {
-				secretNameSlice = append(secretNameSlice, v.(string))
+				if v == nil {
+					secretNameSlice = append(secretNameSlice, "")
+				} else {
+					secretNameSlice = append(secretNameSlice, v.(string))
+				}
 			}
 			secretNameFilter := filter{
 				Key:    "SecretName",
@@ -77,7 +81,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" trn is not slice ")
 			}
 			for _, v := range trnInter {
-				trnSlice = append(trnSlice, v.(string))
+				if v == nil {
+					trnSlice = append(trnSlice, "")
+				} else {
+					trnSlice = append(trnSlice, v.(string))
+				}
 			}
 			trnFilter := filter{
 				Key:    "Trn",
@@ -94,7 +102,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" SecretType is not slice ")
 			}
 			for _, v := range secretTypeInter {
-				secretTypeSlice = append(secretTypeSlice, v.(string))
+				if v == nil {
+					secretTypeSlice = append(secretTypeSlice, "")
+				} else {
+					secretTypeSlice = append(secretTypeSlice, v.(string))
+				}
 			}
 			secretTypeFilter := filter{
 				Key:    "SecretType",
@@ -111,7 +123,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" SecretState is not slice ")
 			}
 			for _, v := range secretStateInter {
-				secretStateSlice = append(secretStateSlice, v.(string))
+				if v == nil {
+					secretStateSlice = append(secretStateSlice, "")
+				} else {
+					secretStateSlice = append(secretStateSlice, v.(string))
+				}
 			}
 			secretStateFilter := filter{
 				Key:    "SecretState",
@@ -128,7 +144,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" ManagedState is not slice ")
 			}
 			for _, v := range managedStateInter {
-				managedStateSlice = append(managedStateSlice, v.(string))
+				if v == nil {
+					managedStateSlice = append(managedStateSlice, "")
+				} else {
+					managedStateSlice = append(managedStateSlice, v.(string))
+				}
 			}
 			managedStateFilter := filter{
 				Key:    "ManagedState",
@@ -145,7 +165,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" RotationState is not slice ")
 			}
 			for _, v := range rotationStateInter {
-				rotationStateSlice = append(rotationStateSlice, v.(string))
+				if v == nil {
+					rotationStateSlice = append(rotationStateSlice, "")
+				} else {
+					rotationStateSlice = append(rotationStateSlice, v.(string))
+				}
 			}
 			rotationStateFilter := filter{
 				Key:    "RotationState",
@@ -162,7 +186,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" description is not slice ")
 			}
 			for _, v := range descriptionInter {
-				descriptionSlice = append(descriptionSlice, v.(string))
+				if v == nil {
+					descriptionSlice = append(descriptionSlice, "")
+				} else {
+					descriptionSlice = append(descriptionSlice, v.(string))
+				}
 			}
 			descriptionFilter := filter{
 				Key:    "Description",
@@ -179,7 +207,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" CreationDateRange is not slice ")
 			}
 			for _, v := range creationDateRangeInter {
-				creationDateRangeSlice = append(creationDateRangeSlice, v.(string))
+				if v == nil {
+					creationDateRangeSlice = append(creationDateRangeSlice, "")
+				} else {
+					creationDateRangeSlice = append(creationDateRangeSlice, v.(string))
+				}
 			}
 			creationDateRangeFilter := filter{
 				Key:    "CreationDateRange",
@@ -196,7 +228,11 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 				return data, fmt.Errorf(" UpdateDateRange is not slice ")
 			}
 			for _, v := range updateDateRangeInter {
-				updateDateRangeSlice = append(updateDateRangeSlice, v.(string))
+				if v == nil {
+					updateDateRangeSlice = append(updateDateRangeSlice, "")
+				} else {
+					updateDateRangeSlice = append(updateDateRangeSlice, v.(string))
+				}
 			}
 			updateDateRangeFilter := filter{
 				Key:    "UpdateDateRange",

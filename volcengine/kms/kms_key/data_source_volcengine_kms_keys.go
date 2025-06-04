@@ -36,10 +36,85 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				Optional:    true,
 				Description: "Query the Key ring that meets the specified conditions, which is composed of key-value pairs.",
 			},
-			"filters": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Query the Key ring that meets the specified conditions, which is composed of key-value pairs.",
+			"key_name": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The name of the key.",
+			},
+			"key_spec": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The algorithm used in the key.",
+			},
+			"description": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The description of the key.",
+			},
+			"key_state": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The state of the key.",
+			},
+			"key_usage": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The usage of the key.",
+			},
+			"protection_level": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The protection level of the key.",
+			},
+			"rotate_state": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The state of the rotate.",
+			},
+			"origin": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The origin of the key.",
+			},
+			"creation_date_range": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The creation date of the keyring.",
+			},
+			"update_date_range": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The update date of the keyring.",
 			},
 			"tags": ve.TagsSchema(),
 			"keys": {

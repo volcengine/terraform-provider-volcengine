@@ -60,7 +60,11 @@ func (s *VolcengineKmsKeyringService) ReadResources(m map[string]interface{}) (d
 				return data, fmt.Errorf(" KeyringName is not slice ")
 			}
 			for _, v := range keyringNameInter {
-				keyringNameSlice = append(keyringNameSlice, v.(string))
+				if v == nil {
+					keyringNameSlice = append(keyringNameSlice, "")
+				} else {
+					keyringNameSlice = append(keyringNameSlice, v.(string))
+				}
 			}
 			keyringNameFilter := filter{
 				Key:    "KeyringName",
@@ -77,7 +81,11 @@ func (s *VolcengineKmsKeyringService) ReadResources(m map[string]interface{}) (d
 				return data, fmt.Errorf(" KeyringType is not slice ")
 			}
 			for _, v := range keyringTypeInter {
-				keyringTypeSlice = append(keyringTypeSlice, v.(string))
+				if v == nil {
+					keyringTypeSlice = append(keyringTypeSlice, "")
+				} else {
+					keyringTypeSlice = append(keyringTypeSlice, v.(string))
+				}
 			}
 			keyringTypeFilter := filter{
 				Key:    "KeyringType",
@@ -94,7 +102,11 @@ func (s *VolcengineKmsKeyringService) ReadResources(m map[string]interface{}) (d
 				return data, fmt.Errorf(" description is not slice ")
 			}
 			for _, v := range descriptionInter {
-				descriptionSlice = append(descriptionSlice, v.(string))
+				if v == nil {
+					descriptionSlice = append(descriptionSlice, "")
+				} else {
+					descriptionSlice = append(descriptionSlice, v.(string))
+				}
 			}
 			descriptionFilter := filter{
 				Key:    "Description",
@@ -111,7 +123,11 @@ func (s *VolcengineKmsKeyringService) ReadResources(m map[string]interface{}) (d
 				return data, fmt.Errorf(" CreationDateRange is not slice ")
 			}
 			for _, v := range creationDateRangeInter {
-				creationDateRangeSlice = append(creationDateRangeSlice, v.(string))
+				if v == nil {
+					creationDateRangeSlice = append(creationDateRangeSlice, "")
+				} else {
+					creationDateRangeSlice = append(creationDateRangeSlice, v.(string))
+				}
 			}
 			creationDateRangeFilter := filter{
 				Key:    "CreationDateRange",
@@ -128,7 +144,11 @@ func (s *VolcengineKmsKeyringService) ReadResources(m map[string]interface{}) (d
 				return data, fmt.Errorf(" UpdateDateRange is not slice ")
 			}
 			for _, v := range updateDateRangeInter {
-				updateDateRangeSlice = append(updateDateRangeSlice, v.(string))
+				if v == nil {
+					updateDateRangeSlice = append(updateDateRangeSlice, "")
+				} else {
+					updateDateRangeSlice = append(updateDateRangeSlice, v.(string))
+				}
 			}
 			updateDateRangeFilter := filter{
 				Key:    "UpdateDateRange",

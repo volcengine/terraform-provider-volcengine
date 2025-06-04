@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/copystructure"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -15,6 +16,11 @@ import (
 type VolcengineKmsKeyService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
+}
+
+type filter struct {
+	Key    string   `json:"Key"`
+	Values []string `json:"Values"`
 }
 
 func NewKmsKeyService(c *ve.SdkClient) *VolcengineKmsKeyService {
@@ -30,28 +36,252 @@ func (s *VolcengineKmsKeyService) GetClient() *ve.SdkClient {
 
 func (s *VolcengineKmsKeyService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
+		filters      []interface{}
+		newCondition map[string]interface{}
+		resp         *map[string]interface{}
+		results      interface{}
+		ok           bool
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "CurrentPage", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeKeys"
 
-		bytes, _ := json.Marshal(condition)
-		logger.Debug(logger.ReqFormat, action, string(bytes))
-		if condition == nil {
+		deepCopyValue, err := copystructure.Copy(condition)
+		if err != nil {
+			return data, fmt.Errorf(" DeepCopy condition error: %v ", err)
+		}
+		if newCondition, ok = deepCopyValue.(map[string]interface{}); !ok {
+			return data, fmt.Errorf(" DeepCopy condition error: newCondition is not map ")
+		}
+
+		if keyName, exists := condition["KeyName"]; exists {
+			keyNameSlice := make([]string, 0)
+			keyNameInter, ok := keyName.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" key name is not slice ")
+			}
+			for _, v := range keyNameInter {
+				if v == nil {
+					keyNameSlice = append(keyNameSlice, "")
+				} else {
+					keyNameSlice = append(keyNameSlice, v.(string))
+				}
+			}
+			keyNameFilter := filter{
+				Key:    "KeyName",
+				Values: keyNameSlice,
+			}
+			filters = append(filters, keyNameFilter)
+			delete(newCondition, "KeyName")
+		}
+
+		if keySpec, exists := condition["KeySpec"]; exists {
+			keySpecSlice := make([]string, 0)
+			keySpecInter, ok := keySpec.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" key spec is not slice ")
+			}
+			for _, v := range keySpecInter {
+				if v == nil {
+					keySpecSlice = append(keySpecSlice, "")
+				} else {
+					keySpecSlice = append(keySpecSlice, v.(string))
+				}
+			}
+			keySpecFilter := filter{
+				Key:    "KeySpec",
+				Values: keySpecSlice,
+			}
+			filters = append(filters, keySpecFilter)
+			delete(newCondition, "KeySpec")
+		}
+
+		if description, exists := condition["Description"]; exists {
+			descriptionSlice := make([]string, 0)
+			descriptionInter, ok := description.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" description is not slice ")
+			}
+			for _, v := range descriptionInter {
+				if v == nil {
+					descriptionSlice = append(descriptionSlice, "")
+				} else {
+					descriptionSlice = append(descriptionSlice, v.(string))
+				}
+			}
+			descriptionFilter := filter{
+				Key:    "Description",
+				Values: descriptionSlice,
+			}
+			filters = append(filters, descriptionFilter)
+			delete(newCondition, "Description")
+		}
+
+		if keyState, exists := condition["KeyState"]; exists {
+			keyStateSlice := make([]string, 0)
+			keyStateInter, ok := keyState.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" key state is not slice ")
+			}
+			for _, v := range keyStateInter {
+				if v == nil {
+					keyStateSlice = append(keyStateSlice, "")
+				} else {
+					keyStateSlice = append(keyStateSlice, v.(string))
+				}
+			}
+			keyStateFilter := filter{
+				Key:    "KeyState",
+				Values: keyStateSlice,
+			}
+			filters = append(filters, keyStateFilter)
+			delete(newCondition, "KeyState")
+		}
+
+		if keyUsage, exists := condition["KeyUsage"]; exists {
+			keyUsageSlice := make([]string, 0)
+			keyUsageInter, ok := keyUsage.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" key usage is not slice ")
+			}
+			for _, v := range keyUsageInter {
+				if v == nil {
+					keyUsageSlice = append(keyUsageSlice, "")
+				} else {
+					keyUsageSlice = append(keyUsageSlice, v.(string))
+				}
+			}
+			keyUsageFilter := filter{
+				Key:    "KeyUsage",
+				Values: keyUsageSlice,
+			}
+			filters = append(filters, keyUsageFilter)
+			delete(newCondition, "KeyUsage")
+		}
+
+		if protectionLevel, exists := condition["ProtectionLevel"]; exists {
+			protectionLevelSlice := make([]string, 0)
+			protectionLevelInter, ok := protectionLevel.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" protectionLevel is not slice ")
+			}
+			for _, v := range protectionLevelInter {
+				if v == nil {
+					protectionLevelSlice = append(protectionLevelSlice, "")
+				} else {
+					protectionLevelSlice = append(protectionLevelSlice, v.(string))
+				}
+			}
+			protectionLevelFilter := filter{
+				Key:    "ProtectionLevel",
+				Values: protectionLevelSlice,
+			}
+			filters = append(filters, protectionLevelFilter)
+			delete(newCondition, "ProtectionLevel")
+		}
+
+		if rotateState, exists := condition["RotateState"]; exists {
+			rotateStateSlice := make([]string, 0)
+			rotateStateInter, ok := rotateState.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" rotateState is not slice ")
+			}
+			for _, v := range rotateStateInter {
+				if v == nil {
+					rotateStateSlice = append(rotateStateSlice, "")
+				} else {
+					rotateStateSlice = append(rotateStateSlice, v.(string))
+				}
+			}
+			rotateStateFilter := filter{
+				Key:    "RotateState",
+				Values: rotateStateSlice,
+			}
+			filters = append(filters, rotateStateFilter)
+			delete(newCondition, "RotateState")
+		}
+
+		if origin, exists := condition["Origin"]; exists {
+			originSlice := make([]string, 0)
+			originInter, ok := origin.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" origin is not slice ")
+			}
+			for _, v := range originInter {
+				if v == nil {
+					originSlice = append(originSlice, "")
+				} else {
+					originSlice = append(originSlice, v.(string))
+				}
+			}
+			originFilter := filter{
+				Key:    "Origin",
+				Values: originSlice,
+			}
+			filters = append(filters, originFilter)
+			delete(newCondition, "Origin")
+		}
+
+		if creationDateRange, exists := condition["CreationDateRange"]; exists {
+			creationDateRangeSlice := make([]string, 0)
+			creationDateRangeInter, ok := creationDateRange.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" CreationDateRange is not slice ")
+			}
+			for _, v := range creationDateRangeInter {
+				if v == nil {
+					creationDateRangeSlice = append(creationDateRangeSlice, "")
+				} else {
+					creationDateRangeSlice = append(creationDateRangeSlice, v.(string))
+				}
+			}
+			creationDateRangeFilter := filter{
+				Key:    "CreationDateRange",
+				Values: creationDateRangeSlice,
+			}
+			filters = append(filters, creationDateRangeFilter)
+			delete(newCondition, "CreationDateRange")
+		}
+
+		if updateDateRange, exists := condition["UpdateDateRange"]; exists {
+			updateDateRangeSlice := make([]string, 0)
+			updateDateRangeInter, ok := updateDateRange.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" UpdateDateRange is not slice ")
+			}
+			for _, v := range updateDateRangeInter {
+				if v == nil {
+					updateDateRangeSlice = append(updateDateRangeSlice, "")
+				} else {
+					updateDateRangeSlice = append(updateDateRangeSlice, v.(string))
+				}
+			}
+			updateDateRangeFilter := filter{
+				Key:    "UpdateDateRange",
+				Values: updateDateRangeSlice,
+			}
+			filters = append(filters, updateDateRangeFilter)
+			delete(newCondition, "UpdateDateRange")
+		}
+
+		if len(filters) > 0 {
+			filtersBytes, _ := json.Marshal(filters)
+			newCondition["Filters"] = string(filtersBytes)
+		}
+
+		logger.Debug(logger.ReqFormat, action, &newCondition)
+		if newCondition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &newCondition)
 			if err != nil {
 				return data, err
 			}
 		}
 		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		logger.Debug(logger.RespFormat, action, newCondition, string(respBytes))
 		results, err = ve.ObtainSdkValue("Result.Keys", *resp)
 		if err != nil {
 			return data, err
