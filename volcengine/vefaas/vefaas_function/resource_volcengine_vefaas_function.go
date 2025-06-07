@@ -87,7 +87,7 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 				Description: "Code source.",
 			},
 			"envs": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Optional:    true,
 				Computed:    true,
 				Description: "Function environment variable.",
@@ -109,6 +109,7 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 			"vpc_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				MaxItems:    1,
 				Computed:    true,
 				Description: "The configuration of VPC.",
 				Elem: &schema.Resource{
@@ -124,16 +125,18 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 							Description: "Whether the function enables private network access.",
 						},
 						"subnet_ids": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
+							Set:      schema.HashString,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
 							Description: "The ID of subnet.",
 						},
 						"security_group_ids": {
-							Type:     schema.TypeList,
+							Type:     schema.TypeSet,
 							Optional: true,
+							Set:      schema.HashString,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
@@ -150,6 +153,7 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 			"tls_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				MaxItems:    1,
 				Computed:    true,
 				Description: "Function log configuration.",
 				Elem: &schema.Resource{
@@ -175,6 +179,7 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 			"source_access_config": {
 				Type:        schema.TypeList,
 				Optional:    true,
+				MaxItems:    1,
 				Description: "Access configuration for the image repository.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -193,6 +198,7 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 			},
 			"nas_storage": {
 				Type:        schema.TypeList,
+				MaxItems:    1,
 				Optional:    true,
 				Computed:    true,
 				Description: "The configuration of file storage NAS mount.",
@@ -209,20 +215,6 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 							Description: "The configuration of NAS.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"gid": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										Description: "User groups in the file system. " +
-											"Customization is not supported yet. If this parameter is provided, " +
-											"the parameter value is 1000 (consistent with the function run user gid).",
-									},
-									"uid": {
-										Type:     schema.TypeInt,
-										Optional: true,
-										Description: "Users in the file system do not support customization yet. " +
-											"If this parameter is provided, " +
-											"its value can only be 1000 (consistent with the function run user uid).",
-									},
 									"remote_path": {
 										Type:        schema.TypeString,
 										Required:    true,
@@ -251,6 +243,7 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 			},
 			"tos_mount_config": {
 				Type:        schema.TypeList,
+				MaxItems:    1,
 				Optional:    true,
 				Computed:    true,
 				Description: "The configuration of Object Storage TOS mount.",
@@ -262,19 +255,24 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 							Description: "Whether to enable TOS storage mounting.",
 						},
 						"credentials": {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "After enabling TOS, you need to provide an AKSK with access rights to the TOS domain name.",
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Description: "After enabling TOS, you need to provide an AKSK with access rights to the TOS domain name. " +
+								"When importing resources, this attribute will not be imported. " +
+								"If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"access_key_id": {
 										Type:        schema.TypeString,
 										Required:    true,
+										Sensitive:   true,
 										Description: "The AccessKey ID (AK) of the Volcano Engine account.",
 									},
 									"secret_access_key": {
 										Type:        schema.TypeString,
 										Required:    true,
+										Sensitive:   true,
 										Description: "The Secret Access Key (SK) of the Volcano Engine account.",
 									},
 								},

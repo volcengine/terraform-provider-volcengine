@@ -95,6 +95,23 @@ func (s *VolcengineVefaasFunctionService) ReadResource(resourceData *schema.Reso
 	if len(data) == 0 {
 		return data, fmt.Errorf("function %s not exist", id)
 	}
+
+	if resourceData.Get("tos_mount_config.0.credentials.0.access_key_id").(string) != "" && resourceData.Get("tos_mount_config.0.credentials.0.secret_access_key").(string) != "" {
+		logger.Debug(logger.RespFormat, "tos_mount_config.0.credentials.0.access_key_id data is", resourceData.Get("tos_mount_config.0.credentials.0.access_key_id").(string))
+		if tosMountConfig, tosMountConfigExist := data["TosMountConfig"]; tosMountConfigExist {
+			logger.Debug(logger.RespFormat, "TosMountConfig data is", data["TosMountConfig"])
+			tosMountConfigMap, ok := tosMountConfig.(map[string]interface{})
+			if ok {
+				tosMountConfigMap["Credentials"] = []interface{}{
+					map[string]interface{}{
+						"AccessKeyId":     resourceData.Get("tos_mount_config.0.credentials.0.access_key_id").(string),
+						"SecretAccessKey": resourceData.Get("tos_mount_config.0.credentials.0.secret_access_key").(string),
+					},
+				}
+			}
+		}
+	}
+
 	return data, err
 }
 
@@ -111,6 +128,46 @@ func (s *VolcengineVefaasFunctionService) CreateResource(resourceData *schema.Re
 			Convert: map[string]ve.RequestConvert{
 				"memory_mb": {
 					TargetField: "MemoryMB",
+				},
+				"envs": {
+					TargetField: "Envs",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"vpc_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"subnet_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"security_group_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+					},
+				},
+				"tls_config": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"source_access_config": {
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"nas_storage": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"nas_configs": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+					},
+				},
+				"tos_mount_config": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"credentials": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"mount_points": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+					},
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -150,6 +207,52 @@ func (s *VolcengineVefaasFunctionService) ModifyResource(resourceData *schema.Re
 				"MemoryMB": {
 					TargetField: "memory_mb",
 				},
+				"envs": {
+					TargetField: "Envs",
+					ConvertType: ve.ConvertJsonObjectArray,
+					ForceGet:    true,
+				},
+				"vpc_config": {
+					ForceGet:    true,
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"subnet_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"security_group_ids": {
+							ConvertType: ve.ConvertJsonArray,
+						},
+					},
+				},
+				"tls_config": {
+					ForceGet:    true,
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"source_access_config": {
+					ForceGet:    true,
+					ConvertType: ve.ConvertJsonObject,
+				},
+				"nas_storage": {
+					ForceGet:    true,
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"nas_configs": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+					},
+				},
+				"tos_mount_config": {
+					ForceGet:    true,
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"credentials": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"mount_points": {
+							ConvertType: ve.ConvertJsonObjectArray,
+						},
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
@@ -170,14 +273,16 @@ func (s *VolcengineVefaasFunctionService) RemoveResource(resourceData *schema.Re
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteFunction",
-			ConvertMode: ve.RequestConvertInConvert,
+			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			SdkParam: &map[string]interface{}{
 				"Id": resourceData.Id(),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
