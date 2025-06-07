@@ -118,7 +118,7 @@ resource "volcengine_vke_node_pool" "foo" {
   }
 }
 
-// add existing instances to a custom node pool
+# add existing instances to a custom node pool
 resource "volcengine_ecs_instance" "foo" {
   instance_name        = "acc-test-ecs-${count.index}"
   host_name            = "tf-acc-test"

@@ -1,19 +1,24 @@
+# query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
+# create vpc
 resource "volcengine_vpc" "foo" {
-  vpc_name   = "acc-test-vpc"
-  cidr_block = "172.16.0.0/16"
+  vpc_name     = "acc-test-vpc"
+  cidr_block   = "172.16.0.0/16"
+  dns_servers  = ["8.8.8.8", "114.114.114.114"]
+  project_name = "default"
 }
 
+# create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
-  description = "tfdesc"
   cidr_block  = "172.16.0.0/24"
   zone_id     = data.volcengine_zones.foo.zones[0].id
   vpc_id      = volcengine_vpc.foo.id
 }
 
+# create escloud instance
 resource "volcengine_escloud_instance_v2" "foo" {
   instance_name       = "acc-test-escloud-instance"
   version             = "V7_10"
@@ -72,7 +77,12 @@ resource "volcengine_escloud_instance_v2" "foo" {
     key   = "k1"
     value = "v1"
   }
+}
 
-  #  maintenance_time = "02:00-08:00"
-  #  maintenance_day = ["FRIDAY", "MONDAY"]
+# create escloud ip white list
+resource "volcengine_escloud_ip_white_list" "foo" {
+  instance_id = volcengine_escloud_instance_v2.foo.id
+  type        = "public"
+  component   = "es"
+  ip_list     = ["172.16.0.10", "172.16.0.11", "172.16.0.12"]
 }

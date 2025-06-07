@@ -217,8 +217,9 @@ func (s *VolcengineRedisDbInstanceService) ReadResources(condition map[string]in
 				ins["ConfigureNodes"] = nodes
 			}
 
-			data = append(data, ins)
+			//data = append(data, ins)
 		}
+		data = instances
 		return data, nil
 	})
 }

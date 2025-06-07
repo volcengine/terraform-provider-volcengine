@@ -148,5 +148,6 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }

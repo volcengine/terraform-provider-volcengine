@@ -164,6 +164,7 @@ func (VolcengineVolumeService) WithResourceResponseHandlers(volume map[string]in
 }
 
 func (s *VolcengineVolumeService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateVolume",
@@ -195,7 +196,38 @@ func (s *VolcengineVolumeService) CreateResource(resourceData *schema.ResourceDa
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	if resourceData.Get("delete_with_instance").(bool) {
+		callbacks = append(callbacks, ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyVolumeAttribute",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"delete_with_instance": {
+						TargetField: "DeleteWithInstance",
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["VolumeId"] = d.Id()
+					delete(*call.SdkParam, "Tags")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"available", "attached"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		})
+	}
+
+	return callbacks
 }
 
 func (s *VolcengineVolumeService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -389,6 +421,21 @@ func (s *VolcengineVolumeService) RemoveResource(resourceData *schema.ResourceDa
 				if err != nil {
 					return false, err
 				}
+
+				// 包年包月云盘和随实例删除云盘，直接移除管理
+				chargeType, err := ve.ObtainSdkValue("VolumeChargeType", volume)
+				if err != nil {
+					return false, err
+				}
+				deleteWithInstance, err := ve.ObtainSdkValue("DeleteWithInstance", volume)
+				if err != nil {
+					return false, err
+				}
+				if chargeType == "PrePaid" && deleteWithInstance.(bool) {
+					logger.DebugInfo("The Resource volcengine_volume %s ChargeType is PrePaid and its attribute DeleteWithInstance is true, so it will remove from state.", d.Id())
+					return false, nil
+				}
+
 				status, err := ve.ObtainSdkValue("Status", volume)
 				if err != nil {
 					return false, err
