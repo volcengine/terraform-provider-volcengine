@@ -64,7 +64,7 @@ func ResourceVolcengineVkePermission() *schema.Resource {
 				Optional:    true,
 				ForceNew:    true,
 				Computed:    true,
-				Description: "Whether the RBAC role is a custom role. Default is false",
+				Description: "Whether the RBAC role is a custom role. Default is false.",
 			},
 			"grantee_id": {
 				Type:        schema.TypeInt,

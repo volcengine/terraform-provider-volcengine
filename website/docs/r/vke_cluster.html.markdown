@@ -10,17 +10,17 @@ description: |-
 Provides a resource to manage vke cluster
 ## Example Usage
 ```hcl
-// query available zones in current region
+# query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
-// create vpc
+# create vpc
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
-// create subnet
+# create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -28,13 +28,13 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
-// create security group
+# create security group
 resource "volcengine_security_group" "foo" {
   security_group_name = "acc-test-security-group"
   vpc_id              = volcengine_vpc.foo.id
 }
 
-// create vke cluster
+# create vke cluster
 resource "volcengine_vke_cluster" "foo" {
   name                      = "acc-test-1"
   description               = "created by terraform"
@@ -66,12 +66,12 @@ resource "volcengine_vke_cluster" "foo" {
   }
 }
 
-// query the image_id which match the specified image_name
+# query the image_id which match the specified image_name
 data "volcengine_images" "foo" {
   name_regex = "veLinux 1.0 CentOS Compatible 64 bit"
 }
 
-// create vke node pool
+# create vke node pool
 resource "volcengine_vke_node_pool" "foo" {
   cluster_id = volcengine_vke_cluster.foo.id
   name       = "acc-test-node-pool"
@@ -137,7 +137,7 @@ resource "volcengine_vke_node_pool" "foo" {
   }
 }
 
-// create ecs instance
+# create ecs instance
 resource "volcengine_ecs_instance" "foo" {
   instance_name        = "acc-test-ecs"
   host_name            = "tf-acc-test"
@@ -159,7 +159,7 @@ resource "volcengine_ecs_instance" "foo" {
   }
 }
 
-// add the ecs instance to the vke node pool
+# add the ecs instance to the vke node pool
 resource "volcengine_vke_node" "foo" {
   cluster_id   = volcengine_vke_cluster.foo.id
   instance_id  = volcengine_ecs_instance.foo.id
