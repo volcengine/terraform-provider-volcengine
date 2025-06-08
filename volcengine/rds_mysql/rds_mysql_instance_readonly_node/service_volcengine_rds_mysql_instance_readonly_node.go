@@ -151,6 +151,9 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) CreateResource(resourceD
 				if err != nil {
 					return common, err
 				}
+
+				// 等待 mysql 示例进入 Updating 状态
+				time.Sleep(10 * time.Second)
 				return common, nil
 			},
 			AfterRefresh: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) error {

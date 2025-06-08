@@ -41,11 +41,10 @@ func ResourceVolcengineEscloudInstanceV2() *schema.Resource {
 				Description: "The version of instance. When creating ESCloud instance, the valid value is `V6_7` or `V7_10`. When creating OpenSearch instance, the valid value is `OPEN_SEARCH_2_9`.",
 			},
 			"zone_ids": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Required: true,
 				ForceNew: true,
 				MinItems: 1,
-				Set:      schema.HashString,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},

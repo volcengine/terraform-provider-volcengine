@@ -1,7 +1,7 @@
-// 创建步骤：terraform init -> terraform plan -> terraform apply
-// 删除步骤: terraform state rm volcengine_scaling_configuration.foo1 -> terraform destroy
+# 创建步骤：terraform init -> terraform plan -> terraform apply
+# 删除步骤: terraform state rm volcengine_scaling_configuration.foo1 -> terraform destroy
 
-// 创建伸缩组
+# 创建伸缩组
 resource "volcengine_scaling_group" "foo" {
   scaling_group_name = "zzm-tf-test"
   subnet_ids = ["subnet-2fegl9waotzi859gp67relkhv"]
@@ -13,7 +13,7 @@ resource "volcengine_scaling_group" "foo" {
   default_cooldown = 10
 }
 
-// 创建伸缩配置
+# 创建伸缩配置
 resource "volcengine_scaling_configuration" "foo1" {
   scaling_configuration_name = "terraform-test"
   scaling_group_id = volcengine_scaling_group.foo.scaling_group_id
@@ -41,13 +41,13 @@ resource "volcengine_scaling_configuration" "foo1" {
   eip_billing_type = "PostPaidByBandwidth"
 }
 
-// 绑定伸缩配置
+# 绑定伸缩配置
 resource "volcengine_scaling_configuration_attachment" "foo2" {
   depends_on = [volcengine_scaling_configuration.foo1]
   scaling_configuration_id = volcengine_scaling_configuration.foo1.scaling_configuration_id
 }
 
-// 启用伸缩组
+# 启用伸缩组
 resource "volcengine_scaling_group_enabler" "foo3" {
   depends_on = [volcengine_scaling_configuration_attachment.foo2]
   scaling_group_id = volcengine_scaling_group.foo.scaling_group_id

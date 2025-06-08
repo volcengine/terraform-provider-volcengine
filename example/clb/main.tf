@@ -1,14 +1,14 @@
-// query available zones in current region
+# query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
-// create vpc
+# create vpc
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
-// create subnet
+# create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -45,7 +45,7 @@ resource "volcengine_clb" "private_clb" {
   project_name       = "default"
 }
 
-// create eip
+# create eip
 resource "volcengine_eip_address" "eip" {
   billing_type = "PostPaidByBandwidth"
   bandwidth    = 1
@@ -55,7 +55,7 @@ resource "volcengine_eip_address" "eip" {
   project_name = "default"
 }
 
-// associate eip to clb
+# associate eip to clb
 resource "volcengine_eip_associate" "associate" {
   allocation_id = volcengine_eip_address.eip.id
   instance_id   = volcengine_clb.private_clb.id
@@ -69,7 +69,7 @@ resource "volcengine_vpc" "vpc_ipv6" {
   enable_ipv6 = true
 }
 
-// create ipv6 subnet
+# create ipv6 subnet
 resource "volcengine_subnet" "subnet_ipv6" {
   subnet_name     = "acc-test-subnet-ipv6"
   cidr_block      = "172.16.0.0/24"
@@ -78,7 +78,7 @@ resource "volcengine_subnet" "subnet_ipv6" {
   ipv6_cidr_block = 1
 }
 
-// create ipv6 private clb
+# create ipv6 private clb
 resource "volcengine_clb" "private_clb_ipv6" {
   type               = "private"
   subnet_id          = volcengine_subnet.subnet_ipv6.id
@@ -89,7 +89,7 @@ resource "volcengine_clb" "private_clb_ipv6" {
   address_ip_version = "DualStack"
 }
 
-// create ipv6 gateway
+# create ipv6 gateway
 resource "volcengine_vpc_ipv6_gateway" "ipv6_gateway" {
   vpc_id = volcengine_vpc.vpc_ipv6.id
   name   = "acc-test-ipv6-gateway"

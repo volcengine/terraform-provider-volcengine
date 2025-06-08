@@ -1,3 +1,13 @@
+resource "volcengine_dns_zone" "foo" {
+  zone_name = "xxxx.com"
+  tags {
+    key   = "xx"
+    value = "xx"
+  }
+  project_name = "default"
+  remark       = "xxx"
+}
+
 resource "volcengine_dns_backup" "foo" {
-  zid = 58846
+  zid = volcengine_dns_zone.foo.id
 }

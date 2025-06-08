@@ -47,7 +47,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				//ForceNew:    true,
-				Description: "The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.",
+				Description: "The type of Volume. Valid values: `ESSD_PL0`, `ESSD_FlexPL`, `TSSD_TL0`.",
 			},
 			"kind": {
 				Type:        schema.TypeString,
@@ -70,7 +70,7 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				Description: "The ID of the instance to which the created volume is automatically attached. " +
+				Description: "The ID of the instance to which the created volume is automatically attached. It is recommended to attach the PostPaid volume to instance through resource `volume_attach`." +
 					"When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.",
 			},
 			"snapshot_id": {
@@ -117,10 +117,6 @@ func ResourceVolcengineVolume() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				Description: "Delete Volume with Attached Instance.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// 创建时不存在这个参数，修改时存在这个参数
-					return d.Id() == ""
-				},
 			},
 			"project_name": {
 				Type:        schema.TypeString,

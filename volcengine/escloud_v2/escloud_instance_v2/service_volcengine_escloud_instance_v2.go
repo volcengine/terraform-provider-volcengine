@@ -333,7 +333,10 @@ func (s *VolcengineEscloudInstanceV2Service) CreateResource(resourceData *schema
 				)
 
 				// zone id
-				zoneIdsArr := d.Get("zone_ids").(*schema.Set).List()
+				zoneIdsArr, ok := d.Get("zone_ids").([]interface{})
+				if !ok {
+					return false, fmt.Errorf("zone_ids is not slice")
+				}
 				zoneIds := make([]string, 0)
 				for _, id := range zoneIdsArr {
 					zoneIds = append(zoneIds, id.(string))

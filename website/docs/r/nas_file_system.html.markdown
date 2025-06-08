@@ -10,12 +10,12 @@ description: |-
 Provides a resource to manage nas file system
 ## Example Usage
 ```hcl
-// query available zones in current region
+# query available zones in current region
 data "volcengine_nas_zones" "foo" {
 
 }
 
-// create nas file system
+# create nas file system
 resource "volcengine_nas_file_system" "foo" {
   file_system_name = "acc-test-fs"
   description      = "acc-test"
@@ -28,13 +28,13 @@ resource "volcengine_nas_file_system" "foo" {
   }
 }
 
-// create vpc
+# create vpc
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
-// create subnet
+# create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -42,7 +42,7 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
-// create nas permission group
+# create nas permission group
 resource "volcengine_nas_permission_group" "foo" {
   permission_group_name = "acc-test"
   description           = "acctest"
@@ -58,7 +58,7 @@ resource "volcengine_nas_permission_group" "foo" {
   }
 }
 
-// create nas mount point
+# create nas mount point
 resource "volcengine_nas_mount_point" "foo" {
   file_system_id      = volcengine_nas_file_system.foo.id
   mount_point_name    = "acc-test"

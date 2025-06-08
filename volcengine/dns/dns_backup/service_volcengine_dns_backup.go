@@ -190,8 +190,8 @@ func (s *VolcengineDnsBackupService) CreateResource(resourceData *schema.Resourc
 func (VolcengineDnsBackupService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, map[string]ve.ResponseConvert{
-			"zid": {
-				TargetField: "ZID",
+			"ZID": {
+				TargetField: "zid",
 			},
 		}, nil
 	}
@@ -295,6 +295,7 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }
 
@@ -305,5 +306,6 @@ func getPostUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }
