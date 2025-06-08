@@ -203,6 +203,7 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }
 
@@ -213,5 +214,6 @@ func getPostUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }

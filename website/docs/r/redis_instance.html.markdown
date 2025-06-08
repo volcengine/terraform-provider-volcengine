@@ -14,14 +14,19 @@ in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),wh
 use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
+# query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
+# create vpc
 resource "volcengine_vpc" "foo" {
-  vpc_name   = "acc-test-vpc"
-  cidr_block = "172.16.0.0/16"
+  vpc_name     = "acc-test-vpc"
+  cidr_block   = "172.16.0.0/16"
+  dns_servers  = ["8.8.8.8", "114.114.114.114"]
+  project_name = "default"
 }
 
+# create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -29,7 +34,7 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
-
+# create redis instance
 resource "volcengine_redis_instance" "foo" {
   instance_name       = "tf-test2"
   sharded_cluster     = 1
@@ -82,7 +87,6 @@ resource "volcengine_redis_instance" "foo" {
   configure_nodes {
     az = "cn-beijing-b"
   }
-  #additional_bandwidth = 12
 }
 ```
 ## Argument Reference

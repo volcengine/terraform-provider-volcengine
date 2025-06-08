@@ -16,7 +16,7 @@ resource "volcengine_dns_zone" "foo" {
     key   = "xx"
     value = "xx"
   }
-  project_name = "xxx"
+  project_name = "default"
   remark       = "xxx"
 }
 ```

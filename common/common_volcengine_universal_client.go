@@ -78,7 +78,7 @@ func (u *Universal) loadEndpoint(info UniversalInfo, defaultEndpoint, region str
 	// todo: secondly, query endpoint by location DescribeOpenAPIEndpoints
 
 	// thirdly, combine standard endpoint for target region
-	if v, exist := tobRegion[region]; exist && v {
+	if v, exist := tobRegion[region]; exist && v && endpoint == "" {
 		serviceName := strings.ReplaceAll(strings.ToLower(info.ServiceName), "_", "-")
 		regionType := getRegionType(info.RegionType)
 		var standardEndpoint string

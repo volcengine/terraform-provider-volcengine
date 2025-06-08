@@ -14,17 +14,17 @@ in  [Volcengine Console](https://console.volcengine.com/finance/unsubscribe/),wh
 use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
-// query available zones in current region
+# query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
-// create vpc
+# create vpc
 resource "volcengine_vpc" "foo" {
   vpc_name   = "acc-test-vpc"
   cidr_block = "172.16.0.0/16"
 }
 
-// create subnet
+# create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -32,26 +32,26 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
-// create security group
+# create security group
 resource "volcengine_security_group" "foo" {
   security_group_name = "acc-test-security-group"
   vpc_id              = volcengine_vpc.foo.id
 }
 
-// query the image_id which match the specified instance_type
+# query the image_id which match the specified instance_type
 data "volcengine_images" "foo" {
   os_type          = "Linux"
   visibility       = "public"
-  instance_type_id = "ecs.g1.large"
+  instance_type_id = "ecs.g3il.large"
 }
 
-// create PrePaid ecs instance
+# create PrePaid ecs instance
 resource "volcengine_ecs_instance" "foo" {
   instance_name        = "acc-test-ecs"
   description          = "acc-test"
   host_name            = "tf-acc-test"
   image_id             = data.volcengine_images.foo.images[0].image_id
-  instance_type        = "ecs.g1.large"
+  instance_type        = "ecs.g3il.large"
   password             = "93f0cb0614Aab12"
   instance_charge_type = "PrePaid"
   period               = 1
@@ -66,7 +66,7 @@ resource "volcengine_ecs_instance" "foo" {
   }
 }
 
-// create PrePaid data volume
+# create PrePaid data volume
 resource "volcengine_volume" "PreVolume" {
   volume_name          = "acc-test-volume"
   volume_type          = "ESSD_PL0"
@@ -84,14 +84,13 @@ resource "volcengine_volume" "PreVolume" {
   }
 }
 
-// create PostPaid data volume
+# create PostPaid data volume
 resource "volcengine_volume" "PostVolume" {
-  volume_name = "acc-test-volume"
-  volume_type = "ESSD_PL0"
-  description = "acc-test"
-  kind        = "data"
-  size        = 40
-  #  snapshot_id        = "snap-3vydtmc0fl3qunm4****"
+  volume_name        = "acc-test-volume"
+  volume_type        = "ESSD_PL0"
+  description        = "acc-test"
+  kind               = "data"
+  size               = 40
   zone_id            = data.volcengine_zones.foo.zones[0].id
   volume_charge_type = "PostPaid"
   project_name       = "default"
@@ -100,20 +99,26 @@ resource "volcengine_volume" "PostVolume" {
     value = "v1"
   }
 }
+
+# attach PostPaid data volume to ecs instance
+resource "volcengine_volume_attach" "foo" {
+  instance_id = volcengine_ecs_instance.foo.id
+  volume_id   = volcengine_volume.PostVolume.id
+}
 ```
 ## Argument Reference
 The following arguments are supported:
 * `kind` - (Required, ForceNew) The kind of Volume, the value is `data`.
 * `size` - (Required) The size of Volume.
 * `volume_name` - (Required) The name of Volume.
-* `volume_type` - (Required) The type of Volume, the value is `PTSSD` or `ESSD_PL0` or `ESSD_PL1` or `ESSD_PL2` or `ESSD_FlexPL`.
+* `volume_type` - (Required) The type of Volume. Valid values: `ESSD_PL0`, `ESSD_FlexPL`, `TSSD_TL0`.
 * `zone_id` - (Required, ForceNew) The id of the Zone.
 * `delete_with_instance` - (Optional) Delete Volume with Attached Instance.
 * `description` - (Optional) The description of the Volume.
 * `extra_performance_iops` - (Optional) The extra IOPS performance size for volume. Unit: times per second. The valid values for `Balance` and `IOPS` is 0~50000.
 * `extra_performance_throughput_mb` - (Optional) The extra Throughput performance size for volume. Unit: MB/s. The valid values for ESSD FlexPL volume is 0~650.
 * `extra_performance_type_id` - (Optional) The type of extra performance for volume. The valid values for ESSD FlexPL volume are `Throughput`, `Balance`, `IOPS`. The valid value for TSSD_TL0 volume is `Throughput`.
-* `instance_id` - (Optional, ForceNew) The ID of the instance to which the created volume is automatically attached. When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.
+* `instance_id` - (Optional, ForceNew) The ID of the instance to which the created volume is automatically attached. It is recommended to attach the PostPaid volume to instance through resource `volume_attach`.When use this field to attach ecs instance, the attached volume cannot be deleted by terraform, please use `terraform state rm volcengine_volume.resource_name` command to remove it from terraform state file and management.
 * `project_name` - (Optional) The ProjectName of the Volume.
 * `snapshot_id` - (Optional, ForceNew) The id of the snapshot. When creating a volume using snapshots, this field is required.
 When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.

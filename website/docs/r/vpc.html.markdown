@@ -10,11 +10,11 @@ description: |-
 Provides a resource to manage vpc
 ## Example Usage
 ```hcl
-// query available zones in current region
+# query available zones in current region
 data "volcengine_zones" "foo" {
 }
 
-// create vpc
+# create vpc
 resource "volcengine_vpc" "foo" {
   vpc_name     = "acc-test-vpc"
   cidr_block   = "172.16.0.0/16"
@@ -22,7 +22,7 @@ resource "volcengine_vpc" "foo" {
   project_name = "default"
 }
 
-// create subnet
+# create subnet
 resource "volcengine_subnet" "foo" {
   subnet_name = "acc-test-subnet"
   cidr_block  = "172.16.0.0/24"
@@ -30,7 +30,7 @@ resource "volcengine_subnet" "foo" {
   vpc_id      = volcengine_vpc.foo.id
 }
 
-// create security group
+# create security group
 resource "volcengine_security_group" "foo" {
   security_group_name = "acc-test-security-group"
   vpc_id              = volcengine_vpc.foo.id

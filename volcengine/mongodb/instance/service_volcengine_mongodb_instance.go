@@ -364,6 +364,12 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 				"storage_space_gb": {
 					TargetField: "StorageSpaceGB",
 				},
+				"config_server_node_spec": {
+					TargetField: "ConfigServerNodeSpec",
+				},
+				"config_server_storage_space_gb": {
+					TargetField: "ConfigServerStorageSpaceGB",
+				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
@@ -399,7 +405,10 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 				}
 
 				var zoneIdsStr string
-				zoneIdsArr := d.Get("zone_ids").(*schema.Set).List()
+				zoneIdsArr, ok := d.Get("zone_ids").([]interface{})
+				if !ok {
+					return false, fmt.Errorf("zone_ids is not slice")
+				}
 				if len(zoneIdsArr) > 0 {
 					zoneIds := make([]string, 0)
 					for _, id := range zoneIdsArr {
@@ -592,7 +601,7 @@ func (s *VolcengineMongoDBInstanceService) RemoveResource(resourceData *schema.R
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 15*time.Minute)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

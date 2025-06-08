@@ -238,39 +238,38 @@ func (VolcengineZoneService) WithResourceResponseHandlers(d map[string]interface
 func (s *VolcengineZoneService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 
-	//if resourceData.HasChange("remark") {
-	//
-	//}
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "UpdateZone",
-			ConvertMode: ve.RequestConvertInConvert,
-			ContentType: ve.ContentTypeJson,
-			Convert: map[string]ve.RequestConvert{
-				"remark": {
-					TargetField: "Remark",
+	if resourceData.HasChange("remark") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "UpdateZone",
+				ConvertMode: ve.RequestConvertInConvert,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"remark": {
+						TargetField: "Remark",
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					zid, err := strconv.Atoi(d.Id())
+					if err != nil {
+						return false, fmt.Errorf(" ZID cannot convert to int ")
+					}
+					(*call.SdkParam)["ZID"] = zid
+					if resourceData.HasChange("remark") {
+						(*call.SdkParam)["Remark"] = d.Get("remark")
+					}
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
 				},
 			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				zid, err := strconv.Atoi(d.Id())
-				if err != nil {
-					return false, fmt.Errorf(" ZID cannot convert to int ")
-				}
-				(*call.SdkParam)["ZID"] = zid
-				if resourceData.HasChange("remark") {
-					(*call.SdkParam)["Remark"] = d.Get("remark")
-				}
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
-			},
-		},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	callbacks = append(callbacks, callback)
 
 	// Tags
 	callbacks = s.setResourceTags(resourceData, callbacks)
@@ -383,6 +382,7 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }
 
@@ -393,6 +393,7 @@ func getPostUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.POST,
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
+		RegionType:  ve.Global,
 	}
 }
 

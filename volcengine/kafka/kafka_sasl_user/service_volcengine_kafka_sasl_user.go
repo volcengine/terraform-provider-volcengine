@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_instance"
 )
 
 type VolcengineKafkaSaslUserService struct {
@@ -123,6 +124,16 @@ func (s *VolcengineKafkaSaslUserService) CreateResource(resourceData *schema.Res
 					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					kafka_instance.NewKafkaInstanceService(s.Client): {
+						Target:     []string{"Running"},
+						Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
+						ResourceId: resourceData.Get("instance_id").(string),
+					},
+				},
 			},
 		}
 		callbacks = append(callbacks, deleteCallback)
@@ -154,6 +165,16 @@ func (s *VolcengineKafkaSaslUserService) CreateResource(resourceData *schema.Res
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				d.SetId(fmt.Sprintf("%v:%v", d.Get("instance_id"), d.Get("user_name")))
 				return nil
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				kafka_instance.NewKafkaInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
+					ResourceId: resourceData.Get("instance_id").(string),
+				},
 			},
 		},
 	}
@@ -199,6 +220,16 @@ func (s *VolcengineKafkaSaslUserService) ModifyResource(resourceData *schema.Res
 					logger.Debug(logger.RespFormat, call.Action, resp, err)
 					return resp, err
 				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					kafka_instance.NewKafkaInstanceService(s.Client): {
+						Target:     []string{"Running"},
+						Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
+						ResourceId: resourceData.Get("instance_id").(string),
+					},
+				},
 			},
 		})
 	}
@@ -222,6 +253,16 @@ func (s *VolcengineKafkaSaslUserService) RemoveResource(resourceData *schema.Res
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+				kafka_instance.NewKafkaInstanceService(s.Client): {
+					Target:     []string{"Running"},
+					Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
+					ResourceId: resourceData.Get("instance_id").(string),
+				},
 			},
 		},
 	}

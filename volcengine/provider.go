@@ -157,6 +157,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/direct_connect/direct_connect_virtual_interface"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_auto_snapshot_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_auto_snapshot_policy_attachment"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_max_extra_performance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_snapshot"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/ebs_snapshot_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/ebs/volume"
@@ -332,6 +333,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/permission"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_resource_types"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip"
@@ -499,6 +501,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_ebs_snapshots":              ebs_snapshot.DataSourceVolcengineEbsSnapshots(),
 			"volcengine_ebs_snapshot_groups":        ebs_snapshot_group.DataSourceVolcengineEbsSnapshotGroups(),
 			"volcengine_ebs_auto_snapshot_policies": ebs_auto_snapshot_policy.DataSourceVolcengineEbsAutoSnapshotPolicies(),
+			"volcengine_ebs_max_extra_performances": ebs_max_extra_performance.DataSourceVolcengineEbsMaxExtraPerformances(),
 
 			// ================ ECS ================
 			"volcengine_ecs_instances":           ecs_instance.DataSourceVolcengineEcsInstances(),
@@ -553,6 +556,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_support_addons":         support_addon.DataSourceVolcengineVkeVkeSupportedAddons(),
 			"volcengine_vke_kubeconfigs":            kubeconfig.DataSourceVolcengineVkeKubeconfigs(),
 			"volcengine_vke_support_resource_types": support_resource_types.DataSourceVolcengineVkeVkeSupportResourceTypes(),
+			"volcengine_vke_permissions":            vke_permission.DataSourceVolcengineVkePermissions(),
 
 			// ================ IAM ================
 			"volcengine_iam_policies":                      iam_policy.DataSourceVolcengineIamPolicies(),
@@ -913,6 +917,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vke_default_node_pool":              default_node_pool.ResourceVolcengineDefaultNodePool(),
 			"volcengine_vke_default_node_pool_batch_attach": default_node_pool_batch_attach.ResourceVolcengineDefaultNodePoolBatchAttach(),
 			"volcengine_vke_kubeconfig":                     kubeconfig.ResourceVolcengineVkeKubeconfig(),
+			"volcengine_vke_permission":                     vke_permission.ResourceVolcengineVkePermission(),
 
 			// ================ IAM ================
 			"volcengine_iam_policy":                       iam_policy.ResourceVolcengineIamPolicy(),

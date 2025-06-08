@@ -1,4 +1,4 @@
-// create cr registry
+# create cr registry
 resource "volcengine_cr_registry" "foo" {
   name               = "acc-test-cr"
   delete_immediately = false
@@ -6,14 +6,14 @@ resource "volcengine_cr_registry" "foo" {
   project            = "default"
 }
 
-// create cr namespace
+# create cr namespace
 resource "volcengine_cr_namespace" "foo" {
   registry = volcengine_cr_registry.foo.id
   name     = "acc-test-namespace"
   project  = "default"
 }
 
-// create cr repository
+# create cr repository
 resource "volcengine_cr_repository" "foo" {
   registry     = volcengine_cr_registry.foo.id
   namespace    = volcengine_cr_namespace.foo.name

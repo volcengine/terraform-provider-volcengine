@@ -44,11 +44,10 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Description: "The zone ID of instance.",
 			},
 			"zone_ids": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Optional: true,
 				Computed: true,
 				ForceNew: true,
-				Set:      schema.HashString,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -119,6 +118,28 @@ func ResourceVolcengineMongoDBInstance() *schema.Resource {
 				Type:        schema.TypeInt,
 				Required:    true,
 				Description: "The total storage space of a replica set instance, or the storage space of a single shard in a sharded cluster. Unit: GiB.",
+			},
+			"config_server_node_spec": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("instance_type") == "ReplicaSet"
+				},
+				Description: "The config server node spec of shard cluster. Default is `mongo.config.1c2g`. This parameter is only effective when the `InstanceType` is `ShardedCluster`. \n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
+			"config_server_storage_space_gb": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("instance_type") == "ReplicaSet"
+				},
+				Description: "The config server storage space of shard cluster, Unit: GiB. Default is 20. This parameter is only effective when the `InstanceType` is `ShardedCluster`. \n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"vpc_id": {
 				Type:        schema.TypeString,
