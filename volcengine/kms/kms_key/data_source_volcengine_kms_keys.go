@@ -116,7 +116,28 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				},
 				Description: "The update date of the keyring.",
 			},
-			"tags": ve.TagsSchema(),
+			"tags": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "A list of tags.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The key of the tag.",
+						},
+						"values": {
+							Type:        schema.TypeList,
+							Required:    true,
+							Description: "The values of the tag.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+					},
+				},
+			},
 			"keys": {
 				Description: "Master key list information.",
 				Type:        schema.TypeList,

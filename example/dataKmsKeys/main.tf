@@ -12,10 +12,6 @@ data "volcengine_kms_keys" "default" {
   update_date_range = ["2025-06-01 19:48:06", "2025-06-04 19:48:06"]
   tags {
     key = "tf-k1"
-    value = "tf-v1"
-  }
-  tags {
-    key = "tf-k2"
-    value = "tf-v2"
+    values = ["tf-v1"]
   }
 }

@@ -270,12 +270,12 @@ func (s *VolcengineKmsKeyService) ReadResources(m map[string]interface{}) (data 
 
 		logger.Debug(logger.ReqFormat, action, &newCondition)
 		if newCondition == nil {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalPostInfo(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &newCondition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalPostInfo(action), &newCondition)
 			if err != nil {
 				return data, err
 			}
@@ -461,10 +461,11 @@ func (s *VolcengineKmsKeyService) DatasourceResources(*schema.ResourceData, *sch
 		RequestConverts: map[string]ve.RequestConvert{
 			"tags": {
 				TargetField: "TagFilters",
-				ConvertType: ve.ConvertListN,
+				ConvertType: ve.ConvertJsonObjectArray,
 				NextLevelConvert: map[string]ve.RequestConvert{
-					"value": {
-						TargetField: "Values.1",
+					"values": {
+						TargetField: "Values",
+						ConvertType: ve.ConvertJsonArray,
 					},
 				},
 			},
@@ -475,6 +476,7 @@ func (s *VolcengineKmsKeyService) DatasourceResources(*schema.ResourceData, *sch
 		NameField:    "KeyName",
 		IdField:      "ID",
 		CollectField: "keys",
+		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"ID": {
 				TargetField: "id",
