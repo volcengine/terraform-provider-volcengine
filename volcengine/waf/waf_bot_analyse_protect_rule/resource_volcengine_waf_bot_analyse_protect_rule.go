@@ -405,7 +405,7 @@ func ResourceVolcengineWafBotAnalyseProtectRule() *schema.Resource {
 			"enable_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The number of statistical protection rules enabled under the current domain name.\n",
+				Description: "The number of statistical protection rules enabled under the current domain name.",
 			},
 			"total_count": {
 				Type:        schema.TypeInt,
