@@ -505,7 +505,7 @@ func ResourceVolcengineWafDomain() *schema.Resource {
 				},
 			},
 			"bot_dytoken_enable": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeInt,
 				Optional:    true,
 				Description: "Whether to enable the bot dynamic token. Works only on modified scenes.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
