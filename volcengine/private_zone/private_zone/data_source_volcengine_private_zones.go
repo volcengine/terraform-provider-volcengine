@@ -47,6 +47,36 @@ func DataSourceVolcenginePrivateZones() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"LIKE", "EXACT"}, false),
 				Description:  "The search mode of query. Valid values: `LIKE`, `EXACT`. Default is `LIKE`.",
 			},
+			"key_word": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The keyword of zone name.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the private zone.",
+			},
+			"tag_filters": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of tag filters.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The key of the tag.",
+						},
+						"values": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "The values of the tag.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -120,6 +150,12 @@ func DataSourceVolcenginePrivateZones() *schema.Resource {
 							Computed:    true,
 							Description: "The updated time of the private zone.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the private zone.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"region": {
 							Type:     schema.TypeList,
 							Computed: true,

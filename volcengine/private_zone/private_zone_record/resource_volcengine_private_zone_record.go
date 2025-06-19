@@ -66,12 +66,12 @@ func ResourceVolcenginePrivateZoneRecord() *schema.Resource {
 				Computed:    true,
 				Description: "The ttl of the private zone record. Unit: second. Default is 600.",
 			},
-			//"line": {
-			//	Type:        schema.TypeString,
-			//	Optional:    true,
-			//	Computed:    true,
-			//	Description: "The subnet id of the private zone record. This field is only effected when the `intelligent_mode` of the private zone is true. Default is `Default`.",
-			//},
+			"line": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The subnet id of the private zone record. This field is only effected when the `intelligent_mode` of the private zone is true. Default is `Default`.",
+			},
 			"remark": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -85,6 +85,14 @@ func ResourceVolcenginePrivateZoneRecord() *schema.Resource {
 					return d.Id() == ""
 				},
 				Description: "Whether to enable the private zone record. This field is only effected when modify this resource.",
+			},
+			"user_account": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
+				Description: "The user account of the private zone record. This field is only effected when creating this resource.",
 			},
 		},
 	}

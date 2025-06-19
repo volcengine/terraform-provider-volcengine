@@ -60,6 +60,25 @@ func ResourceVolcenginePrivateZone() *schema.Resource {
 				Optional:    true,
 				Description: "Whether to enable the load balance mode of the private zone.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the private zone.",
+			},
+			"tags": ve.TagsSchema(),
+			"vpc_trns": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
+				Description: "The vpc trns of the private zone. Format：trn:vpc:region:accountId:vpc/vpcId. This field is only effected when creating resource. \n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
 			"vpcs": {
 				Type:        schema.TypeSet,
 				Required:    true,

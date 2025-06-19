@@ -173,9 +173,9 @@ func (s *VolcenginePrivateZoneRecordService) ModifyResource(resourceData *schema
 				"weight": {
 					TargetField: "Weight",
 				},
-				//"line": {
-				//	TargetField: "Line",
-				//},
+				"line": {
+					TargetField: "Line",
+				},
 				"remark": {
 					TargetField: "Remark",
 				},
@@ -246,8 +246,9 @@ func (s *VolcenginePrivateZoneRecordService) DatasourceResources(*schema.Resourc
 			"zid": {
 				TargetField: "ZID",
 			},
-			"record_id": {
+			"record_ids": {
 				TargetField: "RecordIDs",
+				ConvertType: ve.ConvertWithN,
 			},
 		},
 		IdField:      "RecordID",

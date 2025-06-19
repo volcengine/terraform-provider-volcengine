@@ -80,6 +80,18 @@ func (p *Project) ModifyProject(trn *ProjectTrn, resourceData *schema.ResourceDa
 						// dns zone 特殊处理
 						trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, "", int(accountId.(float64)),
 							trn.ResourceType, id)
+					} else if trn.ServiceName == "private_zone" {
+						// private_zone 特殊处理
+						if trn.ResourceType == "endpoint" {
+							trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/ep-%s", trn.ServiceName, "", int(accountId.(float64)),
+								trn.ResourceType, id)
+						} else if trn.ResourceType == "rule" {
+							trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/rule-%s", trn.ServiceName, "", int(accountId.(float64)),
+								trn.ResourceType, id)
+						} else {
+							trnStr = fmt.Sprintf("trn:%s:%s:%d:%s/%s", trn.ServiceName, "", int(accountId.(float64)),
+								trn.ResourceType, id)
+						}
 					} else if trn.ServiceName == "cr" && trn.ResourceType == "repository" {
 						// cr namespace 特殊处理
 						ids := strings.Split(id, ":")

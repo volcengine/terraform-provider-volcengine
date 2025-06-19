@@ -38,6 +38,40 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ReadResources(m map[strin
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "ListResolverEndpoints"
 
+		if filter, filterExist := condition["TagFilters"]; filterExist {
+			for index, tag := range filter.([]interface{}) {
+				var (
+					Key    string
+					Values []string
+				)
+				for k, v := range tag.(map[string]interface{}) {
+					if k == "Key" {
+						Key = v.(string)
+					}
+
+					if k == "Values" {
+						ValuesInter := v.([]interface{})
+						for _, value := range ValuesInter {
+							Values = append(Values, value.(string))
+						}
+					}
+				}
+				tagFilterMap := struct {
+					Key    string
+					Values []string
+				}{
+					Key:    Key,
+					Values: Values,
+				}
+
+				tagFilterMapBytes, _ := json.Marshal(tagFilterMap)
+				logger.Debug(logger.RespFormat, action, condition, string(tagFilterMapBytes))
+
+				condition[fmt.Sprintf("TagFilters.%d", index+1)] = string(tagFilterMapBytes)
+				delete(condition, "TagFilters")
+			}
+		}
+
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
 		if condition == nil {
@@ -154,6 +188,14 @@ func (s *VolcenginePrivateZoneResolverEndpointService) CreateResource(resourceDa
 				"security_group_id": {
 					TargetField: "SecurityGroupID",
 				},
+				"vpc_trns": {
+					TargetField: "VpcTrns",
+					ConvertType: ve.ConvertJsonArray,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
 				"ip_configs": {
 					TargetField: "IpConfigs",
 					ConvertType: ve.ConvertJsonObjectArray,
@@ -214,6 +256,8 @@ func (s *VolcenginePrivateZoneResolverEndpointService) WithResourceResponseHandl
 }
 
 func (s *VolcenginePrivateZoneResolverEndpointService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateResolverEndpoint",
@@ -272,7 +316,12 @@ func (s *VolcenginePrivateZoneResolverEndpointService) ModifyResource(resourceDa
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// Tags
+	callbacks = s.setResourceTags(resourceData, callbacks)
+
+	return callbacks
 }
 
 func (s *VolcenginePrivateZoneResolverEndpointService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -325,10 +374,24 @@ func (s *VolcenginePrivateZoneResolverEndpointService) DatasourceResources(*sche
 			"vpc_id": {
 				TargetField: "VpcID",
 			},
+			"tag_filters": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"values": {
+						TargetField: "Values",
+						ConvertType: ve.ConvertJsonArray,
+					},
+				},
+			},
 		},
 		NameField:    "Name",
 		IdField:      "EndpointId",
 		CollectField: "endpoints",
+		ContentType:  ve.ContentTypeJson,
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"Id": {
 				TargetField: "endpoint_id",
@@ -357,6 +420,71 @@ func (s *VolcenginePrivateZoneResolverEndpointService) DatasourceResources(*sche
 
 func (s *VolcenginePrivateZoneResolverEndpointService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcenginePrivateZoneResolverEndpointService) setResourceTags(resourceData *schema.ResourceData, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = "endpoint"
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = "endpoint"
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag.(map[string]interface{}))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getPostUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
+}
+
+func (s *VolcenginePrivateZoneResolverEndpointService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "private_zone",
+		ResourceType:         "endpoint",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {
