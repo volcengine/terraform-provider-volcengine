@@ -568,6 +568,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cen_inter_region_bandwidths": cen_inter_region_bandwidth.DataSourceVolcengineCenInterRegionBandwidths(),
 			"volcengine_cen_service_route_entries":   cen_service_route_entry.DataSourceVolcengineCenServiceRouteEntries(),
 			"volcengine_cen_route_entries":           cen_route_entry.DataSourceVolcengineCenRouteEntries(),
+			"volcengine_cen_grant_instances":         cen_grant_instance.DataSourceVolcengineCenGrantInstances(),
 
 			// ================ VPN ================
 			"volcengine_vpn_gateways":         vpn_gateway.DataSourceVolcengineVpnGateways(),

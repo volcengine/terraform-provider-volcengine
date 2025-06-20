@@ -31,11 +31,11 @@ func (s *VolcengineCenGrantInstanceService) ReadResources(m map[string]interface
 		resp    *map[string]interface{}
 		results interface{}
 		ok      bool
-		cenId   interface{}
+		//cenId   interface{}
 	)
-	if cenId, ok = m["CenId"]; ok {
-		delete(m, "CenId")
-	}
+	//if cenId, ok = m["CenId"]; ok {
+	//	delete(m, "CenId")
+	//}
 	rules, err := ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		universalClient := s.Client.UniversalClient
 		action := "DescribeInstanceGrantedRules"
@@ -64,17 +64,18 @@ func (s *VolcengineCenGrantInstanceService) ReadResources(m map[string]interface
 		}
 		return data, err
 	})
-	if err != nil || cenId == nil || len(data) == 0 {
-		return rules, err
-	}
-	res := make([]interface{}, 0)
-	for _, tmp := range data {
-		if tmp.(map[string]interface{})["CenId"].(string) != cenId.(string) {
-			continue
-		}
-		res = append(res, tmp)
-	}
-	return res, nil
+	//if err != nil || cenId == nil || len(data) == 0 {
+	//	return rules, err
+	//}
+	//res := make([]interface{}, 0)
+	//for _, tmp := range data {
+	//	if tmp.(map[string]interface{})["CenId"].(string) != cenId.(string) {
+	//		continue
+	//	}
+	//	res = append(res, tmp)
+	//}
+	//return res, nil
+	return rules, err
 }
 
 func (s *VolcengineCenGrantInstanceService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
@@ -87,7 +88,7 @@ func (s *VolcengineCenGrantInstanceService) ReadResource(resourceData *schema.Re
 	}
 	ids := strings.Split(id, ":")
 	req := map[string]interface{}{
-		"CenId":            ids[0],
+		//"CenId":            ids[0],
 		"InstanceId":       ids[2],
 		"InstanceType":     ids[3],
 		"InstanceRegionId": ids[4],
@@ -97,8 +98,13 @@ func (s *VolcengineCenGrantInstanceService) ReadResource(resourceData *schema.Re
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
+		rule := make(map[string]interface{})
+		if rule, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
+		}
+		if rule["CenId"] == ids[0] {
+			data = rule
+			break
 		}
 	}
 	if len(data) == 0 {

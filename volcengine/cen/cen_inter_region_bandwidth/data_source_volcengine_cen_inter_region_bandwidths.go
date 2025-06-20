@@ -18,6 +18,11 @@ func DataSourceVolcengineCenInterRegionBandwidths() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of cen inter region bandwidth IDs.",
 			},
+			"cen_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of the cen.",
+			},
 
 			"output_file": {
 				Type:        schema.TypeString,

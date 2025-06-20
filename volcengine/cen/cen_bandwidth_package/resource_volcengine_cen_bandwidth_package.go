@@ -50,6 +50,16 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"China", "Asia"}, false),
 				Description:  "The peer geographic region set id of the cen bandwidth package. Valid value: `China`, `Asia`.",
 			},
+			"line_operator": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "ChinaUnicom",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("local_geographic_region_set_id").(string) == d.Get("peer_geographic_region_set_id").(string)
+				},
+				Description: "The line operator of the cen bandwidth package. Valid value: `ChinaUnicom`, `ChinaTelecom`. This field is only valid when `local_geographic_region_set_id` and `peer_geographic_region_set_id` are different.",
+			},
 			"bandwidth": {
 				Type:         schema.TypeInt,
 				Optional:     true,
@@ -70,12 +80,11 @@ func ResourceVolcengineCenBandwidthPackage() *schema.Resource {
 				Description: "The description of the cen bandwidth package.",
 			},
 			"billing_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				Default:      "PrePaid",
-				ValidateFunc: validation.StringInSlice([]string{"PrePaid"}, false),
-				Description:  "The billing type of the cen bandwidth package. Only support `PrePaid` and default value is `PrePaid`.",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "PrePaid",
+				Description: "The billing type of the cen bandwidth package. Only support `PrePaid` and `PayBy95Peak`, default value is `PrePaid`.",
 			},
 			"period_unit": {
 				Type:             schema.TypeString,

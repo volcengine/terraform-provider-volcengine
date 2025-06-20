@@ -415,7 +415,21 @@ func (s *VolcengineCenBandwidthPackageService) UnsubscribeInfo(resourceData *sch
 	}
 	if resourceData.Get("billing_type").(string) == "PrePaid" {
 		info.NeedUnsubscribe = true
-		info.Products = []string{"CEN"}
+
+		localRegion := resourceData.Get("local_geographic_region_set_id")
+		peerRegion := resourceData.Get("peer_geographic_region_set_id")
+		if localRegion == peerRegion {
+			info.Products = []string{"CEN"}
+		} else {
+			lineOperator := resourceData.Get("line_operator")
+			if lineOperator == "ChinaUnicom" {
+				info.Products = []string{"CEN_CrossArea"}
+			} else if lineOperator == "ChinaTelecom" {
+				info.Products = []string{"CEN_CrossBorderBandwidth_CT"}
+			} else {
+				info.Products = []string{"CEN"}
+			}
+		}
 	}
 	return &info, nil
 }
