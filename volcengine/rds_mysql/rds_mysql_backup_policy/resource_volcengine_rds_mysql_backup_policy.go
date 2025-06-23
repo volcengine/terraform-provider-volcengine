@@ -248,6 +248,51 @@ func ResourceVolcengineRdsMysqlBackupPolicy() *schema.Resource {
 				Description: "Is the retention policy for log backups the same as that for data backups?\n" +
 					"Explanation: When the value is true, LogBackupRetentionDay and BinlogBackupAllRetention are ignored.",
 			},
+			"cross_backup_policy": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Computed:    true,
+				Description: "Cross - region backup strategy.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"backup_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Whether to enable cross-region backup.\ntrue: Enable.\nfalse: Disable. Default value.",
+						},
+						"cross_backup_region": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The destination region ID for cross-region backup. When the value of BackupEnabled is true, this parameter is required.",
+						},
+						"log_backup_enabled": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Computed: true,
+							Description: "Whether to enable cross-region log backup. " +
+								"true: Enable. " +
+								"false: Disable. Default value. " +
+								"Description: Cross-region log backup can only be enabled when cross-region backup is enabled.",
+						},
+						"retention": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The number of days to retain cross - region backups, with a value range of 7 to 1825 days.",
+						},
+					},
+				},
+			},
+			"available_cross_region": {
+				Type:        schema.TypeSet,
+				Computed:    true,
+				Description: "List of destination regions for cross - region backup.",
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 		},
 	}
 	return resource

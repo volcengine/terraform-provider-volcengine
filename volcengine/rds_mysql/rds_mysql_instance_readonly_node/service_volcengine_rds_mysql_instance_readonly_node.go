@@ -69,6 +69,25 @@ func (s *VolcengineRdsMysqlInstanceReadonlyNodeService) ReadResource(resourceDat
 	}
 	data["NodeId"] = nodeId
 
+	req := map[string]interface{}{
+		"InstanceId": instanceId,
+		"NodeId":     nodeId,
+	}
+
+	action := "DescribeReadOnlyNodeDelay"
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		logger.Debug(logger.ReqFormat, action, req, err)
+		return data, nil
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
+	delayTime, err := ve.ObtainSdkValue("Result.DelayReplicationTime", *resp)
+	if err != nil {
+		logger.Debug(logger.RespFormat, action, req, err)
+		return data, nil
+	}
+	data["DelayReplicationTime"] = delayTime
+
 	return data, err
 }
 

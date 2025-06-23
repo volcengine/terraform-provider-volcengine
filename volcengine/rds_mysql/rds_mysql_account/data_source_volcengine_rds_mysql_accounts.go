@@ -58,6 +58,85 @@ func DataSourceVolcengineRdsMysqlAccounts() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the database account.",
 						},
+						"account_desc": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The description information of the account.",
+						},
+						"host": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The host of the account.",
+						},
+						"has_table_column_privilege_db_names": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The databases to which the table column permissions owned by the account belong. " +
+								"Description: If the account does not have table column permissions, this field will not be returned.",
+						},
+						"global_account_privileges": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Computed:    true,
+							Description: "The global privileges of the account.",
+						},
+						"account_privileges_sql": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Computed:    true,
+							Description: "The SQL statement of the account privileges.",
+						},
+						"table_infos": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The instance specifies the table column permission information in the database.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"account_privileges": {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: "The table permissions of the account.",
+									},
+									"table_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the table.",
+									},
+									"column_infos": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "The column permission information of the account.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"column_name": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The name of the column.",
+												},
+												"account_privileges": {
+													Type:     schema.TypeList,
+													Computed: true,
+													Elem: &schema.Schema{
+														Type: schema.TypeString,
+													},
+													Description: "The column privileges of the account.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 						"account_privileges": {
 							Type:        schema.TypeList,
 							Computed:    true,

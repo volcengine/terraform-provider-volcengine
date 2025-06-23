@@ -104,25 +104,18 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 				Type:        schema.TypeList,
 				MaxItems:    1,
 				Required:    true,
-				ForceNew:    true,
 				Description: "Payment methods.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"charge_type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-							ValidateFunc: validation.StringInSlice([]string{
-								"PostPaid",
-								"PrePaid",
-							}, false),
+							Type:        schema.TypeString,
+							Required:    true,
 							Description: "Payment type. Value:\nPostPaid - Pay-As-You-Go\nPrePaid - Yearly and monthly (default).",
 						},
 						"auto_renew": {
 							Type:             schema.TypeBool,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: RdsMysqlInstanceImportDiffSuppress,
 							Description:      "Whether to automatically renew in prepaid scenarios.",
 						},
@@ -130,7 +123,6 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							ValidateFunc:     validation.StringInSlice([]string{"Month", "Year"}, false),
 							DiffSuppressFunc: RdsMysqlInstanceImportDiffSuppress,
 							Description:      "The purchase cycle in the prepaid scenario.\nMonth - monthly subscription (default)\nYear - Package year.",
@@ -139,7 +131,6 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							Computed:         true,
-							ForceNew:         true,
 							DiffSuppressFunc: RdsMysqlInstanceImportDiffSuppress,
 							Description:      "Purchase duration in prepaid scenarios. Default: 1.",
 						},
@@ -209,6 +200,65 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 						},
 					},
 				},
+			},
+			"deletion_protection": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to enable the deletion protection function. Values:\nEnabled: Yes.\nDisabled: No.",
+			},
+			"data_sync_mode": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Data synchronization methods:\nSemiSync: Semi - synchronous.\nAsync: Asynchronous.",
+			},
+			"auto_storage_scaling_config": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Computed:    true,
+				Description: "Auto - storage scaling configuration.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable_storage_auto_scale": {
+							Type:     schema.TypeBool,
+							Required: true,
+							Description: "Whether to enable the instance's auto - scaling function. " +
+								"Values:\ntrue: Yes.\nfalse: No. " +
+								"Description: When StorageConfig is used as a request parameter, " +
+								"if the value of EnableStorageAutoScale is false, the StorageThreshold and StorageUpperBound parameters do not need to be passed in.",
+						},
+						"storage_threshold": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return d.Get("auto_storage_scaling_config.0.enable_storage_auto_scale").(bool) == false
+							},
+							Description: "The proportion of available storage space that triggers automatic expansion." +
+								" The value range is 10 to 50, and the default value is 10, with the unit being %.",
+						},
+						"storage_upper_bound": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Computed: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return d.Get("auto_storage_scaling_config.0.enable_storage_auto_scale").(bool) == false
+							},
+							Description: "The upper limit of the storage space that can be automatically expanded." +
+								" The lower limit of the value of this field is the instance storage space + 20GB; " +
+								"the upper limit of the value is the upper limit of the storage space value range corresponding to the instance master node specification," +
+								" with the unit being GB. For detailed information on the selectable storage space value range of different specifications, " +
+								"please refer to Product Specifications.",
+						},
+					},
+				},
+			},
+			"global_read_only": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to enable global read-only for the instance.",
 			},
 		},
 	}

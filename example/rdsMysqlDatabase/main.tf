@@ -40,4 +40,11 @@ resource "volcengine_rds_mysql_instance" "foo" {
 resource "volcengine_rds_mysql_database" "foo" {
      db_name = "acc-test"
      instance_id = volcengine_rds_mysql_instance.foo.id
+     db_desc = "test-update"
+     database_privileges {
+          account_name = "acc-test"
+          host = "%"
+          account_privilege = "Custom"
+          account_privilege_detail = "CREATE,DROP,ALTER,INDEX"
+     }
 }

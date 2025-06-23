@@ -50,6 +50,7 @@ resource "volcengine_rds_mysql_instance" "foo" {
 resource "volcengine_rds_mysql_database" "foo1" {
   db_name     = "acc-test-db1"
   instance_id = volcengine_rds_mysql_instance.foo.id
+  #instance_id = "mysql-b51d37110dd1"
 }
 
 resource "volcengine_rds_mysql_database" "foo" {
@@ -71,6 +72,19 @@ resource "volcengine_rds_mysql_account" "foo" {
     db_name           = volcengine_rds_mysql_database.foo1.db_name
     account_privilege = "DDLOnly"
   }
+  host = "192.10.10.%"
+  #     table_column_privileges {
+  #          db_name = volcengine_rds_mysql_database.foo.db_name
+  #          table_privileges {
+  #               table_name = "test"
+  #               account_privilege_detail = "SELECT,INSERT,UPDATE"
+  #          }
+  #          column_privileges {
+  #               table_name = "test"
+  #               column_name = "test"
+  #               account_privilege_detail = "SELECT,INSERT,UPDATE"
+  #          }
+  #     }
 }
 ```
 ## Argument Reference
@@ -91,13 +105,33 @@ The special characters are `!@#$%^*()_+-=`. When importing resources, this attri
 Super: A high-privilege account. Only one database account can be created for an instance.
 Normal: An account with ordinary privileges.
 * `instance_id` - (Required, ForceNew) The ID of the RDS instance.
+* `account_desc` - (Optional) Account information description. The length should not exceed 256 characters.
 * `account_privileges` - (Optional) The privilege information of account.
+* `host` - (Optional) Specify the IP address for the account to access the database. The default value is %. If the Host is specified as %, the account is allowed to access the database from any IP address. Wildcards are supported for setting the IP address range that can access the database. For example, if the Host is specified as 192.10.10.%, it means the account can access the database from IP addresses between 192.10.10.0 and 192.10.10.255. The specified Host needs to be added to the whitelist bound to the instance, otherwise the instance cannot be accessed normally. The ModifyAllowList interface can be called to add the Host to the whitelist. Note: If the created account type is a high-privilege account, the host IP can only be specified as %. That is, when the value of AccountType is Super, the value of Host can only be %.
+* `table_column_privileges` - (Optional, ForceNew) Settings for table column permissions of the account.
 
 The `account_privileges` object supports the following:
 
 * `account_privilege` - (Required) The privilege type of the account.
 * `db_name` - (Required) The name of database.
 * `account_privilege_detail` - (Optional) The privilege detail of the account.
+
+The `column_privileges` object supports the following:
+
+* `column_name` - (Required, ForceNew) The name of the column for setting permissions on the account.
+* `table_name` - (Required, ForceNew) The name of the table for setting permissions on the account.
+* `account_privilege_detail` - (Optional, ForceNew) Table privileges of the account.
+
+The `table_column_privileges` object supports the following:
+
+* `db_name` - (Required, ForceNew) Settings for table column permissions of the account.
+* `column_privileges` - (Optional, ForceNew) Column permission information of the account.
+* `table_privileges` - (Optional, ForceNew) Table permission information of the account.
+
+The `table_privileges` object supports the following:
+
+* `table_name` - (Required, ForceNew) The name of the table for setting permissions on the account.
+* `account_privilege_detail` - (Optional, ForceNew) Table privileges of the account.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

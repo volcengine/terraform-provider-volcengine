@@ -73,7 +73,9 @@ In addition to all arguments above, the following attributes are exported:
         * `account_name` - The name of account.
         * `account_privilege_detail` - The privilege detail of the account.
         * `account_privilege` - The privilege type of the account.
+    * `db_desc` - The description information of the RDS database.
     * `db_name` - The name of the RDS database. This field supports fuzzy queries.
+    * `db_status` - The status of the RDS database.
 * `total_count` - The total count of RDS database query.
 
 

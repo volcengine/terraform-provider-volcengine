@@ -11,14 +11,14 @@ Use this data source to query detailed information of rds mysql backups
 ## Example Usage
 ```hcl
 data "volcengine_rds_mysql_backups" "foo" {
-  backup_end_time   = ""
-  backup_id         = ""
-  backup_method     = ""
-  backup_start_time = ""
-  backup_status     = ""
-  backup_type       = ""
-  create_type       = ""
-  instance_id       = ""
+  #    backup_end_time = ""
+  #    backup_id = ""
+  #    backup_method = ""
+  #    backup_start_time = ""
+  #    backup_status = ""
+  #    backup_type = ""
+  #    create_type = ""
+  instance_id = "mysql-b51d37110dd1"
 }
 ```
 ## Argument Reference
@@ -57,6 +57,7 @@ Explanation:
 When the database is empty, this field is not returned.
         * `database` - Database name.
         * `tables` - Table names.
+    * `decryption_key` - The decryption key of the backup.
     * `download_status` - Download status. Values:
 NotDownload: Not downloaded.
 Success: Downloaded.
@@ -71,6 +72,11 @@ false: Not encrypted.
     * `is_expired` - Whether the backup has expired. Value:
 true: Expired.
 false: Not expired.
+    * `iv` - Initialization Vector.
+    * `usage_stats` - Statistics information about the storage space usage of backups.
+        * `quantity` - Backup size, in bytes.
+        * `start_time` - Statistical time.
+        * `stat_item` - Statistical items. TotalBasicSpaceUsage: Storage space usage for basic backups. BasicDataBackupUsage: Storage space usage for local data backups. BasicBinlogBackupUsage: Storage space usage for local log backups. TotalCrossRegionSpaceUsage: Storage space usage for cross-region backups. CrossRegionDataBackupUsage: Storage space usage for cross-region data backups. CrossRegionBinlogBackupUsage: Storage space usage for cross-region log backups.
 * `total_count` - The total count of query.
 
 

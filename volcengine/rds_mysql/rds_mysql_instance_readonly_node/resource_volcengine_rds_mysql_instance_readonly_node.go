@@ -55,6 +55,11 @@ func ResourceVolcengineRdsMysqlInstanceReadonlyNode() *schema.Resource {
 				Computed:    true,
 				Description: "The id of the readonly node.",
 			},
+			"delay_replication_time": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The delay time of the readonly node.",
+			},
 		},
 	}
 }

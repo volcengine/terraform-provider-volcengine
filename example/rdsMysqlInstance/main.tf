@@ -21,7 +21,7 @@ resource "volcengine_subnet" "foo" {
 # create mysql instance
 resource "volcengine_rds_mysql_instance" "foo" {
   db_engine_version      = "MySQL_5_7"
-  node_spec              = "rds.mysql.1c2g"
+  node_spec              = "rds.mysql.2c4g"
   primary_zone_id        = data.volcengine_zones.foo.zones[0].id
   secondary_zone_id      = data.volcengine_zones.foo.zones[0].id
   storage_space          = 80
@@ -45,6 +45,13 @@ resource "volcengine_rds_mysql_instance" "foo" {
   parameters {
     parameter_name  = "auto_increment_offset"
     parameter_value = "5"
+  }
+  deletion_protection = "Disabled"
+  data_sync_mode = "SemiSync"
+  auto_storage_scaling_config {
+    enable_storage_auto_scale = true
+    storage_threshold = 40
+    storage_upper_bound = 110
   }
 }
 

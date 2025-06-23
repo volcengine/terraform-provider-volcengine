@@ -33,7 +33,7 @@ resource "volcengine_subnet" "foo" {
 # create mysql instance
 resource "volcengine_rds_mysql_instance" "foo" {
   db_engine_version      = "MySQL_5_7"
-  node_spec              = "rds.mysql.1c2g"
+  node_spec              = "rds.mysql.2c4g"
   primary_zone_id        = data.volcengine_zones.foo.zones[0].id
   secondary_zone_id      = data.volcengine_zones.foo.zones[0].id
   storage_space          = 80
@@ -57,6 +57,13 @@ resource "volcengine_rds_mysql_instance" "foo" {
   parameters {
     parameter_name  = "auto_increment_offset"
     parameter_value = "5"
+  }
+  deletion_protection = "Disabled"
+  data_sync_mode      = "SemiSync"
+  auto_storage_scaling_config {
+    enable_storage_auto_scale = true
+    storage_threshold         = 40
+    storage_upper_bound       = 110
   }
 }
 
@@ -89,7 +96,7 @@ resource "volcengine_rds_mysql_database" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `charge_info` - (Required, ForceNew) Payment methods.
+* `charge_info` - (Required) Payment methods.
 * `db_engine_version` - (Required, ForceNew) Instance type. Value:
 MySQL_5_7
 MySQL_8_0.
@@ -98,10 +105,18 @@ MySQL_8_0.
 * `secondary_zone_id` - (Required, ForceNew) The available zone of secondary node.
 * `subnet_id` - (Required, ForceNew) Subnet ID of the RDS instance.
 * `allow_list_ids` - (Optional) Allow list Ids of the RDS instance.
+* `auto_storage_scaling_config` - (Optional) Auto - storage scaling configuration.
 * `connection_pool_type` - (Optional) Connection pool type. Value range:
 Direct: Direct connection mode.
 Transaction: Transaction-level connection pool (default).
+* `data_sync_mode` - (Optional) Data synchronization methods:
+SemiSync: Semi - synchronous.
+Async: Asynchronous.
 * `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
+* `deletion_protection` - (Optional) Whether to enable the deletion protection function. Values:
+Enabled: Yes.
+Disabled: No.
+* `global_read_only` - (Optional) Whether to enable global read-only for the instance.
 * `instance_name` - (Optional) Instance name. Cannot start with a number or a dash
 Can only contain Chinese characters, letters, numbers, underscores and dashes
 The length is limited between 1 ~ 128.
@@ -115,16 +130,24 @@ Ranges:
 * `storage_space` - (Optional) Instance storage space. Value range: [20, 3000], unit: GB, increments every 100GB. Default value: 100.
 * `tags` - (Optional) Tags.
 
+The `auto_storage_scaling_config` object supports the following:
+
+* `enable_storage_auto_scale` - (Required) Whether to enable the instance's auto - scaling function. Values:
+true: Yes.
+false: No. Description: When StorageConfig is used as a request parameter, if the value of EnableStorageAutoScale is false, the StorageThreshold and StorageUpperBound parameters do not need to be passed in.
+* `storage_threshold` - (Optional) The proportion of available storage space that triggers automatic expansion. The value range is 10 to 50, and the default value is 10, with the unit being %.
+* `storage_upper_bound` - (Optional) The upper limit of the storage space that can be automatically expanded. The lower limit of the value of this field is the instance storage space + 20GB; the upper limit of the value is the upper limit of the storage space value range corresponding to the instance master node specification, with the unit being GB. For detailed information on the selectable storage space value range of different specifications, please refer to Product Specifications.
+
 The `charge_info` object supports the following:
 
-* `charge_type` - (Required, ForceNew) Payment type. Value:
+* `charge_type` - (Required) Payment type. Value:
 PostPaid - Pay-As-You-Go
 PrePaid - Yearly and monthly (default).
-* `auto_renew` - (Optional, ForceNew) Whether to automatically renew in prepaid scenarios.
-* `period_unit` - (Optional, ForceNew) The purchase cycle in the prepaid scenario.
+* `auto_renew` - (Optional) Whether to automatically renew in prepaid scenarios.
+* `period_unit` - (Optional) The purchase cycle in the prepaid scenario.
 Month - monthly subscription (default)
 Year - Package year.
-* `period` - (Optional, ForceNew) Purchase duration in prepaid scenarios. Default: 1.
+* `period` - (Optional) Purchase duration in prepaid scenarios. Default: 1.
 
 The `maintenance_window` object supports the following:
 
@@ -146,6 +169,9 @@ The `tags` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `allow_list_version` - The version of allow list.
+* `auto_upgrade_minor_version` - The upgrade strategy for the minor version of the instance kernel. Values:
+Auto: Auto upgrade.
+Manual: Manual upgrade.
 * `backup_use` - The instance has used backup space. Unit: GB.
 * `binlog_dump` - Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:
 true: Yes.
@@ -172,12 +198,15 @@ Year - Package year.
     * `temp_modify_end_time` - Restore time of temporary upgrade.
     * `temp_modify_start_time` - Temporary upgrade start time.
 * `create_time` - The create time of the RDS instance.
-* `data_sync_mode` - Data synchronization mode.
 * `db_proxy_status` - The running status of the proxy instance. This parameter is returned only when the database proxy is enabled. Values:
 Creating: The proxy is being started.
 Running: The proxy is running.
 Shutdown: The proxy is closed.
 Deleting: The proxy is being closed.
+* `dr_dts_task_id` - The ID of the data synchronization task in DTS for the data synchronization link between the primary instance and the disaster recovery instance.
+* `dr_dts_task_name` - The name of the DTS data synchronization task for the data synchronization link between the primary instance and the disaster recovery instance.
+* `dr_dts_task_status` - The status of the DTS data synchronization task for the data synchronization link between the primary instance and the disaster recovery instance.
+* `dr_seconds_behind_master` - The number of seconds that the disaster recovery instance is behind the primary instance.
 * `endpoints` - The endpoint info of the RDS instance.
     * `addresses` - Address list.
         * `dns_visibility` - DNS Visibility.
@@ -215,11 +244,12 @@ false: Disabled.
     * `support` - Whether it support this function. Value:
 true: Supported.
 false: Not supported.
-* `global_read_only` - Whether to enable global read-only.
-true: Yes.
-false: No.
 * `instance_id` - The ID of the RDS instance.
 * `instance_status` - The status of the RDS instance.
+* `kernel_version` - The current kernel version of the RDS instance.
+* `master_instance_id` - The ID of the primary instance of the disaster recovery instance.
+* `master_instance_name` - The name of the primary instance of the disaster recovery instance.
+* `master_region` - The region where the primary instance of the disaster recovery instance is located.
 * `memory` - Memory size.
 * `node_cpu_used_percentage` - Average CPU usage of the instance master node in nearly one minute.
 * `node_memory_used_percentage` - Average memory usage of the instance master node in nearly one minute.
@@ -240,6 +270,10 @@ ReadOnly: Read-only node.
     * `v_cpu` - CPU size. For example: 1 means 1U.
     * `zone_id` - Availability zone ID. Subsequent support for multi-availability zones can be separated and displayed by an English colon.
 * `region_id` - The region of the RDS instance.
+* `storage_max_capacity` - The upper limit of the storage space that can be set for automatic expansion. The value is the upper limit of the storage space value range corresponding to the instance master node specification, with the unit being GB. For detailed information on the selectable storage space value ranges of different specifications, please refer to Product Specifications.
+* `storage_max_trigger_threshold` - The upper limit of the proportion of available storage space that triggers automatic expansion. When supported, the value is 50%.
+* `storage_min_capacity` - The lower limit of the storage space that can be set for automatic expansion. The value is the lower limit of the storage space value range corresponding to the instance master node specification, with the unit being GB. For detailed information on the selectable storage space value ranges of different specifications, please refer to Product Specifications.
+* `storage_min_trigger_threshold` - The lower limit of the proportion of available storage space that triggers automatic expansion. When supported, the value is 10%.
 * `storage_type` - Instance storage type.
 * `storage_use` - The instance has used storage space. Unit: GB.
 * `time_zone` - Time zone.

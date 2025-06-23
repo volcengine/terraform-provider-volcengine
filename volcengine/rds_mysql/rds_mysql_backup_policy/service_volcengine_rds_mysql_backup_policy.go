@@ -60,6 +60,25 @@ func (s *VolcengineRdsMysqlBackupPolicyService) ReadResources(m map[string]inter
 		if results == nil {
 			results = []interface{}{}
 		}
+		action = "DescribeCrossBackupPolicy"
+		req := map[string]interface{}{
+			"InstanceId": condition["InstanceId"],
+		}
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+		if err != nil {
+			return data, err
+		}
+		respBytes, _ = json.Marshal(resp)
+		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		crossPolicy, err := ve.ObtainSdkValue("Result", *resp)
+		if err != nil {
+			return data, err
+		}
+		if crossPolicy != nil {
+			if _, ok := results.(map[string]interface{}); ok {
+				results.(map[string]interface{})["CrossBackupPolicy"] = crossPolicy
+			}
+		}
 		results = []interface{}{results}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.BackupPolicy is not Slice")
@@ -128,6 +147,7 @@ func (s *VolcengineRdsMysqlBackupPolicyService) RefreshResourceState(resourceDat
 }
 
 func (s *VolcengineRdsMysqlBackupPolicyService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyBackupPolicy",
@@ -148,6 +168,9 @@ func (s *VolcengineRdsMysqlBackupPolicyService) CreateResource(resourceData *sch
 					TargetField: "DataIncrBackupPeriods",
 					ConvertType: ve.ConvertJsonArray,
 				},
+				"cross_backup_policy": {
+					Ignore: true,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -162,7 +185,34 @@ func (s *VolcengineRdsMysqlBackupPolicyService) CreateResource(resourceData *sch
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	if _, ok := resourceData.GetOk("cross_backup_policy"); ok {
+		crossCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyCrossBackupPolicy",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					if backupEnabled, ok := d.GetOk("cross_backup_policy.0.backup_enabled"); ok {
+						(*call.SdkParam)["BackupEnabled"] = backupEnabled
+					}
+					if backupRegion, ok := d.GetOk("cross_backup_policy.0.cross_backup_region"); ok {
+						(*call.SdkParam)["CrossBackupRegion"] = backupRegion
+					}
+					if logBackupEnabled, ok := d.GetOk("cross_backup_policy.0.log_backup_enabled"); ok {
+						(*call.SdkParam)["LogBackupEnabled"] = logBackupEnabled
+					}
+					if logBackupRegion, ok := d.GetOk("cross_backup_policy.0.log_cross_backup_region"); ok {
+						(*call.SdkParam)["LogCrossBackupRegion"] = logBackupRegion
+					}
+					return true, nil
+				},
+			},
+		}
+		callbacks = append(callbacks, crossCallback)
+	}
+	return callbacks
 }
 
 func (VolcengineRdsMysqlBackupPolicyService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
@@ -180,6 +230,7 @@ func (VolcengineRdsMysqlBackupPolicyService) WithResourceResponseHandlers(d map[
 }
 
 func (s *VolcengineRdsMysqlBackupPolicyService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyBackupPolicy",
@@ -254,6 +305,9 @@ func (s *VolcengineRdsMysqlBackupPolicyService) ModifyResource(resourceData *sch
 				"retention_policy_synced": {
 					TargetField: "RetentionPolicySynced",
 				},
+				"cross_backup_policy": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["InstanceId"] = d.Get("instance_id").(string)
@@ -267,7 +321,34 @@ func (s *VolcengineRdsMysqlBackupPolicyService) ModifyResource(resourceData *sch
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	if resourceData.HasChange("cross_backup_policy") {
+		crossCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyCrossBackupPolicy",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					if backupEnabled, ok := d.GetOk("cross_backup_policy.0.backup_enabled"); ok {
+						(*call.SdkParam)["BackupEnabled"] = backupEnabled
+					}
+					if backupRegion, ok := d.GetOk("cross_backup_policy.0.cross_backup_region"); ok {
+						(*call.SdkParam)["CrossBackupRegion"] = backupRegion
+					}
+					if logBackupEnabled, ok := d.GetOk("cross_backup_policy.0.log_backup_enabled"); ok {
+						(*call.SdkParam)["LogBackupEnabled"] = logBackupEnabled
+					}
+					if logBackupRegion, ok := d.GetOk("cross_backup_policy.0.log_cross_backup_region"); ok {
+						(*call.SdkParam)["LogCrossBackupRegion"] = logBackupRegion
+					}
+					return true, nil
+				},
+			},
+		}
+		callbacks = append(callbacks, crossCallback)
+	}
+	return callbacks
 }
 
 func (s *VolcengineRdsMysqlBackupPolicyService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {

@@ -118,6 +118,12 @@ func (s *VolcengineRdsMysqlDatabaseService) WithResourceResponseHandlers(databas
 			"DBName": {
 				TargetField: "db_name",
 			},
+			"DBDesc": {
+				TargetField: "db_desc",
+			},
+			"DBStatus": {
+				TargetField: "db_status",
+			},
 		}, nil
 	}
 	return []volc.ResourceResponseHandler{handler}
@@ -136,6 +142,13 @@ func (s *VolcengineRdsMysqlDatabaseService) CreateResource(resourceData *schema.
 				"db_name": {
 					TargetField: "DBName",
 				},
+				"database_privileges": {
+					TargetField: "DatabasePrivileges",
+					ConvertType: volc.ConvertJsonObjectArray,
+				},
+				"db_desc": {
+					TargetField: "DBDesc",
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -153,7 +166,110 @@ func (s *VolcengineRdsMysqlDatabaseService) CreateResource(resourceData *schema.
 }
 
 func (s *VolcengineRdsMysqlDatabaseService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
-	return []volc.Callback{}
+	var callbacks []volc.Callback
+	if resourceData.HasChange("database_privileges") {
+		callback := volc.Callback{
+			Call: volc.SdkCall{
+				Action:      "GrantDatabasePrivilege",
+				ContentType: volc.ContentTypeJson,
+				ConvertMode: volc.RequestConvertInConvert,
+				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					(*call.SdkParam)["DBName"] = d.Get("db_name")
+					return true, nil
+				},
+				Convert: map[string]volc.RequestConvert{
+					"database_privileges": {
+						TargetField: "DatabasePrivileges",
+						ConvertType: volc.ConvertJsonObjectArray,
+						ForceGet:    true,
+					},
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+
+		callbacks = append(callbacks, callback)
+
+		add, remove, _, _ := volc.GetSetDifference("database_privileges", resourceData, RdsMysqlDatabasePrivilegeHash, false)
+		if remove != nil && remove.Len() > 0 {
+			removeCallback := volc.Callback{
+				Call: volc.SdkCall{
+					Action:      "RevokeDatabasePrivilege",
+					ContentType: volc.ContentTypeJson,
+					ConvertMode: volc.RequestConvertIgnore,
+					BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+						(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+						(*call.SdkParam)["DBName"] = d.Get("db_name")
+						accountNames := make([]string, 0)
+						for _, item := range remove.List() {
+							m, ok := item.(map[string]interface{})
+							if !ok {
+								continue
+							}
+							removeAccountName := m["account_name"].(string)
+							if add != nil && add.Len() > 0 && hasAccountNameInSet(removeAccountName, add) {
+								continue
+							}
+							accountNames = append(accountNames, removeAccountName)
+						}
+						if len(accountNames) == 0 {
+							return false, nil
+						}
+						(*call.SdkParam)["AccountNames"] = strings.Join(accountNames, ",")
+						return true, nil
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+						return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					},
+				},
+			}
+			callbacks = append(callbacks, removeCallback)
+		}
+	}
+
+	if resourceData.HasChange("db_desc") {
+		callback := volc.Callback{
+			Call: volc.SdkCall{
+				Action:      "ModifyDatabaseDescription",
+				ConvertMode: volc.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					(*call.SdkParam)["DBName"] = d.Get("db_name")
+					(*call.SdkParam)["DBDesc"] = d.Get("db_desc")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
+	return callbacks
+}
+
+func hasAccountNameInSet(dbName string, set *schema.Set) bool {
+	for _, item := range set.List() {
+		if m, ok := item.(map[string]interface{}); ok {
+			if v, ok := m["account_name"]; ok && v.(string) == dbName {
+				if detail, ok := m["account_privilege_detail"].(string); ok {
+					if len(detail) == 0 && m["account_privilege"].(string) == "Custom" {
+						return false
+					}
+				} else {
+					return true
+				}
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func (s *VolcengineRdsMysqlDatabaseService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {
@@ -216,6 +332,12 @@ func (s *VolcengineRdsMysqlDatabaseService) DatasourceResources(*schema.Resource
 		ResponseConverts: map[string]volc.ResponseConvert{
 			"DBName": {
 				TargetField: "db_name",
+			},
+			"DBDesc": {
+				TargetField: "db_desc",
+			},
+			"DBStatus": {
+				TargetField: "db_status",
 			},
 		},
 	}

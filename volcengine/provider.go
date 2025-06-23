@@ -39,6 +39,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_keyring"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_planned_event"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_task"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
@@ -680,6 +683,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_endpoints":           rds_mysql_endpoint.DataSourceVolcengineRdsMysqlEndpoints(),
 			"volcengine_rds_mysql_backups":             rds_mysql_backup.DataSourceVolcengineRdsMysqlBackups(),
 			"volcengine_rds_mysql_parameter_templates": rds_mysql_parameter_template.DataSourceVolcengineRdsMysqlParameterTemplates(),
+			"volcengine_rds_mysql_tasks":               rds_mysql_task.DataSourceVolcengineRdsMysqlTasks(),
+			"volcengine_rds_mysql_planned_events":      rds_mysql_planned_event.DataSourceVolcengineRdsMysqlPlannedEvents(),
 
 			// ================ TLS ================
 			"volcengine_tls_rules":               tlsRule.DataSourceVolcengineTlsRules(),
