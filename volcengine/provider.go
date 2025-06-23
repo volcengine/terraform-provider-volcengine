@@ -49,6 +49,14 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_source"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_version"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/flow_log"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/flow_log_active"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_filter"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_filter_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_session"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_target"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc_cidr_block_associate"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
@@ -550,6 +558,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpc_ipv6_addresses":          ipv6_address.DataSourceVolcengineIpv6Addresses(),
 			"volcengine_vpc_prefix_lists":            prefix_list.DataSourceVolcengineVpcPrefixLists(),
 			"volcengine_ha_vips":                     ha_vip.DataSourceVolcengineHaVips(),
+			"volcengine_flow_logs":                   flow_log.DataSourceVolcengineFlowLogs(),
+			"volcengine_traffic_mirror_filters":      traffic_mirror_filter.DataSourceVolcengineTrafficMirrorFilters(),
+			"volcengine_traffic_mirror_filter_rules": traffic_mirror_filter_rule.DataSourceVolcengineTrafficMirrorFilterRules(),
+			"volcengine_traffic_mirror_sessions":     traffic_mirror_session.DataSourceVolcengineTrafficMirrorSessions(),
+			"volcengine_traffic_mirror_targets":      traffic_mirror_target.DataSourceVolcengineTrafficMirrorTargets(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
@@ -973,6 +986,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpc_prefix_list":            prefix_list.ResourceVolcengineVpcPrefixList(),
 			"volcengine_ha_vip":                     ha_vip.ResourceVolcengineHaVip(),
 			"volcengine_ha_vip_associate":           ha_vip_associate.ResourceVolcengineHaVipAssociate(),
+			"volcengine_vpc_cidr_block_associate":   vpc_cidr_block_associate.ResourceVolcengineVpcCidrBlockAssociate(),
+			"volcengine_flow_log":                   flow_log.ResourceVolcengineFlowLog(),
+			"volcengine_flow_log_active":            flow_log_active.ResourceVolcengineFlowLogActive(),
+			"volcengine_traffic_mirror_filter":      traffic_mirror_filter.ResourceVolcengineTrafficMirrorFilter(),
+			"volcengine_traffic_mirror_filter_rule": traffic_mirror_filter_rule.ResourceVolcengineTrafficMirrorFilterRule(),
+			"volcengine_traffic_mirror_session":     traffic_mirror_session.ResourceVolcengineTrafficMirrorSession(),
+			"volcengine_traffic_mirror_target":      traffic_mirror_target.ResourceVolcengineTrafficMirrorTarget(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),
