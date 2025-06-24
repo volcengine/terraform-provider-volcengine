@@ -346,6 +346,17 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpc_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpn_attachment"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alert"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alerting_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_instance_type"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_group_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_rule_file"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_workspace"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_batch_edge_machine"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_cluster"
@@ -885,6 +896,18 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kms_keyrings": kms_keyring.DataSourceVolcengineKmsKeyrings(),
 			"volcengine_kms_keys":     kms_key.DataSourceVolcengineKmsKeys(),
 			"volcengine_kms_secrets":  kms_secret.DataSourceVolcengineKmsSecrets(),
+
+			// ================ VMP ================
+			"volcengine_vmp_workspaces":            vmp_workspace.DataSourceVolcengineVmpWorkspaces(),
+			"volcengine_vmp_instance_types":        vmp_instance_type.DataSourceVolcengineVmpInstanceTypes(),
+			"volcengine_vmp_rule_files":            vmp_rule_file.DataSourceVolcengineVmpRuleFiles(),
+			"volcengine_vmp_rules":                 vmp_rule.DataSourceVolcengineVmpRules(),
+			"volcengine_vmp_contact_groups":        vmp_contact_group.DataSourceVolcengineVmpContactGroups(),
+			"volcengine_vmp_contacts":              vmp_contact.DataSourceVolcengineVmpContacts(),
+			"volcengine_vmp_alerting_rules":        vmp_alerting_rule.DataSourceVolcengineVmpAlertingRules(),
+			"volcengine_vmp_alerts":                vmp_alert.DataSourceVolcengineVmpAlerts(),
+			"volcengine_vmp_notify_group_policies": vmp_notify_group_policy.DataSourceVolcengineVmpNotifyGroupPolicies(),
+			"volcengine_vmp_notify_policies":       vmp_notify_policy.DataSourceVolcengineVmpNotifyPolicies(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1281,6 +1304,15 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kms_key_rotation": kms_key_rotation.ResourceVolcengineKmsKeyRotation(),
 			"volcengine_kms_key_archive":  kms_key_archive.ResourceVolcengineKmsKeyArchive(),
 			"volcengine_kms_secret":       kms_secret.ResourceVolcengineKmsSecret(),
+
+			// ================ VMP ================
+			"volcengine_vmp_workspace":           vmp_workspace.ResourceVolcengineVmpWorkspace(),
+			"volcengine_vmp_rule_file":           vmp_rule_file.ResourceVolcengineVmpRuleFile(),
+			"volcengine_vmp_contact_group":       vmp_contact_group.ResourceVolcengineVmpContactGroup(),
+			"volcengine_vmp_contact":             vmp_contact.ResourceVolcengineVmpContact(),
+			"volcengine_vmp_alerting_rule":       vmp_alerting_rule.ResourceVolcengineVmpAlertingRule(),
+			"volcengine_vmp_notify_group_policy": vmp_notify_group_policy.ResourceVolcengineVmpNotifyGroupPolicy(),
+			"volcengine_vmp_notify_policy":       vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
