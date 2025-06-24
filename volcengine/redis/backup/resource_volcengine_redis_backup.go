@@ -45,6 +45,12 @@ func ResourceVolcengineRedisBackup() *schema.Resource {
 				ForceNew:    true,
 				Description: "Id of instance to create backup.",
 			},
+			"backup_point_name": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Set the backup name for the manually created backup.",
+			},
 			"backup_point_id": {
 				Type:        schema.TypeString,
 				Computed:    true,

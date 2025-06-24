@@ -45,20 +45,37 @@ func ResourceVolcengineRedisBackupRestore() *schema.Resource {
 			"backup_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Default:     "Full",
 				Description: "The type of backup. The value can be Full or Inc.",
+			},
+			"time_point": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: []string{"time_point", "backup_point_id"},
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// 在更新时，timestamp 没发生变化，忽略变化
-					if d.Id() != "" && !d.HasChange("time_point") {
+					// 在更新时， 如果backup_type为full或空，忽略变化
+					if d.Id() != "" && (d.Get("backup_type") == "" || d.Get("backup_type") == "Full") {
 						return true
 					}
 					return false
 				},
-			},
-			"time_point": {
-				Type:        schema.TypeString,
-				Required:    true,
 				Description: "Time point of backup, for example: 2021-11-09T06:07:26Z. Use lifecycle and ignore_changes in import.",
+			},
+			"backup_point_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ExactlyOneOf: []string{"time_point", "backup_point_id"},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// 在更新时， 如果backup_type为full或空，忽略变化
+					if d.Id() != "" && (d.Get("backup_type") == "Inc") {
+						return true
+					}
+					return false
+				},
+				Description: "Backup ID, used to specify the backups to be used when restoring by the backup set. " +
+					"When choosing to restore by backup set (i.e., BackupType is Full), this parameter is required. " +
+					"Use lifecycle and ignore_changes in import.",
 			},
 		},
 	}

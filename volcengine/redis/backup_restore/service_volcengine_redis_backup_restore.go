@@ -95,45 +95,48 @@ func (s *VolcengineRedisBackupRestoreService) CreateResource(resourceData *schem
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineRedisBackupRestoreService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	if !resourceData.HasChange("time_point") {
-		return nil
+func (s *VolcengineRedisBackupRestoreService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) (callbacks []ve.Callback) {
+	if resourceData.HasChanges("time_point", "backup_point_id") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      ActionRestoreDBInstance,
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"instance_id": {
+						ForceGet: true,
+					},
+					"backup_type": {
+						ForceGet: true,
+					},
+					"time_point": {
+						TargetField: "TimePoint",
+					},
+					"backup_point_id": {
+						TargetField: "BackupPointId",
+					},
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, *call.SdkParam)
+					output, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, *call.SdkParam, *output)
+					return output, err
+				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					instance.NewRedisDbInstanceService(s.Client): {
+						Target:     []string{"Running"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: resourceData.Get("instance_id").(string),
+					},
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      ActionRestoreDBInstance,
-			ContentType: ve.ContentTypeJson,
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"instance_id": {
-					ForceGet: true,
-				},
-				"backup_type": {
-					ForceGet: true,
-				},
-				"time_point": {
-					TargetField: "TimePoint",
-				},
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, *call.SdkParam)
-				output, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, *call.SdkParam, *output)
-				return output, err
-			},
-			LockId: func(d *schema.ResourceData) string {
-				return d.Get("instance_id").(string)
-			},
-			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				instance.NewRedisDbInstanceService(s.Client): {
-					Target:     []string{"Running"},
-					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-					ResourceId: resourceData.Get("instance_id").(string),
-				},
-			},
-		},
-	}
-	return []ve.Callback{callback}
+	return callbacks
 }
 
 func (s *VolcengineRedisBackupRestoreService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {

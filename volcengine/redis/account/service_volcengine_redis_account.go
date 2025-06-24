@@ -98,7 +98,51 @@ func (s *VolcengineRedisAccountService) ReadResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineRedisAccountService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
-	return nil
+	return &resource.StateChangeConf{
+		Delay:      10 * time.Second,
+		Pending:    []string{},
+		Target:     target,
+		Timeout:    timeout,
+		MinTimeout: 1 * time.Second,
+
+		Refresh: func() (result interface{}, state string, err error) {
+			var (
+				instance   map[string]interface{}
+				status     interface{}
+				failStates []string
+			)
+			failStates = append(failStates, "CreateFailed", "TaskFailed")
+
+			logger.DebugInfo("start refresh :%s", id)
+
+			ids := strings.Split(resourceData.Id(), ":")
+			if len(ids) != 2 {
+				return nil, "", fmt.Errorf("invalid redis account id")
+			}
+			instanceId := ids[0]
+			if err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+				status, err = s.DescribeRedisInstanceStatus(instanceId)
+				if err != nil {
+					if volc.ResourceNotFoundError(err) {
+						return resource.RetryableError(err)
+					} else {
+						return resource.NonRetryableError(err)
+					}
+				}
+				return nil
+			}); err != nil {
+				return nil, "", err
+			}
+			logger.DebugInfo("Refresh instance status resp: %v", instance)
+			for _, v := range failStates {
+				if v == status.(string) {
+					return nil, "", fmt.Errorf("instance %s status error, status %s", id, status.(string))
+				}
+			}
+			logger.DebugInfo("refresh status:%v", status)
+			return instance, status.(string), err
+		},
+	}
 }
 
 func (VolcengineRedisAccountService) WithResourceResponseHandlers(account map[string]interface{}) []volc.ResourceResponseHandler {
@@ -124,6 +168,13 @@ func (s *VolcengineRedisAccountService) CreateResource(resourceData *schema.Reso
 				d.SetId(id)
 				return nil
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			Refresh: &volc.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
 		},
 	}
 	return []volc.Callback{callback}
@@ -148,6 +199,13 @@ func (s *VolcengineRedisAccountService) ModifyResource(resourceData *schema.Reso
 			ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("instance_id").(string)
+			},
+			Refresh: &volc.StateRefresh{
+				Target:  []string{"Running"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
 			},
 		},
 	}
@@ -230,4 +288,51 @@ func getUniversalInfo(actionName string) volc.UniversalInfo {
 		ContentType: volc.ApplicationJSON,
 		Action:      actionName,
 	}
+}
+
+func (s *VolcengineRedisAccountService) DescribeRedisInstanceStatus(id string) (string, error) {
+	var (
+		results interface{}
+		data    map[string]interface{}
+	)
+	action := "DescribeDBInstances"
+	req := map[string]interface{}{
+		"InstanceId": id,
+	}
+	logger.Debug(logger.ReqFormat, action, req)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return "", err
+	}
+	logger.Debug(logger.RespFormat, action, req, *resp)
+	results, err = volc.ObtainSdkValue("Result.Instances", *resp)
+	if err != nil {
+		logger.DebugInfo("ve.ObtainSdkValue return :%v", err)
+		return "", err
+	}
+	if results == nil {
+		results = []interface{}{}
+	}
+	instances, ok := results.([]interface{})
+	if !ok {
+		return "", fmt.Errorf("DescribeDBInstances responsed instances is not a slice")
+	}
+
+	for _, v := range instances {
+		if data, ok = v.(map[string]interface{}); !ok {
+			return "", fmt.Errorf("Value is not map ")
+		}
+	}
+
+	if len(data) == 0 {
+		return "", fmt.Errorf("db instance %s not exist ", id)
+	}
+
+	status, ok := data["Status"].(string)
+	if !ok {
+		return "", fmt.Errorf("db instance %s status is not string ", id)
+	}
+
+	return status, nil
+
 }

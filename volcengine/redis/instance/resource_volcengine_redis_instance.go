@@ -282,6 +282,65 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 				DiffSuppressFunc: redisInstanceImportDiffSuppress,
 				Description:      "Whether enable auto backup for redis instance. This field is valid and required when updating the backup plan of primary and secondary instance.",
 			},
+			"backup_point_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "Set the backup name for the final backup of the instance to be deleted. " +
+					"If the backup name is not set, the backup ID is used as the name by default. " +
+					"Use lifecycle and ignore_changes in import.",
+			},
+			"time_scope": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "The maintainable time period of the instance, in the format of HH:mm-HH:mm (UTC+8).",
+			},
+			"max_connections": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "Maximum number of connections per shard.",
+			},
+			"addr_type": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "The type of connection address that requires an address prefix. " +
+					"Use lifecycle and ignore_changes in import.",
+			},
+			"new_address_prefix": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "The modified connection address prefix. " +
+					"Use lifecycle and ignore_changes in import.",
+			},
+			"new_port": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "The modified connection address port number. " +
+					"Use lifecycle and ignore_changes in import.",
+			},
+			"upgrade_region_domain": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() == ""
+				},
+				Description: "Whether to upgrade the domain suffix of the connection address. " +
+					"Use lifecycle and ignore_changes in import.",
+			},
 		},
 	}
 	return resource
