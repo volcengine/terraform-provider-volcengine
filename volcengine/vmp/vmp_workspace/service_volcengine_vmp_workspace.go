@@ -135,16 +135,34 @@ func (s *VolcengineVmpWorkspaceService) CreateResource(resourceData *schema.Reso
 			Action:      "CreateWorkspace",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				// password 需要 base64 加密
-				if pass, ok := (*call.SdkParam)["Password"]; ok {
-					(*call.SdkParam)["Password"] = base64.StdEncoding.EncodeToString([]byte(pass.(string)))
+				if v, ok := (*call.SdkParam)["Password"]; ok {
+					pass, ok := v.(string)
+					if !ok {
+						return false, errors.New("password must be string")
+					}
+					// 如果是 base64 编码的字符串，直接使用，否则进行 base64 编码
+					_, base64DecodeError := base64.StdEncoding.DecodeString(pass)
+					if base64DecodeError == nil {
+						(*call.SdkParam)["Password"] = pass
+					} else {
+						(*call.SdkParam)["Password"] = base64.StdEncoding.EncodeToString([]byte(pass))
+					}
 				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				id, _ := ve.ObtainSdkValue("Result.Id", *resp)
@@ -189,14 +207,26 @@ func (s *VolcengineVmpWorkspaceService) ModifyResource(resourceData *schema.Reso
 				}
 
 				// password base64 encode
-				if pass, ok := (*call.SdkParam)["Password"]; ok {
-					(*call.SdkParam)["Password"] = base64.StdEncoding.EncodeToString([]byte(pass.(string)))
+				if v, ok := (*call.SdkParam)["Password"]; ok {
+					pass, ok := v.(string)
+					if !ok {
+						return false, errors.New("password must be string")
+					}
+					// 如果是 base64 编码的字符串，直接使用，否则进行 base64 编码
+					_, base64DecodeError := base64.StdEncoding.DecodeString(pass)
+					if base64DecodeError == nil {
+						(*call.SdkParam)["Password"] = pass
+					} else {
+						(*call.SdkParam)["Password"] = base64.StdEncoding.EncodeToString([]byte(pass))
+					}
 				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Active"},
@@ -205,6 +235,10 @@ func (s *VolcengineVmpWorkspaceService) ModifyResource(resourceData *schema.Reso
 		},
 	}
 	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	callbacks = s.setResourceTags(resourceData, "Workspace", callbacks)
+
 	return callbacks
 }
 
@@ -224,10 +258,35 @@ func (s *VolcengineVmpWorkspaceService) RemoveResource(resourceData *schema.Reso
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 10*time.Minute)
+			},
+			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
+				// 开启删除保护时，跳过 CallError
+				if d.Get("delete_protection_enabled").(bool) {
+					return baseErr
+				}
+
+				//出现错误后重试
+				return resource.Retry(5*time.Minute, func() *resource.RetryError {
+					_, callErr := s.ReadResource(d, "")
+					if callErr != nil {
+						if ve.ResourceNotFoundError(callErr) {
+							return nil
+						} else {
+							return resource.NonRetryableError(fmt.Errorf("error on reading vmp workspace on delete %q, %w", d.Id(), callErr))
+						}
+					}
+					_, callErr = call.ExecuteCall(d, client, call)
+					if callErr == nil {
+						return nil
+					}
+					return resource.RetryableError(callErr)
+				})
 			},
 		},
 	}
@@ -248,6 +307,23 @@ func (s *VolcengineVmpWorkspaceService) DatasourceResources(*schema.ResourceData
 				TargetField: "Filters.InstanceTypeIds",
 				ConvertType: ve.ConvertJsonArray,
 			},
+			"statuses": {
+				TargetField: "Filters.Statuses",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"values": {
+						TargetField: "Values",
+						ConvertType: ve.ConvertJsonArray,
+					},
+				},
+			},
 		},
 		ContentType:  ve.ContentTypeJson,
 		NameField:    "Name",
@@ -258,6 +334,76 @@ func (s *VolcengineVmpWorkspaceService) DatasourceResources(*schema.ResourceData
 
 func (s *VolcengineVmpWorkspaceService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineVmpWorkspaceService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, v := range addedTags.List() {
+						tagMap, ok := v.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("Tags is not map ")
+						}
+						tag := make(map[string]interface{})
+						tag["Key"] = tagMap["key"]
+						tag["Value"] = tagMap["value"]
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
+}
+
+func (s *VolcengineVmpWorkspaceService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vmp",
+		ResourceType:         "Workspace",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

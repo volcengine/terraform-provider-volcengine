@@ -27,10 +27,46 @@ func DataSourceVolcengineVmpWorkspaces() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of Instance Type IDs.",
 			},
+			"statuses": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of Workspace status.",
+			},
 			"name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The name of workspace.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of vmp workspace.",
+			},
+			"tags": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The tags of vmp workspace.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"values": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The Value of Tags.",
+						},
+					},
+				},
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -103,6 +139,12 @@ func DataSourceVolcengineVmpWorkspaces() *schema.Resource {
 							Computed:    true,
 							Description: "Whether enable delete protection.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of vmp workspace.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

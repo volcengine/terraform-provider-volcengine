@@ -65,6 +65,15 @@ func ResourceVolcengineVmpWorkspace() *schema.Resource {
 				Optional:    true,
 				Description: "Whether enable delete protection.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the vmp workspace.",
+			},
+			"tags": ve.TagsSchema(),
+
+			// computed fields
 			"prometheus_write_intranet_endpoint": {
 				Type:        schema.TypeString,
 				Computed:    true,

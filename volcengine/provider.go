@@ -18,6 +18,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/import_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/schedule_sql_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shipper"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_template"
 	"net/http"
 	"net/url"
 	"os"
@@ -908,6 +909,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_alerts":                vmp_alert.DataSourceVolcengineVmpAlerts(),
 			"volcengine_vmp_notify_group_policies": vmp_notify_group_policy.DataSourceVolcengineVmpNotifyGroupPolicies(),
 			"volcengine_vmp_notify_policies":       vmp_notify_policy.DataSourceVolcengineVmpNotifyPolicies(),
+			"volcengine_vmp_notify_templates":      vmp_notify_template.DataSourceVolcengineVmpNotifyTemplates(),
+			//"volcengine_vmp_silence_policies":      vmp_silence_policy.DataSourceVolcengineVmpSilencePolicies(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1313,6 +1316,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_alerting_rule":       vmp_alerting_rule.ResourceVolcengineVmpAlertingRule(),
 			"volcengine_vmp_notify_group_policy": vmp_notify_group_policy.ResourceVolcengineVmpNotifyGroupPolicy(),
 			"volcengine_vmp_notify_policy":       vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
+			"volcengine_vmp_notify_template":     vmp_notify_template.ResourceVolcengineVmpNotifyTemplate(),
+			//"volcengine_vmp_silence_policy":      vmp_silence_policy.ResourceVolcengineVmpSilencePolicy(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
