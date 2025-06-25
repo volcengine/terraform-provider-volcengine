@@ -458,12 +458,12 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 												"node_id": {
 													Type:        schema.TypeString,
 													Computed:    true,
-													Description: "The ID of node",
+													Description: "The ID of node.",
 												},
 												"status": {
 													Type:        schema.TypeString,
 													Computed:    true,
-													Description: "The status of node",
+													Description: "The status of node.",
 												},
 												"zone_id": {
 													Type:        schema.TypeString,
@@ -515,12 +515,12 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 									"node_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The ID of node",
+										Description: "The ID of node.",
 									},
 									"status": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The status of node",
+										Description: "The status of node.",
 									},
 									"zone_id": {
 										Type:        schema.TypeString,

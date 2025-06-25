@@ -97,6 +97,7 @@ The following arguments are supported:
 * `sharded_cluster` - (Required) Whether enable sharded cluster for the current redis instance. Valid values: 0, 1. 0 means disable, 1 means enable.
 * `subnet_id` - (Required) The subnet id of the redis instance. The specified subnet id must belong to the zone ids.
 * `additional_bandwidth` - (Optional) Modify the single-shard additional bandwidth of the target Redis instance. Set the additional bandwidth of a single shard, that is, the bandwidth that needs to be additionally increased on the basis of the default bandwidth. Unit: MB/s. The value of additional bandwidth needs to meet the following conditions at the same time: It must be greater than or equal to 0. When the value is 0, it means that no additional bandwidth is added, and the bandwidth of a single shard is the default bandwidth. The sum of additional bandwidth and default bandwidth cannot exceed the upper limit of bandwidth that can be modified for the current instance. Different specification nodes have different upper limits of bandwidth that can be modified. For more details, please refer to bandwidth modification range. The upper limits of the total write bandwidth and the total read bandwidth of an instance are both 2048MB/s.
+* `addr_type` - (Optional) The type of connection address that requires an address prefix. Use lifecycle and ignore_changes in import.
 * `apply_immediately` - (Optional) Whether to apply the instance configuration change operation immediately. The value of this field is false, means that the change operation will be applied within maintenance time.
 * `auto_renew` - (Optional) Whether to enable automatic renewal. This field is valid only when `ChargeType` is `PrePaid`, the default value is false. 
 When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
@@ -105,16 +106,20 @@ When importing resources, this attribute will not be imported. If this attribute
 This field is valid and required when updating the backup plan of primary and secondary instance.
 * `backup_period` - (Optional) The backup period. The valid value can be any integer between 1 and 7. Among them, 1 means backup every Monday, 2 means backup every Tuesday, and so on. 
 This field is valid and required when updating the backup plan of primary and secondary instance.
+* `backup_point_name` - (Optional) Set the backup name for the final backup of the instance to be deleted. If the backup name is not set, the backup ID is used as the name by default. Use lifecycle and ignore_changes in import.
 * `charge_type` - (Optional) The charge type of redis instance. Valid value: `PostPaid`, `PrePaid`.
 * `configure_nodes` - (Optional) Set the list of available zones to which the node belongs.
 * `create_backup` - (Optional) Whether to create a final backup when modify the instance configuration or destroy the redis instance.
 * `deletion_protection` - (Optional) Whether enable deletion protection for redis instance. Valid values: `enabled`, `disabled`(default).
 * `instance_name` - (Optional) The name of the redis instance.
+* `max_connections` - (Optional) Maximum number of connections per shard.
 * `multi_az` - (Optional) Set the availability zone deployment scheme for the instance. The value range is as follows: 
 disabled: Single availability zone deployment scheme.
  enabled: Multi-availability zone deployment scheme.
  Description:
  When the newly created instance is a single-node instance (that is, when the value of NodeNumber is 1), only the single availability zone deployment scheme is allowed. At this time, the value of MultiAZ must be disabled.
+* `new_address_prefix` - (Optional) The modified connection address prefix. Use lifecycle and ignore_changes in import.
+* `new_port` - (Optional) The modified connection address port number. Use lifecycle and ignore_changes in import.
 * `param_values` - (Optional) The configuration item information to be modified. This field can only be added or modified. Deleting this field is invalid.
 When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields, or use the command `terraform apply` to perform a modification operation.
 * `password` - (Optional) The account password. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields. If this parameter is left blank, it means that no password is set for the default account. At this time, the system will automatically generate a password for the default account to ensure instance access security. No account can obtain this random password. Therefore, before connecting to the instance, you need to reset the password of the default account through the ModifyDBAccount interface.You can also set a new account and password through the CreateDBAccount interface according to business needs. If you need to use password-free access function, you need to enable password-free access first through the ModifyDBInstanceVpcAuthMode interface.
@@ -124,6 +129,8 @@ When importing resources, this attribute will not be imported. If this attribute
 When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `shard_number` - (Optional) The number of shards in redis instance, the valid value range is `2-256`. This field is valid and required when the value of `ShardedCluster` is 1.
 * `tags` - (Optional) Tags.
+* `time_scope` - (Optional) The maintainable time period of the instance, in the format of HH:mm-HH:mm (UTC+8).
+* `upgrade_region_domain` - (Optional) Whether to upgrade the domain suffix of the connection address. Use lifecycle and ignore_changes in import.
 * `vpc_auth_mode` - (Optional) Whether to enable password-free access when connecting to an instance through a private network. Valid values: `open`, `close`.
 * `zone_ids` - (Optional, **Deprecated**) This field has been deprecated after version-0.0.152. Please use multi_az and configure_nodes to specify the availability zone. The list of zone IDs of instance. When creating a single node instance, only one zone id can be specified.
 
