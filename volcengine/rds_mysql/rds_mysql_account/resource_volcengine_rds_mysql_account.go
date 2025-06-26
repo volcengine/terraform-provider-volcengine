@@ -86,7 +86,8 @@ func ResourceVolcengineRdsMysqlAccount() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("account_type").(string) == "Super"
 				},
-				Description: "The privilege information of account.",
+				Description: "The privilege information of account. Due to differences in the return structure of the query interface, " +
+					"it is necessary to use lifecycle_ignore to suppress changes when creating Global permissions.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"db_name": {

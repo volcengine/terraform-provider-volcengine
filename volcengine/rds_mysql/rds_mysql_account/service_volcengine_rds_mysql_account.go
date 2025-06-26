@@ -147,20 +147,6 @@ func (s *VolcengineRdsMysqlAccountService) ReadResource(resourceData *schema.Res
 		return data, fmt.Errorf("RDS account %s not exist ", RdsMysqlAccountId)
 	}
 
-	//if accountPrivileges, ok := resourceData.GetOk("account_privileges"); ok {
-	//	data["AccountPrivileges"] = accountPrivileges
-	//}
-	//
-	//if tableColumnPrivileges, ok := resourceData.GetOk("table_column_privileges"); ok {
-	//	tableSet, ok := tableColumnPrivileges.(*schema.Set)
-	//	if ok {
-	//		for _, table := range tableSet.List() {
-	//
-	//		}
-	//	}
-	//	data["TableColumnPrivileges"] = tableColumnPrivileges
-	//}
-
 	return data, err
 }
 
@@ -194,6 +180,7 @@ func (s *VolcengineRdsMysqlAccountService) CreateResource(resourceData *schema.R
 					NextLevelConvert: map[string]volc.RequestConvert{
 						"db_name": {
 							TargetField: "DBName",
+							ForceGet:    true,
 						},
 					},
 				},
@@ -220,7 +207,11 @@ func (s *VolcengineRdsMysqlAccountService) CreateResource(resourceData *schema.R
 							if err != nil {
 								return false, err
 							}
+						} else {
+							privilegeMap["db_name"] = ""
 						}
+					} else {
+						privilegeMap["db_name"] = ""
 					}
 				}
 
@@ -308,6 +299,13 @@ func (s *VolcengineRdsMysqlAccountService) ModifyResource(resourceData *schema.R
 					"AccountName":     resourceData.Get("account_name"),
 					"AccountPassword": resourceData.Get("account_password"),
 				},
+				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+					host, ok := resourceData.GetOk("host")
+					if ok {
+						(*call.SdkParam)["Host"] = host
+					}
+					return true, nil
+				},
 				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -371,6 +369,7 @@ func (s *VolcengineRdsMysqlAccountService) ModifyResource(resourceData *schema.R
 						NextLevelConvert: map[string]volc.RequestConvert{
 							"db_name": {
 								TargetField: "DBName",
+								ForceGet:    true,
 							},
 						},
 						ConvertType: volc.ConvertJsonObjectArray,
@@ -379,6 +378,10 @@ func (s *VolcengineRdsMysqlAccountService) ModifyResource(resourceData *schema.R
 				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
 					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
 					(*call.SdkParam)["AccountName"] = d.Get("account_name")
+					host, ok := resourceData.GetOk("host")
+					if ok {
+						(*call.SdkParam)["Host"] = host
+					}
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
@@ -415,6 +418,10 @@ func (s *VolcengineRdsMysqlAccountService) ModifyResource(resourceData *schema.R
 							return false, nil
 						}
 						(*call.SdkParam)["DBNames"] = strings.Join(dbNames, ",")
+						host, ok := resourceData.GetOk("host")
+						if ok {
+							(*call.SdkParam)["Host"] = host
+						}
 						return true, nil
 					},
 					ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
