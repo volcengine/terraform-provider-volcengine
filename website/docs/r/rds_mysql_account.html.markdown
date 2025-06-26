@@ -106,7 +106,7 @@ Super: A high-privilege account. Only one database account can be created for an
 Normal: An account with ordinary privileges.
 * `instance_id` - (Required, ForceNew) The ID of the RDS instance.
 * `account_desc` - (Optional) Account information description. The length should not exceed 256 characters.
-* `account_privileges` - (Optional) The privilege information of account.
+* `account_privileges` - (Optional) The privilege information of account. Due to differences in the return structure of the query interface, it is necessary to use lifecycle_ignore to suppress changes when creating Global permissions.
 * `host` - (Optional) Specify the IP address for the account to access the database. The default value is %. If the Host is specified as %, the account is allowed to access the database from any IP address. Wildcards are supported for setting the IP address range that can access the database. For example, if the Host is specified as 192.10.10.%, it means the account can access the database from IP addresses between 192.10.10.0 and 192.10.10.255. The specified Host needs to be added to the whitelist bound to the instance, otherwise the instance cannot be accessed normally. The ModifyAllowList interface can be called to add the Host to the whitelist. Note: If the created account type is a high-privilege account, the host IP can only be specified as %. That is, when the value of AccountType is Super, the value of Host can only be %.
 * `table_column_privileges` - (Optional, ForceNew) Settings for table column permissions of the account.
 

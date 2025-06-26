@@ -74,7 +74,12 @@ func ResponseToDataSource(d *schema.ResourceData, r *schema.Resource, info DataS
 	_, _, err = datasourceMapping(d, result, dataSource{
 		idField: info.IdField,
 		idValue: func(idField string, item map[string]interface{}) string {
-			return item[idField].(string)
+			idVal := item[idField]
+			idValStr, ok := idVal.(string)
+			if ok {
+				return idValStr
+			}
+			return ""
 		},
 		sliceValue: func(item map[string]interface{}) map[string]interface{} {
 			return mergeDatasource(r, info.CollectField, item, info.ResponseConverts)

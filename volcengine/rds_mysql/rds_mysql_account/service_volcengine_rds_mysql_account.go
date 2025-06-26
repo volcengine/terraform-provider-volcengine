@@ -63,44 +63,6 @@ func (s *VolcengineRdsMysqlAccountService) ReadResources(m map[string]interface{
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Accounts is not Slice")
 		}
-		for _, value := range data {
-			account, ok := value.(map[string]interface{})
-			if !ok {
-				return data, errors.New("Value is not map ")
-			}
-			action = "DescribeDBAccountTableColumnInfo"
-			tableNames, ok := account["HasTableColumnPrivilegeDBNames"]
-			if ok {
-				names, ok := tableNames.([]string)
-				if !ok {
-					continue
-				} else {
-					var infos []interface{}
-					for _, name := range names {
-						req := map[string]interface{}{
-							"InstanceId": condition["InstanceId"],
-							"DBName":     name,
-						}
-						logger.Debug(logger.ReqFormat, action, req)
-						detailResp, err := universalClient.DoCall(getUniversalInfo(action), &req)
-						if err != nil {
-							logger.Info("DescribeDBAccountTableColumnInfo error:", err)
-							continue
-						}
-						logger.Debug(logger.RespFormat, action, req, string(respBytes))
-						tableInfos, err := volc.ObtainSdkValue("Result.TableInfos", *detailResp)
-						if err != nil {
-							logger.Info("ObtainSdkValue Result.TableInfos error:", err)
-							continue
-						}
-						infos = append(infos, tableInfos)
-					}
-					account["TableInfos"] = infos
-				}
-			} else {
-				continue
-			}
-		}
 		return data, err
 	})
 }

@@ -18,7 +18,7 @@ resource "volcengine_rds_mysql_backup_policy" "foo" {
   lock_ddl_time             = 80
   cross_backup_policy {
     backup_enabled      = true
-    cross_backup_region = "cn-beijing"
+    cross_backup_region = "cn-chongqing-sdv"
     log_backup_enabled  = true
     retention           = 10
   }

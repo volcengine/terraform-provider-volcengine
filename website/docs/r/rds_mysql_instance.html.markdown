@@ -110,7 +110,7 @@ MySQL_8_0.
 Direct: Direct connection mode.
 Transaction: Transaction-level connection pool (default).
 * `data_sync_mode` - (Optional) Data synchronization methods:
-SemiSync: Semi - synchronous.
+SemiSync: Semi - synchronous(Default).
 Async: Asynchronous.
 * `db_time_zone` - (Optional, ForceNew) Time zone. Support UTC -12:00 ~ +13:00. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `deletion_protection` - (Optional) Whether to enable the deletion protection function. Values:

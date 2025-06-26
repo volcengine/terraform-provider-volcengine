@@ -91,12 +91,6 @@ In addition to all arguments above, the following attributes are exported:
     * `global_account_privileges` - The global privileges of the account.
     * `has_table_column_privilege_db_names` - The databases to which the table column permissions owned by the account belong. Description: If the account does not have table column permissions, this field will not be returned.
     * `host` - The host of the account.
-    * `table_infos` - The instance specifies the table column permission information in the database.
-        * `account_privileges` - The table permissions of the account.
-        * `column_infos` - The column permission information of the account.
-            * `account_privileges` - The column privileges of the account.
-            * `column_name` - The name of the column.
-        * `table_name` - The name of the table.
 * `total_count` - The total count of database account query.
 
 
