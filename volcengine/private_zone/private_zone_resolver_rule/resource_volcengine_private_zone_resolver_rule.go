@@ -123,7 +123,7 @@ func ResourceVolcenginePrivateZoneResolverRule() *schema.Resource {
 				},
 			},
 			"line": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("type").(string) != "LINE"
