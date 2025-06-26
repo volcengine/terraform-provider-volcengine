@@ -23,6 +23,7 @@ data "volcengine_cr_registries" "foo" {
 The following arguments are supported:
 * `names` - (Optional) The list of registry names to query.
 * `output_file` - (Optional) File name where to save data source results.
+* `projects` - (Optional) The list of project names to query.
 * `resource_tags` - (Optional) The tags of cr registry.
 * `statuses` - (Optional) The list of registry statuses.
 * `types` - (Optional) The list of registry types to query.
@@ -47,6 +48,12 @@ In addition to all arguments above, the following attributes are exported:
         * `type` - The domain type of registry.
     * `name` - The name of registry.
     * `project` - The ProjectName of the cr registry.
+    * `proxy_cache_enabled` - Whether to enable proxy cache.
+    * `proxy_cache` - The proxy cache of registry. This field is valid when proxy_cache_enabled is true.
+        * `endpoint` - The endpoint of proxy cache.
+        * `skip_ssl_verify` - Whether to skip ssl verify.
+        * `type` - The type of proxy cache. Valid values: `DockerHub`, `DockerRegistry`.
+        * `username` - The username of proxy cache.
     * `resource_tags` - Tags.
         * `key` - The Key of Tags.
         * `value` - The Value of Tags.
