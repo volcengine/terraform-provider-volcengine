@@ -211,8 +211,8 @@ func ResourceVolcengineRdsMysqlInstance() *schema.Resource {
 			"data_sync_mode": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
-				Description: "Data synchronization methods:\nSemiSync: Semi - synchronous.\nAsync: Asynchronous.",
+				Default:     "SemiSync",
+				Description: "Data synchronization methods:\nSemiSync: Semi - synchronous(Default).\nAsync: Asynchronous.",
 			},
 			"auto_storage_scaling_config": {
 				Type:        schema.TypeList,

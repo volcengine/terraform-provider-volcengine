@@ -203,10 +203,16 @@ func (s *VolcengineRdsMysqlBackupPolicyService) CreateResource(resourceData *sch
 					if logBackupEnabled, ok := d.GetOk("cross_backup_policy.0.log_backup_enabled"); ok {
 						(*call.SdkParam)["LogBackupEnabled"] = logBackupEnabled
 					}
-					if logBackupRegion, ok := d.GetOk("cross_backup_policy.0.log_cross_backup_region"); ok {
-						(*call.SdkParam)["LogCrossBackupRegion"] = logBackupRegion
+					if retention, ok := d.GetOk("cross_backup_policy.0.retention"); ok {
+						(*call.SdkParam)["Retention"] = retention
 					}
 					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
 				},
 			},
 		}
@@ -339,10 +345,16 @@ func (s *VolcengineRdsMysqlBackupPolicyService) ModifyResource(resourceData *sch
 					if logBackupEnabled, ok := d.GetOk("cross_backup_policy.0.log_backup_enabled"); ok {
 						(*call.SdkParam)["LogBackupEnabled"] = logBackupEnabled
 					}
-					if logBackupRegion, ok := d.GetOk("cross_backup_policy.0.log_cross_backup_region"); ok {
-						(*call.SdkParam)["LogCrossBackupRegion"] = logBackupRegion
+					if retention, ok := d.GetOk("cross_backup_policy.0.retention"); ok {
+						(*call.SdkParam)["Retention"] = retention
 					}
 					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
 				},
 			},
 		}

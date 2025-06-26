@@ -99,6 +99,7 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResources(m map[string]interface
 				rdsInstance["DrDtsTaskName"] = basicInfoMap["DrDtsTaskName"]
 				rdsInstance["DrDtsTaskStatus"] = basicInfoMap["DrDtsTaskStatus"]
 			}
+			logger.Debug(logger.ReqFormat, "DescribeInstanceDetail Result.BasicInfo", "basicInfo", basicInfo, "rds", rdsInstance)
 
 			// 2. endpoint info
 			endpoints, err := ve.ObtainSdkValue("Result.Endpoints", *instanceDetailInfo)
