@@ -79,6 +79,26 @@ func (s *VolcengineRdsMysqlBackupPolicyService) ReadResources(m map[string]inter
 				results.(map[string]interface{})["CrossBackupPolicy"] = crossPolicy
 			}
 		}
+		action = "DescribeAvailableCrossRegion"
+		req = map[string]interface{}{
+			"InstanceId": condition["InstanceId"],
+			"RegionId":   s.Client.Region,
+		}
+		resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+		if err != nil {
+			return data, err
+		}
+		respBytes, _ = json.Marshal(resp)
+		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		availableCrossRegion, err := ve.ObtainSdkValue("Result.Regions", *resp)
+		if err != nil {
+			return data, err
+		}
+		if availableCrossRegion != nil {
+			if _, ok := results.(map[string]interface{}); ok {
+				results.(map[string]interface{})["AvailableCrossRegion"] = availableCrossRegion
+			}
+		}
 		results = []interface{}{results}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.BackupPolicy is not Slice")
