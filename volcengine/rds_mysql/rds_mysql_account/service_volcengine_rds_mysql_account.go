@@ -316,6 +316,26 @@ func (s *VolcengineRdsMysqlAccountService) ModifyResource(resourceData *schema.R
 		}
 		callbacks = append(callbacks, callback)
 	}
+	if resourceData.HasChange("host") {
+		callback := volc.Callback{
+			Call: volc.SdkCall{
+				Action:      "ModifyDBAccountHost",
+				ConvertMode: volc.RequestConvertIgnore,
+				SdkParam: &map[string]interface{}{
+					"InstanceId":  resourceData.Get("instance_id"),
+					"AccountName": resourceData.Get("account_name"),
+					"NewHost":     resourceData.Get("host"),
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+					o, _ := resourceData.GetChange("host")
+					(*call.SdkParam)["Host"] = o
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
 	if resourceData.HasChange("account_desc") {
 		callback := volc.Callback{
 			Call: volc.SdkCall{
@@ -331,26 +351,6 @@ func (s *VolcengineRdsMysqlAccountService) ModifyResource(resourceData *schema.R
 					if ok {
 						(*call.SdkParam)["Host"] = host
 					}
-					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				},
-			},
-		}
-		callbacks = append(callbacks, callback)
-	}
-	if resourceData.HasChange("host") {
-		callback := volc.Callback{
-			Call: volc.SdkCall{
-				Action:      "ModifyDBAccountHost",
-				ConvertMode: volc.RequestConvertIgnore,
-				SdkParam: &map[string]interface{}{
-					"InstanceId":  resourceData.Get("instance_id"),
-					"AccountName": resourceData.Get("account_name"),
-					"NewHost":     resourceData.Get("host"),
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
-					o, _ := resourceData.GetChange("host")
-					(*call.SdkParam)["Host"] = o
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
