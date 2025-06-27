@@ -134,6 +134,11 @@ func DataSourceVolcengineVmpWorkspaces() *schema.Resource {
 							Computed:    true,
 							Description: "The prometheus query intranet endpoint.",
 						},
+						"prometheus_push_intranet_endpoint": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The prometheus push intranet endpoint.",
+						},
 						"delete_protection_enabled": {
 							Type:        schema.TypeBool,
 							Computed:    true,

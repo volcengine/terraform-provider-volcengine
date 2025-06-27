@@ -117,6 +117,44 @@ func ResourceVolcengineVmpAlertingRule() *schema.Resource {
 					},
 				},
 			},
+			"annotations": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The annotations of the vmp alerting rule.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the annotation.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The value of the annotation.",
+						},
+					},
+				},
+			},
+			"labels": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The labels of the vmp alerting rule.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the label.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The value of the label.",
+						},
+					},
+				},
+			},
 
 			"create_time": {
 				Type:        schema.TypeString,

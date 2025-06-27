@@ -92,7 +92,7 @@ func ResourceVolcengineVmpNotifyPolicy() *schema.Resource {
 						},
 						"resolved_channels": {
 							Type:     schema.TypeSet,
-							Required: true,
+							Optional: true,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},

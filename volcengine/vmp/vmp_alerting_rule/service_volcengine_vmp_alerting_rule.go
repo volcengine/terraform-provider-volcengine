@@ -157,6 +157,14 @@ func (s *VolcengineVmpAlertingRuleService) CreateResource(resourceData *schema.R
 					TargetField: "Levels",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"annotations": {
+					TargetField: "Annotations",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"labels": {
+					TargetField: "Labels",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Type"] = "vmp/PromQL"
@@ -236,6 +244,16 @@ func (s *VolcengineVmpAlertingRuleService) ModifyResource(resourceData *schema.R
 							ForceGet:    true,
 						},
 					},
+				},
+				"annotations": {
+					TargetField: "Annotations",
+					ConvertType: ve.ConvertJsonObjectArray,
+					ForceGet:    true,
+				},
+				"labels": {
+					TargetField: "Labels",
+					ConvertType: ve.ConvertJsonObjectArray,
+					ForceGet:    true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {

@@ -84,6 +84,11 @@ func ResourceVolcengineVmpWorkspace() *schema.Resource {
 				Computed:    true,
 				Description: "The prometheus query intranet endpoint.",
 			},
+			"prometheus_push_intranet_endpoint": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The prometheus push intranet endpoint.",
+			},
 			"overdue_reclaim_time": {
 				Type:        schema.TypeString,
 				Computed:    true,

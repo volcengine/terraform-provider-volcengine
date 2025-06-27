@@ -127,6 +127,44 @@ func DataSourceVolcengineVmpAlertingRules() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the vmp alerting rule.",
 						},
+						"annotations": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The annotations of the vmp alerting rule.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the annotation.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The value of the annotation.",
+									},
+								},
+							},
+						},
+						"labels": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The labels of the vmp alerting rule.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the label.",
+									},
+									"value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The value of the label.",
+									},
+								},
+							},
+						},
 						"query": {
 							Type:        schema.TypeList,
 							Computed:    true,
