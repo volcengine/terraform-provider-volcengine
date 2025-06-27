@@ -162,9 +162,15 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `alerting_rules` - The collection of query.
+    * `annotations` - The annotations of the vmp alerting rule.
+        * `name` - The name of the annotation.
+        * `value` - The value of the annotation.
     * `create_time` - The create time of the vmp alerting rule.
     * `description` - The description of the vmp alerting rule.
     * `id` - The id of the vmp alerting rule.
+    * `labels` - The labels of the vmp alerting rule.
+        * `key` - The name of the label.
+        * `value` - The value of the label.
     * `levels` - The alerting levels of the vmp alerting rule.
         * `comparator` - The comparator of the vmp alerting rule.
         * `for` - The duration of the alerting rule.

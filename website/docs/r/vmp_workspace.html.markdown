@@ -45,6 +45,7 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `create_time` - The create time of workspace.
 * `overdue_reclaim_time` - The overdue reclaim time.
+* `prometheus_push_intranet_endpoint` - The prometheus push intranet endpoint.
 * `prometheus_query_intranet_endpoint` - The prometheus query intranet endpoint.
 * `prometheus_write_intranet_endpoint` - The prometheus write intranet endpoint.
 * `status` - The status of workspace.

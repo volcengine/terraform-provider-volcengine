@@ -4,7 +4,7 @@ resource "volcengine_vmp_workspace" "foo" {
   delete_protection_enabled = false
   description               = "acc-test-1"
   username                  = "admin123"
-  password                  = "**********"
+  password                  = "Pass123456"
 }
 
 resource "volcengine_vmp_contact" "foo" {
@@ -25,7 +25,7 @@ resource "volcengine_vmp_contact" "foo" {
   }
   phone_number {
     country_code = "+86"
-    number = "18310101010"
+    number       = "18310101010"
   }
 }
 
@@ -47,86 +47,94 @@ resource "volcengine_vmp_contact" "foo1" {
   }
   phone_number {
     country_code = "+86"
-    number = "18310101011"
+    number       = "18310101011"
   }
 }
 
 resource "volcengine_vmp_contact_group" "foo" {
-  name = "acc-test"
+  name        = "acc-test"
   contact_ids = [volcengine_vmp_contact.foo.id]
 }
 
 resource "volcengine_vmp_contact_group" "foo1" {
-  name = "acc-test-1"
+  name        = "acc-test-1"
   contact_ids = [volcengine_vmp_contact.foo1.id]
 }
 
 resource "volcengine_vmp_notify_policy" "foo" {
-  name = "acc-test-1"
+  name        = "acc-test-1"
   description = "acc-test-1"
   levels {
-    level = "P1"
+    level             = "P1"
     contact_group_ids = [volcengine_vmp_contact_group.foo.id]
-    channels = ["Email", "Webhook"]
+    channels          = ["Email", "Webhook"]
   }
   levels {
-    level = "P0"
+    level             = "P0"
     contact_group_ids = [volcengine_vmp_contact_group.foo1.id]
-    channels = ["LarkBotWebhook"]
+    channels          = ["LarkBotWebhook"]
   }
 }
 
 resource "volcengine_vmp_notify_group_policy" "foo" {
-  name = "acc-test-1"
+  name        = "acc-test-1"
   description = "acc-test-1"
   levels {
-    level = "P2"
-    group_by = ["__rule__"]
-    group_wait = "35"
-    group_interval = "30"
-    repeat_interval = "30"
+    level           = "P2"
+    group_by        = ["__rule__"]
+    group_wait      = "35"
+    group_interval  = "60"
+    repeat_interval = "70"
   }
   levels {
-    level = "P0"
-    group_by = ["__rule__"]
-    group_wait = "30"
-    group_interval = "30"
-    repeat_interval = "30"
+    level           = "P0"
+    group_by        = ["__rule__"]
+    group_wait      = "30"
+    group_interval  = "60"
+    repeat_interval = "70"
   }
   levels {
-    level = "P1"
-    group_by = ["__rule__"]
-    group_wait = "40"
-    group_interval = "45"
-    repeat_interval = "30"
+    level           = "P1"
+    group_by        = ["__rule__"]
+    group_wait      = "40"
+    group_interval  = "75"
+    repeat_interval = "75"
   }
 }
 
 resource "volcengine_vmp_alerting_rule" "foo" {
-  name = "acc-test-1"
-  description = "acc-test-1"
-  notify_policy_id = volcengine_vmp_notify_policy.foo.id
+  name                   = "acc-test-1"
+  description            = "acc-test-1"
+  notify_policy_id       = volcengine_vmp_notify_policy.foo.id
   notify_group_policy_id = volcengine_vmp_notify_group_policy.foo.id
   query {
     workspace_id = volcengine_vmp_workspace.foo.id
-    prom_ql = "sum(up)"
+    prom_ql      = "sum(up)"
   }
   levels {
-    level = "P0"
-    for = "0s"
+    level      = "P0"
+    for        = "0s"
     comparator = ">="
-    threshold = 2.0
+    threshold  = 2.0
   }
   levels {
-    level = "P1"
-    for = "0s"
+    level      = "P1"
+    for        = "0s"
     comparator = ">="
-    threshold = 1.0
+    threshold  = 1.0
   }
   levels {
-    level = "P2"
-    for = "0s"
+    level      = "P2"
+    for        = "0s"
     comparator = ">="
-    threshold = 0.5
+    threshold  = 0.5
+  }
+  annotations {
+    name  = "annotation"
+    value = "acc-test"
+  }
+  labels {
+    name  = "label"
+    value = "acc-test"
   }
 }

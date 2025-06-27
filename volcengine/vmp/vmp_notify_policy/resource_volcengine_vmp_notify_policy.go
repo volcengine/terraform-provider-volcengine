@@ -1,11 +1,9 @@
 package vmp_notify_policy
 
 import (
-	"bytes"
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -59,7 +57,7 @@ func ResourceVolcengineVmpNotifyPolicy() *schema.Resource {
 				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "The levels of the notify policy.",
-				Set:         levelsHash,
+				//Set:         levelsHash,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"level": {
@@ -143,16 +141,16 @@ func resourceVolcengineVmpNotifyPolicyDelete(d *schema.ResourceData, meta interf
 	return err
 }
 
-func levelsHash(v interface{}) int {
-	if v == nil {
-		return hashcode.String("")
-	}
-	m := v.(map[string]interface{})
-	var (
-		buf bytes.Buffer
-	)
-	buf.WriteString(fmt.Sprintf("%v:", m["level"]))
-	buf.WriteString(fmt.Sprintf("%v:", m["contact_group_ids"]))
-	buf.WriteString(fmt.Sprintf("%v:", m["channels"]))
-	return hashcode.String(buf.String())
-}
+//func levelsHash(v interface{}) int {
+//	if v == nil {
+//		return hashcode.String("")
+//	}
+//	m := v.(map[string]interface{})
+//	var (
+//		buf bytes.Buffer
+//	)
+//	buf.WriteString(fmt.Sprintf("%v:", m["level"]))
+//	buf.WriteString(fmt.Sprintf("%v:", m["contact_group_ids"]))
+//	buf.WriteString(fmt.Sprintf("%v:", m["channels"]))
+//	return hashcode.String(buf.String())
+//}

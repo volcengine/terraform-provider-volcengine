@@ -260,6 +260,16 @@ func (s *VolcengineVmpAlertingRuleService) ModifyResource(resourceData *schema.R
 				if d.HasChange("notify_policy_id") {
 					(*call.SdkParam)["NotifyPolicyId"] = d.Get("notify_policy_id")
 				}
+				if d.HasChange("annotations") {
+					if _, exists := d.GetOk("annotations"); !exists {
+						(*call.SdkParam)["Annotations"] = []interface{}{}
+					}
+				}
+				if d.HasChange("labels") {
+					if _, exists := d.GetOk("labels"); !exists {
+						(*call.SdkParam)["Labels"] = []interface{}{}
+					}
+				}
 				if len(*call.SdkParam) > 0 {
 					(*call.SdkParam)["Id"] = d.Id()
 					if d.HasChange("query") {

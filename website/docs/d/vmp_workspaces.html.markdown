@@ -50,6 +50,7 @@ In addition to all arguments above, the following attributes are exported:
     * `name` - The name of workspace.
     * `overdue_reclaim_time` - The overdue reclaim time.
     * `project_name` - The project name of vmp workspace.
+    * `prometheus_push_intranet_endpoint` - The prometheus push intranet endpoint.
     * `prometheus_query_intranet_endpoint` - The prometheus query intranet endpoint.
     * `prometheus_write_intranet_endpoint` - The prometheus write intranet endpoint.
     * `status` - The status of workspace.

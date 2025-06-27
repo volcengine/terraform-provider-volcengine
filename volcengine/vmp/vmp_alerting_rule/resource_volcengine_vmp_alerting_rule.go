@@ -142,7 +142,7 @@ func ResourceVolcengineVmpAlertingRule() *schema.Resource {
 				Description: "The labels of the vmp alerting rule.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"key": {
+						"name": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "The name of the label.",

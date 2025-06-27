@@ -91,7 +91,7 @@ The `levels` object supports the following:
 * `channels` - (Required) The alarm notification method of the alarm notification policy, the optional value can be `Email`, `Webhook`, `LarkBotWebhook`, `DingTalkBotWebhook`, `WeComBotWebhook`.
 * `contact_group_ids` - (Required) The contact group for the alarm notification policy.
 * `level` - (Required) The level of the policy, the value can be one of the following: `P0`, `P1`, `P2`.
-* `resolved_channels` - (Required) The resolved alarm notification method of the alarm notification policy, the optional value can be `Email`, `Webhook`, `LarkBotWebhook`, `DingTalkBotWebhook`, `WeComBotWebhook`.
+* `resolved_channels` - (Optional) The resolved alarm notification method of the alarm notification policy, the optional value can be `Email`, `Webhook`, `LarkBotWebhook`, `DingTalkBotWebhook`, `WeComBotWebhook`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

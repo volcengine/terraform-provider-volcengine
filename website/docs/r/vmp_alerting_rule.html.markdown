@@ -16,7 +16,7 @@ resource "volcengine_vmp_workspace" "foo" {
   delete_protection_enabled = false
   description               = "acc-test-1"
   username                  = "admin123"
-  password                  = "**********"
+  password                  = "Pass123456"
 }
 
 resource "volcengine_vmp_contact" "foo" {
@@ -95,22 +95,22 @@ resource "volcengine_vmp_notify_group_policy" "foo" {
     level           = "P2"
     group_by        = ["__rule__"]
     group_wait      = "35"
-    group_interval  = "30"
-    repeat_interval = "30"
+    group_interval  = "60"
+    repeat_interval = "70"
   }
   levels {
     level           = "P0"
     group_by        = ["__rule__"]
     group_wait      = "30"
-    group_interval  = "30"
-    repeat_interval = "30"
+    group_interval  = "60"
+    repeat_interval = "70"
   }
   levels {
     level           = "P1"
     group_by        = ["__rule__"]
     group_wait      = "40"
-    group_interval  = "45"
-    repeat_interval = "30"
+    group_interval  = "75"
+    repeat_interval = "75"
   }
 }
 
@@ -141,6 +141,14 @@ resource "volcengine_vmp_alerting_rule" "foo" {
     comparator = ">="
     threshold  = 0.5
   }
+  annotations {
+    name  = "annotation"
+    value = "acc-test"
+  }
+  labels {
+    name  = "label"
+    value = "acc-test"
+  }
 }
 ```
 ## Argument Reference
@@ -149,8 +157,20 @@ The following arguments are supported:
 * `name` - (Required) The name of the vmp alerting rule.
 * `notify_group_policy_id` - (Required) The id of the notify group policy.
 * `query` - (Required) The alerting query of the vmp alerting rule.
+* `annotations` - (Optional) The annotations of the vmp alerting rule.
 * `description` - (Optional) The description of the vmp alerting rule.
+* `labels` - (Optional) The labels of the vmp alerting rule.
 * `notify_policy_id` - (Optional) The id of the notify policy.
+
+The `annotations` object supports the following:
+
+* `name` - (Required) The name of the annotation.
+* `value` - (Required) The value of the annotation.
+
+The `labels` object supports the following:
+
+* `name` - (Required) The name of the label.
+* `value` - (Required) The value of the label.
 
 The `levels` object supports the following:
 

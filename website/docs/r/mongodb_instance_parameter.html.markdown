@@ -66,7 +66,7 @@ In addition to all arguments above, the following attributes are exported:
 
 
 ## Import
-mongodb parameter can be imported using the param:instanceId:parameterName, e.g.
+mongodb parameter can be imported using the param:instanceId:parameterName:parameterRole, e.g.
 ```
 $ terraform import volcengine_mongodb_instance_parameter.default param:mongo-replica-e405f8e2****:connPoolMaxConnsPerHost
 ```
