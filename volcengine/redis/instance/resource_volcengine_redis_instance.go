@@ -285,6 +285,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"backup_point_name": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				Description: "Set the backup name for the final backup of the instance to be deleted. " +
 					"If the backup name is not set, the backup ID is used as the name by default. " +
 					"Use lifecycle and ignore_changes in import.",
@@ -292,6 +293,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"time_scope": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},
@@ -300,6 +302,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"max_connections": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},
@@ -308,6 +311,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"addr_type": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},
@@ -317,6 +321,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"new_address_prefix": {
 				Type:     schema.TypeString,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},
@@ -326,6 +331,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"new_port": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},
@@ -335,6 +341,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"upgrade_region_domain": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() == ""
 				},

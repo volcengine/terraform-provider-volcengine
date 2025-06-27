@@ -3,6 +3,7 @@ package backup
 import (
 	"errors"
 	"fmt"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineerr"
 	"strings"
 	"time"
 
@@ -149,6 +150,8 @@ func (s *VolcengineRedisBackupService) ReadResource(resourceData *schema.Resourc
 			}
 		}
 	}
+
+	data["InstanceDetail"] = []interface{}{}
 	return data, errors.New("backup not exist")
 }
 
@@ -171,7 +174,7 @@ func (s *VolcengineRedisBackupService) RefreshResourceState(resourceData *schema
 			if err = resource.Retry(20*time.Minute, func() *resource.RetryError {
 				demo, err = s.ReadResource(resourceData, id)
 				if err != nil {
-					if ve.ResourceNotFoundError(err) {
+					if s.ResourceNotFoundError(err) {
 						return resource.RetryableError(err)
 					} else {
 						return resource.NonRetryableError(err)
@@ -303,4 +306,19 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
 	}
+}
+
+func (s *VolcengineRedisBackupService) ResourceNotFoundError(err error) bool {
+	if e, ok := err.(volcengineerr.RequestFailure); ok && e.StatusCode() == 404 {
+		return true
+	}
+	errMessage := strings.ToLower(err.Error())
+	return strings.Contains(errMessage, "notfound") ||
+		strings.Contains(errMessage, "not found") ||
+		strings.Contains(errMessage, "not exist") ||
+		strings.Contains(errMessage, "not associate") ||
+		strings.Contains(errMessage, "invalid") ||
+		strings.Contains(errMessage, "not_found") ||
+		strings.Contains(errMessage, "notexist") ||
+		strings.Contains(errMessage, "unavailable")
 }
