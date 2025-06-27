@@ -12,7 +12,7 @@ import (
 /*
 
 Import
-mongodb parameter can be imported using the param:instanceId:parameterName, e.g.
+mongodb parameter can be imported using the param:instanceId:parameterName:parameterRole, e.g.
 ```
 $ terraform import volcengine_mongodb_instance_parameter.default param:mongo-replica-e405f8e2****:connPoolMaxConnsPerHost
 ```
@@ -96,10 +96,11 @@ func resourceVolcengineMongoDBInstanceParameterRead(d *schema.ResourceData, meta
 
 func mongoDBParameterImporter(d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
 	items := strings.Split(d.Id(), ":")
-	if len(items) != 3 || items[0] != "param" {
+	if len(items) != 4 || items[0] != "param" {
 		return []*schema.ResourceData{d}, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName'")
 	}
 	_ = d.Set("instance_id", items[1])
 	_ = d.Set("parameter_name", items[2])
+	_ = d.Set("parameter_role", items[3])
 	return []*schema.ResourceData{d}, nil
 }

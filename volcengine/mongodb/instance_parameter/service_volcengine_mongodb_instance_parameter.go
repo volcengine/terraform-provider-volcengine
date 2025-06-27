@@ -105,12 +105,21 @@ func (s *VolcengineMongoDBInstanceParameterService) ReadResource(resourceData *s
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	parts := strings.Split(id, ":")
-	if len(parts) != 3 {
-		return data, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName'")
+	// 兼容处理 id 为 param:instanceId:parameterName 的情况
+	if len(parts) != 4 && len(parts) != 3 {
+		return data, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName:parameterRole'")
+	}
+	if len(parts) == 3 {
+		role := resourceData.Get("parameter_role").(string)
+		if role == "" {
+			return data, fmt.Errorf("the format of import id must be 'param:instanceId:parameterName:parameterRole'")
+		}
+		parts = append(parts, role)
 	}
 	req := map[string]interface{}{
 		"InstanceId":     parts[1],
 		"ParameterNames": parts[2],
+		"ParameterRole":  parts[3],
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -173,7 +182,8 @@ func (s *VolcengineMongoDBInstanceParameterService) CreateResource(resourceData 
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				instanceId := d.Get("instance_id").(string)
 				parameterName := d.Get("parameter_name").(string)
-				id := fmt.Sprintf("%v:%v:%v", "param", instanceId, parameterName)
+				parameterRole := d.Get("parameter_role").(string)
+				id := fmt.Sprintf("%v:%v:%v:%v", "param", instanceId, parameterName, parameterRole)
 				d.SetId(id)
 				return nil
 			},
