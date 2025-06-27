@@ -388,11 +388,8 @@ func ResourceVolcengineWafDomain() *schema.Resource {
 			"certificate_platform": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				Computed:    true,
 				Description: "Certificate custody platform. Works only on modified scenes.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// 创建时不存在这个参数，修改时存在这个参数
-					return d.Id() == ""
-				},
 			},
 			"custom_sni": {
 				Type:        schema.TypeString,
