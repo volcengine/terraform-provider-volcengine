@@ -174,6 +174,24 @@ func (s *VolcengineWafCustomPageService) CreateResource(resourceData *schema.Res
 					},
 				},
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				enable, ok := d.Get("enable").(int)
+				if !ok {
+					return false, errors.New("enable is not int")
+				}
+				if enable == 0 {
+					(*call.SdkParam)["Enable"] = 0
+				}
+
+				pageMode, ok := d.Get("page_mode").(int)
+				if !ok {
+					return false, errors.New("pageMode is not int")
+				}
+				if pageMode == 0 {
+					(*call.SdkParam)["PageMode"] = 0
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -315,6 +333,21 @@ func (s *VolcengineWafCustomPageService) ModifyResource(resourceData *schema.Res
 
 				if logic == 0 {
 					delete(*call.SdkParam, "Accurate.Logic")
+				}
+				enable, ok := d.Get("enable").(int)
+				if !ok {
+					return false, errors.New("enable is not int")
+				}
+				if enable == 0 {
+					(*call.SdkParam)["Enable"] = 0
+				}
+
+				pageMode, ok := d.Get("page_mode").(int)
+				if !ok {
+					return false, errors.New("pageMode is not int")
+				}
+				if pageMode == 0 {
+					(*call.SdkParam)["PageMode"] = 0
 				}
 				return true, nil
 			},

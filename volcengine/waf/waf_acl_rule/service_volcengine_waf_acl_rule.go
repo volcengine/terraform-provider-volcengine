@@ -193,6 +193,16 @@ func (s *VolcengineWafAclRuleService) CreateResource(resourceData *schema.Resour
 					ConvertType: ve.ConvertJsonArray,
 				},
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				enable, ok := d.Get("enable").(int)
+				if !ok {
+					return false, errors.New("enable is not int")
+				}
+				if enable == 0 {
+					(*call.SdkParam)["Enable"] = 0
+				}
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)

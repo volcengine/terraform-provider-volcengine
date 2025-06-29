@@ -317,6 +317,13 @@ func (s *VolcengineWafDomainService) CreateResource(resourceData *schema.Resourc
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Region"] = client.Region
+				tLSEnable, ok := d.Get("tls_enable").(int)
+				if !ok {
+					return false, errors.New("TLSEnable is not int")
+				}
+				if tLSEnable == 0 {
+					(*call.SdkParam)["TLSEnable"] = 0
+				}
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return true, nil
 			},
