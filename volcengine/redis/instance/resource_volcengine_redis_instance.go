@@ -135,6 +135,7 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 			"additional_bandwidth": {
 				Type:     schema.TypeInt,
 				Optional: true,
+				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					// 创建时不存在这个参数，修改时存在这个参数
 					return d.Id() == ""

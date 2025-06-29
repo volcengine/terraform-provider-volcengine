@@ -449,6 +449,35 @@ func (s *VolcengineRedisDbInstanceService) ReadResource(resourceData *schema.Res
 		}
 	}
 
+	if visitAddrs, exist := data["VisitAddrs"]; exist {
+		visitAddr, ok := visitAddrs.([]interface{})
+		if ok {
+			for _, addr := range visitAddr {
+				addrMap := addr.(map[string]interface{})
+				addrType, ok := resourceData.Get("addr_type").(string)
+				if ok {
+					if addrMap["AddrType"].(string) == addrType {
+						address := addrMap["Address"]
+						addressString, ok := address.(string)
+						if ok {
+							regionEndPointVolces := ".redis." + s.Client.Region + ".volces.com"
+							regionEndPoinvIVolces := ".redis." + s.Client.Region + ".ivolces.com"
+							targets := []string{".redis.ivolces.com", ".redis.volces.com", regionEndPointVolces, regionEndPoinvIVolces}
+							for _, target := range targets {
+								addressPrefix := getPrefixBeforeEndPoint(addressString, target)
+								if addressPrefix != "" {
+									data["NewAddressPrefix"] = addressPrefix
+								}
+							}
+						}
+						break
+					}
+				}
+
+			}
+		}
+	}
+
 	return data, err
 }
 
@@ -1498,12 +1527,19 @@ func (s *VolcengineRedisDbInstanceService) RemoveResource(resourceData *schema.R
 					(*call.SdkParam)["CreateBackup"] = d.Get("create_backup")
 				}
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
-				(*call.SdkParam)["BackupPointName"] = d.Get("backup_point_name")
+				backupPointName, ok := d.Get("backup_point_name").(string)
+				if ok {
+					if backupPointName != "" {
+						(*call.SdkParam)["BackupPointName"] = backupPointName
+					}
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, *call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				// 开启删除保护时，跳过 CallError
@@ -1689,4 +1725,12 @@ func getVpcUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.Default,
 		Action:      actionName,
 	}
+}
+
+func getPrefixBeforeEndPoint(domain, target string) string {
+	index := strings.Index(domain, target)
+	if index == -1 {
+		return ""
+	}
+	return domain[:index]
 }
