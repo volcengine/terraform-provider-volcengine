@@ -10,6 +10,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/route_table"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 )
 
 type VolcengineRouteEntryService struct {
@@ -161,10 +163,20 @@ func (VolcengineRouteEntryService) WithResourceResponseHandlers(entries map[stri
 }
 
 func (s *VolcengineRouteEntryService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var vpcId string
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateRouteEntry",
 			ConvertMode: ve.RequestConvertAll,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				routeTableId := resourceData.Get("route_table_id").(string)
+				resp, err := route_table.NewRouteTableService(s.Client).ReadResource(resourceData, routeTableId)
+				if err != nil {
+					return false, err
+				}
+				vpcId = resp["VpcId"].(string)
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -175,9 +187,22 @@ func (s *VolcengineRouteEntryService) CreateResource(resourceData *schema.Resour
 				d.SetId(fmt.Sprint((*call.SdkParam)["RouteTableId"], ":", id))
 				return nil
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("route_table_id").(string)
+			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
+			// 外部定义vpcId无法传入ExtraRefresh中
+			ExtraRefreshCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (map[ve.ResourceService]*ve.StateRefresh, error) {
+				return map[ve.ResourceService]*ve.StateRefresh{
+					vpc.NewVpcService(s.Client): {
+						Target:     []string{"Available"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: vpcId,
+					},
+				}, nil
 			},
 		},
 	}
@@ -186,11 +211,19 @@ func (s *VolcengineRouteEntryService) CreateResource(resourceData *schema.Resour
 
 func (s *VolcengineRouteEntryService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	ids := strings.Split(s.ReadResourceId(resourceData.Id()), ":")
+	var vpcId string
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyRouteEntry",
 			ConvertMode: ve.RequestConvertAll,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				routeTableId := resourceData.Get("route_table_id").(string)
+				resp, err := route_table.NewRouteTableService(s.Client).ReadResource(resourceData, routeTableId)
+				if err != nil {
+					return false, err
+				}
+				vpcId = resp["VpcId"].(string)
+
 				(*call.SdkParam)["RouteEntryId"] = ids[1]
 				return true, nil
 			},
@@ -198,9 +231,22 @@ func (s *VolcengineRouteEntryService) ModifyResource(resourceData *schema.Resour
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("route_table_id").(string)
+			},
 			Refresh: &ve.StateRefresh{
 				Target:  []string{"Available"},
 				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+			// 外部定义vpcId无法传入ExtraRefresh中
+			ExtraRefreshCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (map[ve.ResourceService]*ve.StateRefresh, error) {
+				return map[ve.ResourceService]*ve.StateRefresh{
+					vpc.NewVpcService(s.Client): {
+						Target:     []string{"Available"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: vpcId,
+					},
+				}, nil
 			},
 		},
 	}
@@ -209,6 +255,7 @@ func (s *VolcengineRouteEntryService) ModifyResource(resourceData *schema.Resour
 
 func (s *VolcengineRouteEntryService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	ids := strings.Split(resourceData.Id(), ":")
+	var vpcId string
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteRouteEntry",
@@ -216,9 +263,31 @@ func (s *VolcengineRouteEntryService) RemoveResource(resourceData *schema.Resour
 			SdkParam: &map[string]interface{}{
 				"RouteEntryId": ids[1],
 			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				routeTableId := resourceData.Get("route_table_id").(string)
+				resp, err := route_table.NewRouteTableService(s.Client).ReadResource(resourceData, routeTableId)
+				if err != nil {
+					return false, err
+				}
+				vpcId = resp["VpcId"].(string)
+				return true, nil
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Get("route_table_id").(string)
+			},
+			// 外部定义vpcId无法传入ExtraRefresh中
+			ExtraRefreshCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (map[ve.ResourceService]*ve.StateRefresh, error) {
+				return map[ve.ResourceService]*ve.StateRefresh{
+					vpc.NewVpcService(s.Client): {
+						Target:     []string{"Available"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+						ResourceId: vpcId,
+					},
+				}, nil
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
