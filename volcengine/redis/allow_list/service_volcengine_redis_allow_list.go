@@ -225,6 +225,14 @@ func (s *VolcengineRedisAllowListService) RemoveResource(resourceData *schema.Re
 
 func (s *VolcengineRedisAllowListService) DatasourceResources(data *schema.ResourceData, resource2 *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"ip_address": {
+				TargetField: "IPAddress",
+			},
+			"ip_segment": {
+				TargetField: "IPSegment",
+			},
+		},
 		ContentType:  ve.ContentTypeJson,
 		NameField:    "AllowListName",
 		IdField:      "AllowListId",

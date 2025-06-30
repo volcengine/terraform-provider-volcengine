@@ -3,6 +3,15 @@ package volcengine
 import (
 	"context"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/big_key"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_spec"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/parameter_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/planned_event"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/consumer_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/etl_task"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/import_task"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/schedule_sql_task"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shipper"
 	"net/http"
 	"net/url"
 	"os"
@@ -604,6 +613,10 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_redis_accounts":          redisAccount.DataSourceVolcengineRedisAccounts(),
 			"volcengine_redis_instances":         redisInstance.DataSourceVolcengineRedisDbInstances(),
 			"volcengine_redis_pitr_time_windows": pitr_time_period.DataSourceVolcengineRedisPitrTimeWindows(),
+			"volcengine_redis_parameter_groups":  parameter_group.DataSourceVolcengineParameterGroups(),
+			"volcengine_redis_instance_specs":    instance_spec.DataSourceVolcengineInstanceSpecs(),
+			"volcengine_redis_big_keys":          big_key.DataSourceVolcengineBigKeys(),
+			"volcengine_redis_planned_events":    planned_event.DataSourceVolcenginePlannedEvents(),
 
 			// ================ CR ================
 			"volcengine_cr_registries":           cr_registry.DataSourceVolcengineCrRegistries(),
@@ -671,6 +684,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_projects":            tlsProject.DataSourceVolcengineTlsProjects(),
 			"volcengine_tls_topics":              tlsTopic.DataSourceVolcengineTlsTopics(),
 			"volcengine_tls_indexes":             tlsIndex.DataSourceVolcengineTlsIndexes(),
+			"volcengine_tls_schedule_sql_tasks":  schedule_sql_task.DataSourceVolcengineScheduleSqlTasks(),
+			"volcengine_tls_import_tasks":        import_task.DataSourceVolcengineImportTasks(),
+			"volcengine_tls_etl_tasks":           etl_task.DataSourceVolcengineEtlTasks(),
+			"volcengine_tls_shippers":            shipper.DataSourceVolcengineShippers(),
+			"volcengine_tls_consumer_groups":     consumer_group.DataSourceVolcengineConsumerGroups(),
 
 			// ================ Cloudfs ================
 			"volcengine_cloudfs_quotas":       cloudfs_quota.DataSourceVolcengineCloudfsQuotas(),
@@ -983,6 +1001,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_redis_instance":             redisInstance.ResourceVolcengineRedisDbInstance(),
 			"volcengine_redis_instance_state":       instance_state.ResourceVolcengineRedisInstanceState(),
 			"volcengine_redis_continuous_backup":    redisContinuousBackup.ResourceVolcengineRedisContinuousBackup(),
+			"volcengine_redis_parameter_group":      parameter_group.ResourceVolcengineParameterGroup(),
 
 			// ================ CR ================
 			"volcengine_cr_registry":            cr_registry.ResourceVolcengineCrRegistry(),
@@ -1049,6 +1068,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_project":            tlsProject.ResourceVolcengineTlsProject(),
 			"volcengine_tls_topic":              tlsTopic.ResourceVolcengineTlsTopic(),
 			"volcengine_tls_index":              tlsIndex.ResourceVolcengineTlsIndex(),
+			"volcengine_tls_schedule_sql_task":  schedule_sql_task.ResourceVolcengineScheduleSqlTask(),
+			"volcengine_tls_import_task":        import_task.ResourceVolcengineImportTask(),
+			"volcengine_tls_etl_task":           etl_task.ResourceVolcengineEtlTask(),
+			"volcengine_tls_shipper":            shipper.ResourceVolcengineShipper(),
+			"volcengine_tls_consumer_group":     consumer_group.ResourceVolcengineConsumerGroup(),
 
 			// ================ Cloudfs ================
 			"volcengine_cloudfs_file_system": cloudfs_file_system.ResourceVolcengineCloudfsFileSystem(),

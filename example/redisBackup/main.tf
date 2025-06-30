@@ -32,4 +32,5 @@ resource "volcengine_redis_instance" "foo"{
 
 resource "volcengine_redis_backup" "foo" {
   instance_id = volcengine_redis_instance.foo.id
+  backup_point_name = "acc-test-tf-redis-backup"
 }

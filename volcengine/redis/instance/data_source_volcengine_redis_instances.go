@@ -82,6 +82,19 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"default_bandwidth_per_shard": {
+							Type:     schema.TypeInt,
+							Computed: true,
+							Description: "The default bandwidth of a single shard in the instance. " +
+								"Both the read bandwidth (i.e., the downlink bandwidth) and " +
+								"the write bandwidth (i.e., the uplink bandwidth) are of this value. Unit: MB/s.",
+						},
+						"additional_bandwidth_per_shard": {
+							Type:     schema.TypeInt,
+							Computed: true,
+							Description: "The additional bandwidth of a single shard, that is, " +
+								"the extra bandwidth that needs to be added on top of the default bandwidth, unit: MB/s.",
+						},
 						// InstanceInfo
 						"id": {
 							Type:        schema.TypeString,
@@ -151,6 +164,7 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 						"shard_capacity": {
 							Type:        schema.TypeFloat,
 							Computed:    true,
+							Deprecated:  "Replaced by shard_capacity_v2.",
 							Description: "The memory capacity of each shard. Unit: GiB.",
 						},
 						"shard_number": {
@@ -415,6 +429,108 @@ func DataSourceVolcengineRedisDbInstances() *schema.Resource {
 											"The specific rules are as follows: If the primary-standby instance selects the multi-availability zone deployment scheme (that is, the value of MultiAZ is enabled), " +
 											"then at least two different availability zone IDs must be passed in in AZ, and the first availability zone is the availability zone where the primary node is located." +
 											" If the primary and standby instances choose a single availability zone deployment scheme (that is, the value of MultiAZ is disabled), then the availability zones passed in for each node must be the same.",
+									},
+								},
+							},
+						},
+						"instance_shards": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "A detailed list of all Shard shards in the instance.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"shard_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ID of the shard.",
+									},
+									"node_number": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The number of nodes in each shard.",
+									},
+									"server_nodes": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "A detailed list of all Server nodes in the shard.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"node_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The ID of node.",
+												},
+												"status": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The status of node.",
+												},
+												"zone_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The availability zone where the node is located.",
+												},
+												"current_role": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The current role of the node.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"instance_class": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The type of the instance.",
+						},
+						"max_connections": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The current maximum number of connections in a single shard for the instance of the instance.",
+						},
+						"data_layout": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The data storage form of the instance.",
+						},
+						"shard_capacity_v2": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The memory capacity of each shard in the instance.",
+						},
+						"shard_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the shard.",
+						},
+						"server_nodes": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "A detailed list of all Server nodes in the shard.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"node_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ID of node.",
+									},
+									"status": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The status of node.",
+									},
+									"zone_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The availability zone where the node is located.",
+									},
+									"current_role": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The current role of the node.",
 									},
 								},
 							},
