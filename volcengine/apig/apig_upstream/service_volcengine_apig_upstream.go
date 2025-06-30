@@ -512,6 +512,17 @@ func (s *VolcengineApigUpstreamService) ModifyResource(resourceData *schema.Reso
 						}
 					}
 				}
+				if v, exist := (*call.SdkParam)["CircuitBreakingSettings"]; exist {
+					if vMap, ok := v.(map[string]interface{}); ok {
+						if enable, exist := vMap["Enable"]; exist {
+							if enableBool, ok := enable.(bool); ok {
+								if !enableBool {
+									delete(*call.SdkParam, "CircuitBreakingSettings")
+								}
+							}
+						}
+					}
+				}
 
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)

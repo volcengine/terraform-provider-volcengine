@@ -44,6 +44,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_custom_domain"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_gateway"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_gateway_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_route"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_source"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_version"
@@ -953,6 +954,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_apig_upstreams":         apig_upstream.DataSourceVolcengineApigUpstreams(),
 			"volcengine_apig_upstream_sources":  apig_upstream_source.DataSourceVolcengineApigUpstreamSources(),
 			"volcengine_apig_upstream_versions": apig_upstream_version.DataSourceVolcengineApigUpstreamVersions(),
+			"volcengine_apig_routes":            apig_route.DataSourceVolcengineApigRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1381,6 +1383,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_apig_upstream":         apig_upstream.ResourceVolcengineApigUpstream(),
 			"volcengine_apig_upstream_source":  apig_upstream_source.ResourceVolcengineApigUpstreamSource(),
 			"volcengine_apig_upstream_version": apig_upstream_version.ResourceVolcengineApigUpstreamVersion(),
+			"volcengine_apig_route":            apig_route.ResourceVolcengineApigRoute(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
