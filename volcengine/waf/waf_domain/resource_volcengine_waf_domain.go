@@ -379,17 +379,14 @@ func ResourceVolcengineWafDomain() *schema.Resource {
 			"volc_certificate_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "When the protocol type is HTTPS, the bound certificate ID needs to be entered. Works only on modified scenes.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					// 创建时不存在这个参数，修改时存在这个参数
-					return d.Id() == ""
-				},
+				Computed:    true,
+				Description: "When the protocol type is HTTPS, the bound certificate ID needs to be entered.",
 			},
 			"certificate_platform": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "Certificate custody platform. Works only on modified scenes.",
+				Description: "Certificate custody platform.",
 			},
 			"custom_sni": {
 				Type:        schema.TypeString,
