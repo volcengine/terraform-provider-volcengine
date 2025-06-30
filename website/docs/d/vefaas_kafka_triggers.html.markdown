@@ -10,7 +10,9 @@ description: |-
 Use this data source to query detailed information of vefaas kafka triggers
 ## Example Usage
 ```hcl
-
+data "volcengine_vefaas_kafka_triggers" "foo" {
+  function_id = "f0zvcxxx"
+}
 ```
 ## Argument Reference
 The following arguments are supported:

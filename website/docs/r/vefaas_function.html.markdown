@@ -11,7 +11,7 @@ Provides a resource to manage vefaas function
 ## Example Usage
 ```hcl
 resource "volcengine_vefaas_function" "foo" {
-  name            = "project-1"
+  name            = "tf-1"
   runtime         = "golang/v1"
   description     = "123131231"
   exclusive_mode  = false
@@ -31,6 +31,7 @@ The following arguments are supported:
 * `max_concurrency` - (Optional) Maximum concurrency of a single instance.
 * `memory_mb` - (Optional) Maximum memory for a single instance.
 * `nas_storage` - (Optional) The configuration of file storage NAS mount.
+* `port` - (Optional) Custom listening port for the instance.
 * `request_timeout` - (Optional) Request timeout (in seconds).
 * `source_access_config` - (Optional) Access configuration for the image repository.
 * `source_type` - (Optional) Code Source type, supports tos, zip, image (whitelist accounts support native/v1 custom images).
@@ -63,8 +64,6 @@ The `nas_configs` object supports the following:
 * `local_mount_path` - (Required) The directory of Function local mount.
 * `mount_point_id` - (Required) The ID of NAS mount point.
 * `remote_path` - (Required) Remote directory of the file system.
-* `gid` - (Optional) User groups in the file system. Customization is not supported yet. If this parameter is provided, the parameter value is 1000 (consistent with the function run user gid).
-* `uid` - (Optional) Users in the file system do not support customization yet. If this parameter is provided, its value can only be 1000 (consistent with the function run user uid).
 
 The `nas_storage` object supports the following:
 
@@ -85,7 +84,7 @@ The `tls_config` object supports the following:
 The `tos_mount_config` object supports the following:
 
 * `enable_tos` - (Required) Whether to enable TOS storage mounting.
-* `credentials` - (Optional) After enabling TOS, you need to provide an AKSK with access rights to the TOS domain name.
+* `credentials` - (Optional) After enabling TOS, you need to provide an AKSK with access rights to the TOS domain name. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `mount_points` - (Optional) After enabling TOS, you need to provide a TOS storage configuration list, with a maximum of 5 items.
 
 The `vpc_config` object supports the following:
@@ -104,7 +103,6 @@ In addition to all arguments above, the following attributes are exported:
 * `creation_time` - The creation time of the function.
 * `last_update_time` - The last update time of the function.
 * `owner` - The owner of Function.
-* `port` - Custom listening port for the instance.
 * `source_location` - Maximum code package size.
 * `triggers_count` - The number of triggers for this Function.
 

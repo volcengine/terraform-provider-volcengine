@@ -378,6 +378,10 @@ func (s *VolcengineMongoDBInstanceService) CreateResource(resourceData *schema.R
 					TargetField: "NodeAvailabilityZone",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"auto_renew": {
+					TargetField: "AutoRenew",
+					ForceGet:    true,
+				},
 				"zone_id": {
 					Ignore: true,
 				},
@@ -748,6 +752,17 @@ func (s *VolcengineMongoDBInstanceService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func (s *VolcengineMongoDBInstanceService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {
+	info := ve.UnsubscribeInfo{
+		InstanceId: s.ReadResourceId(resourceData.Id()),
+	}
+	if resourceData.Get("charge_type").(string) == "Prepaid" {
+		info.NeedUnsubscribe = true
+		info.Products = []string{"veDB for DocumentDB"}
+	}
+	return &info, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

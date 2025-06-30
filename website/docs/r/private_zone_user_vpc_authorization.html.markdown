@@ -17,6 +17,8 @@ resource "volcengine_private_zone_user_vpc_authorization" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `account_id` - (Required, ForceNew) The account Id which authorizes the private zone resource.
+* `auth_type` - (Optional, ForceNew) The auth type of the private zone resource. 0: authorized by organization, 1: authorized by verify code. Default is 0.
+* `verify_code` - (Optional, ForceNew) The verify code of the private zone resource. This field is required when the auth_type is 1.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

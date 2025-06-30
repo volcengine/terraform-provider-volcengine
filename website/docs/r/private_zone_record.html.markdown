@@ -40,8 +40,10 @@ The following arguments are supported:
 * `value` - (Required) The value of the private zone record. Record values need to be set based on the value of the `type`.
 * `zid` - (Required, ForceNew) The zid of the private zone record.
 * `enable` - (Optional) Whether to enable the private zone record. This field is only effected when modify this resource.
+* `line` - (Optional) The subnet id of the private zone record. This field is only effected when the `intelligent_mode` of the private zone is true. Default is `Default`.
 * `remark` - (Optional) The remark of the private zone record.
 * `ttl` - (Optional) The ttl of the private zone record. Unit: second. Default is 600.
+* `user_account` - (Optional) The user account of the private zone record. This field is only effected when creating this resource.
 * `weight` - (Optional) The weight of the private zone record. This field is only effected when the `load_balance_mode` of the private zone is true and the `weight_enabled` of the record_set is true. Default is 1.
 
 ## Attributes Reference

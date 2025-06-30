@@ -63,7 +63,7 @@ func ResourceVolcenginePrivateZoneResolverRule() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() != ""
 				},
-				Description: "The vpc trns of the private zone resolver rule. Format：trn:vpc:region:accountId:vpc/vpcId. This field is only effected when creating resource. \n" +
+				Description: "The vpc trns of the private zone resolver rule. Format: trn:vpc:region:accountId:vpc/vpcId. This field is only effected when creating resource. \n" +
 					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"endpoint_trn": {
@@ -72,7 +72,7 @@ func ResourceVolcenginePrivateZoneResolverRule() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Id() != ""
 				},
-				Description: "The endpoint trn of the private zone resolver rule. Format：trn:private_zone::accountId:endpoint/endpointId. This field is only effected when creating resource. \n" +
+				Description: "The endpoint trn of the private zone resolver rule. Format: trn:private_zone::accountId:endpoint/endpointId. This field is only effected when creating resource. \n" +
 					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
 			"zone_name": {

@@ -49,8 +49,8 @@ resource "volcengine_redis_backup" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `backup_point_name` - (Required, ForceNew) Set the backup name for the manually created backup.
 * `instance_id` - (Required, ForceNew) Id of instance to create backup.
+* `backup_point_name` - (Optional, ForceNew) Set the backup name for the manually created backup.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -64,28 +64,6 @@ In addition to all arguments above, the following attributes are exported:
 * `backup_strategy` - Backup strategy.
 * `backup_type` - Backup type.
 * `end_time` - End time of backup.
-* `instance_detail` - Information of instance.
-    * `account_id` - Id of account.
-    * `arch_type` - Arch type of instance(Standard/Cluster).
-    * `charge_type` - Charge type of instance(Postpaid/Prepaid).
-    * `engine_version` - Engine version of instance.
-    * `expired_time` - Expired time of instance.
-    * `instance_id` - Id of instance.
-    * `instance_name` - Name of instance.
-    * `maintenance_time` - The maintainable period (in UTC) of the instance.
-    * `network_type` - Network type of instance.
-    * `project_name` - Project name of instance.
-    * `region_id` - Id of region.
-    * `replicas` - Count of replica in which shard.
-    * `server_cpu` - Count of cpu cores of instance.
-    * `shard_capacity` - Capacity of shard.
-    * `shard_count` - Count of shard.
-    * `total_capacity` - Total capacity of instance.
-    * `used_capacity` - Capacity used of this instance.
-    * `vpc_info` - Information of vpc.
-        * `id` - Id of vpc.
-        * `name` - Name of vpc.
-    * `zone_ids` - List of id of zone.
 * `instance_info` - Information of instance.
     * `account_id` - Id of account.
     * `arch_type` - Arch type of instance(Standard/Cluster).

@@ -18,7 +18,14 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of Resource.
 * `name` - (Optional) The name of the rule.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the private zone resolver rule.
+* `tag_filters` - (Optional) List of tag filters.
 * `zone_name` - (Optional) The main domain associated with the forwarding rule. For example, if you set this parameter to example.com, DNS requests for example.com and all subdomains of example.com will be forwarded.
+
+The `tag_filters` object supports the following:
+
+* `key` - (Optional) The key of the tag.
+* `values` - (Optional) The values of the tag.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -31,7 +38,11 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The id of the rule.
     * `line` - The ISP of the exit IP address of the recursive DNS server.
     * `name` - The name of the rule.
+    * `project_name` - The project name of the rule.
     * `rule_id` - The id of the rule.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `type` - The type of the rule.
     * `updated_at` - The updated time of the rule.
     * `zone_name` - The zone name of the rule.

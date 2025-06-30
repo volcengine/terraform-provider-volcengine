@@ -3,21 +3,6 @@ package volcengine
 import (
 	"context"
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_node_available_spec"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_zone_v2"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_auto_snapshot_policy"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_auto_snapshot_policy_apply"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_region"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_zone"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/big_key"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_spec"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/parameter_group"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/planned_event"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/consumer_group"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/etl_task"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/import_task"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/schedule_sql_task"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shipper"
 	"net/http"
 	"net/url"
 	"os"
@@ -71,6 +56,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_instance_plugin"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_public_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_zone"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vedb_mysql/vedb_mysql_allowlist"
@@ -225,6 +212,8 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_instance_v2"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_ip_white_list"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_node_available_spec"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_zone_v2"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
@@ -248,6 +237,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/spec"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/ssl_state"
 	mongodbZone "github.com/volcengine/terraform-provider-volcengine/volcengine/mongodb/zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_auto_snapshot_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_auto_snapshot_policy_apply"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_file_system"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_mount_point"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_permission_group"
@@ -310,24 +301,33 @@ import (
 	redis_allow_list_associate "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/allow_list_associate"
 	redis_backup "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/backup"
 	redis_backup_restore "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/backup_restore"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/big_key"
 	redisContinuousBackup "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/continuous_backup"
 	redis_endpoint "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/endpoint"
 	redisInstance "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_spec"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_state"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/parameter_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/pitr_time_period"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/planned_event"
 	redisRegion "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/region"
 	redisZone "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/zone"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_notify_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/consumer_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/etl_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/import_task"
 	tlsIndex "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/index"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/kafka_consumer"
 	tlsProject "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/project"
 	tlsRule "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_applier"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/schedule_sql_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shipper"
 	tlsTopic "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 
@@ -345,6 +345,18 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_peer_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpc_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpn_attachment"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alert"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alerting_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_instance_type"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_group_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_rule_file"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_workspace"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_batch_edge_machine"
@@ -885,6 +897,20 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kms_keyrings": kms_keyring.DataSourceVolcengineKmsKeyrings(),
 			"volcengine_kms_keys":     kms_key.DataSourceVolcengineKmsKeys(),
 			"volcengine_kms_secrets":  kms_secret.DataSourceVolcengineKmsSecrets(),
+
+			// ================ VMP ================
+			"volcengine_vmp_workspaces":            vmp_workspace.DataSourceVolcengineVmpWorkspaces(),
+			"volcengine_vmp_instance_types":        vmp_instance_type.DataSourceVolcengineVmpInstanceTypes(),
+			"volcengine_vmp_rule_files":            vmp_rule_file.DataSourceVolcengineVmpRuleFiles(),
+			"volcengine_vmp_rules":                 vmp_rule.DataSourceVolcengineVmpRules(),
+			"volcengine_vmp_contact_groups":        vmp_contact_group.DataSourceVolcengineVmpContactGroups(),
+			"volcengine_vmp_contacts":              vmp_contact.DataSourceVolcengineVmpContacts(),
+			"volcengine_vmp_alerting_rules":        vmp_alerting_rule.DataSourceVolcengineVmpAlertingRules(),
+			"volcengine_vmp_alerts":                vmp_alert.DataSourceVolcengineVmpAlerts(),
+			"volcengine_vmp_notify_group_policies": vmp_notify_group_policy.DataSourceVolcengineVmpNotifyGroupPolicies(),
+			"volcengine_vmp_notify_policies":       vmp_notify_policy.DataSourceVolcengineVmpNotifyPolicies(),
+			"volcengine_vmp_notify_templates":      vmp_notify_template.DataSourceVolcengineVmpNotifyTemplates(),
+			//"volcengine_vmp_silence_policies":      vmp_silence_policy.DataSourceVolcengineVmpSilencePolicies(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1281,6 +1307,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kms_key_rotation": kms_key_rotation.ResourceVolcengineKmsKeyRotation(),
 			"volcengine_kms_key_archive":  kms_key_archive.ResourceVolcengineKmsKeyArchive(),
 			"volcengine_kms_secret":       kms_secret.ResourceVolcengineKmsSecret(),
+
+			// ================ VMP ================
+			"volcengine_vmp_workspace":           vmp_workspace.ResourceVolcengineVmpWorkspace(),
+			"volcengine_vmp_rule_file":           vmp_rule_file.ResourceVolcengineVmpRuleFile(),
+			"volcengine_vmp_contact_group":       vmp_contact_group.ResourceVolcengineVmpContactGroup(),
+			"volcengine_vmp_contact":             vmp_contact.ResourceVolcengineVmpContact(),
+			"volcengine_vmp_alerting_rule":       vmp_alerting_rule.ResourceVolcengineVmpAlertingRule(),
+			"volcengine_vmp_notify_group_policy": vmp_notify_group_policy.ResourceVolcengineVmpNotifyGroupPolicy(),
+			"volcengine_vmp_notify_policy":       vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
+			"volcengine_vmp_notify_template":     vmp_notify_template.ResourceVolcengineVmpNotifyTemplate(),
+			//"volcengine_vmp_silence_policy":      vmp_silence_policy.ResourceVolcengineVmpSilencePolicy(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
