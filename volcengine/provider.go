@@ -17,6 +17,13 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_timer"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_archive"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_enable"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_rotation"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_keyring"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
@@ -831,6 +838,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vefaas_releases":       vefaas_release.DataSourceVolcengineVefaasReleases(),
 			"volcengine_vefaas_timers":         vefaas_timer.DataSourceVolcengineVefaasTimers(),
 			"volcengine_vefaas_kafka_triggers": vefaas_kafka_trigger.DataSourceVolcengineVefaasKafkaTriggers(),
+
+			// ================ KMS ================
+			"volcengine_kms_keyrings": kms_keyring.DataSourceVolcengineKmsKeyrings(),
+			"volcengine_kms_keys":     kms_key.DataSourceVolcengineKmsKeys(),
+			"volcengine_kms_secrets":  kms_secret.DataSourceVolcengineKmsSecrets(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1209,6 +1221,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vefaas_release":       vefaas_release.ResourceVolcengineVefaasRelease(),
 			"volcengine_vefaas_timer":         vefaas_timer.ResourceVolcengineVefaasTimer(),
 			"volcengine_vefaas_kafka_trigger": vefaas_kafka_trigger.ResourceVolcengineVefaasKafkaTrigger(),
+
+			// ================ KMS ================
+			"volcengine_kms_keyring":      kms_keyring.ResourceVolcengineKmsKeyring(),
+			"volcengine_kms_key":          kms_key.ResourceVolcengineKmsKey(),
+			"volcengine_kms_key_enable":   kms_key_enable.ResourceVolcengineKmsKeyEnable(),
+			"volcengine_kms_key_rotation": kms_key_rotation.ResourceVolcengineKmsKeyRotation(),
+			"volcengine_kms_key_archive":  kms_key_archive.ResourceVolcengineKmsKeyArchive(),
+			"volcengine_kms_secret":       kms_secret.ResourceVolcengineKmsSecret(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
