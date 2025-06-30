@@ -11,4 +11,9 @@ resource "volcengine_private_zone" "foo" {
     vpc_id = "vpc-3qdzk9xju6o747prml0jk****"
     region = "cn-shanghai"
   }
+  project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }

@@ -10,5 +10,10 @@ resource "volcengine_private_zone_resolver_rule" "foo" {
     ip   = "10.199.38.19"
     port = 33
   }
-  zone_name = ["www.baidu.com"]
+  zone_name    = ["www.baidu.com"]
+  project_name = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }

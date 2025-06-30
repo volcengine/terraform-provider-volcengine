@@ -13,14 +13,25 @@ func DataSourceVolcenginePrivateZoneRecords() *schema.Resource {
 			"zid": {
 				Type:         schema.TypeInt,
 				Optional:     true,
-				AtLeastOneOf: []string{"zid", "record_id"},
+				AtLeastOneOf: []string{"zid", "record_ids"},
 				Description:  "The zid of Private Zone.",
 			},
 			"record_id": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				AtLeastOneOf: []string{"zid", "record_id"},
-				Description:  "The id of Private Zone Record.",
+				Type:     schema.TypeString,
+				Optional: true,
+				//AtLeastOneOf: []string{"zid", "record_id"},
+				Deprecated:  "This field is deprecated, please use `record_ids` instead.",
+				Description: "The id of Private Zone Record.",
+			},
+			"record_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Set:      schema.HashString,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				AtLeastOneOf: []string{"zid", "record_ids"},
+				Description:  "The ids of Private Zone Record.",
 			},
 			"host": {
 				Type:        schema.TypeString,
@@ -57,7 +68,7 @@ func DataSourceVolcenginePrivateZoneRecords() *schema.Resource {
 			"line": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The subnet id of Private Zone Record. This field is only effected when the `intelligent_mode` of the private zone is true.",
+				Description: "The subnet id of Private Zone Record.",
 			},
 
 			"output_file": {

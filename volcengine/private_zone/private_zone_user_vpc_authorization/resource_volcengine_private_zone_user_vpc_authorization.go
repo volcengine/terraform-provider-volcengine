@@ -37,6 +37,19 @@ func ResourceVolcenginePrivateZoneUserVpcAuthorization() *schema.Resource {
 				ForceNew:    true,
 				Description: "The account Id which authorizes the private zone resource.",
 			},
+			"auth_type": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     0,
+				Description: "The auth type of the private zone resource. 0: authorized by organization, 1: authorized by verify code. Default is 0.",
+			},
+			"verify_code": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The verify code of the private zone resource. This field is required when the auth_type is 1.",
+			},
 		},
 	}
 	return resource
