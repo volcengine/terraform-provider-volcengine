@@ -336,13 +336,16 @@ func (s *VolcengineKafkaTopicService) ModifyResource(resourceData *schema.Resour
 		callbacks = append(callbacks, topicCallback)
 	}
 
-	if resourceData.HasChanges("partition_number", "parameters") {
+	if resourceData.HasChanges("partition_number", "parameters", "replica_number") {
 		paramCallback := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "ModifyTopicParameters",
 				ConvertMode: ve.RequestConvertInConvert,
 				ContentType: ve.ContentTypeJson,
 				Convert: map[string]ve.RequestConvert{
+					"replica_number": {
+						TargetField: "ReplicaNumber",
+					},
 					"partition_number": {
 						TargetField: "PartitionNumber",
 					},
