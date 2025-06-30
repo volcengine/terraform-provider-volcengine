@@ -12,9 +12,9 @@ import (
 /*
 
 Import
-CenServiceRouteEntry can be imported using the CenId:DestinationCidrBlock:ServiceRegionId:ServiceVpcId, e.g.
+CenServiceRouteEntry can be imported using the CenId#DestinationCidrBlock#ServiceRegionId#ServiceVpcId, e.g.
 ```
-$ terraform import volcengine_cen_service_route_entry.default cen-2nim00ybaylts7trquyzt****:100.XX.XX.0/24:cn-beijing:vpc-3rlkeggyn6tc010exd32q****
+$ terraform import volcengine_cen_service_route_entry.default cen-2nim00ybaylts7trquyzt****#100.XX.XX.0/24#cn-beijing#vpc-3rlkeggyn6tc010exd32q****
 ```
 
 */

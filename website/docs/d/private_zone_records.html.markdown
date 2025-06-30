@@ -19,10 +19,11 @@ data "volcengine_private_zone_records" "foo" {
 The following arguments are supported:
 * `host` - (Optional) The host of Private Zone Record.
 * `last_operator` - (Optional) The last operator account id of Private Zone Record.
-* `line` - (Optional) The subnet id of Private Zone Record. This field is only effected when the `intelligent_mode` of the private zone is true.
+* `line` - (Optional) The subnet id of Private Zone Record.
 * `name` - (Optional) The domain name of Private Zone Record.
 * `output_file` - (Optional) File name where to save data source results.
-* `record_id` - (Optional) The id of Private Zone Record.
+* `record_id` - (Optional, **Deprecated**) This field is deprecated, please use `record_ids` instead. The id of Private Zone Record.
+* `record_ids` - (Optional) The ids of Private Zone Record.
 * `search_mode` - (Optional) The search mode of query `host`. Valid values: `LIKE`, `EXACT`. Default is `LIKE`.
 * `type` - (Optional) The type of Private Zone Record.
 * `value` - (Optional) The value of Private Zone Record.

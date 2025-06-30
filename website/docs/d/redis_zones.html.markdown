@@ -26,5 +26,6 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The id of the zone.
     * `zone_id` - The id of the zone.
     * `zone_name` - The name of the zone.
+    * `zone_status` - The status of the zone.
 
 

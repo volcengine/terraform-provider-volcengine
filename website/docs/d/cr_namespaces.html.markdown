@@ -20,6 +20,7 @@ The following arguments are supported:
 * `registry` - (Required) The target cr instance name.
 * `names` - (Optional) The list of instance IDs.
 * `output_file` - (Optional) File name where to save data source results.
+* `projects` - (Optional) The list of project names to query.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -27,6 +28,7 @@ In addition to all arguments above, the following attributes are exported:
     * `create_time` - The time when namespace created.
     * `name` - The name of OCI repository.
     * `project` - The ProjectName of the CrNamespace.
+    * `repository_default_access_level` - The default access level of repository. Valid values: `Private`, `Public`.
 * `total_count` - The total count of instance query.
 
 

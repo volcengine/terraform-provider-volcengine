@@ -36,7 +36,6 @@ func DataSourceVolcengineMongoDBInstanceParameterLogs() *schema.Resource {
 			},
 			"parameter_change_logs": {
 				Type:        schema.TypeList,
-				MaxItems:    1,
 				Computed:    true,
 				Description: "The collection of parameter change log query.",
 				Elem: &schema.Resource{

@@ -38,6 +38,7 @@ resource "volcengine_rds_mysql_instance" "foo" {
 resource "volcengine_rds_mysql_database" "foo1" {
      db_name = "acc-test-db1"
      instance_id = volcengine_rds_mysql_instance.foo.id
+     #instance_id = "mysql-b51d37110dd1"
 }
 
 resource "volcengine_rds_mysql_database" "foo" {
@@ -59,4 +60,17 @@ resource "volcengine_rds_mysql_account" "foo" {
           db_name = volcengine_rds_mysql_database.foo1.db_name
           account_privilege = "DDLOnly"
      }
+     host = "192.10.10.%"
+#     table_column_privileges {
+#          db_name = volcengine_rds_mysql_database.foo.db_name
+#          table_privileges {
+#               table_name = "test"
+#               account_privilege_detail = "SELECT,INSERT,UPDATE"
+#          }
+#          column_privileges {
+#               table_name = "test"
+#               column_name = "test"
+#               account_privilege_detail = "SELECT,INSERT,UPDATE"
+#          }
+#     }
 }

@@ -65,6 +65,13 @@ func ResourceVolcengineCrNamespace() *schema.Resource {
 				Computed:    true,
 				Description: "The ProjectName of the CrNamespace.",
 			},
+			"repository_default_access_level": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "The default access level of repository. Valid values: `Private`, `Public`. Default is `Private`.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineCrNamespaces().Schema["namespaces"].Elem.(*schema.Resource).Schema

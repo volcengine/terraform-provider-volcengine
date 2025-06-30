@@ -63,6 +63,60 @@ func (s *VolcengineRdsMysqlBackupService) ReadResources(m map[string]interface{}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Backups is not Slice")
 		}
+		for _, v := range data {
+			var (
+				itemErr error
+			)
+			instanceId, ok := condition["InstanceId"]
+			if !ok {
+				continue
+			}
+			req := map[string]interface{}{
+				"InstanceId": instanceId,
+			}
+			action = "DescribeBackupStats"
+			bytes, _ = json.Marshal(req)
+			logger.Debug(logger.ReqFormat, action, string(bytes))
+			resp, itemErr = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if itemErr != nil {
+				continue
+			}
+			respBytes, _ = json.Marshal(resp)
+			logger.Debug(logger.RespFormat, action, req, string(respBytes))
+			results, itemErr = ve.ObtainSdkValue("Result.UsageStats", *resp)
+			if itemErr != nil {
+				continue
+			}
+			backupMap, ok := v.(map[string]interface{})
+			if !ok {
+				return data, errors.New("Value is not map ")
+			}
+			backupMap["UsageStats"] = results
+			backupId := backupMap["BackupId"]
+			req = map[string]interface{}{
+				"InstanceId": instanceId,
+				"BackupId":   backupId,
+			}
+			action = "DescribeBackupDecryptionKey"
+			bytes, _ = json.Marshal(req)
+			logger.Debug(logger.ReqFormat, action, string(bytes))
+			resp, itemErr = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+			if itemErr != nil {
+				continue
+			}
+			respBytes, _ = json.Marshal(resp)
+			logger.Debug(logger.RespFormat, action, req, string(respBytes))
+			results, itemErr = ve.ObtainSdkValue("Result.DecryptionKey", *resp)
+			if itemErr != nil {
+				continue
+			}
+			backupMap["DecryptionKey"] = results
+			results, itemErr = ve.ObtainSdkValue("Result.Iv", *resp)
+			if itemErr != nil {
+				continue
+			}
+			backupMap["Iv"] = results
+		}
 		return data, err
 	})
 }

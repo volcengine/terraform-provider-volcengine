@@ -3,6 +3,7 @@ package backup
 import (
 	"errors"
 	"fmt"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineerr"
 	"strings"
 	"time"
 
@@ -32,11 +33,33 @@ func (s *VolcengineRedisBackupService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
+func (s *VolcengineRedisBackupService) readBackupPointDownloadUrls(instanceId, backupPointId string) (instance interface{}, err error) {
+	action := "DescribeBackupPointDownloadUrls"
+	cond := map[string]interface{}{
+		"InstanceId":    instanceId,
+		"BackupPointId": backupPointId,
+	}
+	logger.Debug(logger.RespFormat, action, cond)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &cond)
+	logger.Debug(logger.RespFormat, action, *resp)
+	if err != nil {
+		return instance, err
+	}
+
+	instance, err = ve.ObtainSdkValue("Result.BackupPointDownloadUrls", *resp)
+	if err != nil {
+		return instance, err
+	}
+	if instance == nil {
+		return instance, fmt.Errorf("instance %s or BackupPointId %s is not exist", instanceId, backupPointId)
+	}
+	return instance, err
+}
+
 func (s *VolcengineRedisBackupService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
-		ok      bool
 	)
 
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
@@ -63,9 +86,30 @@ func (s *VolcengineRedisBackupService) ReadResources(m map[string]interface{}) (
 		if results == nil {
 			results = []interface{}{}
 		}
-		data, ok = results.([]interface{})
+		backupDetails, ok := results.([]interface{})
 		if !ok {
 			return data, fmt.Errorf("Result.Backups is not slice")
+		}
+
+		for _, ele := range backupDetails {
+			backupDetail := ele.(map[string]interface{})
+			instanceId, ok := backupDetail["InstanceId"].(string)
+			if !ok {
+				return data, fmt.Errorf("InstanceId is not string")
+			}
+
+			backupPointId, ok := backupDetail["BackupPointId"].(string)
+			if !ok {
+				return data, fmt.Errorf("BackupPointId is not string")
+			}
+
+			backupPointDownloadUrls, err := s.readBackupPointDownloadUrls(instanceId, backupPointId)
+			if err != nil {
+				return data, err
+			}
+			backupDetail["BackupPointDownloadUrls"] = backupPointDownloadUrls
+
+			data = append(data, backupDetail)
 		}
 		return data, nil
 	})
@@ -97,11 +141,17 @@ func (s *VolcengineRedisBackupService) ReadResource(resourceData *schema.Resourc
 	}
 	for _, v := range results {
 		if data, ok = v.(map[string]interface{}); ok {
-			if data["BackupPointId"] == ids[1] {
+			backupPointId, ok := data["BackupPointId"].(string)
+			if !ok {
+				return data, fmt.Errorf("BackupPointId is not string")
+			}
+			if backupPointId == ids[1] {
 				return data, nil
 			}
 		}
 	}
+
+	data["InstanceDetail"] = []interface{}{}
 	return data, errors.New("backup not exist")
 }
 
@@ -124,7 +174,7 @@ func (s *VolcengineRedisBackupService) RefreshResourceState(resourceData *schema
 			if err = resource.Retry(20*time.Minute, func() *resource.RetryError {
 				demo, err = s.ReadResource(resourceData, id)
 				if err != nil {
-					if ve.ResourceNotFoundError(err) {
+					if s.ResourceNotFoundError(err) {
 						return resource.RetryableError(err)
 					} else {
 						return resource.NonRetryableError(err)
@@ -155,14 +205,22 @@ func (s *VolcengineRedisBackupService) RefreshResourceState(resourceData *schema
 }
 
 func (s *VolcengineRedisBackupService) WithResourceResponseHandlers(backup map[string]interface{}) []ve.ResourceResponseHandler {
-	detail := backup["InstanceDetail"].(map[string]interface{})
-	vpcInfo := detail["VpcInfo"].(map[string]interface{})
-	vpcInfo["Id"] = vpcInfo["ID"] // id change
-	detail["VpcInfo"] = []interface{}{vpcInfo}
-	backup["InstanceDetail"] = detail
+	detail, ok := backup["InstanceDetail"].(map[string]interface{})
+	if ok {
+		vpcInfo, vpcInfoOk := detail["VpcInfo"].(map[string]interface{})
+		if vpcInfoOk {
+			vpcInfo["Id"] = vpcInfo["ID"] // id change
+			detail["VpcInfo"] = []interface{}{vpcInfo}
+			backup["InstanceDetail"] = detail
+		}
+	}
 
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return backup, map[string]ve.ResponseConvert{}, nil
+		return backup, map[string]ve.ResponseConvert{
+			"TTL": {
+				TargetField: "ttl",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -229,6 +287,9 @@ func (s *VolcengineRedisBackupService) DatasourceResources(data *schema.Resource
 			"ID": {
 				TargetField: "id",
 			},
+			"TTL": {
+				TargetField: "ttl",
+			},
 		},
 	}
 }
@@ -245,4 +306,19 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.ApplicationJSON,
 		Action:      actionName,
 	}
+}
+
+func (s *VolcengineRedisBackupService) ResourceNotFoundError(err error) bool {
+	if e, ok := err.(volcengineerr.RequestFailure); ok && e.StatusCode() == 404 {
+		return true
+	}
+	errMessage := strings.ToLower(err.Error())
+	return strings.Contains(errMessage, "notfound") ||
+		strings.Contains(errMessage, "not found") ||
+		strings.Contains(errMessage, "not exist") ||
+		strings.Contains(errMessage, "not associate") ||
+		strings.Contains(errMessage, "invalid") ||
+		strings.Contains(errMessage, "not_found") ||
+		strings.Contains(errMessage, "notexist") ||
+		strings.Contains(errMessage, "unavailable")
 }

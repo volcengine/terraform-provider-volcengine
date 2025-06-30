@@ -45,6 +45,11 @@ func DataSourceVolcengineRedisZones() *schema.Resource {
 							Computed:    true,
 							Description: "The name of the zone.",
 						},
+						"zone_status": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The status of the zone.",
+						},
 					},
 				},
 			},

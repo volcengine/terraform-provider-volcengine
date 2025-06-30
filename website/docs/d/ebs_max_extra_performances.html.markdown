@@ -10,7 +10,10 @@ description: |-
 Use this data source to query detailed information of ebs max extra performances
 ## Example Usage
 ```hcl
-
+data "volcengine_ebs_max_extra_performances" "foo" {
+  volume_type = "TSSD_TL0"
+  size        = 60
+}
 ```
 ## Argument Reference
 The following arguments are supported:

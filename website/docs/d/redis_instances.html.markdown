@@ -69,6 +69,7 @@ The `tags` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `instances` - The collection of redis instances query.
+    * `additional_bandwidth_per_shard` - The additional bandwidth of a single shard, that is, the extra bandwidth that needs to be added on top of the default bandwidth, unit: MB/s.
     * `backup_plan` - The list of backup plans.
         * `active` - Whether enable auto backup.
         * `backup_hour` - The time period to start performing the backup. The value range is any integer between 0 and 23, where 0 means that the system will perform the backup in the period of 00:00~01:00, 1 means that the backup will be performed in the period of 01:00~02:00, and so on.
@@ -86,13 +87,25 @@ In addition to all arguments above, the following attributes are exported:
         * `az` - Set the availability zone to which the node belongs. The number of nodes of an instance (i.e., NodeNumber) and the availability zone deployment scheme (i.e., the value of the MultiAZ parameter) will affect the filling of the current parameter. Among them:
  When a new instance is a single-node instance (i.e., the value of NodeNumber is 1), only a single availability zone deployment scheme is allowed (i.e., the value of MultiAZ must be disabled). At this time, only one availability zone needs to be passed in AZ, and all nodes in the instance will be deployed in this availability zone. When creating a new instance as a primary-standby instance (that is, when the value of NodeNumber is greater than or equal to 2), the number of availability zones passed in must be equal to the number of nodes in a single shard (that is, the value of the NodeNumber parameter), and the value of AZ must comply with the multi-availability zone deployment scheme rules. The specific rules are as follows: If the primary-standby instance selects the multi-availability zone deployment scheme (that is, the value of MultiAZ is enabled), then at least two different availability zone IDs must be passed in in AZ, and the first availability zone is the availability zone where the primary node is located. If the primary and standby instances choose a single availability zone deployment scheme (that is, the value of MultiAZ is disabled), then the availability zones passed in for each node must be the same.
     * `create_time` - The creation time of the redis instance.
+    * `data_layout` - The data storage form of the instance.
+    * `default_bandwidth_per_shard` - The default bandwidth of a single shard in the instance. Both the read bandwidth (i.e., the downlink bandwidth) and the write bandwidth (i.e., the uplink bandwidth) are of this value. Unit: MB/s.
     * `deletion_protection` - whether enable deletion protection.
     * `engine_version` - The engine version of the redis instance.
     * `expired_time` - The expire time of the redis instance, valid when charge type is `PrePaid`.
     * `id` - The id of the redis instance.
+    * `instance_class` - The type of the instance.
     * `instance_id` - The id of the redis instance.
     * `instance_name` - The name of the redis instance.
+    * `instance_shards` - A detailed list of all Shard shards in the instance.
+        * `node_number` - The number of nodes in each shard.
+        * `server_nodes` - A detailed list of all Server nodes in the shard.
+            * `current_role` - The current role of the node.
+            * `node_id` - The ID of node.
+            * `status` - The status of node.
+            * `zone_id` - The availability zone where the node is located.
+        * `shard_id` - The ID of the shard.
     * `maintenance_time` - The maintainable time of the redis instance.
+    * `max_connections` - The current maximum number of connections in a single shard for the instance of the instance.
     * `multi_az` - Set the availability zone deployment scheme for the instance. The value range is as follows: 
 disabled: Single availability zone deployment scheme.
  enabled: Multi-availability zone deployment scheme.
@@ -115,7 +128,14 @@ disabled: Single availability zone deployment scheme.
         * `unit` - The unit of the numeric type configuration parameter.
     * `project_name` - The project name of the redis instance.
     * `region_id` - The region id of the redis instance.
-    * `shard_capacity` - The memory capacity of each shard. Unit: GiB.
+    * `server_nodes` - A detailed list of all Server nodes in the shard.
+        * `current_role` - The current role of the node.
+        * `node_id` - The ID of node.
+        * `status` - The status of node.
+        * `zone_id` - The availability zone where the node is located.
+    * `shard_capacity_v2` - The memory capacity of each shard in the instance.
+    * `shard_capacity` - (**Deprecated**) Replaced by shard_capacity_v2. The memory capacity of each shard. Unit: GiB.
+    * `shard_id` - The ID of the shard.
     * `shard_number` - The number of shards in the redis instance.
     * `sharded_cluster` - Whether enable sharded cluster for the redis instance.
     * `status` - The status of the redis instance.

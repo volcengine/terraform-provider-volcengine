@@ -90,7 +90,7 @@ The following arguments are supported:
 * `all_authority` - (Optional) Whether the kafka topic is configured to be accessible by all users. Default: true.
 * `description` - (Optional) The description of the kafka topic.
 * `parameters` - (Optional) The parameters of the kafka topic.
-* `replica_number` - (Optional, ForceNew) The number of replica in kafka topic. The value can be 2 or 3. Default is 3.
+* `replica_number` - (Optional) The number of replica in kafka topic. The value can be 2 or 3. Default is 3.
 
 The `access_policies` object supports the following:
 

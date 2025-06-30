@@ -274,7 +274,10 @@ func (s *VolcengineCenBandwidthPackageService) RemoveResource(resourceData *sche
 				"CenBandwidthPackageId": resourceData.Id(),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				return nil, nil
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试
@@ -415,7 +418,21 @@ func (s *VolcengineCenBandwidthPackageService) UnsubscribeInfo(resourceData *sch
 	}
 	if resourceData.Get("billing_type").(string) == "PrePaid" {
 		info.NeedUnsubscribe = true
-		info.Products = []string{"CEN"}
+
+		localRegion := resourceData.Get("local_geographic_region_set_id")
+		peerRegion := resourceData.Get("peer_geographic_region_set_id")
+		if localRegion == peerRegion {
+			info.Products = []string{"CEN"}
+		} else {
+			lineOperator := resourceData.Get("line_operator")
+			if lineOperator == "ChinaUnicom" {
+				info.Products = []string{"CEN_CrossArea"}
+			} else if lineOperator == "ChinaTelecom" {
+				info.Products = []string{"CEN_CrossBorderBandwidth_CT"}
+			} else {
+				info.Products = []string{"CEN"}
+			}
+		}
 	}
 	return &info, nil
 }

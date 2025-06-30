@@ -33,9 +33,10 @@ resource "volcengine_cen_bandwidth_package" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `bandwidth` - (Optional) The bandwidth of the cen bandwidth package. Value: 2~10000.
-* `billing_type` - (Optional, ForceNew) The billing type of the cen bandwidth package. Only support `PrePaid` and default value is `PrePaid`.
+* `billing_type` - (Optional, ForceNew) The billing type of the cen bandwidth package. Only support `PrePaid` and `PayBy95Peak`, default value is `PrePaid`.
 * `cen_bandwidth_package_name` - (Optional) The name of the cen bandwidth package.
 * `description` - (Optional) The description of the cen bandwidth package.
+* `line_operator` - (Optional, ForceNew) The line operator of the cen bandwidth package. Valid value: `ChinaUnicom`, `ChinaTelecom`. This field is only valid when `local_geographic_region_set_id` and `peer_geographic_region_set_id` are different.
 * `local_geographic_region_set_id` - (Optional, ForceNew) The local geographic region set id of the cen bandwidth package. Valid value: `China`, `Asia`.
 * `peer_geographic_region_set_id` - (Optional, ForceNew) The peer geographic region set id of the cen bandwidth package. Valid value: `China`, `Asia`.
 * `period_unit` - (Optional) The period unit of the cen bandwidth package. Value: `Month`, `Year`. Default value is `Month`.

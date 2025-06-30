@@ -30,6 +30,31 @@ func DataSourceVolcenginePrivateZoneResolverEndpoints() *schema.Resource {
 				Optional:    true,
 				Description: "The direction of the private zone resolver endpoint.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the private zone resolver endpoint.",
+			},
+			"tag_filters": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of tag filters.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The key of the tag.",
+						},
+						"values": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "The values of the tag.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -102,6 +127,12 @@ func DataSourceVolcenginePrivateZoneResolverEndpoints() *schema.Resource {
 							Computed:    true,
 							Description: "The security group id of the endpoint.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the endpoint.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"ip_configs": {
 							Type:        schema.TypeList,
 							Computed:    true,

@@ -206,7 +206,11 @@ func (s *VolcengineCrRegistryService) RefreshResourceState(resourceData *schema.
 
 func (s *VolcengineCrRegistryService) WithResourceResponseHandlers(instance map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return instance, nil, nil
+		return instance, map[string]ve.ResponseConvert{
+			"SkipSSLVerify": {
+				TargetField: "skip_ssl_verify",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -221,6 +225,25 @@ func (s *VolcengineCrRegistryService) CreateResource(resourceData *schema.Resour
 			Convert: map[string]ve.RequestConvert{
 				"project": {
 					TargetField: "Project",
+				},
+				"resource_tags": {
+					TargetField: "ResourceTags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"type": {
+					TargetField: "Type",
+				},
+				"proxy_cache_enabled": {
+					TargetField: "ProxyCacheEnabled",
+				},
+				"proxy_cache": {
+					TargetField: "ProxyCache",
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"skip_ssl_verify": {
+							TargetField: "SkipSSLVerify",
+						},
+					},
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -341,6 +364,10 @@ func (s *VolcengineCrRegistryService) DatasourceResources(*schema.ResourceData, 
 				TargetField: "Filter.Types",
 				ConvertType: ve.ConvertJsonArray,
 			},
+			"projects": {
+				TargetField: "Filter.Projects",
+				ConvertType: ve.ConvertJsonArray,
+			},
 			"statuses": {
 				TargetField: "Filter.Statuses",
 				ConvertType: ve.ConvertJsonObjectArray,
@@ -357,6 +384,11 @@ func (s *VolcengineCrRegistryService) DatasourceResources(*schema.ResourceData, 
 						ConvertType: ve.ConvertJsonArray,
 					},
 				},
+			},
+		},
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"SkipSSLVerify": {
+				TargetField: "skip_ssl_verify",
 			},
 		},
 	}

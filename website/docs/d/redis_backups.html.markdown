@@ -53,20 +53,29 @@ data "volcengine_redis_backups" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `instance_id` - (Required) Id of instance.
+* `backup_point_id` - (Optional) The id of backup point.
+* `backup_point_name` - (Optional) Backup name, supporting fuzzy query.
 * `backup_strategy_list` - (Optional) The list of backup strategy, support AutomatedBackup and ManualBackup.
 * `end_time` - (Optional) Query end time.
+* `instance_id` - (Optional) Id of instance.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) Back up the project to which it belongs.
+* `scope` - (Optional) The query scope of the backup.
 * `start_time` - (Optional) Query start time.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `backups` - Information of backups.
+    * `backup_point_download_urls` - The download address information of the backup file to which the current backup point belongs.
+        * `private_download_url` - The private network download address for RDB files.
+        * `public_download_url` - The public network download address for RDB files.
+        * `rdb_file_size` - RDB file size, unit: Byte.
+        * `shard_id` - The shard ID where the RDB file is located.
     * `backup_point_id` - The id of backup point.
     * `backup_strategy` - Backup strategy.
     * `backup_type` - Backup type.
     * `end_time` - End time of backup.
-    * `instance_detail` - Information of instance.
+    * `instance_detail` - (**Deprecated**) Replaced by instance_info. Information of instance.
         * `account_id` - Id of account.
         * `arch_type` - Arch type of instance(Standard/Cluster).
         * `charge_type` - Charge type of instance(Postpaid/Prepaid).
@@ -89,9 +98,29 @@ In addition to all arguments above, the following attributes are exported:
             * `name` - Name of vpc.
         * `zone_ids` - List of id of zone.
     * `instance_id` - Id of instance.
+    * `instance_info` - Information of instance.
+        * `account_id` - Id of account.
+        * `arch_type` - Arch type of instance(Standard/Cluster).
+        * `charge_type` - Charge type of instance(Postpaid/Prepaid).
+        * `deletion_protection` - The status of the deletion protection function of the instance.
+        * `engine_version` - Engine version of instance.
+        * `expired_time` - Expired time of instance.
+        * `instance_id` - Id of instance.
+        * `instance_name` - Name of instance.
+        * `maintenance_time` - The maintainable period (in UTC) of the instance.
+        * `network_type` - Network type of instance.
+        * `region_id` - Id of region.
+        * `replicas` - Count of replica in which shard.
+        * `shard_capacity` - Capacity of shard.
+        * `shard_number` - The number of shards in the instance.
+        * `total_capacity` - Total capacity of instance.
+        * `vpc_id` - The private network ID of the instance.
+        * `zone_ids` - List of id of zone.
+    * `project_name` - Project name of instance.
     * `size` - Size in MiB.
     * `start_time` - Start time of backup.
     * `status` - Status of backup (Creating/Available/Unavailable/Deleting).
+    * `ttl` - Backup retention days.
 * `total_count` - The total count of backup query.
 
 

@@ -22,12 +22,14 @@ func ResourceVolcengineRdsMysqlDatabase() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineRdsMysqlDatabaseCreate,
 		Read:   resourceVolcengineRdsMysqlDatabaseRead,
+		Update: resourceVolcengineRdsMysqlDatabaseUpdate,
 		Delete: resourceVolcengineRdsMysqlDatabaseDelete,
 		Importer: &schema.ResourceImporter{
 			State: databaseImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
@@ -50,6 +52,14 @@ func ResourceVolcengineRdsMysqlDatabase() *schema.Resource {
 				ForceNew:    true,
 				Description: "Database character set. Currently supported character sets include: utf8, utf8mb4, latin1, ascii.",
 			},
+			"db_desc": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "The description information of the database, with a length not exceeding 256 characters." +
+					" This field is optional." +
+					" If this field is not set, or if this field is set but the length of the description information is 0, " +
+					"then the description information is empty.",
+			},
 		},
 	}
 }
@@ -70,6 +80,15 @@ func resourceVolcengineRdsMysqlDatabaseRead(d *schema.ResourceData, meta interfa
 		return fmt.Errorf("error on reading database %q, %w", d.Id(), err)
 	}
 	return err
+}
+
+func resourceVolcengineRdsMysqlDatabaseUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	databaseService := NewRdsMysqlDatabaseService(meta.(*volc.SdkClient))
+	err = databaseService.Dispatcher.Update(databaseService, d, ResourceVolcengineRdsMysqlDatabase())
+	if err != nil {
+		return fmt.Errorf("error on updating database %q, %w", d.Id(), err)
+	}
+	return resourceVolcengineRdsMysqlDatabaseRead(d, meta)
 }
 
 func resourceVolcengineRdsMysqlDatabaseDelete(d *schema.ResourceData, meta interface{}) (err error) {

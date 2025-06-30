@@ -41,6 +41,31 @@ func DataSourceVolcenginePrivateZoneResolverRules() *schema.Resource {
 				Optional:    true,
 				Description: "ID of the exit terminal node.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the private zone resolver rule.",
+			},
+			"tag_filters": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of tag filters.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The key of the tag.",
+						},
+						"values": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "The values of the tag.",
+							Elem:        &schema.Schema{Type: schema.TypeString},
+						},
+					},
+				},
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -107,10 +132,16 @@ func DataSourceVolcenginePrivateZoneResolverRules() *schema.Resource {
 							Description: "The endpoint ID of the rule.",
 						},
 						"line": {
-							Type:        schema.TypeInt,
+							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The ISP of the exit IP address of the recursive DNS server.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the rule.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"forward_ips": {
 							Type:        schema.TypeList,
 							Computed:    true,

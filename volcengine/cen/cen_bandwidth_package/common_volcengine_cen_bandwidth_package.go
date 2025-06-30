@@ -11,6 +11,8 @@ var billingTypeRequestConvert = func(data *schema.ResourceData, old interface{})
 	switch old.(string) {
 	case "PrePaid":
 		ty = 1
+	case "PayBy95Peak":
+		ty = 4
 	}
 	return ty
 }
@@ -20,6 +22,8 @@ var billingTypeResponseConvert = func(i interface{}) interface{} {
 	switch i.(float64) {
 	case 1:
 		ty = "PrePaid"
+	case 4:
+		ty = "PayBy95Peak"
 	default:
 		ty = fmt.Sprintf("%v", i)
 	}
@@ -27,5 +31,10 @@ var billingTypeResponseConvert = func(i interface{}) interface{} {
 }
 
 var periodDiffSuppress = func(k, old, new string, d *schema.ResourceData) bool {
+	// 非包年包月实例时，忽略相关参数
+	if d.Get("billing_type").(string) != "PrePaid" {
+		return true
+	}
+
 	return len(d.Id()) != 0
 }

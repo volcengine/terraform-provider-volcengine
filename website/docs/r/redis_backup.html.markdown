@@ -43,45 +43,50 @@ resource "volcengine_redis_instance" "foo" {
 }
 
 resource "volcengine_redis_backup" "foo" {
-  instance_id = volcengine_redis_instance.foo.id
+  instance_id       = volcengine_redis_instance.foo.id
+  backup_point_name = "acc-test-tf-redis-backup"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `instance_id` - (Required, ForceNew) Id of instance to create backup.
+* `backup_point_name` - (Optional, ForceNew) Set the backup name for the manually created backup.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `backup_point_download_urls` - The download address information of the backup file to which the current backup point belongs.
+    * `private_download_url` - The private network download address for RDB files.
+    * `public_download_url` - The public network download address for RDB files.
+    * `rdb_file_size` - RDB file size, unit: Byte.
+    * `shard_id` - The shard ID where the RDB file is located.
 * `backup_point_id` - The id of backup point.
 * `backup_strategy` - Backup strategy.
 * `backup_type` - Backup type.
 * `end_time` - End time of backup.
-* `instance_detail` - Information of instance.
+* `instance_info` - Information of instance.
     * `account_id` - Id of account.
     * `arch_type` - Arch type of instance(Standard/Cluster).
     * `charge_type` - Charge type of instance(Postpaid/Prepaid).
+    * `deletion_protection` - The status of the deletion protection function of the instance.
     * `engine_version` - Engine version of instance.
     * `expired_time` - Expired time of instance.
     * `instance_id` - Id of instance.
     * `instance_name` - Name of instance.
     * `maintenance_time` - The maintainable period (in UTC) of the instance.
     * `network_type` - Network type of instance.
-    * `project_name` - Project name of instance.
     * `region_id` - Id of region.
     * `replicas` - Count of replica in which shard.
-    * `server_cpu` - Count of cpu cores of instance.
     * `shard_capacity` - Capacity of shard.
-    * `shard_count` - Count of shard.
+    * `shard_number` - The number of shards in the instance.
     * `total_capacity` - Total capacity of instance.
-    * `used_capacity` - Capacity used of this instance.
-    * `vpc_info` - Information of vpc.
-        * `id` - Id of vpc.
-        * `name` - Name of vpc.
+    * `vpc_id` - The private network ID of the instance.
     * `zone_ids` - List of id of zone.
+* `project_name` - Project name of instance.
 * `size` - Size in MiB.
 * `start_time` - Start time of backup.
 * `status` - Status of backup (Creating/Available/Unavailable/Deleting).
+* `ttl` - Backup retention days.
 
 
 ## Import

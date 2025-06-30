@@ -147,6 +147,24 @@ func (s *VolcengineRdsMysqlEndpointService) ReadResource(resourceData *schema.Re
 		}
 		data["ReadOnlyNodeWeight"] = weights
 	}
+
+	rdType, ok := data["ReadOnlyNodeDistributionType"]
+	if ok {
+		rdTypeStr, ok := rdType.(string)
+		if ok {
+			// 输入和输出不一致 参考https://www.volcengine.com/docs/6313/170670，覆盖
+			if rdTypeStr == "Default" || rdTypeStr == "Custom" {
+				if rdTypeTf, ok := resourceData.GetOk("read_only_node_distribution_type"); ok {
+					rdTypeTfStr, ok := rdTypeTf.(string)
+					if ok {
+						logger.Debug(logger.ReqFormat, "ReadOnlyNodeDistributionType Trans", "tf content", rdTypeTfStr)
+						data["ReadOnlyNodeDistributionType"] = rdTypeTfStr
+					}
+				}
+			}
+		}
+	}
+
 	logger.Debug(logger.ReqFormat, "After Trans Data", data)
 	return data, err
 }
@@ -195,17 +213,8 @@ func (s *VolcengineRdsMysqlEndpointService) CreateResource(resourceData *schema.
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-				"read_write_spliting": {
-					Ignore: true,
-				},
-				"read_only_node_max_delay_time": {
-					Ignore: true,
-				},
-				"read_only_node_distribution_type": {
-					Ignore: true,
-				},
 				"read_only_node_weight": {
-					Ignore: true,
+					ConvertType: ve.ConvertJsonObjectArray,
 				},
 				"nodes": {
 					Ignore: true,
@@ -258,43 +267,7 @@ func (s *VolcengineRdsMysqlEndpointService) CreateResource(resourceData *schema.
 		},
 	}
 	callbacks = append(callbacks, callback)
-	// 调用 ModifyDBEndpointDNS 接口修改私网地址的解析方式。
-	//if dns, ok := resourceData.GetOk("dns_visibility"); ok {
-	//	dnsCallback := ve.Callback{
-	//		Call: ve.SdkCall{
-	//			Action:      "ModifyDBEndpointDNS",
-	//			ConvertMode: ve.RequestConvertIgnore,
-	//			ContentType: ve.ContentTypeJson,
-	//			SdkParam: &map[string]interface{}{
-	//				"NetworkType":   "Private",
-	//				"DNSVisibility": dns,
-	//			},
-	//			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-	//				ids := strings.Split(d.Id(), ":")
-	//				(*call.SdkParam)["InstanceId"] = ids[0]
-	//				(*call.SdkParam)["EndpointId"] = ids[1]
-	//				return true, nil
-	//			},
-	//			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-	//				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-	//				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-	//				logger.Debug(logger.RespFormat, call.Action, resp, err)
-	//				return resp, err
-	//			},
-	//			LockId: func(d *schema.ResourceData) string {
-	//				return d.Get("instance_id").(string)
-	//			},
-	//			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-	//				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
-	//					ResourceId: resourceData.Get("instance_id").(string),
-	//					Target:     []string{"Running"},
-	//					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-	//				},
-	//			},
-	//		},
-	//	}
-	//	callbacks = append(callbacks, dnsCallback)
-	//}
+
 	// 调用 ModifyDBEndpointAddress 接口修改连接地址的前缀或端口。 仅针对私网。
 	port, ok := resourceData.GetOk("port")
 	domain, ok1 := resourceData.GetOk("domain")
@@ -342,52 +315,90 @@ func (s *VolcengineRdsMysqlEndpointService) CreateResource(resourceData *schema.
 		}
 		callbacks = append(callbacks, addressCallback)
 	}
-	// 调用 ModifyDBEndpoint 接口修改 Endpoint。
-	/*
-		read_write_splitting
-		read_only_node_max_delay_time
-		read_only_node_distribution_type
-		read_only_node_weight
-	*/
-	_, spExist := resourceData.GetOk("read_write_spliting")
-	_, timeExist := resourceData.GetOk("read_only_node_max_delay_time")
-	_, typeExist := resourceData.GetOk("read_only_node_distribution_type")
-	_, weightExist := resourceData.GetOk("read_only_node_weight")
-	if spExist || timeExist || typeExist || weightExist {
-		modifyCallback := ve.Callback{
+	//// 调用 ModifyDBEndpoint 接口修改 Endpoint。
+	///*
+	//	read_write_splitting
+	//	read_only_node_max_delay_time
+	//	read_only_node_distribution_type
+	//	read_only_node_weight
+	//*/
+	//_, spExist := resourceData.GetOk("read_write_spliting")
+	//_, timeExist := resourceData.GetOk("read_only_node_max_delay_time")
+	//_, typeExist := resourceData.GetOk("read_only_node_distribution_type")
+	//_, weightExist := resourceData.GetOk("read_only_node_weight")
+	//if spExist || timeExist || typeExist || weightExist {
+	//	modifyCallback := ve.Callback{
+	//		Call: ve.SdkCall{
+	//			Action:      "ModifyDBEndpoint",
+	//			ContentType: ve.ContentTypeJson,
+	//			ConvertMode: ve.RequestConvertAll,
+	//			Convert: map[string]ve.RequestConvert{
+	//				"nodes": {
+	//					Ignore: true,
+	//				},
+	//				"read_only_node_weight": {
+	//					ConvertType: ve.ConvertJsonObjectArray,
+	//				},
+	//				"dns_visibility": {
+	//					Ignore: true,
+	//				},
+	//				"domain": {
+	//					Ignore: true,
+	//				},
+	//				"port": {
+	//					Ignore: true,
+	//				},
+	//			},
+	//			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+	//				ids := strings.Split(d.Id(), ":")
+	//				(*call.SdkParam)["InstanceId"] = ids[0]
+	//				(*call.SdkParam)["EndpointId"] = ids[1]
+	//				if nodes, ok := d.GetOk("nodes"); ok {
+	//					nodesList := nodes.(*schema.Set).List()
+	//					nodesArr := make([]string, 0)
+	//					for _, node := range nodesList {
+	//						nodesArr = append(nodesArr, node.(string))
+	//					}
+	//					(*call.SdkParam)["Nodes"] = strings.Join(nodesArr, ",")
+	//				}
+	//				return true, nil
+	//			},
+	//			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+	//				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+	//				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+	//				logger.Debug(logger.RespFormat, call.Action, resp, err)
+	//				return resp, err
+	//			},
+	//			LockId: func(d *schema.ResourceData) string {
+	//				return d.Get("instance_id").(string)
+	//			},
+	//			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+	//				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
+	//					ResourceId: resourceData.Get("instance_id").(string),
+	//					Target:     []string{"Running"},
+	//					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+	//				},
+	//			},
+	//		},
+	//	}
+	//	callbacks = append(callbacks, modifyCallback)
+	//}
+
+	// 调用 ModifyDBEndpointDNS 接口修改私网地址的解析方式。
+	if dns, ok := resourceData.GetOk("dns_visibility"); ok {
+		dnsCallback := ve.Callback{
 			Call: ve.SdkCall{
-				Action:      "ModifyDBEndpoint",
+				Action:      "ModifyDBEndpointDNS",
+				ConvertMode: ve.RequestConvertIgnore,
 				ContentType: ve.ContentTypeJson,
-				ConvertMode: ve.RequestConvertAll,
-				Convert: map[string]ve.RequestConvert{
-					"nodes": {
-						Ignore: true,
-					},
-					"read_only_node_weight": {
-						ConvertType: ve.ConvertJsonObjectArray,
-					},
-					"dns_visibility": {
-						Ignore: true,
-					},
-					"domain": {
-						Ignore: true,
-					},
-					"port": {
-						Ignore: true,
-					},
+				SdkParam: &map[string]interface{}{
+					"NetworkType":   "Private",
+					"DNSVisibility": dns,
 				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 					ids := strings.Split(d.Id(), ":")
 					(*call.SdkParam)["InstanceId"] = ids[0]
 					(*call.SdkParam)["EndpointId"] = ids[1]
-					if nodes, ok := d.GetOk("nodes"); ok {
-						nodesList := nodes.(*schema.Set).List()
-						nodesArr := make([]string, 0)
-						for _, node := range nodesList {
-							nodesArr = append(nodesArr, node.(string))
-						}
-						(*call.SdkParam)["Nodes"] = strings.Join(nodesArr, ",")
-					}
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -408,8 +419,9 @@ func (s *VolcengineRdsMysqlEndpointService) CreateResource(resourceData *schema.
 				},
 			},
 		}
-		callbacks = append(callbacks, modifyCallback)
+		callbacks = append(callbacks, dnsCallback)
 	}
+
 	return callbacks
 }
 
@@ -468,139 +480,144 @@ func (s *VolcengineRdsMysqlEndpointService) ModifyResource(resourceData *schema.
 		}
 		callbacks = append(callbacks, addressCallback)
 	}
-	// 调用 ModifyDBEndpointDNS 接口修改私网地址的解析方式。
-	//if resourceData.HasChange("dns_visibility") {
-	//	dnsCallback := ve.Callback{
-	//		Call: ve.SdkCall{
-	//			Action:      "ModifyDBEndpointDNS",
-	//			ConvertMode: ve.RequestConvertIgnore,
-	//			ContentType: ve.ContentTypeJson,
-	//			SdkParam: &map[string]interface{}{
-	//				"InstanceId":    ids[0],
-	//				"EndpointId":    ids[1],
-	//				"NetworkType":   "Private",
-	//				"DNSVisibility": resourceData.Get("dns_visibility"),
-	//			},
-	//			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-	//				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-	//				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-	//				logger.Debug(logger.RespFormat, call.Action, resp, err)
-	//				return resp, err
-	//			},
-	//			LockId: func(d *schema.ResourceData) string {
-	//				return d.Get("instance_id").(string)
-	//			},
-	//			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-	//				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
-	//					ResourceId: resourceData.Get("instance_id").(string),
-	//					Target:     []string{"Running"},
-	//					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-	//				},
-	//			},
-	//		},
-	//	}
-	//	callbacks = append(callbacks, dnsCallback)
-	//}
-	// 调用 ModifyDBEndpoint 接口修改 Endpoint。
-	modifyCallback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "ModifyDBEndpoint",
-			ContentType: ve.ContentTypeJson,
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"nodes": {
-					Ignore: true,
+	//调用 ModifyDBEndpointDNS 接口修改私网地址的解析方式。
+	if resourceData.HasChange("dns_visibility") {
+		dnsCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBEndpointDNS",
+				ConvertMode: ve.RequestConvertIgnore,
+				ContentType: ve.ContentTypeJson,
+				SdkParam: &map[string]interface{}{
+					"InstanceId":    ids[0],
+					"EndpointId":    ids[1],
+					"NetworkType":   "Private",
+					"DNSVisibility": resourceData.Get("dns_visibility"),
 				},
-				"read_write_mode": {
-					TargetField: "ReadWriteMode",
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
 				},
-				"endpoint_name": {
-					TargetField: "EndpointName",
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
 				},
-				"description": {
-					TargetField: "Description",
-				},
-				"auto_add_new_nodes": {
-					TargetField: "AutoAddNewNodes",
-					ForceGet:    true,
-				},
-				"read_write_spliting": {
-					TargetField: "ReadWriteSpliting",
-					ForceGet:    true,
-				},
-				"read_only_node_max_delay_time": {
-					TargetField: "ReadOnlyNodeMaxDelayTime",
-				},
-				"read_only_node_distribution_type": {
-					TargetField: "ReadOnlyNodeDistributionType",
-					// 不传会变default
-					ForceGet: true,
-				},
-				"read_only_node_weight": {
-					Ignore: true,
-				},
-				"dns_visibility": {
-					Ignore: true,
-				},
-				"domain": {
-					Ignore: true,
-				},
-				"port": {
-					Ignore: true,
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
+						ResourceId: resourceData.Get("instance_id").(string),
+						Target:     []string{"Running"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					},
 				},
 			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
-			},
-			LockId: func(d *schema.ResourceData) string {
-				return d.Get("instance_id").(string)
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["InstanceId"] = ids[0]
-				(*call.SdkParam)["EndpointId"] = ids[1]
-				if nodes, ok := d.GetOk("nodes"); ok {
-					nodesList := nodes.(*schema.Set).List()
-					nodesArr := make([]string, 0)
-					for _, node := range nodesList {
-						nodesArr = append(nodesArr, node.(string))
-					}
-					(*call.SdkParam)["Nodes"] = strings.Join(nodesArr, ",")
-				}
-				if d.HasChange("read_only_node_weight") ||
-					d.Get("read_only_node_distribution_type").(string) == "Custom" {
-					weights := make([]interface{}, 0)
-					w := d.Get("read_only_node_weight")
-					for _, v := range w.(*schema.Set).List() {
-						weight := make(map[string]interface{})
-						vMap := v.(map[string]interface{})
-						if nodeId, ok := vMap["node_id"]; ok {
-							weight["NodeId"] = nodeId
-						}
-						if nodeType, ok := vMap["node_type"]; ok {
-							weight["NodeType"] = nodeType
-						}
-						if we, ok := vMap["weight"]; ok {
-							weight["Weight"] = we
-						}
-						weights = append(weights, weight)
-					}
-					(*call.SdkParam)["ReadOnlyNodeWeight"] = weights
-				}
-				return true, nil
-			},
-			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
-					ResourceId: resourceData.Get("instance_id").(string),
-					Target:     []string{"Running"},
-					Timeout:    resourceData.Timeout(schema.TimeoutCreate),
-				},
-			},
-		},
+		}
+		callbacks = append(callbacks, dnsCallback)
 	}
-	callbacks = append(callbacks, modifyCallback)
+
+	if resourceData.HasChanges("nodes", "read_write_mode", "endpoint_name",
+		"description", "auto_add_new_nodes", "read_write_spliting", "read_only_node_max_delay_time",
+		"read_only_node_distribution_type", "read_only_node_weight") {
+		// 调用 ModifyDBEndpoint 接口修改 Endpoint。
+		modifyCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBEndpoint",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"nodes": {
+						Ignore: true,
+					},
+					"read_write_mode": {
+						TargetField: "ReadWriteMode",
+					},
+					"endpoint_name": {
+						TargetField: "EndpointName",
+					},
+					"description": {
+						TargetField: "Description",
+					},
+					"auto_add_new_nodes": {
+						TargetField: "AutoAddNewNodes",
+						ForceGet:    true,
+					},
+					"read_write_spliting": {
+						TargetField: "ReadWriteSpliting",
+						ForceGet:    true,
+					},
+					"read_only_node_max_delay_time": {
+						TargetField: "ReadOnlyNodeMaxDelayTime",
+					},
+					"read_only_node_distribution_type": {
+						TargetField: "ReadOnlyNodeDistributionType",
+						// 不传会变default
+						ForceGet: true,
+					},
+					"read_only_node_weight": {
+						Ignore: true,
+					},
+					"dns_visibility": {
+						Ignore: true,
+					},
+					"domain": {
+						Ignore: true,
+					},
+					"port": {
+						Ignore: true,
+					},
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
+				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = ids[0]
+					(*call.SdkParam)["EndpointId"] = ids[1]
+					if nodes, ok := d.GetOk("nodes"); ok {
+						nodesList := nodes.(*schema.Set).List()
+						nodesArr := make([]string, 0)
+						for _, node := range nodesList {
+							nodesArr = append(nodesArr, node.(string))
+						}
+						(*call.SdkParam)["Nodes"] = strings.Join(nodesArr, ",")
+					}
+					if d.HasChange("read_only_node_weight") ||
+						d.Get("read_only_node_distribution_type").(string) == "RoundRobinCustom" {
+						weights := make([]interface{}, 0)
+						w := d.Get("read_only_node_weight")
+						for _, v := range w.(*schema.Set).List() {
+							weight := make(map[string]interface{})
+							vMap := v.(map[string]interface{})
+							if nodeId, ok := vMap["node_id"]; ok {
+								weight["NodeId"] = nodeId
+							}
+							if nodeType, ok := vMap["node_type"]; ok {
+								weight["NodeType"] = nodeType
+							}
+							if we, ok := vMap["weight"]; ok {
+								weight["Weight"] = we
+							}
+							weights = append(weights, weight)
+						}
+						(*call.SdkParam)["ReadOnlyNodeWeight"] = weights
+					}
+					return true, nil
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					rds_mysql_instance.NewRdsMysqlInstanceService(s.Client): {
+						ResourceId: resourceData.Get("instance_id").(string),
+						Target:     []string{"Running"},
+						Timeout:    resourceData.Timeout(schema.TimeoutCreate),
+					},
+				},
+			},
+		}
+		callbacks = append(callbacks, modifyCallback)
+	}
 	return callbacks
 }
 

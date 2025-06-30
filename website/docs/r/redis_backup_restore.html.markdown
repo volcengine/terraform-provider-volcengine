@@ -55,8 +55,9 @@ resource "volcengine_redis_backup_restore" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `instance_id` - (Required, ForceNew) Id of instance.
-* `time_point` - (Required) Time point of backup, for example: 2021-11-09T06:07:26Z. Use lifecycle and ignore_changes in import.
-* `backup_type` - (Optional) The type of backup. The value can be Full or Inc.
+* `backup_point_id` - (Optional) Backup ID, used to specify the backups to be used when restoring by the backup set. When choosing to restore by backup set (i.e., BackupType is Full), this parameter is required. Use lifecycle and ignore_changes in import.
+* `backup_type` - (Optional, ForceNew) The type of backup. The value can be Full or Inc.
+* `time_point` - (Optional) Time point of backup, for example: 2021-11-09T06:07:26Z. Use lifecycle and ignore_changes in import.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

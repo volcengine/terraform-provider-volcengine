@@ -63,6 +63,7 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `delay_replication_time` - The delay time of the readonly node.
 * `node_id` - The id of the readonly node.
 
 

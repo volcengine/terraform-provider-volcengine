@@ -170,6 +170,9 @@ var resourceKeys = map[string]string{
 	"veecp":              "VEECP",
 	"escloud_v2":         "ESCLOUD",
 	"dns":                "DNS",
+	"vefaas":             "VEFAAS",
+	"kms":                "KMS",
+	"vmp":                "VMP",
 }
 
 type Products struct {

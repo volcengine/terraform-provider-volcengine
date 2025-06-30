@@ -68,6 +68,45 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"PostPaid", "PrePaid"}, false),
 			},
 			"tags": ve.TagsSchema(),
+			"instance_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Instance type. The value is DoubleNode.",
+			},
+			"node_spec": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "Primary node specification. " +
+					"For detailed information about the node specifications, please refer to Product Specifications.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the RDS instance.",
+			},
+			"private_network_ip_address": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The IP address of the instance's default terminal, used to query the instance by IP address.",
+			},
+			"kernel_version": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The kernel version of the instance.",
+			},
+			"private_network_vpc_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The ID of the private network. Instances using the specified private network can be filtered by this field.",
+			},
+			"storage_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Instance storage type. The value is LocalSSD, indicating a local SSD disk.",
+			},
 
 			"rds_mysql_instances": {
 				Description: "The collection of RDS instance query.",
@@ -219,6 +258,72 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 							Description: "The project name of the RDS instance.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"auto_storage_scaling_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Auto - storage scaling configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enable_storage_auto_scale": {
+										Type:     schema.TypeBool,
+										Computed: true,
+										Description: "Whether to enable the instance's auto - scaling function. " +
+											"Values:\ntrue: Yes.\nfalse: No. " +
+											"Description: When StorageConfig is used as a request parameter, " +
+											"if the value of EnableStorageAutoScale is false, the StorageThreshold and StorageUpperBound parameters do not need to be passed in.",
+									},
+									"storage_threshold": {
+										Type:     schema.TypeInt,
+										Computed: true,
+										Description: "The proportion of available storage space that triggers automatic expansion." +
+											" The value range is 10 to 50, and the default value is 10, with the unit being %.",
+									},
+									"storage_upper_bound": {
+										Type:     schema.TypeInt,
+										Computed: true,
+										Description: "The upper limit of the storage space that can be automatically expanded." +
+											" The lower limit of the value of this field is the instance storage space + 20GB; " +
+											"the upper limit of the value is the upper limit of the storage space value range corresponding to the instance master node specification," +
+											" with the unit being GB. For detailed information on the selectable storage space value range of different specifications, " +
+											"please refer to Product Specifications.",
+									},
+								},
+							},
+						},
+						"storage_max_capacity": {
+							Type:     schema.TypeInt,
+							Computed: true,
+							Description: "The upper limit of the storage space that can be set for automatic expansion. " +
+								"The value is the upper limit of the storage space value range corresponding to the instance master node specification, " +
+								"with the unit being GB. For detailed information on the selectable storage space value ranges of different specifications," +
+								" please refer to Product Specifications.",
+						},
+						"storage_min_capacity": {
+							Type:     schema.TypeInt,
+							Computed: true,
+							Description: "The lower limit of the storage space that can be set for automatic expansion. " +
+								"The value is the lower limit of the storage space value range corresponding to the instance master node specification, " +
+								"with the unit being GB. For detailed information on the selectable storage space value ranges of different specifications," +
+								" please refer to Product Specifications.",
+						},
+						"storage_max_trigger_threshold": {
+							Type:     schema.TypeInt,
+							Computed: true,
+							Description: "The upper limit of the proportion of available storage space that triggers automatic expansion." +
+								" When supported, the value is 50%.",
+						},
+						"storage_min_trigger_threshold": {
+							Type:     schema.TypeInt,
+							Computed: true,
+							Description: "The lower limit of the proportion of available storage space that triggers automatic expansion." +
+								" When supported, the value is 10%.",
+						},
+						"deletion_protection": {
+							Type:     schema.TypeString,
+							Computed: true,
+							Description: "Whether to enable the deletion protection function. " +
+								"Values:\nEnabled: Yes.\nDisabled: No.",
+						},
 						"charge_detail": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -334,6 +439,51 @@ func DataSourceVolcengineRdsMysqlInstances() *schema.Resource {
 							Type:        schema.TypeBool,
 							Computed:    true,
 							Description: "Whether to enable global read-only.\ntrue: Yes.\nfalse: No.",
+						},
+						"kernel_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The current kernel version of the RDS instance.",
+						},
+						"dr_dts_task_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the data synchronization task in DTS for the data synchronization link between the primary instance and the disaster recovery instance.",
+						},
+						"master_region": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The region where the primary instance of the disaster recovery instance is located.",
+						},
+						"dr_dts_task_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the DTS data synchronization task for the data synchronization link between the primary instance and the disaster recovery instance.",
+						},
+						"dr_dts_task_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The status of the DTS data synchronization task for the data synchronization link between the primary instance and the disaster recovery instance.",
+						},
+						"master_instance_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the primary instance of the disaster recovery instance.",
+						},
+						"master_instance_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the primary instance of the disaster recovery instance.",
+						},
+						"dr_seconds_behind_master": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The number of seconds that the disaster recovery instance is behind the primary instance.",
+						},
+						"auto_upgrade_minor_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The upgrade strategy for the minor version of the instance kernel. Values:\nAuto: Auto upgrade.\nManual: Manual upgrade.",
 						},
 						"db_proxy_status": {
 							Type:     schema.TypeString,

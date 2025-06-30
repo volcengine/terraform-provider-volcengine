@@ -20,15 +20,23 @@ data "volcengine_private_zones" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
+* `key_word` - (Optional) The keyword of zone name.
 * `line_mode` - (Optional) The line mode of Private Zone, specified whether the intelligent mode and the load balance function is enabled.
 * `name_regex` - (Optional) A Name Regex of Resource.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the private zone.
 * `recursion_mode` - (Optional) Whether the recursion mode of Private Zone is enabled.
 * `region` - (Optional) The region of Private Zone.
 * `search_mode` - (Optional) The search mode of query. Valid values: `LIKE`, `EXACT`. Default is `LIKE`.
+* `tag_filters` - (Optional) List of tag filters.
 * `vpc_id` - (Optional) The vpc id associated to Private Zone.
 * `zid` - (Optional) The zid of Private Zone.
 * `zone_name` - (Optional) The name of Private Zone.
+
+The `tag_filters` object supports the following:
+
+* `key` - (Optional) The key of the tag.
+* `values` - (Optional) The values of the tag.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -42,10 +50,14 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The id of the private zone.
     * `last_operator` - The account id of the last operator who created the private zone.
     * `line_mode` - The line mode of the private zone, specified whether the intelligent mode and the load balance function is enabled.
+    * `project_name` - The project name of the private zone.
     * `record_count` - The record count of the private zone.
     * `recursion_mode` - Whether the recursion mode of the private zone is enabled.
     * `region` - The region of the private zone.
     * `remark` - The remark of the private zone.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `updated_at` - The updated time of the private zone.
     * `zid` - The id of the private zone.
     * `zone_name` - The id of the private zone.

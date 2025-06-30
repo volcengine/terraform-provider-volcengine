@@ -47,6 +47,34 @@ func ResourceVolcenginePrivateZoneResolverRule() *schema.Resource {
 					"LINE: Set the recursive DNS server used for recursive resolution to the recursive DNS server of the Volcano Engine PublicDNS," +
 					" and customize the operator's exit IP address for the recursive DNS server.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the private zone resolver rule.",
+			},
+			"tags": ve.TagsSchema(),
+			"vpc_trns": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
+				Description: "The vpc trns of the private zone resolver rule. Format: trn:vpc:region:accountId:vpc/vpcId. This field is only effected when creating resource. \n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
+			"endpoint_trn": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
+				Description: "The endpoint trn of the private zone resolver rule. Format: trn:private_zone::accountId:endpoint/endpointId. This field is only effected when creating resource. \n" +
+					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+			},
 			"zone_name": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -95,7 +123,7 @@ func ResourceVolcenginePrivateZoneResolverRule() *schema.Resource {
 				},
 			},
 			"line": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("type").(string) != "LINE"

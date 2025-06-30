@@ -40,6 +40,23 @@ The following arguments are supported:
 * `delete_immediately` - (Optional) Whether delete registry immediately. Only effected in delete action.
 * `password` - (Optional) The password of registry user.
 * `project` - (Optional) The ProjectName of the cr registry.
+* `proxy_cache_enabled` - (Optional, ForceNew) Whether to enable proxy cache.
+* `proxy_cache` - (Optional, ForceNew) The proxy cache of registry. This field is valid when proxy_cache_enabled is true.
+* `resource_tags` - (Optional, ForceNew) Tags.
+* `type` - (Optional, ForceNew) The type of registry. Valid values: `Enterprise`, `Micro`. Default is `Enterprise`.
+
+The `proxy_cache` object supports the following:
+
+* `type` - (Required, ForceNew) The type of proxy cache. Valid values: `DockerHub`, `DockerRegistry`.
+* `endpoint` - (Optional, ForceNew) The endpoint of proxy cache.
+* `password` - (Optional, ForceNew) The password of proxy cache.
+* `skip_ssl_verify` - (Optional, ForceNew) Whether to skip ssl verify.
+* `username` - (Optional, ForceNew) The username of proxy cache.
+
+The `resource_tags` object supports the following:
+
+* `key` - (Required, ForceNew) The Key of Tags.
+* `value` - (Required, ForceNew) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -49,13 +66,9 @@ In addition to all arguments above, the following attributes are exported:
 * `domains` - The domain of registry.
     * `domain` - The domain of registry.
     * `type` - The domain type of registry.
-* `resource_tags` - Tags.
-    * `key` - The Key of Tags.
-    * `value` - The Value of Tags.
 * `status` - The status of registry.
     * `conditions` - The condition of registry.
     * `phase` - The phase status of registry.
-* `type` - The type of registry.
 * `user_status` - The status of user.
 * `username` - The username of cr instance.
 
