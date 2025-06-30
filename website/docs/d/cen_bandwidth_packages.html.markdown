@@ -62,6 +62,7 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of the cen bandwidth package.
     * `expired_time` - The expired time of the cen bandwidth package.
     * `id` - The ID of the cen bandwidth package.
+    * `line_operator` - The line operator of the cen bandwidth package.
     * `local_geographic_region_set_id` - The local geographic region set id of the cen bandwidth package.
     * `peer_geographic_region_set_id` - The peer geographic region set id of the cen bandwidth package.
     * `project_name` - The ProjectName of the cen bandwidth package.

@@ -11,22 +11,45 @@ Use this data source to query detailed information of kms keys
 ## Example Usage
 ```hcl
 data "volcengine_kms_keys" "default" {
-  keyring_id = "a8d724c5-a487-4d80-a1f6-531c95d0xxxx"
+  keyring_id          = "7a358829-bd5a-4763-ba77-7500ecxxxxxx"
+  key_name            = ["mrk-tf-key-mod", "mrk-tf-key"]
+  key_spec            = ["SYMMETRIC_256"]
+  description         = ["tf-test"]
+  key_state           = ["Enable"]
+  key_usage           = ["ENCRYPT_DECRYPT"]
+  protection_level    = ["SOFTWARE"]
+  rotate_state        = ["Enable"]
+  origin              = ["CloudKMS"]
+  creation_date_range = ["2025-06-01 19:48:06", "2025-06-04 19:48:06"]
+  update_date_range   = ["2025-06-01 19:48:06", "2025-06-04 19:48:06"]
+  tags {
+    key    = "tf-k1"
+    values = ["tf-v1"]
+  }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `filters` - (Optional) Query the Key ring that meets the specified conditions, which is composed of key-value pairs.
+* `creation_date_range` - (Optional) The creation date of the keyring.
+* `description` - (Optional) The description of the key.
+* `key_name` - (Optional) The name of the key.
+* `key_spec` - (Optional) The algorithm used in the key.
+* `key_state` - (Optional) The state of the key.
+* `key_usage` - (Optional) The usage of the key.
 * `keyring_id` - (Optional) Query the Key ring that meets the specified conditions, which is composed of key-value pairs.
 * `keyring_name` - (Optional) Query the Key ring that meets the specified conditions, which is composed of key-value pairs.
 * `name_regex` - (Optional) A Name Regex of Resource.
+* `origin` - (Optional) The origin of the key.
 * `output_file` - (Optional) File name where to save data source results.
-* `tags` - (Optional) Tags.
+* `protection_level` - (Optional) The protection level of the key.
+* `rotate_state` - (Optional) The state of the rotate.
+* `tags` - (Optional) A list of tags.
+* `update_date_range` - (Optional) The update date of the keyring.
 
 The `tags` object supports the following:
 
-* `key` - (Required) The Key of Tags.
-* `value` - (Required) The Value of Tags.
+* `key` - (Required) The key of the tag.
+* `values` - (Required) The values of the tag.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -55,6 +55,7 @@ data "volcengine_cen_inter_region_bandwidths" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
+* `cen_id` - (Optional) The ID of the cen.
 * `ids` - (Optional) A list of cen inter region bandwidth IDs.
 * `output_file` - (Optional) File name where to save data source results.
 
