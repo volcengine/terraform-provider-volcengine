@@ -39,6 +39,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_keyring"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_planned_event"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_task"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
@@ -103,6 +106,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_topic_partition"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_zone"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account_table_column_info"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -670,16 +675,19 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_instances_v2": rds_instance_v2.DataSourceVolcengineRdsInstances(),
 
 			// ================ RdsMysql ================
-			"volcengine_rds_mysql_instances":           rds_mysql_instance.DataSourceVolcengineRdsMysqlInstances(),
-			"volcengine_rds_mysql_accounts":            rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
-			"volcengine_rds_mysql_databases":           rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
-			"volcengine_rds_mysql_allowlists":          allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
-			"volcengine_rds_mysql_regions":             rds_mysql_region.DataSourceVolcengineRdsMysqlRegions(),
-			"volcengine_rds_mysql_zones":               rds_mysql_zone.DataSourceVolcengineRdsMysqlZones(),
-			"volcengine_rds_mysql_instance_specs":      rds_mysql_instance_spec.DataSourceVolcengineRdsMysqlInstanceSpecs(),
-			"volcengine_rds_mysql_endpoints":           rds_mysql_endpoint.DataSourceVolcengineRdsMysqlEndpoints(),
-			"volcengine_rds_mysql_backups":             rds_mysql_backup.DataSourceVolcengineRdsMysqlBackups(),
-			"volcengine_rds_mysql_parameter_templates": rds_mysql_parameter_template.DataSourceVolcengineRdsMysqlParameterTemplates(),
+			"volcengine_rds_mysql_instances":                  rds_mysql_instance.DataSourceVolcengineRdsMysqlInstances(),
+			"volcengine_rds_mysql_accounts":                   rds_mysql_account.DataSourceVolcengineRdsMysqlAccounts(),
+			"volcengine_rds_mysql_databases":                  rds_mysql_database.DataSourceVolcengineRdsMysqlDatabases(),
+			"volcengine_rds_mysql_allowlists":                 allowlist.DataSourceVolcengineRdsMysqlAllowLists(),
+			"volcengine_rds_mysql_regions":                    rds_mysql_region.DataSourceVolcengineRdsMysqlRegions(),
+			"volcengine_rds_mysql_zones":                      rds_mysql_zone.DataSourceVolcengineRdsMysqlZones(),
+			"volcengine_rds_mysql_instance_specs":             rds_mysql_instance_spec.DataSourceVolcengineRdsMysqlInstanceSpecs(),
+			"volcengine_rds_mysql_endpoints":                  rds_mysql_endpoint.DataSourceVolcengineRdsMysqlEndpoints(),
+			"volcengine_rds_mysql_backups":                    rds_mysql_backup.DataSourceVolcengineRdsMysqlBackups(),
+			"volcengine_rds_mysql_parameter_templates":        rds_mysql_parameter_template.DataSourceVolcengineRdsMysqlParameterTemplates(),
+			"volcengine_rds_mysql_tasks":                      rds_mysql_task.DataSourceVolcengineRdsMysqlTasks(),
+			"volcengine_rds_mysql_planned_events":             rds_mysql_planned_event.DataSourceVolcengineRdsMysqlPlannedEvents(),
+			"volcengine_rds_mysql_account_table_column_infos": rds_mysql_account_table_column_info.DataSourceVolcengineRdsMysqlAccountTableColumnInfos(),
 
 			// ================ TLS ================
 			"volcengine_tls_rules":               tlsRule.DataSourceVolcengineTlsRules(),

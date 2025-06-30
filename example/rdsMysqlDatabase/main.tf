@@ -40,4 +40,5 @@ resource "volcengine_rds_mysql_instance" "foo" {
 resource "volcengine_rds_mysql_database" "foo" {
      db_name = "acc-test"
      instance_id = volcengine_rds_mysql_instance.foo.id
+     db_desc = "test-update"
 }

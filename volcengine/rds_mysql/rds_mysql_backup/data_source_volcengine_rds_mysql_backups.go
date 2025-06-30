@@ -198,6 +198,46 @@ func DataSourceVolcengineRdsMysqlBackups() *schema.Resource {
 							Computed:    true,
 							Description: "Error message.",
 						},
+						"decryption_key": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The decryption key of the backup.",
+						},
+						"iv": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Initialization Vector.",
+						},
+						"usage_stats": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "Statistics information about the storage space usage of backups.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"quantity": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "Backup size, in bytes.",
+									},
+									"stat_item": {
+										Type:     schema.TypeString,
+										Computed: true,
+										Description: "Statistical items. " +
+											"TotalBasicSpaceUsage: Storage space usage for basic backups. " +
+											"BasicDataBackupUsage: Storage space usage for local data backups. " +
+											"BasicBinlogBackupUsage: Storage space usage for local log backups. " +
+											"TotalCrossRegionSpaceUsage: Storage space usage for cross-region backups. " +
+											"CrossRegionDataBackupUsage: Storage space usage for cross-region data backups. " +
+											"CrossRegionBinlogBackupUsage: Storage space usage for cross-region log backups.",
+									},
+									"start_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Statistical time.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

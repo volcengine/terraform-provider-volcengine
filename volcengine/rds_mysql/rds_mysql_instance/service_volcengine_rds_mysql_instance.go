@@ -91,7 +91,15 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResources(m map[string]interface
 				rdsInstance["UpdateTime"] = basicInfoMap["UpdateTime"]
 				rdsInstance["BackupUse"] = basicInfoMap["BackupUse"]
 				rdsInstance["DataSyncMode"] = basicInfoMap["DataSyncMode"]
+				rdsInstance["MasterRegion"] = basicInfoMap["MasterRegion"]
+				rdsInstance["MasterInstanceId"] = basicInfoMap["MasterInstanceId"]
+				rdsInstance["MasterInstanceName"] = basicInfoMap["MasterInstanceName"]
+				rdsInstance["DrSecondsBehindMaster"] = basicInfoMap["DrSecondsBehindMaster"]
+				rdsInstance["DrDtsTaskId"] = basicInfoMap["DrDtsTaskId"]
+				rdsInstance["DrDtsTaskName"] = basicInfoMap["DrDtsTaskName"]
+				rdsInstance["DrDtsTaskStatus"] = basicInfoMap["DrDtsTaskStatus"]
 			}
+			logger.Debug(logger.ReqFormat, "DescribeInstanceDetail Result.BasicInfo", "basicInfo", basicInfo, "rds", rdsInstance)
 
 			// 2. endpoint info
 			endpoints, err := ve.ObtainSdkValue("Result.Endpoints", *instanceDetailInfo)
@@ -177,6 +185,26 @@ func (s *VolcengineRdsMysqlInstanceService) ReadResources(m map[string]interface
 			rdsInstance["DBProxyStatus"] = proxyMap["DBProxyStatus"]
 			rdsInstance["CheckModifyDBProxyAllowed"] = proxyMap["CheckModifyDBProxyAllowed"]
 			rdsInstance["FeatureStates"] = proxyMap["FeatureStates"]
+
+			autoScalingConfig, err := s.Client.UniversalClient.DoCall(getUniversalInfo("DescribeDBAutoScalingConfig"),
+				&map[string]interface{}{
+					"InstanceId": rdsInstance["InstanceId"],
+				})
+			if err != nil {
+				logger.Info("DescribeDBAutoScalingConfig error:", err)
+				continue
+			}
+			autoResult, err := ve.ObtainSdkValue("Result", *autoScalingConfig)
+			if err != nil {
+				logger.Info("ObtainSdkValue Result error:", err)
+				continue
+			}
+			autoMap := autoResult.(map[string]interface{})
+			rdsInstance["AutoStorageScalingConfig"] = autoMap["StorageConfig"]
+			rdsInstance["StorageMaxCapacity"] = autoMap["StorageMaxCapacity"]
+			rdsInstance["StorageMinCapacity"] = autoMap["StorageMinCapacity"]
+			rdsInstance["StorageMaxTriggerThreshold"] = autoMap["StorageMaxTriggerThreshold"]
+			rdsInstance["StorageMinTriggerThreshold"] = autoMap["StorageMinTriggerThreshold"]
 		}
 	}
 
@@ -362,7 +390,20 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
 				"maintenance_window": {
-					Ignore: true,
+					TargetField: "MaintenanceWindow",
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"day_of_week": {
+							TargetField: "DayOfWeek",
+							ConvertType: ve.ConvertJsonArray,
+						},
+					},
+				},
+				"deletion_protection": {
+					TargetField: "DeletionProtection",
+				},
+				"auto_storage_scaling_config": {
+					ConvertType: ve.ConvertJsonObject,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -520,12 +561,9 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 				ConvertMode: ve.RequestConvertIgnore,
 				ContentType: ve.ContentTypeJson,
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-					if len(*call.SdkParam) > 0 {
-						(*call.SdkParam)["InstanceId"] = d.Id()
-						(*call.SdkParam)["ConnectionPoolType"] = connectionPool
-						return true, nil
-					}
-					return false, nil
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ConnectionPoolType"] = connectionPool
+					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -538,6 +576,54 @@ func (s *VolcengineRdsMysqlInstanceService) CreateResource(resourceData *schema.
 			},
 		}
 		callbacks = append(callbacks, connectionPoolCallback)
+	}
+
+	if syncMode, ok := resourceData.GetOk("data_sync_mode"); ok {
+		syncModeCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceSyncMode",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["SyncMode"] = syncMode
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, syncModeCallback)
+	}
+
+	if globalReadOnly, ok := resourceData.GetOk("global_read_only"); ok {
+		globalReadOnlyCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceGlobalReadOnly",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["GlobalReadOnly"] = globalReadOnly
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				},
+			},
+		}
+		callbacks = append(callbacks, globalReadOnlyCallback)
 	}
 
 	return callbacks
@@ -621,6 +707,83 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 			},
 		}
 		callbacks = append(callbacks, instanceCallback)
+	}
+
+	if resourceData.HasChange("deletion_protection") {
+		deletionProtectionCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceDeletionProtectionPolicy",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["DeletionProtection"] = d.Get("deletion_protection")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, deletionProtectionCallback)
+	}
+
+	if resourceData.HasChange("charge_info") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceChargeType",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ChargeType"] = d.Get("charge_info.0.charge_type")
+					if d.Get("charge_info.0.charge_type") == "PrePaid" {
+						(*call.SdkParam)["PeriodUnit"] = d.Get("charge_info.0.period_unit")
+						(*call.SdkParam)["Period"] = d.Get("charge_info.0.period")
+						(*call.SdkParam)["AutoRenew"] = d.Get("charge_info.0.auto_renew")
+					}
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
+
+	if resourceData.HasChange("data_sync_mode") {
+		syncModeCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceSyncMode",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["SyncMode"] = d.Get("data_sync_mode")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, syncModeCallback)
 	}
 
 	// InstanceName
@@ -760,6 +923,65 @@ func (s *VolcengineRdsMysqlInstanceService) ModifyResource(resourceData *schema.
 			},
 		}
 		callbacks = append(callbacks, parameterCallback)
+	}
+
+	if resourceData.HasChange("auto_storage_scaling_config") {
+		autoScaleCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBAutoScalingConfig",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					config := make(map[string]interface{})
+					autoScaleMap := d.Get("auto_storage_scaling_config").([]interface{})[0].(map[string]interface{})
+					if v, ok := autoScaleMap["enable_storage_auto_scale"]; ok {
+						config["EnableStorageAutoScale"] = v
+					}
+					if v, ok := autoScaleMap["storage_threshold"]; ok {
+						config["StorageThreshold"] = v
+					}
+					if v, ok := autoScaleMap["storage_upper_bound"]; ok {
+						config["StorageUpperBound"] = v
+					}
+					(*call.SdkParam)["StorageConfig"] = config
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, autoScaleCallback)
+	}
+
+	if resourceData.HasChange("global_read_only") {
+		readOnlyCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceGlobalReadOnly",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["GlobalReadOnly"] = d.Get("global_read_only")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Running"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, readOnlyCallback)
 	}
 
 	// 更新Tags
@@ -943,6 +1165,9 @@ func (s *VolcengineRdsMysqlInstanceService) DatasourceResources(*schema.Resource
 			//"CheckModifyDBProxyAllowed": {
 			//	TargetField: "check_modify_db_proxy_allowed",
 			//},
+			"CurrentKernelVersion": {
+				TargetField: "kernel_version",
+			},
 		},
 	}
 }

@@ -62,8 +62,15 @@ The following arguments are supported:
 * `instance_id` - (Optional) The id of the RDS instance.
 * `instance_name` - (Optional) The name of the RDS instance.
 * `instance_status` - (Optional) The status of the RDS instance.
+* `instance_type` - (Optional) Instance type. The value is DoubleNode.
+* `kernel_version` - (Optional) The kernel version of the instance.
 * `name_regex` - (Optional) A Name Regex of RDS instance.
+* `node_spec` - (Optional) Primary node specification. For detailed information about the node specifications, please refer to Product Specifications.
 * `output_file` - (Optional) File name where to save data source results.
+* `private_network_ip_address` - (Optional) The IP address of the instance's default terminal, used to query the instance by IP address.
+* `private_network_vpc_id` - (Optional) The ID of the private network. Instances using the specified private network can be filtered by this field.
+* `project_name` - (Optional) The project name of the RDS instance.
+* `storage_type` - (Optional) Instance storage type. The value is LocalSSD, indicating a local SSD disk.
 * `tags` - (Optional) Tags.
 * `zone_id` - (Optional) The available zone of the RDS instance.
 
@@ -76,6 +83,15 @@ The `tags` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `rds_mysql_instances` - The collection of RDS instance query.
     * `allow_list_version` - The version of allow list.
+    * `auto_storage_scaling_config` - Auto - storage scaling configuration.
+        * `enable_storage_auto_scale` - Whether to enable the instance's auto - scaling function. Values:
+true: Yes.
+false: No. Description: When StorageConfig is used as a request parameter, if the value of EnableStorageAutoScale is false, the StorageThreshold and StorageUpperBound parameters do not need to be passed in.
+        * `storage_threshold` - The proportion of available storage space that triggers automatic expansion. The value range is 10 to 50, and the default value is 10, with the unit being %.
+        * `storage_upper_bound` - The upper limit of the storage space that can be automatically expanded. The lower limit of the value of this field is the instance storage space + 20GB; the upper limit of the value is the upper limit of the storage space value range corresponding to the instance master node specification, with the unit being GB. For detailed information on the selectable storage space value range of different specifications, please refer to Product Specifications.
+    * `auto_upgrade_minor_version` - The upgrade strategy for the minor version of the instance kernel. Values:
+Auto: Auto upgrade.
+Manual: Manual upgrade.
     * `backup_use` - The instance has used backup space. Unit: GB.
     * `binlog_dump` - Does it support the binlog capability? This parameter is returned only when the database proxy is enabled. Values:
 true: Yes.
@@ -110,6 +126,13 @@ Creating: The proxy is being started.
 Running: The proxy is running.
 Shutdown: The proxy is closed.
 Deleting: The proxy is being closed.
+    * `deletion_protection` - Whether to enable the deletion protection function. Values:
+Enabled: Yes.
+Disabled: No.
+    * `dr_dts_task_id` - The ID of the data synchronization task in DTS for the data synchronization link between the primary instance and the disaster recovery instance.
+    * `dr_dts_task_name` - The name of the DTS data synchronization task for the data synchronization link between the primary instance and the disaster recovery instance.
+    * `dr_dts_task_status` - The status of the DTS data synchronization task for the data synchronization link between the primary instance and the disaster recovery instance.
+    * `dr_seconds_behind_master` - The number of seconds that the disaster recovery instance is behind the primary instance.
     * `endpoints` - The endpoint info of the RDS instance.
         * `addresses` - Address list.
             * `dns_visibility` - DNS Visibility.
@@ -154,6 +177,7 @@ false: No.
     * `instance_id` - The ID of the RDS instance.
     * `instance_name` - The name of the RDS instance.
     * `instance_status` - The status of the RDS instance.
+    * `kernel_version` - The current kernel version of the RDS instance.
     * `lower_case_table_names` - Whether the table name is case sensitive, the default value is 1.
 Ranges:
 0: Table names are stored as fixed and table names are case-sensitive.
@@ -163,6 +187,9 @@ Ranges:
         * `day_of_month` - Days of maintainable window of the month.
         * `day_of_week` - Days of maintainable window of the week.
         * `maintenance_time` - The maintainable time of the RDS instance.
+    * `master_instance_id` - The ID of the primary instance of the disaster recovery instance.
+    * `master_instance_name` - The name of the primary instance of the disaster recovery instance.
+    * `master_region` - The region where the primary instance of the disaster recovery instance is located.
     * `memory` - Memory size.
     * `node_cpu_used_percentage` - Average CPU usage of the instance master node in nearly one minute.
     * `node_memory_used_percentage` - Average memory usage of the instance master node in nearly one minute.
@@ -185,6 +212,10 @@ ReadOnly: Read-only node.
         * `zone_id` - Availability zone ID. Subsequent support for multi-availability zones can be separated and displayed by an English colon.
     * `project_name` - The project name of the RDS instance.
     * `region_id` - The region of the RDS instance.
+    * `storage_max_capacity` - The upper limit of the storage space that can be set for automatic expansion. The value is the upper limit of the storage space value range corresponding to the instance master node specification, with the unit being GB. For detailed information on the selectable storage space value ranges of different specifications, please refer to Product Specifications.
+    * `storage_max_trigger_threshold` - The upper limit of the proportion of available storage space that triggers automatic expansion. When supported, the value is 50%.
+    * `storage_min_capacity` - The lower limit of the storage space that can be set for automatic expansion. The value is the lower limit of the storage space value range corresponding to the instance master node specification, with the unit being GB. For detailed information on the selectable storage space value ranges of different specifications, please refer to Product Specifications.
+    * `storage_min_trigger_threshold` - The lower limit of the proportion of available storage space that triggers automatic expansion. When supported, the value is 10%.
     * `storage_space` - Total instance storage space. Unit: GB.
     * `storage_type` - Instance storage type.
     * `storage_use` - The instance has used storage space. Unit: GB.

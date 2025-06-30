@@ -54,6 +54,16 @@ func DataSourceVolcengineRdsMysqlDatabases() *schema.Resource {
 							Computed:    true,
 							Description: "The character set of the RDS database.",
 						},
+						"db_desc": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The description information of the RDS database.",
+						},
+						"db_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The status of the RDS database.",
+						},
 						"database_privileges": {
 							Type:        schema.TypeList,
 							Computed:    true,

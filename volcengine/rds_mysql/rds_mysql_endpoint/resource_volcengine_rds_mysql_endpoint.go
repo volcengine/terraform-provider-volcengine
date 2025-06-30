@@ -83,18 +83,10 @@ func ResourceVolcengineRdsMysqlEndpoint() *schema.Resource {
 					" The values are:\ntrue: Automatically add.\nfalse: Do not automatically add (default).",
 			},
 			"read_write_spliting": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Computed: true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					//当 ReadWriteMode 为读写时支持设置；当 ReadWriteMode 为只读时不支持设置。此参数仅对默认终端生效。
-					return d.Get("read_write_mode").(string) == "ReadOnly" ||
-						d.Get("endpoint_id").(string) == ""
-				},
-				Description: "Enable read-write separation. Possible values: TRUE, FALSE.\n" +
-					"This setting can be configured when ReadWriteMode is set to read-write, " +
-					"but cannot be configured when ReadWriteMode is set to read-only. " +
-					"This parameter only applies to the default terminal.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to enable read-write splitting. Values: true: Yes. Default value. false: No.",
 			},
 			"read_only_node_max_delay_time": {
 				Type:     schema.TypeInt,
@@ -116,14 +108,18 @@ func ResourceVolcengineRdsMysqlEndpoint() *schema.Resource {
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return !d.Get("read_write_spliting").(bool)
 				},
-				Description: "Read weight allocation mode. This parameter is required when enabling read-write separation setting to TRUE. " +
-					"Possible values:\nDefault: Automatically allocate weights based on specifications (default).\nCustom: Custom weight allocation.",
+				Description: "Read weight distribution mode. " +
+					"This parameter needs to be passed in when the read-write separation setting is true. " +
+					"When used as a request parameter in the CreateDBEndpoint and ModifyDBEndpoint interfaces, the value range is as follows: " +
+					"LoadSchedule: Load scheduling. " +
+					"RoundRobinCustom: Polling scheduling with custom weights. " +
+					"RoundRobinAuto: Polling scheduling with automatically allocated weights.",
 			},
 			"read_only_node_weight": {
 				Type: schema.TypeSet,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					//当 ReadOnlyNodeDistributionType 取值为 Custom 时，需要传入此参数。
-					return d.Get("read_only_node_distribution_type").(string) != "Custom"
+					return d.Get("read_only_node_distribution_type").(string) != "RoundRobinCustom"
 				},
 				Computed: true,
 				Elem: &schema.Resource{
@@ -151,12 +147,12 @@ func ResourceVolcengineRdsMysqlEndpoint() *schema.Resource {
 					"When the ReadOnlyNodeDistributionType value is Custom, " +
 					"this parameter needs to be passed in.",
 			},
-			//"dns_visibility": {
-			//	Type:        schema.TypeBool,
-			//	Optional:    true,
-			//	Computed:    true,
-			//	Description: "Values:\nfalse: Volcano Engine private network resolution (default).\ntrue: Volcano Engine private and public network resolution.",
-			//},
+			"dns_visibility": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Values:\nfalse: Volcano Engine private network resolution (default).\ntrue: Volcano Engine private and public network resolution.",
+			},
 			"domain": {
 				Type:     schema.TypeString,
 				Optional: true,

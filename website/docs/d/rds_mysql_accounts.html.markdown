@@ -79,13 +79,18 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `accounts` - The collection of RDS instance account query.
+    * `account_desc` - The description information of the account.
     * `account_name` - The name of the database account.
+    * `account_privileges_sql` - The SQL statement of the account privileges.
     * `account_privileges` - The privilege detail list of RDS mysql instance account.
         * `account_privilege_detail` - The privilege detail of the account.
         * `account_privilege` - The privilege type of the account.
         * `db_name` - The name of database.
     * `account_status` - The status of the database account.
     * `account_type` - The type of the database account.
+    * `global_account_privileges` - The global privileges of the account.
+    * `has_table_column_privilege_db_names` - The databases to which the table column permissions owned by the account belong. Description: If the account does not have table column permissions, this field will not be returned.
+    * `host` - The host of the account.
 * `total_count` - The total count of database account query.
 
 

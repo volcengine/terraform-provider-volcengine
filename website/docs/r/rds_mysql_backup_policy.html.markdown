@@ -11,11 +11,17 @@ Provides a resource to manage rds mysql backup policy
 ## Example Usage
 ```hcl
 resource "volcengine_rds_mysql_backup_policy" "foo" {
-  instance_id               = "mysql-c8c3f45c4b07"
-  data_full_backup_periods  = ["Monday", "Sunday"]
+  instance_id               = "mysql-b51d37110dd1"
+  data_full_backup_periods  = ["Monday", "Sunday", "Tuesday"]
   binlog_file_counts_enable = true
   binlog_space_limit_enable = true
   lock_ddl_time             = 80
+  cross_backup_policy {
+    backup_enabled      = true
+    cross_backup_region = "cn-chongqing-sdv"
+    log_backup_enabled  = true
+    retention           = 10
+  }
 }
 ```
 ## Argument Reference
@@ -35,6 +41,7 @@ false: No.
 * `binlog_local_retention_hour` - (Optional) Local Binlog retention duration, with a value ranging from 0 to 168, in hours. Local logs exceeding the retention duration will be automatically deleted. When set to 0, local logs will not be automatically deleted. Note: When modifying the log backup policy, this parameter needs to be passed.
 * `binlog_space_limit_enable` - (Optional) Whether to enable automatic cleanup of Binlog when space is too large. When the total storage space occupancy rate of the instance exceeds 80% or the remaining space is less than 5GB, the system will automatically start cleaning up the earliest local Binlog until the total space occupancy rate is lower than 80% and the remaining space is greater than 5GB. true: Enabled. false: Disabled. Description: This parameter needs to be passed in when modifying the log backup policy.
 * `binlog_storage_percentage` - (Optional) Maximum storage space usage rate can be set to 20% - 50%. After exceeding this limit, the earliest Binlog file will be automatically deleted until the space usage rate is lower than this ratio. Local Binlog space usage rate = Local Binlog size / Total available (purchased) instance space size. When modifying the log backup policy, this parameter needs to be passed in. Explanation: When modifying the log backup policy, this parameter needs to be passed in.
+* `cross_backup_policy` - (Optional) Cross - region backup strategy.
 * `data_backup_all_retention` - (Optional) Whether to retain all data backups before releasing the instance. Values:
 true: Yes.
 false: No.
@@ -57,10 +64,19 @@ false: No.
 * `retention_policy_synced` - (Optional) Is the retention policy for log backups the same as that for data backups?
 Explanation: When the value is true, LogBackupRetentionDay and BinlogBackupAllRetention are ignored.
 
+The `cross_backup_policy` object supports the following:
+
+* `backup_enabled` - (Optional) Whether to enable cross-region backup.
+true: Enable.
+false: Disable. Default value.
+* `cross_backup_region` - (Optional) The destination region ID for cross-region backup. When the value of BackupEnabled is true, this parameter is required.
+* `log_backup_enabled` - (Optional) Whether to enable cross-region log backup. true: Enable. false: Disable. Default value. Description: Cross-region log backup can only be enabled when cross-region backup is enabled.
+* `retention` - (Optional) The number of days to retain cross - region backups, with a value range of 7 to 1825 days.
+
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-
+* `available_cross_region` - List of destination regions for cross - region backup.
 
 
 ## Import

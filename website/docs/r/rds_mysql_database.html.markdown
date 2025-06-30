@@ -52,6 +52,7 @@ resource "volcengine_rds_mysql_instance" "foo" {
 resource "volcengine_rds_mysql_database" "foo" {
   db_name     = "acc-test"
   instance_id = volcengine_rds_mysql_instance.foo.id
+  db_desc     = "test-update"
 }
 ```
 ## Argument Reference
@@ -65,6 +66,7 @@ Consists of lowercase letters, numbers, and underscores (_) or dashes (-).
 Database names are disabled [keywords](https://www.volcengine.com/docs/6313/66162).
 * `instance_id` - (Required, ForceNew) The ID of the RDS instance.
 * `character_set_name` - (Optional, ForceNew) Database character set. Currently supported character sets include: utf8, utf8mb4, latin1, ascii.
+* `db_desc` - (Optional) The description information of the database, with a length not exceeding 256 characters. This field is optional. If this field is not set, or if this field is set but the length of the description information is 0, then the description information is empty.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
