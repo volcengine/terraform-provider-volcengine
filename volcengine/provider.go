@@ -12,6 +12,11 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_function"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_kafka_trigger"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_timer"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
@@ -820,6 +825,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_dns_record_sets": dns_record_sets.DataSourceVolcengineDnsRecordSets(),
 			// ================ ESCloud V2 ================
 			"volcengine_escloud_instances_v2": escloud_instance_v2.DataSourceVolcengineEscloudInstanceV2s(),
+
+			// ================ Vefaas ================
+			"volcengine_vefaas_functions":      vefaas_function.DataSourceVolcengineVefaasFunctions(),
+			"volcengine_vefaas_releases":       vefaas_release.DataSourceVolcengineVefaasReleases(),
+			"volcengine_vefaas_timers":         vefaas_timer.DataSourceVolcengineVefaasTimers(),
+			"volcengine_vefaas_kafka_triggers": vefaas_kafka_trigger.DataSourceVolcengineVefaasKafkaTriggers(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1192,6 +1203,12 @@ func Provider() terraform.ResourceProvider {
 			// ================ ESCloud V2 ================
 			"volcengine_escloud_instance_v2":   escloud_instance_v2.ResourceVolcengineEscloudInstanceV2(),
 			"volcengine_escloud_ip_white_list": escloud_ip_white_list.ResourceVolcengineEscloudIpWhiteList(),
+
+			// ================ Vefaas ================
+			"volcengine_vefaas_function":      vefaas_function.ResourceVolcengineVefaasFunction(),
+			"volcengine_vefaas_release":       vefaas_release.ResourceVolcengineVefaasRelease(),
+			"volcengine_vefaas_timer":         vefaas_timer.ResourceVolcengineVefaasTimer(),
+			"volcengine_vefaas_kafka_trigger": vefaas_kafka_trigger.ResourceVolcengineVefaasKafkaTrigger(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
