@@ -67,11 +67,13 @@ func (s *VolcengineKafkaInstanceService) ReadResources(condition map[string]inte
 		for _, element := range results.([]interface{}) {
 			instance := element.(map[string]interface{})
 			// 拆开 ChargeDetail
-			chargeInfo := instance["ChargeDetail"].(map[string]interface{})
-			for k, v := range chargeInfo {
-				instance[k] = v
+			if v, exist := instance["ChargeDetail"]; exist {
+				if chargeInfo, ok := v.(map[string]interface{}); ok {
+					for k, v := range chargeInfo {
+						instance[k] = v
+					}
+				}
 			}
-			delete(instance, "ChargeDetail")
 
 			// update tags
 			if v, ok := instance["Tags"]; ok {
@@ -151,6 +153,21 @@ func (s *VolcengineKafkaInstanceService) ReadResource(resourceData *schema.Resou
 			data["Parameters"] = set.List()
 		}
 	}
+
+	// 拆开 ChargeDetail
+	if v, exist := data["ChargeDetail"]; exist {
+		if chargeInfo, ok := v.(map[string]interface{}); ok {
+			for k, v := range chargeInfo {
+				data[k] = v
+			}
+		}
+	} else {
+		// 接口不返回 ChargeDetail，则回填
+		data["ChargeType"] = resourceData.Get("charge_type")
+		data["Period"] = resourceData.Get("period")
+		data["AutoRenew"] = resourceData.Get("auto_renew")
+	}
+
 	return data, err
 }
 

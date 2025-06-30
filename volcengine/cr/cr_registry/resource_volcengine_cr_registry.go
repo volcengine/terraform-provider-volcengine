@@ -57,6 +57,87 @@ func ResourceVolcengineCrRegistry() *schema.Resource {
 				Computed:    true,
 				Description: "The ProjectName of the cr registry.",
 			},
+			"resource_tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Tags.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The Key of Tags.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The Value of Tags.",
+						},
+					},
+				},
+			},
+			"type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "The type of registry. Valid values: `Enterprise`, `Micro`. Default is `Enterprise`.",
+			},
+			"proxy_cache_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Whether to enable proxy cache.",
+			},
+			"proxy_cache": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The proxy cache of registry. This field is valid when proxy_cache_enabled is true.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The type of proxy cache. Valid values: `DockerHub`, `DockerRegistry`.",
+						},
+						"endpoint": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "The endpoint of proxy cache.",
+						},
+						"password": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Sensitive:   true,
+							Description: "The password of proxy cache.",
+						},
+						"username": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "The username of proxy cache.",
+						},
+						"skip_ssl_verify": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							ForceNew:    true,
+							Computed:    true,
+							Description: "Whether to skip ssl verify.",
+						},
+					},
+				},
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineCrRegistries().Schema["registries"].Elem.(*schema.Resource).Schema

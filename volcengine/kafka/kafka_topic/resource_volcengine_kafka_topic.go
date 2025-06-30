@@ -58,12 +58,11 @@ func ResourceVolcengineKafkaTopic() *schema.Resource {
 				Description:  "The number of partition in kafka topic. The value range in 1-300. This field can only be adjusted up but not down.",
 			},
 			"replica_number": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				ForceNew:     true, // 不支持修改
-				Default:      3,
-				ValidateFunc: validation.IntInSlice([]int{2, 3}),
-				Description:  "The number of replica in kafka topic. The value can be 2 or 3. Default is 3.",
+				Type:     schema.TypeInt,
+				Optional: true,
+				//ForceNew:     true, // 不支持修改
+				Default:     3,
+				Description: "The number of replica in kafka topic. The value can be 2 or 3. Default is 3.",
 			},
 			"parameters": {
 				Type:        schema.TypeList,

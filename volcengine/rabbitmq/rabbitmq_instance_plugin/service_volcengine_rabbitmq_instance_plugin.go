@@ -142,6 +142,8 @@ func (s *VolcengineRabbitmqInstancePluginService) CreateResource(resourceData *s
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				// 部分插件需要重启实例，需等待2s再轮询实例状态
+				time.Sleep(2 * time.Second)
 				instanceId := d.Get("instance_id").(string)
 				pluginName := d.Get("plugin_name").(string)
 				d.SetId(instanceId + ":" + pluginName)
@@ -186,6 +188,11 @@ func (s *VolcengineRabbitmqInstancePluginService) RemoveResource(resourceData *s
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				// 部分插件需要重启实例，需等待2s再轮询实例状态
+				time.Sleep(2 * time.Second)
+				return nil
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("instance_id").(string)

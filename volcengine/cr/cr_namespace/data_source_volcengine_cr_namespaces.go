@@ -23,6 +23,15 @@ func DataSourceVolcengineCrNamespaces() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The list of instance IDs.",
 			},
+			"projects": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "The list of project names to query.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -53,6 +62,11 @@ func DataSourceVolcengineCrNamespaces() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The ProjectName of the CrNamespace.",
+						},
+						"repository_default_access_level": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The default access level of repository. Valid values: `Private`, `Public`.",
 						},
 					},
 				},

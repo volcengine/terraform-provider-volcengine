@@ -3,6 +3,12 @@ package volcengine
 import (
 	"context"
 	"fmt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_node_available_spec"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_zone_v2"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_auto_snapshot_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_auto_snapshot_policy_apply"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rabbitmq/rabbitmq_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/big_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_spec"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/parameter_group"
@@ -85,6 +91,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_resolver_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/private_zone/private_zone_user_vpc_authorization"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_allow_list"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_allow_list_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_partition"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_consumed_topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_group"
@@ -698,12 +706,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_namespaces":   cloudfs_namespace.DataSourceVolcengineCloudfsNamespaces(),
 
 			// ================ NAS ================
-			"volcengine_nas_file_systems":      nas_file_system.DataSourceVolcengineNasFileSystems(),
-			"volcengine_nas_snapshots":         nas_snapshot.DataSourceVolcengineNasSnapshots(),
-			"volcengine_nas_zones":             nas_zone.DataSourceVolcengineNasZones(),
-			"volcengine_nas_regions":           nas_region.DataSourceVolcengineNasRegions(),
-			"volcengine_nas_mount_points":      nas_mount_point.DataSourceVolcengineNasMountPoints(),
-			"volcengine_nas_permission_groups": nas_permission_group.DataSourceVolcengineNasPermissionGroups(),
+			"volcengine_nas_file_systems":           nas_file_system.DataSourceVolcengineNasFileSystems(),
+			"volcengine_nas_snapshots":              nas_snapshot.DataSourceVolcengineNasSnapshots(),
+			"volcengine_nas_zones":                  nas_zone.DataSourceVolcengineNasZones(),
+			"volcengine_nas_regions":                nas_region.DataSourceVolcengineNasRegions(),
+			"volcengine_nas_mount_points":           nas_mount_point.DataSourceVolcengineNasMountPoints(),
+			"volcengine_nas_permission_groups":      nas_permission_group.DataSourceVolcengineNasPermissionGroups(),
+			"volcengine_nas_auto_snapshot_policies": nas_auto_snapshot_policy.DataSourceVolcengineNasAutoSnapshotPolicys(),
 
 			// ================ TransitRouter =============
 			"volcengine_transit_routers":                                   transit_router.DataSourceVolcengineTransitRouters(),
@@ -794,6 +803,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kafka_zones":               kafka_zone.DataSourceVolcengineZones(),
 			"volcengine_kafka_consumed_topics":     kafka_consumed_topic.DataSourceVolcengineKafkaConsumedTopics(),
 			"volcengine_kafka_consumed_partitions": kafka_consumed_partition.DataSourceVolcengineKafkaConsumedPartitions(),
+			"volcengine_kafka_allow_lists":         kafka_allow_list.DataSourceVolcengineKafkaAllowLists(),
 
 			// ================ PrivateZone ================
 			"volcengine_private_zones":                   private_zone.DataSourceVolcenginePrivateZones(),
@@ -825,6 +835,8 @@ func Provider() terraform.ResourceProvider {
 			// ================ RabbitMQ ================
 			"volcengine_rabbitmq_instances":        rabbitmq_instance.DataSourceVolcengineRabbitmqInstances(),
 			"volcengine_rabbitmq_instance_plugins": rabbitmq_instance_plugin.DataSourceVolcengineRabbitmqInstancePlugins(),
+			"volcengine_rabbitmq_regions":          rabbitmq_region.DataSourceVolcengineRabbitmqRegions(),
+			"volcengine_rabbitmq_zones":            rabbitmq_zone.DataSourceVolcengineRabbitmqZones(),
 
 			// ================ CloudFirewall ================
 			"volcengine_cfw_address_books":                 address_book.DataSourceVolcengineAddressBooks(),
@@ -848,8 +860,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_dns_records":     dns_record.DataSourceVolcengineDnsRecords(),
 			"volcengine_dns_zones":       dns_zone.DataSourceVolcengineZones(),
 			"volcengine_dns_record_sets": dns_record_sets.DataSourceVolcengineDnsRecordSets(),
+
 			// ================ ESCloud V2 ================
-			"volcengine_escloud_instances_v2": escloud_instance_v2.DataSourceVolcengineEscloudInstanceV2s(),
+			"volcengine_escloud_instances_v2":         escloud_instance_v2.DataSourceVolcengineEscloudInstanceV2s(),
+			"volcengine_escloud_zones_v2":             escloud_zone_v2.DataSourceVolcengineEscloudZoneV2s(),
+			"volcengine_escloud_node_available_specs": escloud_node_available_spec.DataSourceVolcengineEscloudNodeAvailableSpecs(),
 
 			// ================ Vefaas ================
 			"volcengine_vefaas_functions":      vefaas_function.DataSourceVolcengineVefaasFunctions(),
@@ -1080,10 +1095,12 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloudfs_namespace":   cloudfs_namespace.ResourceVolcengineCloudfsNamespace(),
 
 			// ================ NAS ================
-			"volcengine_nas_file_system":      nas_file_system.ResourceVolcengineNasFileSystem(),
-			"volcengine_nas_snapshot":         nas_snapshot.ResourceVolcengineNasSnapshot(),
-			"volcengine_nas_mount_point":      nas_mount_point.ResourceVolcengineNasMountPoint(),
-			"volcengine_nas_permission_group": nas_permission_group.ResourceVolcengineNasPermissionGroup(),
+			"volcengine_nas_file_system":                nas_file_system.ResourceVolcengineNasFileSystem(),
+			"volcengine_nas_snapshot":                   nas_snapshot.ResourceVolcengineNasSnapshot(),
+			"volcengine_nas_mount_point":                nas_mount_point.ResourceVolcengineNasMountPoint(),
+			"volcengine_nas_permission_group":           nas_permission_group.ResourceVolcengineNasPermissionGroup(),
+			"volcengine_nas_auto_snapshot_policy":       nas_auto_snapshot_policy.ResourceVolcengineNasAutoSnapshotPolicy(),
+			"volcengine_nas_auto_snapshot_policy_apply": nas_auto_snapshot_policy_apply.ResourceVolcengineNasAutoSnapshotPolicyApply(),
 
 			// ================ TransitRouter =============
 			"volcengine_transit_router":                                   transit_router.ResourceVolcengineTransitRouter(),
@@ -1168,11 +1185,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_cloud_identity_permission_set_provisioning": cloud_identity_permission_set_provisioning.ResourceVolcengineCloudIdentityPermissionSetProvisioning(),
 
 			// ================ Kafka ================
-			"volcengine_kafka_sasl_user":      kafka_sasl_user.ResourceVolcengineKafkaSaslUser(),
-			"volcengine_kafka_group":          kafka_group.ResourceVolcengineKafkaGroup(),
-			"volcengine_kafka_topic":          kafka_topic.ResourceVolcengineKafkaTopic(),
-			"volcengine_kafka_instance":       kafka_instance.ResourceVolcengineKafkaInstance(),
-			"volcengine_kafka_public_address": kafka_public_address.ResourceVolcengineKafkaPublicAddress(),
+			"volcengine_kafka_sasl_user":            kafka_sasl_user.ResourceVolcengineKafkaSaslUser(),
+			"volcengine_kafka_group":                kafka_group.ResourceVolcengineKafkaGroup(),
+			"volcengine_kafka_topic":                kafka_topic.ResourceVolcengineKafkaTopic(),
+			"volcengine_kafka_instance":             kafka_instance.ResourceVolcengineKafkaInstance(),
+			"volcengine_kafka_public_address":       kafka_public_address.ResourceVolcengineKafkaPublicAddress(),
+			"volcengine_kafka_allow_list":           kafka_allow_list.ResourceVolcengineKafkaAllowList(),
+			"volcengine_kafka_allow_list_associate": kafka_allow_list_associate.ResourceVolcengineKafkaAllowListAssociate(),
 
 			// ================ PrivateZone ================
 			"volcengine_private_zone":                        private_zone.ResourceVolcenginePrivateZone(),

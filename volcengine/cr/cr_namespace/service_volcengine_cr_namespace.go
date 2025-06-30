@@ -134,6 +134,9 @@ func (s *VolcengineCrNamespaceService) CreateResource(resourceData *schema.Resou
 				"project": {
 					TargetField: "Project",
 				},
+				"repository_default_access_level": {
+					TargetField: "RepositoryDefaultAccessLevel",
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -194,6 +197,10 @@ func (s *VolcengineCrNamespaceService) DatasourceResources(*schema.ResourceData,
 		RequestConverts: map[string]ve.RequestConvert{
 			"names": {
 				TargetField: "Filter.Names",
+				ConvertType: ve.ConvertJsonArray,
+			},
+			"projects": {
+				TargetField: "Filter.Projects",
 				ConvertType: ve.ConvertJsonArray,
 			},
 		},

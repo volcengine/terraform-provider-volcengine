@@ -27,6 +27,7 @@ The following arguments are supported:
 * `name` - (Required, ForceNew) The name of CrNamespace.
 * `registry` - (Required, ForceNew) The registry name.
 * `project` - (Optional) The ProjectName of the CrNamespace.
+* `repository_default_access_level` - (Optional, ForceNew) The default access level of repository. Valid values: `Private`, `Public`. Default is `Private`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -32,6 +32,15 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The list of registry types to query.",
 			},
+			"projects": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "The list of project names to query.",
+			},
 			"statuses": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -165,6 +174,40 @@ func DataSourceVolcengineCrRegistries() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The domain type of registry.",
+									},
+								},
+							},
+						},
+						"proxy_cache_enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable proxy cache.",
+						},
+						"proxy_cache": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The proxy cache of registry. This field is valid when proxy_cache_enabled is true.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The type of proxy cache. Valid values: `DockerHub`, `DockerRegistry`.",
+									},
+									"endpoint": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The endpoint of proxy cache.",
+									},
+									"username": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The username of proxy cache.",
+									},
+									"skip_ssl_verify": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to skip ssl verify.",
 									},
 								},
 							},
