@@ -8,9 +8,9 @@ import (
 )
 
 var cenServiceRouteEntryImporter = func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
-	items := strings.Split(data.Id(), ":")
+	items := strings.Split(data.Id(), "#")
 	if len(items) != 4 {
-		return []*schema.ResourceData{data}, fmt.Errorf("import id must split with ':'")
+		return []*schema.ResourceData{data}, fmt.Errorf("import id must split with '#'")
 	}
 	if err := data.Set("cen_id", items[0]); err != nil {
 		return []*schema.ResourceData{data}, err

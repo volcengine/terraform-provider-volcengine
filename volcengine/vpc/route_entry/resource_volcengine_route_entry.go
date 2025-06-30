@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -52,11 +51,10 @@ func ResourceVolcengineRouteEntry() *schema.Resource {
 				Description: "The destination CIDR block of the route entry.",
 			},
 			"next_hop_type": {
-				Type:         schema.TypeString,
-				Required:     true,
-				ForceNew:     true,
-				Description:  "The type of the next hop, Optional choice contains `Instance`, `NetworkInterface`, `NatGW`, `VpnGW`, `TransitRouter`.",
-				ValidateFunc: validation.StringInSlice([]string{"Instance", "NetworkInterface", "NatGW", "VpnGW", "TransitRouter"}, false),
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The type of the next hop, Optional choice contains `Instance`, `HaVip`, `NetworkInterface`, `NatGW`, `VpnGW`, `TransitRouter`.",
 			},
 			"next_hop_id": {
 				Type:        schema.TypeString,

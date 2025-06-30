@@ -71,7 +71,7 @@ func (s *VolcengineCenServiceRouteEntryService) ReadResource(resourceData *schem
 	if tmpId == "" {
 		tmpId = s.ReadResourceId(resourceData.Id())
 	}
-	ids := strings.Split(tmpId, ":")
+	ids := strings.Split(tmpId, "#")
 	req := map[string]interface{}{
 		"CenId":                ids[0],
 		"DestinationCidrBlock": ids[1],
@@ -155,7 +155,7 @@ func (s *VolcengineCenServiceRouteEntryService) CreateResource(resourceData *sch
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				//注意 获取内容 这个地方不能是指针 需要转一次
-				d.SetId(fmt.Sprintf("%v:%v:%v:%v", resourceData.Get("cen_id"), resourceData.Get("destination_cidr_block"),
+				d.SetId(fmt.Sprintf("%v#%v#%v#%v", resourceData.Get("cen_id"), resourceData.Get("destination_cidr_block"),
 					resourceData.Get("service_region_id"), resourceData.Get("service_vpc_id")))
 				return nil
 			},
@@ -237,7 +237,7 @@ func (s *VolcengineCenServiceRouteEntryService) ModifyResource(resourceData *sch
 }
 
 func (s *VolcengineCenServiceRouteEntryService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
-	ids := strings.Split(resourceData.Id(), ":")
+	ids := strings.Split(resourceData.Id(), "#")
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteCenServiceRouteEntry",
