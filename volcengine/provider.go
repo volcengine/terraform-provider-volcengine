@@ -4,11 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/big_key"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/hot_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/instance_spec"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/parameter_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/planned_event"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/redis/slow_log"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/consumer_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/etl_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/import_task"
@@ -617,10 +615,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_redis_pitr_time_windows": pitr_time_period.DataSourceVolcengineRedisPitrTimeWindows(),
 			"volcengine_redis_parameter_groups":  parameter_group.DataSourceVolcengineParameterGroups(),
 			"volcengine_redis_instance_specs":    instance_spec.DataSourceVolcengineInstanceSpecs(),
-			"volcengine_redis_hot_keys":          hot_key.DataSourceVolcengineHotKeys(),
 			"volcengine_redis_big_keys":          big_key.DataSourceVolcengineBigKeys(),
 			"volcengine_redis_planned_events":    planned_event.DataSourceVolcenginePlannedEvents(),
-			"volcengine_redis_slow_logs":         slow_log.DataSourceVolcengineSlowLogs(),
 
 			// ================ CR ================
 			"volcengine_cr_registries":           cr_registry.DataSourceVolcengineCrRegistries(),

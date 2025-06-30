@@ -217,11 +217,10 @@ func ResourceVolcengineRedisDbInstance() *schema.Resource {
 				Description: "Whether enable deletion protection for redis instance. Valid values: `enabled`, `disabled`(default).",
 			},
 			"create_backup": {
-				Type:             schema.TypeBool,
-				Optional:         true,
-				Default:          false,
-				Description:      "Whether to create a final backup when modify the instance configuration or destroy the redis instance.",
-				DiffSuppressFunc: redisInstanceImportDiffSuppress,
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to create a final backup when modify the instance configuration or destroy the redis instance.",
 			},
 			"apply_immediately": {
 				Type:             schema.TypeBool,
