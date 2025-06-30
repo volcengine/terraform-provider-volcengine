@@ -372,6 +372,7 @@ func ResourceVolcengineVefaasFunction() *schema.Resource {
 			},
 			"port": {
 				Type:        schema.TypeInt,
+				Optional:    true,
 				Computed:    true,
 				Description: "Custom listening port for the instance.",
 			},

@@ -253,6 +253,10 @@ func (s *VolcengineVefaasFunctionService) ModifyResource(resourceData *schema.Re
 						},
 					},
 				},
+				"port": {
+					TargetField: "Port",
+					ForceGet:    true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
