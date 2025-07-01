@@ -177,7 +177,7 @@ func (s *VolcengineFlowLogService) ModifyResource(resourceData *schema.ResourceD
 			ConvertMode: ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
 				"flow_log_name": {
-					TargetField: "Name",
+					TargetField: "FlowLogName",
 					ConvertType: ve.ConvertDefault,
 				},
 				"description": {
