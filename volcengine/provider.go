@@ -12,6 +12,20 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_acl_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_bot_analyse_protect_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_cc_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_custom_bot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_custom_page"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_host_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_instance_ctl"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_ip_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_prohibition"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_service_certificate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_system_bot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_vulnerability"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_function"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_kafka_trigger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
@@ -911,6 +925,19 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_notify_policies":       vmp_notify_policy.DataSourceVolcengineVmpNotifyPolicies(),
 			"volcengine_vmp_notify_templates":      vmp_notify_template.DataSourceVolcengineVmpNotifyTemplates(),
 			//"volcengine_vmp_silence_policies":      vmp_silence_policy.DataSourceVolcengineVmpSilencePolicies(),
+
+			// ================ WAF ================
+			"volcengine_waf_domains":                   waf_domain.DataSourceVolcengineWafDomains(),
+			"volcengine_waf_acl_rules":                 waf_acl_rule.DataSourceVolcengineWafAclRules(),
+			"volcengine_waf_cc_rules":                  waf_cc_rule.DataSourceVolcengineWafCcRules(),
+			"volcengine_waf_custom_pages":              waf_custom_page.DataSourceVolcengineWafCustomPages(),
+			"volcengine_waf_system_bots":               waf_system_bot.DataSourceVolcengineWafSystemBots(),
+			"volcengine_waf_custom_bots":               waf_custom_bot.DataSourceVolcengineWafCustomBots(),
+			"volcengine_waf_bot_analyse_protect_rules": waf_bot_analyse_protect_rule.DataSourceVolcengineWafBotAnalyseProtectRules(),
+			"volcengine_waf_prohibitions":              waf_prohibition.DataSourceVolcengineWafProhibitions(),
+			"volcengine_waf_host_groups":               waf_host_group.DataSourceVolcengineWafHostGroups(),
+			"volcengine_waf_ip_groups":                 waf_ip_group.DataSourceVolcengineWafIpGroups(),
+			"volcengine_waf_service_certificates":      waf_service_certificate.DataSourceVolcengineWafServiceCertificates(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1318,6 +1345,19 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_notify_policy":       vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
 			"volcengine_vmp_notify_template":     vmp_notify_template.ResourceVolcengineVmpNotifyTemplate(),
 			//"volcengine_vmp_silence_policy":      vmp_silence_policy.ResourceVolcengineVmpSilencePolicy(),
+
+			// ================ WAF ================
+			"volcengine_waf_domain":                   waf_domain.ResourceVolcengineWafDomain(),
+			"volcengine_waf_acl_rule":                 waf_acl_rule.ResourceVolcengineWafAclRule(),
+			"volcengine_waf_cc_rule":                  waf_cc_rule.ResourceVolcengineWafCcRule(),
+			"volcengine_waf_custom_page":              waf_custom_page.ResourceVolcengineWafCustomPage(),
+			"volcengine_waf_system_bot":               waf_system_bot.ResourceVolcengineWafSystemBot(),
+			"volcengine_waf_custom_bot":               waf_custom_bot.ResourceVolcengineWafCustomBot(),
+			"volcengine_waf_instance_ctl":             waf_instance_ctl.ResourceVolcengineWafInstanceCtl(),
+			"volcengine_waf_bot_analyse_protect_rule": waf_bot_analyse_protect_rule.ResourceVolcengineWafBotAnalyseProtectRule(),
+			"volcengine_waf_host_group":               waf_host_group.ResourceVolcengineWafHostGroup(),
+			"volcengine_waf_ip_group":                 waf_ip_group.ResourceVolcengineWafIpGroup(),
+			"volcengine_waf_vulnerability":            waf_vulnerability.ResourceVolcengineWafVulnerability(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
