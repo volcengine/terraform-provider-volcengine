@@ -67,7 +67,7 @@ The following arguments are supported:
 * `bot_sequence_enable` - (Optional) Whether to enable the bot behavior map. Works only on modified scenes.
 * `cc_enable` - (Optional) Whether to enable the CC protection policy. Works only on modified scenes.
 * `certificate_id` - (Optional) When the protocol type is HTTPS, the bound certificate ID needs to be entered.
-* `certificate_platform` - (Optional) Certificate custody platform. Works only on modified scenes.
+* `certificate_platform` - (Optional) Certificate custody platform.
 * `client_ip_location` - (Optional) The method of obtaining the client IP.
 * `client_max_body_size` - (Optional) The client requests the maximum value of body.
 * `cloud_access_config` - (Optional) Access port information.If AccessMode is Alb/CLB, this field is required.
@@ -105,7 +105,7 @@ The following arguments are supported:
 * `tamper_proof_enable` - (Optional) Whether to enable the page tamper-proof policy. Works only on modified scenes.
 * `tls_enable` - (Optional) Whether to enable the log service.
 * `tls_fields_config` - (Optional) Details of log field configuration. Works only on modified scenes.
-* `volc_certificate_id` - (Optional) When the protocol type is HTTPS, the bound certificate ID needs to be entered. Works only on modified scenes.
+* `volc_certificate_id` - (Optional) When the protocol type is HTTPS, the bound certificate ID needs to be entered.
 * `vpc_id` - (Optional) The ID of vpc.
 * `waf_enable` - (Optional) Whether to enable the vulnerability protection strategy. Works only on modified scenes.
 * `waf_white_req_enable` - (Optional) Whether to enable the whitening strategy for vulnerability protection requests. Works only on modified scenes.
