@@ -41,6 +41,14 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_planned_event"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_task"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_custom_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_gateway_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_route"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_source"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_version"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record"
@@ -938,6 +946,15 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_waf_host_groups":               waf_host_group.DataSourceVolcengineWafHostGroups(),
 			"volcengine_waf_ip_groups":                 waf_ip_group.DataSourceVolcengineWafIpGroups(),
 			"volcengine_waf_service_certificates":      waf_service_certificate.DataSourceVolcengineWafServiceCertificates(),
+
+			// ================ APIG ================
+			"volcengine_apig_gateways":          apig_gateway.DataSourceVolcengineApigGateways(),
+			"volcengine_apig_gateway_services":  apig_gateway_service.DataSourceVolcengineApigGatewayServices(),
+			"volcengine_apig_custom_domains":    apig_custom_domain.DataSourceVolcengineApigCustomDomains(),
+			"volcengine_apig_upstreams":         apig_upstream.DataSourceVolcengineApigUpstreams(),
+			"volcengine_apig_upstream_sources":  apig_upstream_source.DataSourceVolcengineApigUpstreamSources(),
+			"volcengine_apig_upstream_versions": apig_upstream_version.DataSourceVolcengineApigUpstreamVersions(),
+			"volcengine_apig_routes":            apig_route.DataSourceVolcengineApigRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -1358,6 +1375,15 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_waf_host_group":               waf_host_group.ResourceVolcengineWafHostGroup(),
 			"volcengine_waf_ip_group":                 waf_ip_group.ResourceVolcengineWafIpGroup(),
 			"volcengine_waf_vulnerability":            waf_vulnerability.ResourceVolcengineWafVulnerability(),
+
+			// ================ APIG ================
+			"volcengine_apig_gateway":          apig_gateway.ResourceVolcengineApigGateway(),
+			"volcengine_apig_gateway_service":  apig_gateway_service.ResourceVolcengineApigGatewayService(),
+			"volcengine_apig_custom_domain":    apig_custom_domain.ResourceVolcengineApigCustomDomain(),
+			"volcengine_apig_upstream":         apig_upstream.ResourceVolcengineApigUpstream(),
+			"volcengine_apig_upstream_source":  apig_upstream_source.ResourceVolcengineApigUpstreamSource(),
+			"volcengine_apig_upstream_version": apig_upstream_version.ResourceVolcengineApigUpstreamVersion(),
+			"volcengine_apig_route":            apig_route.ResourceVolcengineApigRoute(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

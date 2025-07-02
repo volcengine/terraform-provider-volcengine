@@ -174,6 +174,7 @@ var resourceKeys = map[string]string{
 	"kms":                "KMS",
 	"vmp":                "VMP",
 	"waf":                "WAF",
+	"apig":               "APIG",
 }
 
 type Products struct {
