@@ -57,6 +57,11 @@ func DataSourceVolcengineSubnets() *schema.Resource {
 				Optional:    true,
 				Description: "The ID of route table which subnet associated with.",
 			},
+			"subnet_owner_id": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The owner ID of the subnet.",
+			},
 			"subnets": {
 				Description: "The collection of Subnet query.",
 				Type:        schema.TypeList,

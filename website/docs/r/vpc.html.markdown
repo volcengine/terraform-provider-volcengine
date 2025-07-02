@@ -64,6 +64,7 @@ In addition to all arguments above, the following attributes are exported:
 * `creation_time` - Creation time of VPC.
 * `nat_gateway_ids` - The nat gateway ID list of VPC.
 * `route_table_ids` - The route table ID list of VPC.
+* `secondary_cidr_blocks` - The secondary cidr block list of VPC.
 * `security_group_ids` - The security group ID list of VPC.
 * `status` - Status of VPC.
 * `subnet_ids` - The subnet ID list of VPC.

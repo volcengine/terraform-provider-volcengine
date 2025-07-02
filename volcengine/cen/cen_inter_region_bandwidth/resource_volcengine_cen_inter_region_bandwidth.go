@@ -58,6 +58,12 @@ func ResourceVolcengineCenInterRegionBandwidth() *schema.Resource {
 				ValidateFunc: validation.IntAtLeast(1),
 				Description:  "The bandwidth of the cen inter region bandwidth.",
 			},
+			"cen_bandwidth_package_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The cen bandwidth package id of the cen inter region bandwidth.",
+			},
 		},
 	}
 	s := DataSourceVolcengineCenInterRegionBandwidths().Schema["inter_region_bandwidths"].Elem.(*schema.Resource).Schema

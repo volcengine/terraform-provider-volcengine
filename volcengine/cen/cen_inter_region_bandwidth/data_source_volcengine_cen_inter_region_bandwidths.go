@@ -50,6 +50,11 @@ func DataSourceVolcengineCenInterRegionBandwidths() *schema.Resource {
 							Computed:    true,
 							Description: "The ID of the cen inter region bandwidth.",
 						},
+						"cen_bandwidth_package_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the cen bandwidth package.",
+						},
 						"creation_time": {
 							Type:        schema.TypeString,
 							Computed:    true,

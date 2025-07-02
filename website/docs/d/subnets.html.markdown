@@ -21,6 +21,7 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `route_table_id` - (Optional) The ID of route table which subnet associated with.
 * `subnet_name` - (Optional) The subnet name to query.
+* `subnet_owner_id` - (Optional) The owner ID of the subnet.
 * `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The ID of VPC which subnet belongs to.
 * `zone_id` - (Optional) The ID of zone which subnet belongs to.

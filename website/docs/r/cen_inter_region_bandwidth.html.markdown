@@ -55,6 +55,7 @@ The following arguments are supported:
 * `cen_id` - (Required, ForceNew) The cen ID of the cen inter region bandwidth.
 * `local_region_id` - (Required, ForceNew) The local region id of the cen inter region bandwidth.
 * `peer_region_id` - (Required, ForceNew) The peer region id of the cen inter region bandwidth.
+* `cen_bandwidth_package_id` - (Optional) The cen bandwidth package id of the cen inter region bandwidth.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -12,6 +12,20 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_acl_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_bot_analyse_protect_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_cc_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_custom_bot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_custom_page"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_host_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_instance_ctl"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_ip_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_prohibition"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_service_certificate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_system_bot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_vulnerability"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_function"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_kafka_trigger"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
@@ -26,6 +40,22 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_planned_event"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_task"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_custom_domain"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_gateway_service"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_route"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_source"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/apig/apig_upstream_version"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/flow_log"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/flow_log_active"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_filter"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_filter_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_session"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_target"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc_cidr_block_associate"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
@@ -528,6 +558,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpc_ipv6_addresses":          ipv6_address.DataSourceVolcengineIpv6Addresses(),
 			"volcengine_vpc_prefix_lists":            prefix_list.DataSourceVolcengineVpcPrefixLists(),
 			"volcengine_ha_vips":                     ha_vip.DataSourceVolcengineHaVips(),
+			"volcengine_flow_logs":                   flow_log.DataSourceVolcengineFlowLogs(),
+			"volcengine_traffic_mirror_filters":      traffic_mirror_filter.DataSourceVolcengineTrafficMirrorFilters(),
+			"volcengine_traffic_mirror_filter_rules": traffic_mirror_filter_rule.DataSourceVolcengineTrafficMirrorFilterRules(),
+			"volcengine_traffic_mirror_sessions":     traffic_mirror_session.DataSourceVolcengineTrafficMirrorSessions(),
+			"volcengine_traffic_mirror_targets":      traffic_mirror_target.DataSourceVolcengineTrafficMirrorTargets(),
 
 			// ================ EIP ================
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
@@ -911,6 +946,28 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_notify_policies":       vmp_notify_policy.DataSourceVolcengineVmpNotifyPolicies(),
 			"volcengine_vmp_notify_templates":      vmp_notify_template.DataSourceVolcengineVmpNotifyTemplates(),
 			//"volcengine_vmp_silence_policies":      vmp_silence_policy.DataSourceVolcengineVmpSilencePolicies(),
+
+			// ================ WAF ================
+			"volcengine_waf_domains":                   waf_domain.DataSourceVolcengineWafDomains(),
+			"volcengine_waf_acl_rules":                 waf_acl_rule.DataSourceVolcengineWafAclRules(),
+			"volcengine_waf_cc_rules":                  waf_cc_rule.DataSourceVolcengineWafCcRules(),
+			"volcengine_waf_custom_pages":              waf_custom_page.DataSourceVolcengineWafCustomPages(),
+			"volcengine_waf_system_bots":               waf_system_bot.DataSourceVolcengineWafSystemBots(),
+			"volcengine_waf_custom_bots":               waf_custom_bot.DataSourceVolcengineWafCustomBots(),
+			"volcengine_waf_bot_analyse_protect_rules": waf_bot_analyse_protect_rule.DataSourceVolcengineWafBotAnalyseProtectRules(),
+			"volcengine_waf_prohibitions":              waf_prohibition.DataSourceVolcengineWafProhibitions(),
+			"volcengine_waf_host_groups":               waf_host_group.DataSourceVolcengineWafHostGroups(),
+			"volcengine_waf_ip_groups":                 waf_ip_group.DataSourceVolcengineWafIpGroups(),
+			"volcengine_waf_service_certificates":      waf_service_certificate.DataSourceVolcengineWafServiceCertificates(),
+
+			// ================ APIG ================
+			"volcengine_apig_gateways":          apig_gateway.DataSourceVolcengineApigGateways(),
+			"volcengine_apig_gateway_services":  apig_gateway_service.DataSourceVolcengineApigGatewayServices(),
+			"volcengine_apig_custom_domains":    apig_custom_domain.DataSourceVolcengineApigCustomDomains(),
+			"volcengine_apig_upstreams":         apig_upstream.DataSourceVolcengineApigUpstreams(),
+			"volcengine_apig_upstream_sources":  apig_upstream_source.DataSourceVolcengineApigUpstreamSources(),
+			"volcengine_apig_upstream_versions": apig_upstream_version.DataSourceVolcengineApigUpstreamVersions(),
+			"volcengine_apig_routes":            apig_route.DataSourceVolcengineApigRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
@@ -929,6 +986,13 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vpc_prefix_list":            prefix_list.ResourceVolcengineVpcPrefixList(),
 			"volcengine_ha_vip":                     ha_vip.ResourceVolcengineHaVip(),
 			"volcengine_ha_vip_associate":           ha_vip_associate.ResourceVolcengineHaVipAssociate(),
+			"volcengine_vpc_cidr_block_associate":   vpc_cidr_block_associate.ResourceVolcengineVpcCidrBlockAssociate(),
+			"volcengine_flow_log":                   flow_log.ResourceVolcengineFlowLog(),
+			"volcengine_flow_log_active":            flow_log_active.ResourceVolcengineFlowLogActive(),
+			"volcengine_traffic_mirror_filter":      traffic_mirror_filter.ResourceVolcengineTrafficMirrorFilter(),
+			"volcengine_traffic_mirror_filter_rule": traffic_mirror_filter_rule.ResourceVolcengineTrafficMirrorFilterRule(),
+			"volcengine_traffic_mirror_session":     traffic_mirror_session.ResourceVolcengineTrafficMirrorSession(),
+			"volcengine_traffic_mirror_target":      traffic_mirror_target.ResourceVolcengineTrafficMirrorTarget(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),
@@ -1318,6 +1382,28 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_notify_policy":       vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
 			"volcengine_vmp_notify_template":     vmp_notify_template.ResourceVolcengineVmpNotifyTemplate(),
 			//"volcengine_vmp_silence_policy":      vmp_silence_policy.ResourceVolcengineVmpSilencePolicy(),
+
+			// ================ WAF ================
+			"volcengine_waf_domain":                   waf_domain.ResourceVolcengineWafDomain(),
+			"volcengine_waf_acl_rule":                 waf_acl_rule.ResourceVolcengineWafAclRule(),
+			"volcengine_waf_cc_rule":                  waf_cc_rule.ResourceVolcengineWafCcRule(),
+			"volcengine_waf_custom_page":              waf_custom_page.ResourceVolcengineWafCustomPage(),
+			"volcengine_waf_system_bot":               waf_system_bot.ResourceVolcengineWafSystemBot(),
+			"volcengine_waf_custom_bot":               waf_custom_bot.ResourceVolcengineWafCustomBot(),
+			"volcengine_waf_instance_ctl":             waf_instance_ctl.ResourceVolcengineWafInstanceCtl(),
+			"volcengine_waf_bot_analyse_protect_rule": waf_bot_analyse_protect_rule.ResourceVolcengineWafBotAnalyseProtectRule(),
+			"volcengine_waf_host_group":               waf_host_group.ResourceVolcengineWafHostGroup(),
+			"volcengine_waf_ip_group":                 waf_ip_group.ResourceVolcengineWafIpGroup(),
+			"volcengine_waf_vulnerability":            waf_vulnerability.ResourceVolcengineWafVulnerability(),
+
+			// ================ APIG ================
+			"volcengine_apig_gateway":          apig_gateway.ResourceVolcengineApigGateway(),
+			"volcengine_apig_gateway_service":  apig_gateway_service.ResourceVolcengineApigGatewayService(),
+			"volcengine_apig_custom_domain":    apig_custom_domain.ResourceVolcengineApigCustomDomain(),
+			"volcengine_apig_upstream":         apig_upstream.ResourceVolcengineApigUpstream(),
+			"volcengine_apig_upstream_source":  apig_upstream_source.ResourceVolcengineApigUpstreamSource(),
+			"volcengine_apig_upstream_version": apig_upstream_version.ResourceVolcengineApigUpstreamVersion(),
+			"volcengine_apig_route":            apig_route.ResourceVolcengineApigRoute(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}
