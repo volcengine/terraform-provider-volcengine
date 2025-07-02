@@ -169,6 +169,9 @@ func (s *VolcengineCenInterRegionBandwidthService) ModifyResource(resourceData *
 				"bandwidth": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"cen_bandwidth_package_id": {
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["InterRegionBandwidthId"] = d.Id()

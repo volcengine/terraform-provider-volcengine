@@ -97,6 +97,14 @@ func ResourceVolcengineVpc() *schema.Resource {
 				Computed:    true,
 				Description: "Creation time of VPC.",
 			},
+			"secondary_cidr_blocks": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The secondary cidr block list of VPC.",
+			},
 		},
 	}
 	ve.MergeDateSourceToResource(DataSourceVolcengineVpcs().Schema["vpcs"].Elem.(*schema.Resource).Schema, &resource.Schema)

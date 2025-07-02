@@ -40,6 +40,7 @@ const (
 )
 
 var tobRegion = map[string]bool{
+	"cn-beijing-selfdrive":    true,
 	"cn-beijing-autodriving":  true,
 	"ap-southeast-3":          true,
 	"cn-shanghai-autodriving": true,

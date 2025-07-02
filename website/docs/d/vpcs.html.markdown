@@ -22,6 +22,7 @@ The following arguments are supported:
 * `project_name` - (Optional) The ProjectName of the VPC.
 * `tags` - (Optional) Tags.
 * `vpc_name` - (Optional) The vpc name to query.
+* `vpc_owner_id` - (Optional) The owner ID of the vpc.
 
 The `tags` object supports the following:
 
@@ -46,6 +47,7 @@ In addition to all arguments above, the following attributes are exported:
     * `nat_gateway_ids` - The nat gateway ID list of VPC.
     * `project_name` - The ProjectName of the VPC.
     * `route_table_ids` - The route table ID list of VPC.
+    * `secondary_cidr_blocks` - The secondary cidr block list of VPC.
     * `security_group_ids` - The security group ID list of VPC.
     * `status` - The status of VPC.
     * `subnet_ids` - The subnet ID list of VPC.

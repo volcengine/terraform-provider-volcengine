@@ -131,6 +131,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 WafBotAnalyseProtectRule can be imported using the id, e.g.
 ```
-$ terraform import volcengine_waf_bot_analyse_protect_rule.default resource_id
+$ terraform import volcengine_waf_bot_analyse_protect_rule.default resource_id:bot_space:host
 ```
 

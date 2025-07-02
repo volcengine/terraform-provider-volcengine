@@ -63,6 +63,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `inter_region_bandwidths` - The collection of cen inter region bandwidth query.
     * `bandwidth` - The bandwidth of the cen inter region bandwidth.
+    * `cen_bandwidth_package_id` - The ID of the cen bandwidth package.
     * `cen_id` - The cen ID of the cen inter region bandwidth.
     * `creation_time` - The create time of the cen inter region bandwidth.
     * `id` - The ID of the cen inter region bandwidth.
