@@ -229,12 +229,11 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				},
 				"certificate_source": {
 					ConvertType: ve.ConvertDefault,
-					ForceGet:    true,
 				},
 				"cert_center_certificate_id": {
 					ConvertType: ve.ConvertDefault,
 				},
-				"certificated_id": {
+				"certificate_id": {
 					ConvertType: ve.ConvertDefault,
 				},
 				"ca_certificate_id": {
@@ -271,6 +270,11 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ListenerId"] = d.Id()
+
+				if d.HasChanges("certificate_id", "cert_center_certificate_id") {
+					(*call.SdkParam)["CertificateSource"] = d.Get("certificate_source")
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
