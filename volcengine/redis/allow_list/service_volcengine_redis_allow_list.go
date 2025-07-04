@@ -104,6 +104,11 @@ func (s *VolcengineRedisAllowListService) ReadResource(resourceData *schema.Reso
 	data["AllowList"] = strings.Split(ips.(string), ",")
 	data["AllowListIPNum"] = len(strings.Split(ips.(string), ","))
 	data["AssociatedInstanceNum"] = len(data["AssociatedInstances"].([]interface{}))
+
+	if _, exists := data["SecurityGroupBindInfos"]; !exists {
+		data["SecurityGroupBindInfos"] = []interface{}{}
+	}
+
 	return data, err
 }
 
