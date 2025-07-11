@@ -87,9 +87,9 @@ func (s *VolcengineRocketmqInstanceService) ReadResources(m map[string]interface
 		}
 		logger.Debug(logger.RespFormat, action, *detailResp)
 
-		connectionInfo, err := ve.ObtainSdkValue("Result.Connection", *detailResp)
+		connectionInfo, err := ve.ObtainSdkValue("Result.ConnectionInfo", *detailResp)
 		if err != nil {
-			logger.Info("ObtainSdkValue Result.Connection error:", err)
+			logger.Info("ObtainSdkValue Result.ConnectionInfo error:", err)
 			continue
 		}
 		mqInstance["ConnectionInfo"] = connectionInfo
