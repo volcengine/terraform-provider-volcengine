@@ -103,6 +103,18 @@ func (s *VolcengineEcsService) ReadResources(condition map[string]interface{}) (
 					}
 				}
 			}
+
+			if volumes, exist := ecsInstance["Volumes"]; exist {
+				if volumeList, ok := volumes.([]interface{}); ok {
+					volumeIds := make([]string, 0)
+					for _, volume := range volumeList {
+						if volumeMap, ok := volume.(map[string]interface{}); ok {
+							volumeIds = append(volumeIds, volumeMap["VolumeId"].(string))
+						}
+					}
+					ecsInstance["VolumeIds"] = volumeIds
+				}
+			}
 		}
 	}
 
@@ -1196,7 +1208,12 @@ func (s *VolcengineEcsService) DatasourceResources(data *schema.ResourceData, re
 			if err != nil {
 				return extraData, err
 			}
-			sourceData, err = s.readEbsVolumes(sourceData)
+			//sourceData, err = s.readEbsVolumes(sourceData)
+			//if err != nil {
+			//	return extraData, err
+			//}
+			// 优化 volumes 查询方式
+			sourceData, err = s.batchReadEbsVolumes(sourceData)
 			if err != nil {
 				return extraData, err
 			}
@@ -1452,6 +1469,159 @@ func (s *VolcengineEcsService) readInstanceTypes(sourceData []interface{}) (extr
 	return extraData, err
 }
 
+func (s *VolcengineEcsService) batchReadEbsVolumes(sourceData []interface{}) (extraData []interface{}, err error) {
+	if len(sourceData) == 0 {
+		return sourceData, err
+	}
+	var (
+		wg                 sync.WaitGroup
+		syncMap            sync.Map
+		allVolumeIds       []string
+		allVolumes         []interface{}
+		splitVolumeIds     []interface{}
+		instanceIdsMap     = make(map[string]bool)
+		instanceVolumesMap = make(map[string][]interface{})
+	)
+	for _, data := range sourceData {
+		v, err := ve.ObtainSdkValue("VolumeIds", data)
+		if err != nil {
+			return extraData, err
+		}
+		volumeIds, ok := v.([]string)
+		if !ok {
+			return extraData, fmt.Errorf("volumeIds is not []string")
+		}
+		allVolumeIds = append(allVolumeIds, volumeIds...)
+		instanceId, err := ve.ObtainSdkValue("InstanceId", data)
+		if err != nil {
+			return extraData, err
+		}
+		instanceIdStr, ok := instanceId.(string)
+		if !ok {
+			return extraData, fmt.Errorf("instanceId is not string")
+		}
+		instanceIdsMap[instanceIdStr] = true
+	}
+
+	splitSize := 100
+	for i := 0; i < len(allVolumeIds); i += splitSize {
+		end := i + splitSize
+		if end > len(allVolumeIds) {
+			end = len(allVolumeIds)
+		}
+		splitVolumeIds = append(splitVolumeIds, allVolumeIds[i:end])
+	}
+	splitCount := len(splitVolumeIds)
+
+	wg.Add(splitCount)
+	for idx, data := range splitVolumeIds {
+		var (
+			action  string
+			resp    *map[string]interface{}
+			results interface{}
+			_err    error
+		)
+		action = "DescribeVolumes"
+		index := idx
+		splitVolumes := data
+		go func() {
+			defer func() {
+				if e := recover(); e != nil {
+					logger.Debug(logger.ReqFormat, action, e)
+				}
+				wg.Done()
+			}()
+
+			// query volumes by ids
+			action = "DescribeVolumes"
+			volumeCondition := map[string]interface{}{}
+			for i, id := range splitVolumes.([]string) {
+				volumeCondition[fmt.Sprintf("VolumeIds.%d", i+1)] = id
+			}
+			volumeCondition["PageSize"] = 100
+			volumeCondition["PageNumber"] = 1
+			logger.Debug(logger.ReqFormat, action, volumeCondition)
+			resp, _err = s.Client.UniversalClient.DoCall(getEbsUniversalInfo(action), &volumeCondition)
+			if _err != nil {
+				logger.DebugInfo("DescribeVolumes error: %v", _err)
+				syncMap.Store(index, _err)
+				return
+			}
+			logger.Debug(logger.RespFormat, action, volumeCondition, *resp)
+			results, _err = ve.ObtainSdkValue("Result.Volumes", *resp)
+			if _err != nil {
+				logger.DebugInfo("ObtainSdkValue Result.Volumes error: %v", _err)
+				syncMap.Store(index, _err)
+				return
+			}
+			if results == nil {
+				results = []interface{}{}
+			}
+			volumes, ok := results.([]interface{})
+			if !ok {
+				logger.DebugInfo("Result.Volumes is not Slice")
+				syncMap.Store(index, _err)
+				return
+			}
+
+			syncMap.Store(index, volumes)
+		}()
+	}
+	wg.Wait()
+	var errorStr string
+
+	for index, _ := range splitVolumeIds {
+		if v, ok := syncMap.Load(index); ok {
+			if e1, ok1 := v.(error); ok1 {
+				errorStr = errorStr + e1.Error() + ";"
+			}
+			if volumes, ok2 := v.([]interface{}); ok2 {
+				allVolumes = append(allVolumes, volumes...)
+			}
+		}
+	}
+
+	for _, v := range allVolumes {
+		volume, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		instanceId, err := ve.ObtainSdkValue("InstanceId", volume)
+		if err != nil {
+			continue
+		}
+		instanceIdStr, ok := instanceId.(string)
+		if !ok {
+			continue
+		}
+		if ok := instanceIdsMap[instanceIdStr]; ok {
+			instanceVolumesMap[instanceIdStr] = append(instanceVolumesMap[instanceIdStr], volume)
+		}
+	}
+
+	for _, instance := range sourceData {
+		var (
+			instanceId interface{}
+		)
+		instanceId, err = ve.ObtainSdkValue("InstanceId", instance)
+		if err != nil {
+			return extraData, err
+		}
+		instanceIdStr, ok := instanceId.(string)
+		if !ok {
+			return extraData, fmt.Errorf("instanceId is not string")
+		}
+		if v, exist := instanceVolumesMap[instanceIdStr]; exist {
+			instance.(map[string]interface{})["Volumes"] = v
+		}
+		extraData = append(extraData, instance)
+	}
+	if len(errorStr) > 0 {
+		return extraData, fmt.Errorf(errorStr)
+	}
+	return extraData, err
+}
+
 func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraData []interface{}, err error) {
 	//merge ebs
 	var (
@@ -1533,7 +1703,7 @@ func (s *VolcengineEcsService) readEbsVolumes(sourceData []interface{}) (extraDa
 				syncMap.Store(instanceId, errors.New("Result.Volumes is not Slice"))
 				return
 			}
-			volumes = append(volumes, dataVolumes)
+			volumes = append(volumes, dataVolumes...)
 
 			syncMap.Store(instanceId, volumes)
 		}()

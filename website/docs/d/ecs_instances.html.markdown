@@ -133,6 +133,7 @@ In addition to all arguments above, the following attributes are exported:
         * `key` - The Key of Tags.
         * `value` - The Value of Tags.
     * `updated_at` - The update time of ECS instance.
+    * `volume_ids` - The volume ID list of ECS instance.
     * `volumes` - The volume detail collection of volume.
         * `delete_with_instance` - The delete with instance flag of volume.
         * `size` - The size of volume.

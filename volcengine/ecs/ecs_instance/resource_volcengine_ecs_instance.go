@@ -475,6 +475,16 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 					},
 				},
 			},
+			"install_run_command_agent": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Id() != ""
+				},
+				Description: "Whether to install the Run Command Agent. Default is false. This field is only effective when creating a new instance.",
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,

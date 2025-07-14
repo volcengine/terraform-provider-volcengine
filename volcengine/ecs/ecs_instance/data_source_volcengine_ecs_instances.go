@@ -282,6 +282,14 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 								},
 							},
 						},
+						"volume_ids": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The volume ID list of ECS instance.",
+						},
 						"volumes": {
 							Type:        schema.TypeList,
 							Computed:    true,
