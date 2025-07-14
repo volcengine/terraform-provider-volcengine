@@ -10,7 +10,10 @@ description: |-
 Use this data source to query detailed information of redis parameter groups
 ## Example Usage
 ```hcl
-
+data "volcengine_redis_parameter_groups" "foo" {
+  engine_version = "5.0"
+  source         = "User"
+}
 ```
 ## Argument Reference
 The following arguments are supported:
