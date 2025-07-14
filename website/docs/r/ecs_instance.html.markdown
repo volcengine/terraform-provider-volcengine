@@ -117,6 +117,7 @@ It is not recommended to use this field, it is recommended to use `volcengine_ei
 * `host_name` - (Optional, ForceNew) The host name of ECS instance.
 * `hpc_cluster_id` - (Optional, ForceNew) The hpc cluster ID of ECS instance.
 * `include_data_volumes` - (Optional) The include data volumes flag of ECS instance.Only effective when change instance charge type.include_data_volumes.
+* `install_run_command_agent` - (Optional, ForceNew) Whether to install the Run Command Agent. Default is false. This field is only effective when creating a new instance.
 * `instance_charge_type` - (Optional) The charge type of ECS instance, the value can be `PrePaid` or `PostPaid`.
 * `instance_name` - (Optional) The name of ECS instance.
 * `ipv6_address_count` - (Optional, ForceNew) The number of IPv6 addresses to be automatically assigned from within the CIDR block of the subnet that hosts the ENI. Valid values: 1 to 10.
@@ -192,6 +193,7 @@ In addition to all arguments above, the following attributes are exported:
 * `stopped_mode` - The stop mode of ECS instance.
 * `system_volume_id` - The ID of system volume.
 * `updated_at` - The update time of ECS instance.
+* `volume_ids` - The volume ID list of ECS instance.
 * `vpc_id` - The VPC ID of ECS instance.
 
 
