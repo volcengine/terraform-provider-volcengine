@@ -30,6 +30,12 @@ func DataSourceVolcengineEcsCommands() *schema.Resource {
 				Optional:    true,
 				Description: "The type of ecs command. Valid values: `Shell`.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of ecs command.",
+			},
+			"tags": ve.TagsSchema(),
 			"order": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -121,6 +127,77 @@ func DataSourceVolcengineEcsCommands() *schema.Resource {
 							Type:        schema.TypeInt,
 							Computed:    true,
 							Description: "The invocation times of the ecs command. Public commands do not display the invocation times.",
+						},
+						"content_encoding": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "Whether the command content is base64 encoded. Valid values: `Base64`, `PlainText`. Default is `Base64`.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the ecs command.",
+						},
+						"tags": ve.TagsSchemaComputed(),
+						"enable_parameter": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable custom parameter. Default is `false`.",
+						},
+						"parameter_definitions": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The custom parameter definitions of the ecs command.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the custom parameter.",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The type of the custom parameter. Valid values: `String`, `Digit`.",
+									},
+									"required": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the custom parameter is required.",
+									},
+									"default_value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The default value of the custom parameter.",
+									},
+									"min_length": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The minimum length of the custom parameter. This field is required when the parameter type is `String`.",
+									},
+									"max_length": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The maximum length of the custom parameter. This field is required when the parameter type is `String`.",
+									},
+									"min_value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The minimum value of the custom parameter. This field is required when the parameter type is `Digit`.",
+									},
+									"max_value": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The maximum value of the custom parameter. This field is required when the parameter type is `Digit`.",
+									},
+									"decimal_precision": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The decimal precision of the custom parameter. This field is required when the parameter type is `Digit`.",
+									},
+								},
+							},
 						},
 					},
 				},

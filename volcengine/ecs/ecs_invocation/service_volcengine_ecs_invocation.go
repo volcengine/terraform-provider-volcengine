@@ -35,7 +35,7 @@ func (s *VolcengineEcsInvocationService) ReadResources(m map[string]interface{})
 		results interface{}
 		ok      bool
 	)
-	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
+	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 100, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeInvocations"
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -131,6 +131,13 @@ func (s *VolcengineEcsInvocationService) ReadResource(resourceData *schema.Resou
 		return data, fmt.Errorf("ecs invocation %s is not exist ", id)
 	}
 
+	// 处理 parameters
+	delete(data, "Parameters")
+	if parameters, exist := resourceData.GetOk("parameters"); exist {
+		parametersArr := parameters.(*schema.Set).List()
+		data["Parameters"] = parametersArr
+	}
+
 	// 处理 launch_time、recurrence_end_time 传参与查询结果不一致的问题
 	if mode := resourceData.Get("repeat_mode"); mode.(string) != "Once" {
 		layout := "2006-01-02T15:04:05Z"
@@ -216,6 +223,11 @@ func (s *VolcengineEcsInvocationService) RefreshResourceState(resourceData *sche
 			if err != nil {
 				return nil, "", err
 			}
+
+			// 定时和周期任务直接退出
+			if mode := resourceData.Get("repeat_mode"); mode.(string) != "Once" {
+				return demo, "Success", nil
+			}
 			return demo, status.(string), err
 		},
 	}
@@ -239,6 +251,32 @@ func (s *VolcengineEcsInvocationService) CreateResource(resourceData *schema.Res
 					TargetField: "InstanceIds",
 					ConvertType: ve.ConvertWithN,
 				},
+				"parameters": {
+					Ignore: true,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if parameters, ok := d.GetOk("parameters"); ok {
+					parametersArr := parameters.(*schema.Set).List()
+					if len(parametersArr) == 0 {
+						return true, nil
+					}
+					allParams := make([]string, 0)
+					for _, p := range parametersArr {
+						param, ok := p.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("parameters value is not map")
+						}
+						paramStr := fmt.Sprintf("\"%v\":\"%v\"", param["name"], param["value"])
+						allParams = append(allParams, paramStr)
+					}
+					(*call.SdkParam)["Parameters"] = fmt.Sprintf("{%v}", strings.Join(allParams, ","))
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -251,13 +289,23 @@ func (s *VolcengineEcsInvocationService) CreateResource(resourceData *schema.Res
 				d.SetId(id.(string))
 				return nil
 			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Scheduled", "Success", "Failed", "Stopped", "PartialFailed", "Finished"},
+				Timeout: resourceData.Timeout(schema.TimeoutCreate),
+			},
 		},
 	}
 	return []ve.Callback{callback}
 }
 
 func (s *VolcengineEcsInvocationService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	var callbacks []ve.Callback
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "invocation", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineEcsInvocationService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -282,10 +330,6 @@ func (s *VolcengineEcsInvocationService) RemoveResource(resourceData *schema.Res
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Stopped"},
-				Timeout: resourceData.Timeout(schema.TimeoutDelete),
 			},
 		},
 	}
@@ -312,6 +356,15 @@ func (s *VolcengineEcsInvocationService) DatasourceResources(*schema.ResourceDat
 					return status
 				},
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "InvocationName",
 		IdField:      "InvocationId",
@@ -327,6 +380,15 @@ func (s *VolcengineEcsInvocationService) DatasourceResources(*schema.ResourceDat
 
 func (s *VolcengineEcsInvocationService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineEcsInvocationService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "invocation",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

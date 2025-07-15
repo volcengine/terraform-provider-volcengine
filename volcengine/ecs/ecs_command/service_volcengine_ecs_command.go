@@ -108,8 +108,18 @@ func (s *VolcengineEcsCommandService) CreateResource(resourceData *schema.Resour
 			Action:      "CreateCommand",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeDefault,
+			Convert: map[string]ve.RequestConvert{
+				"parameter_definitions": {
+					TargetField: "ParameterDefinitions",
+					ConvertType: ve.ConvertListN,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Type"] = "Shell"
+				//(*call.SdkParam)["Type"] = "Shell"
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -129,6 +139,8 @@ func (s *VolcengineEcsCommandService) CreateResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineEcsCommandService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
+
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyCommand",
@@ -153,6 +165,25 @@ func (s *VolcengineEcsCommandService) ModifyResource(resourceData *schema.Resour
 				"timeout": {
 					TargetField: "Timeout",
 				},
+				"type": {
+					TargetField: "Type",
+				},
+				"enable_parameter": {
+					TargetField: "EnableParameter",
+					ForceGet:    true,
+				},
+				"parameter_definitions": {
+					TargetField: "ParameterDefinitions",
+					ConvertType: ve.ConvertListN,
+					ForceGet:    true,
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						// 不启用参数时，不发送参数定义
+						if enable := data.Get("enable_parameter").(bool); !enable {
+							return nil
+						}
+						return i
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) > 0 {
@@ -169,7 +200,13 @@ func (s *VolcengineEcsCommandService) ModifyResource(resourceData *schema.Resour
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "command", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineEcsCommandService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -217,6 +254,15 @@ func (s *VolcengineEcsCommandService) DatasourceResources(*schema.ResourceData, 
 			"command_provider": {
 				TargetField: "Provider",
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "Name",
 		IdField:      "CommandId",
@@ -235,6 +281,15 @@ func (s *VolcengineEcsCommandService) DatasourceResources(*schema.ResourceData, 
 
 func (s *VolcengineEcsCommandService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineEcsCommandService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "command",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

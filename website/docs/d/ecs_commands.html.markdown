@@ -22,7 +22,14 @@ The following arguments are supported:
 * `name` - (Optional) The name of ecs command. This field support fuzzy query.
 * `order` - (Optional) The order of ecs command query result.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of ecs command.
+* `tags` - (Optional) Tags.
 * `type` - (Optional) The type of ecs command. Valid values: `Shell`.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -30,11 +37,27 @@ In addition to all arguments above, the following attributes are exported:
     * `command_content` - The base64 encoded content of the ecs command.
     * `command_id` - The id of the ecs command.
     * `command_provider` - The provider of the public command.
+    * `content_encoding` - Whether the command content is base64 encoded. Valid values: `Base64`, `PlainText`. Default is `Base64`.
     * `created_at` - The create time of the ecs command.
     * `description` - The description of the ecs command.
+    * `enable_parameter` - Whether to enable custom parameter. Default is `false`.
     * `id` - The id of the ecs command.
     * `invocation_times` - The invocation times of the ecs command. Public commands do not display the invocation times.
     * `name` - The name of the ecs command.
+    * `parameter_definitions` - The custom parameter definitions of the ecs command.
+        * `decimal_precision` - The decimal precision of the custom parameter. This field is required when the parameter type is `Digit`.
+        * `default_value` - The default value of the custom parameter.
+        * `max_length` - The maximum length of the custom parameter. This field is required when the parameter type is `String`.
+        * `max_value` - The maximum value of the custom parameter. This field is required when the parameter type is `Digit`.
+        * `min_length` - The minimum length of the custom parameter. This field is required when the parameter type is `String`.
+        * `min_value` - The minimum value of the custom parameter. This field is required when the parameter type is `Digit`.
+        * `name` - The name of the custom parameter.
+        * `required` - Whether the custom parameter is required.
+        * `type` - The type of the custom parameter. Valid values: `String`, `Digit`.
+    * `project_name` - The project name of the ecs command.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `timeout` - The timeout of the ecs command.
     * `type` - The type of the ecs command.
     * `updated_at` - The update time of the ecs command.
