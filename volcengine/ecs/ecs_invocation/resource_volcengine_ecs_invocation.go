@@ -140,7 +140,7 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 				Type:        schema.TypeSet,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "The custom parameters of the ecs command.",
+				Description: "The custom parameters of the ecs command. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"name": {
@@ -204,7 +204,7 @@ func resourceVolcengineEcsInvocationUpdate(d *schema.ResourceData, meta interfac
 	if err != nil {
 		return fmt.Errorf("error on updating ecs invocation %q, %s", d.Id(), err)
 	}
-	return err
+	return resourceVolcengineEcsInvocationRead(d, meta)
 }
 
 func resourceVolcengineEcsInvocationDelete(d *schema.ResourceData, meta interface{}) (err error) {
