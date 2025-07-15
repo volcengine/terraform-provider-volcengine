@@ -58,6 +58,12 @@ func DataSourceVolcengineEcsInvocations() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The list of status of ecs invocation. Valid values: `Pending`, `Scheduled`, `Running`, `Success`, `Failed`, `Stopped`, `PartialFailed`, `Finished`.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of ecs invocation.",
+			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -193,6 +199,17 @@ func DataSourceVolcengineEcsInvocations() *schema.Resource {
 							Computed:    true,
 							Description: "The recurrence end time of the ecs invocation.",
 						},
+						"parameters": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The custom parameters of the ecs invocation.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the ecs invocation.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

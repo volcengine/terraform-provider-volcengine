@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -63,13 +62,96 @@ func ResourceVolcengineEcsCommand() *schema.Resource {
 				Description: "The username of the ecs command.",
 			},
 			"timeout": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ValidateFunc: validation.IntBetween(10, 600),
-				Description:  "The timeout of the ecs command. Valid value range: 10-600.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The timeout of the ecs command. Unit: seconds. Valid value range: 30~86400. Default is 300.",
+			},
+			"type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "Shell",
+				Description: "The type of the ecs command. Valid values: `Shell`, `Python`, `PowerShell`, `Bat`. Default is `Shell`.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the ecs command.",
+			},
+			"tags": ve.TagsSchema(),
+			"enable_parameter": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to enable custom parameter. Default is `false`.",
+			},
+			"parameter_definitions": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return !d.Get("enable_parameter").(bool)
+				},
+				Description: "The custom parameter definitions of the ecs command.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The name of the custom parameter.",
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The type of the custom parameter. Valid values: `String`, `Digit`.",
+						},
+						"required": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Computed:    true,
+							Description: "Whether the custom parameter is required.",
+						},
+						"default_value": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The default value of the custom parameter.",
+						},
+						"min_length": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The minimum length of the custom parameter. This field is required when the parameter type is `String`.",
+						},
+						"max_length": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The maximum length of the custom parameter. This field is required when the parameter type is `String`.",
+						},
+						"min_value": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The minimum value of the custom parameter. This field is required when the parameter type is `Digit`.",
+						},
+						"max_value": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The maximum value of the custom parameter. This field is required when the parameter type is `Digit`.",
+						},
+						"decimal_precision": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Computed:    true,
+							Description: "The decimal precision of the custom parameter. This field is required when the parameter type is `Digit`.",
+						},
+					},
+				},
 			},
 
+			// computed fields
 			"invocation_times": {
 				Type:        schema.TypeInt,
 				Computed:    true,

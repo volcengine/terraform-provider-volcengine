@@ -25,7 +25,14 @@ The following arguments are supported:
 * `invocation_status` - (Optional) The list of status of ecs invocation. Valid values: `Pending`, `Scheduled`, `Running`, `Success`, `Failed`, `Stopped`, `PartialFailed`, `Finished`.
 * `name_regex` - (Optional) A Name Regex of Resource.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of ecs invocation.
 * `repeat_mode` - (Optional) The repeat mode of ecs invocation. Valid values: `Once`, `Rate`, `Fixed`.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -46,9 +53,14 @@ In addition to all arguments above, the following attributes are exported:
     * `invocation_name` - The name of the ecs invocation.
     * `invocation_status` - The status of the ecs invocation.
     * `launch_time` - The launch time of the ecs invocation.
+    * `parameters` - The custom parameters of the ecs invocation.
+    * `project_name` - The project name of the ecs invocation.
     * `recurrence_end_time` - The recurrence end time of the ecs invocation.
     * `repeat_mode` - The repeat mode of the ecs invocation.
     * `start_time` - The start time of the ecs invocation.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `timeout` - The timeout of the ecs command.
     * `username` - The username of the ecs command.
     * `working_dir` - The working directory of the ecs command.

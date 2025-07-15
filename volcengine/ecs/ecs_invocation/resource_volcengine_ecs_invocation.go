@@ -23,6 +23,7 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineEcsInvocationCreate,
 		Read:   resourceVolcengineEcsInvocationRead,
+		Update: resourceVolcengineEcsInvocationUpdate,
 		Delete: resourceVolcengineEcsInvocationDelete,
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
@@ -74,12 +75,11 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 				Description: "The working directory of the ecs invocation. When this field is not specified, use the value of the field with the same name in ecs command as the default value.",
 			},
 			"timeout": {
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Computed:     true,
-				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(10, 600),
-				Description:  "The timeout of the ecs command. Valid value range: 10-600. When this field is not specified, use the value of the field with the same name in ecs command as the default value.",
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The timeout of the ecs command. Unit: seconds. Valid value range: 30~86400. Default is 60.",
 			},
 			"repeat_mode": {
 				Type:     schema.TypeString,
@@ -91,7 +91,7 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 					"Rate",
 					"Fixed",
 				}, false),
-				Description: "The repeat mode of the ecs invocation. Valid values: `Once`, `Rate`, `Fixed`.",
+				Description: "The repeat mode of the ecs invocation. Valid values: `Once`, `Rate`, `Fixed`. Default is `Once`.",
 			},
 			"frequency": {
 				Type:     schema.TypeString,
@@ -129,7 +129,37 @@ func ResourceVolcengineEcsInvocation() *schema.Resource {
 				},
 				Description: "The recurrence end time of the ecs invocation. RFC3339 format. This field is valid and required when the value of the repeat_mode field is `Rate`.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name of the ecs command.",
+			},
+			"tags": ve.TagsSchema(),
+			"parameters": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The custom parameters of the ecs command. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The name of the parameter.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							ForceNew:    true,
+							Description: "The value of the parameter.",
+						},
+					},
+				},
+			},
 
+			// computed fields
 			"invocation_status": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -166,6 +196,15 @@ func resourceVolcengineEcsInvocationRead(d *schema.ResourceData, meta interface{
 		return fmt.Errorf("error on reading ecs invocation %q, %s", d.Id(), err)
 	}
 	return err
+}
+
+func resourceVolcengineEcsInvocationUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	service := NewEcsInvocationService(meta.(*ve.SdkClient))
+	err = ve.DefaultDispatcher().Update(service, d, ResourceVolcengineEcsInvocation())
+	if err != nil {
+		return fmt.Errorf("error on updating ecs invocation %q, %s", d.Id(), err)
+	}
+	return resourceVolcengineEcsInvocationRead(d, meta)
 }
 
 func resourceVolcengineEcsInvocationDelete(d *schema.ResourceData, meta interface{}) (err error) {
