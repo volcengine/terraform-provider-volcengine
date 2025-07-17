@@ -147,6 +147,9 @@ func (s *VolcengineSecurityGroupService) CreateResource(resourceData *schema.Res
 				return d.Get("vpc_id").(string)
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				// 兼容逻辑
+				(*call.SdkParam)["ServiceManaged"] = false
+
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)

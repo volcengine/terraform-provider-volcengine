@@ -68,6 +68,16 @@ func ResourceVolcengineKafkaInstance() *schema.Resource {
 				Description: "The user password of instance. " +
 					"When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.",
 			},
+			"zone_ids": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Computed: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The list of zone ids. If you need to deploy multiple availability zones for a newly created instance, you can specify three availability zone IDs at the same time.",
+			},
 			"storage_space": {
 				Type:        schema.TypeInt,
 				Optional:    true,
