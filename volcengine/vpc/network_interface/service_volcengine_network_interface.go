@@ -156,6 +156,9 @@ func (s *VolcengineNetworkInterfaceService) CreateResource(resourceData *schema.
 			Action:      "CreateNetworkInterface",
 			ConvertMode: ve.RequestConvertAll,
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				// 兼容逻辑
+				(*call.SdkParam)["ServiceManaged"] = false
+
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},

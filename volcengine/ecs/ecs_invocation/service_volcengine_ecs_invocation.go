@@ -240,7 +240,7 @@ func (VolcengineEcsInvocationService) WithResourceResponseHandlers(invocation ma
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineEcsInvocationService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineEcsInvocationService) CreateResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "InvokeCommand",
@@ -278,10 +278,23 @@ func (s *VolcengineEcsInvocationService) CreateResource(resourceData *schema.Res
 				}
 				return true, nil
 			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (resp *map[string]interface{}, err error) {
+				if err = resource.Retry(5*time.Minute, func() *resource.RetryError {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					if err != nil {
+						errMessage := err.Error()
+						if strings.Contains(errMessage, "InvalidInstanceId.Unregister") {
+							return resource.RetryableError(err)
+						} else {
+							return resource.NonRetryableError(err)
+						}
+					}
+					return nil
+				}); err != nil {
+					return nil, err
+				}
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
