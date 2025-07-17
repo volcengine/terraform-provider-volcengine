@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -146,6 +147,12 @@ func (s *VolcengineKafkaInstanceService) ReadResource(resourceData *schema.Resou
 	if len(data) == 0 {
 		return data, fmt.Errorf("kafka_instance %s not exist ", id)
 	}
+
+	if zoneId, ok := data["ZoneId"]; ok {
+		zoneIds := strings.Split(zoneId.(string), ",")
+		data["ZoneIds"] = zoneIds
+	}
+
 	// parameters 会有默认参数，防止不一致产生
 	delete(data, "Parameters")
 	if parameterSet, ok := resourceData.GetOk("parameters"); ok {
@@ -232,6 +239,9 @@ func (s *VolcengineKafkaInstanceService) CreateResource(resourceData *schema.Res
 				"tags": {
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"zone_ids": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				subnetId := (*call.SdkParam)["SubnetId"].(string)
@@ -249,11 +259,31 @@ func (s *VolcengineKafkaInstanceService) CreateResource(resourceData *schema.Res
 					return false, err
 				}
 				(*call.SdkParam)["VpcId"] = vpcId
-				zoneId, err := ve.ObtainSdkValue("Result.ZoneId", *resp)
+				v, err := ve.ObtainSdkValue("Result.ZoneId", *resp)
 				if err != nil {
 					return false, err
 				}
-				(*call.SdkParam)["ZoneId"] = zoneId
+				zoneId, ok := v.(string)
+				if !ok {
+					return false, fmt.Errorf("Result.ZoneId is not string")
+				}
+
+				var zoneIdsStr string
+				zoneIdsArr, ok := d.Get("zone_ids").([]interface{})
+				if !ok {
+					return false, fmt.Errorf("zone_ids is not slice")
+				}
+				if len(zoneIdsArr) > 0 {
+					zoneIds := make([]string, 0)
+					for _, id := range zoneIdsArr {
+						zoneIds = append(zoneIds, id.(string))
+					}
+					zoneIdsStr = strings.Join(zoneIds, ",")
+				} else {
+					zoneIdsStr = zoneId
+				}
+				(*call.SdkParam)["ZoneId"] = zoneIdsStr
+
 				// update charge info
 				charge := make(map[string]interface{})
 				if (*call.SdkParam)["ChargeType"] == "PrePaid" {

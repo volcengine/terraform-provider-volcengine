@@ -130,6 +130,7 @@ The following arguments are supported:
 * `storage_space` - (Optional) The storage space of instance.
 * `storage_type` - (Optional, ForceNew) The storage type of instance. The value can be ESSD_FlexPL or ESSD_PL0.
 * `tags` - (Optional) The tags of instance.
+* `zone_ids` - (Optional, ForceNew) The list of zone ids. If you need to deploy multiple availability zones for a newly created instance, you can specify three availability zone IDs at the same time.
 
 The `parameters` object supports the following:
 
