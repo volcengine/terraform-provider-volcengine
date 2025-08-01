@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -143,8 +144,8 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Description: "Specify instance specifications.",
 				Optional:    true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					_, ok := d.GetOk("launch_template_id")
-					return !ok
+					lt, ok := d.GetOk("launch_template_id")
+					return !ok && lt == ""
 				},
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -172,6 +173,19 @@ func ResourceVolcengineScalingGroup() *schema.Resource {
 				Computed:    true,
 				ForceNew:    true,
 				Description: "Example recycling mode for the elastic group, with values:\nrelease (default): Release mode.\nrecycle: Shutdown recycling mode.",
+			},
+			"wait_for_capacity_timeout": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "0",
+				ValidateFunc: validDuration,
+				Description:  "Maximum duration that Provider should wait for ASG instances to be InService before timing out. Setting this to \"0\" causes Provider to skip all Capacity Waiting behavior. Default is \"0\".",
+			},
+			"ignore_failed_scaling_activities": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Whether to ignore failed ASG scaling activities while waiting for capacity. Default is false.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
@@ -236,4 +250,20 @@ func serverGroupAttributeHash(v interface{}) int {
 	buf.WriteString(fmt.Sprintf("%v:", m["server_group_id"]))
 	buf.WriteString(fmt.Sprintf("%v:", m["weight"]))
 	return hashcode.String(buf.String())
+}
+
+func validDuration(i interface{}, k string) (warnings []string, errors []error) {
+	value, ok := i.(string)
+	if !ok {
+		errors = append(errors, fmt.Errorf("expected type of %q to be string", k))
+		return warnings, errors
+	}
+	duration, err := time.ParseDuration(value)
+	if err != nil {
+		errors = append(errors, fmt.Errorf("%q cannot be parsed as a duration: %s", k, err))
+	}
+	if duration < 0 {
+		errors = append(errors, fmt.Errorf("%q must be greater than zero", k))
+	}
+	return warnings, errors
 }
