@@ -497,6 +497,7 @@ func ResourceVolcengineEcsInstance() *schema.Resource {
 	dataSource := DataSourceVolcengineEcsInstances().Schema["instances"].Elem.(*schema.Resource).Schema
 	delete(dataSource, "network_interfaces")
 	delete(dataSource, "volumes")
+	delete(dataSource, "eip_address")
 	ve.MergeDateSourceToResource(dataSource, &resource.Schema)
 	return resource
 }

@@ -56,6 +56,7 @@ The following arguments are supported:
 * `db_instance_ids` - (Optional, ForceNew) ID of the RDS database instance.
 * `default_cooldown` - (Optional) The default cooldown interval of the scaling group. Value range: 5 ~ 86400, unit: second. Default value: 300.
 * `desire_instance_number` - (Optional) The desire instance number of the scaling group.
+* `ignore_failed_scaling_activities` - (Optional) Whether to ignore failed ASG scaling activities while waiting for capacity. Default is false.
 * `instance_terminate_policy` - (Optional) The instance terminate policy of the scaling group. Valid values: OldestInstance, NewestInstance, OldestScalingConfigurationWithOldestInstance, OldestScalingConfigurationWithNewestInstance. Default value: OldestScalingConfigurationWithOldestInstance.
 * `launch_template_id` - (Optional) The ID of the launch template bound to the scaling group. The launch template and scaling configuration cannot take effect at the same time.
 * `launch_template_overrides` - (Optional) Specify instance specifications.
@@ -67,6 +68,7 @@ release (default): Release mode.
 recycle: Shutdown recycling mode.
 * `server_group_attributes` - (Optional) The load balancer server group attributes of the scaling group.
 * `tags` - (Optional) Tags.
+* `wait_for_capacity_timeout` - (Optional) Maximum duration that Provider should wait for ASG instances to be InService before timing out. Setting this to "0" causes Provider to skip all Capacity Waiting behavior. Default is "0".
 
 The `launch_template_overrides` object supports the following:
 

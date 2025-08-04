@@ -98,6 +98,9 @@ In addition to all arguments above, the following attributes are exported:
     * `created_at` - The create time of ECS instance.
     * `deployment_set_id` - The ID of DeploymentSet.
     * `description` - The description of ECS instance.
+    * `eip_address` - The EIP address of the ECS instance.
+        * `allocation_id` - The EIP ID of the ECS instance.
+        * `ip_address` - The EIP address of the ECS instance.
     * `gpu_devices` - The GPU device info of Instance.
         * `count` - The Count of GPU device.
         * `encrypted_memory_size` - The Encrypted Memory Size of GPU device.
