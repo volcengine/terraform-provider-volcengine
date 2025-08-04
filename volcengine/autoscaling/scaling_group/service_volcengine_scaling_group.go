@@ -207,7 +207,190 @@ func (s *VolcengineScalingGroupService) CreateResource(resourceData *schema.Reso
 		},
 	}
 	callbacks = append(callbacks, callback)
+
+	// 伸缩配置来源为 LaunchTemplate, 自动启动伸缩组
+	if id, ok := resourceData.GetOk("launch_template_id"); ok && id != "" {
+		enableCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "EnableScalingGroup",
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["ScalingGroupId"] = d.Id()
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, enableCallback)
+	}
+
+	if v, ok := resourceData.GetOk("wait_for_capacity_timeout"); ok {
+		if timeout, _ := time.ParseDuration(v.(string)); timeout > 0 {
+			minInstanceNumber := resourceData.Get("min_instance_number")
+			desireInstanceNumber := resourceData.Get("desire_instance_number")
+			startTime := time.Now().UTC()
+			waitCallback := ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "EnableScalingGroup",
+					ConvertMode: ve.RequestConvertIgnore,
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						compare := func(totalInstanceNumber int) error {
+							minInstanceNumber := minInstanceNumber.(int)
+							if desireInstanceNumber.(int) > 0 {
+								minInstanceNumber = desireInstanceNumber.(int)
+							}
+
+							if totalInstanceNumber < minInstanceNumber {
+								return fmt.Errorf("Expected to have %v instances in the auto scaling group, currently there are %v instances. ", minInstanceNumber, totalInstanceNumber)
+							}
+							return nil
+						}
+
+						if err := s.waitScalingGroupCapacityStateConf(resourceData, timeout, resourceData.Id(), startTime, resourceData.Get("ignore_failed_scaling_activities").(bool), compare); err != nil {
+							return nil, err
+						}
+						return nil, nil
+					},
+				},
+			}
+			callbacks = append(callbacks, waitCallback)
+		}
+	}
+
 	return callbacks
+}
+
+func (s *VolcengineScalingGroupService) waitScalingGroupCapacityStateConf(resourceData *schema.ResourceData, timeout time.Duration, groupId string, startTime time.Time, ignoreFailedScalingActivities bool, compare func(int) error) error {
+	stateConf := &resource.StateChangeConf{
+		Target:  []string{"Satisfied"},
+		Timeout: timeout,
+		Refresh: s.waitScalingGroupCapacitySatisfied(resourceData, groupId, startTime, ignoreFailedScalingActivities, compare),
+	}
+
+	_, err := stateConf.WaitForState()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *VolcengineScalingGroupService) waitScalingGroupCapacitySatisfied(resourceData *schema.ResourceData, groupId string, startTime time.Time, ignoreFailedScalingActivities bool, compare func(int) error) resource.StateRefreshFunc {
+	return func() (result interface{}, state string, err error) {
+		var (
+			resp       *map[string]interface{}
+			results    interface{}
+			ok         bool
+			activities []interface{}
+			instances  []interface{}
+		)
+		if !ignoreFailedScalingActivities {
+			condition := map[string]interface{}{
+				"ScalingGroupId": resourceData.Id(),
+				"StartTime":      startTime.Format("2006-01-02T15:04Z"),
+			}
+			activities, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 50, 1, func(condition map[string]interface{}) ([]interface{}, error) {
+				universalClient := s.Client.UniversalClient
+				action := "DescribeScalingActivities"
+				logger.Debug(logger.ReqFormat, action, condition)
+				if condition == nil {
+					resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
+					if err != nil {
+						return activities, err
+					}
+				} else {
+					resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
+					if err != nil {
+						return activities, err
+					}
+				}
+				logger.Debug(logger.RespFormat, action, resp)
+				results, err = ve.ObtainSdkValue("Result.ScalingActivities", *resp)
+				if err != nil {
+					return activities, err
+				}
+				if results == nil {
+					results = []interface{}{}
+				}
+				if activities, ok = results.([]interface{}); !ok {
+					return activities, errors.New("Result.ScalingActivities is not Slice")
+				}
+				return activities, err
+			})
+			if err != nil {
+				return nil, "", err
+			}
+
+			var errs []error
+			for _, v := range activities {
+				activity, ok := v.(map[string]interface{})
+				if !ok {
+					return nil, "", errors.New("ScalingActivity is not Map")
+				}
+				if activity["StatusCode"] == "Error" || activity["StatusCode"] == "Exception" {
+					errs = append(errs, fmt.Errorf("ScalingActivity %s failed, status: %s, msg: %s", activity["ScalingActivityId"], activity["StatusCode"], activity["ResultMsg"]))
+				}
+			}
+			err = errors.Join(errs...)
+			if err != nil {
+				return nil, "", err
+			}
+		}
+
+		condition := map[string]interface{}{
+			"ScalingGroupId": resourceData.Id(),
+		}
+		instances, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 50, 1, func(condition map[string]interface{}) ([]interface{}, error) {
+			universalClient := s.Client.UniversalClient
+			action := "DescribeScalingInstances"
+			logger.Debug(logger.ReqFormat, action, condition)
+			if condition == nil {
+				resp, err = universalClient.DoCall(getUniversalInfo(action), nil)
+				if err != nil {
+					return activities, err
+				}
+			} else {
+				resp, err = universalClient.DoCall(getUniversalInfo(action), &condition)
+				if err != nil {
+					return activities, err
+				}
+			}
+			logger.Debug(logger.RespFormat, action, condition, *resp)
+			results, err = ve.ObtainSdkValue("Result.ScalingInstances", *resp)
+			if err != nil {
+				return activities, err
+			}
+			if results == nil {
+				results = []interface{}{}
+			}
+			if instances, ok = results.([]interface{}); !ok {
+				return activities, errors.New("Result.ScalingInstances is not Slice")
+			}
+			return instances, err
+		})
+		if err != nil {
+			return nil, "", err
+		}
+
+		totalNumber := 0
+		for _, v := range instances {
+			instance, ok := v.(map[string]interface{})
+			if !ok {
+				return nil, "", errors.New("ScalingInstance is not Map")
+			}
+			if instance["Status"] == "InService" {
+				totalNumber += 1
+			}
+		}
+
+		err = compare(totalNumber)
+		if err != nil {
+			return []interface{}{}, err.Error(), nil
+		}
+		return []interface{}{}, "Satisfied", nil
+	}
 }
 
 func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -354,6 +537,42 @@ func (s *VolcengineScalingGroupService) ModifyResource(resourceData *schema.Reso
 	// 更新Tags
 	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "scalinggroup", resourceData, getUniversalInfo)
 	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	if resourceData.HasChanges("desire_instance_number", "min_instance_number") {
+		if v, ok := resourceData.GetOk("wait_for_capacity_timeout"); ok {
+			if timeout, _ := time.ParseDuration(v.(string)); timeout > 0 {
+				minInstanceNumber := resourceData.Get("min_instance_number")
+				desireInstanceNumber := resourceData.Get("desire_instance_number")
+				startTime := time.Now().UTC()
+				waitCallback := ve.Callback{
+					Call: ve.SdkCall{
+						Action:      "EnableScalingGroup",
+						ConvertMode: ve.RequestConvertIgnore,
+						ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+							compare := func(totalInstanceNumber int) error {
+								minInstanceNumber := minInstanceNumber.(int)
+								if desireInstanceNumber.(int) > 0 {
+									minInstanceNumber = desireInstanceNumber.(int)
+								}
+
+								if totalInstanceNumber != minInstanceNumber {
+									return fmt.Errorf("Expected to have %v instances in the auto scaling group, currently there are %v instances. ", minInstanceNumber, totalInstanceNumber)
+								}
+								return nil
+							}
+
+							if err := s.waitScalingGroupCapacityStateConf(resourceData, timeout, resourceData.Id(), startTime, resourceData.Get("ignore_failed_scaling_activities").(bool), compare); err != nil {
+								return nil, err
+							}
+							return nil, nil
+						},
+					},
+				}
+				callbacks = append(callbacks, waitCallback)
+			}
+		}
+	}
+
 	return callbacks
 }
 
@@ -368,6 +587,9 @@ func (s *VolcengineScalingGroupService) RemoveResource(resourceData *schema.Reso
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {
 				//出现错误后重试

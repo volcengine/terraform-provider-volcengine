@@ -383,6 +383,25 @@ func DataSourceVolcengineEcsInstances() *schema.Resource {
 								Type: schema.TypeString,
 							},
 						},
+						"eip_address": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The EIP address of the ECS instance.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"allocation_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The EIP ID of the ECS instance.",
+									},
+									"ip_address": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The EIP address of the ECS instance.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
