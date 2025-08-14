@@ -260,6 +260,10 @@ func (s *VolcengineVefaasFunctionService) ModifyResource(resourceData *schema.Re
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Id"] = d.Id()
+				if d.HasChanges("source_type", "source") {
+					(*call.SdkParam)["SourceType"] = d.Get("source_type")
+					(*call.SdkParam)["Source"] = d.Get("source")
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
