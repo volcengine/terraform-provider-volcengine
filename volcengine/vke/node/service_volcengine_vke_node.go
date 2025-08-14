@@ -202,6 +202,9 @@ func (s *VolcengineVkeNodeService) CreateResource(resourceData *schema.ResourceD
 				"image_id": {
 					TargetField: "ImageId",
 				},
+				"pre_script": {
+					TargetField: "PreScript",
+				},
 				"initialize_script": {
 					TargetField: "InitializeScript",
 				},
