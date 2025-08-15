@@ -193,6 +193,7 @@ In addition to all arguments above, the following attributes are exported:
     * `name` - The name of Node.
     * `node_pool_id` - The node pool id.
     * `phase` - The Phase of Node.
+    * `pre_script` - The PreScript of NodeConfig.
     * `roles` - The roles of node.
     * `taints` - The Taint of KubernetesConfig.
         * `effect` - The Effect of Taint.
