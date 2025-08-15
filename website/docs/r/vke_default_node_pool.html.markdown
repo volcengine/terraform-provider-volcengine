@@ -156,6 +156,7 @@ The `node_config` object supports the following:
 * `ecs_tags` - (Optional) Tags for Ecs.
 * `initialize_script` - (Optional) The initializeScript of NodeConfig.
 * `name_prefix` - (Optional) The NamePrefix of NodeConfig.
+* `pre_script` - (Optional) The PreScript of NodeConfig.
 
 The `security` object supports the following:
 

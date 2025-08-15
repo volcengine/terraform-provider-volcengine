@@ -498,6 +498,12 @@ func Provider() terraform.ResourceProvider {
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_CUSTOMER_ENDPOINT_SUFFIX", nil),
 				Description: "CUSTOMER ENDPOINT SUFFIX for Volcengine Provider",
 			},
+			"enable_standard_endpoint": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ENABLE_STANDARD_ENDPOINT", nil),
+				Description: "ENABLE STANDARD ENDPOINT for Volcengine Provider",
+			},
 			"proxy_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -1417,6 +1423,7 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 		Region:                 d.Get("region").(string),
 		Endpoint:               d.Get("endpoint").(string),
 		DisableSSL:             d.Get("disable_ssl").(bool),
+		EnableStandardEndpoint: d.Get("enable_standard_endpoint").(bool),
 		CustomerHeaders:        map[string]string{},
 		CustomerEndpoints:      defaultCustomerEndPoints(),
 		CustomerEndpointSuffix: map[string]string{},
@@ -1539,7 +1546,7 @@ func assumeRole(c ve.Config, arTrn, arSessionName, arPolicy string, arDurationSe
 		return nil, err
 	}
 
-	universalClient := ve.NewUniversalClient(sess, c.CustomerEndpoints)
+	universalClient := ve.NewUniversalClient(sess, c.CustomerEndpoints, c.EnableStandardEndpoint)
 
 	action := "AssumeRole"
 	req := map[string]interface{}{

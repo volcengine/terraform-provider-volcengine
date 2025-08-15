@@ -244,6 +244,11 @@ func ResourceVolcengineNodePool() *schema.Resource {
 							},
 							Description: "The DataVolumes of NodeConfig.",
 						},
+						"pre_script": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The PreScript of NodeConfig.",
+						},
 						"initialize_script": {
 							Type:        schema.TypeString,
 							Optional:    true,

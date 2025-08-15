@@ -350,6 +350,9 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						"data_volumes": {
 							Ignore: true,
 						},
+						"pre_script": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
 						},
@@ -607,6 +610,9 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 							},
 						},
 						"additional_container_storage_enabled": {
+							ConvertType: ve.ConvertJsonObject,
+						},
+						"pre_script": {
 							ConvertType: ve.ConvertJsonObject,
 						},
 						"initialize_script": {
@@ -1041,6 +1047,9 @@ func (s *VolcengineNodePoolService) DatasourceResources(*schema.ResourceData, *s
 					}
 					return results
 				},
+			},
+			"NodeConfig.PreScript": {
+				TargetField: "pre_script",
 			},
 			"NodeConfig.InitializeScript": {
 				TargetField: "initialize_script",

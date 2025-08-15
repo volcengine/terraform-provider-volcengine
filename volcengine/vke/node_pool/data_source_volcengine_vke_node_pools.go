@@ -217,6 +217,11 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 							Computed:    true,
 							Description: "The login SshKeyPairName of NodeConfig.",
 						},
+						"pre_script": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The PreScript of NodeConfig.",
+						},
 						"initialize_script": {
 							Type:        schema.TypeString,
 							Computed:    true,

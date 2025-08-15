@@ -327,6 +327,9 @@ func (s *VolcengineDefaultNodePoolService) ModifyResource(resourceData *schema.R
 								},
 							},
 						},
+						"pre_script": {
+							ConvertType: ve.ConvertJsonObject,
+						},
 						"initialize_script": {
 							ConvertType: ve.ConvertJsonObject,
 						},
