@@ -75,6 +75,13 @@ func ResourceVolcengineVkeNode() *schema.Resource {
 				ForceNew:    true,
 				Description: "The ImageId of NodeConfig. This field is valid only when adding an existing instance to the default node pool.",
 			},
+			"pre_script": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "The PreScript of Node. This field is valid only when adding an existing instance to the default node pool.",
+			},
 			"initialize_script": {
 				Type:        schema.TypeString,
 				Optional:    true,

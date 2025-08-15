@@ -209,6 +209,11 @@ func ResourceVolcengineDefaultNodePool() *schema.Resource {
 							},
 							Description: "The Security of NodeConfig.",
 						},
+						"pre_script": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The PreScript of NodeConfig.",
+						},
 						"initialize_script": {
 							Type:        schema.TypeString,
 							Optional:    true,

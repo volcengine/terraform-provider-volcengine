@@ -205,6 +205,7 @@ In addition to all arguments above, the following attributes are exported:
         * `value` - The Value of Tags.
     * `initialize_script` - The initializeScript of NodeConfig.
     * `name_prefix` - The NamePrefix of NodeConfig.
+    * `pre_script` - The PreScript of NodeConfig.
     * `security` - The Security of NodeConfig.
         * `login` - The Login of Security.
             * `password` - The Password of Security.

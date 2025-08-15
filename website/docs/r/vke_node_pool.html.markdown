@@ -290,6 +290,7 @@ The `node_config` object supports the following:
 * `instance_charge_type` - (Optional, ForceNew) The InstanceChargeType of PrePaid instance of NodeConfig. Valid values: PostPaid, PrePaid. Default value: PostPaid.
 * `name_prefix` - (Optional) The NamePrefix of NodeConfig.
 * `period` - (Optional) The Period of PrePaid instance of NodeConfig. Valid values: 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 24, 36. Unit: month. when InstanceChargeType is PrePaid, default value is 12.
+* `pre_script` - (Optional) The PreScript of NodeConfig.
 * `project_name` - (Optional) The project name of the ecs instance.
 * `system_volume` - (Optional) The SystemVolume of NodeConfig.
 

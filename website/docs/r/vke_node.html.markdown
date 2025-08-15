@@ -161,6 +161,7 @@ The following arguments are supported:
 * `keep_instance_name` - (Optional) The flag of keep instance name, the value is `true` or `false`.
 * `kubernetes_config` - (Optional, ForceNew) The KubernetesConfig of Node. This field is valid only when adding an existing instance to the default node pool.
 * `node_pool_id` - (Optional, ForceNew) The node pool id. This field is used to specify the custom node pool to which you want to add nodes. If not filled in, it means added to the default node pool.
+* `pre_script` - (Optional, ForceNew) The PreScript of Node. This field is valid only when adding an existing instance to the default node pool.
 
 The `kubernetes_config` object supports the following:
 

@@ -29,6 +29,7 @@ type Config struct {
 	Region                 string
 	Endpoint               string
 	DisableSSL             bool
+	EnableStandardEndpoint bool
 	CustomerHeaders        map[string]string
 	CustomerEndpoints      map[string]string
 	CustomerEndpointSuffix map[string]string
@@ -78,7 +79,7 @@ func (c *Config) Client() (*SdkClient, error) {
 	client.RdsClient = rdsmysql.New(sess)
 	client.RdsClientV2 = rdsmysqlv2.New(sess)
 	client.IamClient = iam.New(sess)
-	client.UniversalClient = NewUniversalClient(sess, c.CustomerEndpoints)
+	client.UniversalClient = NewUniversalClient(sess, c.CustomerEndpoints, c.EnableStandardEndpoint)
 	client.BypassSvcClient = NewBypassClient(sess, c.CustomerEndpointSuffix)
 
 	//InitLocks()

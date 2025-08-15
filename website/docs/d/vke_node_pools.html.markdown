@@ -210,6 +210,7 @@ In addition to all arguments above, the following attributes are exported:
         * `updating_count` - The UpdatingCount of Node.
     * `period` - The period of the PrePaid instance of NodeConfig.
     * `phase` - The Phase of Status.
+    * `pre_script` - The PreScript of NodeConfig.
     * `priority` - The Priority of AutoScaling.
     * `project_name` - The project name of NodeConfig.
     * `security_group_ids` - The SecurityGroupIds of NodeConfig.
