@@ -71,7 +71,14 @@ func (s *VolcengineCenServiceRouteEntryService) ReadResource(resourceData *schem
 	if tmpId == "" {
 		tmpId = s.ReadResourceId(resourceData.Id())
 	}
+
 	ids := strings.Split(tmpId, "#")
+	if len(ids) != 4 {
+		ids = strings.Split(tmpId, ":")
+		if len(ids) != 4 {
+			return data, fmt.Errorf("cen service route entry id %s is invalid", tmpId)
+		}
+	}
 	req := map[string]interface{}{
 		"CenId":                ids[0],
 		"DestinationCidrBlock": ids[1],
@@ -238,6 +245,14 @@ func (s *VolcengineCenServiceRouteEntryService) ModifyResource(resourceData *sch
 
 func (s *VolcengineCenServiceRouteEntryService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	ids := strings.Split(resourceData.Id(), "#")
+	if len(ids) != 4 {
+		ids = strings.Split(resourceData.Id(), ":")
+		if len(ids) != 4 {
+			return []ve.Callback{{
+				Err: fmt.Errorf("cen service route entry id %s is invalid", resourceData.Id()),
+			}}
+		}
+	}
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteCenServiceRouteEntry",
