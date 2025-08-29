@@ -327,51 +327,56 @@ func (s *VolcengineTosBucketService) CreateResource(resourceData *schema.Resourc
 	callbacks = append(callbacks, callbackVersion)
 
 	//acl
-	callbackAcl := ve.Callback{
-		Call: ve.SdkCall{
-			ServiceCategory: ve.ServiceBypass,
-			Action:          "PutBucketAcl",
-			ConvertMode:     ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"bucket_name": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "BucketName",
-					SpecialParam: &ve.SpecialParam{
-						Type: ve.DomainParam,
-					},
-				},
-				"account_acl": {
-					ConvertType: ve.ConvertListN,
-					TargetField: "Grants",
-					NextLevelConvert: map[string]ve.RequestConvert{
-						"account_id": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "Grantee.ID",
-						},
-						"acl_type": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "Grantee.Type",
-						},
-						"permission": {
-							ConvertType: ve.ConvertDefault,
-							TargetField: "Permission",
+	publicAcl := resourceData.Get("public_acl")
+	_, ok1 := resourceData.GetOk("account_acl")
+	_, ok2 := resourceData.GetOk("bucket_acl_delivered")
+	if publicAcl.(string) != "private" || ok1 || ok2 {
+		callbackAcl := ve.Callback{
+			Call: ve.SdkCall{
+				ServiceCategory: ve.ServiceBypass,
+				Action:          "PutBucketAcl",
+				ConvertMode:     ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"bucket_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketName",
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.DomainParam,
 						},
 					},
+					"account_acl": {
+						ConvertType: ve.ConvertListN,
+						TargetField: "Grants",
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"account_id": {
+								ConvertType: ve.ConvertDefault,
+								TargetField: "Grantee.ID",
+							},
+							"acl_type": {
+								ConvertType: ve.ConvertDefault,
+								TargetField: "Grantee.Type",
+							},
+							"permission": {
+								ConvertType: ve.ConvertDefault,
+								TargetField: "Permission",
+							},
+						},
+					},
+					"bucket_acl_delivered": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketAclDelivered",
+					},
 				},
-				"bucket_acl_delivered": {
-					ConvertType: ve.ConvertDefault,
-					TargetField: "BucketAclDelivered",
-				},
+				BeforeCall:  s.beforePutBucketAcl(),
+				ExecuteCall: s.executePutBucketAcl(),
+				//Refresh: &ve.StateRefresh{
+				//	Target:  []string{"Success"},
+				//	Timeout: resourceData.Timeout(schema.TimeoutCreate),
+				//},
 			},
-			BeforeCall:  s.beforePutBucketAcl(),
-			ExecuteCall: s.executePutBucketAcl(),
-			//Refresh: &ve.StateRefresh{
-			//	Target:  []string{"Success"},
-			//	Timeout: resourceData.Timeout(schema.TimeoutCreate),
-			//},
-		},
+		}
+		callbacks = append(callbacks, callbackAcl)
 	}
-	callbacks = append(callbacks, callbackAcl)
 
 	//tags
 	if _, ok := resourceData.GetOk("tags"); ok {
