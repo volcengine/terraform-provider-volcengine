@@ -2,6 +2,7 @@ package tos_bucket_inventory
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -25,7 +26,19 @@ func ResourceVolcengineTosBucketInventory() *schema.Resource {
 		Update: resourceVolcengineTosBucketInventoryUpdate,
 		Delete: resourceVolcengineTosBucketInventoryDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
+				items := strings.Split(data.Id(), ":")
+				if len(items) != 2 {
+					return []*schema.ResourceData{data}, fmt.Errorf("import id must split with ':'")
+				}
+				if err := data.Set("bucket_name", items[0]); err != nil {
+					return []*schema.ResourceData{data}, err
+				}
+				if err := data.Set("inventory_id", items[1]); err != nil {
+					return []*schema.ResourceData{data}, err
+				}
+				return []*schema.ResourceData{data}, nil
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
