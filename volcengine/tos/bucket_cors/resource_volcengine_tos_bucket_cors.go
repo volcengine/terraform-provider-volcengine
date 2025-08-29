@@ -40,8 +40,9 @@ func ResourceVolcengineTosBucketCors() *schema.Resource {
 				Description: "The name of the bucket.",
 			},
 			"cors_rules": {
-				Type:     schema.TypeSet,
-				Required: true,
+				Type:        schema.TypeSet,
+				Required:    true,
+				Description: "The CORS rules of the bucket.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"allowed_origins": {
