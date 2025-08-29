@@ -12,6 +12,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 
+	tos_bucket_cors "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_cors"
+	tos_bucket_encryption "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_encryption"
+	tos_bucket_notification "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_notification"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_acl_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_bot_analyse_protect_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_cc_rule"
@@ -1110,6 +1114,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tos_bucket_policy":       bucket_policy.ResourceVolcengineTosBucketPolicy(),
 			"volcengine_tos_bucket_inventory":    tos_bucket_inventory.ResourceVolcengineTosBucketInventory(),
 			"volcengine_tos_bucket_realtime_log": tos_bucket_realtime_log.ResourceVolcengineTosBucketRealtimeLog(),
+			"volcengine_tos_bucket_notification": tos_bucket_notification.ResourceVolcengineTosBucketNotification(),
+			"volcengine_tos_bucket_encryption":   tos_bucket_encryption.ResourceVolcengineTosBucketEncryption(),
+			"volcengine_tos_bucket_cors":         tos_bucket_cors.ResourceVolcengineTosBucketCors(),
 
 			// ================ Redis ==============
 			"volcengine_redis_allow_list":           redis_allow_list.ResourceVolcengineRedisAllowList(),
