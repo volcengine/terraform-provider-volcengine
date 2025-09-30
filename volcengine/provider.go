@@ -251,10 +251,12 @@ import (
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_oidc_provider"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_saml_provider"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_service_linked_role"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group_attachment"
@@ -450,13 +452,13 @@ func Provider() terraform.ResourceProvider {
 		Schema: map[string]*schema.Schema{
 			"access_key": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ACCESS_KEY", nil),
 				Description: "The Access Key for Volcengine Provider",
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_SECRET_KEY", nil),
 				Description: "The Secret Key for Volcengine Provider",
 			},
@@ -538,6 +540,51 @@ func Provider() terraform.ResourceProvider {
 							Required: true,
 							DefaultFunc: func() (interface{}, error) {
 								if v := os.Getenv("VOLCENGINE_ASSUME_ROLE_DURATION_SECONDS"); v != "" {
+									return strconv.Atoi(v)
+								}
+								return 3600, nil
+							},
+							ValidateFunc: validation.IntBetween(900, 43200),
+							Description:  "The duration of the session when making the AssumeRole call. Its value ranges from 900 to 43200(seconds), and default is 3600 seconds.",
+						},
+						"policy": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "A more restrictive policy when making the AssumeRole call.",
+						},
+					},
+				},
+			},
+			"assume_role_with_oidc": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "The ASSUME ROLE WITH OIDC block for Volcengine Provider. If provided, terraform will attempt to assume this role using the supplied credentials.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"role_trn": {
+							Type:        schema.TypeString,
+							Required:    true,
+							DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_TRN", nil),
+							Description: "The TRN of the role to assume, in the format `trn:iam:${AccountId}:role/${RoleName}`.",
+						},
+						"oidc_token": {
+							Type:        schema.TypeString,
+							Required:    true,
+							DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_TOKEN", nil),
+							Description: "The OIDC token to use when making the AssumeRole call.",
+						},
+						"role_session_name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							DefaultFunc: schema.EnvDefaultFunc("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_SESSION_NAME", nil),
+							Description: "The session name to use when making the AssumeRole call.",
+						},
+						"duration_seconds": {
+							Type:     schema.TypeInt,
+							Required: true,
+							DefaultFunc: func() (interface{}, error) {
+								if v := os.Getenv("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_DURATION_SECONDS"); v != "" {
 									return strconv.Atoi(v)
 								}
 								return 3600, nil
@@ -658,6 +705,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user_group_policy_attachments": iam_user_group_policy_attachment.DataSourceVolcengineIamUserGroupPolicyAttachments(),
 			"volcengine_iam_saml_providers":                iam_saml_provider.DataSourceVolcengineIamSamlProviders(),
 			"volcengine_iam_access_keys":                   iam_access_key.DataSourceVolcengineIamAccessKeys(),
+			"volcengine_iam_oidc_providers":                iam_oidc_provider.DataSourceVolcengineIamOidcProviders(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),
@@ -1096,6 +1144,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_user_group_attachment":        iam_user_group_attachment.ResourceVolcengineIamUserGroupAttachment(),
 			"volcengine_iam_user_group_policy_attachment": iam_user_group_policy_attachment.ResourceVolcengineIamUserGroupPolicyAttachment(),
 			"volcengine_iam_saml_provider":                iam_saml_provider.ResourceVolcengineIamSamlProvider(),
+			"volcengine_iam_oidc_provider":                iam_oidc_provider.ResourceVolcengineIamOidcProvider(),
+			"volcengine_iam_service_linked_role":          iam_service_linked_role.ResourceVolcengineIamServiceLinkedRole(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instance":           rds_instance.ResourceVolcengineRdsInstance(),
@@ -1470,13 +1520,41 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 		}
 	}
 
-	// get assume role
-	var (
-		arTrn             string
-		arSessionName     string
-		arPolicy          string
-		arDurationSeconds int
-	)
+	// get assume role config
+	assumeRoleConfig, err := getAssumeRoleConfig(d)
+	if err != nil {
+		return nil, err
+	}
+	config.AssumeRoleConfig = assumeRoleConfig
+
+	// get assume role with oidc config
+	assumeRoleWithOidcConfig, err := getAssumeRoleWithOidcConfig(d)
+	if err != nil {
+		return nil, err
+	}
+	config.AssumeRoleWithOidcConfig = assumeRoleWithOidcConfig
+
+	// get credentials
+	cred, err := getCredentials(config)
+	if err != nil {
+		return nil, err
+	}
+	if cred != nil {
+		config.AccessKey = cred["AccessKeyId"].(string)
+		config.SecretKey = cred["SecretAccessKey"].(string)
+		config.SessionToken = cred["SessionToken"].(string)
+	}
+
+	if config.AccessKey == "" || config.SecretKey == "" {
+		return nil, fmt.Errorf("access_key and secret_key are required")
+	}
+
+	client, err := config.Client()
+	return client, err
+}
+
+func getAssumeRoleConfig(d *schema.ResourceData) (*ve.AssumeRoleConfig, error) {
+	assumeRoleConfig := &ve.AssumeRoleConfig{}
 
 	if v, ok := d.GetOk("assume_role"); ok {
 		assumeRoleList, ok := v.([]interface{})
@@ -1488,41 +1566,87 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 			if !ok {
 				return nil, fmt.Errorf("the value of the assume_role is not map ")
 			}
-			arTrn = assumeRoleMap["assume_role_trn"].(string)
-			arSessionName = assumeRoleMap["assume_role_session_name"].(string)
-			arDurationSeconds = assumeRoleMap["duration_seconds"].(int)
-			arPolicy = assumeRoleMap["policy"].(string)
+			assumeRoleConfig.AssumeRoleTrn = assumeRoleMap["assume_role_trn"].(string)
+			assumeRoleConfig.AssumeRoleSessionName = assumeRoleMap["assume_role_session_name"].(string)
+			assumeRoleConfig.DurationSeconds = assumeRoleMap["duration_seconds"].(int)
+			assumeRoleConfig.Policy = assumeRoleMap["policy"].(string)
 		}
 	} else {
-		arTrn = os.Getenv("VOLCENGINE_ASSUME_ROLE_TRN")
-		arSessionName = os.Getenv("VOLCENGINE_ASSUME_ROLE_SESSION_NAME")
+		assumeRoleConfig.AssumeRoleTrn = os.Getenv("VOLCENGINE_ASSUME_ROLE_TRN")
+		assumeRoleConfig.AssumeRoleSessionName = os.Getenv("VOLCENGINE_ASSUME_ROLE_SESSION_NAME")
 		duration := os.Getenv("VOLCENGINE_ASSUME_ROLE_DURATION_SECONDS")
 		if duration != "" {
 			durationSeconds, err := strconv.Atoi(duration)
 			if err != nil {
 				return nil, err
 			}
-			arDurationSeconds = durationSeconds
+			assumeRoleConfig.DurationSeconds = durationSeconds
 		} else {
-			arDurationSeconds = 3600
+			assumeRoleConfig.DurationSeconds = 3600
 		}
 	}
 
-	if arTrn != "" && arSessionName != "" {
-		cred, err := assumeRole(config, arTrn, arSessionName, arPolicy, arDurationSeconds)
-		if err != nil {
-			return nil, err
-		}
-		config.AccessKey = cred["AccessKeyId"].(string)
-		config.SecretKey = cred["SecretAccessKey"].(string)
-		config.SessionToken = cred["SessionToken"].(string)
-	}
-
-	client, err := config.Client()
-	return client, err
+	return assumeRoleConfig, nil
 }
 
-func assumeRole(c ve.Config, arTrn, arSessionName, arPolicy string, arDurationSeconds int) (map[string]interface{}, error) {
+func getAssumeRoleWithOidcConfig(d *schema.ResourceData) (*ve.AssumeRoleWithOidcConfig, error) {
+	assumeRoleConfig := &ve.AssumeRoleWithOidcConfig{}
+
+	if v, ok := d.GetOk("assume_role_with_oidc"); ok {
+		assumeRoleList, ok := v.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("the assume_role_with_oidc is not slice ")
+		}
+		if len(assumeRoleList) == 1 {
+			assumeRoleMap, ok := assumeRoleList[0].(map[string]interface{})
+			if !ok {
+				return nil, fmt.Errorf("the value of the assume_role_with_oidc is not map ")
+			}
+			assumeRoleConfig.AssumeRoleWithOidcTrn = assumeRoleMap["role_trn"].(string)
+			assumeRoleConfig.AssumeRoleWithOidcSessionName = assumeRoleMap["role_session_name"].(string)
+			assumeRoleConfig.OidcToken = assumeRoleMap["oidc_token"].(string)
+			assumeRoleConfig.DurationSeconds = assumeRoleMap["duration_seconds"].(int)
+			assumeRoleConfig.Policy = assumeRoleMap["policy"].(string)
+		}
+	} else {
+		assumeRoleConfig.AssumeRoleWithOidcTrn = os.Getenv("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_TRN")
+		assumeRoleConfig.AssumeRoleWithOidcSessionName = os.Getenv("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_SESSION_NAME")
+		assumeRoleConfig.OidcToken = os.Getenv("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_TOKEN")
+		duration := os.Getenv("VOLCENGINE_ASSUME_ROLE_WITH_OIDC_DURATION_SECONDS")
+		if duration != "" {
+			durationSeconds, err := strconv.Atoi(duration)
+			if err != nil {
+				return nil, err
+			}
+			assumeRoleConfig.DurationSeconds = durationSeconds
+		} else {
+			assumeRoleConfig.DurationSeconds = 3600
+		}
+	}
+
+	return assumeRoleConfig, nil
+}
+
+func getCredentials(c ve.Config) (map[string]interface{}, error) {
+	cred, err := assumeRoleWithOidc(c)
+	if err != nil {
+		return nil, err
+	}
+	if cred != nil {
+		return cred, nil
+	}
+	return assumeRole(c)
+}
+
+func assumeRole(c ve.Config) (map[string]interface{}, error) {
+	if c.AccessKey == "" || c.AssumeRoleConfig == nil {
+		return nil, nil
+	}
+	assumeRoleConfig := c.AssumeRoleConfig
+	if assumeRoleConfig.AssumeRoleTrn == "" || assumeRoleConfig.AssumeRoleSessionName == "" {
+		return nil, nil
+	}
+
 	version := fmt.Sprintf("%s/%s", ve.TerraformProviderName, ve.TerraformProviderVersion)
 	conf := volcengine.NewConfig().
 		WithRegion(c.Region).
@@ -1557,12 +1681,76 @@ func assumeRole(c ve.Config, arTrn, arSessionName, arPolicy string, arDurationSe
 
 	action := "AssumeRole"
 	req := map[string]interface{}{
-		"RoleTrn":         arTrn,
-		"RoleSessionName": arSessionName,
-		"DurationSeconds": arDurationSeconds,
-		"Policy":          arPolicy,
+		"RoleTrn":         assumeRoleConfig.AssumeRoleTrn,
+		"RoleSessionName": assumeRoleConfig.AssumeRoleSessionName,
+		"DurationSeconds": assumeRoleConfig.DurationSeconds,
+		"Policy":          assumeRoleConfig.Policy,
 	}
 	resp, err := universalClient.DoCall(getUniversalInfo(action), &req)
+	if err != nil {
+		return nil, fmt.Errorf("AssumeRole failed, error: %s", err.Error())
+	}
+	results, err := ve.ObtainSdkValue("Result.Credentials", *resp)
+	if err != nil {
+		return nil, err
+	}
+	cred, ok := results.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("AssumeRole Result.Credentials is not Map")
+	}
+	return cred, nil
+}
+
+func assumeRoleWithOidc(c ve.Config) (map[string]interface{}, error) {
+	if c.AccessKey != "" || c.AssumeRoleWithOidcConfig == nil {
+		return nil, nil
+	}
+	assumeRoleWithOidcConfig := c.AssumeRoleWithOidcConfig
+	if assumeRoleWithOidcConfig.AssumeRoleWithOidcTrn == "" || assumeRoleWithOidcConfig.AssumeRoleWithOidcSessionName == "" || assumeRoleWithOidcConfig.OidcToken == "" {
+		return nil, nil
+	}
+
+	version := fmt.Sprintf("%s/%s", ve.TerraformProviderName, ve.TerraformProviderVersion)
+	conf := volcengine.NewConfig().
+		WithRegion(c.Region).
+		WithExtraUserAgent(volcengine.String(version)).
+		WithCredentials(credentials.NewStaticCredentials("oidc-ak", "oidc-sk", "")).
+		WithDisableSSL(true).
+		WithEndpoint(ve.VolcengineStsEndpoint).
+		WithExtendHttpRequest(func(ctx context.Context, request *http.Request) {
+			if len(c.CustomerHeaders) > 0 {
+				for k, v := range c.CustomerHeaders {
+					request.Header.Add(k, v)
+				}
+			}
+		})
+
+	if c.ProxyUrl != "" {
+		u, _ := url.Parse(c.ProxyUrl)
+		t := &http.Transport{
+			Proxy: http.ProxyURL(u),
+		}
+		httpClient := http.DefaultClient
+		httpClient.Transport = t
+		httpClient.Timeout = time.Duration(30000) * time.Millisecond
+	}
+
+	sess, err := session.NewSession(conf)
+	if err != nil {
+		return nil, err
+	}
+
+	universalClient := ve.NewUniversalClient(sess, c.CustomerEndpoints, c.EnableStandardEndpoint)
+
+	action := "AssumeRoleWithOIDC"
+	req := map[string]interface{}{
+		"RoleTrn":         assumeRoleWithOidcConfig.AssumeRoleWithOidcTrn,
+		"RoleSessionName": assumeRoleWithOidcConfig.AssumeRoleWithOidcSessionName,
+		"OIDCToken":       assumeRoleWithOidcConfig.OidcToken,
+		"DurationSeconds": assumeRoleWithOidcConfig.DurationSeconds,
+		"Policy":          assumeRoleWithOidcConfig.Policy,
+	}
+	resp, err := universalClient.DoCall(getPostUniversalInfo(action), &req)
 	if err != nil {
 		return nil, fmt.Errorf("AssumeRole failed, error: %s", err.Error())
 	}
@@ -1583,6 +1771,16 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Version:     "2018-01-01",
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
+		Action:      actionName,
+	}
+}
+
+func getPostUniversalInfo(actionName string) ve.UniversalInfo {
+	return ve.UniversalInfo{
+		ServiceName: "sts",
+		Version:     "2018-01-01",
+		HttpMethod:  ve.POST,
+		ContentType: ve.FormUrlencoded,
 		Action:      actionName,
 	}
 }
