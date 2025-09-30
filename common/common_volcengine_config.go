@@ -23,17 +23,34 @@ import (
 )
 
 type Config struct {
-	AccessKey              string
-	SecretKey              string
-	SessionToken           string
-	Region                 string
-	Endpoint               string
-	DisableSSL             bool
-	EnableStandardEndpoint bool
-	CustomerHeaders        map[string]string
-	CustomerEndpoints      map[string]string
-	CustomerEndpointSuffix map[string]string
-	ProxyUrl               string
+	AccessKey                string
+	SecretKey                string
+	SessionToken             string
+	Region                   string
+	Endpoint                 string
+	DisableSSL               bool
+	EnableStandardEndpoint   bool
+	CustomerHeaders          map[string]string
+	CustomerEndpoints        map[string]string
+	CustomerEndpointSuffix   map[string]string
+	ProxyUrl                 string
+	AssumeRoleConfig         *AssumeRoleConfig
+	AssumeRoleWithOidcConfig *AssumeRoleWithOidcConfig
+}
+
+type AssumeRoleConfig struct {
+	AssumeRoleTrn         string
+	AssumeRoleSessionName string
+	Policy                string
+	DurationSeconds       int
+}
+
+type AssumeRoleWithOidcConfig struct {
+	AssumeRoleWithOidcTrn         string
+	AssumeRoleWithOidcSessionName string
+	OidcToken                     string
+	Policy                        string
+	DurationSeconds               int
 }
 
 func (c *Config) Client() (*SdkClient, error) {

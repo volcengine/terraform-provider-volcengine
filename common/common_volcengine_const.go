@@ -53,4 +53,6 @@ const (
 
 	VolcengineIpv4EndpointSuffix   = "volcengineapi.com"
 	VolcengineBypassEndpointSuffix = "volces.com"
+
+	VolcengineStsEndpoint = "sts.volcengineapi.com"
 )

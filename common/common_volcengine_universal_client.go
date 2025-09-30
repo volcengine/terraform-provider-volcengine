@@ -30,6 +30,7 @@ type ContentType int
 const (
 	Default ContentType = iota
 	ApplicationJSON
+	FormUrlencoded
 )
 
 type RegionType int
@@ -149,6 +150,8 @@ func getContentType(m ContentType) string {
 	switch m {
 	case ApplicationJSON:
 		return "application/json"
+	case FormUrlencoded:
+		return "x-www-form-urlencoded"
 	default:
 		return ""
 	}
