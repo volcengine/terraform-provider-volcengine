@@ -71,6 +71,52 @@ func ResourceVolcengineNodePool() *schema.Resource {
 				Description: "Whether to keep instance name when adding an existing instance to a custom node pool, the value is `true` or `false`.\n" +
 					"This field is valid only when adding new instances to the custom node pool.",
 			},
+			"management": {
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Computed:    true,
+				Description: "The Management Config of NodePool.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether to enable the management function of the node pool. Default is `false`.",
+						},
+						"remedy_config": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Computed: true,
+							DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+								return !d.Get("management.0.enabled").(bool)
+							},
+							Description: "The Remedy Config of NodePool. This field is valid when the value of `enabled` is `true`.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "Whether to enable the remedy function of the node pool. Default is `false`.",
+									},
+									"id": {
+										Type:     schema.TypeString,
+										Optional: true,
+										Computed: true,
+										DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+											return !d.Get("management.0.remedy_config.0.enabled").(bool)
+										},
+										Description: "The ID of the remedy policy. This field is valid when the value of `enabled` is `true`.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			"auto_scaling": {
 				Type:          schema.TypeList,
 				MaxItems:      1,
