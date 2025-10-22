@@ -28,6 +28,7 @@ resource "volcengine_vke_cluster" "foo" {
   description               = "created by terraform"
   project_name              = "default"
   delete_protection_enabled = false
+  irsa_enabled              = false
   cluster_config {
     subnet_ids                       = [volcengine_subnet.foo.id]
     api_server_public_access_enabled = true
@@ -63,6 +64,9 @@ data "volcengine_images" "foo" {
 resource "volcengine_vke_node_pool" "foo" {
   cluster_id = volcengine_vke_cluster.foo.id
   name       = "acc-test-node-pool"
+  management {
+    enabled = false
+  }
   auto_scaling {
     enabled          = true
     min_replicas     = 0

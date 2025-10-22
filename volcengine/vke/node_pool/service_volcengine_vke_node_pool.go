@@ -208,6 +208,16 @@ func (s *VolcengineNodePoolService) ReadResource(resourceData *schema.ResourceDa
 		delete(result["NodeConfig"].(map[string]interface{}), "Tags")
 	}
 
+	if v, exist := result["Management"]; exist {
+		if managementMap, ok := v.(map[string]interface{}); ok {
+			if remedyConfig, ok := managementMap["RemedyConfig"]; ok {
+				if remedyConfigMap, ok := remedyConfig.(map[string]interface{}); ok {
+					managementMap["RemedyConfig"] = []interface{}{remedyConfigMap}
+				}
+			}
+		}
+	}
+
 	logger.Debug(logger.RespFormat, "result of ReadResource ", result)
 	return result, err
 }
@@ -448,6 +458,27 @@ func (s *VolcengineNodePoolService) CreateResource(resourceData *schema.Resource
 						},
 					},
 				},
+				"management": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"enabled": {
+							TargetField: "Enabled",
+							ForceGet:    true,
+						},
+						"remedy_config": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"enabled": {
+									TargetField: "Enabled",
+									ForceGet:    true,
+								},
+								"id": {
+									TargetField: "Id",
+								},
+							},
+						},
+					},
+				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
@@ -684,6 +715,27 @@ func (s *VolcengineNodePoolService) ModifyResource(resourceData *schema.Resource
 											ForceGet:    true,
 										},
 									},
+								},
+							},
+						},
+					},
+				},
+				"management": {
+					ConvertType: ve.ConvertJsonObject,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"enabled": {
+							TargetField: "Enabled",
+							ForceGet:    true,
+						},
+						"remedy_config": {
+							ConvertType: ve.ConvertJsonObject,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"enabled": {
+									TargetField: "Enabled",
+									ForceGet:    true,
+								},
+								"id": {
+									TargetField: "Id",
 								},
 							},
 						},

@@ -515,6 +515,40 @@ func DataSourceVolcengineNodePools() *schema.Resource {
 								},
 							},
 						},
+						"management": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The Management Config of NodePool.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to enable the management function of the node pool. Default is `false`.",
+									},
+									"remedy_config": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "The Remedy Config of NodePool.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enabled": {
+													Type:        schema.TypeBool,
+													Computed:    true,
+													Description: "Whether to enable the remedy function of the node pool.",
+												},
+												"id": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Computed:    true,
+													Description: "The ID of the remedy policy.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
 				},
 			},

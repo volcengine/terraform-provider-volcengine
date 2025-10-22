@@ -223,6 +223,12 @@ func (s *VolcengineVkeClusterService) ReadResource(resourceData *schema.Resource
 		return data, fmt.Errorf("Vke Cluster %s not exist ", clusterId)
 	}
 
+	if irsaConfig, exist := data["IrsaConfig"]; exist {
+		if irsaConfigMap, ok := irsaConfig.(map[string]interface{}); ok {
+			data["IrsaEnabled"] = irsaConfigMap["Enabled"]
+		}
+	}
+
 	return data, err
 }
 
@@ -372,6 +378,9 @@ func (s *VolcengineVkeClusterService) CreateResource(resourceData *schema.Resour
 						},
 					},
 				},
+				"irsa_enabled": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if billingType, ok := (*call.SdkParam)["ClusterConfig.ApiServerPublicAccessConfig.PublicAccessNetworkConfig.BillingType"]; ok {
@@ -478,6 +487,10 @@ func (s *VolcengineVkeClusterService) ModifyResource(resourceData *schema.Resour
 							},
 						},
 					},
+				},
+				"irsa_enabled": {
+					TargetField: "IrsaEnabled",
+					ForceGet:    true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {

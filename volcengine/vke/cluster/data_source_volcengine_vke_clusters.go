@@ -522,6 +522,45 @@ func DataSourceVolcengineVkeVkeClusters() *schema.Resource {
 								},
 							},
 						},
+						"irsa_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The IRSA configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to enable IRSA for the cluster.",
+									},
+									"issuer": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The issuer of the IRSA.",
+									},
+									"audience": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The audience of the IRSA.",
+									},
+									"oidc_trn": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The OIDC trn of the IRSA.",
+									},
+									"open_id_config_url": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The OpenID Connect configuration URL of the IRSA.",
+									},
+									"jwks_url": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The JWKS URL of the IRSA.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

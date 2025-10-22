@@ -194,6 +194,11 @@ In addition to all arguments above, the following attributes are exported:
         * `value` - The Value of KubernetesConfig.
     * `login_key_pair_name` - The login SshKeyPairName of NodeConfig.
     * `login_type` - The login type of NodeConfig.
+    * `management` - The Management Config of NodePool.
+        * `enabled` - Whether to enable the management function of the node pool. Default is `false`.
+        * `remedy_config` - The Remedy Config of NodePool.
+            * `enabled` - Whether to enable the remedy function of the node pool.
+            * `id` - The ID of the remedy policy.
     * `max_replicas` - The MaxReplicas of AutoScaling.
     * `min_replicas` - The MinReplicas of AutoScaling.
     * `name_prefix` - The NamePrefix of NodeConfig.
