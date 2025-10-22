@@ -222,6 +222,7 @@ Note that removing instance ids from the list will only remove the nodes from cl
 It is not recommended to use this field, it is recommended to use `volcengine_vke_node` resource to add an existing instance to a custom node pool.
 * `keep_instance_name` - (Optional) Whether to keep instance name when adding an existing instance to a custom node pool, the value is `true` or `false`.
 This field is valid only when adding new instances to the custom node pool.
+* `management` - (Optional) The Management Config of NodePool.
 * `name` - (Optional) The Name of NodePool.
 * `tags` - (Optional) Tags.
 
@@ -274,6 +275,11 @@ The `login` object supports the following:
 * `password` - (Optional) The Password of Security, this field must be encoded with base64.
 * `ssh_key_pair_name` - (Optional) The SshKeyPairName of Security.
 
+The `management` object supports the following:
+
+* `enabled` - (Optional) Whether to enable the management function of the node pool. Default is `false`.
+* `remedy_config` - (Optional) The Remedy Config of NodePool. This field is valid when the value of `enabled` is `true`.
+
 The `node_config` object supports the following:
 
 * `instance_type_ids` - (Required) The InstanceTypeIds of NodeConfig. The value can get from volcengine_vke_support_resource_types datasource.
@@ -293,6 +299,11 @@ The `node_config` object supports the following:
 * `pre_script` - (Optional) The PreScript of NodeConfig.
 * `project_name` - (Optional) The project name of the ecs instance.
 * `system_volume` - (Optional) The SystemVolume of NodeConfig.
+
+The `remedy_config` object supports the following:
+
+* `enabled` - (Optional) Whether to enable the remedy function of the node pool. Default is `false`.
+* `id` - (Optional) The ID of the remedy policy. This field is valid when the value of `enabled` is `true`.
 
 The `security` object supports the following:
 

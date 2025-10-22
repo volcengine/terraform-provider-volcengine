@@ -112,6 +112,13 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of the cluster.
     * `eip_allocation_id` - Eip allocation Id.
     * `id` - The ID of the Cluster.
+    * `irsa_config` - The IRSA configuration.
+        * `audience` - The audience of the IRSA.
+        * `enabled` - Whether to enable IRSA for the cluster.
+        * `issuer` - The issuer of the IRSA.
+        * `jwks_url` - The JWKS URL of the IRSA.
+        * `oidc_trn` - The OIDC trn of the IRSA.
+        * `open_id_config_url` - The OpenID Connect configuration URL of the IRSA.
     * `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
     * `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
     * `kubernetes_version` - The Kubernetes version information corresponding to the cluster, specific to the patch version.
