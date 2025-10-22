@@ -40,6 +40,7 @@ resource "volcengine_vke_cluster" "foo" {
   description               = "created by terraform"
   project_name              = "default"
   delete_protection_enabled = false
+  irsa_enabled              = false
   cluster_config {
     subnet_ids                       = [volcengine_subnet.foo.id]
     api_server_public_access_enabled = true
@@ -75,6 +76,9 @@ data "volcengine_images" "foo" {
 resource "volcengine_vke_node_pool" "foo" {
   cluster_id = volcengine_vke_cluster.foo.id
   name       = "acc-test-node-pool"
+  management {
+    enabled = false
+  }
   auto_scaling {
     enabled          = true
     min_replicas     = 0
@@ -175,6 +179,7 @@ The following arguments are supported:
 * `client_token` - (Optional) ClientToken is a case-sensitive string of no more than 64 ASCII characters passed in by the caller.
 * `delete_protection_enabled` - (Optional) The delete protection of the cluster, the value is `true` or `false`.
 * `description` - (Optional) The description of the cluster.
+* `irsa_enabled` - (Optional) Whether to enable IRSA for the cluster. This field is valid only when modifying the cluster.
 * `kubernetes_version` - (Optional, ForceNew) The version of Kubernetes specified when creating a VKE cluster (specified to patch version), with an example value of `1.24`. If not specified, the latest Kubernetes version supported by VKE is used by default, which is a 3-segment version format starting with a lowercase v, that is, KubernetesVersion with IsLatestVersion=True in the return value of ListSupportedVersions.
 * `logging_config` - (Optional) Cluster log configuration information.
 * `project_name` - (Optional) The project name of the cluster.
@@ -242,6 +247,13 @@ The `vpc_cni_config` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `eip_allocation_id` - Eip allocation Id.
+* `irsa_config` - The IRSA configuration.
+    * `audience` - The audience of the IRSA.
+    * `enabled` - Whether to enable IRSA for the cluster.
+    * `issuer` - The issuer of the IRSA.
+    * `jwks_url` - The JWKS URL of the IRSA.
+    * `oidc_trn` - The OIDC trn of the IRSA.
+    * `open_id_config_url` - The OpenID Connect configuration URL of the IRSA.
 * `kubeconfig_private` - Kubeconfig data with private network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
 * `kubeconfig_public` - Kubeconfig data with public network access, returned in BASE64 encoding, it is suggested to use vke_kubeconfig instead.
 
