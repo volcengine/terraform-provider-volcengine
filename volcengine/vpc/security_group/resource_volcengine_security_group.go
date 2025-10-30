@@ -60,6 +60,13 @@ func ResourceVolcengineSecurityGroup() *schema.Resource {
 				Computed:    true,
 				Description: "Name of SecurityGroup.",
 			},
+			"type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Computed:    true,
+				Description: "Type of SecurityGroup. Valid values: `cidr_only`. If this parameter is not specified, it is a normal security group.",
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,

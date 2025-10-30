@@ -294,7 +294,9 @@ func ResourceVolcengineVkeCluster() *schema.Resource {
 											"Audit: Cluster audit logs.\n" +
 											"KubeApiServer: kube-apiserver component logs.\n" +
 											"KubeScheduler: kube-scheduler component logs.\n" +
-											"KubeControllerManager: kube-controller-manager component logs.",
+											"KubeControllerManager: kube-controller-manager component logs.\n" +
+											"Etcd: etcd component logs.\n" +
+											"ClusterAutoscaler: cluster-autoscaler component logs.",
 									},
 									"log_ttl": {
 										Type:         schema.TypeInt,
