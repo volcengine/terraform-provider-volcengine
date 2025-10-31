@@ -42,7 +42,7 @@ In addition to all arguments above, the following attributes are exported:
     * `tags` - Tags.
         * `key` - The Key of Tags.
         * `value` - The Value of Tags.
-    * `type` - A Name Regex of SecurityGroup.
+    * `type` - The type of SecurityGroup.
     * `vpc_id` - The ID of Vpc.
 * `total_count` - The total count of SecurityGroup query.
 

@@ -22,6 +22,7 @@ The following arguments are supported:
 * `project_name` - (Optional) The ProjectName of SecurityGroup.
 * `security_group_name` - (Optional) Name of SecurityGroup.
 * `tags` - (Optional) Tags.
+* `type` - (Optional, ForceNew) Type of SecurityGroup. Valid values: `cidr_only`. If this parameter is not specified, it is a normal security group.
 
 The `tags` object supports the following:
 
