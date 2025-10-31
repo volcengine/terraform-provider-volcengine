@@ -262,6 +262,14 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 					return false, errors.New("certificate_id is only allowed for HTTPS")
 				}
 
+				// 3. connection_drain_timeout
+				if d.Get("connection_drain_enabled") == "on" {
+					timeout := d.Get("connection_drain_timeout").(int)
+					if timeout == 0 {
+						(*call.SdkParam)["ConnectionDrainTimeout"] = 0
+					}
+				}
+
 				return true, nil
 			},
 			AfterLocked: s.refreshAclStatus(),

@@ -49,6 +49,18 @@ resource "volcengine_vke_cluster" "foo" {
   services_config {
     service_cidrsv4 = ["172.30.0.0/18"]
   }
+  logging_config {
+    log_setups {
+      log_type = "ClusterAutoscaler"
+      enabled = true
+      log_ttl = 60
+    }
+    log_setups {
+      log_type = "Etcd"
+      enabled = false
+      log_ttl = 60
+    }
+  }
   tags {
     key   = "tf-k1"
     value = "tf-v1"
