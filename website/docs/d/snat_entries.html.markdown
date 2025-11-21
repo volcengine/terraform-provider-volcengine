@@ -90,6 +90,7 @@ In addition to all arguments above, the following attributes are exported:
     * `eip_id` - The id of the public ip address used by the SNAT entry.
     * `id` - The id of the SNAT entry.
     * `nat_gateway_id` - The id of the nat gateway to which the entry belongs.
+    * `nat_ip_id` - The ID of the intranet NAT gateway's transit IP.
     * `snat_entry_id` - The id of the SNAT entry.
     * `snat_entry_name` - The name of the SNAT entry.
     * `source_cidr` - The SourceCidr of the SNAT entry.

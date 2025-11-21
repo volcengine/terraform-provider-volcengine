@@ -79,6 +79,11 @@ func DataSourceVolcengineNatGateways() *schema.Resource {
 							Computed:    true,
 							Description: "The ID of the NatGateway.",
 						},
+						"network_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The network type of the NatGateway.",
+						},
 						"nat_gateway_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -174,6 +179,18 @@ func DataSourceVolcengineNatGateways() *schema.Resource {
 							Description: "The update time of the NatGateway.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"snat_entry_ids": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Computed:    true,
+							Description: "A list of snat entry ids.",
+						},
+						"dnat_entry_ids": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Computed:    true,
+							Description: "A list of dnat entry ids.",
+						},
 					},
 				},
 			},

@@ -64,7 +64,7 @@ func ResourceVolcengineDnatEntry() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validation.StringInSlice([]string{"tcp", "udp"}, false),
-				Description:  "The network protocol.",
+				Description:  "The network protocol. Valid values: `tcp`, `udp`.",
 			},
 			"dnat_entry_name": {
 				Type:        schema.TypeString,

@@ -69,6 +69,11 @@ func DataSourceVolcengineDnatEntries() *schema.Resource {
 				Description: "List of DNAT entries.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the DNAT entry.",
+						},
 						"dnat_entry_id": {
 							Type:        schema.TypeString,
 							Computed:    true,

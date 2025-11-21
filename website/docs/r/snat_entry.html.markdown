@@ -63,8 +63,9 @@ resource "volcengine_snat_entry" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `eip_id` - (Required) The id of the public ip address used by the SNAT entry.
 * `nat_gateway_id` - (Required, ForceNew) The id of the nat gateway to which the entry belongs.
+* `eip_id` - (Optional) The id of the public ip address used by the SNAT entry. This field is required when the nat gateway is a internet NAT gateway.
+* `nat_ip_id` - (Optional) The ID of the intranet NAT gateway's transit IP. This field is required when the nat gateway is a intranet NAT gateway.
 * `snat_entry_name` - (Optional) The name of the SNAT entry.
 * `source_cidr` - (Optional, ForceNew) The SourceCidr of the SNAT entry. Only one of `subnet_id,source_cidr` can be specified.
 * `subnet_id` - (Optional, ForceNew) The id of the subnet that is required to access the internet. Only one of `subnet_id,source_cidr` can be specified.

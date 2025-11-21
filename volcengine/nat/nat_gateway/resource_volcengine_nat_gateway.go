@@ -46,11 +46,19 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				ForceNew:    true,
 				Description: "The ID of the Subnet.",
 			},
-			"spec": {
+			"network_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
-				Description: "The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large` or leave blank.",
+				ForceNew:    true,
+				Default:     "internet",
+				Description: "The network type of the NatGateway. Valid values are `internet` and `intranet`. Default value is `internet`.",
+			},
+			"spec": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+				Description: "The specification of the NatGateway. Optional choice contains `Small`(default), `Medium`, `Large` or leave blank.\n" +
+					"When the `billing_type` is `PostPaidByUsage`, this field should not be specified.",
 			},
 			"nat_gateway_name": {
 				Type:        schema.TypeString,
@@ -63,11 +71,12 @@ func ResourceVolcengineNatGateway() *schema.Resource {
 				Description: "The description of the NatGateway.",
 			},
 			"billing_type": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Default:     "PostPaid",
-				Description: "The billing type of the NatGateway, the value is `PostPaid` or `PrePaid`.",
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "PostPaid",
+				Description: "The billing type of the NatGateway, the value is `PostPaid` or `PrePaid` or `PostPaidByUsage`. Default value is `PostPaid`.\n" +
+					"When the `network_type` is `intranet`, the billing type must be `PostPaidByUsage`.",
 			},
 			//"period_unit": {
 			//	Type:     schema.TypeString,

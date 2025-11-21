@@ -105,6 +105,11 @@ func DataSourceVolcengineSnatEntries() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the SNAT entry.",
 						},
+						"nat_ip_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the intranet NAT gateway's transit IP.",
+						},
 					},
 				},
 			},

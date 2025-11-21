@@ -71,7 +71,7 @@ The following arguments are supported:
 * `internal_ip` - (Required) Provides the internal IP address.
 * `internal_port` - (Required) The port or port segment on which the cloud server instance provides services to the public network.
 * `nat_gateway_id` - (Required, ForceNew) The id of the nat gateway to which the entry belongs.
-* `protocol` - (Required) The network protocol.
+* `protocol` - (Required) The network protocol. Valid values: `tcp`, `udp`.
 * `dnat_entry_name` - (Optional) The name of the DNAT rule.
 
 ## Attributes Reference
