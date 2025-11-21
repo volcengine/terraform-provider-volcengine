@@ -69,6 +69,7 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - The creation time of the NatGateway.
     * `deleted_time` - The deleted time of the NatGateway.
     * `description` - The description of the NatGateway.
+    * `dnat_entry_ids` - A list of dnat entry ids.
     * `eip_addresses` - The eip addresses of the NatGateway.
         * `allocation_id` - The ID of Eip.
         * `eip_address` - The address of Eip.
@@ -78,7 +79,9 @@ In addition to all arguments above, the following attributes are exported:
     * `nat_gateway_id` - The ID of the NatGateway.
     * `nat_gateway_name` - The name of the NatGateway.
     * `network_interface_id` - The ID of the network interface.
+    * `network_type` - The network type of the NatGateway.
     * `overdue_time` - The overdue time of the NatGateway.
+    * `snat_entry_ids` - A list of snat entry ids.
     * `spec` - The specification of the NatGateway.
     * `status` - The status of the NatGateway.
     * `subnet_id` - The ID of the Subnet.
