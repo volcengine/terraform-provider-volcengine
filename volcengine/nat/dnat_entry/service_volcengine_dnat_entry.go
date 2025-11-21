@@ -224,6 +224,12 @@ func (s *VolcengineDnatEntryService) DatasourceResources(data *schema.ResourceDa
 		NameField:    "DnatEntryName",
 		IdField:      "DnatEntryId",
 		CollectField: "dnat_entries",
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"DnatEntryId": {
+				TargetField: "id",
+				KeepDefault: true,
+			},
+		},
 	}
 }
 

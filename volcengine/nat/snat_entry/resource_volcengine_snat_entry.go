@@ -52,7 +52,7 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 			},
 			"eip_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if len(old) != len(new) {
 						return false
@@ -63,7 +63,14 @@ func ResourceVolcengineSnatEntry() *schema.Resource {
 					sort.Strings(newArr)
 					return reflect.DeepEqual(oldArr, newArr)
 				},
-				Description: "The id of the public ip address used by the SNAT entry.",
+				ConflictsWith: []string{"nat_ip_id"},
+				Description:   "The id of the public ip address used by the SNAT entry. This field is required when the nat gateway is a internet NAT gateway.",
+			},
+			"nat_ip_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"eip_id"},
+				Description:   "The ID of the intranet NAT gateway's transit IP. This field is required when the nat gateway is a intranet NAT gateway.",
 			},
 			"snat_entry_name": {
 				Type:        schema.TypeString,

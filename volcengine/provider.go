@@ -283,6 +283,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nas/nas_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/dnat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_gateway"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/nat_ip"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/nat/snat_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/organization/organization_account"
@@ -661,6 +662,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_snat_entries": snat_entry.DataSourceVolcengineSnatEntries(),
 			"volcengine_nat_gateways": nat_gateway.DataSourceVolcengineNatGateways(),
 			"volcengine_dnat_entries": dnat_entry.DataSourceVolcengineDnatEntries(),
+			"volcengine_nat_ips":      nat_ip.DataSourceVolcengineNatIps(),
 
 			// ================ AutoScaling ================
 			"volcengine_scaling_groups":          scaling_group.DataSourceVolcengineScalingGroups(),
@@ -1094,6 +1096,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_snat_entry":  snat_entry.ResourceVolcengineSnatEntry(),
 			"volcengine_nat_gateway": nat_gateway.ResourceVolcengineNatGateway(),
 			"volcengine_dnat_entry":  dnat_entry.ResourceVolcengineDnatEntry(),
+			"volcengine_nat_ip":      nat_ip.ResourceVolcengineNatIp(),
 
 			// ================ AutoScaling ================
 			"volcengine_scaling_group":                    scaling_group.ResourceVolcengineScalingGroup(),
@@ -1480,7 +1483,7 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 		Region:                 d.Get("region").(string),
 		Endpoint:               d.Get("endpoint").(string),
 		DisableSSL:             d.Get("disable_ssl").(bool),
-		EnableStandardEndpoint: d.Get("enable_standard_endpoint").(bool),
+		EnableStandardEndpoint: true,
 		CustomerHeaders:        map[string]string{},
 		CustomerEndpoints:      defaultCustomerEndPoints(),
 		CustomerEndpointSuffix: map[string]string{},
@@ -1518,6 +1521,11 @@ func ProviderConfigure(d *schema.ResourceData) (interface{}, error) {
 				config.CustomerEndpointSuffix[point[0]] = point[1]
 			}
 		}
+	}
+
+	// enable_standard_endpoint is default true
+	if enableStandardEndpoint, exist := d.GetOkExists("enable_standard_endpoint"); exist {
+		config.EnableStandardEndpoint = enableStandardEndpoint.(bool)
 	}
 
 	// get assume role config

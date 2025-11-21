@@ -87,6 +87,7 @@ In addition to all arguments above, the following attributes are exported:
     * `dnat_entry_name` - The name of the DNAT entry.
     * `external_ip` - Provides the public IP address for public network access.
     * `external_port` - The port or port segment that receives requests from the public network. If InternalPort is passed into the port segment, ExternalPort must also be passed into the port segment.
+    * `id` - The ID of the DNAT entry.
     * `internal_ip` - Provides the internal IP address.
     * `internal_port` - The port or port segment on which the cloud server instance provides services to the public network.
     * `nat_gateway_id` - The ID of the NAT gateway.
