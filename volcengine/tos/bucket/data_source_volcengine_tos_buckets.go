@@ -15,6 +15,16 @@ func DataSourceVolcengineTosBuckets() *schema.Resource {
 				Optional:    true,
 				Description: "The name the TOS bucket.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project of the TOS bucket.",
+			},
+			"bucket_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The bucket type of the TOS bucket.",
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -87,6 +97,16 @@ func DataSourceVolcengineTosBuckets() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The intranet endpoint the TOS bucket.",
+						},
+						"bucket_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The bucket type of the TOS bucket.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project of the TOS bucket.",
 						},
 					},
 				},

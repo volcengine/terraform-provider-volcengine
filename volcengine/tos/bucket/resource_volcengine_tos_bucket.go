@@ -64,16 +64,10 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 				Description: "The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.",
 			},
 			"storage_class": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				ValidateFunc: validation.StringInSlice([]string{
-					"STANDARD",
-					"IA",
-					"ARCHIVE_FR",
-				}, false),
+				Type:        schema.TypeString,
+				Optional:    true,
 				Default:     "STANDARD",
-				Description: "The storage type of the object.Valid value is STANDARD|IA|ARCHIVE_FR.Default is STANDARD.",
+				Description: "The storage type of the object.Valid value is STANDARD|IA|INTELLIGENT_TIERING|ARCHIVE_FR|ARCHIVE|COLD_ARCHIVE|DEEP_COLD_ARCHIVE.Default is STANDARD.",
 			},
 			"enable_version": {
 				Type:        schema.TypeBool,
@@ -92,6 +86,12 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 				Optional:    true,
 				Default:     "default",
 				Description: "The ProjectName of the Tos Bucket. Default is `default`.",
+			},
+			"bucket_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "fns",
+				Description: "The bucket type of the TOS bucket. Default is `fns`. Valid values: `hns`, `fns`",
 			},
 			"tags": {
 				Type:        schema.TypeSet,
