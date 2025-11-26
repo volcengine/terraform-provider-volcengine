@@ -112,6 +112,12 @@ func (s *VolcengineRdsPostgresqlSchemaService) CreateResource(resourceData *sche
 				"db_name": {
 					TargetField: "DBName",
 				},
+				"schema_name": {
+					TargetField: "SchemaName",
+				},
+				"owner": {
+					TargetField: "Owner",
+				},
 			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("instance_id").(string)
@@ -216,6 +222,12 @@ func (s *VolcengineRdsPostgresqlSchemaService) DatasourceResources(*schema.Resou
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"DBName": {
 				TargetField: "db_name",
+			},
+			"SchemaName": {
+				TargetField: "schema_name",
+			},
+			"Owner": {
+				TargetField: "owner",
 			},
 		},
 	}

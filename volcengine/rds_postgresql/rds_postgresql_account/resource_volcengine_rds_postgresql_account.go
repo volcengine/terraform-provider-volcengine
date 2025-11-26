@@ -72,7 +72,7 @@ func ResourceVolcengineRdsPostgresqlAccount() *schema.Resource {
 				Required:     true,
 				ForceNew:     true,
 				Description:  "Database account type, value:\nSuper: A high-privilege account. Only one database account can be created for an instance.\nNormal: An account with ordinary privileges.",
-				ValidateFunc: validation.StringInSlice([]string{"Super", "Normal"}, false),
+				ValidateFunc: validation.StringInSlice([]string{"Super", "Normal", "InstanceReadOnly"}, false),
 			},
 			"account_status": {
 				Type:        schema.TypeString,
@@ -82,8 +82,16 @@ func ResourceVolcengineRdsPostgresqlAccount() *schema.Resource {
 			"account_privileges": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					// 高权限或只读账号不支持权限变更，完全抑制差异
+					if t, ok := d.Get("account_type").(string); ok && t != "Normal" {
+						return true
+					}
+					// Normal 账号：当新值为空且旧值非空，触发撤销（不抑制差异）
+					if strings.TrimSpace(new) == "" && strings.TrimSpace(old) != "" {
+						return false
+					}
+					// 其余情况按集合比较抑制顺序差异
 					oldS := strings.Split(old, ",")
 					sort.Strings(oldS)
 					newS := strings.Split(new, ",")
@@ -93,7 +101,22 @@ func ResourceVolcengineRdsPostgresqlAccount() *schema.Resource {
 				Description: "The privilege information of account. " +
 					"When the account type is a super account, there is no need to pass in this parameter, and all privileges are supported by default. " +
 					"When the account type is a normal account, this parameter can be passed in, " +
-					"the default values are Login and Inherit.",
+					"the default values are Login and Inherit." +
+					"When the account type is an instance read-only account, this parameter is not required to be passed in, " +
+					"as this account type does not support permission granting.",
+			},
+			"not_allow_privileges": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"DDL"}, false),
+				},
+				// 为账号禁用的权限。当前仅支持取值为 DDL。仅支持为高权限账号或普通账号传入此字段，即 AccountType 取值为 Super 或 Normal 时。
+				Description: "The permissions to be disabled for the account. " +
+					"Only the DDL permission is supported for the moment. " +
+					"This field can only be passed in for high-privilege accounts or normal accounts, i.e., when the account_type is set to Super or Normal.",
 			},
 		},
 	}

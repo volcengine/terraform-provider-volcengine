@@ -31,7 +31,32 @@ func DataSourceVolcengineRdsPostgresqlAllowlists() *schema.Resource {
 				Computed:    true,
 				Description: "The total count of query.",
 			},
-
+			"allow_list_category": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Ordinary", "Default"}, false),
+				Description:  "The category of the postgresql allow list. Valid values: Ordinary, Default.",
+			},
+			"allow_list_desc": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The description of the postgresql allow list. Perform a fuzzy search based on the description information.",
+			},
+			"allow_list_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The id of the postgresql allow list.",
+			},
+			"allow_list_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the postgresql allow list.",
+			},
+			"ip_address": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The IP address to be added to the allow list.",
+			},
 			"postgresql_allow_lists": {
 				Description: "The list of postgresql allowed list.",
 				Type:        schema.TypeList,
@@ -73,6 +98,43 @@ func DataSourceVolcengineRdsPostgresqlAllowlists() *schema.Resource {
 							Computed:    true,
 							Description: "The total number of instances bound under the whitelist.",
 						},
+						"allow_list_category": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The category of the postgresql allow list.",
+						},
+						"security_group_bind_infos": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The information of the security group bound by the allowlist.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ip_list": {
+										Type:        schema.TypeSet,
+										Computed:    true,
+										Description: "IP addresses in the security group.",
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+									"bind_mode": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The binding mode of the security group.",
+									},
+									"security_group_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ID of the security group.",
+									},
+									"security_group_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the security group.",
+									},
+								},
+							},
+						},
 						"allow_list": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -104,6 +166,14 @@ func DataSourceVolcengineRdsPostgresqlAllowlists() *schema.Resource {
 									},
 								},
 							},
+						},
+						"user_allow_list": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "IP addresses outside the security group and added to the allowlist.",
 						},
 					},
 				},

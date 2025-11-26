@@ -127,6 +127,46 @@ func (s *VolcengineRdsPostgresqlDatabaseService) WithResourceResponseHandlers(da
 }
 
 func (s *VolcengineRdsPostgresqlDatabaseService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
+	v := strings.TrimSpace(resourceData.Get("source_db_name").(string))
+	if v != "" {
+		callback := volc.Callback{
+			Call: volc.SdkCall{
+				Action:      "CloneDatabase",
+				ContentType: volc.ContentTypeJson,
+				ConvertMode: volc.RequestConvertIgnore,
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
+				},
+				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+					(*call.SdkParam)["SourceDBName"] = d.Get("source_db_name")
+					// 将 db_name 映射到 API 的 NewDBName 参数
+					(*call.SdkParam)["NewDBName"] = d.Get("db_name")
+					if opt, ok := d.GetOk("data_option"); ok {
+						(*call.SdkParam)["DataOption"] = opt
+					}
+					if arr, ok := d.GetOk("plpgsql_option"); ok {
+						var items []string
+						for _, it := range arr.([]interface{}) {
+							items = append(items, it.(string))
+						}
+						(*call.SdkParam)["PLPGSQLOption"] = strings.Join(items, ",")
+					}
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *volc.SdkClient, resp *map[string]interface{}, call volc.SdkCall) error {
+					id := fmt.Sprintf("%s:%s", d.Get("instance_id"), d.Get("db_name"))
+					d.SetId(id)
+					return nil
+				},
+			},
+		}
+		return []volc.Callback{callback}
+	}
 	callback := volc.Callback{
 		Call: volc.SdkCall{
 			Action:      "CreateDatabase",
@@ -155,7 +195,32 @@ func (s *VolcengineRdsPostgresqlDatabaseService) CreateResource(resourceData *sc
 }
 
 func (s *VolcengineRdsPostgresqlDatabaseService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []volc.Callback {
-	return []volc.Callback{}
+	var callbacks []volc.Callback
+	if resourceData.HasChange("owner") {
+		callback := volc.Callback{
+			Call: volc.SdkCall{
+				Action:      "ModifyDatabaseOwner",
+				ContentType: volc.ContentTypeJson,
+				ConvertMode: volc.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (bool, error) {
+					ids := strings.Split(d.Id(), ":")
+					if len(ids) != 2 {
+						return false, fmt.Errorf("invalid rds postgresql database id")
+					}
+					(*call.SdkParam)["InstanceId"] = ids[0]
+					(*call.SdkParam)["DBName"] = ids[1]
+					(*call.SdkParam)["Owner"] = d.Get("owner")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *volc.SdkClient, call volc.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, callback)
+	}
+	return callbacks
 }
 
 func (s *VolcengineRdsPostgresqlDatabaseService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []volc.Callback {

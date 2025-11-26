@@ -35,7 +35,11 @@ func (s *VolcengineRdsPostgresqlAllowlistService) ReadResources(m map[string]int
 		ok          bool
 		allowListId string
 	)
-	return ve.WithSimpleQuery(m, func(condition map[string]interface{}) ([]interface{}, error) {
+	if id, exist := m["AllowListId"]; exist {
+		allowListId = id.(string)
+	}
+
+	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		if condition != nil {
 			condition["RegionId"] = s.Client.Region
 		}
@@ -64,9 +68,6 @@ func (s *VolcengineRdsPostgresqlAllowlistService) ReadResources(m map[string]int
 			return data, errors.New("Result.AllowLists is not slice ")
 		}
 
-		if id, exist := condition["AllowListId"]; exist {
-			allowListId = id.(string)
-		}
 		for _, ele := range data {
 			allowList, ok := ele.(map[string]interface{})
 			if !ok {
@@ -89,12 +90,32 @@ func (s *VolcengineRdsPostgresqlAllowlistService) ReadResources(m map[string]int
 					return data, err
 				}
 				allowList["AssociatedInstances"] = instances
+				associatedNum, _ := ve.ObtainSdkValue("Result.AssociatedInstanceNum", *resp)
+				if associatedNum != nil {
+					allowList["AssociatedInstanceNum"] = associatedNum
+				}
 				allowListIp, err := ve.ObtainSdkValue("Result.AllowList", *resp)
 				if err != nil {
 					return data, err
 				}
-				allowListIpArr := strings.Split(allowListIp.(string), ",")
-				allowList["AllowList"] = allowListIpArr
+				if allowListIp != nil {
+					allowList["AllowList"] = strings.Split(allowListIp.(string), ",")
+				} else {
+					allowList["AllowList"] = []string{}
+				}
+				userAllowList, err := ve.ObtainSdkValue("Result.UserAllowList", *resp)
+				if err != nil {
+					return data, err
+				}
+				if userAllowList != nil {
+					allowList["UserAllowList"] = strings.Split(userAllowList.(string), ",")
+				} else {
+					allowList["UserAllowList"] = []string{}
+				}
+				bindInfos, _ := ve.ObtainSdkValue("Result.SecurityGroupBindInfos", *resp)
+				if bindInfos != nil {
+					allowList["SecurityGroupBindInfos"] = bindInfos
+				}
 			}
 		}
 		return data, err
@@ -148,29 +169,95 @@ func (VolcengineRdsPostgresqlAllowlistService) WithResourceResponseHandlers(d ma
 }
 
 func (s *VolcengineRdsPostgresqlAllowlistService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	// 如果设置了InstanceIds，则走合并白名单的流程
+	if v, ok := resourceData.GetOk("instance_ids"); ok {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "UnifyNewAllowList",
+				ConvertMode: ve.RequestConvertAll,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"allow_list_name":           {TargetField: "AllowListName"},
+					"allow_list_desc":           {TargetField: "AllowListDesc"},
+					"instance_ids":              {Ignore: true},
+					"allow_list":                {Ignore: true},
+					"user_allow_list":           {Ignore: true},
+					"security_group_bind_infos": {Ignore: true},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					set := v.(*schema.Set)
+					var ids []string
+					for _, id := range set.List() {
+						ids = append(ids, id.(string))
+					}
+					(*call.SdkParam)["InstanceIds"] = ids
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					id, _ := ve.ObtainSdkValue("Result.AllowListId", *resp)
+					d.SetId(id.(string))
+					return nil
+				},
+			},
+		}
+		return []ve.Callback{callback}
+	}
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateAllowList",
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
-				"allow_list": {
-					Ignore: true,
+				"allow_list_name":     {TargetField: "AllowListName"},
+				"allow_list_desc":     {TargetField: "AllowListDesc"},
+				"allow_list_type":     {TargetField: "AllowListType"},
+				"allow_list_category": {TargetField: "AllowListCategory"},
+				"security_group_bind_infos": {
+					TargetField: "SecurityGroupBindInfos",
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"security_group_id":   {TargetField: "SecurityGroupId"},
+						"bind_mode":           {TargetField: "BindMode"},
+						"ip_list":             {TargetField: "IpList", ConvertType: ve.ConvertJsonArray},
+						"security_group_name": {TargetField: "SecurityGroupName"},
+					},
 				},
+				"user_allow_list": {Ignore: true},
+				"allow_list":      {Ignore: true},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				var allowStrings []string
-				allowListsSet := d.Get("allow_list").(*schema.Set)
-				for _, v := range allowListsSet.List() {
-					allowStrings = append(allowStrings, v.(string))
+				if v, ok := d.GetOk("allow_list"); ok {
+					allowListsSet := v.(*schema.Set)
+					for _, v := range allowListsSet.List() {
+						allowStrings = append(allowStrings, v.(string))
+					}
+					if len(allowStrings) > 0 {
+						allowLists := strings.Join(allowStrings, ",")
+						(*call.SdkParam)["AllowList"] = allowLists
+					}
 				}
-				allowLists := strings.Join(allowStrings, ",")
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, allowLists)
-				(*call.SdkParam)["AllowList"] = allowLists
+				if v, ok := d.GetOk("user_allow_list"); ok {
+					s := v.(*schema.Set)
+					var items []string
+					for _, vv := range s.List() {
+						items = append(items, vv.(string))
+					}
+					if len(items) > 0 {
+						(*call.SdkParam)["UserAllowList"] = strings.Join(items, ",")
+					}
+				}
+				logger.Debug(logger.ReqFormat, call.Action+" FullRequest", *call.SdkParam)
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
@@ -199,23 +286,47 @@ func (s *VolcengineRdsPostgresqlAllowlistService) ModifyResource(resourceData *s
 				"allow_list_desc": {
 					TargetField: "AllowListDesc",
 				},
-				"allow_list": {
-					Ignore: true,
+				"allow_list_category": {TargetField: "AllowListCategory"},
+				"security_group_bind_infos": {
+					TargetField: "SecurityGroupBindInfos",
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"security_group_id":   {TargetField: "SecurityGroupId"},
+						"bind_mode":           {TargetField: "BindMode"},
+						"ip_list":             {TargetField: "IpList", ConvertType: ve.ConvertJsonArray},
+						"security_group_name": {TargetField: "SecurityGroupName"},
+					},
 				},
+				"user_allow_list":       {Ignore: true},
+				"update_security_group": {TargetField: "UpdateSecurityGroup"},
+				"allow_list":            {Ignore: true},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				var allowStrings []string
-				allowListsSet := d.Get("allow_list").(*schema.Set)
-				for _, v := range allowListsSet.List() {
-					allowStrings = append(allowStrings, v.(string))
+				if v, ok := d.GetOk("allow_list"); ok {
+					allowListsSet := v.(*schema.Set)
+					for _, v := range allowListsSet.List() {
+						allowStrings = append(allowStrings, v.(string))
+					}
+					if len(allowStrings) > 0 {
+						allowLists := strings.Join(allowStrings, ",")
+						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, allowLists)
+						(*call.SdkParam)["AllowList"] = allowLists
+					}
 				}
-				allowLists := strings.Join(allowStrings, ",")
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam, allowLists)
-				(*call.SdkParam)["AllowList"] = allowLists
-
-				(*call.SdkParam)["AllowListId"] = d.Id()
-				(*call.SdkParam)["ModifyMode"] = "Cover"
+				if v, ok := d.GetOk("user_allow_list"); ok {
+					s := v.(*schema.Set)
+					var items []string
+					for _, vv := range s.List() {
+						items = append(items, vv.(string))
+					}
+					if len(items) > 0 {
+						(*call.SdkParam)["UserAllowList"] = strings.Join(items, ",")
+					}
+				}
 				(*call.SdkParam)["ApplyInstanceNum"] = d.Get("associated_instance_num")
+				(*call.SdkParam)["ModifyMode"] = "Cover"
+				(*call.SdkParam)["AllowListId"] = d.Id()
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -270,6 +381,23 @@ func (s *VolcengineRdsPostgresqlAllowlistService) RemoveResource(resourceData *s
 
 func (s *VolcengineRdsPostgresqlAllowlistService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"allow_list_category": {
+				TargetField: "AllowListCategory",
+			},
+			"allow_list_desc": {
+				TargetField: "AllowListDesc",
+			},
+			"allow_list_id": {
+				TargetField: "AllowListId",
+			},
+			"allow_list_name": {
+				TargetField: "AllowListName",
+			},
+			"ip_address": {
+				TargetField: "IPAddress",
+			},
+		},
 		NameField:    "AllowListName",
 		IdField:      "AllowListId",
 		CollectField: "postgresql_allow_lists",

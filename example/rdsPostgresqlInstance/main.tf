@@ -1,5 +1,5 @@
 # query available zones in current region
-data "volcengine_zones" "foo" {
+data "volcengine_rds_postgresql_zones" "foo" {
 }
 
 # create vpc
@@ -89,4 +89,21 @@ resource "volcengine_rds_postgresql_schema" "foo" {
   instance_id = volcengine_rds_postgresql_instance.foo.id
   owner       = volcengine_rds_postgresql_account.foo.account_name
   schema_name = "acc-test-schema"
+}
+
+# Restore the backup to a new instance
+
+resource "volcengine_rds_postgresql_instance" "example"{
+  src_instance_id   = "postgres-faa4921fdde4"
+  backup_id         = "20251215-215628F"
+  db_engine_version = "PostgreSQL_12"
+  node_spec         = "rds.postgres.1c2g"
+  subnet_id         = volcengine_subnet.foo.id
+  instance_name     = "acc-test-postgresql-instance-restore"
+  charge_info {
+    charge_type = "PostPaid"
+    number      = 1
+  }
+  primary_zone_id   = data.volcengine_zones.foo.zones[0].id
+  secondary_zone_id = data.volcengine_zones.foo.zones[0].id
 }
