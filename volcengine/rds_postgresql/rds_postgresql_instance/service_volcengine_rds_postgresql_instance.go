@@ -93,8 +93,14 @@ func (s *VolcengineRdsPostgresqlInstanceService) ReadResources(m map[string]inte
 				instance["VCPU"] = basicInfoMap["VCPU"]
 				instance["Memory"] = basicInfoMap["Memory"]
 				instance["UpdateTime"] = basicInfoMap["UpdateTime"]
-				instance["BackupUse"] = basicInfoMap["BackupUse"]
+				// DescribeDBInstanceDetail API 的返回字段中已没有 BackupUse 字段，赋默认值 0
+				instance["BackupUse"] = 0
 				instance["DataSyncMode"] = basicInfoMap["DataSyncMode"]
+				instance["StorageDataUse"] = basicInfoMap["StorageDataUse"]
+				instance["StorageLogUse"] = basicInfoMap["StorageLogUse"]
+				instance["StorageTempUse"] = basicInfoMap["StorageTempUse"]
+				instance["StorageUse"] = basicInfoMap["StorageUse"]
+				instance["StorageWALUse"] = basicInfoMap["StorageWALUse"]
 			}
 
 			// append endpoint info
@@ -122,6 +128,11 @@ func (s *VolcengineRdsPostgresqlInstanceService) ReadResources(m map[string]inte
 				// 接口返回nil
 				instance["Nodes"] = []interface{}{}
 			}
+
+			// 默认化估算结果，避免 plan 阶段出现 known after apply 的差异
+			if _, ok := instance["EstimationResult"]; !ok {
+				instance["EstimationResult"] = []interface{}{}
+			}
 		}
 		return data, err
 	})
@@ -144,11 +155,11 @@ func (s *VolcengineRdsPostgresqlInstanceService) ReadResource(resourceData *sche
 	}
 	for _, v := range results {
 		if data, ok = v.(map[string]interface{}); !ok {
-			return data, errors.New("Value is not map ")
+			return data, errors.New("value is not map")
 		}
 	}
 	if len(data) == 0 {
-		return data, fmt.Errorf("Rds PostgreSQL instance %s not exist ", id)
+		return data, fmt.Errorf("the Rds PostgreSQL instance %s not exist", id)
 	}
 
 	if nodeArr, ok := data["Nodes"].([]interface{}); ok {
@@ -169,6 +180,10 @@ func (s *VolcengineRdsPostgresqlInstanceService) ReadResource(resourceData *sche
 	}
 
 	data["ChargeInfo"] = data["ChargeDetail"]
+
+	if v, ok := resourceData.GetOk("estimation_result"); ok {
+		data["EstimationResult"] = v
+	}
 
 	return data, err
 }
@@ -208,7 +223,7 @@ func (s *VolcengineRdsPostgresqlInstanceService) RefreshResourceState(resourceDa
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("Rds PostgreSQL instance status error, status:%s ", status.(string))
+					return nil, "", fmt.Errorf("the Rds PostgreSQL instance status error, status:%s ", status.(string))
 				}
 			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
@@ -219,7 +234,97 @@ func (s *VolcengineRdsPostgresqlInstanceService) RefreshResourceState(resourceDa
 
 func (s *VolcengineRdsPostgresqlInstanceService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
-	// instance callback
+	// 如果指定了 src_instance_id，则走 RestoreToNewInstance
+	if _, hasRestore := resourceData.GetOk("src_instance_id"); hasRestore {
+		restore := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "RestoreToNewInstance",
+				ConvertMode: ve.RequestConvertAll,
+				ContentType: ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"src_instance_id":   {TargetField: "SrcInstanceId"},
+					"backup_id":         {TargetField: "BackupId"},
+					"restore_time":      {TargetField: "RestoreTime"},
+					"db_engine_version": {Ignore: true},
+					"tags":              {TargetField: "Tags", ConvertType: ve.ConvertJsonObjectArray},
+					"charge_info":       {ConvertType: ve.ConvertJsonObject},
+					"allow_list_ids":    {TargetField: "AllowListIds", ConvertType: ve.ConvertJsonArray},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					// RestoreToNewInstance API 没有 DBEngineVersion 参数，需要移除可能残留的值
+					delete(*call.SdkParam, "db_engine_version")
+					delete(*call.SdkParam, "DBEngineVersion")
+					// 直接复用正常创建的beforecall
+					var (
+						nodeInfos []interface{}
+						subnets   []interface{}
+						results   interface{}
+						ok        bool
+					)
+					// add vpc id
+					subnetId := d.Get("subnet_id")
+					req := map[string]interface{}{
+						"SubnetIds.1": subnetId,
+					}
+					action := "DescribeSubnets"
+					resp, err := s.Client.UniversalClient.DoCall(getVPCUniversalInfo(action), &req)
+					if err != nil {
+						return false, err
+					}
+					results, err = ve.ObtainSdkValue("Result.Subnets", *resp)
+					if err != nil {
+						return false, err
+					}
+					if results == nil {
+						results = []interface{}{}
+					}
+					if subnets, ok = results.([]interface{}); !ok {
+						return false, errors.New("Result.Subnets is not Slice")
+					}
+					if len(subnets) == 0 {
+						return false, fmt.Errorf("subnet %s not exist", subnetId.(string))
+					}
+					vpcId := subnets[0].(map[string]interface{})["VpcId"]
+
+					(*call.SdkParam)["VpcId"] = vpcId
+
+					// add NodeInfo，默认一主一备的高可用架构
+					primaryNodeInfo := make(map[string]interface{})
+					primaryNodeInfo["NodeType"] = "Primary"
+					primaryNodeInfo["ZoneId"] = d.Get("primary_zone_id")
+					primaryNodeInfo["NodeSpec"] = d.Get("node_spec")
+					primaryNodeInfo["NodeOperateType"] = "Create"
+					nodeInfos = append(nodeInfos, primaryNodeInfo)
+
+					secondaryNodeInfo := make(map[string]interface{})
+					secondaryNodeInfo["NodeType"] = "Secondary"
+					secondaryNodeInfo["ZoneId"] = d.Get("secondary_zone_id")
+					secondaryNodeInfo["NodeSpec"] = d.Get("node_spec")
+					secondaryNodeInfo["NodeOperateType"] = "Create"
+					nodeInfos = append(nodeInfos, secondaryNodeInfo)
+
+					(*call.SdkParam)["NodeInfo"] = nodeInfos
+					(*call.SdkParam)["StorageType"] = "LocalSSD"
+
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					id, _ := ve.ObtainSdkValue("Result.InstanceId", *resp)
+					d.SetId(id.(string))
+					return nil
+				},
+				Refresh: &ve.StateRefresh{Target: []string{"Running"}, Timeout: resourceData.Timeout(schema.TimeoutCreate)},
+			},
+		}
+		callbacks = append(callbacks, restore)
+		return callbacks
+	}
+
+	// 否则走常规创建实例
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateDBInstance",
@@ -235,6 +340,10 @@ func (s *VolcengineRdsPostgresqlInstanceService) CreateResource(resourceData *sc
 				},
 				"charge_info": {
 					ConvertType: ve.ConvertJsonObject,
+				},
+				"allow_list_ids": {
+					TargetField: "AllowListIds",
+					ConvertType: ve.ConvertJsonArray,
 				},
 				// node ignore
 				"node_spec": {
@@ -284,22 +393,23 @@ func (s *VolcengineRdsPostgresqlInstanceService) CreateResource(resourceData *sc
 
 				(*call.SdkParam)["VpcId"] = vpcId
 
-				// add NodeInfo
+				// add NodeInfo，默认一主一备的高可用架构
 				primaryNodeInfo := make(map[string]interface{})
 				primaryNodeInfo["NodeType"] = "Primary"
 				primaryNodeInfo["ZoneId"] = d.Get("primary_zone_id")
 				primaryNodeInfo["NodeSpec"] = d.Get("node_spec")
+				primaryNodeInfo["NodeOperateType"] = "Create"
 				nodeInfos = append(nodeInfos, primaryNodeInfo)
 
 				secondaryNodeInfo := make(map[string]interface{})
 				secondaryNodeInfo["NodeType"] = "Secondary"
 				secondaryNodeInfo["ZoneId"] = d.Get("secondary_zone_id")
 				secondaryNodeInfo["NodeSpec"] = d.Get("node_spec")
+				secondaryNodeInfo["NodeOperateType"] = "Create"
 				nodeInfos = append(nodeInfos, secondaryNodeInfo)
 
 				(*call.SdkParam)["NodeInfo"] = nodeInfos
 
-				// add StorageType
 				(*call.SdkParam)["StorageType"] = "LocalSSD"
 
 				return true, nil
@@ -363,6 +473,10 @@ func (VolcengineRdsPostgresqlInstanceService) WithResourceResponseHandlers(d map
 			"DBEngineVersion": {
 				TargetField: "db_engine_version",
 			},
+			"EstimationResult": {
+				TargetField: "estimation_result",
+				KeepDefault: true,
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -407,8 +521,110 @@ func (s *VolcengineRdsPostgresqlInstanceService) ModifyResource(resourceData *sc
 		callbacks = append(callbacks, nameCallback)
 	}
 
+	// ModifyDBInstanceChargeType
+	if resourceData.HasChange("charge_info") {
+		chargeCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceChargeType",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					// 文档约束：仅支持将 PostPaid 转为 PrePaid，若希望转回 PostPaid，则会报错
+					_, newType := d.GetChange("charge_info.0.charge_type")
+					if newType == "PostPaid" {
+						return false, fmt.Errorf("only support convert PostPaid to PrePaid")
+					}
+					(*call.SdkParam)["InstanceId"] = d.Id()
+					(*call.SdkParam)["ChargeType"] = newType
+					(*call.SdkParam)["PeriodUnit"] = d.Get("charge_info.0.period_unit")
+					(*call.SdkParam)["Period"] = d.Get("charge_info.0.period")
+					(*call.SdkParam)["AutoRenew"] = d.Get("charge_info.0.auto_renew")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{Target: []string{"Running"}, Timeout: resourceData.Timeout(schema.TimeoutUpdate)},
+			},
+		}
+		callbacks = append(callbacks, chargeCallback)
+	}
+
+	// ModifyDBInstanceAvailabilityZone
+	if resourceData.HasChange("zone_migrations") || resourceData.HasChange("secondary_zone_id") {
+		zoneCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyDBInstanceAvailabilityZone",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertIgnore,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if d.HasChange("secondary_zone_id") {
+						if _, ok := d.GetOk("zone_migrations"); !ok {
+							return false, fmt.Errorf("the zone_migrations field is needed to migrate the secondary node")
+						}
+					}
+					(*call.SdkParam)["InstanceId"] = d.Id()
+
+					instance, err := s.ReadResource(d, d.Id())
+					if err != nil {
+						return false, err
+					}
+					var primaryZone, secondaryZone string
+					if nodeArr, ok := instance["Nodes"].([]interface{}); ok {
+						for _, node := range nodeArr {
+							if nodeMap, ok1 := node.(map[string]interface{}); ok1 {
+								if nodeMap["NodeType"] == "Primary" {
+									if z, ok2 := nodeMap["ZoneId"].(string); ok2 {
+										primaryZone = z
+									}
+								} else if nodeMap["NodeType"] == "Secondary" {
+									if z, ok2 := nodeMap["ZoneId"].(string); ok2 {
+										secondaryZone = z
+									}
+								}
+							}
+						}
+					}
+					if primaryZone != "" && secondaryZone != "" && primaryZone != secondaryZone {
+						return false, fmt.Errorf("Cross-AZ instance migration is not supported, currently, Primary vs Secondary: %s vs %s", primaryZone, secondaryZone)
+					}
+					if v, ok := d.GetOk("zone_migrations"); ok {
+						arr := v.([]interface{})
+						nodeInfo := make([]map[string]interface{}, 0)
+						for _, item := range arr {
+							m, ok := item.(map[string]interface{})
+							if !ok {
+								continue
+							}
+							if t, ok := m["node_type"].(string); ok && (t == "Secondary" || t == "ReadOnly") {
+								node := map[string]interface{}{
+									"NodeId": m["node_id"],
+									"ZoneId": m["zone_id"],
+								}
+								nodeInfo = append(nodeInfo, node)
+							}
+						}
+						if len(nodeInfo) > 0 {
+							(*call.SdkParam)["NodeInfo"] = nodeInfo
+							return true, nil
+						}
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{Target: []string{"Running"}, Timeout: resourceData.Timeout(schema.TimeoutUpdate)},
+			},
+		}
+		callbacks = append(callbacks, zoneCallback)
+	}
+
 	// ModifyDBInstanceSpec
-	if resourceData.HasChanges("node_spec", "storage_space") {
+	if resourceData.HasChanges("node_spec", "storage_space") || (resourceData.HasChange("estimate_only") && resourceData.Get("estimate_only").(bool)) {
+
 		instanceCallback := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "ModifyDBInstanceSpec",
@@ -465,19 +681,51 @@ func (s *VolcengineRdsPostgresqlInstanceService) ModifyResource(resourceData *sc
 						(*call.SdkParam)["NodeInfo"] = nodeInfos
 					}
 
+					// Temporary mode handling
+					if v, ok := d.GetOk("modify_type"); ok && v.(string) == "Temporary" {
+						(*call.SdkParam)["ModifyType"] = "Temporary"
+						if rt, ok2 := d.GetOk("rollback_time"); ok2 {
+							(*call.SdkParam)["RollbackTime"] = rt.(string)
+						}
+						delete(*call.SdkParam, "StorageSpace")
+						delete(*call.SdkParam, "StorageType")
+					} else if v, ok := d.GetOk("modify_type"); ok {
+						(*call.SdkParam)["ModifyType"] = v
+					}
+					if v, ok := d.GetOk("estimate_only"); ok && v.(bool) {
+						(*call.SdkParam)["EstimateOnly"] = true
+					}
 					return true, nil
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-					common, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-					if err != nil {
-						return common, err
-					}
-					return common, nil
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
-				Refresh: &ve.StateRefresh{
-					Target:  []string{"Running"},
-					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				Refresh: &ve.StateRefresh{Target: []string{"Running"}, Timeout: resourceData.Timeout(schema.TimeoutUpdate)},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					if v, ok := d.GetOk("estimate_only"); ok && v.(bool) {
+						est, _ := ve.ObtainSdkValue("Result.EstimationResult", *resp)
+						if m, ok2 := est.(map[string]interface{}); ok2 {
+							plans := []string{}
+							effects := []string{}
+							if p, okp := m["Plans"].([]interface{}); okp {
+								for _, it := range p {
+									if s2, ok3 := it.(string); ok3 {
+										plans = append(plans, s2)
+									}
+								}
+							}
+							if e, oke := m["Effects"].([]interface{}); oke {
+								for _, it := range e {
+									if s2, ok3 := it.(string); ok3 {
+										effects = append(effects, s2)
+									}
+								}
+							}
+							_ = d.Set("estimation_result", []map[string]interface{}{{"plans": plans, "effects": effects}})
+						}
+					}
+					return nil
 				},
 			},
 		}
@@ -500,7 +748,7 @@ func (s *VolcengineRdsPostgresqlInstanceService) ModifyResource(resourceData *sc
 						for _, v := range modifiedParams.List() {
 							paramMap, ok := v.(map[string]interface{})
 							if !ok {
-								return false, fmt.Errorf("Parameter is not map ")
+								return false, fmt.Errorf("parameter is not map ")
 							}
 							(*call.SdkParam)["Parameters"] = append((*call.SdkParam)["Parameters"].([]map[string]interface{}), map[string]interface{}{
 								"Name":  paramMap["name"],
@@ -600,6 +848,9 @@ func (s *VolcengineRdsPostgresqlInstanceService) DatasourceResources(*schema.Res
 			},
 			"VCPU": {
 				TargetField: "v_cpu",
+			},
+			"StorageWALUse": {
+				TargetField: "storage_wal_use",
 			},
 		},
 	}

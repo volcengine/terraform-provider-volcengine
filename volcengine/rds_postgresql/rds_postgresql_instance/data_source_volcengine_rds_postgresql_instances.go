@@ -66,7 +66,18 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 				Optional:    true,
 				Description: "The charge type of the RDS instance.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the RDS PostgreSQL instance.",
+			},
 			"tags": ve.TagsSchema(),
+			"storage_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"LocalSSD"}, false),
+				Description:  "The storage type of the RDS PostgreSQL instance.",
+			},
 			"instances": {
 				Description: "The collection of query.",
 				Type:        schema.TypeList,
@@ -113,6 +124,11 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The engine version of the RDS PostgreSQL instance.",
+						},
+						"allow_list_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The allow list version of the RDS PostgreSQL instance.",
 						},
 						"create_time": {
 							Type:        schema.TypeString,
@@ -173,7 +189,32 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 						"memory": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "Memory size.",
+							Description: "Memory size. Unit: GB.",
+						},
+						"storage_data_use": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The instance's primary node has used storage space. Unit: Byte.",
+						},
+						"storage_log_use": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The instance's primary node has used log storage space. Unit: Byte.",
+						},
+						"storage_temp_use": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The instance's primary node has used temporary storage space. Unit: Byte.",
+						},
+						"storage_use": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The instance has used storage space. Unit: Byte.",
+						},
+						"storage_wal_use": { // 转换需要特殊处理
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The instance's primary node has used WAL storage space. Unit: Byte.",
 						},
 						"backup_use": {
 							Type:        schema.TypeInt,
@@ -201,6 +242,11 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 										Computed:    true,
 										Description: "Whether to automatically renew in prepaid scenarios.\nAutorenew_Enable\nAutorenew_Disable (default).",
 									},
+									"number": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The number of the RDS PostgreSQL instance.",
+									},
 									"period_unit": {
 										Type:        schema.TypeString,
 										Computed:    true,
@@ -214,7 +260,7 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 									"charge_status": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "Pay status. Value:\nnormal - normal\noverdue - overdue\n.",
+										Description: "Pay status. Value:\nnormal - normal\noverdue - overdue\nunpaid - unpaid.",
 									},
 									"charge_start_time": {
 										Type:        schema.TypeString,
@@ -359,6 +405,28 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 										Computed:    true,
 										Description: "Whether global read-only is enabled, value: Enable: Enable. Disable: Disabled.",
 									},
+									"read_only_node_distribution_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The distribution type of the read-only nodes, value:\nDefault: Default distribution.\nCustom: Custom distribution.",
+									},
+									"read_only_node_max_delay_time": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "Maximum latency threshold of read-only node. If the latency of a read-only node exceeds this value, reading traffic won't be routed to this node. Unit: seconds.Values: 0~3600.Default value: 30.",
+									},
+									"read_write_proxy_connection": {
+										Type:     schema.TypeInt,
+										Computed: true,
+										Description: "After the terminal enables read-write separation, the number of proxy connections set for the terminal. " +
+											"The lower limit of the number of proxy connections is 20. " +
+											"The upper limit of the number of proxy connections depends on the specifications of the instance master node.",
+									},
+									"write_node_halt_writing": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether the endpoint sends write requests to the write node (currently only the master node is a write node). Values: true: Yes(Default). false: No.",
+									},
 									"read_only_node_weight": {
 										Type:        schema.TypeList,
 										Computed:    true,
@@ -399,10 +467,20 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 													Computed:    true,
 													Description: "Connect domain name.",
 												},
+												"cross_region_domain": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "Address that can be accessed across regions.",
+												},
 												"ip_address": {
 													Type:        schema.TypeString,
 													Computed:    true,
 													Description: "The IP Address.",
+												},
+												"ipv6_address": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The IPv6 Address.",
 												},
 												"port": {
 													Type:        schema.TypeString,
@@ -420,9 +498,23 @@ func DataSourceVolcengineRdsPostgresqlInstances() *schema.Resource {
 													Description: "The ID of the EIP, only valid for Public addresses.",
 												},
 												"dns_visibility": {
-													Type:        schema.TypeBool,
+													Type:     schema.TypeBool,
+													Computed: true,
+													Description: "Whether to enable public network resolution. Values: " +
+														"false: Default value. PrivateZone of Volcano Engine. " +
+														"true: Private and public network resolution of Volcano Engine.",
+												},
+												"internet_protocol": {
+													Type:        schema.TypeString,
 													Computed:    true,
-													Description: "DNS Visibility.",
+													Description: "Address IP protocol, IPv4 or IPv6.",
+												},
+												"domain_visibility_setting": {
+													Type:     schema.TypeString,
+													Computed: true,
+													Description: "The type of private network address. Values: " +
+														"LocalDomain: Local domain name. " +
+														"CrossRegionDomain: Domains accessible across regions.",
 												},
 											},
 										},
