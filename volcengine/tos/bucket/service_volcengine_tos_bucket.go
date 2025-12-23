@@ -135,20 +135,23 @@ func (s *VolcengineTosBucketService) ReadResource(resourceData *schema.ResourceD
 		data["BucketAclDelivered"] = acl["BucketAclDelivered"]
 	}
 
-	action = "GetBucketVersioning"
-	req = map[string]interface{}{
-		"versioning": "",
-	}
-	logger.Debug(logger.ReqFormat, action, req)
-	resp, err = tos.DoBypassSvcCall(ve.BypassSvcInfo{
-		HttpMethod: ve.GET,
-		Domain:     instanceId,
-	}, &req)
-	if err != nil {
-		return data, err
-	}
-	if version, ok = (*resp)[ve.BypassResponse].(map[string]interface{}); ok {
-		data["EnableVersion"] = version
+	bucketType := resourceData.Get("bucket_type").(string)
+	if bucketType == "" || bucketType == "fns" {
+		action = "GetBucketVersioning"
+		req = map[string]interface{}{
+			"versioning": "",
+		}
+		logger.Debug(logger.ReqFormat, action, req)
+		resp, err = tos.DoBypassSvcCall(ve.BypassSvcInfo{
+			HttpMethod: ve.GET,
+			Domain:     instanceId,
+		}, &req)
+		if err != nil {
+			return data, err
+		}
+		if version, ok = (*resp)[ve.BypassResponse].(map[string]interface{}); ok {
+			data["EnableVersion"] = version
+		}
 	}
 
 	action = "GetBucketTagging"
@@ -269,6 +272,13 @@ func (s *VolcengineTosBucketService) CreateResource(resourceData *schema.Resourc
 						Type: ve.HeaderParam,
 					},
 				},
+				"bucket_type": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "x-tos-bucket-type",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -313,10 +323,20 @@ func (s *VolcengineTosBucketService) CreateResource(resourceData *schema.Resourc
 					},
 					ForceGet: true,
 				},
+				"bucket_type": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "x-tos-bucket-type",
+					SpecialParam: &ve.SpecialParam{
+						Type: ve.HeaderParam,
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				//if disable version,skip this call
 				if (*call.SdkParam)[ve.BypassParam].(map[string]interface{})["Status"] == "" {
+					return false, nil
+				}
+				if (*call.SdkParam)[ve.BypassHeader].(map[string]string)["x-tos-bucket-type"] == "hns" {
 					return false, nil
 				}
 				return true, nil
@@ -403,44 +423,78 @@ func (s *VolcengineTosBucketService) CreateResource(resourceData *schema.Resourc
 		callbacks = append(callbacks, callbackTags)
 	}
 
+	//storage class
+	if _, ok := resourceData.GetOk("storage_class"); ok {
+		callbackStorageClass := ve.Callback{
+			Call: ve.SdkCall{
+				ServiceCategory: ve.ServiceBypass,
+				Action:          "PutBucketStorageClass",
+				ConvertMode:     ve.RequestConvertInConvert,
+				ContentType:     ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"bucket_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.DomainParam,
+						},
+					},
+					"storage_class": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "x-tos-storage-class",
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.HeaderParam,
+						},
+					},
+				},
+				ExecuteCall: s.executePutBucketStorageClass(),
+			},
+		}
+		callbacks = append(callbacks, callbackStorageClass)
+	}
+
 	return callbacks
 }
 
 func (s *VolcengineTosBucketService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
-	if data.HasChange("enable_version") {
-		//version
-		callbackVersion := ve.Callback{
-			Call: ve.SdkCall{
-				ServiceCategory: ve.ServiceBypass,
-				Action:          "PutBucketVersioning",
-				ConvertMode:     ve.RequestConvertInConvert,
-				Convert: map[string]ve.RequestConvert{
-					"bucket_name": {
-						ConvertType: ve.ConvertDefault,
-						TargetField: "BucketName",
-						SpecialParam: &ve.SpecialParam{
-							Type: ve.DomainParam,
+	bucketType := data.Get("bucket_type").(string)
+	if bucketType == "" || bucketType == "fns" {
+		if data.HasChange("enable_version") {
+			//version
+			callbackVersion := ve.Callback{
+				Call: ve.SdkCall{
+					ServiceCategory: ve.ServiceBypass,
+					Action:          "PutBucketVersioning",
+					ConvertMode:     ve.RequestConvertInConvert,
+					Convert: map[string]ve.RequestConvert{
+						"bucket_name": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "BucketName",
+							SpecialParam: &ve.SpecialParam{
+								Type: ve.DomainParam,
+							},
+							ForceGet: true,
 						},
-						ForceGet: true,
-					},
-					"enable_version": {
-						ConvertType: ve.ConvertDefault,
-						TargetField: "Status",
-						Convert: func(data *schema.ResourceData, i interface{}) interface{} {
-							if i.(bool) {
-								return "Enabled"
-							} else {
-								return "Suspended"
-							}
+						"enable_version": {
+							ConvertType: ve.ConvertDefault,
+							TargetField: "Status",
+							Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+								if i.(bool) {
+									return "Enabled"
+								} else {
+									return "Suspended"
+								}
+							},
+							ForceGet: true,
 						},
-						ForceGet: true,
 					},
+					ExecuteCall: s.executePutBucketVersioning(),
 				},
-				ExecuteCall: s.executePutBucketVersioning(),
-			},
+			}
+			callbacks = append(callbacks, callbackVersion)
 		}
-		callbacks = append(callbacks, callbackVersion)
 	}
 	var grant = []string{
 		"public_acl",
@@ -506,6 +560,36 @@ func (s *VolcengineTosBucketService) ModifyResource(data *schema.ResourceData, r
 
 	if data.HasChange("tags") {
 		callbacks = s.setResourceTags(data, callbacks)
+	}
+
+	if data.HasChange("storage_class") {
+		callbackStorageClass := ve.Callback{
+			Call: ve.SdkCall{
+				ServiceCategory: ve.ServiceBypass,
+				Action:          "PutBucketStorageClass",
+				ConvertMode:     ve.RequestConvertInConvert,
+				ContentType:     ve.ContentTypeJson,
+				Convert: map[string]ve.RequestConvert{
+					"bucket_name": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "BucketName",
+						ForceGet:    true,
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.DomainParam,
+						},
+					},
+					"storage_class": {
+						ConvertType: ve.ConvertDefault,
+						TargetField: "x-tos-storage-class",
+						SpecialParam: &ve.SpecialParam{
+							Type: ve.HeaderParam,
+						},
+					},
+				},
+				ExecuteCall: s.executePutBucketStorageClass(),
+			},
+		}
+		callbacks = append(callbacks, callbackStorageClass)
 	}
 
 	return callbacks
@@ -690,6 +774,23 @@ func (s *VolcengineTosBucketService) executePutBucketVersioning() ve.ExecuteCall
 			Domain:      (*call.SdkParam)[ve.BypassDomain].(string),
 			UrlParam: map[string]string{
 				"versioning": "",
+			},
+		}, &condition)
+	}
+}
+
+func (s *VolcengineTosBucketService) executePutBucketStorageClass() ve.ExecuteCallFunc {
+	return func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+		logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+		//PutStorageClass
+		condition := (*call.SdkParam)[ve.BypassParam].(map[string]interface{})
+		return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+			ContentType: ve.ApplicationJSON,
+			HttpMethod:  ve.PUT,
+			Header:      (*call.SdkParam)[ve.BypassHeader].(map[string]string),
+			Domain:      (*call.SdkParam)[ve.BypassDomain].(string),
+			UrlParam: map[string]string{
+				"storageClass": "",
 			},
 		}, &condition)
 	}

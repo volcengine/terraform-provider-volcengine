@@ -11,10 +11,20 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	tos_bucket_logging "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_logging"
+	tos_bucket_object_lock_configuration "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_object_lock_configuration"
+	tos_bucket_replication "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_replication"
+	tos_bucket_request_payment "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_request_payment"
 
+	tos_bucket_access_monitor "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_access_monitor"
 	tos_bucket_cors "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_cors"
+	tos_bucket_customdomain "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_customdomain"
 	tos_bucket_encryption "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_encryption"
+	tos_bucket_lifecycle "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_lifecycle"
+	tos_bucket_mirror_back "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_mirror_back"
 	tos_bucket_notification "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_notification"
+	tos_bucket_rename "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_rename"
+	tos_bucket_transfer_acceleration "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_transfer_acceleration"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_acl_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_bot_analyse_protect_rule"
@@ -395,6 +405,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
+	tos_bucket_website "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_website"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
 	trEntry "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_entry"
 	trTable "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table"
@@ -1210,14 +1221,25 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 
 			//================= TOS =================
-			"volcengine_tos_bucket":              bucket.ResourceVolcengineTosBucket(),
-			"volcengine_tos_object":              object.ResourceVolcengineTosObject(),
-			"volcengine_tos_bucket_policy":       bucket_policy.ResourceVolcengineTosBucketPolicy(),
-			"volcengine_tos_bucket_inventory":    tos_bucket_inventory.ResourceVolcengineTosBucketInventory(),
-			"volcengine_tos_bucket_realtime_log": tos_bucket_realtime_log.ResourceVolcengineTosBucketRealtimeLog(),
-			"volcengine_tos_bucket_notification": tos_bucket_notification.ResourceVolcengineTosBucketNotification(),
-			"volcengine_tos_bucket_encryption":   tos_bucket_encryption.ResourceVolcengineTosBucketEncryption(),
-			"volcengine_tos_bucket_cors":         tos_bucket_cors.ResourceVolcengineTosBucketCors(),
+			"volcengine_tos_bucket":                           bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object":                           object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket_policy":                    bucket_policy.ResourceVolcengineTosBucketPolicy(),
+			"volcengine_tos_bucket_website":                   tos_bucket_website.ResourceVolcengineTosBucketWebsite(),
+			"volcengine_tos_bucket_access_monitor":            tos_bucket_access_monitor.ResourceVolcengineTosBucketAccessMonitor(),
+			"volcengine_tos_bucket_inventory":                 tos_bucket_inventory.ResourceVolcengineTosBucketInventory(),
+			"volcengine_tos_bucket_realtime_log":              tos_bucket_realtime_log.ResourceVolcengineTosBucketRealtimeLog(),
+			"volcengine_tos_bucket_notification":              tos_bucket_notification.ResourceVolcengineTosBucketNotification(),
+			"volcengine_tos_bucket_lifecycle":                 tos_bucket_lifecycle.ResourceVolcengineTosBucketLifecycle(),
+			"volcengine_tos_bucket_mirror_back":               tos_bucket_mirror_back.ResourceVolcengineTosBucketMirrorBack(),
+			"volcengine_tos_bucket_transfer_acceleration":     tos_bucket_transfer_acceleration.ResourceVolcengineTosBucketTransferAcceleration(),
+			"volcengine_tos_bucket_replication":               tos_bucket_replication.ResourceVolcengineTosBucketReplication(),
+			"volcengine_tos_bucket_encryption":                tos_bucket_encryption.ResourceVolcengineTosBucketEncryption(),
+			"volcengine_tos_bucket_cors":                      tos_bucket_cors.ResourceVolcengineTosBucketCors(),
+			"volcengine_tos_bucket_customdomain":              tos_bucket_customdomain.ResourceVolcengineTosBucketCustomDomain(),
+			"volcengine_tos_bucket_rename":                    tos_bucket_rename.ResourceVolcengineTosBucketRename(),
+			"volcengine_tos_bucket_request_payment":           tos_bucket_request_payment.ResourceVolcengineTosBucketRequestPayment(),
+			"volcengine_tos_bucket_object_lock_configuration": tos_bucket_object_lock_configuration.ResourceVolcengineTosBucketObjectLockConfiguration(),
+			"volcengine_tos_bucket_logging":                   tos_bucket_logging.ResourceVolcengineTosBucketLogging(),
 
 			// ================ Redis ==============
 			"volcengine_redis_allow_list":           redis_allow_list.ResourceVolcengineRedisAllowList(),
