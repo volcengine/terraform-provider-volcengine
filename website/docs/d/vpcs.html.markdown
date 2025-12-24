@@ -55,6 +55,7 @@ In addition to all arguments above, the following attributes are exported:
         * `key` - The Key of Tags.
         * `value` - The Value of Tags.
     * `update_time` - The update time of VPC.
+    * `user_cidr_blocks` - The user cidr block list of VPC.
     * `vpc_id` - The ID of VPC.
     * `vpc_name` - The name of VPC.
 

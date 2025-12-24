@@ -12,7 +12,7 @@ Provides a resource to manage tos bucket
 ```hcl
 # create tos bucket
 resource "volcengine_tos_bucket" "foo" {
-  bucket_name = "tf-acc-test-bucket"
+  bucket_name = "tflyb7"
   #  storage_class        = "IA"
   public_acl           = "private"
   az_redundancy        = "multi-az"
@@ -61,10 +61,11 @@ The following arguments are supported:
 * `account_acl` - (Optional) The user set of grant full control.
 * `az_redundancy` - (Optional, ForceNew) The AZ redundancy of the Tos Bucket. Default is `single-az`. Valid values: `single-az`, `multi-az`.
 * `bucket_acl_delivered` - (Optional) Whether to enable the default inheritance bucket ACL function for objects. Default is false.
+* `bucket_type` - (Optional) The bucket type of the TOS bucket. Default is `fns`. Valid values: `hns`, `fns`.
 * `enable_version` - (Optional) The flag of enable tos version.
 * `project_name` - (Optional) The ProjectName of the Tos Bucket. Default is `default`.
 * `public_acl` - (Optional) The public acl control of object.Valid value is private|public-read|public-read-write|authenticated-read|bucket-owner-read.
-* `storage_class` - (Optional, ForceNew) The storage type of the object.Valid value is STANDARD|IA|ARCHIVE_FR.Default is STANDARD.
+* `storage_class` - (Optional) The storage type of the object.Valid value is STANDARD|IA|INTELLIGENT_TIERING|ARCHIVE_FR|ARCHIVE|COLD_ARCHIVE|DEEP_COLD_ARCHIVE.Default is STANDARD.
 * `tags` - (Optional) Tos Bucket Tags.
 
 The `account_acl` object supports the following:

@@ -69,6 +69,7 @@ In addition to all arguments above, the following attributes are exported:
 * `status` - Status of VPC.
 * `subnet_ids` - The subnet ID list of VPC.
 * `update_time` - The update time of VPC.
+* `user_cidr_blocks` - The user cidr block list of VPC.
 * `vpc_id` - The ID of VPC.
 
 

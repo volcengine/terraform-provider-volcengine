@@ -188,6 +188,14 @@ func DataSourceVolcengineVpcs() *schema.Resource {
 							},
 							Description: "The secondary cidr block list of VPC.",
 						},
+						"user_cidr_blocks": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The user cidr block list of VPC.",
+						},
 						"ipv6_cidr_block": {
 							Type:        schema.TypeString,
 							Computed:    true,

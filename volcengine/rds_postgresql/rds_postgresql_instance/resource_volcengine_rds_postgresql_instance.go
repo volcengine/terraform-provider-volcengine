@@ -229,7 +229,7 @@ func ResourceVolcengineRdsPostgresqlInstance() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				ForceNew:    true,
-				Description: "Backup ID (choose either this or restore_time; if both are set, backup_id shall prevail).s",
+				Description: "Backup ID (choose either this or restore_time; if both are set, backup_id shall prevail).",
 			},
 			"restore_time": {
 				Type:        schema.TypeString,

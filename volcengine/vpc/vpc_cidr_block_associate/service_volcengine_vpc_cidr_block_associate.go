@@ -96,7 +96,16 @@ func (s *VolcengineVpcCidrBlockAssociateService) ReadResource(resourceData *sche
 				return data, fmt.Errorf("vpc_cidr_block_associate %s not exist ", id)
 			}
 			data = vpc
-			data["SecondaryCidrBlock"] = secondaryCidrBlocks[0]
+			cidrBlock := resourceData.Get("secondary_cidr_block").(string)
+			for _, v := range secondaryCidrBlocks {
+				if v.(string) == cidrBlock {
+					data["SecondaryCidrBlock"] = v.(string)
+					break
+				}
+			}
+			if data["SecondaryCidrBlock"] == nil || data["SecondaryCidrBlock"].(string) == "" {
+				return data, fmt.Errorf("vpc_cidr_block_associate %s not exist ", id)
+			}
 		}
 	}
 

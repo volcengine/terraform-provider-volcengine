@@ -327,7 +327,7 @@ func ResourceVolcengineTosBucketMirrorBack() *schema.Resource {
 									"http_code": {
 										Type:        schema.TypeInt,
 										Required:    true,
-										Description: "Error code for triggering the source re-fetch function",
+										Description: "Error code for triggering the source re-fetch function.",
 									},
 									"key_prefix": {
 										Type:        schema.TypeString,

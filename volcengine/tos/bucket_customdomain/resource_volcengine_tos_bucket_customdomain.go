@@ -60,7 +60,7 @@ func ResourceVolcengineTosBucketCustomDomain() *schema.Resource {
 						"protocol": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "Custom domain access protocol.tos|s3",
+							Description: "Custom domain access protocol.tos|s3.",
 						},
 					},
 				},

@@ -27,6 +27,7 @@ In addition to all arguments above, the following attributes are exported:
     * `account_privileges` - The privileges of the database account.
     * `account_status` - The status of the database account.
     * `account_type` - The type of the database account.
+    * `not_allow_privileges` - The privileges to be disabled for the account.
 * `total_count` - The total count of database account query.
 
 

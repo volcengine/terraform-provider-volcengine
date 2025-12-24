@@ -11,7 +11,7 @@ Provides a resource to manage rds postgresql instance
 ## Example Usage
 ```hcl
 # query available zones in current region
-data "volcengine_zones" "foo" {
+data "volcengine_rds_postgresql_zones" "foo" {
 }
 
 # create vpc
@@ -102,32 +102,58 @@ resource "volcengine_rds_postgresql_schema" "foo" {
   owner       = volcengine_rds_postgresql_account.foo.account_name
   schema_name = "acc-test-schema"
 }
+
+# Restore the backup to a new instance
+
+resource "volcengine_rds_postgresql_instance" "example" {
+  src_instance_id   = "postgres-faa4921fdde4"
+  backup_id         = "20251215-215628F"
+  db_engine_version = "PostgreSQL_12"
+  node_spec         = "rds.postgres.1c2g"
+  subnet_id         = volcengine_subnet.foo.id
+  instance_name     = "acc-test-postgresql-instance-restore"
+  charge_info {
+    charge_type = "PostPaid"
+    number      = 1
+  }
+  primary_zone_id   = data.volcengine_zones.foo.zones[0].id
+  secondary_zone_id = data.volcengine_zones.foo.zones[0].id
+}
 ```
 ## Argument Reference
 The following arguments are supported:
-* `charge_info` - (Required, ForceNew) Payment methods.
-* `db_engine_version` - (Required, ForceNew) Instance type. Value: PostgreSQL_11, PostgreSQL_12, PostgreSQL_13.
+* `charge_info` - (Required) Payment methods.
+* `db_engine_version` - (Required, ForceNew) Instance type. Value: PostgreSQL_11, PostgreSQL_12, PostgreSQL_13, PostgreSQL_14, PostgreSQL_15, PostgreSQL_16, PostgreSQL_17.
 * `node_spec` - (Required) The specification of primary node and secondary node.
 * `primary_zone_id` - (Required, ForceNew) The available zone of primary node.
-* `secondary_zone_id` - (Required, ForceNew) The available zone of secondary node.
+* `secondary_zone_id` - (Required) The available zone of secondary node.
 * `subnet_id` - (Required, ForceNew) Subnet ID of the RDS PostgreSQL instance.
+* `allow_list_ids` - (Optional) Allow list IDs to bind at creation.
+* `backup_id` - (Optional, ForceNew) Backup ID (choose either this or restore_time; if both are set, backup_id shall prevail).
+* `estimate_only` - (Optional) Whether to initiate a configuration change assessment. Only estimate spec change impact without executing. Default value: false.
 * `instance_name` - (Optional) Instance name. Cannot start with a number or a dash. Can only contain Chinese characters, letters, numbers, underscores and dashes. The length is limited between 1 ~ 128.
+* `modify_type` - (Optional) Spec change type. Usually(default) or Temporary.
 * `parameters` - (Optional) Parameter of the RDS PostgreSQL instance. This field can only be added or modified. Deleting this field is invalid.
 * `project_name` - (Optional) The project name of the RDS instance.
-* `storage_space` - (Optional) Instance storage space. Value range: [20, 3000], unit: GB, increments every 100GB. Default value: 100.
+* `restore_time` - (Optional, ForceNew) The point in time to restore to, in UTC format yyyy-MM-ddTHH:mm:ssZ (choose either this or backup_id).
+* `rollback_time` - (Optional) Rollback time for Temporary change, UTC format yyyy-MM-ddTHH:mm:ss.sssZ.
+* `src_instance_id` - (Optional, ForceNew) Source instance ID. After setting it, a new instance will be created by restoring from the backup/time point.
+* `storage_space` - (Optional) Instance storage space. Value range: [20, 3000], unit: GB, step 10GB. Default value: 100.
 * `tags` - (Optional) Tags.
+* `zone_migrations` - (Optional) Nodes to migrate AZ. Only Secondary or ReadOnly nodes are allowed. If you want to migrate the availability zone of the secondary node, you need to add the zone_migrations field. Modifying the secondary_zone_id directly will not work. Cross-AZ instance migration is not supported.
 
 The `charge_info` object supports the following:
 
-* `charge_type` - (Required, ForceNew) Payment type. Value:
+* `charge_type` - (Required) Payment type. Value:
 PostPaid - Pay-As-You-Go
 PrePaid - Yearly and monthly (default). 
 When the value of this field is `PrePaid`, the postgresql instance cannot be deleted through terraform. Please unsubscribe the instance from the Volcengine console first, and then use `terraform state rm volcengine_rds_postgresql_instance.resource_name` command to remove it from terraform state file and management.
-* `auto_renew` - (Optional, ForceNew) Whether to automatically renew in prepaid scenarios.
-* `period_unit` - (Optional, ForceNew) The purchase cycle in the prepaid scenario.
+* `auto_renew` - (Optional) Whether to automatically renew in prepaid scenarios.
+* `number` - (Optional) Purchase number of the RDS PostgreSQL instance. Range: [1, 20]. Default: 1.
+* `period_unit` - (Optional) The purchase cycle in the prepaid scenario.
 Month - monthly subscription (default)
 Year - Package year.
-* `period` - (Optional, ForceNew) Purchase duration in prepaid scenarios. Default: 1.
+* `period` - (Optional) Purchase duration in prepaid scenarios. Default: 1.
 
 The `parameters` object supports the following:
 
@@ -139,9 +165,16 @@ The `tags` object supports the following:
 * `key` - (Required) The Key of Tags.
 * `value` - (Required) The Value of Tags.
 
+The `zone_migrations` object supports the following:
+
+* `node_id` - (Required) Node ID to migrate.
+* `zone_id` - (Required) Target zone ID.
+* `node_type` - (Optional) Node type: Secondary or ReadOnly.
+
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `allow_list_version` - The allow list version of the RDS PostgreSQL instance.
 * `backup_use` - The instance has used backup space. Unit: GB.
 * `charge_detail` - Payment methods.
     * `auto_renew` - Whether to automatically renew in prepaid scenarios.
@@ -152,10 +185,11 @@ Autorenew_Disable (default).
     * `charge_status` - Pay status. Value:
 normal - normal
 overdue - overdue
-.
+unpaid - unpaid.
     * `charge_type` - Payment type. Value:
 PostPaid - Pay-As-You-Go
 PrePaid - Yearly and monthly (default).
+    * `number` - The number of the RDS PostgreSQL instance.
     * `overdue_reclaim_time` - Estimated release time when arrears are closed (pay-as-you-go & monthly subscription).
     * `overdue_time` - Shutdown time in arrears (pay-as-you-go & monthly subscription).
     * `period_unit` - The purchase cycle in the prepaid scenario.
@@ -168,10 +202,14 @@ Year - Package year.
 * `data_sync_mode` - Data synchronization mode.
 * `endpoints` - The endpoint info of the RDS instance.
     * `address` - Address list.
-        * `dns_visibility` - DNS Visibility.
+        * `cross_region_domain` - Address that can be accessed across regions.
+        * `dns_visibility` - Whether to enable public network resolution. Values: false: Default value. PrivateZone of Volcano Engine. true: Private and public network resolution of Volcano Engine.
+        * `domain_visibility_setting` - The type of private network address. Values: LocalDomain: Local domain name. CrossRegionDomain: Domains accessible across regions.
         * `domain` - Connect domain name.
         * `eip_id` - The ID of the EIP, only valid for Public addresses.
+        * `internet_protocol` - Address IP protocol, IPv4 or IPv6.
         * `ip_address` - The IP Address.
+        * `ipv6_address` - The IPv6 Address.
         * `network_type` - Network address type, temporarily Private, Public, PublicService.
         * `port` - The Port.
         * `subnet_id` - Subnet ID, valid only for private addresses.
@@ -187,6 +225,10 @@ Primary: Primary node terminal.
 Custom: Custom terminal.
 Direct: Direct connection to the terminal. (Only the operation and maintenance side)
 AllNode: All node terminals. (Only the operation and maintenance side).
+    * `read_only_node_distribution_type` - The distribution type of the read-only nodes, value:
+Default: Default distribution.
+Custom: Custom distribution.
+    * `read_only_node_max_delay_time` - Maximum latency threshold of read-only node. If the latency of a read-only node exceeds this value, reading traffic won't be routed to this node. Unit: seconds.Values: 0~3600.Default value: 30.
     * `read_only_node_weight` - The list of nodes configured by the connection terminal and the corresponding read-only weights.
         * `node_id` - The ID of the node.
         * `node_type` - The type of the node.
@@ -194,10 +236,15 @@ AllNode: All node terminals. (Only the operation and maintenance side).
     * `read_write_mode` - Read and write mode:
 ReadWrite: read and write
 ReadOnly: read only (default).
+    * `read_write_proxy_connection` - After the terminal enables read-write separation, the number of proxy connections set for the terminal. The lower limit of the number of proxy connections is 20. The upper limit of the number of proxy connections depends on the specifications of the instance master node.
+    * `write_node_halt_writing` - Whether the endpoint sends write requests to the write node (currently only the master node is a write node). Values: true: Yes(Default). false: No.
+* `estimation_result` - The estimated impact on the instance after the current configuration changes.
+    * `effects` - After changing according to the current configuration, the estimated impact on the read and write connections of the instance.
+    * `plans` - Estimated impact on the instance after the current configuration changes.
 * `instance_id` - The ID of the RDS PostgreSQL instance.
 * `instance_status` - The status of the RDS PostgreSQL instance.
 * `instance_type` - The instance type of the RDS PostgreSQL instance.
-* `memory` - Memory size.
+* `memory` - Memory size. Unit: GB.
 * `node_number` - The number of nodes.
 * `nodes` - Instance node information.
     * `create_time` - Node creation local time.
@@ -214,7 +261,12 @@ ReadOnly: Read-only node.
     * `v_cpu` - CPU size. For example: 1 means 1U.
     * `zone_id` - Availability zone ID. Subsequent support for multi-availability zones can be separated and displayed by an English colon.
 * `region_id` - The region of the RDS PostgreSQL instance.
+* `storage_data_use` - The instance's primary node has used storage space. Unit: Byte.
+* `storage_log_use` - The instance's primary node has used log storage space. Unit: Byte.
+* `storage_temp_use` - The instance's primary node has used temporary storage space. Unit: Byte.
 * `storage_type` - Instance storage type.
+* `storage_use` - The instance has used storage space. Unit: Byte.
+* `storage_wal_use` - The instance's primary node has used WAL storage space. Unit: Byte.
 * `update_time` - The update time of the RDS PostgreSQL instance.
 * `v_cpu` - CPU size.
 * `vpc_id` - The vpc ID of the RDS PostgreSQL instance.

@@ -86,7 +86,7 @@ resource "volcengine_rds_postgresql_schema" "foo" {
 The following arguments are supported:
 * `db_name` - (Required, ForceNew) The name of the database.
 * `instance_id` - (Required, ForceNew) The id of the postgresql instance.
-* `owner` - (Required) The owner of the schema.
+* `owner` - (Required) The owner of the schema.The instance read-only account, a high-privilege account with DDL permissions disabled, or a normal account with DDL permissions disabled cannot be used as the owner of the schema.
 * `schema_name` - (Required, ForceNew) The name of the schema.
 
 ## Attributes Reference
