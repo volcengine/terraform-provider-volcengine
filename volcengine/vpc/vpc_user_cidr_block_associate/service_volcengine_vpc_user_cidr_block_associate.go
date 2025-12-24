@@ -1,4 +1,4 @@
-package vpc_cidr_block_associate
+package vpc_user_cidr_block_associate
 
 import (
 	"errors"
@@ -12,23 +12,23 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc"
 )
 
-type VolcengineVpcCidrBlockAssociateService struct {
+type VolcengineVpcUserCidrBlockAssociateService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewVpcCidrBlockAssociateService(c *ve.SdkClient) *VolcengineVpcCidrBlockAssociateService {
-	return &VolcengineVpcCidrBlockAssociateService{
+func NewVpcUserCidrBlockAssociateService(c *ve.SdkClient) *VolcengineVpcUserCidrBlockAssociateService {
+	return &VolcengineVpcUserCidrBlockAssociateService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) GetClient() *ve.SdkClient {
+func (s *VolcengineVpcUserCidrBlockAssociateService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineVpcUserCidrBlockAssociateService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp    *map[string]interface{}
 		results interface{}
@@ -64,7 +64,7 @@ func (s *VolcengineVpcCidrBlockAssociateService) ReadResources(m map[string]inte
 	})
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineVpcUserCidrBlockAssociateService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
 		ok      bool
@@ -90,21 +90,21 @@ func (s *VolcengineVpcCidrBlockAssociateService) ReadResource(resourceData *sche
 		return data, fmt.Errorf("vpc %s not exist ", id)
 	}
 
-	if v, exists := vpc["SecondaryCidrBlocks"]; exists {
-		if secondaryCidrBlocks, ok := v.([]interface{}); ok {
-			if len(secondaryCidrBlocks) == 0 {
-				return data, fmt.Errorf("vpc_cidr_block_associate %s not exist ", id)
+	if v, exists := vpc["UserCidrBlocks"]; exists {
+		if userCidrBlocks, ok := v.([]interface{}); ok {
+			if len(userCidrBlocks) == 0 {
+				return data, fmt.Errorf("vpc_user_cidr_block_associate %s not exist ", id)
 			}
 			data = vpc
-			cidrBlock := resourceData.Get("secondary_cidr_block").(string)
-			for _, v := range secondaryCidrBlocks {
+			cidrBlock := resourceData.Get("user_cidr_block").(string)
+			for _, v := range userCidrBlocks {
 				if v.(string) == cidrBlock {
-					data["SecondaryCidrBlock"] = v.(string)
+					data["UserCidrBlocks"] = v.(string)
 					break
 				}
 			}
-			if data["SecondaryCidrBlock"] == nil || data["SecondaryCidrBlock"].(string) == "" {
-				return data, fmt.Errorf("vpc_cidr_block_associate %s not exist ", id)
+			if data["UserCidrBlocks"] == nil || data["UserCidrBlocks"].(string) == "" {
+				return data, fmt.Errorf("vpc_user_cidr_block_associate %s not exist ", id)
 			}
 		}
 	}
@@ -112,21 +112,21 @@ func (s *VolcengineVpcCidrBlockAssociateService) ReadResource(resourceData *sche
 	return data, err
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineVpcUserCidrBlockAssociateService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{}
 }
 
-func (VolcengineVpcCidrBlockAssociateService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineVpcUserCidrBlockAssociateService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineVpcUserCidrBlockAssociateService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "AssociateVpcCidrBlock",
+			Action:      "AssociateVpcUserCidrBlock",
 			ConvertMode: ve.RequestConvertAll,
 			Convert:     map[string]ve.RequestConvert{},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -155,22 +155,22 @@ func (s *VolcengineVpcCidrBlockAssociateService) CreateResource(resourceData *sc
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineVpcUserCidrBlockAssociateService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineVpcUserCidrBlockAssociateService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "DisassociateVpcCidrBlock",
+			Action:      "DisassociateVpcUserCidrBlock",
 			ConvertMode: ve.RequestConvertInConvert,
 			Convert: map[string]ve.RequestConvert{
 				"vpc_id": {
 					TargetField: "VpcId",
 					ForceGet:    true,
 				},
-				"secondary_cidr_block": {
-					TargetField: "SecondaryCidrBlock",
+				"user_cidr_block": {
+					TargetField: "UserCidrBlock",
 					ForceGet:    true,
 				},
 			},
@@ -195,11 +195,11 @@ func (s *VolcengineVpcCidrBlockAssociateService) RemoveResource(resourceData *sc
 	return []ve.Callback{callback}
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineVpcUserCidrBlockAssociateService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{}
 }
 
-func (s *VolcengineVpcCidrBlockAssociateService) ReadResourceId(id string) string {
+func (s *VolcengineVpcUserCidrBlockAssociateService) ReadResourceId(id string) string {
 	return id
 }
 

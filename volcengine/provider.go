@@ -70,6 +70,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_session"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_target"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc_cidr_block_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc_user_cidr_block_associate"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
@@ -1089,29 +1090,30 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_apig_routes":            apig_route.DataSourceVolcengineApigRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
-			"volcengine_subnet":                     subnet.ResourceVolcengineSubnet(),
-			"volcengine_route_table":                route_table.ResourceVolcengineRouteTable(),
-			"volcengine_route_entry":                route_entry.ResourceVolcengineRouteEntry(),
-			"volcengine_route_table_associate":      route_table_associate.ResourceVolcengineRouteTableAssociate(),
-			"volcengine_security_group":             security_group.ResourceVolcengineSecurityGroup(),
-			"volcengine_network_interface":          network_interface.ResourceVolcengineNetworkInterface(),
-			"volcengine_network_interface_attach":   network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
-			"volcengine_security_group_rule":        security_group_rule.ResourceVolcengineSecurityGroupRule(),
-			"volcengine_network_acl":                network_acl.ResourceVolcengineNetworkAcl(),
-			"volcengine_network_acl_associate":      network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
-			"volcengine_vpc_ipv6_gateway":           ipv6_gateway.ResourceVolcengineIpv6Gateway(),
-			"volcengine_vpc_ipv6_address_bandwidth": ipv6_address_bandwidth.ResourceVolcengineIpv6AddressBandwidth(),
-			"volcengine_vpc_prefix_list":            prefix_list.ResourceVolcengineVpcPrefixList(),
-			"volcengine_ha_vip":                     ha_vip.ResourceVolcengineHaVip(),
-			"volcengine_ha_vip_associate":           ha_vip_associate.ResourceVolcengineHaVipAssociate(),
-			"volcengine_vpc_cidr_block_associate":   vpc_cidr_block_associate.ResourceVolcengineVpcCidrBlockAssociate(),
-			"volcengine_flow_log":                   flow_log.ResourceVolcengineFlowLog(),
-			"volcengine_flow_log_active":            flow_log_active.ResourceVolcengineFlowLogActive(),
-			"volcengine_traffic_mirror_filter":      traffic_mirror_filter.ResourceVolcengineTrafficMirrorFilter(),
-			"volcengine_traffic_mirror_filter_rule": traffic_mirror_filter_rule.ResourceVolcengineTrafficMirrorFilterRule(),
-			"volcengine_traffic_mirror_session":     traffic_mirror_session.ResourceVolcengineTrafficMirrorSession(),
-			"volcengine_traffic_mirror_target":      traffic_mirror_target.ResourceVolcengineTrafficMirrorTarget(),
+			"volcengine_vpc":                           vpc.ResourceVolcengineVpc(),
+			"volcengine_subnet":                        subnet.ResourceVolcengineSubnet(),
+			"volcengine_route_table":                   route_table.ResourceVolcengineRouteTable(),
+			"volcengine_route_entry":                   route_entry.ResourceVolcengineRouteEntry(),
+			"volcengine_route_table_associate":         route_table_associate.ResourceVolcengineRouteTableAssociate(),
+			"volcengine_security_group":                security_group.ResourceVolcengineSecurityGroup(),
+			"volcengine_network_interface":             network_interface.ResourceVolcengineNetworkInterface(),
+			"volcengine_network_interface_attach":      network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
+			"volcengine_security_group_rule":           security_group_rule.ResourceVolcengineSecurityGroupRule(),
+			"volcengine_network_acl":                   network_acl.ResourceVolcengineNetworkAcl(),
+			"volcengine_network_acl_associate":         network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
+			"volcengine_vpc_ipv6_gateway":              ipv6_gateway.ResourceVolcengineIpv6Gateway(),
+			"volcengine_vpc_ipv6_address_bandwidth":    ipv6_address_bandwidth.ResourceVolcengineIpv6AddressBandwidth(),
+			"volcengine_vpc_prefix_list":               prefix_list.ResourceVolcengineVpcPrefixList(),
+			"volcengine_ha_vip":                        ha_vip.ResourceVolcengineHaVip(),
+			"volcengine_ha_vip_associate":              ha_vip_associate.ResourceVolcengineHaVipAssociate(),
+			"volcengine_vpc_cidr_block_associate":      vpc_cidr_block_associate.ResourceVolcengineVpcCidrBlockAssociate(),
+			"volcengine_flow_log":                      flow_log.ResourceVolcengineFlowLog(),
+			"volcengine_flow_log_active":               flow_log_active.ResourceVolcengineFlowLogActive(),
+			"volcengine_traffic_mirror_filter":         traffic_mirror_filter.ResourceVolcengineTrafficMirrorFilter(),
+			"volcengine_traffic_mirror_filter_rule":    traffic_mirror_filter_rule.ResourceVolcengineTrafficMirrorFilterRule(),
+			"volcengine_traffic_mirror_session":        traffic_mirror_session.ResourceVolcengineTrafficMirrorSession(),
+			"volcengine_traffic_mirror_target":         traffic_mirror_target.ResourceVolcengineTrafficMirrorTarget(),
+			"volcengine_vpc_user_cidr_block_associate": vpc_user_cidr_block_associate.ResourceVolcengineVpcUserCidrBlockAssociate(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),
