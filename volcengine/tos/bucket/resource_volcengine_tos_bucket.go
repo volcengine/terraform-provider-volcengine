@@ -91,7 +91,7 @@ func ResourceVolcengineTosBucket() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "fns",
-				Description: "The bucket type of the TOS bucket. Default is `fns`. Valid values: `hns`, `fns`",
+				Description: "The bucket type of the TOS bucket. Default is `fns`. Valid values: `hns`, `fns`.",
 			},
 			"tags": {
 				Type:        schema.TypeSet,

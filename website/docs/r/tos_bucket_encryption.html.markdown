@@ -11,7 +11,7 @@ Provides a resource to manage tos bucket encryption
 ## Example Usage
 ```hcl
 resource "volcengine_tos_bucket" "foo" {
-  bucket_name   = "tf-acc-test-bucket"
+  bucket_name   = "tf-acc-test-bucket1"
   public_acl    = "private"
   az_redundancy = "multi-az"
   project_name  = "default"

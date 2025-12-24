@@ -12,7 +12,7 @@ func DataSourceVolcengineRdsPostgresqlReplicationSlots() *schema.Resource {
 			"instance_id": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The id of the PostgreSQL instance",
+				Description: "The id of the PostgreSQL instance.",
 			},
 			"slot_name": {
 				Type:        schema.TypeString,
