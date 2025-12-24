@@ -55,6 +55,14 @@ func DataSourceVolcengineRdsPostgresqlAccounts() *schema.Resource {
 							Computed:    true,
 							Description: "The privileges of the database account.",
 						},
+						"not_allow_privileges": {
+							Type:        schema.TypeSet,
+							Computed:    true,
+							Description: "The privileges to be disabled for the account.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					},
 				},
 			},

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	volc "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -23,6 +24,7 @@ func ResourceVolcengineRdsPostgresqlDatabase() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineRdsPostgresqlDatabaseCreate,
 		Read:   resourceVolcengineRdsPostgresqlDatabaseRead,
+		Update: resourceVolcengineRdsPostgresqlDatabaseUpdate,
 		Delete: resourceVolcengineRdsPostgresqlDatabaseDelete,
 		Importer: &schema.ResourceImporter{
 			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
@@ -81,13 +83,37 @@ func ResourceVolcengineRdsPostgresqlDatabase() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				ForceNew:    true,
 				Description: "The owner of database.",
 			},
 			"db_status": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The status of the RDS database.",
+			},
+			"source_db_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The name of the source database. This parameter is required when clone an existing database.",
+			},
+			"data_option": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"Metadata"}, false),
+				Description: "The data option of the new database. Currently only Metadata is supported. " +
+					"This parameter is optional when clone an existing database.",
+			},
+			"plpgsql_option": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Schema{
+					Type:         schema.TypeString,
+					ValidateFunc: validation.StringInSlice([]string{"View", "Procedure", "Function", "Trigger"}, false),
+				},
+				Description: "The pl_pgsql option of the new database. Value range: View, Procedure, Function, Trigger. " +
+					"This parameter is optional when clone an existing database.",
 			},
 		},
 	}
@@ -107,6 +133,15 @@ func resourceVolcengineRdsPostgresqlDatabaseRead(d *schema.ResourceData, meta in
 	err = databaseService.Dispatcher.Read(databaseService, d, ResourceVolcengineRdsPostgresqlDatabase())
 	if err != nil {
 		return fmt.Errorf("error on reading postgresql database %q, %w", d.Id(), err)
+	}
+	return err
+}
+
+func resourceVolcengineRdsPostgresqlDatabaseUpdate(d *schema.ResourceData, meta interface{}) (err error) {
+	databaseService := NewRdsPostgresqlDatabaseService(meta.(*volc.SdkClient))
+	err = databaseService.Dispatcher.Update(databaseService, d, ResourceVolcengineRdsPostgresqlDatabase())
+	if err != nil {
+		return fmt.Errorf("error on updating postgresql database %q, %w", d.Id(), err)
 	}
 	return err
 }

@@ -53,9 +53,11 @@ func ResourceVolcengineRdsPostgresqlSchema() *schema.Resource {
 				Description: "The name of the schema.",
 			},
 			"owner": {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "The owner of the schema.",
+				Type:     schema.TypeString,
+				Required: true,
+				Description: "The owner of the schema." +
+					"The instance read-only account, a high-privilege account with DDL permissions disabled, " +
+					"or a normal account with DDL permissions disabled cannot be used as the owner of the schema.",
 			},
 		},
 	}

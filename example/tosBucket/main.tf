@@ -1,6 +1,6 @@
 # create tos bucket
 resource "volcengine_tos_bucket" "foo" {
-  bucket_name = "tf-acc-test-bucket"
+  bucket_name = "tflyb7"
   #  storage_class        = "IA"
   public_acl           = "private"
   az_redundancy        = "multi-az"

@@ -11,10 +11,20 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	tos_bucket_logging "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_logging"
+	tos_bucket_object_lock_configuration "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_object_lock_configuration"
+	tos_bucket_replication "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_replication"
+	tos_bucket_request_payment "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_request_payment"
 
+	tos_bucket_access_monitor "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_access_monitor"
 	tos_bucket_cors "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_cors"
+	tos_bucket_customdomain "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_customdomain"
 	tos_bucket_encryption "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_encryption"
+	tos_bucket_lifecycle "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_lifecycle"
+	tos_bucket_mirror_back "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_mirror_back"
 	tos_bucket_notification "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_notification"
+	tos_bucket_rename "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_rename"
+	tos_bucket_transfer_acceleration "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_transfer_acceleration"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_acl_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/waf/waf_bot_analyse_protect_rule"
@@ -60,6 +70,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_session"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/traffic_mirror_target"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc_cidr_block_associate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/vpc_user_cidr_block_associate"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_backup_schedule"
@@ -67,8 +78,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_record_sets"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/dns/dns_zone"
 
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_inventory"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
+	tos_bucket_inventory "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_inventory"
+	tos_bucket_realtime_log "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_realtime_log"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/address_book"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cloud_firewall/control_policy"
@@ -129,6 +140,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kafka/kafka_zone"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_account_table_column_info"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist_version_upgrade"
+	rds_postgresql_backup_download "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_backup_download"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_backup_policy"
+	rds_postgresql_data_backup "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_data_backup"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_backup_detached"
+	rds_postgresql_instance_backup_wal_log "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_backup_wal_log"
+	rds_postgresql_instance_recoverable_time "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_recoverable_time"
+	rds_postgresql_replication_slot "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_replication_slot"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_restore_backup"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
@@ -329,9 +349,26 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist_associate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database"
+	rds_postgresql_database_endpoint "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_database_endpoint"
+	rds_postgresql_endpoint_public_address "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_endpoint_public_address"
+	rds_postgresql_engine_version_parameter "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_engine_version_parameter"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance"
+	rds_postgresql_instance_failover_log "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_failover_log"
+	rds_pg_instance_param "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_parameter"
+	rds_postgresql_instance_parameter_log "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_parameter_log"
+	rds_postgresql_instance_price_detail "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_price_detail"
+	rds_postgresql_instance_price_difference "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_price_difference"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_readonly_node"
+	rds_postgresql_instance_spec "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_spec"
+	rdsPgSSL "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_ssl"
+	rds_postgresql_instance_state "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_state"
+	rds_postgresql_instance_task "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_instance_task"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_parameter_template"
+	rds_postgresql_parameter_template_apply_diff "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_parameter_template_apply_diff"
+	rds_postgresql_planned_event "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_planned_event"
+	rds_postgresql_region "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_schema"
+	rds_postgresql_zone "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_zone"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_v2/rds_instance_v2"
 	redisAccount "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/account"
 	redis_allow_list "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/allow_list"
@@ -369,6 +406,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_policy"
+	tos_bucket_website "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_website"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/object"
 	trEntry "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_entry"
 	trTable "github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/route_table"
@@ -416,7 +454,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/kubeconfig"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/node_pool"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/permission"
+	vke_permission "github.com/volcengine/terraform-provider-volcengine/volcengine/vke/permission"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_addon"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vke/support_resource_types"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vpc/ha_vip"
@@ -880,10 +918,32 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mssql_backups":   mssqlBackup.DataSourceVolcengineRdsMssqlBackups(),
 
 			// ================ Postgresql ================
-			"volcengine_rds_postgresql_databases":  rds_postgresql_database.DataSourceVolcengineRdsPostgresqlDatabases(),
-			"volcengine_rds_postgresql_accounts":   rds_postgresql_account.DataSourceVolcengineRdsPostgresqlAccounts(),
-			"volcengine_rds_postgresql_instances":  rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
-			"volcengine_rds_postgresql_allowlists": rds_postgresql_allowlist.DataSourceVolcengineRdsPostgresqlAllowlists(),
+			"volcengine_rds_postgresql_databases":                      rds_postgresql_database.DataSourceVolcengineRdsPostgresqlDatabases(),
+			"volcengine_rds_postgresql_accounts":                       rds_postgresql_account.DataSourceVolcengineRdsPostgresqlAccounts(),
+			"volcengine_rds_postgresql_instances":                      rds_postgresql_instance.DataSourceVolcengineRdsPostgresqlInstances(),
+			"volcengine_rds_postgresql_instance_specs":                 rds_postgresql_instance_spec.DataSourceVolcengineRdsPostgresqlInstanceSpecs(),
+			"volcengine_rds_postgresql_instance_price_details":         rds_postgresql_instance_price_detail.DataSourceVolcengineRdsPostgresqlInstancePriceDetails(),
+			"volcengine_rds_postgresql_instance_price_differences":     rds_postgresql_instance_price_difference.DataSourceVolcengineRdsPostgresqlInstancePriceDifferences(),
+			"volcengine_rds_postgresql_allowlists":                     rds_postgresql_allowlist.DataSourceVolcengineRdsPostgresqlAllowlists(),
+			"volcengine_rds_postgresql_instance_ssls":                  rdsPgSSL.DataSourceVolcengineRdsPostgresqlInstanceSsls(),
+			"volcengine_rds_postgresql_regions":                        rds_postgresql_region.DataSourceVolcengineRdsPostgresqlRegions(),
+			"volcengine_rds_postgresql_zones":                          rds_postgresql_zone.DataSourceVolcengineRdsPostgresqlZones(),
+			"volcengine_rds_postgresql_instance_parameters":            rds_pg_instance_param.DataSourceVolcengineRdsPostgresqlInstanceParameters(),
+			"volcengine_rds_postgresql_instance_parameter_logs":        rds_postgresql_instance_parameter_log.DataSourceVolcengineRdsPostgresqlInstanceParameterLogs(),
+			"volcengine_rds_postgresql_instance_failover_logs":         rds_postgresql_instance_failover_log.DataSourceVolcengineRdsPostgresqlInstanceFailoverLogs(),
+			"volcengine_rds_postgresql_engine_version_parameters":      rds_postgresql_engine_version_parameter.DataSourceVolcengineRdsPostgresqlEngineVersionParameters(),
+			"volcengine_rds_postgresql_parameter_templates":            rds_postgresql_parameter_template.DataSourceVolcengineRdsPostgresqlParameterTemplates(),
+			"volcengine_rds_postgresql_parameter_template_apply_diffs": rds_postgresql_parameter_template_apply_diff.DataSourceVolcengineRdsPostgresqlParameterTemplateApplyDiffs(),
+			"volcengine_rds_postgresql_database_endpoints":             rds_postgresql_database_endpoint.DataSourceVolcengineRdsPostgresqlDatabaseEndpoints(),
+			"volcengine_rds_postgresql_data_backups":                   rds_postgresql_data_backup.DataSourceVolcengineRdsPostgresqlDataBackups(),
+			"volcengine_rds_postgresql_backup_downloads":               rds_postgresql_backup_download.DataSourceVolcengineRdsPostgresqlBackupDownloads(),
+			"volcengine_rds_postgresql_instance_backup_detacheds":      rds_postgresql_instance_backup_detached.DataSourceVolcengineRdsPostgresqlInstanceBackupDetacheds(),
+			"volcengine_rds_postgresql_replication_slots":              rds_postgresql_replication_slot.DataSourceVolcengineRdsPostgresqlReplicationSlots(),
+			"volcengine_rds_postgresql_instance_recoverable_times":     rds_postgresql_instance_recoverable_time.DataSourceVolcengineRdsPostgresqlInstanceRecoverableTimes(),
+			"volcengine_rds_postgresql_instance_backup_wal_logs":       rds_postgresql_instance_backup_wal_log.DataSourceVolcengineRdsPostgresqlInstanceBackupWalLogs(),
+			"volcengine_rds_postgresql_backup_policys":                 rds_postgresql_backup_policy.DataSourceVolcengineRdsPostgresqlBackupPolicys(),
+			"volcengine_rds_postgresql_planned_events":                 rds_postgresql_planned_event.DataSourceVolcengineRdsPostgresqlPlannedEvents(),
+			"volcengine_rds_postgresql_instance_tasks":                 rds_postgresql_instance_task.DataSourceVolcengineRdsPostgresqlInstanceTasks(),
 
 			// ================ Organization ================
 			"volcengine_organization_units":                    organization_unit.DataSourceVolcengineOrganizationUnits(),
@@ -1030,29 +1090,30 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_apig_routes":            apig_route.DataSourceVolcengineApigRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"volcengine_vpc":                        vpc.ResourceVolcengineVpc(),
-			"volcengine_subnet":                     subnet.ResourceVolcengineSubnet(),
-			"volcengine_route_table":                route_table.ResourceVolcengineRouteTable(),
-			"volcengine_route_entry":                route_entry.ResourceVolcengineRouteEntry(),
-			"volcengine_route_table_associate":      route_table_associate.ResourceVolcengineRouteTableAssociate(),
-			"volcengine_security_group":             security_group.ResourceVolcengineSecurityGroup(),
-			"volcengine_network_interface":          network_interface.ResourceVolcengineNetworkInterface(),
-			"volcengine_network_interface_attach":   network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
-			"volcengine_security_group_rule":        security_group_rule.ResourceVolcengineSecurityGroupRule(),
-			"volcengine_network_acl":                network_acl.ResourceVolcengineNetworkAcl(),
-			"volcengine_network_acl_associate":      network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
-			"volcengine_vpc_ipv6_gateway":           ipv6_gateway.ResourceVolcengineIpv6Gateway(),
-			"volcengine_vpc_ipv6_address_bandwidth": ipv6_address_bandwidth.ResourceVolcengineIpv6AddressBandwidth(),
-			"volcengine_vpc_prefix_list":            prefix_list.ResourceVolcengineVpcPrefixList(),
-			"volcengine_ha_vip":                     ha_vip.ResourceVolcengineHaVip(),
-			"volcengine_ha_vip_associate":           ha_vip_associate.ResourceVolcengineHaVipAssociate(),
-			"volcengine_vpc_cidr_block_associate":   vpc_cidr_block_associate.ResourceVolcengineVpcCidrBlockAssociate(),
-			"volcengine_flow_log":                   flow_log.ResourceVolcengineFlowLog(),
-			"volcengine_flow_log_active":            flow_log_active.ResourceVolcengineFlowLogActive(),
-			"volcengine_traffic_mirror_filter":      traffic_mirror_filter.ResourceVolcengineTrafficMirrorFilter(),
-			"volcengine_traffic_mirror_filter_rule": traffic_mirror_filter_rule.ResourceVolcengineTrafficMirrorFilterRule(),
-			"volcengine_traffic_mirror_session":     traffic_mirror_session.ResourceVolcengineTrafficMirrorSession(),
-			"volcengine_traffic_mirror_target":      traffic_mirror_target.ResourceVolcengineTrafficMirrorTarget(),
+			"volcengine_vpc":                           vpc.ResourceVolcengineVpc(),
+			"volcengine_subnet":                        subnet.ResourceVolcengineSubnet(),
+			"volcengine_route_table":                   route_table.ResourceVolcengineRouteTable(),
+			"volcengine_route_entry":                   route_entry.ResourceVolcengineRouteEntry(),
+			"volcengine_route_table_associate":         route_table_associate.ResourceVolcengineRouteTableAssociate(),
+			"volcengine_security_group":                security_group.ResourceVolcengineSecurityGroup(),
+			"volcengine_network_interface":             network_interface.ResourceVolcengineNetworkInterface(),
+			"volcengine_network_interface_attach":      network_interface_attach.ResourceVolcengineNetworkInterfaceAttach(),
+			"volcengine_security_group_rule":           security_group_rule.ResourceVolcengineSecurityGroupRule(),
+			"volcengine_network_acl":                   network_acl.ResourceVolcengineNetworkAcl(),
+			"volcengine_network_acl_associate":         network_acl_associate.ResourceVolcengineNetworkAclAssociate(),
+			"volcengine_vpc_ipv6_gateway":              ipv6_gateway.ResourceVolcengineIpv6Gateway(),
+			"volcengine_vpc_ipv6_address_bandwidth":    ipv6_address_bandwidth.ResourceVolcengineIpv6AddressBandwidth(),
+			"volcengine_vpc_prefix_list":               prefix_list.ResourceVolcengineVpcPrefixList(),
+			"volcengine_ha_vip":                        ha_vip.ResourceVolcengineHaVip(),
+			"volcengine_ha_vip_associate":              ha_vip_associate.ResourceVolcengineHaVipAssociate(),
+			"volcengine_vpc_cidr_block_associate":      vpc_cidr_block_associate.ResourceVolcengineVpcCidrBlockAssociate(),
+			"volcengine_flow_log":                      flow_log.ResourceVolcengineFlowLog(),
+			"volcengine_flow_log_active":               flow_log_active.ResourceVolcengineFlowLogActive(),
+			"volcengine_traffic_mirror_filter":         traffic_mirror_filter.ResourceVolcengineTrafficMirrorFilter(),
+			"volcengine_traffic_mirror_filter_rule":    traffic_mirror_filter_rule.ResourceVolcengineTrafficMirrorFilterRule(),
+			"volcengine_traffic_mirror_session":        traffic_mirror_session.ResourceVolcengineTrafficMirrorSession(),
+			"volcengine_traffic_mirror_target":         traffic_mirror_target.ResourceVolcengineTrafficMirrorTarget(),
+			"volcengine_vpc_user_cidr_block_associate": vpc_user_cidr_block_associate.ResourceVolcengineVpcUserCidrBlockAssociate(),
 
 			// ================ EIP ================
 			"volcengine_eip_address":   eip_address.ResourceVolcengineEipAddress(),
@@ -1162,14 +1223,25 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_escloud_instance": instance.ResourceVolcengineESCloudInstance(),
 
 			//================= TOS =================
-			"volcengine_tos_bucket":              bucket.ResourceVolcengineTosBucket(),
-			"volcengine_tos_object":              object.ResourceVolcengineTosObject(),
-			"volcengine_tos_bucket_policy":       bucket_policy.ResourceVolcengineTosBucketPolicy(),
-			"volcengine_tos_bucket_inventory":    tos_bucket_inventory.ResourceVolcengineTosBucketInventory(),
-			"volcengine_tos_bucket_realtime_log": tos_bucket_realtime_log.ResourceVolcengineTosBucketRealtimeLog(),
-			"volcengine_tos_bucket_notification": tos_bucket_notification.ResourceVolcengineTosBucketNotification(),
-			"volcengine_tos_bucket_encryption":   tos_bucket_encryption.ResourceVolcengineTosBucketEncryption(),
-			"volcengine_tos_bucket_cors":         tos_bucket_cors.ResourceVolcengineTosBucketCors(),
+			"volcengine_tos_bucket":                           bucket.ResourceVolcengineTosBucket(),
+			"volcengine_tos_object":                           object.ResourceVolcengineTosObject(),
+			"volcengine_tos_bucket_policy":                    bucket_policy.ResourceVolcengineTosBucketPolicy(),
+			"volcengine_tos_bucket_website":                   tos_bucket_website.ResourceVolcengineTosBucketWebsite(),
+			"volcengine_tos_bucket_access_monitor":            tos_bucket_access_monitor.ResourceVolcengineTosBucketAccessMonitor(),
+			"volcengine_tos_bucket_inventory":                 tos_bucket_inventory.ResourceVolcengineTosBucketInventory(),
+			"volcengine_tos_bucket_realtime_log":              tos_bucket_realtime_log.ResourceVolcengineTosBucketRealtimeLog(),
+			"volcengine_tos_bucket_notification":              tos_bucket_notification.ResourceVolcengineTosBucketNotification(),
+			"volcengine_tos_bucket_lifecycle":                 tos_bucket_lifecycle.ResourceVolcengineTosBucketLifecycle(),
+			"volcengine_tos_bucket_mirror_back":               tos_bucket_mirror_back.ResourceVolcengineTosBucketMirrorBack(),
+			"volcengine_tos_bucket_transfer_acceleration":     tos_bucket_transfer_acceleration.ResourceVolcengineTosBucketTransferAcceleration(),
+			"volcengine_tos_bucket_replication":               tos_bucket_replication.ResourceVolcengineTosBucketReplication(),
+			"volcengine_tos_bucket_encryption":                tos_bucket_encryption.ResourceVolcengineTosBucketEncryption(),
+			"volcengine_tos_bucket_cors":                      tos_bucket_cors.ResourceVolcengineTosBucketCors(),
+			"volcengine_tos_bucket_customdomain":              tos_bucket_customdomain.ResourceVolcengineTosBucketCustomDomain(),
+			"volcengine_tos_bucket_rename":                    tos_bucket_rename.ResourceVolcengineTosBucketRename(),
+			"volcengine_tos_bucket_request_payment":           tos_bucket_request_payment.ResourceVolcengineTosBucketRequestPayment(),
+			"volcengine_tos_bucket_object_lock_configuration": tos_bucket_object_lock_configuration.ResourceVolcengineTosBucketObjectLockConfiguration(),
+			"volcengine_tos_bucket_logging":                   tos_bucket_logging.ResourceVolcengineTosBucketLogging(),
 
 			// ================ Redis ==============
 			"volcengine_redis_allow_list":           redis_allow_list.ResourceVolcengineRedisAllowList(),
@@ -1316,12 +1388,23 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mssql_backup":   mssqlBackup.ResourceVolcengineRdsMssqlBackup(),
 
 			// ================ Postgresql ================
-			"volcengine_rds_postgresql_database":               rds_postgresql_database.ResourceVolcengineRdsPostgresqlDatabase(),
-			"volcengine_rds_postgresql_account":                rds_postgresql_account.ResourceVolcengineRdsPostgresqlAccount(),
-			"volcengine_rds_postgresql_instance":               rds_postgresql_instance.ResourceVolcengineRdsPostgresqlInstance(),
-			"volcengine_rds_postgresql_instance_readonly_node": rds_postgresql_instance_readonly_node.ResourceVolcengineRdsPostgresqlInstanceReadonlyNode(),
-			"volcengine_rds_postgresql_allowlist":              rds_postgresql_allowlist.ResourceVolcengineRdsPostgresqlAllowlist(),
-			"volcengine_rds_postgresql_allowlist_associate":    rds_postgresql_allowlist_associate.ResourceVolcengineRdsPostgresqlAllowlistAssociate(),
+			"volcengine_rds_postgresql_database":                  rds_postgresql_database.ResourceVolcengineRdsPostgresqlDatabase(),
+			"volcengine_rds_postgresql_account":                   rds_postgresql_account.ResourceVolcengineRdsPostgresqlAccount(),
+			"volcengine_rds_postgresql_instance":                  rds_postgresql_instance.ResourceVolcengineRdsPostgresqlInstance(),
+			"volcengine_rds_postgresql_instance_state":            rds_postgresql_instance_state.ResourceVolcengineRdsPostgresqlInstanceState(),
+			"volcengine_rds_postgresql_instance_readonly_node":    rds_postgresql_instance_readonly_node.ResourceVolcengineRdsPostgresqlInstanceReadonlyNode(),
+			"volcengine_rds_postgresql_allowlist":                 rds_postgresql_allowlist.ResourceVolcengineRdsPostgresqlAllowlist(),
+			"volcengine_rds_postgresql_allowlist_associate":       rds_postgresql_allowlist_associate.ResourceVolcengineRdsPostgresqlAllowlistAssociate(),
+			"volcengine_rds_postgresql_allowlist_version_upgrade": rds_postgresql_allowlist_version_upgrade.ResourceVolcengineRdsPostgresqlAllowlistVersionUpgrade(),
+			"volcengine_rds_postgresql_instance_ssl":              rdsPgSSL.ResourceVolcengineRdsPostgresqlInstanceSsl(),
+			"volcengine_rds_postgresql_parameter_template":        rds_postgresql_parameter_template.ResourceVolcengineRdsPostgresqlParameterTemplate(),
+			"volcengine_rds_postgresql_database_endpoint":         rds_postgresql_database_endpoint.ResourceVolcengineRdsPostgresqlDatabaseEndpoint(),
+			"volcengine_rds_postgresql_endpoint_public_address":   rds_postgresql_endpoint_public_address.ResourceVolcengineRdsPostgresqlEndpointPublicAddress(),
+			"volcengine_rds_postgresql_data_backup":               rds_postgresql_data_backup.ResourceVolcengineRdsPostgresqlDataBackup(),
+			"volcengine_rds_postgresql_backup_policy":             rds_postgresql_backup_policy.ResourceVolcengineRdsPostgresqlBackupPolicy(),
+			"volcengine_rds_postgresql_backup_download":           rds_postgresql_backup_download.ResourceVolcengineRdsPostgresqlBackupDownload(),
+			"volcengine_rds_postgresql_replication_slot":          rds_postgresql_replication_slot.ResourceVolcengineRdsPostgresqlReplicationSlot(),
+			"volcengine_rds_postgresql_restore_backup":            rds_postgresql_restore_backup.ResourceVolcengineRdsPostgresqlRestoreBackup(),
 
 			// ================ Organization ================
 			"volcengine_organization_unit":                              organization_unit.ResourceVolcengineOrganizationUnit(),
