@@ -63,6 +63,14 @@ func ResourceVolcengineVmpContact() *schema.Resource {
 					},
 				},
 			},
+			"contact_group_ids": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "A list of contact group ids.",
+			},
 			"lark_bot_webhook": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -168,14 +176,6 @@ func ResourceVolcengineVmpContact() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The create time of contact.",
-			},
-			"contact_group_ids": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "A list of contact group ids.",
 			},
 			"email_active": {
 				Type:        schema.TypeBool,
