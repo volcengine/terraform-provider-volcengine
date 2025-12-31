@@ -47,11 +47,18 @@ func DataSourceVolcengineListeners() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the Listener.",
 			},
+			"protocol": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
+				Description:  "The protocol of the Listener.",
+			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The project name of the listener.",
 			},
+			"tags": ve.TagsSchema(),
 			"listeners": {
 				Description: "The collection of Listener query.",
 				Type:        schema.TypeList,
@@ -152,10 +159,20 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The certificate ID associated with the HTTPS listener.",
 						},
+						"ca_certificate_source": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The source of the CA certificate associated with the HTTPS listener.",
+						},
 						"ca_certificate_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "CA certificate ID associated with HTTPS listener.",
+						},
+						"pca_root_ca_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The CA certificate ID associated with the HTTPS listener. It takes effect when the certificate source is pca_root.",
 						},
 						"enable_http2": {
 							Type:        schema.TypeString,
@@ -195,6 +212,22 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The project name of the listener.",
 						},
+						"tags": ve.TagsSchemaComputed(),
+						"access_log_record_customized_headers_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether the listener has enabled the \"Log custom headers in the access log\" feature.",
+						},
+						"pca_leaf_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The certificate ID associated with the HTTPS listener. Effective when the certificate source is pca_leaf.",
+						},
+						"pca_sub_ca_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The CA certificate ID associated with the HTTPS listener. Effective when the certificate source is pca_sub.",
+						},
 						"domain_extensions": {
 							Type:        schema.TypeList,
 							Computed:    true,
@@ -206,10 +239,20 @@ func DataSourceVolcengineListeners() *schema.Resource {
 										Computed:    true,
 										Description: "The extension domain ID.",
 									},
+									"certificate_source": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The source of the certificate.",
+									},
 									"certificate_id": {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The server certificate ID that domain used.",
+									},
+									"cert_center_certificate_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The server certificate ID used by the domain name. It takes effect when the certificate source is cert_center.",
 									},
 									"domain": {
 										Type:        schema.TypeString,
@@ -220,6 +263,16 @@ func DataSourceVolcengineListeners() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The listener ID that domain belongs to.",
+									},
+									"san": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The CommonName, extended domain names, and IPs of the certificate are separated by ','.",
+									},
+									"pca_leaf_certificate_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The server certificate ID used by the domain name. It takes effect when the certificate source is pca_leaf.",
 									},
 								},
 							},

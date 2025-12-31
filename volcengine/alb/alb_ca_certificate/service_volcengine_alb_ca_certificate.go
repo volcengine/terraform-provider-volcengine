@@ -61,6 +61,13 @@ func (s *VolcengineAlbCaCertificateService) ReadResources(m map[string]interface
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.CACertificates is not Slice")
 		}
+
+		// 过滤系统标签，目前证书不会自动生成系统标签，兜底一下
+		// data, err = removeSystemTags(data)
+		// if err != nil {
+		// 	return data, err
+		// }
+
 		return data, err
 	})
 }
@@ -146,6 +153,10 @@ func (s *VolcengineAlbCaCertificateService) CreateResource(resourceData *schema.
 				"ca_certificate": {
 					TargetField: "CACertificate",
 				},
+				// "tags": {
+				// 	TargetField: "Tags",
+				// 	ConvertType: ve.ConvertListN,
+				// },
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -175,6 +186,7 @@ func (VolcengineAlbCaCertificateService) WithResourceResponseHandlers(d map[stri
 }
 
 func (s *VolcengineAlbCaCertificateService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyCACertificateAttributes",
@@ -205,7 +217,11 @@ func (s *VolcengineAlbCaCertificateService) ModifyResource(resourceData *schema.
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	// 更新Tags
+	// setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "certificate", resourceData, getUniversalInfo)
+	// callbacks = append(callbacks, setResourceTagsCallbacks...)
+	return callbacks
 }
 
 func (s *VolcengineAlbCaCertificateService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -238,6 +254,15 @@ func (s *VolcengineAlbCaCertificateService) DatasourceResources(*schema.Resource
 			"ca_certificate_name": {
 				TargetField: "CACertificateName",
 			},
+			// "tags": {
+			// 	TargetField: "TagFilters",
+			// 	ConvertType: ve.ConvertListN,
+			// 	NextLevelConvert: map[string]ve.RequestConvert{
+			// 		"value": {
+			// 			TargetField: "Values.1",
+			// 		},
+			// 	},
+			// },
 		},
 		NameField:    "CACertificateName",
 		IdField:      "CACertificateId",
@@ -266,6 +291,27 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		Action:      actionName,
 	}
 }
+
+// func removeSystemTags(data []interface{}) ([]interface{}, error) {
+// 	var (
+// 		ok      bool
+// 		result  map[string]interface{}
+// 		results []interface{}
+// 		tags    []interface{}
+// 	)
+// 	for _, d := range data {
+// 		if result, ok = d.(map[string]interface{}); !ok {
+// 			return results, errors.New("The elements in data are not map ")
+// 		}
+// 		tags, ok = result["Tags"].([]interface{})
+// 		if ok {
+// 			tags = ve.FilterSystemTags(tags)
+// 			result["Tags"] = tags
+// 		}
+// 		results = append(results, result)
+// 	}
+// 	return results, nil
+// }
 
 func (s *VolcengineAlbCaCertificateService) ProjectTrn() *ve.ProjectTrn {
 	return &ve.ProjectTrn{

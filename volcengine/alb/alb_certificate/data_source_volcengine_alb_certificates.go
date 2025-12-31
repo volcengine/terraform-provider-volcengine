@@ -23,12 +23,17 @@ func DataSourceVolcengineAlbCertificates() *schema.Resource {
 				Optional:    true,
 				Description: "The Name of Certificate.",
 			},
+			"tags": ve.TagsSchema(),
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name to which the certificate belongs.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "File name where to save data source results.",
 			},
-
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
@@ -90,6 +95,12 @@ func DataSourceVolcengineAlbCertificates() *schema.Resource {
 							Computed:    true,
 							Description: "The ProjectName of the Certificate.",
 						},
+						"san": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The san extension of the Certificate.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"listeners": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{

@@ -2,6 +2,7 @@ package alb_acl
 
 import (
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
@@ -63,6 +64,18 @@ func ResourceVolcengineAlbAcl() *schema.Resource {
 						},
 					},
 				},
+			},
+			"tags": ve.TagsSchema(),
+			// computed fields
+			"status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The status of the Acl.",
+			},
+			"update_time": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Update time of Acl.",
 			},
 			"create_time": {
 				Type:        schema.TypeString,

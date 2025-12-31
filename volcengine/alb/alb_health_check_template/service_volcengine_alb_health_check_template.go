@@ -62,6 +62,7 @@ func (s *VolcengineAlbHealthCheckTemplateService) ReadResources(m map[string]int
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.HealthCheckTemplates is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 }
@@ -108,6 +109,9 @@ func (s *VolcengineAlbHealthCheckTemplateService) CreateResource(resourceData *s
 				"description": {
 					TargetField: "HealthCheckTemplates.1.Description",
 				},
+				"health_check_port": {
+					TargetField: "HealthCheckTemplates.1.HealthCheckPort",
+				},
 				"health_check_interval": {
 					TargetField: "HealthCheckTemplates.1.HealthCheckInterval",
 				},
@@ -138,6 +142,13 @@ func (s *VolcengineAlbHealthCheckTemplateService) CreateResource(resourceData *s
 				"health_check_http_version": {
 					TargetField: "HealthCheckTemplates.1.HealthCheckHttpVersion",
 				},
+				"project_name": {
+					TargetField: "HealthCheckTemplates.1.ProjectName",
+				},
+				"tags": {
+					TargetField: "HealthCheckTemplates.1.Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -164,12 +175,17 @@ func (s *VolcengineAlbHealthCheckTemplateService) CreateResource(resourceData *s
 
 func (VolcengineAlbHealthCheckTemplateService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		return d, map[string]ve.ResponseConvert{
+			"HealthCheckURI": {
+				TargetField: "health_check_uri",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
 func (s *VolcengineAlbHealthCheckTemplateService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyHealthCheckTemplatesAttributes",
@@ -180,6 +196,9 @@ func (s *VolcengineAlbHealthCheckTemplateService) ModifyResource(resourceData *s
 				},
 				"description": {
 					TargetField: "HealthCheckTemplates.1.Description",
+				},
+				"health_check_port": {
+					TargetField: "HealthCheckTemplates.1.HealthCheckPort",
 				},
 				"health_check_interval": {
 					TargetField: "HealthCheckTemplates.1.HealthCheckInterval",
@@ -224,7 +243,13 @@ func (s *VolcengineAlbHealthCheckTemplateService) ModifyResource(resourceData *s
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "healthchecktemplate", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineAlbHealthCheckTemplateService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -254,6 +279,18 @@ func (s *VolcengineAlbHealthCheckTemplateService) DatasourceResources(*schema.Re
 				TargetField: "HealthCheckTemplateIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"project_name": {
+				TargetField: "ProjectName",
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "HealthCheckTemplateName",
 		IdField:      "HealthCheckTemplateId",
@@ -272,6 +309,36 @@ func (s *VolcengineAlbHealthCheckTemplateService) DatasourceResources(*schema.Re
 
 func (s *VolcengineAlbHealthCheckTemplateService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineAlbHealthCheckTemplateService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "alb",
+		ResourceType:         "healthchecktemplate",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

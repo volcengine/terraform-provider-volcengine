@@ -63,6 +63,7 @@ func (s *VolcengineAlbServerGroupService) ReadResources(m map[string]interface{}
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.ServerGroups is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 	if err != nil {
@@ -160,6 +161,12 @@ func (VolcengineAlbServerGroupService) WithResourceResponseHandlers(d map[string
 			"URI": {
 				TargetField: "uri",
 			},
+			"CrossZoneEnabled": {
+				TargetField: "cross_zone_enabled",
+			},
+			"Protocol": {
+				TargetField: "protocol",
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -183,6 +190,10 @@ func (s *VolcengineAlbServerGroupService) CreateResource(resourceData *schema.Re
 				"sticky_session_config": {
 					TargetField: "StickySessionConfig",
 					ConvertType: ve.ConvertListUnique,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -216,6 +227,7 @@ func (s *VolcengineAlbServerGroupService) CreateResource(resourceData *schema.Re
 }
 
 func (s *VolcengineAlbServerGroupService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyServerGroupAttributes",
@@ -229,6 +241,9 @@ func (s *VolcengineAlbServerGroupService) ModifyResource(resourceData *schema.Re
 				},
 				"scheduler": {
 					TargetField: "Scheduler",
+				},
+				"cross_zone_enabled": {
+					TargetField: "CrossZoneEnabled",
 				},
 				"health_check": {
 					TargetField: "HealthCheck",
@@ -252,6 +267,7 @@ func (s *VolcengineAlbServerGroupService) ModifyResource(resourceData *schema.Re
 						(*call.SdkParam)["StickySessionConfig.Cookie"] = d.Get("sticky_session_config.0.cookie").(string)
 						(*call.SdkParam)["StickySessionConfig.CookieTimeout"] = d.Get("sticky_session_config.0.cookie_timeout").(int)
 					}
+
 					(*call.SdkParam)["ServerGroupId"] = d.Id()
 					return true, nil
 				}
@@ -272,7 +288,13 @@ func (s *VolcengineAlbServerGroupService) ModifyResource(resourceData *schema.Re
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "servergroup", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineAlbServerGroupService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -335,6 +357,15 @@ func (s *VolcengineAlbServerGroupService) DatasourceResources(*schema.ResourceDa
 				TargetField: "ServerGroupNames",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"values": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "ServerGroupName",
 		IdField:      "ServerGroupId",
@@ -346,6 +377,9 @@ func (s *VolcengineAlbServerGroupService) DatasourceResources(*schema.ResourceDa
 			},
 			"URI": {
 				TargetField: "uri",
+			},
+			"CrossZoneEnabled": {
+				TargetField: "cross_zone_enabled",
 			},
 		},
 	}
@@ -362,6 +396,27 @@ func (s *VolcengineAlbServerGroupService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

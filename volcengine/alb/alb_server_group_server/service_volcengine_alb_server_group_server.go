@@ -1,6 +1,7 @@
 package alb_server_group_server
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strings"
@@ -29,15 +30,16 @@ func (s *VolcengineServerGroupServerService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineServerGroupServerService) ReadResources(condition map[string]interface{}) ([]interface{}, error) {
-	servers, err := ve.WithSimpleQuery(condition, func(m map[string]interface{}) ([]interface{}, error) {
-		var (
-			resp    *map[string]interface{}
-			err     error
-			results interface{}
-		)
-		action := "DescribeServerGroupAttributes"
-		logger.Debug(logger.ReqFormat, action, condition)
+func (s *VolcengineServerGroupServerService) ReadResources(m map[string]interface{}) ([]interface{}, error) {
+	var (
+		resp    *map[string]interface{}
+		err     error
+		results interface{}
+	)
+	servers, err := ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
+		action := "DescribeServerGroupBackendServers"
+		bytes, _ := json.Marshal(condition)
+		logger.Debug(logger.ReqFormat, action, string(bytes))
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
@@ -49,7 +51,8 @@ func (s *VolcengineServerGroupServerService) ReadResources(condition map[string]
 				return nil, err
 			}
 		}
-		logger.Debug(logger.RespFormat, action, condition, *resp)
+		respBytes, _ := json.Marshal(resp)
+		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
 
 		results, err = ve.ObtainSdkValue("Result.Servers", *resp)
 		if err != nil {
@@ -103,7 +106,15 @@ func (s *VolcengineServerGroupServerService) RefreshResourceState(resourceData *
 }
 
 func (*VolcengineServerGroupServerService) WithResourceResponseHandlers(serverGroupServer map[string]interface{}) []ve.ResourceResponseHandler {
-	return []ve.ResourceResponseHandler{}
+	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		return serverGroupServer, map[string]ve.ResponseConvert{
+			"ServerId": {
+				TargetField: "id",
+				KeepDefault: true,
+			},
+		}, nil
+	}
+	return []ve.ResourceResponseHandler{handler}
 }
 
 func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -119,6 +130,9 @@ func (s *VolcengineServerGroupServerService) CreateResource(resourceData *schema
 				(*call.SdkParam)["Servers.1.Port"] = d.Get("port")
 				(*call.SdkParam)["Servers.1.Description"] = d.Get("description")
 				(*call.SdkParam)["Servers.1.Ip"] = d.Get("ip")
+				if v, ok := d.GetOk("remote_enabled"); ok {
+					(*call.SdkParam)["Servers.1.RemoteEnabled"] = v
+				}
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -212,6 +226,16 @@ func (s *VolcengineServerGroupServerService) RemoveResource(resourceData *schema
 
 func (s *VolcengineServerGroupServerService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"instance_ids": {
+				TargetField: "InstanceIds",
+				ConvertType: ve.ConvertWithN,
+			},
+			"ips": {
+				TargetField: "Ips",
+				ConvertType: ve.ConvertWithN,
+			},
+		},
 		NameField:    "ServerId",
 		IdField:      "ServerId",
 		CollectField: "servers",

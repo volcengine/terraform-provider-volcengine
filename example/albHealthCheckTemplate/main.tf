@@ -11,4 +11,8 @@ resource "volcengine_alb_health_check_template" "foo" {
   health_check_http_code="http_2xx"
   health_check_protocol="HTTP"
   health_check_http_version = "HTTP1.1"
+  tags {
+      key   = "key1"
+      value = "value2"
+  }
 }

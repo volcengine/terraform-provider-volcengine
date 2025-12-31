@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 	"time"
+
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/alb/alb"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -63,6 +64,7 @@ func (s *VolcengineAlbListenerService) ReadResources(m map[string]interface{}) (
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Listeners is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 }
@@ -135,8 +137,33 @@ func (s *VolcengineAlbListenerService) CreateResource(resourceData *schema.Resou
 				"ca_certificate_id": {
 					TargetField: "CACertificateId",
 				},
+				"ca_certificate_source": {
+					TargetField: "CACertificateSource",
+				},
+				"pca_root_ca_certificate_id": {
+					TargetField: "PcaRootCACertificateId",
+				},
+				"pca_sub_ca_certificate_id": {
+					TargetField: "PcaSubCACertificateId",
+				},
+				"domain_extensions": {
+					TargetField: "DomainExtensions",
+					ConvertType: ve.ConvertListN,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"domain_extension_id": {
+							Ignore: true,
+						},
+					},
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 				"acl_ids": {
 					ConvertType: ve.ConvertWithN,
+				},
+				"customized_cfg_id": {
+					Ignore: true,
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -210,12 +237,45 @@ func (s *VolcengineAlbListenerService) CreateResource(resourceData *schema.Resou
 
 func (VolcengineAlbListenerService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		return d, map[string]ve.ResponseConvert{
+			"CACertificateId": {
+				TargetField: "ca_certificate_id",
+			},
+			"CACertificateSource": {
+				TargetField: "ca_certificate_source",
+			},
+			"PcaRootCACertificateId": {
+				TargetField: "pca_root_ca_certificate_id",
+			},
+			"PcaSubCACertificateId": {
+				TargetField: "pca_sub_ca_certificate_id",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
+// 蛇形命名转驼峰命名的映射
+var fieldNameMapping = map[string]string{
+	"domain":                     "Domain",
+	"certificate_source":         "CertificateSource",
+	"certificate_id":             "CertificateId",
+	"cert_center_certificate_id": "CertCenterCertificateId",
+	"pca_leaf_certificate_id":    "PcaLeafCertificateId",
+	"domain_extension_id":        "DomainExtensionId",
+	"action":                     "Action",
+}
+
+// 将字段名转换为驼峰命名法
+func convertToCamelCase(fieldName string) string {
+	if camelCase, exists := fieldNameMapping[fieldName]; exists {
+		return camelCase
+	}
+	return fieldName
+}
+
 func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyListenerAttributes",
@@ -236,8 +296,17 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				"certificate_id": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"ca_certificate_source": {
+					TargetField: "CACertificateSource",
+				},
 				"ca_certificate_id": {
 					TargetField: "CACertificateId",
+				},
+				"pca_root_ca_certificate_id": {
+					TargetField: "PcaRootCACertificateId",
+				},
+				"pca_sub_ca_certificate_id": {
+					TargetField: "PcaSubCACertificateId",
 				},
 				"acl_ids": {
 					ConvertType: ve.ConvertWithN,
@@ -267,12 +336,150 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 				"description": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"pca_leaf_certificate_id": {
+					TargetField: "PcaLeafCertificateId",
+				},
+				"access_log_record_customized_headers_enabled": {
+					TargetField: "AccessLogRecordCustomizedHeadersEnabled",
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ListenerId"] = d.Id()
 
 				if d.HasChanges("certificate_id", "cert_center_certificate_id") {
 					(*call.SdkParam)["CertificateSource"] = d.Get("certificate_source")
+				}
+				if d.HasChanges("ca_certificate_id", "pca_root_ca_certificate_id", "pca_sub_ca_certificate_id") {
+					(*call.SdkParam)["CACertificateSource"] = d.Get("ca_certificate_source")
+				}
+				// 处理 DomainExtensions 的 Action 推断
+				// 检查 domain_extensions 字段是否有变更
+				if d.HasChanges("domain_extensions") {
+					// 使用 GetChange 获取真实的旧值和新值
+					oldValue, newValue := d.GetChange("domain_extensions")
+
+					// 处理删除所有 domain_extensions 的情况
+					oldExtensions := []interface{}{}
+					newExtensions := []interface{}{}
+
+					// 转换旧值
+					if oldList, ok := oldValue.([]interface{}); ok {
+						oldExtensions = oldList
+					}
+
+					// 转换新值
+					if newList, ok := newValue.([]interface{}); ok {
+						newExtensions = newList
+					}
+
+					// 检查是否需要删除所有现有的 domain_extensions，删除所有的domain_extensions
+					if len(oldExtensions) > 0 && len(newExtensions) == 0 {
+						// 用户删除了所有 domain_extensions 配置
+						domainExtensionsMap := make(map[string]interface{})
+						index := 1
+
+						for _, v := range oldExtensions {
+							ext := v.(map[string]interface{})
+							// 创建删除操作
+							deleteExt := make(map[string]interface{})
+							for k, val := range ext {
+								deleteExt[k] = val
+							}
+							deleteExt["Action"] = "delete"
+							// 添加到 map 中，使用正确的格式 DomainExtensions.N.Field，过滤空值
+							for k, val := range deleteExt {
+								if val != nil && val != "" {
+									paramName := fmt.Sprintf("DomainExtensions.%d.%s", index, convertToCamelCase(k))
+									domainExtensionsMap[paramName] = val
+								}
+							}
+							index++
+						}
+						// 将所有参数合并到 SdkParam 中
+						for k, v := range domainExtensionsMap {
+							(*call.SdkParam)[k] = v
+						}
+						return true, nil
+					}
+
+					// 处理新增和修改的域名扩展（原有逻辑）
+					if len(newExtensions) > 0 {
+						// 构建 oldExtensions 的 map 以 domain_extension_id 为 key
+						oldExtMap := make(map[string]map[string]interface{})
+						for _, v := range oldExtensions {
+							ext := v.(map[string]interface{})
+							if domainExtensionId, ok := ext["domain_extension_id"].(string); ok && domainExtensionId != "" {
+								oldExtMap[domainExtensionId] = ext
+							}
+						}
+
+						// 构建 DomainExtensions 的 map 格式参数
+						domainExtensionsMap := make(map[string]interface{})
+						index := 1
+
+						// 处理新增和修改的域名扩展
+						for _, v := range newExtensions {
+							ext := v.(map[string]interface{})
+							domainExtensionId := ext["domain_extension_id"].(string)
+
+							// 复制原扩展信息
+							processedExt := make(map[string]interface{})
+							for k, val := range ext {
+								processedExt[k] = val
+							}
+							// 推断 Action：基于 domain_extension_id 是否存在
+							if domainExtensionId == "" {
+								// domain_extension_id 为空，进行创建
+								processedExt["Action"] = "create"
+							} else {
+								// domain_extension_id 不为空，进行修改
+								processedExt["Action"] = "modify"
+							}
+							// 添加到 map 中，使用正确的格式 DomainExtensions.N.Field，过滤空值
+							// 使用驼峰命名法适配火山引擎 API
+							for k, val := range processedExt {
+								if val != nil && val != "" {
+									paramName := fmt.Sprintf("DomainExtensions.%d.%s", index, convertToCamelCase(k))
+									domainExtensionsMap[paramName] = val
+								}
+							}
+							index++
+						}
+						// 检查是否有需要删除的 domain_extension_id
+						for oldDomainExtensionId, oldExtInfo := range oldExtMap {
+							found := false
+							for _, newExt := range newExtensions {
+								newExtMap := newExt.(map[string]interface{})
+								if newExtMap["domain_extension_id"] == oldDomainExtensionId {
+									found = true
+									break
+								}
+							}
+							if !found {
+								// 需要删除的域名扩展
+								deleteExt := make(map[string]interface{})
+								for k, val := range oldExtInfo {
+									deleteExt[k] = val
+								}
+								deleteExt["Action"] = "delete"
+
+								// 添加到 map 中，使用正确的格式 DomainExtensions.N.Field，过滤空值
+								// 使用驼峰命名法适配火山引擎 API
+								for k, val := range deleteExt {
+									if val != nil && val != "" {
+										paramName := fmt.Sprintf("DomainExtensions.%d.%s", index, convertToCamelCase(k))
+										domainExtensionsMap[paramName] = val
+									}
+								}
+								index++
+							}
+						}
+
+						// 将所有参数合并到 SdkParam 中
+						for k, v := range domainExtensionsMap {
+							(*call.SdkParam)[k] = v
+						}
+					}
 				}
 
 				return true, nil
@@ -299,7 +506,13 @@ func (s *VolcengineAlbListenerService) ModifyResource(resourceData *schema.Resou
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "listener", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineAlbListenerService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -349,6 +562,15 @@ func (s *VolcengineAlbListenerService) DatasourceResources(*schema.ResourceData,
 				TargetField: "ListenerIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "ListenerName",
 		IdField:      "ListenerId",
@@ -361,12 +583,42 @@ func (s *VolcengineAlbListenerService) DatasourceResources(*schema.ResourceData,
 			"CACertificateId": {
 				TargetField: "ca_certificate_id",
 			},
+			"CACertificateSource": {
+				TargetField: "ca_certificate_source",
+			},
+			"PcaRootCACertificateId": {
+				TargetField: "pca_root_ca_certificate_id",
+			},
+			"PcaSubCACertificateId": {
+				TargetField: "pca_sub_ca_certificate_id",
+			},
 		},
 	}
 }
 
 func (s *VolcengineAlbListenerService) ReadResourceId(id string) string {
 	return id
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

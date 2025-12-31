@@ -132,6 +132,9 @@ func (s *VolcengineAclService) CreateResource(resourceData *schema.ResourceData,
 				"acl_entries": {
 					Ignore: true,
 				},
+				"tags": {
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -266,6 +269,10 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 	}
 	callbacks = append(callbacks, entryAddCallback)
 
+	//更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "acl", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -292,6 +299,15 @@ func (s *VolcengineAclService) DatasourceResources(*schema.ResourceData, *schema
 			"ids": {
 				TargetField: "AclIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "AclName",

@@ -49,7 +49,13 @@ func ResourceVolcengineAlbServerGroupServer() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of instance. Optional choice contains `ecs`, `eni`.",
+				Description: "The type of instance. Optional choice contains `ecs`, `eni`, `ip`.",
+			},
+			"remote_enabled": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to enable remote IP function. Optional choice contains `on`, `off`. Default value is `off`. This field is only effective when the type is `ip`.",
 			},
 			"weight": {
 				Type:        schema.TypeInt,
@@ -65,7 +71,7 @@ func ResourceVolcengineAlbServerGroupServer() *schema.Resource {
 			"port": {
 				Type:        schema.TypeInt,
 				Required:    true,
-				Description: "The port receiving request.",
+				Description: "The port receiving request. Value range: 1 ~ 65535.",
 			},
 			"description": {
 				Type:        schema.TypeString,

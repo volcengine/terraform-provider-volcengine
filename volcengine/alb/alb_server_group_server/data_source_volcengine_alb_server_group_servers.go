@@ -14,6 +14,25 @@ func DataSourceVolcengineAlbServerGroupServers() *schema.Resource {
 				Required:    true,
 				Description: "The ID of the ServerGroup.",
 			},
+			"instance_ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set: schema.HashString,
+				Description: "A list of instance IDs. When the backend server is ECS, the parameter value is the ID of the ECS. " +
+					"When the backend server is a secondary network interface card, the parameter value is the ID of the secondary network interface card.",
+			},
+			"ips": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of private IP addresses.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -48,7 +67,12 @@ func DataSourceVolcengineAlbServerGroupServers() *schema.Resource {
 						"type": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The type of instance. Optional choice contains `ecs`, `eni`.",
+							Description: "The type of instance. Optional choice contains `ecs`, `eni`, `ip`.",
+						},
+						"remote_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether to enable remote IP function. Optional choice contains `on`, `off`.",
 						},
 						"weight": {
 							Type:        schema.TypeInt,

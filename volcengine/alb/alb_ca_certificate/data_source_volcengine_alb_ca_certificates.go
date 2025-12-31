@@ -35,6 +35,7 @@ func DataSourceVolcengineAlbCaCertificates() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of the CA certificate.",
 			},
+			// "tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -86,6 +87,11 @@ func DataSourceVolcengineAlbCaCertificates() *schema.Resource {
 							Computed:    true,
 							Description: "The domain name of the CA Certificate.",
 						},
+						"san": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The san extension of the CA Certificate.",
+						},
 						"status": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -96,6 +102,7 @@ func DataSourceVolcengineAlbCaCertificates() *schema.Resource {
 							Computed:    true,
 							Description: "The ProjectName of the CA Certificate.",
 						},
+						// "tags": ve.TagsSchemaComputed(),
 						"listeners": {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{

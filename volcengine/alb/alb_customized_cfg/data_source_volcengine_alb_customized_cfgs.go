@@ -29,6 +29,7 @@ func DataSourceVolcengineAlbCustomizedCfgs() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the CustomizedCfg.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -101,6 +102,7 @@ func DataSourceVolcengineAlbCustomizedCfgs() *schema.Resource {
 							Computed:    true,
 							Description: "The project name of CustomizedCfg.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 						"listeners": {
 							Type:        schema.TypeList,
 							Computed:    true,
