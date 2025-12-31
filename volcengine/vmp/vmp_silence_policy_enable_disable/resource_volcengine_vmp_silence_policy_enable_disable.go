@@ -28,10 +28,11 @@ func ResourceVolcengineVmpSilencePolicyEnableDisable() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"ids": {
-				Type:     schema.TypeSet,
-				Required: true,
-				ForceNew: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Type:        schema.TypeSet,
+				Required:    true,
+				ForceNew:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "The ids of silence policy.",
 			},
 		},
 	}

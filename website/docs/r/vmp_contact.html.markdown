@@ -35,6 +35,7 @@ resource "volcengine_vmp_contact" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `name` - (Required) The name of the contact.
+* `contact_group_ids` - (Optional) A list of contact group ids.
 * `ding_talk_bot_webhook` - (Optional) The ding talk bot webhook of contact.
 * `email` - (Optional) The email of the contact.
 * `lark_bot_webhook` - (Optional) The lark bot webhook of contact.
@@ -72,7 +73,6 @@ The `webhook` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `contact_group_ids` - A list of contact group ids.
 * `create_time` - The create time of contact.
 * `email_active` - Whether the email of contact active.
 
