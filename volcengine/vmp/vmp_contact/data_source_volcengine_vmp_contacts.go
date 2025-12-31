@@ -28,6 +28,16 @@ func DataSourceVolcengineVmpContacts() *schema.Resource {
 				Optional:    true,
 				Description: "The email of contact.",
 			},
+			"sort_by": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The sort field of query.",
+			},
+			"sort_order": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The sort order of query.",
+			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,

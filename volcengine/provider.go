@@ -425,6 +425,8 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alerting_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_integration_task"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_integration_task_enable"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_instance_type"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_group_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_policy"
@@ -1060,6 +1062,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_rules":                 vmp_rule.DataSourceVolcengineVmpRules(),
 			"volcengine_vmp_contact_groups":        vmp_contact_group.DataSourceVolcengineVmpContactGroups(),
 			"volcengine_vmp_contacts":              vmp_contact.DataSourceVolcengineVmpContacts(),
+			"volcengine_vmp_integration_tasks":     vmp_integration_task.DataSourceVolcengineVmpIntegrationTasks(),
 			"volcengine_vmp_alerting_rules":        vmp_alerting_rule.DataSourceVolcengineVmpAlertingRules(),
 			"volcengine_vmp_alerts":                vmp_alert.DataSourceVolcengineVmpAlerts(),
 			"volcengine_vmp_notify_group_policies": vmp_notify_group_policy.DataSourceVolcengineVmpNotifyGroupPolicies(),
@@ -1526,6 +1529,8 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_rule_file":           vmp_rule_file.ResourceVolcengineVmpRuleFile(),
 			"volcengine_vmp_contact_group":       vmp_contact_group.ResourceVolcengineVmpContactGroup(),
 			"volcengine_vmp_contact":             vmp_contact.ResourceVolcengineVmpContact(),
+			"volcengine_vmp_integration_task":    vmp_integration_task.ResourceVolcengineVmpIntegrationTask(),
+			"volcengine_vmp_integration_task_enable": vmp_integration_task_enable.ResourceVolcengineVmpIntegrationTaskEnable(),
 			"volcengine_vmp_alerting_rule":       vmp_alerting_rule.ResourceVolcengineVmpAlertingRule(),
 			"volcengine_vmp_notify_group_policy": vmp_notify_group_policy.ResourceVolcengineVmpNotifyGroupPolicy(),
 			"volcengine_vmp_notify_policy":       vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
