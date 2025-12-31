@@ -42,6 +42,8 @@ The following arguments are supported:
 * `ids` - (Optional) A list of contact ids.
 * `name` - (Optional) The name of contact.
 * `output_file` - (Optional) File name where to save data source results.
+* `sort_by` - (Optional) The sort field of query.
+* `sort_order` - (Optional) The sort order of query.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -422,15 +422,21 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/transit_router/transit_router_vpn_attachment"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alert"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alert_sample"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alerting_rule"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_alerting_rule_enable_disable"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_contact_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_instance_type"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_integration_task"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_integration_task_enable"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_group_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_policy"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_notify_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_rule_file"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_silence_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_silence_policy_enable_disable"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vmp/vmp_workspace"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/veecp/veecp_addon"
@@ -1060,12 +1066,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vmp_rules":                 vmp_rule.DataSourceVolcengineVmpRules(),
 			"volcengine_vmp_contact_groups":        vmp_contact_group.DataSourceVolcengineVmpContactGroups(),
 			"volcengine_vmp_contacts":              vmp_contact.DataSourceVolcengineVmpContacts(),
+			"volcengine_vmp_integration_tasks":     vmp_integration_task.DataSourceVolcengineVmpIntegrationTasks(),
 			"volcengine_vmp_alerting_rules":        vmp_alerting_rule.DataSourceVolcengineVmpAlertingRules(),
 			"volcengine_vmp_alerts":                vmp_alert.DataSourceVolcengineVmpAlerts(),
 			"volcengine_vmp_notify_group_policies": vmp_notify_group_policy.DataSourceVolcengineVmpNotifyGroupPolicies(),
 			"volcengine_vmp_notify_policies":       vmp_notify_policy.DataSourceVolcengineVmpNotifyPolicies(),
 			"volcengine_vmp_notify_templates":      vmp_notify_template.DataSourceVolcengineVmpNotifyTemplates(),
-			//"volcengine_vmp_silence_policies":      vmp_silence_policy.DataSourceVolcengineVmpSilencePolicies(),
+			"volcengine_vmp_silence_policies":      vmp_silence_policy.DataSourceVolcengineVmpSilencePolicies(),
+			"volcengine_vmp_alert_samples":         vmp_alert_sample.DataSourceVolcengineVmpAlertSamples(),
 
 			// ================ WAF ================
 			"volcengine_waf_domains":                   waf_domain.DataSourceVolcengineWafDomains(),
@@ -1522,15 +1530,19 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_kms_secret":       kms_secret.ResourceVolcengineKmsSecret(),
 
 			// ================ VMP ================
-			"volcengine_vmp_workspace":           vmp_workspace.ResourceVolcengineVmpWorkspace(),
-			"volcengine_vmp_rule_file":           vmp_rule_file.ResourceVolcengineVmpRuleFile(),
-			"volcengine_vmp_contact_group":       vmp_contact_group.ResourceVolcengineVmpContactGroup(),
-			"volcengine_vmp_contact":             vmp_contact.ResourceVolcengineVmpContact(),
-			"volcengine_vmp_alerting_rule":       vmp_alerting_rule.ResourceVolcengineVmpAlertingRule(),
-			"volcengine_vmp_notify_group_policy": vmp_notify_group_policy.ResourceVolcengineVmpNotifyGroupPolicy(),
-			"volcengine_vmp_notify_policy":       vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
-			"volcengine_vmp_notify_template":     vmp_notify_template.ResourceVolcengineVmpNotifyTemplate(),
-			//"volcengine_vmp_silence_policy":      vmp_silence_policy.ResourceVolcengineVmpSilencePolicy(),
+			"volcengine_vmp_workspace":                     vmp_workspace.ResourceVolcengineVmpWorkspace(),
+			"volcengine_vmp_rule_file":                     vmp_rule_file.ResourceVolcengineVmpRuleFile(),
+			"volcengine_vmp_contact_group":                 vmp_contact_group.ResourceVolcengineVmpContactGroup(),
+			"volcengine_vmp_contact":                       vmp_contact.ResourceVolcengineVmpContact(),
+			"volcengine_vmp_integration_task":              vmp_integration_task.ResourceVolcengineVmpIntegrationTask(),
+			"volcengine_vmp_integration_task_enable":       vmp_integration_task_enable.ResourceVolcengineVmpIntegrationTaskEnable(),
+			"volcengine_vmp_alerting_rule":                 vmp_alerting_rule.ResourceVolcengineVmpAlertingRule(),
+			"volcengine_vmp_notify_group_policy":           vmp_notify_group_policy.ResourceVolcengineVmpNotifyGroupPolicy(),
+			"volcengine_vmp_notify_policy":                 vmp_notify_policy.ResourceVolcengineVmpNotifyPolicy(),
+			"volcengine_vmp_notify_template":               vmp_notify_template.ResourceVolcengineVmpNotifyTemplate(),
+			"volcengine_vmp_silence_policy":                vmp_silence_policy.ResourceVolcengineVmpSilencePolicy(),
+			"volcengine_vmp_silence_policy_enable_disable": vmp_silence_policy_enable_disable.ResourceVolcengineVmpSilencePolicyEnableDisable(),
+			"volcengine_vmp_alerting_rule_enable_disable":  vmp_alerting_rule_enable_disable.ResourceVolcengineVmpAlertingRuleEnableDisable(),
 
 			// ================ WAF ================
 			"volcengine_waf_domain":                   waf_domain.ResourceVolcengineWafDomain(),
