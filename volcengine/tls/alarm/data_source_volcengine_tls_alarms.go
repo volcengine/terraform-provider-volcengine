@@ -11,7 +11,7 @@ func DataSourceVolcengineTlsAlarms() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The project id.",
 			},
 			"alarm_id": {
@@ -59,6 +59,11 @@ func DataSourceVolcengineTlsAlarms() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The name of the alarm.",
+						},
+						"severity": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The severity of the alarm.",
 						},
 						"project_id": {
 							Type:        schema.TypeString,
@@ -197,6 +202,26 @@ func DataSourceVolcengineTlsAlarms() *schema.Resource {
 										Computed:    true,
 										Description: "The end time of the query range is relative to the current historical time. The unit is minutes. The value is not positive and must be greater than StartTimeOffset. The maximum value is 0 and the minimum value is -1440.",
 									},
+									"time_span_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The time span type.",
+									},
+									"truncated_time": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The truncated time.",
+									},
+									"end_time_offset_unit": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The end time offset unit.",
+									},
+									"start_time_offset_unit": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The start time offset unit.",
+									},
 								},
 							},
 						},
@@ -220,6 +245,11 @@ func DataSourceVolcengineTlsAlarms() *schema.Resource {
 										Type:        schema.TypeInt,
 										Computed:    true,
 										Description: "The cycle of alarm task execution, or the time point of periodic execution. The unit is minutes, and the value range is 1~1440.",
+									},
+									"cron_tab": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The cron tab.",
 									},
 								},
 							},
@@ -252,6 +282,59 @@ func DataSourceVolcengineTlsAlarms() *schema.Resource {
 									},
 								},
 							},
+						},
+						"trigger_conditions": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The list of trigger conditions.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"condition": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The condition.",
+									},
+									"count_condition": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The count condition.",
+									},
+									"severity": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The severity.",
+									},
+									"no_data": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "The no data.",
+									},
+								},
+							},
+						},
+						"join_configurations": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The list of join configurations.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"condition": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The condition.",
+									},
+									"set_operation_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The set operation type.",
+									},
+								},
+							},
+						},
+						"send_resolved": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to send resolved.",
 						},
 						"alarm_id": {
 							Type:        schema.TypeString,

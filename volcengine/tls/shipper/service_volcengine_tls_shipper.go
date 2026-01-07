@@ -137,6 +137,10 @@ func (s *VolcengineShipperService) CreateResource(resourceData *schema.ResourceD
 					TargetField: "TosShipperInfo",
 					ConvertType: ve.ConvertJsonObject,
 				},
+				"role_trn": {
+					TargetField: "RoleTrn",
+					ConvertType: ve.ConvertDefault,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -214,6 +218,10 @@ func (s *VolcengineShipperService) ModifyResource(resourceData *schema.ResourceD
 					ForceGet:    true,
 					ConvertType: ve.ConvertJsonObject,
 				},
+				"role_trn": {
+					TargetField: "RoleTrn",
+					ForceGet:    true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ShipperId"] = d.Id()
@@ -279,11 +287,15 @@ func (s *VolcengineShipperService) RemoveResource(resourceData *schema.ResourceD
 
 func (s *VolcengineShipperService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		RequestConverts:  map[string]ve.RequestConvert{},
-		NameField:        "ShipperName",
-		IdField:          "ShipperId",
-		CollectField:     "shippers",
-		ResponseConverts: map[string]ve.ResponseConvert{},
+		RequestConverts: map[string]ve.RequestConvert{},
+		NameField:       "ShipperName",
+		IdField:         "ShipperId",
+		CollectField:    "shippers",
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"role_trn": {
+				TargetField: "RoleTrn",
+			},
+		},
 	}
 }
 

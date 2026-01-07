@@ -81,7 +81,22 @@ func (v *VolcengineTlsAlarmNotifyGroupService) RefreshResourceState(data *schema
 
 func (v *VolcengineTlsAlarmNotifyGroupService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return m, nil, nil
+		return m, map[string]ve.ResponseConvert{
+			"RuleNode": {
+				Convert: func(v interface{}) interface{} {
+					if v == nil {
+						return nil
+					}
+					return []interface{}{v}
+				},
+			},
+			"Children": {
+				// Chain: "RuleNode",
+				Convert: func(v interface{}) interface{} {
+					return v
+				},
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -104,6 +119,123 @@ func (v *VolcengineTlsAlarmNotifyGroupService) CreateResource(data *schema.Resou
 						},
 						"receiver_channels": {
 							ConvertType: ve.ConvertJsonArray,
+						},
+						"general_webhook_url": {
+							TargetField: "GeneralWebhookUrl",
+						},
+						"general_webhook_body": {
+							TargetField: "GeneralWebhookBody",
+						},
+						"alarm_webhook_at_users": {
+							TargetField: "AlarmWebhookAtUsers",
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"alarm_webhook_is_at_all": {
+							TargetField: "AlarmWebhookIsAtAll",
+						},
+						"general_webhook_headers": {
+							TargetField: "GeneralWebhookHeaders",
+							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									TargetField: "key",
+								},
+								"value": {
+									TargetField: "value",
+								},
+							},
+						},
+						"general_webhook_method": {
+							TargetField: "GeneralWebhookMethod",
+						},
+						"alarm_content_template_id": {
+							TargetField: "AlarmContentTemplateId",
+						},
+						"alarm_webhook_integration_id": {
+							TargetField: "AlarmWebhookIntegrationId",
+						},
+						"alarm_webhook_integration_name": {
+							TargetField: "AlarmWebhookIntegrationName",
+						},
+					},
+				},
+				"notice_rules": {
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"has_next": {
+							TargetField: "HasNext",
+						},
+						"rule_node": {
+							TargetField: "RuleNode",
+							Convert: func(d *schema.ResourceData, v interface{}) interface{} {
+								return convertRuleNode(v)
+							},
+						},
+						"has_end_node": {
+							TargetField: "HasEndNode",
+						},
+						"receiver_infos": {
+							TargetField: "ReceiverInfos",
+							ConvertType: ve.ConvertJsonObjectArray,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"receiver_names": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"receiver_channels": {
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"receiver_type": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"start_time": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"end_time": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"general_webhook_url": {
+									TargetField: "GeneralWebhookUrl",
+								},
+								"general_webhook_body": {
+									TargetField: "GeneralWebhookBody",
+								},
+								"alarm_webhook_at_users": {
+									TargetField: "AlarmWebhookAtUsers",
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"alarm_webhook_is_at_all": {
+									TargetField: "AlarmWebhookIsAtAll",
+								},
+								"general_webhook_headers": {
+									TargetField: "GeneralWebhookHeaders",
+									ConvertType: ve.ConvertJsonObjectArray,
+									ForceGet:    true,
+									NextLevelConvert: map[string]ve.RequestConvert{
+										"key": {
+											TargetField: "key",
+										},
+										"value": {
+											TargetField: "value",
+										},
+									},
+								},
+								"general_webhook_method": {
+									TargetField: "GeneralWebhookMethod",
+								},
+								"alarm_content_template_id": {
+									TargetField: "AlarmContentTemplateId",
+								},
+								"alarm_webhook_integration_id": {
+									TargetField: "AlarmWebhookIntegrationId",
+								},
+								"alarm_webhook_integration_name": {
+									TargetField: "AlarmWebhookIntegrationName",
+								},
+							},
 						},
 					},
 				},
@@ -165,6 +297,125 @@ func (v *VolcengineTlsAlarmNotifyGroupService) ModifyResource(data *schema.Resou
 						"end_time": {
 							ConvertType: ve.ConvertDefault,
 							ForceGet:    true,
+						},
+						"general_webhook_url": {
+							TargetField: "GeneralWebhookUrl",
+						},
+						"general_webhook_body": {
+							TargetField: "GeneralWebhookBody",
+						},
+						"alarm_webhook_at_users": {
+							TargetField: "AlarmWebhookAtUsers",
+							ConvertType: ve.ConvertJsonArray,
+						},
+						"alarm_webhook_is_at_all": {
+							TargetField: "AlarmWebhookIsAtAll",
+						},
+						"general_webhook_headers": {
+							TargetField: "GeneralWebhookHeaders",
+							ConvertType: ve.ConvertJsonObjectArray,
+							ForceGet:    true,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									TargetField: "key",
+								},
+								"value": {
+									TargetField: "value",
+								},
+							},
+						},
+						"general_webhook_method": {
+							TargetField: "GeneralWebhookMethod",
+						},
+						"alarm_content_template_id": {
+							TargetField: "AlarmContentTemplateId",
+						},
+						"alarm_webhook_integration_id": {
+							TargetField: "AlarmWebhookIntegrationId",
+						},
+						"alarm_webhook_integration_name": {
+							TargetField: "AlarmWebhookIntegrationName",
+						},
+					},
+				},
+				"notice_rules": {
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"has_next": {
+							TargetField: "HasNext",
+						},
+						"rule_node": {
+							TargetField: "RuleNode",
+							Convert: func(d *schema.ResourceData, v interface{}) interface{} {
+								return convertRuleNode(v)
+							},
+						},
+						"has_end_node": {
+							TargetField: "HasEndNode",
+						},
+						"receiver_infos": {
+							TargetField: "ReceiverInfos",
+							ConvertType: ve.ConvertJsonObjectArray,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"receiver_names": {
+									ConvertType: ve.ConvertJsonArray,
+									ForceGet:    true,
+								},
+								"receiver_channels": {
+									ConvertType: ve.ConvertJsonArray,
+									ForceGet:    true,
+								},
+								"receiver_type": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"start_time": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"end_time": {
+									ConvertType: ve.ConvertDefault,
+									ForceGet:    true,
+								},
+								"general_webhook_url": {
+									TargetField: "GeneralWebhookUrl",
+								},
+								"general_webhook_body": {
+									TargetField: "GeneralWebhookBody",
+								},
+								"alarm_webhook_at_users": {
+									TargetField: "AlarmWebhookAtUsers",
+									ConvertType: ve.ConvertJsonArray,
+								},
+								"alarm_webhook_is_at_all": {
+									TargetField: "AlarmWebhookIsAtAll",
+								},
+								"general_webhook_headers": {
+									TargetField: "GeneralWebhookHeaders",
+									ConvertType: ve.ConvertJsonObjectArray,
+									ForceGet:    true,
+									NextLevelConvert: map[string]ve.RequestConvert{
+										"key": {
+											TargetField: "key",
+										},
+										"value": {
+											TargetField: "value",
+										},
+									},
+								},
+								"general_webhook_method": {
+									TargetField: "GeneralWebhookMethod",
+								},
+								"alarm_content_template_id": {
+									TargetField: "AlarmContentTemplateId",
+								},
+								"alarm_webhook_integration_id": {
+									TargetField: "AlarmWebhookIntegrationId",
+								},
+								"alarm_webhook_integration_name": {
+									TargetField: "AlarmWebhookIntegrationName",
+								},
+							},
 						},
 					},
 				},
@@ -255,4 +506,69 @@ func (*VolcengineTlsAlarmNotifyGroupService) ProjectTrn() *ve.ProjectTrn {
 		ProjectSchemaField:   "iam_project_name",
 		ProjectResponseField: "IamProjectName",
 	}
+}
+
+func convertRuleNode(v interface{}) interface{} {
+	if v == nil {
+		return nil
+	}
+	list, ok := v.([]interface{})
+	if !ok || len(list) == 0 {
+		return nil
+	}
+	// Take first element
+	nodeMap, ok := list[0].(map[string]interface{})
+	if !ok {
+		return nil
+	}
+	return convertRuleNodeMap(nodeMap)
+}
+
+func convertRuleNodeMap(m map[string]interface{}) map[string]interface{} {
+	result := make(map[string]interface{})
+	if val, ok := m["type"]; ok {
+		result["Type"] = val
+	}
+	if val, ok := m["value"]; ok {
+		strList := convertToStringList(val)
+		if len(strList) > 0 {
+			result["Value"] = strList
+		}
+	}
+	if val, ok := m["children"]; ok {
+		childrenList, ok := val.([]interface{})
+		if ok && len(childrenList) > 0 {
+			convertedChildren := make([]interface{}, 0, len(childrenList))
+			for _, child := range childrenList {
+				childMap, ok := child.(map[string]interface{})
+				if ok {
+					converted := convertRuleNodeMap(childMap)
+					if converted != nil {
+						convertedChildren = append(convertedChildren, converted)
+					}
+				}
+			}
+			if len(convertedChildren) > 0 {
+				result["Children"] = convertedChildren
+			}
+		}
+	}
+	return result
+}
+
+func convertToStringList(v interface{}) []string {
+	if v == nil {
+		return nil
+	}
+	list, ok := v.([]interface{})
+	if !ok {
+		return nil
+	}
+	result := make([]string, 0, len(list))
+	for _, item := range list {
+		if s, ok := item.(string); ok {
+			result = append(result, s)
+		}
+	}
+	return result
 }

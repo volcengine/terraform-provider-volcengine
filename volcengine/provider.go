@@ -10,6 +10,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_content_template"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_webhook_integration"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_bound_host_group"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	tos_bucket_logging "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_logging"
 	tos_bucket_object_lock_configuration "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_object_lock_configuration"
@@ -393,20 +397,28 @@ import (
 	redisRegion "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/region"
 	redisZone "github.com/volcengine/terraform-provider-volcengine/volcengine/redis/zone"
 
+	tlsAccount "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm"
+	tlsShard "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
+	tls_tag "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tag"
+	tls_tag_resource "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tag_resource"
+	tls_trace "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/trace"
+	tls_trace_instance "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/trace_instance"
+
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_notify_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/consumer_group"
+	tlsDownloadTask "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/download_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/etl_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/import_task"
 	tlsIndex "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/index"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/kafka_consumer"
+	tlsLog "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log"
 	tlsProject "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/project"
 	tlsRule "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_applier"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/schedule_sql_task"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shipper"
 	tlsTopic "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket"
@@ -847,22 +859,37 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_account_table_column_infos": rds_mysql_account_table_column_info.DataSourceVolcengineRdsMysqlAccountTableColumnInfos(),
 
 			// ================ TLS ================
-			"volcengine_tls_rules":               tlsRule.DataSourceVolcengineTlsRules(),
-			"volcengine_tls_alarms":              alarm.DataSourceVolcengineTlsAlarms(),
-			"volcengine_tls_alarm_notify_groups": alarm_notify_group.DataSourceVolcengineTlsAlarmNotifyGroups(),
-			"volcengine_tls_rule_appliers":       rule_applier.DataSourceVolcengineTlsRuleAppliers(),
-			"volcengine_tls_shards":              shard.DataSourceVolcengineTlsShards(),
-			"volcengine_tls_kafka_consumers":     kafka_consumer.DataSourceVolcengineTlsKafkaConsumers(),
-			"volcengine_tls_host_groups":         host_group.DataSourceVolcengineTlsHostGroups(),
-			"volcengine_tls_hosts":               host.DataSourceVolcengineTlsHosts(),
-			"volcengine_tls_projects":            tlsProject.DataSourceVolcengineTlsProjects(),
-			"volcengine_tls_topics":              tlsTopic.DataSourceVolcengineTlsTopics(),
-			"volcengine_tls_indexes":             tlsIndex.DataSourceVolcengineTlsIndexes(),
-			"volcengine_tls_schedule_sql_tasks":  schedule_sql_task.DataSourceVolcengineScheduleSqlTasks(),
-			"volcengine_tls_import_tasks":        import_task.DataSourceVolcengineImportTasks(),
-			"volcengine_tls_etl_tasks":           etl_task.DataSourceVolcengineEtlTasks(),
-			"volcengine_tls_shippers":            shipper.DataSourceVolcengineShippers(),
-			"volcengine_tls_consumer_groups":     consumer_group.DataSourceVolcengineConsumerGroups(),
+			"volcengine_tls_rules":                      tlsRule.DataSourceVolcengineTlsRules(),
+			"volcengine_tls_alarms":                     alarm.DataSourceVolcengineTlsAlarms(),
+			"volcengine_tls_alarm_webhook_integrations": alarm_webhook_integration.DataSourceVolcengineTlsAlarmWebhookIntegrations(),
+			"volcengine_tls_alarm_content_templates":    alarm_content_template.DataSourceVolcengineTlsAlarmContentTemplates(),
+			"volcengine_tls_alarm_notify_groups":        alarm_notify_group.DataSourceVolcengineTlsAlarmNotifyGroups(),
+			"volcengine_tls_rule_appliers":              rule_applier.DataSourceVolcengineTlsRuleAppliers(),
+			"volcengine_tls_shards":                     tlsShard.DataSourceVolcengineTlsShards(),
+			"volcengine_tls_kafka_consumers":            kafka_consumer.DataSourceVolcengineTlsKafkaConsumers(),
+			"volcengine_tls_host_groups":                host_group.DataSourceVolcengineTlsHostGroups(),
+			"volcengine_tls_host_group_rules":           host_group.DataSourceVolcengineTlsHostGroupRules(),
+			"volcengine_tls_rule_bound_host_groups":     rule_bound_host_group.DataSourceVolcengineTlsRuleBoundHostGroups(),
+			"volcengine_tls_hosts":                      host.DataSourceVolcengineTlsHosts(),
+			"volcengine_tls_projects":                   tlsProject.DataSourceVolcengineTlsProjects(),
+			"volcengine_tls_topics":                     tlsTopic.DataSourceVolcengineTlsTopics(),
+			"volcengine_tls_indexes":                    tlsIndex.DataSourceVolcengineTlsIndexes(),
+			"volcengine_tls_schedule_sql_tasks":         schedule_sql_task.DataSourceVolcengineScheduleSqlTasks(),
+			"volcengine_tls_import_tasks":               import_task.DataSourceVolcengineImportTasks(),
+			"volcengine_tls_etl_tasks":                  etl_task.DataSourceVolcengineEtlTasks(),
+			"volcengine_tls_shippers":                   shipper.DataSourceVolcengineShippers(),
+			"volcengine_tls_consumer_groups":            consumer_group.DataSourceVolcengineConsumerGroups(),
+			"volcengine_tls_histograms":                 tlsLog.DataSourceVolcengineTlsHistograms(),
+			"volcengine_tls_search_logs":                tlsLog.DataSourceVolcengineTlsSearchLogs(),
+			"volcengine_tls_log_contexts":               tlsLog.DataSourceVolcengineTlsLogContexts(),
+			"volcengine_tls_download_tasks":             tlsDownloadTask.DataSourceVolcengineTlsDownloadTasks(),
+			"volcengine_tls_download_urls":              tlsDownloadTask.DataSourceVolcengineTlsDownloadUrls(),
+			"volcengine_tls_accounts":                   tlsAccount.DataSourceVolcengineTlsAccounts(),
+			"volcengine_tls_trace_instances":            tls_trace_instance.DataSourceVolcengineTlsTraceInstances(),
+			"volcengine_tls_tags":                       tls_tag.DataSourceVolcengineTlsTags(),
+			"volcengine_tls_tag_resources":              tls_tag_resource.DataSourceVolcengineTlsTagResources(),
+			"volcengine_tls_describe_traces":            tls_trace.DataSourceVolcengineTlsDescribeTraces(),
+			"volcengine_tls_search_traces":              tls_trace.DataSourceVolcengineTlsSearchTraces(),
 
 			// ================ Cloudfs ================
 			"volcengine_cloudfs_quotas":       cloudfs_quota.DataSourceVolcengineCloudfsQuotas(),
@@ -1326,21 +1353,31 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_rds_mysql_backup_policy":           rds_mysql_backup_policy.ResourceVolcengineRdsMysqlBackupPolicy(),
 
 			// ================ TLS ================
-			"volcengine_tls_kafka_consumer":     kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
-			"volcengine_tls_host_group":         host_group.ResourceVolcengineTlsHostGroup(),
-			"volcengine_tls_rule":               tlsRule.ResourceVolcengineTlsRule(),
-			"volcengine_tls_rule_applier":       rule_applier.ResourceVolcengineTlsRuleApplier(),
-			"volcengine_tls_alarm":              alarm.ResourceVolcengineTlsAlarm(),
-			"volcengine_tls_alarm_notify_group": alarm_notify_group.ResourceVolcengineTlsAlarmNotifyGroup(),
-			"volcengine_tls_host":               host.ResourceVolcengineTlsHost(),
-			"volcengine_tls_project":            tlsProject.ResourceVolcengineTlsProject(),
-			"volcengine_tls_topic":              tlsTopic.ResourceVolcengineTlsTopic(),
-			"volcengine_tls_index":              tlsIndex.ResourceVolcengineTlsIndex(),
-			"volcengine_tls_schedule_sql_task":  schedule_sql_task.ResourceVolcengineScheduleSqlTask(),
-			"volcengine_tls_import_task":        import_task.ResourceVolcengineImportTask(),
-			"volcengine_tls_etl_task":           etl_task.ResourceVolcengineEtlTask(),
-			"volcengine_tls_shipper":            shipper.ResourceVolcengineShipper(),
-			"volcengine_tls_consumer_group":     consumer_group.ResourceVolcengineConsumerGroup(),
+			"volcengine_tls_kafka_consumer":            kafka_consumer.ResourceVolcengineTlsKafkaConsumer(),
+			"volcengine_tls_host_group":                host_group.ResourceVolcengineTlsHostGroup(),
+			"volcengine_tls_rule":                      tlsRule.ResourceVolcengineTlsRule(),
+			"volcengine_tls_rule_applier":              rule_applier.ResourceVolcengineTlsRuleApplier(),
+			"volcengine_tls_alarm":                     alarm.ResourceVolcengineTlsAlarm(),
+			"volcengine_tls_alarm_webhook_integration": alarm_webhook_integration.ResourceVolcengineTlsAlarmWebhookIntegration(),
+			"volcengine_tls_alarm_content_template":    alarm_content_template.ResourceVolcengineTlsAlarmContentTemplate(),
+			"volcengine_tls_alarm_notify_group":        alarm_notify_group.ResourceVolcengineTlsAlarmNotifyGroup(),
+			"volcengine_tls_rule_bound_host_group":     rule_bound_host_group.ResourceVolcengineTlsRuleBoundHostGroup(),
+			"volcengine_tls_host":                      host.ResourceVolcengineTlsHost(),
+			"volcengine_tls_project":                   tlsProject.ResourceVolcengineTlsProject(),
+			"volcengine_tls_topic":                     tlsTopic.ResourceVolcengineTlsTopic(),
+
+			"volcengine_tls_index":             tlsIndex.ResourceVolcengineTlsIndex(),
+			"volcengine_tls_schedule_sql_task": schedule_sql_task.ResourceVolcengineScheduleSqlTask(),
+			"volcengine_tls_import_task":       import_task.ResourceVolcengineImportTask(),
+			"volcengine_tls_etl_task":          etl_task.ResourceVolcengineEtlTask(),
+			"volcengine_tls_shipper":           shipper.ResourceVolcengineShipper(),
+			"volcengine_tls_consumer_group":    consumer_group.ResourceVolcengineConsumerGroup(),
+			"volcengine_tls_download_task":     tlsDownloadTask.ResourceVolcengineTlsDownloadTask(),
+			"volcengine_tls_account":           tlsAccount.ResourceVolcengineTlsAccount(),
+			"volcengine_tls_trace_instance":    tls_trace_instance.ResourceVolcengineTlsTraceInstance(),
+			"volcengine_tls_tag":               tls_tag.ResourceVolcengineTlsTag(),
+			"volcengine_tls_tag_resource":      tls_tag_resource.ResourceVolcengineTlsTagResource(),
+			"volcengine_tls_shard":             tlsShard.ResourceVolcengineTlsShard(),
 
 			// ================ Cloudfs ================
 			"volcengine_cloudfs_file_system": cloudfs_file_system.ResourceVolcengineCloudfsFileSystem(),

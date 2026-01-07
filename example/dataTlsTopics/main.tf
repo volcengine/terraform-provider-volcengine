@@ -1,4 +1,4 @@
 data "volcengine_tls_topics" "default" {
-  project_id = "e020c978-4f05-40e1-9167-0113d3ef****"
-  topic_id = "edf051ed-3c46-49ba-9339-bea628fe****"
+  project_id = "bdb87e4d-7dad-4b96-ac43-e1b09e9dc8ac"
+  topic_id = "9b756385-1dfb-4306-a094-0c88e04b34a5"
 }

@@ -196,6 +196,11 @@ func ResourceVolcengineShipper() *schema.Resource {
 				Type:        schema.TypeString,
 				Description: "The type of delivery.",
 			},
+			"role_trn": {
+				Optional:    true,
+				Type:        schema.TypeString,
+				Description: "The role trn.",
+			},
 			"topic_id": {
 				Required:    true,
 				ForceNew:    true,

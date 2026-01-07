@@ -112,16 +112,6 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 				Computed:    true,
 				Description: "The rule count of host.",
 			},
-			"normal_heartbeat_status_count": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "The normal heartbeat status count of host.",
-			},
-			"abnormal_heartbeat_status_count": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "The abnormal heartbeat status count of host.",
-			},
 			"create_time": {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -131,11 +121,6 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "The modify time of host group.",
-			},
-			"agent_latest_version": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The latest version of log collector.",
 			},
 		},
 	}

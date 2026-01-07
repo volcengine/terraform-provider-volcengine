@@ -221,6 +221,11 @@ func DataSourceVolcengineShippers() *schema.Resource {
 							Type:        schema.TypeString,
 							Description: "The type of delivery.",
 						},
+						"role_trn": {
+							Computed:    true,
+							Type:        schema.TypeString,
+							Description: "The role trn.",
+						},
 						"shipper_end_time": {
 							Computed:    true,
 							Type:        schema.TypeInt,

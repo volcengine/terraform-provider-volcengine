@@ -1,12 +1,12 @@
 package rds_postgresql_allowlist_test
 
 import (
-    "testing"
+	"testing"
 
-    "github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-    ve "github.com/volcengine/terraform-provider-volcengine/common"
-    "github.com/volcengine/terraform-provider-volcengine/volcengine"
-    "github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
+	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_postgresql/rds_postgresql_allowlist"
 )
 
 const testAccVolcengineRdsPostgresqlAllowlistsDSConfig = `
@@ -51,27 +51,26 @@ data "volcengine_rds_postgresql_allowlists" "foo" {
 `
 
 func TestAccVolcengineRdsPostgresqlAllowlistsDataSource_Basic(t *testing.T) {
-    dsName := "data.volcengine_rds_postgresql_allowlists.foo"
+	dsName := "data.volcengine_rds_postgresql_allowlists.foo"
 
-    acc := &volcengine.AccTestResource{
-        ResourceId: dsName,
-        SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
-            return rds_postgresql_allowlist.NewRdsPostgresqlAllowlistService(client)
-        },
-    }
+	acc := &volcengine.AccTestResource{
+		ResourceId: dsName,
+		SvcInitFunc: func(client *ve.SdkClient) ve.ResourceService {
+			return rds_postgresql_allowlist.NewRdsPostgresqlAllowlistService(client)
+		},
+	}
 
-    resource.ParallelTest(t, resource.TestCase{
-        PreCheck: func() { volcengine.AccTestPreCheck(t) },
-        Providers: volcengine.GetTestAccProviders(),
-        Steps: []resource.TestStep{
-            {
-                Config: testAccVolcengineRdsPostgresqlAllowlistsDSConfig,
-                Check: resource.ComposeTestCheckFunc(
-                    resource.TestCheckResourceAttr(acc.ResourceId, "total_count", "1"),
-                    resource.TestCheckResourceAttr(acc.ResourceId, "postgresql_allow_lists.#", "1"),
-                ),
-            },
-        },
-    })
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:  func() { volcengine.AccTestPreCheck(t) },
+		Providers: volcengine.GetTestAccProviders(),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccVolcengineRdsPostgresqlAllowlistsDSConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(acc.ResourceId, "total_count", "1"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "postgresql_allow_lists.#", "1"),
+				),
+			},
+		},
+	})
 }
-

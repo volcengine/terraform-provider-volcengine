@@ -16,23 +16,16 @@ func DataSourceVolcengineTlsTopics() *schema.Resource {
 				Description: "The project id of tls topic.",
 			},
 			"topic_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The id of tls topic. This field supports fuzzy queries. It is not supported to specify both TopicName and TopicId at the same time.",
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   "The id of tls topic. This field supports fuzzy queries. It is not supported to specify both TopicName and TopicId at the same time.",
+				ConflictsWith: []string{"topic_name"},
 			},
 			"topic_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The name of tls topic. This field supports fuzzy queries. It is not supported to specify both TopicName and TopicId at the same time.",
-			},
-			"is_full_name": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Description: "Whether to match accurately when filtering based on TopicName.",
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("topic_name").(string) == ""
-				},
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   "The name of tls topic. This field supports fuzzy queries. It is not supported to specify both TopicName and TopicId at the same time.",
+				ConflictsWith: []string{"topic_id"},
 			},
 			"tags": ve.TagsSchema(),
 			"name_regex": {
@@ -126,6 +119,76 @@ func DataSourceVolcengineTlsTopics() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The format of the time field.",
+						},
+						"log_public_ip": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable the function of recording public IP.",
+						},
+						"enable_hot_ttl": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable tiered storage.",
+						},
+						"hot_ttl": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Standard storage duration, valid when enable_hot_ttl is true.",
+						},
+						"cold_ttl": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Infrequent storage duration, valid when enable_hot_ttl is true.",
+						},
+						"archive_ttl": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "Archive storage duration, valid when enable_hot_ttl is true.",
+						},
+						"encrypt_conf": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Data encryption configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enable": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to enable data encryption.",
+									},
+									"encrypt_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The encryption type.",
+									},
+									"user_cmk_info": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										MaxItems:    1,
+										Description: "The user custom key.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"user_cmk_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The key id.",
+												},
+												"region_id": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The key region.",
+												},
+												"trn": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The key trn.",
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 						"tags": ve.TagsSchemaComputed(),
 					},
