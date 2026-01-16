@@ -21,6 +21,12 @@ The following arguments are supported:
 * `ids` - (Optional) A list of Acl IDs.
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The name of project.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -41,6 +47,10 @@ In addition to all arguments above, the following attributes are exported:
         * `port` - The port info of listener.
         * `protocol` - The protocol info of listener.
     * `project_name` - The project name of Acl.
+    * `status` - The status of Acl.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - Update time of Acl.
 * `total_count` - The total count of Acl query.
 

@@ -97,7 +97,7 @@ func ResourceVolcengineAlbListener() *schema.Resource {
 					return d.Get("protocol").(string) == "HTTP"
 				},
 				Description: "The source of the CA certificate associated with the listener. This parameter is only valid for HTTPS listeners and is used for two-way authentication. " +
-					"Valid values: `alb`, `pca_root`, `pca_sub`. ",
+					"Valid values: `alb`, `pca_root`, `pca_sub`.",
 			},
 			"ca_certificate_id": {
 				Type:     schema.TypeString,
@@ -220,7 +220,6 @@ func ResourceVolcengineAlbListener() *schema.Resource {
 							Computed:    true,
 							Description: "The extended domain ID, required only for deletion and modification.",
 						},
-						
 					},
 				},
 			},

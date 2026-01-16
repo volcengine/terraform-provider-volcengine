@@ -23,6 +23,12 @@ The following arguments are supported:
 * `customized_cfg_name` - (Required) The name of CustomizedCfg.
 * `description` - (Optional) The description of CustomizedCfg.
 * `project_name` - (Optional) The project name of the CustomizedCfg.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

@@ -30,16 +30,24 @@ The following arguments are supported:
 * `acl_name` - (Optional) The name of Acl.
 * `description` - (Optional) The description of the Acl.
 * `project_name` - (Optional, ForceNew) The project name of the Acl.
+* `tags` - (Optional) Tags.
 
 The `acl_entries` object supports the following:
 
 * `entry` - (Required) The content of the AclEntry.
 * `description` - (Optional) The description of the AclEntry.
 
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
+
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
 * `create_time` - Create time of Acl.
+* `status` - The status of the Acl.
+* `update_time` - Update time of Acl.
 
 
 ## Import

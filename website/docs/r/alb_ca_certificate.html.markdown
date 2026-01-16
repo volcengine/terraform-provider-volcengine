@@ -32,6 +32,7 @@ In addition to all arguments above, the following attributes are exported:
 * `domain_name` - The domain name of the CA Certificate.
 * `expired_at` - The expire time of the CA Certificate.
 * `listeners` - The ID list of the Listener.
+* `san` - The san extension of the Certificate.
 * `status` - The status of the CA Certificate.
 
 

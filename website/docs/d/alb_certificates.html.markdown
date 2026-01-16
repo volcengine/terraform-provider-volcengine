@@ -12,6 +12,10 @@ Use this data source to query detailed information of alb certificates
 ```hcl
 data "volcengine_alb_certificates" "default" {
   certificate_name = "tf-test"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -19,6 +23,13 @@ The following arguments are supported:
 * `certificate_name` - (Optional) The Name of Certificate.
 * `ids` - (Optional) The list of Certificate IDs.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name to which the certificate belongs.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -33,7 +44,11 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The ID of the Certificate.
     * `listeners` - The ID list of the Listener.
     * `project_name` - The ProjectName of the Certificate.
+    * `san` - The san extension of the Certificate.
     * `status` - The status of the Certificate.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
 * `total_count` - The total count of Certificate query.
 
 

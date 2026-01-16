@@ -53,6 +53,7 @@ data "volcengine_albs" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
+* `eip_address` - (Optional) The public ip address of the Alb.
 * `eni_address` - (Optional) The private ip address of the Alb.
 * `ids` - (Optional) A list of Alb IDs.
 * `load_balancer_name` - (Optional) The name of the Alb.
@@ -60,6 +61,7 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `project` - (Optional) The project of the Alb.
 * `tags` - (Optional) Tags.
+* `type` - (Optional) The type of the Alb. public: public network ALB. private: private network ALB.
 * `vpc_id` - (Optional) The vpc id which Alb belongs to.
 
 The `tags` object supports the following:
@@ -80,6 +82,10 @@ In addition to all arguments above, the following attributes are exported:
     * `deleted_time` - The expected deleted time of the Alb. This parameter has a query value only when the status of the Alb instance is `FinancialLocked`.
     * `description` - The description of the Alb.
     * `dns_name` - The DNS name.
+    * `enabled` - The enabled status of the ALB instance. The status is false only when the instance is shut down due to arrears or expiration.
+    * `global_accelerators` - The global accelerator bound to the ALB instance.
+        * `accelerator_id` - The global accelerator id.
+        * `accelerator_name` - The name of the global accelerator.
     * `health_log` - The health log information of the Alb.
         * `enabled` - Whether the health log function is enabled.
         * `project_id` - The TLS project id bound to the health check log.
@@ -89,12 +95,17 @@ In addition to all arguments above, the following attributes are exported:
         * `listener_id` - The listener id of the Alb.
         * `listener_name` - The listener name of the Alb.
     * `load_balancer_billing_type` - The billing type of the Alb.
+    * `load_balancer_edition` - The version of the ALB instance. Basic: Basic Edition. Standard: Standard Edition.
     * `load_balancer_id` - The ID of the Alb.
     * `load_balancer_name` - The name of the Alb.
     * `local_addresses` - The local addresses of the Alb.
     * `lock_reason` - The reason why Alb is locked. This parameter has a query value only when the status of the Alb instance is `FinancialLocked`.
+    * `modification_protection_reason` - The reason for enabling instance modification protection.
+    * `modification_protection_status` - Whether the instance modification protection function is enabled. NonProtection: Not enabled. ConsoleProtection: Enabled.
     * `overdue_time` - The overdue time of the Alb. This parameter has a query value only when the status of the Alb instance is `FinancialLocked`.
     * `project_name` - The project name of the Alb.
+    * `proxy_protocol_enabled` - ALB can support the Proxy Protocol and record the real IP of the client.
+    * `sni_auto_match` - Listeners under the instance support automatically selecting extended certificates.
     * `status` - The status of the Alb.
     * `tags` - Tags.
         * `key` - The Key of Tags.
@@ -106,6 +117,8 @@ In addition to all arguments above, the following attributes are exported:
     * `type` - The type of the Alb, valid value: `public`, `private`.
     * `update_time` - The update time of the Alb.
     * `vpc_id` - The vpc id of the Alb.
+    * `waf_instance_id` - The ID of the WAF security protection instance bound to the ALB instance.
+    * `waf_protection_enabled` - The WAF security protection switch.
     * `zone_mappings` - Configuration information of the Alb instance in different Availability Zones.
         * `load_balancer_addresses` - The IP address information of the Alb in this availability zone.
             * `eip_address` - The Eip address of the Alb in this availability zone.

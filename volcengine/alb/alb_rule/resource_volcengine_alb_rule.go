@@ -285,7 +285,7 @@ func ResourceVolcengineAlbRule() *schema.Resource {
 										Type:        schema.TypeList,
 										Required:    true,
 										Elem:        &schema.Schema{Type: schema.TypeString},
-										Description: "The values of the method. Vaild values: HEAD、GET、POST、OPTIONS、PUT、PATCH、DELETE.",
+										Description: "The values of the method. Vaild values: HEAD,GET,POST,OPTIONS,PUT,PATCH,DELETE.",
 									},
 								},
 							},

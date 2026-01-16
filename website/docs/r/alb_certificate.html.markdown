@@ -14,6 +14,10 @@ resource "volcengine_alb_certificate" "foo" {
   description = "test123"
   public_key  = "public key"
   private_key = "private key"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -23,6 +27,12 @@ The following arguments are supported:
 * `certificate_name` - (Optional) The name of the Certificate.
 * `description` - (Optional) The description of the Certificate.
 * `project_name` - (Optional) The project name of the Certificate.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -32,6 +42,7 @@ In addition to all arguments above, the following attributes are exported:
 * `domain_name` - The domain name of the Certificate.
 * `expired_at` - The expire time of the Certificate.
 * `listeners` - The ID list of the Listener.
+* `san` - The san extension of the Certificate.
 * `status` - The status of the Certificate.
 
 

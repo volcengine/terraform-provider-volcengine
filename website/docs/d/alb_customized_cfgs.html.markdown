@@ -20,6 +20,12 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of CustomizedCfg.
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The project name of the CustomizedCfg.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -37,6 +43,9 @@ In addition to all arguments above, the following attributes are exported:
         * `protocol` - The protocol info of listener.
     * `project_name` - The project name of CustomizedCfg.
     * `status` - The status of CustomizedCfg.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of CustomizedCfg.
 * `total_count` - The total count of CustomizedCfg query.
 
