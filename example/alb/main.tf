@@ -37,8 +37,8 @@ resource "volcengine_alb" "alb-private" {
   project_name = "default"
   delete_protection = "off"
   tags {
-    key = "k1"
-    value = "v1"
+    key = "k2"
+    value = "v2"
   }
 }
 
@@ -66,8 +66,8 @@ resource "volcengine_alb" "alb-public" {
   }
 
   tags {
-    key = "k1"
-    value = "v1"
+    key = "k2"
+    value = "v2"
   }
   depends_on = [volcengine_vpc_ipv6_gateway.ipv6_gateway]
 }
