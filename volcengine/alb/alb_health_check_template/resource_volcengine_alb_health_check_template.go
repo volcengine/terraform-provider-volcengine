@@ -44,6 +44,12 @@ func ResourceVolcengineAlbHealthCheckTemplate() *schema.Resource {
 				Computed:    true,
 				Description: "The description of health check template.",
 			},
+			"health_check_port": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The port for health check. 0 means use backend server port for health check, 1-65535 means use the specified port.",
+			},
 			"health_check_interval": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -96,7 +102,7 @@ func ResourceVolcengineAlbHealthCheckTemplate() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Computed:    true,
-				Description: "THe protocol of health check,only support HTTP.",
+				Description: "The protocol of health check, support HTTP and TCP.",
 			},
 			"health_check_http_version": {
 				Type:        schema.TypeString,
@@ -104,6 +110,13 @@ func ResourceVolcengineAlbHealthCheckTemplate() *schema.Resource {
 				Computed:    true,
 				Description: "The HTTP version of health check.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The project name to which the health check template belongs.",
+			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	return resource

@@ -34,6 +34,7 @@ In addition to all arguments above, the following attributes are exported:
     * `expired_at` - The expire time of the CA Certificate.
     * `listeners` - The ID list of the CA Listener.
     * `project_name` - The ProjectName of the CA Certificate.
+    * `san` - The san extension of the CA Certificate.
     * `status` - The status of the CA Certificate.
 * `total_count` - The total count of query.
 

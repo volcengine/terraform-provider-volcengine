@@ -56,6 +56,13 @@ func ResourceVolcengineAlbCertificate() *schema.Resource {
 				Computed:    true,
 				Description: "The project name of the Certificate.",
 			},
+			"tags": ve.TagsSchema(),
+			// computed fields
+			"san": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The san extension of the Certificate.",
+			},
 			"listeners": {
 				Type: schema.TypeList,
 				Elem: &schema.Schema{

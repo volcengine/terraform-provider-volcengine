@@ -28,6 +28,7 @@ func DataSourceVolcengineAlbAcls() *schema.Resource {
 				Optional:    true,
 				Description: "The name of project.",
 			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -69,6 +70,11 @@ func DataSourceVolcengineAlbAcls() *schema.Resource {
 							Computed:    true,
 							Description: "Update time of Acl.",
 						},
+						"status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The status of Acl.",
+						},
 						"acl_entry_count": {
 							Type:        schema.TypeInt,
 							Computed:    true,
@@ -84,6 +90,7 @@ func DataSourceVolcengineAlbAcls() *schema.Resource {
 							Computed:    true,
 							Description: "The project name of Acl.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 						"listeners": {
 							Type:        schema.TypeList,
 							Computed:    true,

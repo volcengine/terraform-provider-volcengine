@@ -28,6 +28,11 @@ func DataSourceVolcengineAlbServerGroups() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of Alb server group name.",
 			},
+			"vpc_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The vpc id of Alb server group.",
+			},
 			"server_group_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -38,6 +43,7 @@ func DataSourceVolcengineAlbServerGroups() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of Alb server group.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -100,6 +106,16 @@ func DataSourceVolcengineAlbServerGroups() *schema.Resource {
 							Computed:    true,
 							Description: "The scheduler algorithm of the Alb server group.",
 						},
+						"protocol": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The backend protocol of the Alb server group.",
+						},
+						"cross_zone_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether to enable cross-zone load balancing for the server group.",
+						},
 						"server_count": {
 							Type:        schema.TypeInt,
 							Computed:    true,
@@ -120,6 +136,12 @@ func DataSourceVolcengineAlbServerGroups() *schema.Resource {
 							Computed:    true,
 							Description: "The update time of the Alb server group.",
 						},
+						"ip_address_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ip address type of the server group.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"listeners": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -176,17 +198,22 @@ func DataSourceVolcengineAlbServerGroups() *schema.Resource {
 									},
 									"http_code": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The normal http status code of health check.",
 									},
 									"protocol": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The protocol of health check.",
+									},
+									"port": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The port of health check.",
 									},
 									"http_version": {
 										Type:        schema.TypeString,
-										Optional:    true,
+										Computed:    true,
 										Description: "The http version of health check.",
 									},
 								},

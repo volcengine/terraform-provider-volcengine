@@ -24,10 +24,11 @@ resource "volcengine_alb_server_group_server" "foo" {
 The following arguments are supported:
 * `instance_id` - (Required, ForceNew) The ID of ecs instance or the network card bound to ecs instance.
 * `ip` - (Required, ForceNew) The private ip of the instance.
-* `port` - (Required) The port receiving request.
+* `port` - (Required) The port receiving request. Value range: 1 ~ 65535.
 * `server_group_id` - (Required, ForceNew) The ID of the ServerGroup.
-* `type` - (Required, ForceNew) The type of instance. Optional choice contains `ecs`, `eni`.
+* `type` - (Required, ForceNew) The type of instance. Optional choice contains `ecs`, `eni`, `ip`.
 * `description` - (Optional) The description of the instance.
+* `remote_enabled` - (Optional, ForceNew) Whether to enable remote IP function. Optional choice contains `on`, `off`. Default value is `off`. This field is only effective when the type is `ip`.
 * `weight` - (Optional) The weight of the instance, range in 0~100.
 
 ## Attributes Reference

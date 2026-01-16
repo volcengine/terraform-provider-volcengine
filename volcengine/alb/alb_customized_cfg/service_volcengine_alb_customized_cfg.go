@@ -140,7 +140,12 @@ func (s *VolcengineAlbCustomizedCfgService) CreateResource(resourceData *schema.
 		Call: ve.SdkCall{
 			Action:      "CreateCustomizedCfg",
 			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -169,6 +174,7 @@ func (VolcengineAlbCustomizedCfgService) WithResourceResponseHandlers(d map[stri
 }
 
 func (s *VolcengineAlbCustomizedCfgService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyCustomizedCfgAttributes",
@@ -200,7 +206,12 @@ func (s *VolcengineAlbCustomizedCfgService) ModifyResource(resourceData *schema.
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "customizedcfg", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineAlbCustomizedCfgService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -229,6 +240,15 @@ func (s *VolcengineAlbCustomizedCfgService) DatasourceResources(*schema.Resource
 			"ids": {
 				TargetField: "CustomizedCfgIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "CustomizedCfgName",

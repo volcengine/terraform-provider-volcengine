@@ -34,10 +34,20 @@ func DataSourceVolcengineAlbs() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the Alb.",
 			},
+			"eip_address": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The public ip address of the Alb.",
+			},
 			"project": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The project of the Alb.",
+			},
+			"type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The type of the Alb. public: public network ALB. private: private network ALB.",
 			},
 			"tags": ve.TagsSchema(),
 
@@ -155,6 +165,36 @@ func DataSourceVolcengineAlbs() *schema.Resource {
 							Description: "The project name of the Alb.",
 						},
 						"tags": ve.TagsSchemaComputed(),
+						"waf_protection_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The WAF security protection switch.",
+						},
+						"waf_instance_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the WAF security protection instance bound to the ALB instance.",
+						},
+						"modification_protection_status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether the instance modification protection function is enabled. NonProtection: Not enabled. ConsoleProtection: Enabled.",
+						},
+						"modification_protection_reason": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The reason for enabling instance modification protection.",
+						},
+						"load_balancer_edition": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The version of the ALB instance. Basic: Basic Edition. Standard: Standard Edition.",
+						},
+						"sni_auto_match": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Listeners under the instance support automatically selecting extended certificates.",
+						},
 						"local_addresses": {
 							Type:     schema.TypeList,
 							Computed: true,
@@ -162,6 +202,16 @@ func DataSourceVolcengineAlbs() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Description: "The local addresses of the Alb.",
+						},
+						"proxy_protocol_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "ALB can support the Proxy Protocol and record the real IP of the client.",
+						},
+						"enabled": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "The enabled status of the ALB instance. The status is false only when the instance is shut down due to arrears or expiration.",
 						},
 						"listeners": {
 							Type:        schema.TypeList,
@@ -245,6 +295,25 @@ func DataSourceVolcengineAlbs() *schema.Resource {
 										Type:        schema.TypeString,
 										Computed:    true,
 										Description: "The TLS project id bound to the health check log.",
+									},
+								},
+							},
+						},
+						"global_accelerators": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The global accelerator bound to the ALB instance.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"accelerator_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The global accelerator id.",
+									},
+									"accelerator_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the global accelerator.",
 									},
 								},
 							},

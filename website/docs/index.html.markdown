@@ -13,7 +13,7 @@ The provider needs to be configured with the proper credentials before it can be
 
 Use the navigation on the left to read about the available resources.
 
--> **Note:** This guide requires an available Volcengine account or sub-account with project to create resources.
+-> **Note:** This guide requires an available volcengine account or sub-account with project to create resources.
 
 ## Example Usage
 ```hcl

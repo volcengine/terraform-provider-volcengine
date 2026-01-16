@@ -30,6 +30,12 @@ func DataSourceVolcengineAlbHealthCheckTemplates() *schema.Resource {
 				ValidateFunc: validation.StringIsValidRegExp,
 				Description:  "A Name Regex of health check template.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name to query.",
+			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -61,6 +67,11 @@ func DataSourceVolcengineAlbHealthCheckTemplates() *schema.Resource {
 							Computed:    true,
 							Description: "The name of health check template.",
 						},
+						"health_check_port": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The port for health check. 0 means use backend server port for health check, 1-65535 means use the specified port.",
+						},
 						"health_check_interval": {
 							Type:        schema.TypeInt,
 							Computed:    true,
@@ -84,7 +95,7 @@ func DataSourceVolcengineAlbHealthCheckTemplates() *schema.Resource {
 						"health_check_method": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The health check method,default is `GET`,support `GET` and ``HEAD.",
+							Description: "The health check method, support `GET` and `HEAD`.",
 						},
 						"health_check_domain": {
 							Type:        schema.TypeString,
@@ -104,7 +115,7 @@ func DataSourceVolcengineAlbHealthCheckTemplates() *schema.Resource {
 						"health_check_protocol": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The protocol of health check,only support HTTP.",
+							Description: "The protocol of health check, support HTTP and TCP.",
 						},
 						"health_check_http_version": {
 							Type:        schema.TypeString,
@@ -115,6 +126,22 @@ func DataSourceVolcengineAlbHealthCheckTemplates() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The description of health check template.",
+						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name to which the health check template belongs.",
+						},
+						"tags": ve.TagsSchemaComputed(),
+						"create_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The creation time of the health check template.",
+						},
+						"update_time": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The last update time of the health check template.",
 						},
 					},
 				},

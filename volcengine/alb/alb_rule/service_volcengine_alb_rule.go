@@ -124,6 +124,19 @@ func (s *VolcengineAlbRuleService) CreateResource(resourceData *schema.ResourceD
 				"description": {
 					TargetField: "Rules.1.Description",
 				},
+				"priority": {
+					TargetField: "Rules.1.Priority",
+				},
+				"sticky_session_enabled": {
+					TargetField: "Rules.1.ForwardGroupConfig.StickySessionEnabled",
+				},
+				"sticky_session_timeout": {
+					TargetField: "Rules.1.ForwardGroupConfig.StickySessionTimeout",
+				},
+				"server_group_tuples": {
+					TargetField: "Rules.1.ForwardGroupConfig.ServerGroupTuples",
+					ConvertType: ve.ConvertListN,
+				},
 				"traffic_limit_enabled": {
 					TargetField: "Rules.1.TrafficLimitEnabled",
 				},
@@ -140,6 +153,107 @@ func (s *VolcengineAlbRuleService) CreateResource(resourceData *schema.ResourceD
 				"redirect_config": {
 					TargetField: "Rules.1.RedirectConfig",
 					ConvertType: ve.ConvertListUnique,
+				},
+				// 框架支持嵌套转换
+				"rule_conditions": {
+					TargetField: "Rules.1.RuleConditions",
+					ConvertType: ve.ConvertListN,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"type": {
+							TargetField: "Type",
+						},
+						"host_config": {
+							TargetField: "HostConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"path_config": {
+							TargetField: "PathConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"header_config": {
+							TargetField: "HeaderConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"method_config": {
+							TargetField: "MethodConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"query_string_config": {
+							TargetField: "QueryStringConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertListN,
+								},
+							},
+						},
+					},
+				},
+				"rule_actions": {
+					TargetField: "Rules.1.RuleActions",
+					ConvertType: ve.ConvertListN,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"traffic_limit_config": {
+							TargetField: "TrafficLimitConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"qps": {
+									TargetField: "QPS",
+								},
+							},
+						},
+						"forward_group_config": {
+							TargetField: "ForwardGroupConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"server_group_sticky_session": {
+									TargetField: "ServerGroupStickySession",
+									ConvertType: ve.ConvertListUnique,
+								},
+								"server_group_tuples": {
+									TargetField: "ServerGroupTuples",
+									ConvertType: ve.ConvertListN,
+								},
+							},
+						},
+						"redirect_config": {
+							TargetField: "RedirectConfig",
+							ConvertType: ve.ConvertListUnique,
+						},
+						"rewrite_config": {
+							TargetField: "RewriteConfig",
+							ConvertType: ve.ConvertListUnique,
+						},
+						"fixed_response_config": {
+							TargetField: "FixedResponseConfig",
+							ConvertType: ve.ConvertListUnique,
+						},
+					},
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -173,8 +287,30 @@ func (s *VolcengineAlbRuleService) CreateResource(resourceData *schema.ResourceD
 }
 
 func (VolcengineAlbRuleService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+	convert := func(v interface{}) interface{} {
+		if v == nil {
+			return nil
+		}
+		if _, ok := v.([]interface{}); ok {
+			return v
+		}
+		return []interface{}{v}
+	}
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		converts := map[string]ve.ResponseConvert{
+			"HostConfig":               {Convert: convert},
+			"PathConfig":               {Convert: convert},
+			"HeaderConfig":             {Convert: convert},
+			"MethodConfig":             {Convert: convert},
+			"QueryStringConfig":        {Convert: convert},
+			"TrafficLimitConfig":       {Convert: convert},
+			"ForwardGroupConfig":       {Convert: convert},
+			"RedirectConfig":           {Convert: convert},
+			"RewriteConfig":            {Convert: convert},
+			"FixedResponseConfig":      {Convert: convert},
+			"ServerGroupStickySession": {Convert: convert},
+		}
+		return d, converts, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -194,6 +330,19 @@ func (s *VolcengineAlbRuleService) ModifyResource(resourceData *schema.ResourceD
 				"description": {
 					TargetField: "Rules.1.Description",
 				},
+				"priority": {
+					TargetField: "Rules.1.Priority",
+				},
+				"sticky_session_enabled": {
+					TargetField: "Rules.1.ForwardGroupConfig.StickySessionEnabled",
+				},
+				"sticky_session_timeout": {
+					TargetField: "Rules.1.ForwardGroupConfig.StickySessionTimeout",
+				},
+				"server_group_tuples": {
+					TargetField: "Rules.1.ForwardGroupConfig.ServerGroupTuples",
+					ConvertType: ve.ConvertListN,
+				},
 				"traffic_limit_enabled": {
 					TargetField: "Rules.1.TrafficLimitEnabled",
 				},
@@ -212,6 +361,119 @@ func (s *VolcengineAlbRuleService) ModifyResource(resourceData *schema.ResourceD
 					TargetField: "Rules.1.RedirectConfig",
 					ConvertType: ve.ConvertListUnique,
 					ForceGet:    true,
+				},
+				"rule_conditions": {
+					ForceGet:    true,
+					TargetField: "Rules.1.RuleConditions",
+					ConvertType: ve.ConvertListN,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"type": {
+							TargetField: "Type",
+							ForceGet:    true,
+						},
+						"host_config": {
+							TargetField: "HostConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"path_config": {
+							TargetField: "PathConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"header_config": {
+							TargetField: "HeaderConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"method_config": {
+							TargetField: "MethodConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertWithN,
+								},
+							},
+						},
+						"query_string_config": {
+							TargetField: "QueryStringConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"values": {
+									TargetField: "Values",
+									ConvertType: ve.ConvertListN,
+								},
+							},
+						},
+					},
+				},
+				"rule_actions": {
+					TargetField: "Rules.1.RuleActions",
+					ForceGet:    true,
+					ConvertType: ve.ConvertListN,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"traffic_limit_config": {
+							ForceGet:    true,
+							TargetField: "TrafficLimitConfig",
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"qps": {
+									TargetField: "QPS",
+								},
+							},
+						},
+						"forward_group_config": {
+							TargetField: "ForwardGroupConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"server_group_sticky_session": {
+									TargetField: "ServerGroupStickySession",
+									ConvertType: ve.ConvertListUnique,
+								},
+								"server_group_tuples": {
+									TargetField: "ServerGroupTuples",
+									ConvertType: ve.ConvertListN,
+								},
+							},
+						},
+						"redirect_config": {
+							TargetField: "RedirectConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+						},
+						"rewrite_config": {
+							TargetField: "RewriteConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+						},
+						"fixed_response_config": {
+							TargetField: "FixedResponseConfig",
+							ForceGet:    true,
+							ConvertType: ve.ConvertListUnique,
+						},
+					},
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -300,6 +562,9 @@ func (s *VolcengineAlbRuleService) DatasourceResources(*schema.ResourceData, *sc
 			},
 			"TrafficLimitQPS": {
 				TargetField: "traffic_limit_qps",
+			},
+			"RuleActions.TrafficLimitConfig.QPS": {
+				TargetField: "qps",
 			},
 		},
 	}

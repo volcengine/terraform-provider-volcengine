@@ -64,4 +64,16 @@ resource "volcengine_alb_listener" "foo" {
   certificate_id  = volcengine_alb_certificate.foo.id
   server_group_id = volcengine_alb_server_group.foo.id
   description     = "acc test listener"
+  access_log_record_customized_headers_enabled = "off"
+  ca_certificate_source = "alb"
+  ca_certificate_id = "cert-xoekc6lpu9s054ov5eo*****"
+  domain_extensions  {
+    domain = "example.com"
+    certificate_source = "alb"
+    certificate_id  = "cert-1pf4a8k8tokcg845wf******"
+  }
+  tags {
+    key = "key1"
+    value = "value2"
+  }
 }

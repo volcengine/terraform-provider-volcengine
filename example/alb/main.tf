@@ -37,8 +37,8 @@ resource "volcengine_alb" "alb-private" {
   project_name = "default"
   delete_protection = "off"
   tags {
-    key = "k2"
-    value = "v2"
+    key = "k1"
+    value = "v1"
   }
 }
 
@@ -50,6 +50,9 @@ resource "volcengine_alb" "alb-public" {
   subnet_ids = [volcengine_subnet.subnet_ipv6_1.id, volcengine_subnet.subnet_ipv6_2.id]
   project_name = "default"
   delete_protection = "off"
+  modification_protection_status = "NonProtection"
+  modification_protection_reason = "Test modification protection"
+  load_balancer_edition = "Basic"
 
   eip_billing_config {
     isp = "BGP"
@@ -63,8 +66,28 @@ resource "volcengine_alb" "alb-public" {
   }
 
   tags {
-    key = "k2"
-    value = "v2"
+    key = "k1"
+    value = "v1"
   }
   depends_on = [volcengine_vpc_ipv6_gateway.ipv6_gateway]
+}
+
+# CLone ALB instance
+resource "volcengine_alb" "alb-cloned" {
+  source_load_balancer_id = volcengine_alb.alb-private.id
+  load_balancer_name = "acc-test-alb-cloned"
+  description = "cloned from alb-private"
+  subnet_ids = [volcengine_subnet.subnet_ipv6_1.id]
+  type = "private"
+  project_name = "default"
+}
+
+# Example of ALB network type change, private -> public
+resource "volcengine_alb" "alb-type-change" {
+  load_balancer_name = "acc-test-alb-type-change"
+  description = "will change to public type"
+  subnet_ids = [volcengine_subnet.subnet_ipv6_1.id, volcengine_subnet.subnet_ipv6_2.id]
+  type = "public"
+  project_name = "default"
+  allocation_ids = ["eip-iinpy4k1rytc74o8curgocd7", "eip-iinpy4k1rytc74o8curgocd8"]
 }

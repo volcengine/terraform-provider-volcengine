@@ -79,6 +79,45 @@ func ResourceVolcengineAlbRule() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the Rule.",
 			},
+			"priority": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The priority of the Rule.Only the standard version is supported.",
+			},
+			"sticky_session_enabled": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Whether to enable group session stickiness. Valid values are 'on' and 'off'.",
+			},
+			"sticky_session_timeout": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The group session stickiness timeout, in seconds.",
+			},
+			"server_group_tuples": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "Weight forwarded to the corresponding backend server group.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"server_group_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The server group ID. The priority of this parameter is higher than that of `server_group_id`.",
+						},
+						"weight": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Default:     100,
+							Description: "The weight of the server group.",
+						},
+					},
+				},
+			},
 			"traffic_limit_enabled": {
 				Type:        schema.TypeString,
 				Default:     "off",
@@ -162,6 +201,299 @@ func ResourceVolcengineAlbRule() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "Rewrite path.",
+						},
+					},
+				},
+			},
+			"rule_conditions": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "The rule conditions for standard edition forwarding rules.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The type of rule condition. Valid values: Host, Path, Header, Method, QueryString.",
+						},
+						"host_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Host configuration for Host type condition.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"values": {
+										Type:        schema.TypeList,
+										Required:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: "The list of domain names.",
+									},
+								},
+							},
+						},
+						"path_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Path configuration for Path type condition.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"values": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: "The list of absolute paths.",
+									},
+								},
+							},
+						},
+						"header_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Header configuration for Header type condition.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"key": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "The header key.",
+									},
+									"values": {
+										Type:        schema.TypeList,
+										Required:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: "The list of header values.",
+									},
+								},
+							},
+						},
+						"method_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Method configuration for Method type condition.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"values": {
+										Type:        schema.TypeList,
+										Required:    true,
+										Elem:        &schema.Schema{Type: schema.TypeString},
+										Description: "The values of the method. Vaild values: HEAD,GET,POST,OPTIONS,PUT,PATCH,DELETE.",
+									},
+								},
+							},
+						},
+						"query_string_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Query string configuration for QueryString type condition.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"values": {
+										Type:        schema.TypeList,
+										Computed:    true,
+										Description: "The list of query string values.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"key": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The query string key.",
+												},
+												"value": {
+													Type:        schema.TypeString,
+													Computed:    true,
+													Description: "The query string value.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			"rule_actions": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Computed:    true,
+				Description: "The rule actions for standard edition forwarding rules.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The type of rule action. Valid values: ForwardGroup, Redirect, Rewrite, TrafficLimit.",
+						},
+						"traffic_limit_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Traffic limit configuration for TrafficLimit type action.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"qps": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Computed:    true,
+										Description: "The QPS limit.",
+									},
+								},
+							},
+						},
+						"forward_group_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Computed:    true,
+							MaxItems:    1,
+							Description: "Forward group configuration for ForwardGroup type action.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"server_group_sticky_session": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										MaxItems:    1,
+										Description: "The config of group session stickiness.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"timeout": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: "The sticky session timeout, in seconds.",
+												},
+												"enabled": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Computed:    true,
+													Description: "Whether to enable sticky session stickiness. Valid values are 'on' and 'off'.",
+												},
+											},
+										},
+									},
+									"server_group_tuples": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Computed:    true,
+										Description: "The server group tuples.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"server_group_id": {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Computed:    true,
+													Description: "The server group ID.",
+												},
+												"weight": {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Computed:    true,
+													Description: "The weight of the server group.",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						"redirect_config": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Computed:    true,
+							Description: "Redirect configuration for Redirect type action.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"http_code": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "The redirect HTTP code.",
+									},
+									"protocol": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "The redirect protocol.",
+									},
+									"host": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The domain name to which the request was redirected.",
+									},
+									"path": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Computed:    true,
+										Description: "The path to which the request was redirected.",
+									},
+									"port": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The redirect port.",
+									},
+								},
+							},
+						},
+						"rewrite_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Rewrite configuration for Rewrite type action.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"path": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The rewrite path.",
+									},
+								},
+							},
+						},
+						"fixed_response_config": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Fixed response configuration for fixed response type rule.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"response_code": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The fixed response HTTP status code.",
+									},
+									"response_message": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The fixed response message.",
+									},
+									"content_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The content type of the fixed response.",
+									},
+									"response_body": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The response body of the fixed response.",
+									},
+								},
+							},
 						},
 					},
 				},

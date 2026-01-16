@@ -57,6 +57,7 @@ func ResourceVolcengineAlbCustomizedCfg() *schema.Resource {
 				Computed:    true,
 				Description: "The project name of the CustomizedCfg.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	return resource

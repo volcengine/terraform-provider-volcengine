@@ -89,13 +89,39 @@ func ResourceVolcengineAlbListener() *schema.Resource {
 				},
 				Description: "The certificate id associated with the listener. Source is `alb`.",
 			},
+			"ca_certificate_source": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"alb", "pca_root", "pca_sub"}, false),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) == "HTTP"
+				},
+				Description: "The source of the CA certificate associated with the listener. This parameter is only valid for HTTPS listeners and is used for two-way authentication. " +
+					"Valid values: `alb`, `pca_root`, `pca_sub`.",
+			},
 			"ca_certificate_id": {
 				Type:     schema.TypeString,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					return d.Get("protocol").(string) == "HTTP"
 				},
-				Description: "The CA certificate id associated with the listener.",
+				Description: "The CA certificate id associated with the listener. When the value of ca_certificate_source is alb, the ca_certificate_id parameter must be specified.",
+			},
+			"pca_root_ca_certificate_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) == "HTTP"
+				},
+				Description: "The CA certificate id associated with the listener. When the value of ca_certificate_source is pca_root, pca_root_ca_certificate_id parameter must be specified.",
+			},
+			"pca_sub_ca_certificate_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) == "HTTP"
+				},
+				Description: "The CA certificate id associated with the listener. When the value of ca_certificate_source is pca_sub, pca_sub_ca_certificate_id parameter must be specified.",
 			},
 			"server_group_id": {
 				Type:        schema.TypeString,
@@ -155,6 +181,65 @@ func ResourceVolcengineAlbListener() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the Listener.",
 			},
+			"domain_extensions": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    20,
+				Description: "The domain extensions of the Listener.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"domain": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The domain name.",
+						},
+						"certificate_source": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The source of the certificate. Valid values: `alb`, `cert_center`.",
+						},
+						"certificate_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The server certificate ID used by the domain name. Valid when the certificate_source is `alb`.",
+						},
+						"cert_center_certificate_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The server certificate ID used by the domain name. Valid when the certificate_source is `cert_center`.",
+						},
+						"pca_leaf_certificate_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The server certificate ID used by the domain name. Valid when the certificate source is `pca_leaf`.",
+						},
+						// ModifyListenerAttributes 独有参数
+						"domain_extension_id": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Computed:    true,
+							Description: "The extended domain ID, required only for deletion and modification.",
+						},
+					},
+				},
+			},
+			"tags": ve.TagsSchema(),
+			"pca_leaf_certificate_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return d.Get("protocol").(string) == "HTTP"
+				},
+				Description: "The CA certificate id associated with the listener. When the value of ca_certificate_source is pca_leaf, pca_leaf_certificate_id parameter must be specified.",
+			},
+			"access_log_record_customized_headers_enabled": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "off",
+				ValidateFunc: validation.StringInSlice([]string{"on", "off"}, false),
+				Description:  "Whether to enable custom headers in access logs. Default is `off`.",
+			},
+			// ModifyListenerAttributes 参数
 			"customized_cfg_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
