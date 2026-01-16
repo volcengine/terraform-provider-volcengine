@@ -197,11 +197,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_inter_region_bandwidth"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_route_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/cen/cen_service_route_entry"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/access_log"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/acl"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/acl_entry"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/certificate"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/clb"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/health_check_log_project"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/health_check_log_topic"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/listener"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/listener_health"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/clb/server_group_server"
@@ -676,14 +680,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_eip_addresses": eip_address.DataSourceVolcengineEipAddresses(),
 
 			// ================ CLB ================
-			"volcengine_acls":                 acl.DataSourceVolcengineAcls(),
-			"volcengine_clbs":                 clb.DataSourceVolcengineClbs(),
-			"volcengine_listeners":            listener.DataSourceVolcengineListeners(),
-			"volcengine_server_groups":        server_group.DataSourceVolcengineServerGroups(),
-			"volcengine_certificates":         certificate.DataSourceVolcengineCertificates(),
-			"volcengine_clb_rules":            rule.DataSourceVolcengineRules(),
-			"volcengine_server_group_servers": server_group_server.DataSourceVolcengineServerGroupServers(),
-			"volcengine_clb_zones":            clbZone.DataSourceVolcengineClbZones(),
+			"volcengine_acls":                      acl.DataSourceVolcengineAcls(),
+			"volcengine_clbs":                      clb.DataSourceVolcengineClbs(),
+			"volcengine_health_check_log_projects": health_check_log_project.DataSourceVolcengineHealthCheckLogProjects(),
+			"volcengine_health_check_log_topics":   health_check_log_topic.DataSourceVolcengineHealthCheckLogTopics(),
+			"volcengine_listeners":                 listener.DataSourceVolcengineListeners(),
+			"volcengine_listener_healths":          listener_health.DataSourceVolcengineListenerHealths(),
+			"volcengine_server_groups":             server_group.DataSourceVolcengineServerGroups(),
+			"volcengine_certificates":              certificate.DataSourceVolcengineCertificates(),
+			"volcengine_clb_rules":                 rule.DataSourceVolcengineRules(),
+			"volcengine_server_group_servers":      server_group_server.DataSourceVolcengineServerGroupServers(),
+			"volcengine_clb_zones":                 clbZone.DataSourceVolcengineClbZones(),
 
 			// ================ EBS ================
 			"volcengine_volumes":                    volume.DataSourceVolcengineVolumes(),
@@ -1136,14 +1143,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_eip_associate": eip_associate.ResourceVolcengineEipAssociate(),
 
 			// ================ CLB ================
-			"volcengine_acl":                 acl.ResourceVolcengineAcl(),
-			"volcengine_clb":                 clb.ResourceVolcengineClb(),
-			"volcengine_listener":            listener.ResourceVolcengineListener(),
-			"volcengine_server_group":        server_group.ResourceVolcengineServerGroup(),
-			"volcengine_certificate":         certificate.ResourceVolcengineCertificate(),
-			"volcengine_clb_rule":            rule.ResourceVolcengineRule(),
-			"volcengine_server_group_server": server_group_server.ResourceVolcengineServerGroupServer(),
-			"volcengine_acl_entry":           acl_entry.ResourceVolcengineAclEntry(),
+			"volcengine_acl":                      acl.ResourceVolcengineAcl(),
+			"volcengine_clb":                      clb.ResourceVolcengineClb(),
+			"volcengine_access_log":               access_log.ResourceVolcengineAccessLog(),
+			"volcengine_health_check_log_project": health_check_log_project.ResourceVolcengineHealthCheckLogProject(),
+			"volcengine_health_check_log_topic":   health_check_log_topic.ResourceVolcengineHealthCheckLogTopic(),
+			"volcengine_listener":                 listener.ResourceVolcengineListener(),
+			"volcengine_server_group":             server_group.ResourceVolcengineServerGroup(),
+			"volcengine_certificate":              certificate.ResourceVolcengineCertificate(),
+			"volcengine_clb_rule":                 rule.ResourceVolcengineRule(),
+			"volcengine_server_group_server":      server_group_server.ResourceVolcengineServerGroupServer(),
+			"volcengine_acl_entry":                acl_entry.ResourceVolcengineAclEntry(),
 
 			// ================ EBS ================
 			"volcengine_volume":                              volume.ResourceVolcengineVolume(),

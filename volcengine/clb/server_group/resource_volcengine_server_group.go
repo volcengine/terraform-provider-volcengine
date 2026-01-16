@@ -2,8 +2,9 @@ package server_group
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -58,6 +59,14 @@ func ResourceVolcengineServerGroup() *schema.Resource {
 				Computed:    true,
 				Description: "The description of ServerGroup.",
 			},
+			"type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				Default:      "instance",
+				ValidateFunc: validation.StringInSlice([]string{"instance", "ip"}, false),
+				Description:  "The type of the ServerGroup. Valid values: `instance`, `ip`. Default is `instance`.",
+			},
 			"address_ip_version": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -66,6 +75,13 @@ func ResourceVolcengineServerGroup() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
 				Description:  "The address ip version of the ServerGroup. Valid values: `ipv4`, `ipv6`. Default is `ipv4`.",
 			},
+			"any_port_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "Whether to enable full port forwarding. This feature is in beta.",
+			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 }

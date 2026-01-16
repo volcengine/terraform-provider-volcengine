@@ -71,6 +71,7 @@ func ResourceVolcengineAcl() *schema.Resource {
 				Computed:    true,
 				Description: "The ProjectName of the Acl.",
 			},
+			"tags": ve.TagsSchema(),
 			"create_time": {
 				Type:        schema.TypeString,
 				Computed:    true,

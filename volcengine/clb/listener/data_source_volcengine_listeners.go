@@ -47,6 +47,13 @@ func DataSourceVolcengineListeners() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the Listener.",
 			},
+			"protocol": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The protocol of the Listener. Values: `TCP`, `UDP`, `HTTP`, `HTTPS`.",
+			},
+			"tags": ve.TagsSchema(),
+
 			"listeners": {
 				Description: "The collection of Listener query.",
 				Type:        schema.TypeList,
@@ -57,6 +64,11 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true, // tf中不支持写值
 							Description: "The ID of the Listener.",
+						},
+						"load_balancer_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the Clb.",
 						},
 						"create_time": {
 							Type:        schema.TypeString,
@@ -77,6 +89,11 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The name of the Listener.",
+						},
+						"description": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The description of the Listener.",
 						},
 						"acl_status": {
 							Type:        schema.TypeString,
@@ -107,6 +124,31 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The port receiving request of the Listener.",
 						},
+						"start_port": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The start port of the Listener. This parameter is returned only when full-port listening is enabled.",
+						},
+						"end_port": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The end port of the Listener. This parameter is returned only when full-port listening is enabled.",
+						},
+						"scheduler": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The scheduling algorithm of the Listener. Values: `wrr`, `wlc`, `sh`.",
+						},
+						"cps": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The maximum number of new connections for Lsistener.",
+						},
+						"max_connections": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The maximum number of connections for the Listener.",
+						},
 						"status": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -122,10 +164,30 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The ID of the backend server group which is associated with the Listener.",
 						},
+						"certificate_source": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The source of the certificate which is associated with the Listener. Values: `clb`, `cert_center`.",
+						},
 						"certificate_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The ID of the certificate which is associated with the Listener.",
+						},
+						"cert_center_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the certificate in Certificate Center. When `certificate_source` is `cert_center`, this parameter is returned.",
+						},
+						"ca_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether to enable CACertificate two-way authentication.",
+						},
+						"ca_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the CA certificate which is associated with the Listener. When `ca_enabled` is `true`, this parameter is returned.",
 						},
 						"health_check_enabled": {
 							Type:        schema.TypeString,
@@ -182,6 +244,12 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The expected response string for the health check.",
 						},
+						"helth_check_port": {
+							Type:     schema.TypeInt,
+							Computed: true,
+							Description: "The backend server port for health checks. When full-port listening is enabled, this parameter is returned to indicate the port used for health checks. " +
+								"When full-port listening is not enabled, this parameter is not returned, and the health check uses the service port of the backend server.",
+						},
 						"bandwidth": {
 							Type:        schema.TypeInt,
 							Computed:    true,
@@ -202,6 +270,51 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The persistence timeout of the Listener.",
 						},
+						"client_header_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The client header timeout of the Listener. Only HTTP/HTTPS listeners return this parameter.",
+						},
+						"client_body_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The client body timeout of the Listener. Only HTTP/HTTPS listeners return this parameter.",
+						},
+						"keepalive_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The timeout period for the long connection between the client and the CLB. Only HTTP/HTTPS listeners return this parameter.",
+						},
+						"proxy_connect_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The timeout period for establishing a connection between the CLB and the backend server. Only HTTP/HTTPS listeners return this parameter.",
+						},
+						"proxy_send_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The timeout period for CLB to transmit requests to backend servers. Only HTTP/HTTPS listeners return this parameter.",
+						},
+						"proxy_read_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The timeout period for CLB to read the response from the backend server. Only HTTP/HTTPS listeners return this parameter.",
+						},
+						"send_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The timeout period for CLB to send responses to the client. Only HTTP/HTTPS listeners return this parameter.",
+						},
+						"security_policy_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The TLS security policy of the HTTPS listener. Only HTTPS listeners return this parameter.",
+						},
+						"http2_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether the HTTPS protocol listener enables the front-end HTTP 2.0 protocol.",
+						},
 						"cookie": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -217,6 +330,17 @@ func DataSourceVolcengineListeners() *schema.Resource {
 							Computed:    true,
 							Description: "The connection drain timeout of the Listener.",
 						},
+						"established_timeout": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The established timeout of the Listener.",
+						},
+						"waf_protection_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether to enable WAF protection.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

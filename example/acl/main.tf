@@ -10,4 +10,9 @@ resource "volcengine_acl" "foo" {
     description = "e3"
   }
   project_name = "default"
+
+  tags {
+    key = "key1"
+    value = "value2"
+  }
 }
