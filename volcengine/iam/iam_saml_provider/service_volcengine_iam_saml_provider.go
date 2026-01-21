@@ -233,21 +233,23 @@ func (s *VolcengineIamSamlProviderService) ReadResourceId(id string) string {
 	return id
 }
 
+// 获取默认的get请求信息
 func getUniversalInfoDefault(actionName string) ve.UniversalInfo {
-	return getUniversalInfo(actionName, ve.GET)
+	return getUniversalInfo(actionName, ve.GET, ve.Default)
 }
 
+// 获取post请求信息，当前content-type为x-www-form-urlencoded
 func getUniversalInfoPost(actionName string) ve.UniversalInfo {
-	return getUniversalInfo(actionName, ve.POST)
+	return getUniversalInfo(actionName, ve.POST, ve.FormUrlencoded)
 }
 
-func getUniversalInfo(actionName string, httMethod ve.HttpMethod) ve.UniversalInfo {
+func getUniversalInfo(actionName string, httMethod ve.HttpMethod, contentType ve.ContentType) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
 		Action:      actionName,
 		Version:     "2018-01-01",
 		HttpMethod:  httMethod,
-		ContentType: ve.Default,
+		ContentType: contentType,
 		RegionType:  ve.Global,
 	}
 }

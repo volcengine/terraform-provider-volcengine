@@ -200,8 +200,12 @@ func (u *Universal) doCall(info UniversalInfo, input *map[string]interface{}) (o
 	output = &map[string]interface{}{}
 	req := c.NewRequest(op, input, output)
 
-	if getContentType(info.ContentType) == "application/json" {
+	switch info.ContentType {
+	case ApplicationJSON:
 		req.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
+	case FormUrlencoded:
+		req.HTTPRequest.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	default:
 	}
 	err = req.Send()
 	return output, err
