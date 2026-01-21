@@ -40,12 +40,12 @@ func (s *VolcengineIamSamlProviderService) ReadResources(m map[string]interface{
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
 		if condition == nil {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfoDefault(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfoDefault(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -70,7 +70,7 @@ func (s *VolcengineIamSamlProviderService) ReadResources(m map[string]interface{
 			}
 			action = "GetSAMLProvider"
 			logger.Debug(logger.ReqFormat, action, query)
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &query)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfoDefault(action), &query)
 			if err != nil {
 				return data, err
 			}
@@ -200,7 +200,7 @@ func (s *VolcengineIamSamlProviderService) RemoveResource(resourceData *schema.R
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfoDefault(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
@@ -233,15 +233,15 @@ func (s *VolcengineIamSamlProviderService) ReadResourceId(id string) string {
 	return id
 }
 
-func getUniversalInfo(actionName string) ve.UniversalInfo {
-	return getReqInfo(actionName, ve.GET)
+func getUniversalInfoDefault(actionName string) ve.UniversalInfo {
+	return getUniversalInfo(actionName, ve.GET)
 }
 
 func getUniversalInfoPost(actionName string) ve.UniversalInfo {
-	return getReqInfo(actionName, ve.POST)
+	return getUniversalInfo(actionName, ve.POST)
 }
 
-func getReqInfo(actionName string, httMethod ve.HttpMethod) ve.UniversalInfo {
+func getUniversalInfo(actionName string, httMethod ve.HttpMethod) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
 		Action:      actionName,
