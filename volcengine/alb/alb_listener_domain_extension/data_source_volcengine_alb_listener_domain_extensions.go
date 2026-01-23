@@ -40,10 +40,20 @@ func DataSourceVolcengineListenerDomainExtensions() *schema.Resource {
 							Computed:    true,
 							Description: "The extension domain ID.",
 						},
+						"certificate_source": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The source of the certificate.",
+						},
 						"certificate_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The server certificate ID that domain used.",
+						},
+						"cert_center_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The server certificate ID used by the domain name. It takes effect when the certificate source is cert_center.",
 						},
 						"domain": {
 							Type:        schema.TypeString,
@@ -54,6 +64,16 @@ func DataSourceVolcengineListenerDomainExtensions() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The listener ID that domain belongs to.",
+						},
+						"san": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The CommonName, extended domain names, and IPs of the certificate are separated by ','.",
+						},
+						"pca_leaf_certificate_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The server certificate ID used by the domain name. It takes effect when the certificate source is pca_leaf.",
 						},
 					},
 				},

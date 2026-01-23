@@ -129,7 +129,16 @@ func (s *VolcengineAlbListenerDomainExtensionService) CreateResource(resourceDat
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ListenerId"] = d.Get("listener_id")
 				(*call.SdkParam)["DomainExtensions.1.Domain"] = d.Get("domain")
-				(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
+				(*call.SdkParam)["DomainExtensions.1.CertificateSource"] = d.Get("certificate_source")
+
+				if d.Get("certificate_source").(string) == "cert_center" {
+					(*call.SdkParam)["DomainExtensions.1.CertCenterCertificateId"] = d.Get("cert_center_certificate_id")
+				} else if d.Get("certificate_source").(string) == "pca_leaf" {
+					(*call.SdkParam)["DomainExtensions.1.PcaLeafCertificateId"] = d.Get("pca_leaf_certificate_id")
+				} else if d.Get("certificate_source").(string) == "alb" {
+					(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
+				}
+
 				(*call.SdkParam)["DomainExtensions.1.Action"] = "create"
 				if listener["Protocol"] == "HTTP" {
 					return false, fmt.Errorf("Domain extensions only HTTPS protocol listener. ")
@@ -206,7 +215,16 @@ func (s *VolcengineAlbListenerDomainExtensionService) ModifyResource(resourceDat
 				(*call.SdkParam)["ListenerId"] = ids[0]
 				(*call.SdkParam)["DomainExtensions.1.DomainExtensionId"] = ids[1]
 				(*call.SdkParam)["DomainExtensions.1.Domain"] = d.Get("domain")
-				(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
+				(*call.SdkParam)["DomainExtensions.1.CertificateSource"] = d.Get("certificate_source")
+
+				if d.Get("certificate_source").(string) == "cert_center" {
+					(*call.SdkParam)["DomainExtensions.1.CertCenterCertificateId"] = d.Get("cert_center_certificate_id")
+				} else if d.Get("certificate_source").(string) == "pca_leaf" {
+					(*call.SdkParam)["DomainExtensions.1.PcaLeafCertificateId"] = d.Get("pca_leaf_certificate_id")
+				} else if d.Get("certificate_source").(string) == "alb" {
+					(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
+				}
+
 				(*call.SdkParam)["DomainExtensions.1.Action"] = "modify"
 				if listener["Protocol"] == "HTTP" {
 					return false, fmt.Errorf("Domain extensions only HTTPS protocol listener. ")
@@ -244,7 +262,16 @@ func (s *VolcengineAlbListenerDomainExtensionService) RemoveResource(resourceDat
 				(*call.SdkParam)["ListenerId"] = ids[0]
 				(*call.SdkParam)["DomainExtensions.1.DomainExtensionId"] = ids[1]
 				(*call.SdkParam)["DomainExtensions.1.Domain"] = d.Get("domain")
-				(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
+				(*call.SdkParam)["DomainExtensions.1.CertificateSource"] = d.Get("certificate_source")
+
+				if d.Get("certificate_source").(string) == "cert_center" {
+					(*call.SdkParam)["DomainExtensions.1.CertCenterCertificateId"] = d.Get("cert_center_certificate_id")
+				} else if d.Get("certificate_source").(string) == "pca_leaf" {
+					(*call.SdkParam)["DomainExtensions.1.PcaLeafCertificateId"] = d.Get("pca_leaf_certificate_id")
+				} else if d.Get("certificate_source").(string) == "alb" {
+					(*call.SdkParam)["DomainExtensions.1.CertificateId"] = d.Get("certificate_id")
+				}
+
 				(*call.SdkParam)["DomainExtensions.1.Action"] = "delete"
 				if listener["Protocol"] == "HTTP" {
 					return false, fmt.Errorf("Domain extensions only HTTPS protocol listener. ")
