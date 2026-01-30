@@ -2,7 +2,6 @@ package host
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -21,26 +20,6 @@ func ResourceVolcengineTlsHost() *schema.Resource {
 		Create: resourceVolcengineTlsHostCreate,
 		Read:   resourceVolcengineTlsHostRead,
 		Delete: resourceVolcengineTlsHostDelete,
-		Importer: &schema.ResourceImporter{
-			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
-				items := strings.Split(data.Id(), ":")
-				if len(items) == 2 {
-					if err := data.Set("host_group_id", items[0]); err != nil {
-						return []*schema.ResourceData{data}, err
-					}
-					if err := data.Set("ip", items[1]); err != nil {
-						return []*schema.ResourceData{data}, err
-					}
-				} else if len(items) == 1 {
-					if err := data.Set("host_group_id", items[0]); err != nil {
-						return []*schema.ResourceData{data}, err
-					}
-				} else {
-					return []*schema.ResourceData{data}, fmt.Errorf("import id must split with ':'")
-				}
-				return []*schema.ResourceData{data}, nil
-			},
-		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
