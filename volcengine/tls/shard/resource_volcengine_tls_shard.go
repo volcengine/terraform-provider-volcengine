@@ -5,6 +5,13 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
+/*
+
+Import
+TlsShard can not be imported using the id
+
+*/
+
 func ResourceVolcengineTlsShard() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceVolcengineTlsShardCreate,

@@ -82,6 +82,7 @@ func (v *VolcengineTlsRuleBoundHostGroupService) ReadResource(resourceData *sche
 	for _, item := range results {
 		if m, ok := item.(map[string]interface{}); ok {
 			if hgId, ok := m["HostGroupId"].(string); ok && hgId == hostGroupId {
+				m["RuleId"] = ruleId
 				return m, nil
 			}
 		}
@@ -97,7 +98,15 @@ func (v *VolcengineTlsRuleBoundHostGroupService) RefreshResourceState(resourceDa
 
 func (v *VolcengineTlsRuleBoundHostGroupService) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return m, nil, nil
+		convert := map[string]ve.ResponseConvert{
+			"RuleId": {
+				TargetField: "rule_id",
+			},
+			"HostGroupId": {
+				TargetField: "host_group_id",
+			},
+		}
+		return m, convert, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
