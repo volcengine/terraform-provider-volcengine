@@ -54,6 +54,16 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 							Computed:    true,
 							Description: "The modify time of the tls index.",
 						},
+						"max_text_len": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The max text length of the tls index.",
+						},
+						"enable_auto_index": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether to enable auto index.",
+						},
 						"full_text": {
 							Type:        schema.TypeList,
 							Computed:    true,

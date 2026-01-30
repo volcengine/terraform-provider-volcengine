@@ -123,6 +123,77 @@ func ResourceVolcengineTlsTopic() *schema.Resource {
 			},
 			"tags": ve.TagsSchema(),
 
+			"log_public_ip": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to enable the function of recording public IP.",
+			},
+			"enable_hot_ttl": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to enable tiered storage.",
+			},
+			"hot_ttl": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Standard storage duration, valid when enable_hot_ttl is true.",
+			},
+			"cold_ttl": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Infrequent storage duration, valid when enable_hot_ttl is true.",
+			},
+			"archive_ttl": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Archive storage duration, valid when enable_hot_ttl is true.",
+			},
+			"encrypt_conf": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Data encryption configuration.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enable": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Whether to enable data encryption.",
+						},
+						"encrypt_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The encryption type.",
+						},
+						"user_cmk_info": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "The user custom key.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"user_cmk_id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The key id.",
+									},
+									"region_id": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The key region.",
+									},
+									"trn": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "The key trn.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+
 			"create_time": {
 				Type:        schema.TypeString,
 				Computed:    true,

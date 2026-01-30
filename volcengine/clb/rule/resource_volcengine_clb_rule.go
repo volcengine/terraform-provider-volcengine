@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -75,15 +76,64 @@ func ResourceVolcengineRule() *schema.Resource {
 				Default:     "/",
 				Description: "The Url of Rule.",
 			},
+			"action_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "Forward", // 默认动作是 Forward：转发至
+				ValidateFunc: validation.StringInSlice([]string{"Forward", "Redirect"}, false),
+				Description:  "The action type of Rule, valid values: `Forward`, `Redirect`.",
+			},
 			"server_group_id": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Server Group Id.",
+				Optional:    true,
+				Computed:    true,
+				Description: "Server Group Id. Required when action_type is Forward.",
 			},
 			"description": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The description of the Rule.",
+			},
+			"tags": ve.TagsSchema(),
+			"redirect_config": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"protocol": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"HTTP", "HTTPS"}, false),
+							Default:      "HTTPS",
+							Description:  "The redirect protocol. Valid values: `HTTP`, `HTTPS`.",
+						},
+						"host": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The redirect host, i.e. the domain name redirected by the rule.",
+						},
+						"path": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The redirect path.",
+						},
+						"port": {
+							Type:     schema.TypeString,
+							Optional: true,
+							// ValidateFunc: validation.StringMatch(regexp.MustCompile("^[1-9]\\d{0,4}$"), "must be a valid port"),
+							Description: "The redirect port, valid range: 1~65535.",
+						},
+						"status_code": {
+							Type:         schema.TypeString,
+							Optional:     true,
+							ValidateFunc: validation.StringInSlice([]string{"301", "302", "307", "308"}, false),
+							Default:      "301",
+							Description:  "The redirect status code. Valid values: 301, 302, 307, 308.",
+						},
+					},
+				},
+				Description: "The redirect configuration. Required when action_type is `Redirect`.",
 			},
 		},
 	}

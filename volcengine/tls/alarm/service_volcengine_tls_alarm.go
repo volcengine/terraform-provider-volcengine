@@ -122,8 +122,32 @@ func (v *VolcengineTlsAlarmService) CreateResource(data *schema.ResourceData, re
 				"alarm_notify_group": {
 					ConvertType: ve.ConvertJsonArray,
 				},
+				"status": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "Status",
+				},
 				"query_request": {
 					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"join_configurations": {
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"trigger_conditions": {
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"condition": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"count_condition": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"severity": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"no_data": {
+							ConvertType: ve.ConvertDefault,
+						},
+					},
 				},
 				"request_cycle": {
 					ConvertType: ve.ConvertJsonObject,
@@ -147,8 +171,14 @@ func (v *VolcengineTlsAlarmService) CreateResource(data *schema.ResourceData, re
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.AlarmId", *resp)
-				d.SetId(fmt.Sprint(d.Get("project_id").(string), ":", id.(string)))
+				id, err := ve.ObtainSdkValue("RESPONSE.AlarmId", *resp)
+				if err != nil {
+					return fmt.Errorf("failed to obtain AlarmId: %v", err)
+				}
+				if id == nil {
+					return fmt.Errorf("AlarmId is nil in response")
+				}
+				d.SetId(fmt.Sprintf("%s:%v", d.Get("project_id").(string), id))
 				return nil
 			},
 		},
@@ -166,7 +196,14 @@ func (v *VolcengineTlsAlarmService) ModifyResource(data *schema.ResourceData, re
 				"alarm_name": {
 					ConvertType: ve.ConvertDefault,
 				},
+				"alarm_notify_group": {
+					ConvertType: ve.ConvertJsonArray,
+				},
 				"status": {
+					ConvertType: ve.ConvertDefault,
+					TargetField: "Status",
+				},
+				"send_resolved": {
 					ConvertType: ve.ConvertDefault,
 				},
 				"condition": {
@@ -177,6 +214,26 @@ func (v *VolcengineTlsAlarmService) ModifyResource(data *schema.ResourceData, re
 				},
 				"trigger_period": {
 					ConvertType: ve.ConvertDefault,
+				},
+				"join_configurations": {
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"trigger_conditions": {
+					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"condition": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"count_condition": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"severity": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"no_data": {
+							ConvertType: ve.ConvertDefault,
+						},
+					},
 				},
 				"query_request": {
 					ConvertType: ve.ConvertJsonObjectArray,
@@ -201,6 +258,18 @@ func (v *VolcengineTlsAlarmService) ModifyResource(data *schema.ResourceData, re
 							ConvertType: ve.ConvertDefault,
 							ForceGet:    true,
 						},
+						"time_span_type": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"truncated_time": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"end_time_offset_unit": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"start_time_offset_unit": {
+							ConvertType: ve.ConvertDefault,
+						},
 					},
 				},
 				"request_cycle": {
@@ -213,6 +282,9 @@ func (v *VolcengineTlsAlarmService) ModifyResource(data *schema.ResourceData, re
 						"time": {
 							ConvertType: ve.ConvertDefault,
 							ForceGet:    true,
+						},
+						"cron_tab": {
+							ConvertType: ve.ConvertDefault,
 						},
 					},
 				},

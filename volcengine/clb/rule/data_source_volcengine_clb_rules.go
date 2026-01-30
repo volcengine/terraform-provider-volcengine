@@ -28,6 +28,7 @@ func DataSourceVolcengineRules() *schema.Resource {
 				Optional:    true,
 				Description: "File name where to save data source results.",
 			},
+			"tags": ve.TagsSchema(),
 			"rules": {
 				Description: "The collection of Rule query.",
 				Type:        schema.TypeList,
@@ -63,6 +64,46 @@ func DataSourceVolcengineRules() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The Description of Rule.",
+						},
+						"tags": ve.TagsSchemaComputed(),
+						"action_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The action type of Rule. values: `Forward`, `Redirect`.",
+						},
+						"redirect_config": {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"protocol": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The redirect protocol.",
+									},
+									"host": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The redirect host.",
+									},
+									"path": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The redirect path.",
+									},
+									"port": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The redirect port.",
+									},
+									"status_code": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The redirect status code.",
+									},
+								},
+							},
+							Description: "The redirect configuration. When `action_type` is `Redirect`, this parameter is returned.",
 						},
 					},
 				},

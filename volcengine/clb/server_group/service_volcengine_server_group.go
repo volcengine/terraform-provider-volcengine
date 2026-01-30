@@ -32,7 +32,7 @@ func (s *VolcengineServerGroupService) ReadResources(condition map[string]interf
 		results interface{}
 		ok      bool
 	)
-	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
+	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeServerGroups"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
@@ -57,19 +57,40 @@ func (s *VolcengineServerGroupService) ReadResources(condition map[string]interf
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.ServerGroups is not Slice")
 		}
-		for index, serverGroup := range data {
-			if serverGroupMap, ok := serverGroup.(map[string]interface{}); ok {
-				id := serverGroupMap["ServerGroupId"].(string)
-				clbId, err := s.queryLoadBalancerId(id)
-				if err != nil {
-					return data, err
-				}
-				serverGroupMap["LoadBalancerId"] = clbId
-				data[index] = serverGroupMap
-			}
-		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
+
+	if err != nil {
+		return data, err
+	}
+	for _, serverGroup := range data {
+		if serverGroupMap, ok := serverGroup.(map[string]interface{}); ok {
+			id := serverGroupMap["ServerGroupId"].(string)
+			detailAction := "DescribeServerGroupAttributes"
+			req := map[string]interface{}{
+				"ServerGroupId": id,
+			}
+			logger.Debug(logger.ReqFormat, detailAction, req)
+			detailResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(detailAction), &req)
+			if err != nil {
+				return data, err
+			}
+			logger.Debug(logger.RespFormat, detailAction, *detailResp)
+
+			clbId, err := ve.ObtainSdkValue("Result.LoadBalancerId", *detailResp)
+			if err != nil {
+				return data, err
+			}
+			serverGroupMap["LoadBalancerId"] = clbId
+			listeners, err := ve.ObtainSdkValue("Result.Listeners", *detailResp)
+			if err != nil {
+				return data, err
+			}
+			serverGroupMap["Listeners"] = listeners
+		}
+	}
+	return data, err
 }
 
 func (s *VolcengineServerGroupService) ReadResource(resourceData *schema.ResourceData, serverGroupId string) (data map[string]interface{}, err error) {
@@ -119,6 +140,10 @@ func (s *VolcengineServerGroupService) CreateResource(resourceData *schema.Resou
 				"servers": {
 					ConvertType: ve.ConvertListN,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -154,7 +179,7 @@ func (s *VolcengineServerGroupService) ModifyResource(resourceData *schema.Resou
 			Err: err,
 		}}
 	}
-
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyServerGroupAttributes",
@@ -180,7 +205,13 @@ func (s *VolcengineServerGroupService) ModifyResource(resourceData *schema.Resou
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "servergroup", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineServerGroupService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -243,6 +274,15 @@ func (s *VolcengineServerGroupService) DatasourceResources(*schema.ResourceData,
 				TargetField: "ServerGroupIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "ServerGroupName",
 		IdField:      "ServerGroupId",
@@ -278,6 +318,27 @@ func (s *VolcengineServerGroupService) queryLoadBalancerId(serverGroupId string)
 		return "", err
 	}
 	return clbId.(string), nil
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

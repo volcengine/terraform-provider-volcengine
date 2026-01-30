@@ -50,23 +50,13 @@ func ResourceVolcengineTlsProject() *schema.Resource {
 				Computed:    true,
 				Description: "The IAM project name of the tls project.",
 			},
+			"region": {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The region of the tls project.",
+			},
 			"tags": ve.TagsSchema(),
-
-			"create_time": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The create time of the tls project.",
-			},
-			"inner_net_domain": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The inner net domain of the tls project.",
-			},
-			"topic_count": {
-				Type:        schema.TypeInt,
-				Computed:    true,
-				Description: "The count of topics in the tls project.",
-			},
 		},
 	}
 	return resource

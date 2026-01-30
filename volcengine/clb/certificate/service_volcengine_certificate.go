@@ -56,6 +56,7 @@ func (s *VolcengineCertificateService) ReadResources(condition map[string]interf
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Certificates is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 }
@@ -157,7 +158,7 @@ func (s *VolcengineCertificateService) ModifyResource(resourceData *schema.Resou
 	callbacks = append(callbacks, callback)
 
 	// 更新Tags
-	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "Certificate", resourceData, getUniversalInfo)
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "certificate", resourceData, getUniversalInfo)
 	callbacks = append(callbacks, setResourceTagsCallbacks...)
 
 	return callbacks
@@ -230,6 +231,27 @@ func (s *VolcengineCertificateService) DatasourceResources(*schema.ResourceData,
 
 func (s *VolcengineCertificateService) ReadResourceId(id string) string {
 	return id
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

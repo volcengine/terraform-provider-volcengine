@@ -40,12 +40,12 @@ func (s *VolcengineIamSamlProviderService) ReadResources(m map[string]interface{
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
 		if condition == nil {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfoDefault(action), nil)
 			if err != nil {
 				return data, err
 			}
 		} else {
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfoDefault(action), &condition)
 			if err != nil {
 				return data, err
 			}
@@ -70,7 +70,7 @@ func (s *VolcengineIamSamlProviderService) ReadResources(m map[string]interface{
 			}
 			action = "GetSAMLProvider"
 			logger.Debug(logger.ReqFormat, action, query)
-			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &query)
+			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfoDefault(action), &query)
 			if err != nil {
 				return data, err
 			}
@@ -134,8 +134,8 @@ func (s *VolcengineIamSamlProviderService) CreateResource(resourceData *schema.R
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfoPost(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
@@ -181,7 +181,7 @@ func (s *VolcengineIamSamlProviderService) ModifyResource(resourceData *schema.R
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfoPost(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
@@ -200,7 +200,7 @@ func (s *VolcengineIamSamlProviderService) RemoveResource(resourceData *schema.R
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfoDefault(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
@@ -233,13 +233,23 @@ func (s *VolcengineIamSamlProviderService) ReadResourceId(id string) string {
 	return id
 }
 
-func getUniversalInfo(actionName string) ve.UniversalInfo {
+// 获取默认的get请求信息
+func getUniversalInfoDefault(actionName string) ve.UniversalInfo {
+	return getUniversalInfo(actionName, ve.GET, ve.Default)
+}
+
+// 获取post请求信息，当前content-type为x-www-form-urlencoded
+func getUniversalInfoPost(actionName string) ve.UniversalInfo {
+	return getUniversalInfo(actionName, ve.POST, ve.FormUrlencoded)
+}
+
+func getUniversalInfo(actionName string, httMethod ve.HttpMethod, contentType ve.ContentType) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "iam",
 		Action:      actionName,
 		Version:     "2018-01-01",
-		HttpMethod:  ve.GET,
-		ContentType: ve.Default,
+		HttpMethod:  httMethod,
+		ContentType: contentType,
 		RegionType:  ve.Global,
 	}
 }

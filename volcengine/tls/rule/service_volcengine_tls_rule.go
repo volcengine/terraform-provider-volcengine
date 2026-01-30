@@ -29,13 +29,48 @@ func (v *VolcengineTlsRuleService) ReadResources(m map[string]interface{}) (data
 	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeRules"
-		logger.Debug(logger.ReqFormat, action, condition)
+		req := map[string]interface{}{}
+		if v, ok := condition["project_id"]; ok {
+			req["ProjectId"] = v
+		}
+		if v, ok := condition["project_name"]; ok {
+			req["ProjectName"] = v
+		}
+		if v, ok := condition["iam_project_name"]; ok {
+			req["IamProjectName"] = v
+		}
+		if v, ok := condition["rule_id"]; ok {
+			req["RuleId"] = v
+		}
+		if v, ok := condition["rule_name"]; ok {
+			req["RuleName"] = v
+		}
+		if v, ok := condition["topic_id"]; ok {
+			req["TopicId"] = v
+		}
+		if v, ok := condition["topic_name"]; ok {
+			req["TopicName"] = v
+		}
+		if v, ok := condition["log_type"]; ok {
+			req["LogType"] = v
+		}
+		if v, ok := condition["pause"]; ok {
+			req["Pause"] = v
+		}
+		if v, ok := condition["PageNumber"]; ok {
+			req["PageNumber"] = v
+		}
+		if v, ok := condition["PageSize"]; ok {
+			req["PageSize"] = v
+		}
+
+		logger.Debug(logger.ReqFormat, action, req)
 		resp, err = v.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 			ContentType: ve.Default,
 			HttpMethod:  ve.GET,
 			Path:        []string{action},
 			Client:      v.Client.BypassSvcClient.NewTlsClient(),
-		}, &m)
+		}, &req)
 		logger.Debug(logger.RespFormat, action, resp)
 		results, err = ve.ObtainSdkValue("RESPONSE.RuleInfos", *resp)
 		if err != nil {
@@ -91,10 +126,8 @@ func (v *VolcengineTlsRuleService) ReadResources(m map[string]interface{}) (data
 
 func (v *VolcengineTlsRuleService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		resp      *map[string]interface{}
-		results   []interface{}
-		projectId interface{}
-		ok        bool
+		resp *map[string]interface{}
+		ok   bool
 	)
 	if id == "" {
 		id = v.ReadResourceId(resourceData.Id())
@@ -102,7 +135,8 @@ func (v *VolcengineTlsRuleService) ReadResource(resourceData *schema.ResourceDat
 	req := map[string]interface{}{
 		"RuleId": id,
 	}
-	action := "DescribeRule"
+	// First try to use DescribeRuleV2
+	action := "DescribeRuleV2"
 	logger.Debug(logger.ReqFormat, action, req)
 	resp, err = v.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 		ContentType: ve.Default,
@@ -113,23 +147,14 @@ func (v *VolcengineTlsRuleService) ReadResource(resourceData *schema.ResourceDat
 	if err != nil {
 		return data, err
 	}
+	// If DescribeRuleV2 succeeds, use its results
 	logger.Debug(logger.RespFormat, action, resp)
-	projectId, err = ve.ObtainSdkValue("RESPONSE.ProjectId", *resp)
+	resultsInterface, err := ve.ObtainSdkValue("RESPONSE", *resp)
 	if err != nil {
 		return data, err
 	}
-	if projectId == nil {
-		return data, fmt.Errorf("tls rule %s not exist", id)
-	}
-	req["ProjectId"] = projectId.(string)
-	results, err = v.ReadResources(req)
-	if err != nil {
-		return data, err
-	}
-	for _, r := range results {
-		if data, ok = r.(map[string]interface{}); !ok {
-			return data, fmt.Errorf("read resource value is not map")
-		}
+	if data, ok = resultsInterface.(map[string]interface{}); !ok {
+		return data, fmt.Errorf("read resource value is not map")
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("tls rule %s not exist", id)
@@ -160,15 +185,37 @@ func (v *VolcengineTlsRuleService) CreateResource(data *schema.ResourceData, res
 				},
 				"exclude_paths": {
 					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"type": {
+							TargetField: "Type",
+						},
+						"value": {
+							TargetField: "Value",
+						},
+					},
 				},
 				"extract_rule": {
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
+						"quote": {
+							ConvertType: ve.ConvertDefault,
+						},
+						"time_zone": {
+							ConvertType: ve.ConvertDefault,
+						},
 						"keys": {
 							ConvertType: ve.ConvertJsonArray,
 						},
 						"filter_key_regex": {
 							ConvertType: ve.ConvertJsonObjectArray,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									TargetField: "Key",
+								},
+								"regex": {
+									TargetField: "Regex",
+								},
+							},
 						},
 						"log_template": {
 							ConvertType: ve.ConvertJsonObject,
@@ -314,10 +361,54 @@ func (v *VolcengineTlsRuleService) ModifyResource(data *schema.ResourceData, res
 				},
 				"exclude_paths": {
 					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"type": {
+							TargetField: "Type",
+						},
+						"value": {
+							TargetField: "Value",
+						},
+					},
 				},
 				"extract_rule": {
 					ConvertType: ve.ConvertJsonObject,
 					NextLevelConvert: map[string]ve.RequestConvert{
+						"quote": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"delimiter": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"begin_regex": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"log_regex": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"time_key": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"time_format": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"un_match_up_load_switch": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"un_match_log_key": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
+						"time_zone": {
+							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
+						},
 						"keys": {
 							ConvertType: ve.ConvertJsonArray,
 							ForceGet:    true,
@@ -325,6 +416,14 @@ func (v *VolcengineTlsRuleService) ModifyResource(data *schema.ResourceData, res
 						"filter_key_regex": {
 							ConvertType: ve.ConvertJsonObjectArray,
 							ForceGet:    true,
+							NextLevelConvert: map[string]ve.RequestConvert{
+								"key": {
+									TargetField: "Key",
+								},
+								"regex": {
+									TargetField: "Regex",
+								},
+							},
 						},
 						"log_template": {
 							ConvertType: ve.ConvertJsonObject,
@@ -492,9 +591,15 @@ func (v *VolcengineTlsRuleService) ModifyResource(data *schema.ResourceData, res
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				if _, ok := (*call.SdkParam)["UserDefineRule"]; ok {
-					if _, ok = (*call.SdkParam)["UserDefineRule"].(map[string]interface{})["Plugin"].(map[string]interface{})["Processors"]; ok {
-						delete((*call.SdkParam)["UserDefineRule"].(map[string]interface{})["Plugin"].(map[string]interface{}), "Processors")
+				if userDefineRule, ok := (*call.SdkParam)["UserDefineRule"]; ok {
+					if userDefineMap, ok := userDefineRule.(map[string]interface{}); ok {
+						if plugin, ok := userDefineMap["Plugin"]; ok {
+							if pluginMap, ok := plugin.(map[string]interface{}); ok {
+								if _, ok := pluginMap["Processors"]; ok {
+									delete(pluginMap, "Processors")
+								}
+							}
+						}
 					}
 				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -606,5 +711,24 @@ func dataMapTransToList(data map[string]interface{}) map[string]interface{} {
 		}
 	}
 	data["ContainerRule"] = []interface{}{containerRule}
+
+	// 处理 ExcludePaths
+	if excludePaths, ok := data["ExcludePaths"].([]interface{}); ok {
+		// 使用 Set 结构来存储 ExcludePaths，与 Schema 定义保持一致
+		newExcludePaths := schema.NewSet(tlsRuleHash("type", "value"), nil)
+		for _, item := range excludePaths {
+			if m, ok := item.(map[string]interface{}); ok {
+				newMap := make(map[string]interface{})
+				if v, ok := m["Type"]; ok {
+					newMap["type"] = v
+				}
+				if v, ok := m["Value"]; ok {
+					newMap["value"] = v
+				}
+				newExcludePaths.Add(newMap)
+			}
+		}
+		data["ExcludePaths"] = newExcludePaths
+	}
 	return data
 }

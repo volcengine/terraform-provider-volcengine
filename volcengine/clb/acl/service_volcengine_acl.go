@@ -32,7 +32,7 @@ func (s *VolcengineAclService) ReadResources(condition map[string]interface{}) (
 		results interface{}
 		ok      bool
 	)
-	return ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
+	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeAcls"
 		logger.Debug(logger.ReqFormat, action, condition)
 		if condition == nil {
@@ -54,8 +54,37 @@ func (s *VolcengineAclService) ReadResources(condition map[string]interface{}) (
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Acls is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
+	if err != nil {
+		return data, err
+	}
+	for _, value := range data {
+		acl, ok := value.(map[string]interface{})
+		if !ok {
+			return data, fmt.Errorf("Acl is not map ")
+		}
+		detailAction := "DescribeAclAttributes"
+		req := map[string]interface{}{
+			"AclId": acl["AclId"],
+		}
+		logger.Debug(logger.ReqFormat, detailAction, req)
+		detailResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(detailAction), &req)
+		logger.Debug(logger.RespFormat, detailAction, *detailResp)
+		if err != nil {
+			return data, err
+		}
+		entries, _ := ve.ObtainSdkValue("Result.AclEntries", *detailResp)
+		if entries != nil {
+			acl["AclEntries"] = entries
+		}
+		listenerDetails, _ := ve.ObtainSdkValue("Result.Listeners", *detailResp)
+		if listenerDetails != nil {
+			acl["ListenerDetails"] = listenerDetails
+		}
+	}
+	return data, err
 }
 
 func (s *VolcengineAclService) ReadResource(resourceData *schema.ResourceData, aclId string) (data map[string]interface{}, err error) {
@@ -83,20 +112,27 @@ func (s *VolcengineAclService) ReadResource(resourceData *schema.ResourceData, a
 	}
 
 	//查询属性
-	var (
-		resp *map[string]interface{}
-	)
-	action := "DescribeAclAttributes"
-	condition := make(map[string]interface{})
-	condition["AclId"] = aclId
-	logger.Debug(logger.ReqFormat, action, condition)
-	resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
-	entries, _ := ve.ObtainSdkValue("Result.AclEntries", *resp)
-	logger.Debug(logger.ReqFormat, action, condition, entries)
-	logger.Debug(logger.ReqFormat, action, condition, data)
-	if entries != nil {
-		data["AclEntries"] = entries
-	}
+	// var (
+	// 	resp *map[string]interface{}
+	// )
+	// action := "DescribeAclAttributes"
+	// condition := make(map[string]interface{})
+	// condition["AclId"] = aclId
+	// logger.Debug(logger.ReqFormat, action, condition)
+	// resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
+	// entries, _ := ve.ObtainSdkValue("Result.AclEntries", *resp)
+	// logger.Debug(logger.ReqFormat, action, condition, entries)
+
+	// listenerDetails, _ := ve.ObtainSdkValue("Result.Listeners", *resp)
+	// logger.Debug(logger.ReqFormat, action, condition, listenerDetails)
+
+	// logger.Debug(logger.ReqFormat, action, condition, data)
+	// if entries != nil {
+	// 	data["AclEntries"] = entries
+	// }
+	// if listenerDetails != nil {
+	// 	data["ListenerDetails"] = listenerDetails
+	// }
 	return data, err
 }
 
@@ -144,6 +180,10 @@ func (s *VolcengineAclService) CreateResource(resourceData *schema.ResourceData,
 			Convert: map[string]ve.RequestConvert{
 				"acl_entries": {
 					Ignore: true,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -205,6 +245,9 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
 				"acl_entries": {
+					Ignore: true,
+				},
+				"tags": {
 					Ignore: true,
 				},
 			},
@@ -285,6 +328,10 @@ func (s *VolcengineAclService) ModifyResource(resourceData *schema.ResourceData,
 	}
 	callbacks = append(callbacks, entryAddCallback)
 
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "acl", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -330,6 +377,15 @@ func (s *VolcengineAclService) DatasourceResources(*schema.ResourceData, *schema
 				TargetField: "AclIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "AclName",
 		IdField:      "AclId",
@@ -354,6 +410,27 @@ func (s *VolcengineAclService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

@@ -29,4 +29,9 @@ resource "volcengine_server_group" "foo" {
   load_balancer_id = volcengine_clb.foo.id
   server_group_name = "acc-test-create"
   description = "hello demo11"
+  type = "ip"
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }

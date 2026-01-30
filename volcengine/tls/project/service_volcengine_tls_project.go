@@ -124,13 +124,28 @@ func (s *VolcengineTlsProjectService) CreateResource(resourceData *schema.Resour
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
+				"project_name": {
+					TargetField: "ProjectName",
+				},
+				"description": {
+					TargetField: "Description",
+				},
+				"iam_project_name": {
+					TargetField: "IamProjectName",
+				},
+				"region": {
+					TargetField: "Region",
+				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"key":   {TargetField: "Key"},
+						"value": {TargetField: "Value"},
+					},
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["Region"] = s.Client.Region
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

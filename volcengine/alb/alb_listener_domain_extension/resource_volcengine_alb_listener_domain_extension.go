@@ -45,10 +45,27 @@ func ResourceVolcengineAlbListenerDomainExtension() *schema.Resource {
 				Required:    true,
 				Description: "The domain name. The maximum number of associated domain names for an HTTPS listener is 20, with a value range of 1 to 20.",
 			},
-			"certificate_id": {
+			"certificate_source": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Server certificate used for the domain name.",
+				Optional:    true,
+				Default:     "alb",
+				Description: "The source of the certificate. Valid values: `alb`, `cert_center`, `pca_leaf`. Default is `alb`.",
+			},
+			"certificate_id": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"certificate_id", "cert_center_certificate_id", "pca_leaf_certificate_id"},
+				Description:  "Server certificate used for the domain name. Valid when the certificate_source is `alb`.",
+			},
+			"cert_center_certificate_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The server certificate ID used by the domain name. Valid when the certificate_source is `cert_center`.",
+			},
+			"pca_leaf_certificate_id": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The server certificate ID used by the domain name. Valid when the certificate source is `pca_leaf`.",
 			},
 			"domain_extension_id": {
 				Type:        schema.TypeString,

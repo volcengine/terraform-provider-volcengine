@@ -11,8 +11,18 @@ func DataSourceVolcengineTlsRules() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"project_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The project id.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name.",
+			},
+			"iam_project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The iam project name.",
 			},
 			"rule_id": {
 				Type:        schema.TypeString,
@@ -33,6 +43,16 @@ func DataSourceVolcengineTlsRules() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The topic name.",
+			},
+			"log_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The log type.",
+			},
+			"pause": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "Whether to pause collection configuration.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,

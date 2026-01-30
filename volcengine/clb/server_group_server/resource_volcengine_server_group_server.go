@@ -49,14 +49,14 @@ func ResourceVolcengineServerGroupServer() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The ID of ecs instance or the network card bound to ecs instance.",
+				Description: "The ID of ecs instance or the network card bound to ecs instance. When the `type` is `ip`, this parameter is an IP address.",
 			},
 			"type": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ForceNew:     true,
-				Description:  "The type of instance. Optional choice contains `ecs`, `eni`.",
-				ValidateFunc: validation.StringInSlice([]string{"ecs", "eni"}, false),
+				Description:  "The type of instance. Optional choice contains `ecs`, `eni`, `ip`. When the `type` of `server_group_id` is `ip`, only `ip` is supported.",
+				ValidateFunc: validation.StringInSlice([]string{"ecs", "eni", "ip"}, false),
 			},
 			"weight": {
 				Type:        schema.TypeInt,

@@ -210,6 +210,16 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 					},
 				},
 			},
+			"max_text_len": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The max text length of the tls index.",
+			},
+			"enable_auto_index": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Whether to enable auto index.",
+			},
 			"create_time": {
 				Type:        schema.TypeString,
 				Computed:    true,
