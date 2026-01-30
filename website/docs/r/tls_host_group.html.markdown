@@ -47,4 +47,3 @@ Tls Host Group can be imported using the id, e.g.
 ```
 $ terraform import volcengine_tls_host_group.default edf052s21s*******dc15
 ```
-

@@ -137,7 +137,53 @@ func (s *VolcengineTlsTopicService) RefreshResourceState(resourceData *schema.Re
 
 func (VolcengineTlsTopicService) WithResourceResponseHandlers(topic map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return topic, nil, nil
+		if v, ok := topic["EncryptConf"]; ok && v != nil {
+			if encryptConf, ok := v.(map[string]interface{}); ok {
+				newConf := make(map[string]interface{})
+				if val, ok := encryptConf["Enable"]; ok {
+					newConf["enable"] = val
+				}
+				if val, ok := encryptConf["EncryptType"]; ok {
+					newConf["encrypt_type"] = val
+				}
+				if u, ok := encryptConf["UserCmkInfo"]; ok && u != nil {
+					if userKey, ok := u.(map[string]interface{}); ok {
+						newUserKey := make(map[string]interface{})
+						if val, ok := userKey["UserCmkId"]; ok {
+							newUserKey["user_cmk_id"] = val
+						}
+						if val, ok := userKey["RegionId"]; ok {
+							newUserKey["region_id"] = val
+						}
+						if val, ok := userKey["Trn"]; ok {
+							newUserKey["trn"] = val
+						}
+						newConf["user_cmk_info"] = []interface{}{newUserKey}
+					}
+				}
+				topic["EncryptConf"] = []interface{}{newConf}
+			}
+		}
+		return topic, map[string]ve.ResponseConvert{
+			"LogPublicIP": {
+				TargetField: "log_public_ip",
+			},
+			"EnableHotTtl": {
+				TargetField: "enable_hot_ttl",
+			},
+			"HotTtl": {
+				TargetField: "hot_ttl",
+			},
+			"ColdTtl": {
+				TargetField: "cold_ttl",
+			},
+			"ArchiveTtl": {
+				TargetField: "archive_ttl",
+			},
+			"EncryptConf": {
+				TargetField: "encrypt_conf",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 
@@ -152,12 +198,90 @@ func (s *VolcengineTlsTopicService) CreateResource(resourceData *schema.Resource
 			ConvertMode: ve.RequestConvertAll,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
+				"project_id": {
+					TargetField: "ProjectId",
+				},
+				"topic_name": {
+					TargetField: "TopicName",
+				},
+				"ttl": {
+					TargetField: "Ttl",
+				},
+				"shard_count": {
+					TargetField: "ShardCount",
+				},
+				"description": {
+					TargetField: "Description",
+				},
+				"auto_split": {
+					TargetField: "AutoSplit",
+				},
+				"max_split_shard": {
+					TargetField: "MaxSplitShard",
+				},
+				"enable_tracking": {
+					TargetField: "EnableTracking",
+				},
+				"time_key": {
+					TargetField: "TimeKey",
+				},
+				"time_format": {
+					TargetField: "TimeFormat",
+				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"log_public_ip": {
+					TargetField: "LogPublicIP",
+				},
+				"enable_hot_ttl": {
+					TargetField: "EnableHotTtl",
+				},
+				"hot_ttl": {
+					TargetField: "HotTtl",
+				},
+				"cold_ttl": {
+					TargetField: "ColdTtl",
+				},
+				"archive_ttl": {
+					TargetField: "ArchiveTtl",
+				},
+				"encrypt_conf": {
+					TargetField: "EncryptConf",
+					Ignore:      true,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				if v, ok := d.GetOk("encrypt_conf"); ok {
+					if list, ok := v.([]interface{}); ok && len(list) > 0 {
+						conf := list[0].(map[string]interface{})
+						apiConf := make(map[string]interface{})
+						if val, ok := conf["enable"]; ok {
+							apiConf["enable"] = val
+						}
+						if val, ok := conf["encrypt_type"]; ok {
+							apiConf["encrypt_type"] = val
+						}
+						if u, ok := conf["user_cmk_info"]; ok {
+							if uList, ok := u.([]interface{}); ok && len(uList) > 0 {
+								uKey := uList[0].(map[string]interface{})
+								apiUKey := make(map[string]interface{})
+								if val, ok := uKey["user_cmk_id"]; ok {
+									apiUKey["user_cmk_id"] = val
+								}
+								if val, ok := uKey["region_id"]; ok {
+									apiUKey["region_id"] = val
+								}
+								if val, ok := uKey["trn"]; ok {
+									apiUKey["trn"] = val
+								}
+								apiConf["user_cmk_info"] = apiUKey
+							}
+						}
+						(*call.SdkParam)["EncryptConf"] = apiConf
+					}
+				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					ContentType: ve.ApplicationJSON,
@@ -211,6 +335,25 @@ func (s *VolcengineTlsTopicService) ModifyResource(resourceData *schema.Resource
 				"description": {
 					TargetField: "Description",
 				},
+				"log_public_ip": {
+					TargetField: "LogPublicIP",
+				},
+				"enable_hot_ttl": {
+					TargetField: "EnableHotTtl",
+				},
+				"hot_ttl": {
+					TargetField: "HotTtl",
+				},
+				"cold_ttl": {
+					TargetField: "ColdTtl",
+				},
+				"archive_ttl": {
+					TargetField: "ArchiveTtl",
+				},
+				"encrypt_conf": {
+					TargetField: "EncryptConf",
+					Ignore:      true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				if len(*call.SdkParam) > 0 {
@@ -220,6 +363,35 @@ func (s *VolcengineTlsTopicService) ModifyResource(resourceData *schema.Resource
 				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				if v, ok := d.GetOk("encrypt_conf"); ok {
+					if list, ok := v.([]interface{}); ok && len(list) > 0 {
+						conf := list[0].(map[string]interface{})
+						apiConf := make(map[string]interface{})
+						if val, ok := conf["enable"]; ok {
+							apiConf["enable"] = val
+						}
+						if val, ok := conf["encrypt_type"]; ok {
+							apiConf["encrypt_type"] = val
+						}
+						if u, ok := conf["user_cmk_info"]; ok {
+							if uList, ok := u.([]interface{}); ok && len(uList) > 0 {
+								uKey := uList[0].(map[string]interface{})
+								apiUKey := make(map[string]interface{})
+								if val, ok := uKey["user_cmk_id"]; ok {
+									apiUKey["user_cmk_id"] = val
+								}
+								if val, ok := uKey["region_id"]; ok {
+									apiUKey["region_id"] = val
+								}
+								if val, ok := uKey["trn"]; ok {
+									apiUKey["trn"] = val
+								}
+								apiConf["user_cmk_info"] = apiUKey
+							}
+						}
+						(*call.SdkParam)["EncryptConf"] = apiConf
+					}
+				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					ContentType: ve.ApplicationJSON,
@@ -322,6 +494,12 @@ func (s *VolcengineTlsTopicService) RemoveResource(resourceData *schema.Resource
 func (s *VolcengineTlsTopicService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
+			"topic_id": {
+				TargetField: "TopicId",
+			},
+			"topic_name": {
+				TargetField: "TopicName",
+			},
 			"tags": {
 				TargetField: "Tags",
 				ConvertType: ve.ConvertJsonObjectArray,
@@ -335,6 +513,24 @@ func (s *VolcengineTlsTopicService) DatasourceResources(*schema.ResourceData, *s
 			"TopicId": {
 				TargetField: "id",
 				KeepDefault: true,
+			},
+			"LogPublicIP": {
+				TargetField: "log_public_ip",
+			},
+			"EnableHotTtl": {
+				TargetField: "enable_hot_ttl",
+			},
+			"HotTtl": {
+				TargetField: "hot_ttl",
+			},
+			"ColdTtl": {
+				TargetField: "cold_ttl",
+			},
+			"ArchiveTtl": {
+				TargetField: "archive_ttl",
+			},
+			"EncryptConf": {
+				TargetField: "encrypt_conf",
 			},
 		},
 	}

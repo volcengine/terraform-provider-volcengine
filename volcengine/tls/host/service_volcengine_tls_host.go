@@ -65,7 +65,6 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
-		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
@@ -74,21 +73,39 @@ func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (da
 
 	req := map[string]interface{}{
 		"HostGroupId": ids[0],
-		"Ip":          ids[1],
 	}
-	results, err = s.ReadResources(req)
-	if err != nil {
-		return data, err
-	}
-	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
-			return data, errors.New("Value is not map ")
+	if len(ids) == 2 && ids[1] != "" {
+		req["Ip"] = ids[1]
+		results, err = s.ReadResources(req)
+		if err != nil {
+			return data, err
+		}
+		if len(results) == 0 {
+			// Host not found, return mock data to indicate resource exists (as a deletion task)
+			return map[string]interface{}{
+				"host_group_id": ids[0],
+				"ip":            ids[1],
+			}, nil
+		} else {
+			// Host found, return nil to force recreation (which triggers deletion)
+			return nil, nil
+		}
+	} else {
+		req["HeartbeatStatus"] = 0
+		results, err = s.ReadResources(req)
+		if err != nil {
+			return data, err
+		}
+		if len(results) == 0 {
+			// No abnormal hosts, task completed
+			return map[string]interface{}{
+				"host_group_id": ids[0],
+			}, nil
+		} else {
+			// Abnormal hosts found, trigger recreation (deletion)
+			return nil, nil
 		}
 	}
-	if len(data) == 0 {
-		return data, fmt.Errorf("Host %s not exist ", id)
-	}
-	return data, nil
 }
 
 func (s *Service) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
@@ -105,15 +122,6 @@ func (Service) WithResourceResponseHandlers(vpc map[string]interface{}) []ve.Res
 }
 
 func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
-
-}
-
-func (s *Service) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
-}
-
-func (s *Service) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DeleteHost",
@@ -123,6 +131,14 @@ func (s *Service) RemoveResource(resourceData *schema.ResourceData, r *schema.Re
 				"Ip":          resourceData.Get("ip"),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				ip := d.Get("ip").(string)
+				if ip == "" {
+					call.Action = "DeleteAbnormalHosts"
+					delete(*call.SdkParam, "Ip")
+				} else {
+					call.Action = "DeleteHost"
+				}
+
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					ContentType: ve.ApplicationJSON,
@@ -136,9 +152,25 @@ func (s *Service) RemoveResource(resourceData *schema.ResourceData, r *schema.Re
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, *resp)
 				return resp, nil
 			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				if d.Get("ip").(string) == "" {
+					d.SetId(fmt.Sprintf("%s", d.Get("host_group_id").(string)))
+				} else {
+					d.SetId(fmt.Sprintf("%s:%s", d.Get("host_group_id").(string), d.Get("ip").(string)))
+				}
+				return nil
+			},
 		},
 	}
 	return []ve.Callback{callback}
+}
+
+func (s *Service) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	return []ve.Callback{}
+}
+
+func (s *Service) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	return []ve.Callback{}
 }
 
 func (s *Service) DatasourceResources(d *schema.ResourceData, r *schema.Resource) ve.DataSourceInfo {

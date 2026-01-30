@@ -92,12 +92,12 @@ func (s *VolcengineTlsIndexService) ReadResource(resourceData *schema.ResourceDa
 	if indexId == "" {
 		indexId = s.ReadResourceId(resourceData.Id())
 	}
-	items := strings.Split(indexId, ":")
-	if len(items) != 2 {
-		return data, fmt.Errorf(" invalid index id: %s", indexId)
+	topicID := indexId
+	if items := strings.Split(indexId, ":"); len(items) == 2 {
+		topicID = items[1]
 	}
 	req := map[string]interface{}{
-		"TopicIds": []interface{}{items[1]},
+		"TopicIds": []interface{}{topicID},
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -121,7 +121,14 @@ func (s *VolcengineTlsIndexService) RefreshResourceState(resourceData *schema.Re
 
 func (VolcengineTlsIndexService) WithResourceResponseHandlers(index map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return index, nil, nil
+		return index, map[string]ve.ResponseConvert{
+			"MaxTextLen": {
+				TargetField: "max_text_len",
+			},
+			"EnableAutoIndex": {
+				TargetField: "enable_auto_index",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 
@@ -137,6 +144,7 @@ func (s *VolcengineTlsIndexService) CreateResource(resourceData *schema.Resource
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
 				"full_text": {
+					TargetField: "FullText",
 					ConvertType: ve.ConvertJsonObject,
 				},
 				"key_value": {
@@ -146,6 +154,12 @@ func (s *VolcengineTlsIndexService) CreateResource(resourceData *schema.Resource
 				"user_inner_key_value": {
 					// 框架层对于set套set的类型转换有bug，手动处理
 					Ignore: true,
+				},
+				"max_text_len": {
+					TargetField: "MaxTextLen",
+				},
+				"enable_auto_index": {
+					TargetField: "EnableAutoIndex",
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -197,9 +211,12 @@ func (s *VolcengineTlsIndexService) ModifyResource(resourceData *schema.Resource
 			ConvertMode: ve.RequestConvertInConvert,
 			ContentType: ve.ContentTypeJson,
 			Convert: map[string]ve.RequestConvert{
+				"topic_id": {
+					TargetField: "TopicId",
+				},
 				"full_text": {
+					TargetField: "FullText",
 					ConvertType: ve.ConvertJsonObject,
-					ForceGet:    true,
 				},
 				"key_value": {
 					// 框架层对于set套set的类型转换有bug，手动处理
@@ -208,6 +225,13 @@ func (s *VolcengineTlsIndexService) ModifyResource(resourceData *schema.Resource
 				"user_inner_key_value": {
 					// 框架层对于set套set的类型转换有bug，手动处理
 					Ignore: true,
+				},
+				"max_text_len": {
+					TargetField: "MaxTextLen",
+				},
+				"enable_auto_index": {
+					TargetField: "EnableAutoIndex",
+					ForceGet:    true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -303,6 +327,12 @@ func (s *VolcengineTlsIndexService) DatasourceResources(*schema.ResourceData, *s
 			"TopicId": {
 				TargetField: "id",
 				KeepDefault: true,
+			},
+			"MaxTextLen": {
+				TargetField: "max_text_len",
+			},
+			"EnableAutoIndex": {
+				TargetField: "enable_auto_index",
 			},
 		},
 		ExtraData: func(i []interface{}) ([]interface{}, error) {

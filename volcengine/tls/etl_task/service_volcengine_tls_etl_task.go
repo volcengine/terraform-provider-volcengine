@@ -140,7 +140,10 @@ func (VolcengineEtlTaskService) WithResourceResponseHandlers(d map[string]interf
 }
 
 func (s *VolcengineEtlTaskService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
+	var callbacks []ve.Callback
+
+	// Add ModifyETLTask callback for basic task modifications
+	modifyETLTaskCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyETLTask",
 			ConvertMode: ve.RequestConvertInConvert,
@@ -189,7 +192,39 @@ func (s *VolcengineEtlTaskService) ModifyResource(resourceData *schema.ResourceD
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, modifyETLTaskCallback)
+
+	// Add ModifyETLTaskStatus callback for status changes
+	modifyETLTaskStatusCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "ModifyETLTaskStatus",
+			ConvertMode: ve.RequestConvertIgnore,
+			ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				// Check if enable field has changed
+				if d.HasChange("enable") {
+					(*call.SdkParam)["TaskId"] = d.Id()
+					_, newValue := d.GetChange("enable")
+					(*call.SdkParam)["Status"] = newValue.(bool)
+					return true, nil
+				}
+				// Skip if enable field hasn't changed
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+					ContentType: ve.ApplicationJSON,
+					HttpMethod:  ve.PUT,
+					Path:        []string{call.Action},
+					Client:      s.Client.BypassSvcClient.NewTlsClient(),
+				}, call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, modifyETLTaskStatusCallback)
+
+	return callbacks
 }
 
 func (s *VolcengineEtlTaskService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {

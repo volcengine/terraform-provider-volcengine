@@ -168,6 +168,16 @@ func ResourceVolcengineTlsRule() *schema.Resource {
 							Optional:    true,
 							Description: "When uploading the failed log, the key name of the failed log.",
 						},
+						"quote": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The quote symbol.",
+						},
+						"time_zone": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The time zone.",
+						},
 						"log_template": {
 							Type:        schema.TypeSet,
 							Optional:    true,

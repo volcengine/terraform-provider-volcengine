@@ -1,12 +1,10 @@
 package alarm
 
 import (
-	"bytes"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
@@ -41,6 +39,11 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 				Required:    true,
 				Description: "The name of the alarm.",
 			},
+			"severity": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The severity of the alarm.",
+			},
 			"project_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -53,10 +56,15 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 				Default:     true,
 				Description: "Whether to enable the alert policy. The default value is true, that is, on.",
 			},
+			"send_resolved": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "Whether to send resolved.",
+			},
 			"trigger_period": {
 				Type:        schema.TypeInt,
-				Optional:    true,
-				Default:     1,
+				Required:    true,
 				Description: "Continuous cycle. The alarm will be issued after the trigger condition is continuously met for TriggerPeriod periods; the minimum value is 1, the maximum value is 10, and the default value is 1.",
 			},
 			"alarm_period": {
@@ -66,10 +74,9 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 				Description:  "Period for sending alarm notifications. When the number of continuous alarm triggers reaches the specified limit (TriggerPeriod), Log Service will send alarm notifications according to the specified period.",
 			},
 			"alarm_notify_group": {
-				Type:        schema.TypeSet,
+				Type:        schema.TypeList,
 				Required:    true,
 				ForceNew:    true,
-				Set:         schema.HashString,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "List of notification groups corresponding to the alarm.",
 			},
@@ -78,22 +85,57 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 				Optional:    true,
 				Description: "Customize the alarm notification content.",
 			},
-			"query_request": {
-				Type:     schema.TypeSet,
-				Required: true,
-				MaxItems: 3,
-				MinItems: 1,
-				Set: func(i interface{}) int {
-					if i == nil {
-						return hashcode.String("")
-					}
-					m := i.(map[string]interface{})
-					var (
-						buf bytes.Buffer
-					)
-					buf.WriteString(fmt.Sprintf("%v#%v#%v#%v#%v", m["topic_id"], m["query"], m["number"], m["start_time_offset"], m["end_time_offset"]))
-					return hashcode.String(buf.String())
+			"trigger_conditions": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The list of trigger conditions.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"condition": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The condition.",
+						},
+						"count_condition": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The count condition.",
+						},
+						"severity": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The severity.",
+						},
+						"no_data": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "The no data.",
+						},
+					},
 				},
+			},
+			"join_configurations": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The list of join configurations.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"condition": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The condition.",
+						},
+						"set_operation_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The set operation type.",
+						},
+					},
+				},
+			},
+			"query_request": {
+				Type:        schema.TypeList,
+				Required:    true,
 				Description: "Search and analyze sentences, 1~3 can be configured.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -122,11 +164,31 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 							Required:    true,
 							Description: "The end time of the query range is relative to the current historical time. The unit is minutes. The value is not positive and must be greater than StartTimeOffset. The maximum value is 0 and the minimum value is -1440.",
 						},
+						"time_span_type": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The time span type.",
+						},
+						"truncated_time": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The truncated time.",
+						},
+						"end_time_offset_unit": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The end time offset unit.",
+						},
+						"start_time_offset_unit": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The start time offset unit.",
+						},
 					},
 				},
 			},
 			"condition": {
-				Required:    true,
+				Optional:    true,
 				Type:        schema.TypeString,
 				Description: "Alarm trigger condition.",
 			},
@@ -139,13 +201,18 @@ func ResourceVolcengineTlsAlarm() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:        schema.TypeString,
-							Required:    true,
-							Description: "Execution cycle type.\nPeriod: Periodic execution, which means executing once every certain period of time.\nFixed: Regular execution, which means executing at a fixed time point every day.",
+							Optional:    true,
+							Description: "Execution cycle type.",
 						},
 						"time": {
 							Type:        schema.TypeInt,
-							Required:    true,
+							Optional:    true,
 							Description: "The cycle of alarm task execution, or the time point of periodic execution. The unit is minutes, and the value range is 1~1440.",
+						},
+						"cron_tab": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "The cron tab.",
 						},
 					},
 				},

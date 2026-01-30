@@ -27,14 +27,19 @@ func ResourceVolcengineTlsHost() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			State: func(data *schema.ResourceData, i interface{}) ([]*schema.ResourceData, error) {
 				items := strings.Split(data.Id(), ":")
-				if len(items) != 2 {
+				if len(items) == 2 {
+					if err := data.Set("host_group_id", items[0]); err != nil {
+						return []*schema.ResourceData{data}, err
+					}
+					if err := data.Set("ip", items[1]); err != nil {
+						return []*schema.ResourceData{data}, err
+					}
+				} else if len(items) == 1 {
+					if err := data.Set("host_group_id", items[0]); err != nil {
+						return []*schema.ResourceData{data}, err
+					}
+				} else {
 					return []*schema.ResourceData{data}, fmt.Errorf("import id must split with ':'")
-				}
-				if err := data.Set("host_group_id", items[0]); err != nil {
-					return []*schema.ResourceData{data}, err
-				}
-				if err := data.Set("ip", items[1]); err != nil {
-					return []*schema.ResourceData{data}, err
 				}
 				return []*schema.ResourceData{data}, nil
 			},
@@ -52,7 +57,7 @@ func ResourceVolcengineTlsHost() *schema.Resource {
 			},
 			"ip": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				ForceNew:    true,
 				Description: "The ip address.",
 			},
@@ -62,7 +67,12 @@ func ResourceVolcengineTlsHost() *schema.Resource {
 }
 
 func resourceVolcengineTlsHostCreate(d *schema.ResourceData, meta interface{}) (err error) {
-	return fmt.Errorf("only allows importing scenes, for removing unhealthy tls host instance")
+	service := NewService(meta.(*ve.SdkClient))
+	err = ve.DefaultDispatcher().Create(service, d, ResourceVolcengineTlsHost())
+	if err != nil {
+		return fmt.Errorf("error on creating tls host, %s", err)
+	}
+	return nil
 }
 
 func resourceVolcengineTlsHostRead(d *schema.ResourceData, meta interface{}) (err error) {
