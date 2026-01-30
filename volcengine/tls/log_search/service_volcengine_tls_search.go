@@ -1,4 +1,4 @@
-package log
+package log_search
 
 import (
 	"encoding/json"

@@ -1,4 +1,4 @@
-package trace
+package describe_trace
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"

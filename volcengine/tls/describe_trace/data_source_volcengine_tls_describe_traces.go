@@ -1,4 +1,4 @@
-package trace
+package describe_trace
 
 // Update
 import (

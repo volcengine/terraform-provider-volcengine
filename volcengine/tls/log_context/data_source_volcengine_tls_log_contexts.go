@@ -1,4 +1,4 @@
-package log
+package log_context
 
 import (
 	"encoding/json"
