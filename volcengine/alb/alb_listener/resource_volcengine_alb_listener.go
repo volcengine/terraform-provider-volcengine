@@ -185,7 +185,7 @@ func ResourceVolcengineAlbListener() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    20,
-				Description: "The domain extensions of the Listener.",
+				Description: "The domain extensions of the Listener. Only HTTPS listener is effective.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"domain": {
