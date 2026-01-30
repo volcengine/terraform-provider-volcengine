@@ -8,10 +8,7 @@ import (
 /*
 
 Import
-tls account can be imported using the id, e.g.
-```
-$ terraform import volcengine_tls_account.default default
-```
+The AlbAccessLog is not support import.
 
 */
 

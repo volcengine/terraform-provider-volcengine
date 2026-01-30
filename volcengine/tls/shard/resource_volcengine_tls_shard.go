@@ -8,7 +8,7 @@ import (
 /*
 
 Import
-TlsShard can not be imported using the id
+The AlbAccessLog is not support import.
 
 */
 
