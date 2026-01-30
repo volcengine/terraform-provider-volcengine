@@ -15,19 +15,20 @@ resource "volcengine_tls_shipper" "foo" {
     format = "json"
     json_info {
       enable = true
-      keys   = ["__content", "__pod_name__", "__path__", "__tf-test__"]
+      keys   = ["__content", "__pod_name__"]
     }
   }
   shipper_end_time   = 1751255700021
-  shipper_name       = "tf-test"
+  shipper_name       = "tf-test-modify"
   shipper_start_time = 1750737324521
   shipper_type       = "tos"
-  topic_id           = "8ba48bd7-2493-4300-b1d0-cb7xxxxxx"
+  topic_id           = "8ba48bd7-2493-4300-b1d0-cb760b89e51b"
+  role_trn           = ""
   tos_shipper_info {
     bucket           = "tf-test"
     prefix           = "terraform_1.9.4_linux_amd64.zip"
-    max_size         = 100
-    interval         = 100
+    max_size         = 50
+    interval         = 200
     compress         = "snappy"
     partition_format = "%Y/%m/%d/%H/%M"
   }
@@ -39,6 +40,7 @@ The following arguments are supported:
 * `shipper_name` - (Required) Delivery configuration name.
 * `topic_id` - (Required, ForceNew) The log topic ID where the log to be delivered is located.
 * `kafka_shipper_info` - (Optional) JSON format log content configuration.
+* `role_trn` - (Optional) The role trn.
 * `shipper_end_time` - (Optional) Delivery end time, millisecond timestamp. If not configured, it will keep delivering. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `shipper_start_time` - (Optional) Delivery start time, millisecond timestamp. If not configured, it defaults to the current time. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `shipper_type` - (Optional) The type of delivery.

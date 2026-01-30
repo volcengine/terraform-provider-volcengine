@@ -41,15 +41,28 @@ resource "volcengine_server_group" "foo" {
   load_balancer_id  = volcengine_clb.foo.id
   server_group_name = "acc-test-create"
   description       = "hello demo11"
+  type              = "ip"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `load_balancer_id` - (Required, ForceNew) The ID of the Clb.
 * `address_ip_version` - (Optional, ForceNew) The address ip version of the ServerGroup. Valid values: `ipv4`, `ipv6`. Default is `ipv4`.
+* `any_port_enabled` - (Optional, ForceNew) Whether to enable full port forwarding. This feature is in beta.
 * `description` - (Optional) The description of ServerGroup.
 * `server_group_id` - (Optional) The ID of the ServerGroup.
 * `server_group_name` - (Optional) The name of the ServerGroup.
+* `tags` - (Optional) Tags.
+* `type` - (Optional, ForceNew) The type of the ServerGroup. Valid values: `instance`, `ip`. Default is `instance`.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

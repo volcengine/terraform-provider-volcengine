@@ -11,13 +11,16 @@ Provides a resource to manage tls index
 ## Example Usage
 ```hcl
 resource "volcengine_tls_index" "foo" {
-  topic_id = "227a8d0c-b85b-48df-bee1-0927a595****"
+  topic_id = "b600dc34-503f-42fc-8e32-953af55463d1"
 
-  #  full_text {
-  #    case_sensitive = true
-  #    delimiter = "!"
-  #    include_chinese = false
-  #  }
+  max_text_len      = 2048
+  enable_auto_index = true
+
+  full_text {
+    case_sensitive  = false
+    delimiter       = ", ;/\n\t"
+    include_chinese = false
+  }
 
   key_value {
     key             = "k1"
@@ -28,23 +31,15 @@ resource "volcengine_tls_index" "foo" {
     sql_flag        = true
     index_all       = true
     json_keys {
-      key        = "class"
+      key        = "name"
       value_type = "text"
     }
     json_keys {
-      key        = "age"
+      key        = "key"
       value_type = "long"
     }
   }
 
-  key_value {
-    key             = "k5"
-    value_type      = "text"
-    case_sensitive  = true
-    delimiter       = "!"
-    include_chinese = false
-    sql_flag        = false
-  }
 
   user_inner_key_value {
     key             = "__content__"
@@ -54,11 +49,11 @@ resource "volcengine_tls_index" "foo" {
     include_chinese = false
     sql_flag        = false
     json_keys {
-      key        = "age"
+      key        = "app"
       value_type = "long"
     }
     json_keys {
-      key        = "name"
+      key        = "tag"
       value_type = "long"
     }
   }
@@ -67,8 +62,10 @@ resource "volcengine_tls_index" "foo" {
 ## Argument Reference
 The following arguments are supported:
 * `topic_id` - (Required, ForceNew) The topic id of the tls index.
+* `enable_auto_index` - (Optional) Whether to enable auto index.
 * `full_text` - (Optional) The full text info of the tls index.
 * `key_value` - (Optional) The key value info of the tls index.
+* `max_text_len` - (Optional) The max text length of the tls index.
 * `user_inner_key_value` - (Optional) The reserved field index configuration of the tls index.
 
 The `full_text` object supports the following:

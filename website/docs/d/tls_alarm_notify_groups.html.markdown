@@ -30,9 +30,48 @@ In addition to all arguments above, the following attributes are exported:
     * `create_time` - The create time the notification.
     * `iam_project_name` - The iam project name.
     * `modify_time` - The modification time the notification.
+    * `notice_rules` - The list of the notice rules.
+        * `has_end_node` - Whether there is an end node behind.
+        * `has_next` - Whether to continue to the next level of condition judgment.
+        * `receiver_infos` - List of IAM users to receive alerts.
+            * `alarm_content_template_id` - The alarm content template id.
+            * `alarm_webhook_at_users` - The alarm webhook at users.
+            * `alarm_webhook_integration_id` - The alarm webhook integration id.
+            * `alarm_webhook_integration_name` - The alarm webhook integration name.
+            * `alarm_webhook_is_at_all` - The alarm webhook is at all.
+            * `end_time` - The end time.
+            * `general_webhook_body` - The webhook body.
+            * `general_webhook_headers` - The general webhook headers.
+                * `key` - The key of the header.
+                * `value` - The value of the header.
+            * `general_webhook_method` - The general webhook method.
+            * `general_webhook_url` - The webhook url.
+            * `general_webhook` - The general webhook.
+            * `receiver_channels` - The list of the receiver channels.
+            * `receiver_names` - List of the receiver names.
+            * `receiver_type` - The receiver type.
+            * `start_time` - The start time.
+        * `rule_node` - The rule node.
+            * `children` - The children of the rule node.
+                * `type` - The type of the rule node.
+                * `value` - The value of the rule node.
+            * `type` - The type of the rule node.
+            * `value` - The value of the rule node.
     * `notify_type` - The notify group type.
     * `receivers` - List of IAM users to receive alerts.
+        * `alarm_content_template_id` - The alarm content template id.
+        * `alarm_webhook_at_users` - The alarm webhook at users.
+        * `alarm_webhook_integration_id` - The alarm webhook integration id.
+        * `alarm_webhook_integration_name` - The alarm webhook integration name.
+        * `alarm_webhook_is_at_all` - The alarm webhook is at all.
         * `end_time` - The end time.
+        * `general_webhook_body` - The webhook body.
+        * `general_webhook_headers` - The general webhook headers.
+            * `key` - The key of the header.
+            * `value` - The value of the header.
+        * `general_webhook_method` - The general webhook method.
+        * `general_webhook_url` - The webhook url.
+        * `general_webhook` - The general webhook.
         * `receiver_channels` - The list of the receiver channels.
         * `receiver_names` - List of the receiver names.
         * `receiver_type` - The receiver type.

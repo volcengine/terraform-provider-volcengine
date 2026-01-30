@@ -67,15 +67,49 @@ resource "volcengine_clb_rule" "foo" {
   server_group_id = volcengine_server_group.foo.id
   domain          = "test-volc123.com"
   url             = "/tftest"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
+}
+
+resource "volcengine_clb_rule" "foo_redirect" {
+  listener_id = volcengine_listener.foo.id
+  action_type = "Redirect"
+  description = "Redirect rule"
+  domain      = "example1.com"
+  redirect_config {
+    protocol    = "HTTP"
+    host        = "example3.com"
+    path        = "/test"
+    port        = "443"
+    status_code = "301"
+  }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `listener_id` - (Required, ForceNew) The ID of listener.
-* `server_group_id` - (Required) Server Group Id.
+* `action_type` - (Optional) The action type of Rule, valid values: `Forward`, `Redirect`.
 * `description` - (Optional) The description of the Rule.
 * `domain` - (Optional, ForceNew) The domain of Rule.
+* `redirect_config` - (Optional) The redirect configuration. Required when action_type is `Redirect`.
+* `server_group_id` - (Optional) Server Group Id. Required when action_type is Forward.
+* `tags` - (Optional) Tags.
 * `url` - (Optional, ForceNew) The Url of Rule.
+
+The `redirect_config` object supports the following:
+
+* `host` - (Optional) The redirect host, i.e. the domain name redirected by the rule.
+* `path` - (Optional) The redirect path.
+* `port` - (Optional) The redirect port, valid range: 1~65535.
+* `protocol` - (Optional) The redirect protocol. Valid values: `HTTP`, `HTTPS`.
+* `status_code` - (Optional) The redirect status code. Valid values: 301, 302, 307, 308.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

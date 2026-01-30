@@ -52,6 +52,7 @@ In addition to all arguments above, the following attributes are exported:
     * `modify_time` - The most recent modification time of the processing task.
     * `project_id` - The log project ID where the log to be delivered is located.
     * `project_name` - The name of the log item where the log to be delivered is located.
+    * `role_trn` - The role trn.
     * `shipper_end_time` - Delivery end time, millisecond timestamp. If not configured, it will keep delivering.
     * `shipper_id` - Deliver configuration ID.
     * `shipper_name` - Delivery configuration name.

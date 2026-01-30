@@ -78,15 +78,31 @@ The following arguments are supported:
 * `listener_id` - (Required) The Id of listener.
 * `ids` - (Optional) A list of Rule IDs.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `rules` - The collection of Rule query.
+    * `action_type` - The action type of Rule. values: `Forward`, `Redirect`.
     * `description` - The Description of Rule.
     * `domain` - The Domain of Rule.
     * `id` - The Id of Rule.
+    * `redirect_config` - The redirect configuration. When `action_type` is `Redirect`, this parameter is returned.
+        * `host` - The redirect host.
+        * `path` - The redirect path.
+        * `port` - The redirect port.
+        * `protocol` - The redirect protocol.
+        * `status_code` - The redirect status code.
     * `rule_id` - The Id of Rule.
     * `server_group_id` - The Id of Server Group.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `url` - The Url of Rule.
 
 

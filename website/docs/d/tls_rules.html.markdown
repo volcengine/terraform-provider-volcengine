@@ -11,17 +11,21 @@ Use this data source to query detailed information of tls rules
 ## Example Usage
 ```hcl
 data "volcengine_tls_rules" "default" {
-  project_id = "cc44f8b6-0328-4622-b043-023fca735cd4"
-  //rule_id = ""
-  //rule_name = ""
-  //topic_id = ""
-  //topic_name = ""
+  project_id = "39ed1cf8-dbf3-41c3-939d-999bab54313d"
+  topic_id   = "b600dc34-503f-42fc-8e32-953af55463d1"
+  rule_id    = "048dc010-6bb1-4189-858a-281d654d6686"
+  log_type   = "minimalist_log"
+  pause      = 0
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `project_id` - (Required) The project id.
+* `iam_project_name` - (Optional) The iam project name.
+* `log_type` - (Optional) The log type.
 * `output_file` - (Optional) File name where to save data source results.
+* `pause` - (Optional) Whether to pause collection configuration.
+* `project_id` - (Optional) The project id.
+* `project_name` - (Optional) The project name.
 * `rule_id` - (Optional) The rule id.
 * `rule_name` - (Optional) The rule name.
 * `topic_id` - (Optional) The topic id.

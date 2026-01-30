@@ -42,6 +42,14 @@ resource "volcengine_server_group" "foo" {
   load_balancer_id  = volcengine_clb.foo.id
   server_group_name = "acc-test-create"
   description       = "hello demo11"
+  type              = "instance"
+}
+
+resource "volcengine_server_group" "foo_ip" {
+  load_balancer_id  = volcengine_clb.foo.id
+  server_group_name = "acc-test-create-ip"
+  description       = "hello demo ip server group"
+  type              = "ip"
 }
 
 resource "volcengine_security_group" "foo" {
@@ -69,13 +77,32 @@ resource "volcengine_server_group_server" "foo" {
   port            = 80
   description     = "This is a acc test server"
 }
+
+resource "volcengine_server_group_server" "foo_eni" {
+  server_group_id = volcengine_server_group.foo.id
+  instance_id     = "eni-btgpz5my7ta85h0b2ur*****"
+  type            = "eni"
+  weight          = 100
+  port            = 8080
+  description     = "This is a acc test server use eni"
+}
+
+resource "volcengine_server_group_server" "foo_ip" {
+  server_group_id = volcengine_server_group.foo_ip.id
+  instance_id     = "192.168.*.*"
+  ip              = "192.168.*.*"
+  type            = "ip"
+  weight          = 80
+  port            = 400
+  description     = "This is a acc test server use ip"
+}
 ```
 ## Argument Reference
 The following arguments are supported:
-* `instance_id` - (Required, ForceNew) The ID of ecs instance or the network card bound to ecs instance.
+* `instance_id` - (Required, ForceNew) The ID of ecs instance or the network card bound to ecs instance. When the `type` is `ip`, this parameter is an IP address.
 * `port` - (Required) The port receiving request.
 * `server_group_id` - (Required, ForceNew) The ID of the ServerGroup.
-* `type` - (Required, ForceNew) The type of instance. Optional choice contains `ecs`, `eni`.
+* `type` - (Required, ForceNew) The type of instance. Optional choice contains `ecs`, `eni`, `ip`. When the `type` of `server_group_id` is `ip`, only `ip` is supported.
 * `description` - (Optional) The description of the instance.
 * `ip` - (Optional, ForceNew) The private ip of the instance.
 * `weight` - (Optional) The weight of the instance, range in 0~100.

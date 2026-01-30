@@ -11,11 +11,25 @@ Provides a resource to manage tls host group
 ## Example Usage
 ```hcl
 resource "volcengine_tls_host_group" "foo" {
-  host_group_name = "tfgroup"
-  host_group_type = "Label"
-  host_identifier = "tf-controller"
-  auto_update     = false
-  service_logging = false
+  host_group_name   = "tfgroup-test-1"
+  host_group_type   = "Label"
+  host_identifier   = "hostlable"
+  auto_update       = true
+  update_start_time = "00:00"
+  update_end_time   = "02:00"
+  service_logging   = false
+  iam_project_name  = "default"
+}
+
+resource "volcengine_tls_host_group" "foo_ip" {
+  host_group_name   = "tfgroup-ip-1"
+  host_group_type   = "IP"
+  host_ip_list      = ["192.168.0.1", "192.168.0.2", "192.168.0.3"]
+  auto_update       = true
+  update_start_time = "00:00"
+  update_end_time   = "02:00"
+  service_logging   = false
+  iam_project_name  = "default"
 }
 ```
 ## Argument Reference
@@ -33,12 +47,9 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `abnormal_heartbeat_status_count` - The abnormal heartbeat status count of host.
-* `agent_latest_version` - The latest version of log collector.
 * `create_time` - The create time of host group.
 * `host_count` - The count of host.
 * `modify_time` - The modify time of host group.
-* `normal_heartbeat_status_count` - The normal heartbeat status count of host.
 * `rule_count` - The rule count of host.
 
 
@@ -47,3 +58,4 @@ Tls Host Group can be imported using the id, e.g.
 ```
 $ terraform import volcengine_tls_host_group.default edf052s21s*******dc15
 ```
+

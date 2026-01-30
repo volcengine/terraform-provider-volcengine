@@ -85,13 +85,14 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `servers` - The server list of ServerGroup.
+    * `any_port_enabled` - Whether full port forwarding is enabled. Values: `on`, `off`.
     * `description` - The description of the instance.
     * `id` - The server id of instance in ServerGroup.
     * `instance_id` - The ID of ecs instance or the network card bound to ecs instance.
     * `ip` - The private ip of the instance.
-    * `port` - The port receiving request.
+    * `port` - The port receiving request. Return empty when `any_port_enabled` is `on`.
     * `server_id` - The server id of instance in ServerGroup.
-    * `type` - The type of instance. Optional choice contains `ecs`, `eni`.
+    * `type` - The type of instance. Optional choice contains `ecs`, `eni`, `ip`.
     * `weight` - The weight of the instance.
 * `total_count` - The total count of ServerGroupServer query.
 
