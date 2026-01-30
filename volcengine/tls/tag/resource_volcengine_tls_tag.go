@@ -1,6 +1,9 @@
 package tag
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
@@ -21,7 +24,7 @@ func ResourceVolcengineTlsTag() *schema.Resource {
 		Read:   resourceVolcengineTlsTagRead,
 		Delete: resourceVolcengineTlsTagDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceVolcengineTlsTagImport,
 		},
 		Schema: map[string]*schema.Schema{
 			"resource_id": {
@@ -73,4 +76,20 @@ func resourceVolcengineTlsTagRead(d *schema.ResourceData, meta interface{}) erro
 func resourceVolcengineTlsTagDelete(d *schema.ResourceData, meta interface{}) error {
 	service := NewTlsTagService(meta.(*ve.SdkClient))
 	return ve.DefaultDispatcher().Delete(service, d, ResourceVolcengineTlsTag())
+}
+
+func resourceVolcengineTlsTagImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	idParts := strings.Split(d.Id(), ":")
+	if len(idParts) != 2 {
+		return nil, fmt.Errorf("unexpected format of ID (%q), expected resource_id:resource_type", d.Id())
+	}
+
+	resourceId := idParts[0]
+	resourceType := idParts[1]
+
+	d.Set("resource_id", resourceId)
+	d.Set("resource_type", resourceType)
+	d.SetId(resourceId)
+
+	return []*schema.ResourceData{d}, nil
 }
