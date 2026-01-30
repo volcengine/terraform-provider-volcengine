@@ -30,6 +30,14 @@ resource "volcengine_server_group" "foo" {
   load_balancer_id = volcengine_clb.foo.id
   server_group_name = "acc-test-create"
   description = "hello demo11"
+  type = "instance"
+}
+
+resource "volcengine_server_group" "foo_ip" {
+  load_balancer_id = volcengine_clb.foo.id
+  server_group_name = "acc-test-create-ip"
+  description = "hello demo ip server group"
+  type = "ip"
 }
 
 resource "volcengine_security_group" "foo" {
@@ -56,4 +64,23 @@ resource "volcengine_server_group_server" "foo" {
   weight = 100
   port = 80
   description = "This is a acc test server"
+}
+
+resource "volcengine_server_group_server" "foo_eni" {
+  server_group_id = volcengine_server_group.foo.id
+  instance_id = "eni-btgpz5my7ta85h0b2ur*****"
+  type = "eni"
+  weight = 100
+  port = 8080
+  description = "This is a acc test server use eni"
+}
+
+resource "volcengine_server_group_server" "foo_ip" {
+  server_group_id = volcengine_server_group.foo_ip.id
+  instance_id = "192.168.*.*"
+  ip = "192.168.*.*"
+  type = "ip"
+  weight = 80
+  port = 400
+  description = "This is a acc test server use ip"
 }

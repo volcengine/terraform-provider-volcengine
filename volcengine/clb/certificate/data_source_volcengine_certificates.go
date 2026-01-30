@@ -89,6 +89,14 @@ func DataSourceVolcengineCertificates() *schema.Resource {
 							Computed:    true,
 							Description: "The domain name of the Certificate.",
 						},
+						"subject_alternative_names": {
+							Type: schema.TypeSet,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Computed:    true,
+							Description: "The subject alternative domain names of the Certificate.",
+						},
 						"project_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -102,6 +110,11 @@ func DataSourceVolcengineCertificates() *schema.Resource {
 							Set:         schema.HashString,
 							Computed:    true,
 							Description: "The ID list of the Listener.",
+						},
+						"service_managed": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether the Certificate is managed by the CLB service.",
 						},
 						"tags": ve.TagsSchemaComputed(),
 					},

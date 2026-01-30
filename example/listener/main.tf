@@ -48,6 +48,10 @@ resource "volcengine_listener" "foo" {
     method = "GET"
     uri = "/"
   }
+  tags  {
+    key = "k1"
+    value = "v1"
+  }
   enabled = "on"
 }
 
@@ -64,4 +68,36 @@ resource "volcengine_listener" "foo_tcp" {
   persistence_timeout = 100
   connection_drain_enabled = "on"
   connection_drain_timeout = 100
+}
+
+resource "volcengine_listener" "foo_https" {
+  load_balancer_id = volcengine_clb.foo.id
+  listener_name = "acc-test-listener-https"
+  protocol = "HTTPS"
+  port = 100
+  server_group_id = volcengine_server_group.foo.id
+  health_check {
+    enabled = "on"
+    interval = 10
+    timeout = 3
+    healthy_threshold = 5
+    un_healthy_threshold = 2
+    domain = "volcengine.com"
+    http_code = "http_2xx,http_3xx"
+    method = "GET"
+    uri = "/"
+  }
+  enabled = "on"
+  client_header_timeout = 80
+  client_body_timeout = 80
+  keepalive_timeout = 80
+  proxy_connect_timeout = 20
+  proxy_send_timeout = 1800
+  proxy_read_timeout = 1800
+  certificate_source = "clb"
+  certificate_id = "cert-mjpctunmog745smt1a******"
+  tags  {
+    key = "k1"
+    value = "v1"
+  }
 }

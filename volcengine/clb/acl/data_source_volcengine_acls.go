@@ -30,6 +30,7 @@ func DataSourceVolcengineAcls() *schema.Resource {
 				Optional:    true,
 				Description: "The ProjectName of Acl.",
 			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -99,6 +100,71 @@ func DataSourceVolcengineAcls() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The ProjectName of Acl.",
+						},
+						"service_managed": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "Whether the Acl is managed by service.",
+						},
+						"status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The status of the Acl.",
+						},
+						"tags": ve.TagsSchemaComputed(),
+						"acl_entries": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The acl entry list of the Acl.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"description": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The description of the AclEntry.",
+									},
+									"entry": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The address range of the IP entry.",
+									},
+								},
+							},
+						},
+						// 对应 DescribeAclAttributes API 的响应参数中的 Listeners 结构体
+						"listener_details": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The listener details of the Acl.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"listener_id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ID of the listener.",
+									},
+									"listener_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the listener.",
+									},
+									"protocol": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The protocol of the listener.",
+									},
+									"port": {
+										Type:        schema.TypeInt,
+										Computed:    true,
+										Description: "The port receiving request of the listener.",
+									},
+									"acl_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The control method of the listener for this Acl. Valid values: `black`, `white`.",
+									},
+								},
+							},
 						},
 					},
 				},

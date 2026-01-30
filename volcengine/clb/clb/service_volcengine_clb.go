@@ -31,6 +31,7 @@ func (s *VolcengineClbService) ReadResources(condition map[string]interface{}) (
 		results interface{}
 		ok      bool
 	)
+	// 使用分页查询获取所有CLB实例
 	data, err = ve.WithPageNumberQuery(condition, "PageSize", "PageNumber", 20, 1, func(m map[string]interface{}) ([]interface{}, error) {
 		action := "DescribeLoadBalancers"
 		logger.Debug(logger.ReqFormat, action, condition)
@@ -57,18 +58,22 @@ func (s *VolcengineClbService) ReadResources(condition map[string]interface{}) (
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.LoadBalancers is not Slice")
 		}
+		// 移除系统标签
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 	if err != nil {
 		return data, err
 	}
 
+	// 为每个CLB实例获取详细信息和计费信息
 	for _, value := range data {
 		clb, ok := value.(map[string]interface{})
 		if !ok {
 			return data, fmt.Errorf(" Clb is not map ")
 		}
 
+		// 获取CLB详细信息，包括EIP配置和IPv6带宽信息
 		eipAction := "DescribeLoadBalancerAttributes"
 		eipReq := map[string]interface{}{
 			"LoadBalancerId": clb["LoadBalancerId"],
@@ -92,10 +97,41 @@ func (s *VolcengineClbService) ReadResources(condition map[string]interface{}) (
 		}
 		clb["Ipv6AddressBandwidth"] = ipv6EipConfig
 
+		logTopicId, err := ve.ObtainSdkValue("Result.LogTopicId", *eipResp)
+		if err != nil {
+			return data, err
+		}
+		clb["LogTopicId"] = logTopicId
+
+		enabled, err := ve.ObtainSdkValue("Result.Enabled", *eipResp)
+		if err != nil {
+			return data, err
+		}
+		clb["Enabled"] = enabled
+
+		listeners, err := ve.ObtainSdkValue("Result.Listeners", *eipResp)
+		if err != nil {
+			return data, err
+		}
+		clb["Listeners"] = listeners
+
+		serverGroups, err := ve.ObtainSdkValue("Result.ServerGroups", *eipResp)
+		if err != nil {
+			return data, err
+		}
+		clb["ServerGroups"] = serverGroups
+
+		accessLog, err := ve.ObtainSdkValue("Result.AccessLog", *eipResp)
+		if err != nil {
+			return data, err
+		}
+		clb["AccessLog"] = accessLog
+
 		// `PostPaid` 实例不需查询续费相关信息
 		if billingType := clb["LoadBalancerBillingType"]; billingType == 2.0 {
 			continue
 		}
+		// 获取计费信息（仅对PrePaid类型）
 		billingAction := "DescribeLoadBalancersBilling"
 		billingReq := map[string]interface{}{
 			"LoadBalancerIds.1": clb["LoadBalancerId"],
@@ -266,6 +302,7 @@ func (VolcengineClbService) WithResourceResponseHandlers(clb map[string]interfac
 }
 
 func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateLoadBalancer",
@@ -296,11 +333,24 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 						"isp": {
 							TargetField: "ISP",
 						},
+						"security_protection_types": {
+							TargetField: "SecurityProtectionTypes",
+							ConvertType: ve.ConvertWithN,
+						},
 					},
 				},
 				"tags": {
 					TargetField: "Tags",
 					ConvertType: ve.ConvertListN,
+				},
+				"renew_type": {
+					Ignore: true,
+				},
+				"renew_period_times": {
+					Ignore: true,
+				},
+				"remain_renew_times": {
+					Ignore: true,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -315,6 +365,9 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 					delete(*call.SdkParam, "EipBillingConfig.ISP")
 					delete(*call.SdkParam, "EipBillingConfig.EipBillingType")
 					delete(*call.SdkParam, "EipBillingConfig.Bandwidth")
+					delete(*call.SdkParam, "EipBillingConfig.BandwidthPackageId")
+					delete(*call.SdkParam, "EipBillingConfig.SecurityProtectionTypes")
+					delete(*call.SdkParam, "EipBillingConfig.SecurityProtectionInstanceId")
 				}
 				if eipBillingType, exist := (*call.SdkParam)["EipBillingConfig.EipBillingType"]; exist {
 					ty := 0
@@ -336,7 +389,7 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				//创建clb
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
@@ -352,13 +405,78 @@ func (s *VolcengineClbService) CreateResource(resourceData *schema.ResourceData,
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
 
+	// 只有在创建 PrePaid 类型 CLB 且设置了有效的 renew_type 时才需要设置续费类型
+	if billingType, ok := resourceData.GetOk("load_balancer_billing_type"); ok {
+		if billingType.(string) == "PrePaid" {
+			if renewType, ok := resourceData.GetOk("renew_type"); ok && renewType.(string) != "" {
+				renewCallback := s.setLoadBalancerRenewal(resourceData)
+				callbacks = append(callbacks, renewCallback...)
+			}
+		}
+	}
+	return callbacks
+
+}
+func (s *VolcengineClbService) setLoadBalancerRenewal(resourceData *schema.ResourceData) []ve.Callback {
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "SetLoadBalancerRenewal",
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"renew_type": {
+					TargetField: "RenewType",
+					ForceGet:    true,
+					Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+						if i == nil {
+							return nil
+						}
+						renewType := i.(string)
+						switch renewType {
+						case "ManualRenew":
+							return 1
+						case "AutoRenew":
+							return 2
+						}
+						return i
+					},
+				},
+				"renew_period_times": {
+					TargetField: "RenewPeriodTimes",
+					ForceGet:    true,
+				},
+				"remain_renew_times": {
+					TargetField: "RemainRenewTimes",
+					ForceGet:    true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if len(*call.SdkParam) > 0 {
+					(*call.SdkParam)["LoadBalancerId"] = d.Id()
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+			Refresh: &ve.StateRefresh{
+				Target:  []string{"Active"},
+				Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
 
+	// 修改CLB基本属性
 	attributesCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyLoadBalancerAttributes",
@@ -379,8 +497,21 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 				"load_balancer_spec": {
 					TargetField: "LoadBalancerSpec",
 				},
+				"address_ip_version": {
+					TargetField: "AddressIpVersion",
+				},
+				"eni_ipv6_address": {
+					TargetField: "EniIpv6Address",
+				},
+				"bypass_security_group_enabled": {
+					TargetField: "BypassSecurityGroupEnabled",
+				},
+				"timestamp_remove_enabled": {
+					TargetField: "TimestampRemoveEnabled",
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				// PostPaidByLCU 类型不支持指定规格
 				oldType, _ := d.GetChange("load_balancer_billing_type")
 				if oldType == "PostPaidByLCU" {
 					delete(*call.SdkParam, "LoadBalancerSpec")
@@ -404,6 +535,65 @@ func (s *VolcengineClbService) ModifyResource(resourceData *schema.ResourceData,
 	}
 	callbacks = append(callbacks, attributesCallback)
 
+	// 处理计费类型变更
+	// 处理 renew_type 变更
+	if resourceData.HasChanges("renew_type", "renew_period_times", "remain_renew_times") && resourceData.Get("renew_type").(string) != "" {
+		renewalCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "SetLoadBalancerRenewal",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"renew_type": {
+						TargetField: "RenewType",
+						ForceGet:    true,
+						Convert: func(data *schema.ResourceData, i interface{}) interface{} {
+							if i == nil {
+								return nil
+							}
+							renewType := i.(string)
+							switch renewType {
+							case "ManualRenew":
+								return 1
+							case "AutoRenew":
+								return 2
+							}
+							return i
+						},
+					},
+					"renew_period_times": {
+						TargetField: "RenewPeriodTimes",
+						ForceGet:    true,
+					},
+					"remain_renew_times": {
+						TargetField: "RemainRenewTimes",
+						ForceGet:    true,
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if billType, ok := d.GetOk("load_balancer_billing_type"); ok && billType.(string) != "PrePaid" {
+						return false, fmt.Errorf("renew_type can only be set when load_balancer_billing_type is PrePaid")
+					}
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["LoadBalancerId"] = d.Id()
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Active"},
+					Timeout: resourceData.Timeout(schema.TimeoutUpdate),
+				},
+			},
+		}
+		callbacks = append(callbacks, renewalCallback)
+	}
 	if resourceData.HasChange("load_balancer_billing_type") {
 		billingTypeCallback := ve.Callback{
 			Call: ve.SdkCall{
@@ -553,6 +743,14 @@ func (s *VolcengineClbService) DatasourceResources(*schema.ResourceData, *schema
 				TargetField: "LoadBalancerIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"instance_ids": {
+				TargetField: "InstanceIds",
+				ConvertType: ve.ConvertWithN,
+			},
+			"instance_ips": {
+				TargetField: "InstanceIps",
+				ConvertType: ve.ConvertWithN,
+			},
 			"tags": {
 				TargetField: "TagFilters",
 				ConvertType: ve.ConvertListN,
@@ -677,6 +875,27 @@ func (s *VolcengineClbService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func (s *VolcengineClbService) UnsubscribeInfo(resourceData *schema.ResourceData, resource *schema.Resource) (*ve.UnsubscribeInfo, error) {

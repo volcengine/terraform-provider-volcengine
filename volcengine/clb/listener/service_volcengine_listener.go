@@ -59,6 +59,7 @@ func (s *VolcengineListenerService) ReadResources(condition map[string]interface
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.Listeners is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 }
@@ -155,7 +156,14 @@ func (s *VolcengineListenerService) RefreshResourceState(resourceData *schema.Re
 
 func (*VolcengineListenerService) WithResourceResponseHandlers(listener map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return listener, nil, nil
+		return listener, map[string]ve.ResponseConvert{
+			"CAEnabled": {
+				TargetField: "ca_enabled",
+			},
+			"CACertificateId": {
+				TargetField: "ca_certificate_id",
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 
@@ -244,7 +252,24 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 						"un_healthy_threshold": {
 							TargetField: "UnhealthyThreshold",
 						},
+						"uri": {
+							TargetField: "URI",
+						},
 					},
+				},
+				"port": {
+					TargetField: "Port",
+					ForceGet:    true,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+				"ca_enabled": {
+					TargetField: "CAEnabled",
+				},
+				"ca_certificate_id": {
+					TargetField: "CACertificateId",
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -270,6 +295,36 @@ func (s *VolcengineListenerService) CreateResource(resourceData *schema.Resource
 					}
 				}
 
+				// 4. Only Https and Http support
+				if protocol != "HTTP" && protocol != "HTTPS" {
+					httpSpecificParams := []string{
+						"ClientHeaderTimeout",
+						"ClientBodyTimeout",
+						"KeepaliveTimeout",
+						"ProxyConnectTimeout",
+						"ProxySendTimeout",
+						"ProxyReadTimeout",
+						"SendTimeout",
+					}
+					for _, param := range httpSpecificParams {
+						if _, ok := (*call.SdkParam)[param]; ok {
+							return false, fmt.Errorf("%s is only allowed for HTTP or HTTPS protocols", param)
+						}
+					}
+				}
+
+				// 5. Only Https support
+				if protocol != "HTTPS" {
+					httpsSpecificParams := []string{
+						"SecurityPolicyId",
+						"Http2Enabled",
+					}
+					for _, param := range httpsSpecificParams {
+						if _, ok := (*call.SdkParam)[param]; ok {
+							return false, fmt.Errorf("%s is only allowed for HTTPS protocols", param)
+						}
+					}
+				}
 				return true, nil
 			},
 			AfterLocked: s.refreshAclStatus(),
@@ -312,7 +367,7 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 			Err: err,
 		}}
 	}
-
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyListenerAttributes",
@@ -327,7 +382,16 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 						"un_healthy_threshold": {
 							TargetField: "UnhealthyThreshold",
 						},
+						"uri": {
+							TargetField: "URI",
+						},
 					},
+				},
+				"ca_enabled": {
+					TargetField: "CAEnabled",
+				},
+				"ca_certificate_id": {
+					TargetField: "CACertificateId",
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -343,6 +407,37 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 				// 2. certificate_id
 				if protocol != "HTTPS" && (*call.SdkParam)["CertificateId"] != nil {
 					return false, errors.New("certificate_id is only allowed for HTTPS")
+				}
+
+				// 3. Only Https and Http support
+				if protocol != "HTTP" && protocol != "HTTPS" {
+					httpSpecificParams := []string{
+						"ClientHeaderTimeout",
+						"ClientBodyTimeout",
+						"KeepaliveTimeout",
+						"ProxyConnectTimeout",
+						"ProxySendTimeout",
+						"ProxyReadTimeout",
+						"SendTimeout",
+					}
+					for _, param := range httpSpecificParams {
+						if _, ok := (*call.SdkParam)[param]; ok {
+							return false, fmt.Errorf("%s is only allowed for HTTP or HTTPS protocols", param)
+						}
+					}
+				}
+
+				// 4. Only Https support
+				if protocol != "HTTPS" {
+					httpsSpecificParams := []string{
+						"SecurityPolicyId",
+						"Http2Enabled",
+					}
+					for _, param := range httpsSpecificParams {
+						if _, ok := (*call.SdkParam)[param]; ok {
+							return false, fmt.Errorf("%s is only allowed for HTTPS protocols", param)
+						}
+					}
 				}
 
 				(*call.SdkParam)["ListenerId"] = d.Id()
@@ -385,7 +480,12 @@ func (s *VolcengineListenerService) ModifyResource(resourceData *schema.Resource
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	// 更新tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "listener", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineListenerService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -448,6 +548,15 @@ func (s *VolcengineListenerService) DatasourceResources(*schema.ResourceData, *s
 				TargetField: "ListenerIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "ListenerName",
 		IdField:      "ListenerId",
@@ -456,6 +565,15 @@ func (s *VolcengineListenerService) DatasourceResources(*schema.ResourceData, *s
 			"ListenerId": {
 				TargetField: "id",
 				KeepDefault: true,
+			},
+			"CAEnabled": {
+				TargetField: "ca_enabled",
+			},
+			"CACertificateId": {
+				TargetField: "ca_certificate_id",
+			},
+			"HealthCheck.Port": {
+				TargetField: "helth_check_port",
 			},
 			"HealthCheck.Enabled": {
 				TargetField: "health_check_enabled",
@@ -516,6 +634,27 @@ func (s *VolcengineListenerService) queryLoadBalancerId(listenerId string) (stri
 		return "", err
 	}
 	return clbId.(string), nil
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

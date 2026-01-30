@@ -55,4 +55,22 @@ resource "volcengine_clb_rule" "foo" {
   server_group_id = volcengine_server_group.foo.id
   domain = "test-volc123.com"
   url = "/tftest"
+  tags {
+    key = "k1"
+    value = "v1"
+  }
+}
+
+resource "volcengine_clb_rule" "foo_redirect" {
+  listener_id = volcengine_listener.foo.id
+  action_type = "Redirect"
+  description = "Redirect rule"
+  domain = "example1.com"
+  redirect_config {
+    protocol = "HTTP"
+    host = "example3.com"
+    path = "/test"
+    port = "443"
+    status_code = "301"
+  }
 }

@@ -139,12 +139,38 @@ func (VolcengineRuleService) WithResourceResponseHandlers(rule map[string]interf
 }
 
 func (s *VolcengineRuleService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	// 查询 LoadBalancerId
-	clbId, err := s.queryLoadBalancerId(resourceData.Get("server_group_id").(string))
-	if err != nil {
-		return []ve.Callback{{
-			Err: err,
-		}}
+	var clbId string
+	var err error
+
+	// 验证action_type和server_group_id的组合
+	actionType := resourceData.Get("action_type").(string)
+	if actionType == "" {
+		actionType = "Forward"
+	}
+
+	if actionType == "Forward" {
+		serverGroupId := resourceData.Get("server_group_id").(string)
+		if serverGroupId == "" {
+			return []ve.Callback{{
+				Err: fmt.Errorf("server_group_id is required when action_type is Forward"),
+			}}
+		}
+
+		// 查询 LoadBalancerId
+		clbId, err = s.queryLoadBalancerId(serverGroupId)
+		if err != nil {
+			return []ve.Callback{{
+				Err: err,
+			}}
+		}
+	} else {
+		// 对于Redirect类型，使用 listener_id 查询 LoadBalancerId，在规则创建期间，需要锁定 clb
+		clbId, err = s.queryLoadBalancerIdByListenerId(resourceData.Get("listener_id").(string))
+		if err != nil {
+			return []ve.Callback{{
+				Err: err,
+			}}
+		}
 	}
 
 	callback := ve.Callback{
@@ -164,6 +190,49 @@ func (s *VolcengineRuleService) CreateResource(resourceData *schema.ResourceData
 				"description": {
 					TargetField: "Rules.1.Description",
 				},
+				"action_type": {
+					TargetField: "Rules.1.ActionType",
+				},
+				"tags": {
+					TargetField: "Rules.1.Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				actionType := d.Get("action_type").(string)
+				if actionType == "" {
+					actionType = "Forward"
+				}
+
+				// 如果是重定向类型，添加重定向配置
+				if actionType == "Redirect" {
+					if redirectConfig, ok := d.GetOk("redirect_config"); ok {
+						configs := redirectConfig.([]interface{})
+						if len(configs) > 0 && configs[0] != nil {
+							config := configs[0].(map[string]interface{})
+
+							if protocol, ok := config["protocol"].(string); ok && protocol != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Protocol"] = protocol
+							}
+							if host, ok := config["host"].(string); ok && host != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Host"] = host
+							}
+							if path, ok := config["path"].(string); ok && path != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Path"] = path
+							}
+							if port, ok := config["port"].(string); ok && port != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Port"] = port
+							}
+							if statusCode, ok := config["status_code"].(string); ok && statusCode != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.StatusCode"] = statusCode
+							}
+						}
+					} else {
+						return false, fmt.Errorf("redirect_config is required when action_type is Redirect")
+					}
+				}
+
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -190,12 +259,38 @@ func (s *VolcengineRuleService) CreateResource(resourceData *schema.ResourceData
 }
 
 func (s *VolcengineRuleService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	// 查询 LoadBalancerId
-	clbId, err := s.queryLoadBalancerId(resourceData.Get("server_group_id").(string))
-	if err != nil {
-		return []ve.Callback{{
-			Err: err,
-		}}
+	var callbacks []ve.Callback
+	var clbId string
+	var err error
+
+	actionType := resourceData.Get("action_type").(string)
+	if actionType == "" {
+		actionType = "Forward"
+	}
+
+	if actionType == "Forward" {
+		serverGroupId := resourceData.Get("server_group_id").(string)
+		if serverGroupId == "" {
+			return []ve.Callback{{
+				Err: fmt.Errorf("server_group_id is required when action_type is Forward"),
+			}}
+		}
+
+		// 查询 LoadBalancerId
+		clbId, err = s.queryLoadBalancerId(serverGroupId)
+		if err != nil {
+			return []ve.Callback{{
+				Err: err,
+			}}
+		}
+	} else {
+		// 对于Redirect类型，使用 listener_id 查询 Load	BalancerId，在规则修改期间，需要锁定 clb
+		clbId, err = s.queryLoadBalancerIdByListenerId(resourceData.Get("listener_id").(string))
+		if err != nil {
+			return []ve.Callback{{
+				Err: err,
+			}}
+		}
 	}
 
 	callback := ve.Callback{
@@ -203,16 +298,52 @@ func (s *VolcengineRuleService) ModifyResource(resourceData *schema.ResourceData
 			Action:      "ModifyRules",
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
+				"listener_id": {
+					TargetField: "ListenerId",
+					ForceGet:    true,
+				},
 				"server_group_id": {
 					TargetField: "Rules.1.ServerGroupId",
 				},
 				"description": {
 					TargetField: "Rules.1.Description",
 				},
+				"action_type": {
+					TargetField: "Rules.1.ActionType",
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Rules.1.RuleId"] = d.Id()
-				(*call.SdkParam)["ListenerId"] = d.Get("listener_id")
+				actionType := d.Get("action_type").(string)
+
+				// 如果是重定向类型，添加重定向配置
+				if actionType == "Redirect" {
+					if redirectConfig, ok := d.GetOk("redirect_config"); ok {
+						configs := redirectConfig.([]interface{})
+						if len(configs) > 0 && configs[0] != nil {
+							config := configs[0].(map[string]interface{})
+
+							if protocol, ok := config["protocol"].(string); ok && protocol != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Protocol"] = protocol
+							}
+							if host, ok := config["host"].(string); ok && host != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Host"] = host
+							}
+							if path, ok := config["path"].(string); ok && path != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Path"] = path
+							}
+							if port, ok := config["port"].(string); ok && port != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.Port"] = port
+							}
+							if statusCode, ok := config["status_code"].(string); ok && statusCode != "" {
+								(*call.SdkParam)["Rules.1.RedirectConfig.StatusCode"] = statusCode
+							}
+						}
+					} else {
+						return false, fmt.Errorf("redirect_config is required when action_type is Redirect")
+					}
+				}
+
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -231,16 +362,44 @@ func (s *VolcengineRuleService) ModifyResource(resourceData *schema.ResourceData
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+
+	// 更新 Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "rule", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (s *VolcengineRuleService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+	var clbId string
+	var err error
+
+	actionType := resourceData.Get("action_type").(string)
+	if actionType == "" {
+		actionType = "Forward"
+	}
+
 	// 查询 LoadBalancerId
-	clbId, err := s.queryLoadBalancerId(resourceData.Get("server_group_id").(string))
-	if err != nil {
-		return []ve.Callback{{
-			Err: err,
-		}}
+	if actionType == "Forward" {
+		clbId, err = s.queryLoadBalancerId(resourceData.Get("server_group_id").(string))
+		if err != nil {
+			return []ve.Callback{
+				{
+					Err: err,
+				},
+			}
+		}
+	} else {
+		// 对于Redirect类型，使用 listener_id 查询 LoadBalancerId
+		clbId, err = s.queryLoadBalancerIdByListenerId(resourceData.Get("listener_id").(string))
+		if err != nil {
+			return []ve.Callback{
+				{
+					Err: err,
+				},
+			}
+		}
 	}
 
 	callback := ve.Callback{
@@ -293,6 +452,15 @@ func (s *VolcengineRuleService) DatasourceResources(*schema.ResourceData, *schem
 			"ids": {
 				TargetField: "RuleIds",
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		IdField:      "RuleId",
 		CollectField: "rules",
@@ -319,6 +487,23 @@ func (s *VolcengineRuleService) queryLoadBalancerId(serverGroupId string) (strin
 		return "", err
 	}
 	clbId, err := ve.ObtainSdkValue("Result.LoadBalancerId", *serverGroupResp)
+	if err != nil {
+		return "", err
+	}
+	return clbId.(string), nil
+}
+
+func (s *VolcengineRuleService) queryLoadBalancerIdByListenerId(listenerId string) (string, error) {
+	// 使用 listener_id 查询 LoadBalancerId
+	// 原因：当 action_type 为 Redirect 时，server_group_id 不再是 Required 参数，而 listener_id 是唯一的
+	action := "DescribeListenerAttributes"
+	listenerResp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &map[string]interface{}{
+		"ListenerId": listenerId,
+	})
+	if err != nil {
+		return "", err
+	}
+	clbId, err := ve.ObtainSdkValue("Result.LoadBalancerId", *listenerResp)
 	if err != nil {
 		return "", err
 	}

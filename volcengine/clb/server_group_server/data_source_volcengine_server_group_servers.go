@@ -65,7 +65,7 @@ func DataSourceVolcengineServerGroupServers() *schema.Resource {
 						"type": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The type of instance. Optional choice contains `ecs`, `eni`.",
+							Description: "The type of instance. Optional choice contains `ecs`, `eni`, `ip`.",
 						},
 						"weight": {
 							Type:        schema.TypeInt,
@@ -77,10 +77,15 @@ func DataSourceVolcengineServerGroupServers() *schema.Resource {
 							Computed:    true,
 							Description: "The private ip of the instance.",
 						},
+						"any_port_enabled": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Whether full port forwarding is enabled. Values: `on`, `off`.",
+						},
 						"port": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The port receiving request.",
+							Description: "The port receiving request. Return empty when `any_port_enabled` is `on`.",
 						},
 						"description": {
 							Type:        schema.TypeString,
