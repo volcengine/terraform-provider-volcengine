@@ -8,7 +8,7 @@ import (
 /*
 
 Import
-The AlbAccessLog is not support import.
+The TlsAccount is not support import.
 
 */
 
@@ -17,9 +17,6 @@ func ResourceVolcengineTlsAccount() *schema.Resource {
 		Create: resourceVolcengineTlsAccountCreate,
 		Read:   resourceVolcengineTlsAccountRead,
 		Delete: resourceVolcengineTlsAccountDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 			"arch_version": {
 				Type:        schema.TypeString,

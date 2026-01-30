@@ -8,7 +8,7 @@ import (
 /*
 
 Import
-The AlbAccessLog is not support import.
+The TlsShard is not support import.
 
 */
 
@@ -18,9 +18,6 @@ func ResourceVolcengineTlsShard() *schema.Resource {
 		Read:   resourceVolcengineTlsShardRead,
 		Update: resourceVolcengineTlsShardUpdate,
 		Delete: resourceVolcengineTlsShardDelete,
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
 		Schema: map[string]*schema.Schema{
 			"topic_id": {
 				Type:        schema.TypeString,

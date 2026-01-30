@@ -12,10 +12,7 @@ import (
 /*
 
 Import
-Tls Host can be imported using the host_group_id:ip, e.g.
-```
-$ terraform import volcengine_tls_host.default edf051ed-3c46-49:1.1.1.1
-```
+The TlsHost is not support import.
 
 */
 
