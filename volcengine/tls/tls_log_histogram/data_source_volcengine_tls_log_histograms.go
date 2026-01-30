@@ -1,4 +1,4 @@
-package log_histogram
+package tls_log_histogram
 
 import (
 	"fmt"

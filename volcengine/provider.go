@@ -15,9 +15,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_webhook_integration"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_context"
-	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_histogram"
 	tlsLog "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_search"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_bound_host_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tls_log_histogram"
 	tos_bucket_logging "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_logging"
 	tos_bucket_object_lock_configuration "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_object_lock_configuration"
 	tos_bucket_replication "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_replication"
@@ -890,7 +890,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_etl_tasks":                  etl_task.DataSourceVolcengineEtlTasks(),
 			"volcengine_tls_shippers":                   shipper.DataSourceVolcengineShippers(),
 			"volcengine_tls_consumer_groups":            consumer_group.DataSourceVolcengineConsumerGroups(),
-			"volcengine_tls_histograms":                 log_histogram.DataSourceVolcengineTlsHistograms(),
+			"volcengine_tls_histograms":                 tls_log_histogram.DataSourceVolcengineTlsHistograms(),
 			"volcengine_tls_search_logs":                tlsLog.DataSourceVolcengineTlsSearchLogs(),
 			"volcengine_tls_log_contexts":               log_context.DataSourceVolcengineTlsLogContexts(),
 			"volcengine_tls_download_tasks":             tlsDownloadTask.DataSourceVolcengineTlsDownloadTasks(),
