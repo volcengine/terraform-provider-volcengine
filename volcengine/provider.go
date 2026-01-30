@@ -13,6 +13,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_content_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_webhook_integration"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_bound_host_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tls_search_trace"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	tos_bucket_logging "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_logging"
@@ -406,7 +407,7 @@ import (
 	tlsShard "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
 	tls_tag "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tag"
 	tls_tag_resource "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tag_resource"
-	tls_trace "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/trace"
+	tls_trace "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tls_describe_trace"
 	tls_trace_instance "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/trace_instance"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_notify_group"
@@ -896,7 +897,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_tags":            tls_tag.DataSourceVolcengineTlsTags(),
 			"volcengine_tls_tag_resources":   tls_tag_resource.DataSourceVolcengineTlsTagResources(),
 			"volcengine_tls_describe_traces": tls_trace.DataSourceVolcengineTlsDescribeTraces(),
-			"volcengine_tls_search_traces":   tls_trace.DataSourceVolcengineTlsSearchTraces(),
+			"volcengine_tls_search_traces":   tls_describe_trace.DataSourceVolcengineTlsSearchTraces(),
 
 			// ================ Cloudfs ================
 			"volcengine_cloudfs_quotas":       cloudfs_quota.DataSourceVolcengineCloudfsQuotas(),

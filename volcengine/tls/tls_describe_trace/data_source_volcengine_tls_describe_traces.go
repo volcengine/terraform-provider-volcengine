@@ -1,4 +1,4 @@
-package trace
+package tls_describe_trace
 
 // Update
 import (

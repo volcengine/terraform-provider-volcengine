@@ -1,8 +1,9 @@
-package trace
+package tls_describe_trace
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tls_describe_trace"
 )
 
 func DataSourceVolcengineTlsSearchTraces() *schema.Resource {
@@ -175,6 +176,6 @@ func DataSourceVolcengineTlsSearchTraces() *schema.Resource {
 }
 
 func dataSourceVolcengineTlsSearchTracesRead(d *schema.ResourceData, meta interface{}) error {
-	service := NewTlsTraceService(meta.(*ve.SdkClient))
+	service := tls_describe_trace.NewTlsTraceService(meta.(*ve.SdkClient))
 	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineTlsSearchTraces())
 }
