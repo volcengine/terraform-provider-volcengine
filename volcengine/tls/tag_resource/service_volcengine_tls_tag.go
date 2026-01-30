@@ -162,6 +162,8 @@ func (v *VolcengineTlsTagService) ReadResource(resourceData *schema.ResourceData
 	var ResourcesList []string
 	var TagKeyList []string
 	var ResourceType string
+	var tags []interface{}
+
 	for _, v := range results {
 		if tagData, ok := v.(map[string]interface{}); ok {
 			if resourceId, ok := tagData["ResourceId"].(interface{}); ok {
@@ -174,7 +176,18 @@ func (v *VolcengineTlsTagService) ReadResource(resourceData *schema.ResourceData
 					TagKeyList = append(TagKeyList, key)
 				}
 			}
-			ResourceType = tagData["ResourceType"].(string)
+			if rt, ok := tagData["ResourceType"].(string); ok {
+				ResourceType = rt
+			}
+
+			t := map[string]interface{}{}
+			if k, ok := tagData["TagKey"].(string); ok {
+				t["key"] = k
+			}
+			if val, ok := tagData["TagValue"].(string); ok {
+				t["value"] = val
+			}
+			tags = append(tags, t)
 		}
 	}
 
@@ -185,6 +198,7 @@ func (v *VolcengineTlsTagService) ReadResource(resourceData *schema.ResourceData
 	data["ResourceType"] = ResourceType
 	data["ResourcesList"] = ResourcesList
 	data["TagKeyList"] = TagKeyList
+	data["tags"] = tags
 
 	logger.Debug(logger.ReqFormat, "data", data)
 
