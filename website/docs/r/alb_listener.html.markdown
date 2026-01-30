@@ -107,7 +107,7 @@ The following arguments are supported:
 * `certificate_source` - (Optional) The source of the certificate. Valid values: `alb`, `cert_center`. Default is `alb`.
 * `customized_cfg_id` - (Optional) Personalized configuration ID, with a value of " " when not bound.
 * `description` - (Optional) The description of the Listener.
-* `domain_extensions` - (Optional) The domain extensions of the Listener.
+* `domain_extensions` - (Optional) The domain extensions of the Listener. Only HTTPS listener is effective.
 * `enable_http2` - (Optional) The HTTP2 feature switch,valid value is on or off. Default is `off`.
 * `enable_quic` - (Optional) The QUIC feature switch,valid value is on or off. Default is `off`.
 * `enabled` - (Optional) The enable status of the Listener. Optional choice contains `on`, `off`. Default is `on`.

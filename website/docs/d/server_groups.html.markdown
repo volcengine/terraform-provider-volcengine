@@ -54,16 +54,30 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of ServerGroup.
 * `output_file` - (Optional) File name where to save data source results.
 * `server_group_name` - (Optional) The name of the ServerGroup.
+* `tags` - (Optional) Tags.
+* `type` - (Optional) The type of ServerGroup. Valid values: `instance`, `ip`.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `groups` - The collection of ServerGroup query.
-    * `address_ip_version` - The address ip version of the ServerGroup.
+    * `address_ip_version` - The address IP version of the ServerGroup.
+    * `any_port_enabled` - Whether full port forwarding is enabled.
     * `create_time` - The create time of the ServerGroup.
     * `description` - The description of the ServerGroup.
     * `id` - The ID of the ServerGroup.
+    * `listeners` - The listeners of the ServerGroup.
+    * `load_balancer_id` - The ID of the LoadBalancer.
     * `server_group_id` - The ID of the ServerGroup.
     * `server_group_name` - The name of the ServerGroup.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
+    * `type` - The type of the ServerGroup.
     * `update_time` - The update time of the ServerGroup.
 * `total_count` - The total count of ServerGroup query.
 

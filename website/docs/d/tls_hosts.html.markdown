@@ -11,7 +11,7 @@ Use this data source to query detailed information of tls hosts
 ## Example Usage
 ```hcl
 data "volcengine_tls_hosts" "default" {
-  host_group_id = "527102e2-1e4f-45f4-a990-751152125da7"
+  host_group_id = "2123af96-d057-4234-8f34-6fae9c9da6d0"
 }
 ```
 ## Argument Reference

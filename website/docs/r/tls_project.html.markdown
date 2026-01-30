@@ -11,18 +11,24 @@ Provides a resource to manage tls project
 ## Example Usage
 ```hcl
 resource "volcengine_tls_project" "foo" {
-  project_name     = "tf-test"
+  project_name     = "tf-project-m"
   description      = "tf-desc"
+  region           = "cn-guilin-boe"
   iam_project_name = "default"
   tags {
     key   = "k1"
     value = "v1"
+  }
+  tags {
+    key   = "k2"
+    value = "v3"
   }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `project_name` - (Required) The name of the tls project.
+* `region` - (Required, ForceNew) The region of the tls project.
 * `description` - (Optional) The description of the tls project.
 * `iam_project_name` - (Optional) The IAM project name of the tls project.
 * `tags` - (Optional) Tags.
@@ -35,9 +41,7 @@ The `tags` object supports the following:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
-* `create_time` - The create time of the tls project.
-* `inner_net_domain` - The inner net domain of the tls project.
-* `topic_count` - The count of topics in the tls project.
+
 
 
 ## Import

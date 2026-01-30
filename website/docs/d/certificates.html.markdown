@@ -53,6 +53,8 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The ID of the Certificate.
     * `listeners` - The ID list of the Listener.
     * `project_name` - The ProjectName of the Certificate.
+    * `service_managed` - Whether the Certificate is managed by the CLB service.
+    * `subject_alternative_names` - The subject alternative domain names of the Certificate.
     * `tags` - Tags.
         * `key` - The Key of Tags.
         * `value` - The Value of Tags.

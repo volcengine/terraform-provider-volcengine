@@ -122,12 +122,14 @@ resource "volcengine_vpc_ipv6_address_bandwidth" "foo" {
 The following arguments are supported:
 * `subnet_id` - (Required, ForceNew) The id of the Subnet.
 * `type` - (Required, ForceNew) The type of the CLB. And optional choice contains `public` or `private`.
-* `address_ip_version` - (Optional, ForceNew) The address ip version of the Clb. Valid values: `ipv4`, `DualStack`. Default is `ipv4`.
+* `address_ip_version` - (Optional) The address ip version of the Clb. Valid values: `ipv4`, `DualStack`. Default is `ipv4`.
 When the value of this field is `DualStack`, the type of the CLB must be `private`, and suggest using a combination of resource `volcengine_vpc_ipv6_gateway` and `volcengine_vpc_ipv6_address_bandwidth` to achieve ipv6 public network access function.
+* `bypass_security_group_enabled` - (Optional) Whether the CLB instance enables the "Allow Backend Security Group" function. value range: `on`, `off`.
 * `description` - (Optional) The description of the CLB.
 * `eip_billing_config` - (Optional, ForceNew) The billing configuration of the EIP which automatically associated to CLB. This field is valid when the type of CLB is `public`.When the type of the CLB is `private`, suggest using a combination of resource `volcengine_eip_address` and `volcengine_eip_associate` to achieve public network access function.
+* `eni_address_num` - (Optional, ForceNew) The number of private IPv4 addresses for the CLB instance. This parameter is valid only when the type parameter is set to private and eni_address is not passed in.
 * `eni_address` - (Optional, ForceNew) The eni address of the CLB.
-* `eni_ipv6_address` - (Optional, ForceNew) The eni ipv6 address of the Clb.
+* `eni_ipv6_address` - (Optional) The eni ipv6 address of the Clb.
 * `load_balancer_billing_type` - (Optional) The billing type of the CLB, valid values: `PostPaid`, `PrePaid`, `PostPaidByLCU`. Default is `PostPaid`.
 * `load_balancer_name` - (Optional) The name of the CLB.
 * `load_balancer_spec` - (Optional) The specification of the CLB, the value can be `small_1`, `small_2`, `medium_1`, `medium_2`, `large_1`, `large_2`. When the value of the `load_balancer_billing_type` is `PostPaidByLCU`, this field does not need to be specified.
@@ -137,15 +139,23 @@ When the value of this field is `DualStack`, the type of the CLB must be `privat
 * `period` - (Optional) The period of the NatGateway, the valid value range in 1~9 or 12 or 24 or 36. Default value is 12. The period unit defaults to `Month`.This field is only effective when creating a PrePaid NatGateway. When importing resources, this attribute will not be imported. If this attribute is set, please use lifecycle and ignore_changes ignore changes in fields.
 * `project_name` - (Optional) The ProjectName of the CLB.
 * `region_id` - (Optional, ForceNew) The region of the request.
+* `remain_renew_times` - (Optional) The remain renew times of the CLB. When the value of the renew_type is `AutoRenew`, this field is effective. Valid values: `-1`, `1~100`. The `-1` indicates unlimited automatic renewals.
+* `renew_period_times` - (Optional) The renew period times of the CLB. When the value of the renew_type is `AutoRenew`, this field is effective. Valid values: `1`, `2`, `3`, `6`, `12`.
+* `renew_type` - (Optional) The renew type of the CLB. When the value of the load_balancer_billing_type is `PrePaid`, the query returns this field. Valid values: `AutoRenew`, `ManualRenew`.
 * `slave_zone_id` - (Optional) The slave zone ID of the CLB.
 * `tags` - (Optional) Tags.
+* `timestamp_remove_enabled` - (Optional) Whether to enable the function of clearing the timestamp of TCP/HTTP/HTTPS packets (i.e., the time stamp). value range: `on`, `off`.
 * `vpc_id` - (Optional, ForceNew) The id of the VPC.
+* `zone_type` - (Optional, ForceNew) The zone type of the CLB. And optional choice contains `single` or `active-standby`.
 
 The `eip_billing_config` object supports the following:
 
 * `eip_billing_type` - (Required, ForceNew) The billing type of the EIP which automatically assigned to CLB. And optional choice contains `PostPaidByBandwidth` or `PostPaidByTraffic` or `PrePaid`.When creating a `PrePaid` public CLB, this field must be specified as `PrePaid` simultaneously.When the LoadBalancerBillingType changes from `PostPaid` to `PrePaid`, please manually modify the value of this field to `PrePaid` simultaneously.
 * `isp` - (Required, ForceNew) The ISP of the EIP which automatically associated to CLB, the value can be `BGP` or `ChinaMobile` or `ChinaUnicom` or `ChinaTelecom` or `SingleLine_BGP` or `Static_BGP` or `Fusion_BGP`.
+* `bandwidth_package_id` - (Optional, ForceNew) The ID of the shared bandwidth package that the EIP is to be added to. Only valid when the eip_billing_type is `PostPaidByBandwidth` or `PostPaidByTraffic`.
 * `bandwidth` - (Optional) The peek bandwidth of the EIP which automatically assigned to CLB.
+* `security_protection_instance_id` - (Optional, ForceNew) The ID of the DDoS native protection (Enterprise Edition) instance.
+* `security_protection_types` - (Optional, ForceNew) The security protection types of the EIP. Only valid when the eip_billing_type is `PostPaidByBandwidth` or `PostPaidByTraffic`.
 
 The `tags` object supports the following:
 
@@ -158,7 +168,6 @@ In addition to all arguments above, the following attributes are exported:
 * `eip_address` - The Eip address of the Clb.
 * `eip_id` - The Eip ID of the Clb.
 * `ipv6_eip_id` - The Ipv6 Eip ID of the Clb.
-* `renew_type` - The renew type of the CLB. When the value of the load_balancer_billing_type is `PrePaid`, the query returns this field.
 
 
 ## Import

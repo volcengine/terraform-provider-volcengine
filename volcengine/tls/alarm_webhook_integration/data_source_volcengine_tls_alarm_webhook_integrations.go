@@ -17,13 +17,11 @@ func DataSourceVolcengineTlsAlarmWebhookIntegrations() *schema.Resource {
 			"webhook_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "The name of the webhook integration. Fuzzy matching is supported.",
 			},
 			"webhook_type": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "The type of the webhook integration.",
 			},
 			"output_file": {

@@ -35,9 +35,12 @@ resource "volcengine_alb_listener_domain_extension" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `certificate_id` - (Required) Server certificate used for the domain name.
 * `domain` - (Required) The domain name. The maximum number of associated domain names for an HTTPS listener is 20, with a value range of 1 to 20.
 * `listener_id` - (Required, ForceNew) The listener id. Only HTTPS listener is effective.
+* `cert_center_certificate_id` - (Optional) The server certificate ID used by the domain name. Valid when the certificate_source is `cert_center`.
+* `certificate_id` - (Optional) Server certificate used for the domain name. Valid when the certificate_source is `alb`.
+* `certificate_source` - (Optional) The source of the certificate. Valid values: `alb`, `cert_center`, `pca_leaf`. Default is `alb`.
+* `pca_leaf_certificate_id` - (Optional) The server certificate ID used by the domain name. Valid when the certificate source is `pca_leaf`.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

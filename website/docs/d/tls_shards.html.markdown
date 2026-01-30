@@ -11,7 +11,7 @@ Use this data source to query detailed information of tls shards
 ## Example Usage
 ```hcl
 data "volcengine_tls_shards" "default" {
-  topic_id = "edf051ed-3c46-49ba-9339-bea628fedc15"
+  topic_id = "b600dc34-503f-42fc-8e32-953af55463d1"
 }
 ```
 ## Argument Reference

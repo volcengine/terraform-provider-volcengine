@@ -11,7 +11,7 @@ Use this data source to query detailed information of tls indexes
 ## Example Usage
 ```hcl
 data "volcengine_tls_indexes" "default" {
-  ids = ["7ce12237-6670-44a7-9d79-2e36961586e6"]
+  ids = ["9b756385-1dfb-4306-a094-0c88e04b34a5"]
 }
 ```
 ## Argument Reference
@@ -23,6 +23,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 * `tls_indexes` - The collection of tls index query.
     * `create_time` - The create time of the tls index.
+    * `enable_auto_index` - Whether to enable auto index.
     * `full_text` - The FullText index of the tls topic.
         * `case_sensitive` - Whether the FullText index is case sensitive.
         * `delimiter` - The delimiter of the FullText index.
@@ -43,6 +44,7 @@ In addition to all arguments above, the following attributes are exported:
         * `key` - The key of the KeyValue index.
         * `sql_flag` - Whether the filed is enabled for analysis.
         * `value_type` - The type of value.
+    * `max_text_len` - The max text length of the tls index.
     * `modify_time` - The modify time of the tls index.
     * `topic_id` - The topic id of the tls index.
     * `user_inner_key_value` - The reserved field index configuration of the tls topic.
