@@ -1,4 +1,4 @@
-package log
+package log_search
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"

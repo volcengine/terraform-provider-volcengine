@@ -1,8 +1,9 @@
-package host_group
+package host_group_rule
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group"
 )
 
 func DataSourceVolcengineTlsHostGroupRules() *schema.Resource {
@@ -223,7 +224,7 @@ func DataSourceVolcengineTlsHostGroupRules() *schema.Resource {
 }
 
 func dataSourceVolcengineTlsHostGroupRulesRead(d *schema.ResourceData, meta interface{}) error {
-	service := NewService(meta.(*ve.SdkClient))
+	service := host_group.NewService(meta.(*ve.SdkClient))
 	m := map[string]interface{}{
 		"host_group_id": d.Get("host_group_id"),
 	}

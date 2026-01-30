@@ -1,4 +1,4 @@
-package tls_describe_trace
+package describe_trace
 
 import (
 	"fmt"
