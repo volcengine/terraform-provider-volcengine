@@ -10,11 +10,9 @@ description: |-
 Use this data source to query detailed information of tls search traces
 ## Example Usage
 ```hcl
-data "volcengine_tls_search_traces" "default" {
-  trace_instance_id = "e7985388-7b6a-4a15-8013-23556598f0d3"
-  query {
-    limit = 10
-  }
+data "volcengine_tls_seracg_traces" "example" {
+  trace_instance_id = "b28b19bd-a539-453a-8919-fda3ef6a22fe"
+  # trace_id          = "c415ff6a-7141-4fe9-9e6c-9ddce4e4c189"
 }
 ```
 ## Argument Reference
