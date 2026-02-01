@@ -890,7 +890,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_etl_tasks":                  etl_task.DataSourceVolcengineEtlTasks(),
 			"volcengine_tls_shippers":                   shipper.DataSourceVolcengineShippers(),
 			"volcengine_tls_consumer_groups":            consumer_group.DataSourceVolcengineConsumerGroups(),
-			"volcengine_tls_log_histograms":             log_histogram.DataSourceVolcengineTlsHistograms(),
+			"volcengine_tls_log_histograms":             log_histogram.DataSourceVolcengineTlsLogHistograms(),
 			"volcengine_tls_log_searches":               log_search.DataSourceVolcengineTlsSearchLogs(),
 			"volcengine_tls_log_contexts":               log_context.DataSourceVolcengineTlsLogContexts(),
 			"volcengine_tls_download_tasks":             download_task.DataSourceVolcengineTlsDownloadTasks(),

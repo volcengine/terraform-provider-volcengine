@@ -7,7 +7,7 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineTlsHistograms() *schema.Resource {
+func DataSourceVolcengineTlsLogHistograms() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineTlsHistogramsRead,
 		Schema: map[string]*schema.Schema{
