@@ -16,8 +16,9 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_context"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_histogram"
-	tlsLog "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_search"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_search"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_bound_host_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/search_trace"
 	tos_bucket_logging "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_logging"
 	tos_bucket_object_lock_configuration "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_object_lock_configuration"
 	tos_bucket_replication "github.com/volcengine/terraform-provider-volcengine/volcengine/tos/bucket_replication"
@@ -406,17 +407,16 @@ import (
 
 	tlsAccount "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm"
-	tls_describe_trace "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/describe_trace"
-	tls_search_trace "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/search_trace"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/describe_trace"
 	tlsShard "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/shard"
 	tls_tag "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tag"
-	tls_tag_resource "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tag_resource"
-	tls_trace_instance "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/trace_instance"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/tag_resource"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/trace_instance"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_notify_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/consumer_group"
-	tlsDownloadTask "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/download_task"
-	tlsDownloadUrl "github.com/volcengine/terraform-provider-volcengine/volcengine/tls/download_url"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/download_task"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/download_url"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/etl_task"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group"
@@ -890,17 +890,17 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_etl_tasks":                  etl_task.DataSourceVolcengineEtlTasks(),
 			"volcengine_tls_shippers":                   shipper.DataSourceVolcengineShippers(),
 			"volcengine_tls_consumer_groups":            consumer_group.DataSourceVolcengineConsumerGroups(),
-			"volcengine_tls_histograms":                 log_histogram.DataSourceVolcengineTlsHistograms(),
-			"volcengine_tls_search_logs":                tlsLog.DataSourceVolcengineTlsSearchLogs(),
+			"volcengine_tls_log_histograms":             log_histogram.DataSourceVolcengineTlsLogHistograms(),
+			"volcengine_tls_log_searches":               log_search.DataSourceVolcengineTlsSearchLogs(),
 			"volcengine_tls_log_contexts":               log_context.DataSourceVolcengineTlsLogContexts(),
-			"volcengine_tls_download_tasks":             tlsDownloadTask.DataSourceVolcengineTlsDownloadTasks(),
-			"volcengine_tls_download_urls":              tlsDownloadUrl.DataSourceVolcengineTlsDownloadUrls(),
+			"volcengine_tls_download_tasks":             download_task.DataSourceVolcengineTlsDownloadTasks(),
+			"volcengine_tls_download_urls":              download_url.DataSourceVolcengineTlsDownloadUrls(),
 			"volcengine_tls_accounts":                   tlsAccount.DataSourceVolcengineTlsAccounts(),
-			"volcengine_tls_trace_instances":            tls_trace_instance.DataSourceVolcengineTlsTraceInstances(),
+			"volcengine_tls_trace_instances":            trace_instance.DataSourceVolcengineTlsTraceInstances(),
 			"volcengine_tls_tags":                       tls_tag.DataSourceVolcengineTlsTags(),
-			"volcengine_tls_tag_resources":              tls_tag_resource.DataSourceVolcengineTlsTagResources(),
-			"volcengine_tls_describe_traces":            tls_describe_trace.DataSourceVolcengineTlsDescribeTraces(),
-			"volcengine_tls_search_traces":              tls_search_trace.DataSourceVolcengineTlsSearchTraces(),
+			"volcengine_tls_tag_resources":              tag_resource.DataSourceVolcengineTlsTagResources(),
+			"volcengine_tls_describe_traces":            describe_trace.DataSourceVolcengineTlsDescribeTraces(),
+			"volcengine_tls_search_traces":              search_trace.DataSourceVolcengineTlsSearchTraces(),
 
 			// ================ Cloudfs ================
 			"volcengine_cloudfs_quotas":       cloudfs_quota.DataSourceVolcengineCloudfsQuotas(),
@@ -1386,11 +1386,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_etl_task":          etl_task.ResourceVolcengineEtlTask(),
 			"volcengine_tls_shipper":           shipper.ResourceVolcengineShipper(),
 			"volcengine_tls_consumer_group":    consumer_group.ResourceVolcengineConsumerGroup(),
-			"volcengine_tls_download_task":     tlsDownloadTask.ResourceVolcengineTlsDownloadTask(),
+			"volcengine_tls_download_task":     download_task.ResourceVolcengineTlsDownloadTask(),
 			"volcengine_tls_account":           tlsAccount.ResourceVolcengineTlsAccount(),
-			"volcengine_tls_trace_instance":    tls_trace_instance.ResourceVolcengineTlsTraceInstance(),
+			"volcengine_tls_trace_instance":    trace_instance.ResourceVolcengineTlsTraceInstance(),
 			"volcengine_tls_tag":               tls_tag.ResourceVolcengineTlsTag(),
-			"volcengine_tls_tag_resource":      tls_tag_resource.ResourceVolcengineTlsTagResource(),
+			"volcengine_tls_tag_resource":      tag_resource.ResourceVolcengineTlsTagResource(),
 			"volcengine_tls_shard":             tlsShard.ResourceVolcengineTlsShard(),
 
 			// ================ Cloudfs ================
