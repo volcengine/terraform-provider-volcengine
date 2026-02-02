@@ -288,13 +288,25 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud_v2/escloud_zone_v2"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_access_key_last_used"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_account_summer"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_allowed_ip_address"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_caller_identity"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_entities_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_identity_provider"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_oauth_provider"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_oidc_provider"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_oidc_provider_client"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_oidc_provider_thumbprint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_policy_project"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_role_policy_attachment"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_saml_provider"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_security_config"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_service_linked_role"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_tag"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user_group_attachment"
@@ -775,12 +787,26 @@ func Provider() terraform.ResourceProvider {
 			// ================ IAM ================
 			"volcengine_iam_policies":                      iam_policy.DataSourceVolcengineIamPolicies(),
 			"volcengine_iam_roles":                         iam_role.DataSourceVolcengineIamRoles(),
+			"volcengine_iam_role_policy_attachments":       iam_role_policy_attachment.DataSourceVolcengineIamRolePolicyAttachments(),
 			"volcengine_iam_users":                         iam_user.DataSourceVolcengineIamUsers(),
+			"volcengine_iam_entities_policies":             iam_entities_policy.DataSourceVolcengineIamEntitiesPolicies(),
 			"volcengine_iam_user_groups":                   iam_user_group.DataSourceVolcengineIamUserGroups(),
+			"volcengine_iam_user_group_attachments":        iam_user_group_attachment.DataSourceVolcengineIamUserGroupAttachments(),
+			"volcengine_iam_user_group_users":              iam_user_group_attachment.DataSourceVolcengineIamUserGroupUsers(),
 			"volcengine_iam_user_group_policy_attachments": iam_user_group_policy_attachment.DataSourceVolcengineIamUserGroupPolicyAttachments(),
+			"volcengine_iam_user_policy_attachments":       iam_user_policy_attachment.DataSourceVolcengineIamUserPolicyAttachments(),
 			"volcengine_iam_saml_providers":                iam_saml_provider.DataSourceVolcengineIamSamlProviders(),
 			"volcengine_iam_access_keys":                   iam_access_key.DataSourceVolcengineIamAccessKeys(),
+			"volcengine_iam_access_key_last_useds":         iam_access_key_last_used.DataSourceVolcengineIamAccessKeyLastUseds(),
+			"volcengine_iam_account_summaries":             iam_account_summer.DataSourceVolcengineIamAccountSummaries(),
+			"volcengine_iam_caller_identities":             iam_caller_identity.DataSourceVolcengineIamCallerIdentities(),
+			"volcengine_iam_allowed_ip_addresses":          iam_allowed_ip_address.DataSourceVolcengineIamAllowedIpAddresses(),
+			"volcengine_iam_identity_providers":            iam_identity_provider.DataSourceVolcengineIamIdentityProviders(),
+			"volcengine_iam_login_profiles":                iam_login_profile.DataSourceVolcengineIamLoginProfiles(),
+			"volcengine_iam_security_configs":              iam_security_config.DataSourceVolcengineIamSecurityConfigs(),
 			"volcengine_iam_oidc_providers":                iam_oidc_provider.DataSourceVolcengineIamOidcProviders(),
+			"volcengine_iam_oauth_providers":               iam_oauth_provider.DataSourceVolcengineIamOAuthProviders(),
+			"volcengine_iam_tags":                          iam_tag.DataSourceVolcengineIamTags(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instances":           rds_instance.DataSourceVolcengineRdsInstances(),
@@ -1257,16 +1283,23 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_policy":                       iam_policy.ResourceVolcengineIamPolicy(),
 			"volcengine_iam_role":                         iam_role.ResourceVolcengineIamRole(),
 			"volcengine_iam_role_policy_attachment":       iam_role_policy_attachment.ResourceVolcengineIamRolePolicyAttachment(),
+			"volcengine_iam_policy_project":               iam_policy_project.ResourceVolcengineIamPolicyProject(),
 			"volcengine_iam_access_key":                   iam_access_key.ResourceVolcengineIamAccessKey(),
 			"volcengine_iam_user":                         iam_user.ResourceVolcengineIamUser(),
 			"volcengine_iam_login_profile":                iam_login_profile.ResourceVolcengineIamLoginProfile(),
+			"volcengine_iam_security_config":              iam_security_config.ResourceVolcengineIamSecurityConfig(),
 			"volcengine_iam_user_policy_attachment":       iam_user_policy_attachment.ResourceVolcengineIamUserPolicyAttachment(),
 			"volcengine_iam_user_group":                   iam_user_group.ResourceVolcengineIamUserGroup(),
 			"volcengine_iam_user_group_attachment":        iam_user_group_attachment.ResourceVolcengineIamUserGroupAttachment(),
 			"volcengine_iam_user_group_policy_attachment": iam_user_group_policy_attachment.ResourceVolcengineIamUserGroupPolicyAttachment(),
 			"volcengine_iam_saml_provider":                iam_saml_provider.ResourceVolcengineIamSamlProvider(),
 			"volcengine_iam_oidc_provider":                iam_oidc_provider.ResourceVolcengineIamOidcProvider(),
+			"volcengine_iam_oidc_provider_client":         iam_oidc_provider_client.ResourceVolcengineIamOidcProviderClient(),
+			"volcengine_iam_oidc_provider_thumbprint":     iam_oidc_provider_thumbprint.ResourceVolcengineIamOidcProviderThumbprint(),
+			"volcengine_iam_allowed_ip_address":           iam_allowed_ip_address.ResourceVolcengineIamAllowedIpAddress(),
+			"volcengine_iam_oauth_provider":               iam_oauth_provider.ResourceVolcengineIamOAuthProvider(),
 			"volcengine_iam_service_linked_role":          iam_service_linked_role.ResourceVolcengineIamServiceLinkedRole(),
+			"volcengine_iam_tag":                          iam_tag.ResourceVolcengineIamTag(),
 
 			// ================ RDS V1 ==============
 			"volcengine_rds_instance":           rds_instance.ResourceVolcengineRdsInstance(),

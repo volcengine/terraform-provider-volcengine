@@ -410,7 +410,6 @@ func (v *VolcengineTlsTagService) DatasourceResources(data *schema.ResourceData,
 			},
 			"resource_ids": {
 				TargetField: "ResourcesIds",
-				ConvertType: ve.ConvertJsonArray,
 			},
 			"max_results": {
 				TargetField: "MaxResults",
@@ -420,7 +419,20 @@ func (v *VolcengineTlsTagService) DatasourceResources(data *schema.ResourceData,
 			},
 			"tag_filters": {
 				TargetField: "TagFilters",
-				ConvertType: ve.ConvertJsonArray,
+			},
+		},
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"TagKey": {
+				TargetField: "key",
+			},
+			"TagValue": {
+				TargetField: "value",
+			},
+			"ResourceId": {
+				TargetField: "resource_id",
+			},
+			"ResourceType": {
+				TargetField: "resource_type",
 			},
 		},
 		ContentType:  ve.ContentTypeJson,

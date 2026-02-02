@@ -476,14 +476,17 @@ func resourceVolcengineTlsRuleDelete(d *schema.ResourceData, meta interface{}) e
 func tlsRuleHash(key, value string) func(v interface{}) int {
 	return func(v interface{}) int {
 		if v == nil {
-			return hashcode.String("")
+			return 0
 		}
-		m := v.(map[string]interface{})
+		m, ok := v.(map[string]interface{})
+		if !ok {
+			return hashcode.String(fmt.Sprintf("%v", v))
+		}
 		var (
 			buf bytes.Buffer
 		)
-		v1 := m[key].(string)
-		v2 := m[value].(string)
+		v1 := fmt.Sprintf("%v", m[key])
+		v2 := fmt.Sprintf("%v", m[value])
 		buf.WriteString(fmt.Sprintf("%v#%v", v1, v2))
 		return hashcode.String(buf.String())
 	}

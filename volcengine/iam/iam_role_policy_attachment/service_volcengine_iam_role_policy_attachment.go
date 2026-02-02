@@ -3,12 +3,13 @@ package iam_role_policy_attachment
 import (
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"strings"
-	"time"
 )
 
 type VolcengineIamRolePolicyAttachmentService struct {
@@ -163,7 +164,30 @@ func (s *VolcengineIamRolePolicyAttachmentService) RemoveResource(data *schema.R
 }
 
 func (s *VolcengineIamRolePolicyAttachmentService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{}
+	return ve.DataSourceInfo{
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"PolicyName": {
+				TargetField: "policy_name",
+			},
+			"PolicyType": {
+				TargetField: "policy_type",
+			},
+			"PolicyTrn": {
+				TargetField: "policy_trn",
+			},
+			"Description": {
+				TargetField: "description",
+			},
+			"AttachDate": {
+				TargetField: "attach_date",
+			},
+			"PolicyScope": {
+				TargetField: "policy_scope",
+			},
+		},
+		NameField:    "RoleName",
+		CollectField: "policies",
+	}
 }
 
 func (s *VolcengineIamRolePolicyAttachmentService) ReadResourceId(id string) string {

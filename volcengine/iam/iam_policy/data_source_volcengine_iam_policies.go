@@ -2,7 +2,6 @@ package iam_policy
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -10,12 +9,6 @@ func DataSourceVolcengineIamPolicies() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineIamPoliciesRead,
 		Schema: map[string]*schema.Schema{
-			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
-				Description:  "A Name Regex of Policy.",
-			},
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -31,25 +24,10 @@ func DataSourceVolcengineIamPolicies() *schema.Resource {
 				Optional:    true,
 				Description: "The scope of the Policy.",
 			},
-			"query": {
-				Type:        schema.TypeString,
+			"with_service_role_policy": {
+				Type:        schema.TypeInt,
 				Optional:    true,
-				Description: "Query policies, support policy name or description.",
-			},
-			"status": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The status of policy.",
-			},
-			"user_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The name of the IAM user.",
-			},
-			"role_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "The name of the IAM role.",
+				Description: "Whether to return the service role policy.",
 			},
 			"policies": {
 				Description: "The collection of Policy query.",
@@ -97,25 +75,20 @@ func DataSourceVolcengineIamPolicies() *schema.Resource {
 							Computed:    true,
 							Description: "The document of the Policy.",
 						},
-						"user_attach_date": {
+						"category": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The user attach time of the Policy.The data show only query with user_name.",
+							Description: "The category of the Policy.",
 						},
-						"user_name": {
-							Type:        schema.TypeString,
+						"attachment_count": {
+							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The name of the IAM user.The data show only query with user_name.",
+							Description: "The attachment count of the Policy.",
 						},
-						"role_attach_date": {
-							Type:        schema.TypeString,
+						"is_service_role_policy": {
+							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The role attach time of the Policy.The data show only query with role_name.",
-						},
-						"role_name": {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "The name of the IAM role.The data show only query with role_name.",
+							Description: "Whether the Policy is a service role policy.",
 						},
 					},
 				},

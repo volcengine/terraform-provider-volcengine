@@ -1,12 +1,12 @@
 resource "volcengine_tls_project" "foo" {
-  project_name = "tf-test-project-ttt"
+  project_name = "tf-test-project-x"
   description  = "tf-test-project-desc"
   region = "cn-guilin-boe"
 }
 
 resource "volcengine_tls_topic" "foo" {
   project_id  = volcengine_tls_project.foo.id
-  topic_name  = "tf-test-topic-rule-1"
+  topic_name  = "tf-test-topic-rule-x"
   ttl             = 60
     shard_count     = 2
     auto_split      = true
@@ -15,8 +15,8 @@ resource "volcengine_tls_topic" "foo" {
     time_key        = "request_time"
     time_format     = "%Y-%m-%dT%H:%M:%S,%f"
     tags {
-      key   = "k1"
-      value = "v1"
+      key   = "k2"
+      value = "v3"
     }
     log_public_ip  = true
     enable_hot_ttl = true
@@ -101,16 +101,16 @@ resource "volcengine_tls_rule" "foo" {
      stream = "all"
      container_name_regex = ".*test.*"
      include_container_label_regex = {
-       Key1 = "Value12",
-       Key2 = "Value23"
+       Key1 = "Value122",
+       Key2 = "Value223"
      }
      exclude_container_label_regex = {
-       Key1 = "Value12",
-       Key2 = "Value22"
+       Key1 = "Value312",
+       Key2 = "Valu5e22"
      }
      include_container_env_regex = {
-       Key1 = "Value1",
-       Key2 = "Value2"
+       Key1 = "Val2ue1",
+       Key2 = "Val2ue2"
      }
      exclude_container_env_regex = {
        Key1 = "Value1",

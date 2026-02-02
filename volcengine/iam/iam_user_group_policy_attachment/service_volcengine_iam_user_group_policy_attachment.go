@@ -157,8 +157,27 @@ func (s *VolcengineIamUserGroupPolicyAttachmentService) RemoveResource(resourceD
 
 func (s *VolcengineIamUserGroupPolicyAttachmentService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		NameField:    "PolicyName",
-		IdField:      "PolicyTrn",
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"PolicyName": {
+				TargetField: "policy_name",
+			},
+			"PolicyType": {
+				TargetField: "policy_type",
+			},
+			"PolicyTrn": {
+				TargetField: "policy_trn",
+			},
+			"Description": {
+				TargetField: "description",
+			},
+			"AttachDate": {
+				TargetField: "attach_date",
+			},
+			"PolicyScope": {
+				TargetField: "policy_scope",
+			},
+		},
+		NameField:    "UserGroupName",
 		CollectField: "policies",
 	}
 }

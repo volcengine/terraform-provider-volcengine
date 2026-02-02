@@ -12,16 +12,15 @@ Provides a resource to manage tls index
 ```hcl
 resource "volcengine_tls_index" "foo" {
   topic_id = "b600dc34-503f-42fc-8e32-953af55463d1"
-
+  
   max_text_len      = 2048
   enable_auto_index = true
-
+  
   full_text {
     case_sensitive  = false
     delimiter       = ", ;/\n\t"
     include_chinese = false
   }
-
   key_value {
     key             = "k1"
     value_type      = "json"
@@ -39,8 +38,6 @@ resource "volcengine_tls_index" "foo" {
       value_type = "long"
     }
   }
-
-
   user_inner_key_value {
     key             = "__content__"
     value_type      = "json"

@@ -3,6 +3,7 @@ package iam_role
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -64,23 +65,29 @@ func (s *VolcengineIamRoleService) ReadResources(m map[string]interface{}) (data
 
 func (s *VolcengineIamRoleService) ReadResource(resourceData *schema.ResourceData, roleId string) (data map[string]interface{}, err error) {
 	var (
-		results []interface{}
-		ok      bool
+		result interface{}
+		ok     bool
 	)
 	if roleId == "" {
 		roleId = s.ReadResourceId(resourceData.Id())
 	}
-	req := map[string]interface{}{
+	condition := map[string]interface{}{
 		"RoleName": roleId,
 	}
-	results, err = s.ReadResources(req)
+	action := "GetRole"
+	logger.Debug(logger.ReqFormat, action, condition)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &condition)
 	if err != nil {
 		return data, err
 	}
-	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
-			return data, errors.New("value is not map")
-		}
+	logger.Debug(logger.RespFormat, action, condition, *resp)
+
+	result, err = ve.ObtainSdkValue("Result.Role", *resp)
+	if err != nil {
+		return data, err
+	}
+	if data, ok = result.(map[string]interface{}); !ok {
+		return data, errors.New("value is not map")
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("Role %s not exist ", roleId)
@@ -105,6 +112,12 @@ func (s *VolcengineIamRoleService) CreateResource(data *schema.ResourceData, res
 		Call: ve.SdkCall{
 			Action:      "CreateRole",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -126,21 +139,38 @@ func (s *VolcengineIamRoleService) ModifyResource(data *schema.ResourceData, res
 	updateRoleCallback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateRole",
-			ConvertMode: ve.RequestConvertAll,
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["RoleName"] = d.Get("role_name")
-				if maxSessionDuration, ok := d.GetOk("max_session_duration"); ok {
-					(*call.SdkParam)["MaxSessionDuration"] = maxSessionDuration
-				}
-				return true, nil
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"role_name": {
+					TargetField: "NewRoleName",
+					ConvertType: ve.ConvertDefault,
+				},
+				"display_name": {
+					TargetField: "NewDisplayName",
+					ConvertType: ve.ConvertDefault,
+				},
+				"description": {
+					TargetField: "NewDescription",
+					ConvertType: ve.ConvertDefault,
+				},
+				"max_session_duration": {
+					TargetField: "MaxSessionDuration",
+					ConvertType: ve.ConvertDefault,
+				},
+				"tags": {
+					Ignore: true,
+				},
 			},
+			RequestIdField: "RoleName",
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 		},
 	}
-	return []ve.Callback{updateRoleCallback}
+	callbacks := []ve.Callback{updateRoleCallback}
+	setResourceTagsCallbacks := s.setResourceTags(data, "Role", callbacks)
+	return setResourceTagsCallbacks
 }
 
 func (s *VolcengineIamRoleService) RemoveResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -181,10 +211,44 @@ func (s *VolcengineIamRoleService) RemoveResource(data *schema.ResourceData, r *
 
 func (s *VolcengineIamRoleService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"query": {
+				TargetField: "Query",
+			},
+		},
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"RoleName": {
-				TargetField: "id",
-				KeepDefault: true,
+				TargetField: "role_name",
+			},
+			"RoleId": {
+				TargetField: "role_id",
+			},
+			"IsServiceLinkedRole": {
+				TargetField: "is_service_linked_role",
+			},
+			"DisplayName": {
+				TargetField: "display_name",
+			},
+			"MaxSessionDuration": {
+				TargetField: "max_session_duration",
+			},
+			"Tags": {
+				TargetField: "tags",
+			},
+			"Trn": {
+				TargetField: "trn",
+			},
+			"Description": {
+				TargetField: "description",
+			},
+			"TrustPolicyDocument": {
+				TargetField: "trust_policy_document",
+			},
+			"CreateDate": {
+				TargetField: "create_date",
+			},
+			"UpdateDate": {
+				TargetField: "update_date",
 			},
 		},
 		NameField:    "RoleName",
@@ -206,4 +270,57 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.Default,
 		RegionType:  ve.Global,
 	}
+}
+
+func (s *VolcengineIamRoleService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = tag.(map[string]interface{})["key"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tag.(map[string]interface{})["key"].(string)
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tag.(map[string]interface{})["value"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }

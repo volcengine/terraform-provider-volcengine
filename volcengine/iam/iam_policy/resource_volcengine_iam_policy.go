@@ -68,6 +68,21 @@ func ResourceVolcengineIamPolicy() *schema.Resource {
 				Computed:    true,
 				Description: "The update time of the Policy.",
 			},
+			"category": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The category of the Policy.",
+			},
+			"attachment_count": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The attachment count of the Policy.",
+			},
+			"is_service_role_policy": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Whether the Policy is a service role policy.",
+			},
 		},
 	}
 }

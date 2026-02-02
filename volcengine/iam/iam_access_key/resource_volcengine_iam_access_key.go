@@ -33,7 +33,7 @@ func ResourceVolcengineIamAccessKey() *schema.Resource {
 				Optional:    true,
 				Computed:    true,
 				ForceNew:    true,
-				Description: "The user name.",
+				Description: "The user name. If not specified, the current user is used.",
 			},
 			"status": {
 				Type:         schema.TypeString,
@@ -42,33 +42,21 @@ func ResourceVolcengineIamAccessKey() *schema.Resource {
 				ValidateFunc: validation.StringInSlice([]string{"active", "inactive"}, false),
 				Description:  "The status of the access key, Optional choice contains `active` or `inactive`.",
 			},
-			"pgp_key": {
+			"access_key_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "Either a base-64 encoded PGP public key, or a keybase username in the form `keybase:some_person_that_exists`.",
+				Computed:    true,
+				Description: "The access key id.",
 			},
-			"secret_file": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				ForceNew:    true,
-				Description: "The file to save the access id and secret. Strongly suggest you to specified it when you creating access key, otherwise, you wouldn't get its secret ever.",
-			},
-			"secret": {
+			"secret_access_key": {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Sensitive:   true,
-				Description: "The secret of the access key.",
+				Description: "The secret access key.",
 			},
-			"encrypted_secret": {
+			"update_date": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The encrypted secret of the access key by pgp key, base64 encoded.",
-			},
-			"key_fingerprint": {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "The key fingerprint of the encrypted secret.",
+				Description: "The update date of the access key.",
 			},
 			"create_date": {
 				Type:        schema.TypeString,

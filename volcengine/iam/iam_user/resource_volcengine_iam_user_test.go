@@ -1,10 +1,11 @@
 package iam_user_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
-	"testing"
 )
 
 const testAccVolcengineIamUserCreateConfig = `
@@ -12,6 +13,10 @@ resource "volcengine_iam_user" "foo" {
   user_name = "acc-test-user"
   description = "acc test"
   display_name = "name"
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }
 `
 
@@ -21,6 +26,10 @@ resource "volcengine_iam_user" "foo" {
     display_name = "name2"
     email = "xxx@163.com"
     user_name = "acc-test-user2"
+	tags {
+    key = "k2"
+    value = "v2"
+  }
 }
 `
 
@@ -48,6 +57,8 @@ func TestAccVolcengineIamUserResource_Basic(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "email", ""),
 					resource.TestCheckResourceAttr(acc.ResourceId, "mobile_phone", ""),
 					resource.TestCheckResourceAttr(acc.ResourceId, "user_name", "acc-test-user"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.0.key", "k1"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.0.value", "v1"),
 				),
 			},
 			{
@@ -83,6 +94,8 @@ func TestAccVolcengineIamUserResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "email", ""),
 					resource.TestCheckResourceAttr(acc.ResourceId, "mobile_phone", ""),
 					resource.TestCheckResourceAttr(acc.ResourceId, "user_name", "acc-test-user"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.0.key", "k1"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.0.value", "v1"),
 				),
 			},
 			{
@@ -94,6 +107,8 @@ func TestAccVolcengineIamUserResource_Update(t *testing.T) {
 					resource.TestCheckResourceAttr(acc.ResourceId, "email", "xxx@163.com"),
 					resource.TestCheckResourceAttr(acc.ResourceId, "mobile_phone", ""),
 					resource.TestCheckResourceAttr(acc.ResourceId, "user_name", "acc-test-user2"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.0.key", "k2"),
+					resource.TestCheckResourceAttr(acc.ResourceId, "tags.0.value", "v2"),
 				),
 			},
 			{

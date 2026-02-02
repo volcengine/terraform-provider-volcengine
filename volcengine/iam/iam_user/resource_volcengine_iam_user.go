@@ -25,7 +25,10 @@ func ResourceVolcengineIamUser() *schema.Resource {
 		Update: resourceVolcengineIamUserUpdate,
 		Delete: resourceVolcengineIamUserDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				_ = d.Set("user_name", d.Id())
+				return []*schema.ResourceData{d}, nil
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -46,7 +49,7 @@ func ResourceVolcengineIamUser() *schema.Resource {
 			"mobile_phone": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "The mobile phone of the user.",
+				Description:      "The mobile phone of the user, reference: +8618088888888.",
 				DiffSuppressFunc: phoneDiffSuppressFunc,
 			},
 			"email": {
@@ -59,6 +62,7 @@ func ResourceVolcengineIamUser() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the user.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	ve.MergeDateSourceToResource(DataSourceVolcengineIamUsers().Schema["users"].Elem.(*schema.Resource).Schema, &resource.Schema)
@@ -78,6 +82,10 @@ func resourceVolcengineIamUserRead(d *schema.ResourceData, meta interface{}) (er
 	service := NewIamUserService(meta.(*ve.SdkClient))
 	err = ve.DefaultDispatcher().Read(service, d, ResourceVolcengineIamUser())
 	if err != nil {
+		if ve.ResourceNotFoundError(err) {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("error on reading iam user %q, %s", d.Id(), err)
 	}
 	return err

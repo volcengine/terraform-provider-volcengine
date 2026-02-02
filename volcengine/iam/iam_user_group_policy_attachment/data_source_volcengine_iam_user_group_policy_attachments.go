@@ -55,6 +55,35 @@ func DataSourceVolcengineIamUserGroupPolicyAttachments() *schema.Resource {
 							Computed:    true,
 							Description: "The description.",
 						},
+						"policy_scope": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The scope of the policy.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"policy_scope_type": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The type of the policy scope.",
+									},
+									"project_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The name of the project.",
+									},
+									"project_display_name": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The display name of the project.",
+									},
+									"attach_date": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The attach date of the policy scope.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},

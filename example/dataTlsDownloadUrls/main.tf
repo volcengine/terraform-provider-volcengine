@@ -1,6 +1,6 @@
 resource "volcengine_tls_download_task" "foo" {
   topic_id         = "36be6c75-0733-4bee-b63d-48e0eae37f87"
-  task_name        = "tf-test-download-task"
+  task_name        = "tf-test-download-mm"
   query            = "*"
   start_time       = 1740426022
   end_time         = 1740626022

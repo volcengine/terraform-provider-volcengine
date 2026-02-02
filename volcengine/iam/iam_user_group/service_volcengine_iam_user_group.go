@@ -180,12 +180,20 @@ func (s *VolcengineIamUserGroupService) RemoveResource(resourceData *schema.Reso
 
 func (s *VolcengineIamUserGroupService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"query": {
+				TargetField: "Query",
+			},
+		},
 		NameField:    "UserGroupName",
 		IdField:      "UserGroupName",
 		CollectField: "user_groups",
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"AccountID": {
 				TargetField: "account_id",
+			},
+			"UserGroupID": {
+				TargetField: "user_group_id",
 			},
 		},
 	}

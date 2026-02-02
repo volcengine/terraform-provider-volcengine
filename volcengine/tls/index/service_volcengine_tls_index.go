@@ -359,8 +359,13 @@ func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 			return nil, fmt.Errorf("key value struct error")
 		}
 		keyValue["Key"] = kMap["key"]
-		valueMap["ValueType"] = kMap["value_type"]
-		sqlFlag := false
+		vt := ""
+		if v, ok := kMap["value_type"].(string); ok {
+			vt = strings.ToLower(strings.TrimSpace(v))
+		}
+		// Always send the value type in lowercase as expected by API
+		valueMap["ValueType"] = vt
+
 		if v, ok := kMap["case_sensitive"]; ok {
 			valueMap["CaseSensitive"] = v
 		}
@@ -370,35 +375,56 @@ func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 		if v, ok := kMap["delimiter"]; ok {
 			valueMap["Delimiter"] = v
 		}
-		if v, ok := kMap["index_all"]; ok {
-			valueMap["IndexAll"] = v
+
+		// Only send JSON-specific flags if ValueType is "json"
+		indexSQLAllActive := false
+		if vt == "json" {
+			if v, ok := kMap["index_sql_all"].(bool); ok && v {
+				valueMap["IndexSQLAll"] = v
+				indexSQLAllActive = v
+			}
+			// Only send IndexAll if IndexSQLAll is NOT enabled to avoid API conflicts
+			if v, ok := kMap["index_all"].(bool); ok && v && !indexSQLAllActive {
+				valueMap["IndexAll"] = v
+			}
+			if v, ok := kMap["auto_index_flag"].(bool); ok && v {
+				valueMap["AutoIndexFlag"] = v
+			}
 		}
+
+		parentSqlFlag := false
 		if v, ok := kMap["sql_flag"]; ok {
 			valueMap["SqlFlag"] = v
-			sqlFlag = v.(bool)
+			parentSqlFlag = v.(bool)
 		}
+
 		if v, ok := kMap["json_keys"]; ok {
 			jsonKeys := make([]interface{}, 0)
 			jsonList, ok := v.(*schema.Set)
 			if !ok {
 				return nil, fmt.Errorf("json keys struct error")
 			}
-			for _, key := range jsonList.List() {
-				jsonKey := make(map[string]interface{})
-				keyMap, ok := key.(map[string]interface{})
+			for _, jsonKeyRaw := range jsonList.List() {
+				jsonKeyMap, ok := jsonKeyRaw.(map[string]interface{})
 				if !ok {
-					return nil, fmt.Errorf("json key struct error")
+					continue
 				}
-				if v, ok = keyMap["key"]; ok {
-					jsonKey["Key"] = v
+
+				singleJsonKey := make(map[string]interface{})
+				singleJsonKey["Key"] = jsonKeyMap["key"]
+
+				singleJsonValue := make(map[string]interface{})
+				if vtRaw, ok := jsonKeyMap["value_type"].(string); ok {
+					singleJsonValue["ValueType"] = strings.ToLower(strings.TrimSpace(vtRaw))
+				} else {
+					return nil, fmt.Errorf("json key value_type is required")
 				}
-				if v, ok = keyMap["value_type"]; ok {
-					jsonValue := make(map[string]interface{})
-					jsonValue["ValueType"] = v
-					jsonValue["SqlFlag"] = sqlFlag
-					jsonKey["Value"] = jsonValue
-				}
-				jsonKeys = append(jsonKeys, jsonKey)
+
+				// Force sub-key SqlFlag to match parent SqlFlag per API requirement
+				singleJsonValue["SqlFlag"] = parentSqlFlag
+
+				singleJsonKey["Value"] = singleJsonValue
+				jsonKeys = append(jsonKeys, singleJsonKey)
 			}
 			valueMap["JsonKeys"] = jsonKeys
 		}
@@ -420,31 +446,46 @@ func transKeyValueToResponse(keyValue interface{}) ([]interface{}, error) {
 		}
 		valueMap, ok := keyValueMap["Value"].(map[string]interface{})
 		if !ok {
-			return []interface{}{}, fmt.Errorf(" Index KeyValue Value is not map ")
+			continue
 		}
-		for k1, v1 := range valueMap {
-			if k1 == "JsonKeys" && v1 != nil {
-				jsonArr, ok := v1.([]interface{})
+
+		// Map API fields to Schema fields (PascalCase to PascalCase for transMapToSnakeCase)
+		resMap := make(map[string]interface{})
+		resMap["Key"] = keyValueMap["Key"]
+
+		for k, val := range valueMap {
+			if k == "JsonKeys" && val != nil {
+				jsonArr, ok := val.([]interface{})
 				if !ok {
-					return []interface{}{}, fmt.Errorf(" Index KeyValues JsonKeys is not slice ")
+					continue
 				}
-				for _, v2 := range jsonArr {
-					jsonMap, ok := v2.(map[string]interface{})
+				newJsonArr := make([]interface{}, 0)
+				for _, jsonItemRaw := range jsonArr {
+					jsonItemMap, ok := jsonItemRaw.(map[string]interface{})
 					if !ok {
-						return []interface{}{}, fmt.Errorf(" Index KeyValue JsonKeys is not map ")
+						continue
 					}
-					jsonValueMap, ok := jsonMap["Value"].(map[string]interface{})
-					if !ok {
-						return []interface{}{}, fmt.Errorf(" Index KeyValue JsonKeys Value is not map ")
+
+					newJsonItem := make(map[string]interface{})
+					newJsonItem["Key"] = jsonItemMap["Key"]
+					if jsonValueObj, ok := jsonItemMap["Value"].(map[string]interface{}); ok {
+						for jk, jv := range jsonValueObj {
+							newJsonItem[jk] = jv
+						}
 					}
-					for k3, v3 := range jsonValueMap {
-						jsonMap[k3] = v3
-						delete(jsonMap, "Value")
-					}
+					newJsonArr = append(newJsonArr, newJsonItem)
 				}
+				resMap["JsonKeys"] = newJsonArr
+			} else {
+				resMap[k] = val
 			}
-			keyValueMap[k1] = v1
-			delete(keyValueMap, "Value")
+		}
+		// Replace the original map content with our cleaned-up resMap
+		for k := range keyValueMap {
+			delete(keyValueMap, k)
+		}
+		for k, v := range resMap {
+			keyValueMap[k] = v
 		}
 	}
 	return keyValueArray, nil

@@ -1,6 +1,7 @@
 package host_group
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"time"
@@ -114,119 +115,264 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 
 func (s *Service) DatasourceRules(d *schema.ResourceData, r *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
-		IdField:      "host_group_id",
+		IdField:      "RuleId",
 		CollectField: "rule_infos",
 	}
 }
 
 func (s *Service) ReadRules(m map[string]interface{}) (data []interface{}, err error) {
-	var (
-		resp    *map[string]interface{}
-		results interface{}
-		ok      bool
-	)
 	return ve.WithPageNumberQuery(m, "PageSize", "PageNumber", 20, 1, func(condition map[string]interface{}) ([]interface{}, error) {
 		req := map[string]interface{}{
-			"HostGroupId": condition["host_group_id"],
-			"PageNumber":  condition["PageNumber"],
-			"PageSize":    condition["PageSize"],
+			"PageNumber": condition["PageNumber"],
+			"PageSize":   condition["PageSize"],
 		}
+		if v, ok := condition["HostGroupId"]; ok {
+			req["HostGroupId"] = v
+		} else if v, ok := condition["host_group_id"]; ok {
+			req["HostGroupId"] = v
+		}
+
 		action := "DescribeHostGroupRules"
 		logger.Debug(logger.ReqFormat, action, req)
-		resp, err = s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+		resp, err := s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 			ContentType: ve.Default,
 			HttpMethod:  ve.GET,
 			Path:        []string{action},
 			Client:      s.Client.BypassSvcClient.NewTlsClient(),
 		}, &req)
 		if err != nil {
-			return data, err
+			return nil, err
 		}
 		logger.Debug(logger.RespFormat, action, req, *resp)
-		results, err = ve.ObtainSdkValue("RESPONSE.RuleInfos", *resp)
+		results, err := ve.ObtainSdkValue("RESPONSE.RuleInfos", *resp)
 		if err != nil {
-			return data, err
+			return nil, err
 		}
 		if results == nil {
-			results = []interface{}{}
+			return []interface{}{}, nil
 		}
-		if data, ok = results.([]interface{}); !ok {
-			return data, errors.New("Result.RuleInfos is not Slice")
+		rawList, ok := results.([]interface{})
+		if !ok {
+			return nil, errors.New("Result.RuleInfos is not Slice")
 		}
 		var res []interface{}
-		for _, rule := range data {
-			r := rule.(map[string]interface{})
-			ruleMap := map[string]interface{}{
-				"rule_id":     r["RuleId"],
-				"rule_name":   r["RuleName"],
-				"paths":       r["Paths"],
-				"topic_id":    r["TopicId"],
-				"topic_name":  r["TopicName"],
-				"log_type":    r["LogType"],
-				"input_type":  r["InputType"],
-				"create_time": r["CreateTime"],
-				"modify_time": r["ModifyTime"],
-				"log_sample":  r["LogSample"],
+		for _, item := range rawList {
+			if itemMap, ok := item.(map[string]interface{}); ok {
+				res = append(res, transRuleMap(itemMap))
 			}
-
-			if v, ok := r["ExtractRule"].(map[string]interface{}); ok {
-				extractRule := map[string]interface{}{
-					"delimiter":               v["Delimiter"],
-					"begin_regex":             v["BeginRegex"],
-					"log_regex":               v["LogRegex"],
-					"keys":                    v["Keys"],
-					"time_key":                v["TimeKey"],
-					"time_format":             v["TimeFormat"],
-					"un_match_up_load_switch": v["UnMatchUpLoadSwitch"],
-					"un_match_log_key":        v["UnMatchLogKey"],
-				}
-				if fkr, ok := v["FilterKeyRegex"].([]interface{}); ok {
-					var fkrList []interface{}
-					for _, f := range fkr {
-						fm := f.(map[string]interface{})
-						fkrList = append(fkrList, map[string]interface{}{
-							"key":   fm["Key"],
-							"regex": fm["Regex"],
-						})
-					}
-					extractRule["filter_key_regex"] = fkrList
-				}
-				ruleMap["extract_rule"] = []interface{}{extractRule}
-			}
-
-			if v, ok := r["ExcludePaths"].([]interface{}); ok {
-				var epList []interface{}
-				for _, ep := range v {
-					epm := ep.(map[string]interface{})
-					epList = append(epList, map[string]interface{}{
-						"type":  epm["Type"],
-						"value": epm["Value"],
-					})
-				}
-				ruleMap["exclude_paths"] = epList
-			}
-
-			if v, ok := r["ContainerRule"].(map[string]interface{}); ok {
-				ruleMap["container_rule"] = []interface{}{
-					map[string]interface{}{
-						"stream":               v["Stream"],
-						"container_name_regex": v["ContainerNameRegex"],
-					},
-				}
-			}
-
-			if v, ok := r["UserDefineRule"].(map[string]interface{}); ok {
-				ruleMap["user_define_rule"] = []interface{}{
-					map[string]interface{}{
-						"enable_raw_log": v["EnableRawLog"],
-						"tail_files":     v["TailFiles"],
-					},
-				}
-			}
-			res = append(res, ruleMap)
 		}
 		return res, nil
 	})
+}
+
+// transRuleMap 处理 RuleInfo 中的复杂结构，确保其符合 Terraform Schema 要求
+func transRuleMap(data map[string]interface{}) map[string]interface{} {
+	if data == nil {
+		return data
+	}
+
+	// 1. 基本字段转换 (API 大写 -> Schema 小写)
+	res := map[string]interface{}{
+		"topic_id":    data["TopicId"],
+		"rule_id":     data["RuleId"],
+		"rule_name":   data["RuleName"],
+		"log_type":    data["LogType"],
+		"log_sample":  data["LogSample"],
+		"input_type":  data["InputType"],
+		"create_time": data["CreateTime"],
+		"modify_time": data["ModifyTime"],
+	}
+
+	// 2. Paths (TypeSet)
+	if v, ok := data["Paths"]; ok && v != nil {
+		res["paths"] = v
+	} else {
+		res["paths"] = []interface{}{}
+	}
+
+	// 3. ExcludePaths (TypeSet of Resource)
+	if v, ok := data["ExcludePaths"]; ok && v != nil {
+		if list, ok := v.([]interface{}); ok {
+			var eps []interface{}
+			for _, item := range list {
+				if m, ok := item.(map[string]interface{}); ok {
+					eps = append(eps, map[string]interface{}{
+						"type":  m["Type"],
+						"value": m["Value"],
+					})
+				}
+			}
+			res["exclude_paths"] = eps
+		}
+	} else {
+		res["exclude_paths"] = []interface{}{}
+	}
+
+	// 4. ExtractRule (TypeList MaxItems:1)
+	if v, ok := data["ExtractRule"]; ok && v != nil {
+		if m, ok := v.(map[string]interface{}); ok {
+			er := map[string]interface{}{
+				"delimiter":               m["Delimiter"],
+				"begin_regex":             m["BeginRegex"],
+				"log_regex":               m["LogRegex"],
+				"time_key":                m["TimeKey"],
+				"time_format":             m["TimeFormat"],
+				"un_match_up_load_switch": m["UnMatchUpLoadSwitch"],
+				"un_match_log_key":        m["UnMatchLogKey"],
+				"quote":                   m["Quote"],
+				"time_zone":               m["TimeZone"],
+			}
+			if keys, ok := m["Keys"]; ok && keys != nil {
+				er["keys"] = keys
+			} else {
+				er["keys"] = []interface{}{}
+			}
+			if fkr, ok := m["FilterKeyRegex"]; ok && fkr != nil {
+				if list, ok := fkr.([]interface{}); ok {
+					var fkrs []interface{}
+					for _, item := range list {
+						if itemMap, ok := item.(map[string]interface{}); ok {
+							fkrs = append(fkrs, map[string]interface{}{
+								"key":   itemMap["Key"],
+								"regex": itemMap["Regex"],
+							})
+						}
+					}
+					er["filter_key_regex"] = fkrs
+				}
+			} else {
+				er["filter_key_regex"] = []interface{}{}
+			}
+			if lt, ok := m["LogTemplate"]; ok && lt != nil {
+				if ltMap, ok := lt.(map[string]interface{}); ok {
+					er["log_template"] = []interface{}{
+						map[string]interface{}{
+							"type":   ltMap["Type"],
+							"format": ltMap["Value"],
+						},
+					}
+				}
+			}
+			res["extract_rule"] = []interface{}{er}
+		}
+	}
+
+	// 5. UserDefineRule (TypeList MaxItems:1)
+	if v, ok := data["UserDefineRule"]; ok && v != nil {
+		if m, ok := v.(map[string]interface{}); ok {
+			udr := map[string]interface{}{
+				"enable_raw_log": m["EnableRawLog"],
+				"tail_files":     m["TailFiles"],
+			}
+			if fields, ok := m["Fields"]; ok && fields != nil {
+				udr["fields"] = fields
+			} else {
+				udr["fields"] = map[string]interface{}{}
+			}
+			if ppr, ok := m["ParsePathRule"]; ok && ppr != nil {
+				if pprMap, ok := ppr.(map[string]interface{}); ok {
+					pprRes := map[string]interface{}{
+						"path_sample": pprMap["PathSample"],
+						"regex":       pprMap["Regex"],
+					}
+					if keys, ok := pprMap["Keys"]; ok && keys != nil {
+						pprRes["keys"] = keys
+					} else {
+						pprRes["keys"] = []interface{}{}
+					}
+					udr["parse_path_rule"] = []interface{}{pprRes}
+				}
+			}
+			if shk, ok := m["ShardHashKey"]; ok && shk != nil {
+				if shkMap, ok := shk.(map[string]interface{}); ok {
+					udr["shard_hash_key"] = []interface{}{
+						map[string]interface{}{
+							"hash_key": shkMap["HashKey"],
+						},
+					}
+				}
+			}
+			if plugin, ok := m["Plugin"]; ok && plugin != nil {
+				if pluginMap, ok := plugin.(map[string]interface{}); ok {
+					pRes := map[string]interface{}{}
+					processors, ok := pluginMap["processors"]
+					if !ok {
+						processors = pluginMap["Processors"]
+					}
+					if procList, ok := processors.([]interface{}); ok {
+						arr := make([]interface{}, 0)
+						for _, processor := range procList {
+							jsonBytes, _ := json.Marshal(processor)
+							arr = append(arr, string(jsonBytes))
+						}
+						pRes["processors"] = arr
+					} else {
+						pRes["processors"] = []interface{}{}
+					}
+					udr["plugin"] = []interface{}{pRes}
+				}
+			}
+			if adv, ok := m["Advanced"]; ok && adv != nil {
+				if advMap, ok := adv.(map[string]interface{}); ok {
+					udr["advanced"] = []interface{}{
+						map[string]interface{}{
+							"close_inactive": advMap["CloseInactive"],
+							"close_removed":  advMap["CloseRemoved"],
+							"close_renamed":  advMap["CloseRenamed"],
+							"close_eof":      advMap["CloseEOF"],
+							"close_timeout":  advMap["CloseTimeout"],
+						},
+					}
+				}
+			}
+			res["user_define_rule"] = []interface{}{udr}
+		}
+	}
+
+	// 6. ContainerRule (TypeList MaxItems:1)
+	if v, ok := data["ContainerRule"]; ok && v != nil {
+		if m, ok := v.(map[string]interface{}); ok {
+			cr := map[string]interface{}{
+				"stream":               m["Stream"],
+				"container_name_regex": m["ContainerNameRegex"],
+			}
+			maps := []string{
+				"IncludeContainerLabelRegex", "ExcludeContainerLabelRegex",
+				"IncludeContainerEnvRegex", "ExcludeContainerEnvRegex", "EnvTag",
+			}
+			for _, key := range maps {
+				target := ve.HumpToDownLine(key)
+				if val, ok := m[key]; ok && val != nil {
+					cr[target] = val
+				} else {
+					cr[target] = map[string]interface{}{}
+				}
+			}
+			if kr, ok := m["KubernetesRule"]; ok && kr != nil {
+				if krMap, ok := kr.(map[string]interface{}); ok {
+					krRes := map[string]interface{}{
+						"namespace_name_regex": krMap["NamespaceNameRegex"],
+						"workload_type":        krMap["WorkloadType"],
+						"workload_name_regex":  krMap["WorkloadNameRegex"],
+						"pod_name_regex":       krMap["PodNameRegex"],
+					}
+					krMaps := []string{"IncludePodLabelRegex", "ExcludePodLabelRegex", "LabelTag", "AnnotationTag"}
+					for _, key := range krMaps {
+						target := ve.HumpToDownLine(key)
+						if val, ok := krMap[key]; ok && val != nil {
+							krRes[target] = val
+						} else {
+							krRes[target] = map[string]interface{}{}
+						}
+					}
+					cr["kubernetes_rule"] = []interface{}{krRes}
+				}
+			}
+			res["container_rule"] = []interface{}{cr}
+		}
+	}
+
+	return res
 }
 
 func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {

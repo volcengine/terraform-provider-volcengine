@@ -13,7 +13,7 @@ import (
 Import
 Tls Index can be imported using the topic id, e.g.
 ```
-$ terraform import volcengine_tls_index.default index:edf051ed-3c46-49ba-9339-bea628fe****
+$ terraform import volcengine_tls_index.default edf051ed-3c46-49ba-9339-bea628fe****
 ```
 
 */
@@ -54,8 +54,7 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 						},
 						"delimiter": {
 							Type:        schema.TypeString,
-							Optional:    true,
-							Default:     "",
+							Required:    true,
 							Description: "The delimiter of the FullTextInfo.",
 						},
 						"include_chinese": {
@@ -114,21 +113,21 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 							Default:     false,
 							Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 						},
+						"index_sql_all": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+						},
+						"auto_index_flag": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+						},
 						"json_keys": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							//DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-							//	logger.DebugInfo("testValueType1", k)
-							//	items := strings.Split(k, ".")
-							//	if len(items) > 2 {
-							//		key := strings.Join(items[:2], ".")
-							//		logger.DebugInfo("testValueType2", key, d.Get(key+".value_type"))
-							//		if valueType := d.Get(key + ".value_type"); valueType != nil && valueType.(string) != "json" {
-							//			return true
-							//		}
-							//	}
-							//	return false
-							//},
+							Type:        schema.TypeSet,
+							Optional:    true,
 							Description: "The JSON subfield key value index.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -141,6 +140,12 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 										Type:        schema.TypeString,
 										Required:    true,
 										Description: "The type of value. Valid values: `long`, `double`, `text`.",
+									},
+									"sql_flag": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+										Description: "Whether the filed is enabled for analysis.",
 									},
 								},
 							},
@@ -188,6 +193,24 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 							Default:     false,
 							Description: "Whether the filed is enabled for analysis.",
 						},
+						"index_all": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+						},
+						"index_sql_all": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+						},
+						"auto_index_flag": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+						},
 						"json_keys": {
 							Type:        schema.TypeSet,
 							Optional:    true,
@@ -203,6 +226,12 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 										Type:        schema.TypeString,
 										Required:    true,
 										Description: "The type of value. Valid values: `long`, `double`, `text`.",
+									},
+									"sql_flag": {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "Whether the filed is enabled for analysis.",
 									},
 								},
 							},

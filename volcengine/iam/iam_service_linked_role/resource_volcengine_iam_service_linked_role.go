@@ -14,12 +14,14 @@ import (
 Import
 IamServiceLinkedRole can be imported using the id, e.g.
 ```
-$ terraform import volcengine_iam_service_linked_role.default resource_id
+$ terraform import volcengine_iam_service_linked_role.default service_name:role_name
 ```
 
 */
 
 func ResourceVolcengineIamServiceLinkedRole() *schema.Resource {
+	tagsSchema := ve.TagsSchema()
+	tagsSchema.ForceNew = true
 	resource := &schema.Resource{
 		Create: resourceVolcengineIamServiceLinkedRoleCreate,
 		Read:   resourceVolcengineIamServiceLinkedRoleRead,
@@ -55,6 +57,7 @@ func ResourceVolcengineIamServiceLinkedRole() *schema.Resource {
 				Computed:    true,
 				Description: "The status of the role.",
 			},
+			"tags": tagsSchema,
 		},
 	}
 	return resource

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/encryption"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -181,29 +180,17 @@ func (s *VolcengineIamAccessKeyService) CreateResource(resourceData *schema.Reso
 				//注意 获取内容 这个地方不能是指针 需要转一次
 				id, _ := ve.ObtainSdkValue("Result.AccessKey.AccessKeyId", *resp)
 				d.SetId(id.(string))
+				d.Set("access_key_id", id.(string))
 				sk, _ := ve.ObtainSdkValue("Result.AccessKey.SecretAccessKey", *resp)
-				if v, ok := d.GetOk("pgp_key"); ok && len(v.(string)) > 0 {
-					pgpKey := v.(string)
-					encryptionKey, err := encryption.RetrieveGPGKey(pgpKey)
-					if err != nil {
-						return fmt.Errorf("get gpg key error: %s", err.Error())
-					}
-					fingerprint, encrypted, err := encryption.EncryptValue(encryptionKey, sk.(string), "Volcengine IAM Access Key Secret")
-					if err != nil {
-						return fmt.Errorf("encrypt secret err: %s", err.Error())
-					}
-					_ = d.Set("key_fingerprint", fingerprint)
-					_ = d.Set("encrypted_secret", encrypted)
-				} else {
-					_ = d.Set("secret", sk.(string))
-				}
-				if output, ok := d.GetOk("secret_file"); ok && output != nil {
-					akSk, _ := ve.ObtainSdkValue("Result.AccessKey", *resp)
-					if err := writeToFile(output.(string), akSk); err != nil {
-						return fmt.Errorf("write secret to file err: %s", err.Error())
-					}
-				}
-
+				d.Set("secret_access_key", sk.(string))
+				createDate, _ := ve.ObtainSdkValue("Result.AccessKey.CreateDate", *resp)
+				d.Set("create_date", createDate.(string))
+				updateDate, _ := ve.ObtainSdkValue("Result.AccessKey.UpdateDate", *resp)
+				d.Set("update_date", updateDate.(string))
+				userName, _ := ve.ObtainSdkValue("Result.AccessKey.UserName", *resp)
+				d.Set("user_name", userName.(string))
+				status, _ := ve.ObtainSdkValue("Result.AccessKey.Status", *resp)
+				d.Set("status", status.(string))
 				return nil
 			},
 		},
@@ -277,7 +264,6 @@ func (s *VolcengineIamAccessKeyService) DatasourceResources(*schema.ResourceData
 				TargetField: "UserName",
 			},
 		},
-		NameField:    "UserName",
 		IdField:      "UserName",
 		CollectField: "access_key_metadata",
 	}

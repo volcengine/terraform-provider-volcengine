@@ -31,21 +31,7 @@ func (s *VolcengineIamUserService) ReadResources(m map[string]interface{}) (data
 		resp    *map[string]interface{}
 		results interface{}
 		ok      bool
-		nameSet = make(map[string]bool)
 	)
-	if _, ok = m["UserNames.1"]; ok {
-		i := 1
-		for {
-			filed := fmt.Sprintf("UserNames.%d", i)
-			tmpId, ok := m[filed]
-			if !ok {
-				break
-			}
-			nameSet[tmpId.(string)] = true
-			i++
-			delete(m, filed)
-		}
-	}
 	cens, err := ve.WithPageOffsetQuery(m, "Limit", "Offset", 100, 0, func(condition map[string]interface{}) ([]interface{}, error) {
 		universalClient := s.Client.UniversalClient
 		action := "ListUsers"
@@ -72,40 +58,34 @@ func (s *VolcengineIamUserService) ReadResources(m map[string]interface{}) (data
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.UserMetadata is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
-	if err != nil || len(nameSet) == 0 {
-		return cens, err
-	}
-
-	res := make([]interface{}, 0)
-	for _, cen := range cens {
-		if !nameSet[cen.(map[string]interface{})["UserName"].(string)] {
-			continue
-		}
-		res = append(res, cen)
-	}
-	return res, nil
+	return cens, err
 }
 
 func (s *VolcengineIamUserService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
 		results []interface{}
-		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
 	req := map[string]interface{}{
-		"UserNames.1": id,
+		"Query": id,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
 	for _, v := range results {
-		if data, ok = v.(map[string]interface{}); !ok {
-			return data, errors.New("Value is not map ")
+		m, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if name, ok := m["UserName"].(string); ok && name == id {
+			data = m
+			break
 		}
 	}
 	if len(data) == 0 {
@@ -145,6 +125,12 @@ func (s *VolcengineIamUserService) CreateResource(resourceData *schema.ResourceD
 		Call: ve.SdkCall{
 			Action:      "CreateUser",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -161,6 +147,7 @@ func (s *VolcengineIamUserService) CreateResource(resourceData *schema.ResourceD
 }
 
 func (s *VolcengineIamUserService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateUser",
@@ -201,7 +188,9 @@ func (s *VolcengineIamUserService) ModifyResource(resourceData *schema.ResourceD
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	setResourceTagsCallbacks := s.setResourceTags(resourceData, "User", callbacks)
+	return setResourceTagsCallbacks
 }
 
 func (s *VolcengineIamUserService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -223,9 +212,8 @@ func (s *VolcengineIamUserService) RemoveResource(resourceData *schema.ResourceD
 func (s *VolcengineIamUserService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"user_names": {
-				TargetField: "UserNames",
-				ConvertType: ve.ConvertWithN,
+			"query": {
+				TargetField: "Query",
 			},
 		},
 		NameField:    "UserName",
@@ -242,6 +230,30 @@ func (s *VolcengineIamUserService) DatasourceResources(*schema.ResourceData, *sc
 				TargetField: "account_id",
 				Convert: func(i interface{}) interface{} {
 					return strconv.FormatFloat(i.(float64), 'f', 0, 64)
+				},
+			},
+			"Tags": {
+				TargetField: "tags",
+				Convert: func(i interface{}) interface{} {
+					if i == nil {
+						return nil
+					}
+					var tags []map[string]interface{}
+					if list, ok := i.([]interface{}); ok {
+						for _, v := range list {
+							if m, ok := v.(map[string]interface{}); ok {
+								tag := make(map[string]interface{})
+								if key, ok := m["Key"].(string); ok {
+									tag["key"] = key
+								}
+								if value, ok := m["Value"].(string); ok {
+									tag["value"] = value
+								}
+								tags = append(tags, tag)
+							}
+						}
+					}
+					return tags
 				},
 			},
 		},
@@ -261,4 +273,78 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		ContentType: ve.Default,
 		RegionType:  ve.Global,
 	}
+}
+
+func (s *VolcengineIamUserService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = tag.(map[string]interface{})["key"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tag.(map[string]interface{})["key"].(string)
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tag.(map[string]interface{})["value"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }

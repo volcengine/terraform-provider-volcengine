@@ -48,12 +48,84 @@ func ResourceVolcengineIamLoginProfile() *schema.Resource {
 			"login_allowed": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed:    true,
 				Description: "The flag of login allowed.",
 			},
 			"password_reset_required": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed:    true,
 				Description: "Is required reset password when next time login in.",
+			},
+			"safe_auth_flag": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "The flag of safe auth.",
+			},
+			"safe_auth_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "The type of safe auth.",
+			},
+			"safe_auth_exempt_required": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The flag of safe auth exempt required.",
+			},
+			"safe_auth_exempt_unit": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The unit of safe auth exempt.",
+			},
+			"safe_auth_exempt_duration": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Computed:    true,
+				Description: "The duration of safe auth exempt.",
+			},
+			"user_id": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The user id.",
+			},
+			"password_expire_at": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The password expire at.",
+			},
+			"last_reset_password_time": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The last reset password time.",
+			},
+			"last_login_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The last login date.",
+			},
+			"last_login_ip": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The last login ip.",
+			},
+			"login_locked": {
+				Type:        schema.TypeBool,
+				Computed:    true,
+				Description: "The flag of login locked.",
+			},
+			"create_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The create date.",
+			},
+			"update_date": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The update date.",
 			},
 		},
 	}

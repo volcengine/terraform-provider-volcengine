@@ -56,6 +56,7 @@ func (v *VolcengineTlsDownloadTaskService) ReadResources(m map[string]interface{
 
 		// Handle LogContextInfos transformation from Object to List
 		// Also convert StartTime and EndTime from string to int64 for consistency with schema
+		cst := time.FixedZone("CST", 8*3600)
 		for _, task := range taskList {
 			t, ok := task.(map[string]interface{})
 			if !ok {
@@ -67,12 +68,12 @@ func (v *VolcengineTlsDownloadTaskService) ReadResources(m map[string]interface{
 
 			// Convert timestamps
 			if startTimeStr, ok := t["StartTime"].(string); ok && startTimeStr != "" {
-				if parsed, err := time.Parse("2006-01-02 15:04:05", startTimeStr); err == nil {
+				if parsed, err := time.ParseInLocation("2006-01-02 15:04:05", startTimeStr, cst); err == nil {
 					t["StartTime"] = parsed.Unix() * 1000
 				}
 			}
 			if endTimeStr, ok := t["EndTime"].(string); ok && endTimeStr != "" {
-				if parsed, err := time.Parse("2006-01-02 15:04:05", endTimeStr); err == nil {
+				if parsed, err := time.ParseInLocation("2006-01-02 15:04:05", endTimeStr, cst); err == nil {
 					t["EndTime"] = parsed.Unix() * 1000
 				}
 			}
@@ -173,26 +174,6 @@ func (v *VolcengineTlsDownloadTaskService) ReadResource(resourceData *schema.Res
 		}
 
 		if taskMap["TaskId"].(string) == id {
-			// Convert StartTime and EndTime from string to int64
-			if startTimeStr, ok := taskMap["StartTime"].(string); ok && startTimeStr != "" {
-				// Try to parse using RFC3339 format first (e.g. 2021-09-01 10:40:00)
-				if t, err := time.Parse("2006-01-02 15:04:05", startTimeStr); err == nil {
-					// Convert back to int64 timestamp
-					taskMap["StartTime"] = t.Unix() * 1000
-				}
-			} else if startTimeInt, ok := taskMap["StartTime"].(float64); ok {
-				taskMap["StartTime"] = int64(startTimeInt)
-			}
-
-			if endTimeStr, ok := taskMap["EndTime"].(string); ok && endTimeStr != "" {
-				if t, err := time.Parse("2006-01-02 15:04:05", endTimeStr); err == nil {
-					// Convert back to int64 timestamp
-					taskMap["EndTime"] = t.Unix() * 1000
-				}
-			} else if endTimeInt, ok := taskMap["EndTime"].(float64); ok {
-				taskMap["EndTime"] = int64(endTimeInt)
-			}
-
 			return taskMap, nil
 		}
 	}
