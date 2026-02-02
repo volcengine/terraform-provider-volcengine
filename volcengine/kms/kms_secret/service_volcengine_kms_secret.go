@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/copystructure"
 	"time"
+
+	"github.com/mitchellh/copystructure"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -156,6 +157,27 @@ func (s *VolcengineKmsSecretService) ReadResources(m map[string]interface{}) (da
 			}
 			filters = append(filters, managedStateFilter)
 			delete(newCondition, "ManagedState")
+		}
+
+		if owningService, exists := condition["OwningService"]; exists {
+			owningServiceSlice := make([]string, 0)
+			owningServiceInter, ok := owningService.([]interface{})
+			if !ok {
+				return data, fmt.Errorf(" OwningService is not slice ")
+			}
+			for _, v := range owningServiceInter {
+				if v == nil {
+					owningServiceSlice = append(owningServiceSlice, "")
+				} else {
+					owningServiceSlice = append(owningServiceSlice, v.(string))
+				}
+			}
+			owningServiceFilter := filter{
+				Key:    "OwningService",
+				Values: owningServiceSlice,
+			}
+			filters = append(filters, owningServiceFilter)
+			delete(newCondition, "OwningService")
 		}
 
 		if rotationState, exists := condition["RotationState"]; exists {
@@ -393,9 +415,14 @@ func (s *VolcengineKmsSecretService) ModifyResource(resourceData *schema.Resourc
 
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "UpdateSecret",
-			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			Action: "UpdateSecret",
+			// UpdateSecret 只支持修改 Description
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"description": {
+					TargetField: "Description",
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["SecretName"] = d.Id()
 				return true, nil
@@ -431,6 +458,32 @@ func (s *VolcengineKmsSecretService) ModifyResource(resourceData *schema.Resourc
 		}
 		callbacks = append(callbacks, secretRotationCallBack)
 	}
+
+	if resourceData.HasChanges("secret_value", "version_name") {
+		// Generic 类型的 Secret 才支持存入新的 secret_value 和 version_name
+		secretValueCallBack := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "SetSecretValue",
+				ConvertMode: ve.RequestConvertIgnore,
+				Convert:     map[string]ve.RequestConvert{},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if resourceData.Get("secret_type").(string) != "Generic" {
+						return false, fmt.Errorf("Only Generic type secret support modifying secret_value and version_name.")
+					}
+					(*call.SdkParam)["SecretName"] = resourceData.Id()
+					(*call.SdkParam)["SecretValue"] = resourceData.Get("secret_value")
+					(*call.SdkParam)["VersionName"] = resourceData.Get("version_name")
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+			},
+		}
+		callbacks = append(callbacks, secretValueCallBack)
+	}
+
 	return callbacks
 }
 

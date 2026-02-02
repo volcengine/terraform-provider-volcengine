@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -38,21 +39,31 @@ func ResourceVolcengineKmsKeyRotation() *schema.Resource {
 			"keyring_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The name of the keyring.",
 			},
 			"key_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				AtLeastOneOf: []string{"key_name", "key_id"},
-				Description:  "The name of the CMK.",
+				Description:  "The name of the key.",
 			},
 			"key_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				AtLeastOneOf: []string{"key_name", "key_id"},
-				Description:  "The id of the CMK.",
+				Description:  "The id of the key. When key_id is not specified, both keyring_name and key_name must be specified.",
+			},
+			// 支持修改，通过调用 EnableKeyRotation API实现
+			"rotate_interval": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(90, 2560),
+				Description:  "Key rotation period, unit: days; value range: [90, 2560].",
 			},
 			"rotation_state": {
 				Type:        schema.TypeString,

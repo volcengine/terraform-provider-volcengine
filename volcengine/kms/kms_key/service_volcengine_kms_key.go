@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/copystructure"
 	"time"
+
+	"github.com/mitchellh/copystructure"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -351,6 +352,32 @@ func (s *VolcengineKmsKeyService) CreateResource(resourceData *schema.ResourceDa
 					TargetField: "Tags",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"custom_key_store_id": {
+					TargetField: "CustomKeyStoreID",
+				},
+				"xks_key_id": {
+					TargetField: "XksKeyID",
+				},
+				"rotate_state": {
+					Ignore: true,
+				},
+				"rotate_interval": {
+					Ignore: true,
+				},
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if rotateState, ok := d.GetOk("rotate_state"); ok {
+					rotate := rotateState.(string)
+					if rotate == "Enable" {
+						if rotateInterval, ok := d.GetOk("rotate_interval"); ok {
+							rotateInterval := rotateInterval.(int)
+							(*call.SdkParam)["RotateInterval"] = rotateInterval
+						} else {
+							return false, fmt.Errorf("rotate_interval is required when rotate_state is Enable")
+						}
+					}
+				}
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -380,6 +407,12 @@ func (VolcengineKmsKeyService) WithResourceResponseHandlers(d map[string]interfa
 		d["MultiRegionConfiguration"] = interface{}(map[string]interface{}{})
 	}
 
+	if rotationState, ok := d["RotationState"].(string); ok {
+		if rotationState == "Disable" {
+			delete(d, "RotateInterval")
+		}
+	}
+
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
@@ -388,12 +421,25 @@ func (VolcengineKmsKeyService) WithResourceResponseHandlers(d map[string]interfa
 
 func (s *VolcengineKmsKeyService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	var callbacks []ve.Callback
-
+	// 支持修改 key_name tags descryption
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateKey",
 			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					Ignore: true,
+				},
+				"description": {
+					TargetField: "Description",
+				},
+				"rotate_state": {
+					Ignore: true,
+				},
+				"rotate_interval": {
+					Ignore: true,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["KeyID"] = d.Id()
 				(*call.SdkParam)["NewKeyName"] = d.Get("key_name")
@@ -405,11 +451,85 @@ func (s *VolcengineKmsKeyService) ModifyResource(resourceData *schema.ResourceDa
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Id()
+			},
 		},
 	}
 	callbacks = append(callbacks, callback)
+
+	// 处理 轮转 状态的更新
+	// Disable --> Enable: 调用 EnableKeyRotation
+	// Enable --> Disable: 调用 DisableKeyRotation
+	// Enable --> Enable + 轮转间隔更新: 调用 EnableKeyRotation 更新间隔
+	if resourceData.HasChanges("rotate_state", "rotate_interval") {
+		oldState, newState := resourceData.GetChange("rotate_state")
+		fmt.Println(oldState, newState)
+		// Disable --> Enable, 或者 Enable-->Enable + 间隔更新, 或者 空-->Enable: 调用 EnableKeyRotation
+		if newState.(string) == "Enable" {
+			callback := ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "EnableKeyRotation",
+					ConvertMode: ve.RequestConvertIgnore,
+					Convert:     map[string]ve.RequestConvert{},
+					BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+						if rotateInterval, ok := d.GetOk("rotate_interval"); ok {
+							rotateInterval := rotateInterval.(int)
+							(*call.SdkParam)["RotateInterval"] = rotateInterval
+						} else {
+							return false, fmt.Errorf("rotate_interval is required when rotate_state is Enable")
+						}
+						// 兼容 多地域 密钥，使用 keyring_name + key_name
+						// (*call.SdkParam)["KeyID"] = d.Id()
+						(*call.SdkParam)["KeyringName"] = d.Get("keyring_name")
+						(*call.SdkParam)["KeyName"] = d.Get("key_name")
+						return true, nil
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+						resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						logger.Debug(logger.RespFormat, call.Action, resp, err)
+						return resp, err
+					},
+					LockId: func(d *schema.ResourceData) string {
+						return d.Id()
+					},
+				},
+			}
+			callbacks = append(callbacks, callback)
+		} else if (oldState.(string) == "Enable" && newState.(string) == "Disable") || newState.(string) == "" {
+			// Enable --> Disable 或者 Enable--> 空: 调用 DisableKeyRotation
+			callback := ve.Callback{
+				Call: ve.SdkCall{
+					Action:      "DisableKeyRotation",
+					ConvertMode: ve.RequestConvertInConvert,
+					Convert: map[string]ve.RequestConvert{
+						"keyring_name": {
+							TargetField: "KeyringName",
+							ForceGet:    true,
+						},
+						"key_name": {
+							TargetField: "KeyName",
+							ForceGet:    true,
+						},
+					},
+					ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+						logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+						resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+						logger.Debug(logger.RespFormat, call.Action, resp, err)
+						return resp, err
+					},
+					LockId: func(d *schema.ResourceData) string {
+						return d.Id()
+					},
+				},
+			}
+			callbacks = append(callbacks, callback)
+		}
+	}
+
 	// 更新Tags
-	setResourceTagsCallbacks := s.setResourceTags(resourceData, "keys", callbacks)
+	setResourceTagsCallbacks := s.setResourceTags(resourceData, "keys")
 	callbacks = append(callbacks, setResourceTagsCallbacks...)
 
 	return callbacks
@@ -481,6 +601,12 @@ func (s *VolcengineKmsKeyService) DatasourceResources(*schema.ResourceData, *sch
 			"ID": {
 				TargetField: "id",
 			},
+			"CustomKeyStoreID": {
+				TargetField: "custom_key_store_id",
+			},
+			"XksKeyConfiguration.ID": {
+				TargetField: "id",
+			},
 		},
 	}
 }
@@ -509,7 +635,8 @@ func getUniversalPostInfo(actionName string) ve.UniversalInfo {
 	}
 }
 
-func (s *VolcengineKmsKeyService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
+func (s *VolcengineKmsKeyService) setResourceTags(resourceData *schema.ResourceData, resourceType string) []ve.Callback {
+	var callbacks []ve.Callback
 	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
 
 	removeCallback := ve.Callback{

@@ -24,35 +24,36 @@ func ResourceVolcengineKmsKeyEnable() *schema.Resource {
 	resource := &schema.Resource{
 		Create: resourceVolcengineKmsKeyEnableCreate,
 		Read:   resourceVolcengineKmsKeyEnableRead,
-		Update: resourceVolcengineKmsKeyEnableUpdate,
 		Delete: resourceVolcengineKmsKeyEnableDelete,
 		Importer: &schema.ResourceImporter{
 			State: kmsKeyEnableImporter,
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"keyring_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "The name of the keyring.",
 			},
 			"key_name": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				AtLeastOneOf: []string{"key_name", "key_id"},
-				Description:  "The name of the CMK.",
+				Description:  "The name of the key.",
 			},
 			"key_id": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Computed:     true,
+				ForceNew:     true,
 				AtLeastOneOf: []string{"key_name", "key_id"},
-				Description:  "The id of the CMK.",
+				Description:  "The id of the key. When key_id is not specified, both keyring_name and key_name must be specified.",
 			},
 			"key_state": {
 				Type:        schema.TypeString,

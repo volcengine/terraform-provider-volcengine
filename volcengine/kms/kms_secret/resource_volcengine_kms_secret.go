@@ -32,6 +32,24 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 			Update: schema.DefaultTimeout(30 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
+		// 只有 Generic 类型的 Secret 才支持存入新的 secret_value 和 version_name，其他类型需要销毁后重新创建
+		CustomizeDiff: func(diff *schema.ResourceDiff, _ interface{}) error {
+			secretType, _ := diff.Get("secret_type").(string)
+
+			if secretType != "Generic" {
+				if diff.HasChange("secret_value") {
+					if err := diff.ForceNew("secret_value"); err != nil {
+						return err
+					}
+				}
+				if diff.HasChange("version_name") {
+					if err := diff.ForceNew("version_name"); err != nil {
+						return err
+					}
+				}
+			}
+			return nil
+		},
 		Schema: map[string]*schema.Schema{
 			"secret_name": {
 				Type:        schema.TypeString,
@@ -43,13 +61,17 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The type of the secret.",
+				Description: "The type of the secret. Valid values: Generic, IAM, RDS, Redis, ECS.",
 			},
 			"secret_value": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
-				Description: "The value of the secret.",
+				Description: "The value of the secret. Only Generic type secret support modifying secret_value.",
+			},
+			"version_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The version alias of the secret. Only Generic type secret support modifying version_name.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
@@ -80,15 +102,13 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 			"automatic_rotation": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				ForceNew:    true,
-				Description: "The rotation state of the secret.",
+				Description: "The rotation state of the secret. Only valid for IAM, RDS, Redis, ECS secrets.",
 			},
 			"rotation_interval": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Computed:    true,
-				Description: "The interval at which automatic rotation is performed.",
+				Description: "The interval at which automatic rotation is performed. This parameter must be specified when automatic_rotation is true.",
 			},
 			"creation_date": {
 				Type:        schema.TypeInt,
@@ -114,6 +134,11 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 				Type:        schema.TypeBool,
 				Computed:    true,
 				Description: "Indicates whether the secret is hosted.",
+			},
+			"owning_service": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The cloud service that owns the secret.",
 			},
 			"rotation_state": {
 				Type:        schema.TypeString,

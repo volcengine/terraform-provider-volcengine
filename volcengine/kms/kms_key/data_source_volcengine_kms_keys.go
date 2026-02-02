@@ -27,14 +27,16 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				Description: "The total count of query.",
 			},
 			"keyring_name": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Query the Key ring that meets the specified conditions, which is composed of key-value pairs.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"keyring_name", "keyring_id"},
+				Description:  "Query the Key ring that meets the specified conditions, which is composed of key-value pairs.",
 			},
 			"keyring_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Query the Key ring that meets the specified conditions, which is composed of key-value pairs.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				AtLeastOneOf: []string{"keyring_name", "keyring_id"},
+				Description:  "Query the Key ring that meets the specified conditions, which is composed of key-value pairs.",
 			},
 			"key_name": {
 				Type:     schema.TypeList,
@@ -50,7 +52,7 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "The algorithm used in the key.",
+				Description: "The algorithm used in the key. Valid values: SYMMETRIC_256, SYMMETRIC_128, RSA_2048, RSA_3072, RSA_4096, EC_P256K, EC_P256, EC_P384, EC_P521, EC_SM2.",
 			},
 			"description": {
 				Type:     schema.TypeList,
@@ -74,7 +76,7 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "The usage of the key.",
+				Description: "The usage of the key. Valid values: ENCRYPT_DECRYPT, SIGN_VERIFY.",
 			},
 			"protection_level": {
 				Type:     schema.TypeList,
@@ -82,7 +84,7 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "The protection level of the key.",
+				Description: "The protection level of the key. Valid values: SOFTWARE, HSM.",
 			},
 			"rotate_state": {
 				Type:     schema.TypeList,
@@ -90,7 +92,7 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "The state of the rotate.",
+				Description: "The state of the rotate. Valid values: Enable, Disable.",
 			},
 			"origin": {
 				Type:     schema.TypeList,
@@ -98,7 +100,7 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "The origin of the key.",
+				Description: "The origin of the key. Valid values: CloudKMS, External.",
 			},
 			"creation_date_range": {
 				Type:     schema.TypeList,
@@ -280,6 +282,25 @@ func DataSourceVolcengineKmsKeys() *schema.Resource {
 												},
 											},
 										},
+									},
+								},
+							},
+						},
+						"custom_key_store_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The ID of the custom key store.",
+						},
+						"xks_key_configuration": {
+							Type:        schema.TypeList,
+							Computed:    true,
+							Description: "The configuration of the external key store.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "The ID of the external key store.",
 									},
 								},
 							},
