@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/request"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcenginebody"
 )
@@ -48,6 +49,24 @@ func bypassBuild(r *request.Request) {
 		if strings.Contains(strings.ToLower(contentType), "application/json") {
 			if r.HTTPRequest.Header.Get("Content-Length") == "" {
 				volcenginebody.BodyJson(&body, r)
+			}
+		}
+	} else if strings.ToUpper(r.HTTPRequest.Method) == "GET" && strings.Contains(strings.ToLower(contentType), "application/json") &&
+		len(body) > 0 && params != nil {
+		logger.Debug(logger.ReqFormat, "request.url", body)
+		logger.Debug(logger.ReqFormat, "request.body", params)
+		r.HTTPRequest.Header.Set("Content-Type", contentType)
+		if strings.Contains(strings.ToLower(contentType), "application/json") {
+			if r.HTTPRequest.Header.Get("Content-Length") == "" {
+				method := r.HTTPRequest.Method
+				// Temporary switch to POST to force BodyJson to marshal into Body instead of Query
+				if strings.ToUpper(method) == "GET" {
+					r.HTTPRequest.Method = "POST"
+				}
+				volcenginebody.BodyJson(&body, r)
+				if strings.ToUpper(method) == "GET" {
+					r.HTTPRequest.Method = "GET"
+				}
 			}
 		}
 	} else {

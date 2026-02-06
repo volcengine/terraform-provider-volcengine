@@ -13,8 +13,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_content_template"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/alarm_webhook_integration"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/check_point"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/host_group_rule"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_context"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_cursor"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_histogram"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/log_search"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/tls/rule_bound_host_group"
@@ -916,7 +918,9 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_tls_etl_tasks":                  etl_task.DataSourceVolcengineEtlTasks(),
 			"volcengine_tls_shippers":                   shipper.DataSourceVolcengineShippers(),
 			"volcengine_tls_consumer_groups":            consumer_group.DataSourceVolcengineConsumerGroups(),
+			"volcengine_tls_check_points":               check_point.DataSourceVolcengineTlsCheckPoints(),
 			"volcengine_tls_log_histograms":             log_histogram.DataSourceVolcengineTlsLogHistograms(),
+			"volcengine_tls_log_cursors":                log_cursor.DataSourceVolcengineTlsLogCursors(),
 			"volcengine_tls_log_searches":               log_search.DataSourceVolcengineTlsSearchLogs(),
 			"volcengine_tls_log_contexts":               log_context.DataSourceVolcengineTlsLogContexts(),
 			"volcengine_tls_download_tasks":             download_task.DataSourceVolcengineTlsDownloadTasks(),
