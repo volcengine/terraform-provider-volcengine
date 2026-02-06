@@ -9,14 +9,10 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineTlsTopicsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Required: true,
-				Set:      schema.HashString,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The list of topic id of tls index.",
+			"topic_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The topic id of tls index.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -97,54 +93,47 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Computed:    true,
 										Description: "The key of the KeyValueInfo.",
 									},
 									"value_type": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Computed:    true,
 										Description: "The type of value. Valid values: `long`, `double`, `text`, `json`.",
 									},
 									"case_sensitive": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether the value is case sensitive.",
 									},
 									"delimiter": {
 										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "",
+										Computed:    true,
 										Description: "The delimiter of the value.",
 									},
 									"include_chinese": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether the value include chinese.",
 									},
 									"sql_flag": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether the filed is enabled for analysis.",
 									},
 									"index_all": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"index_sql_all": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"auto_index_flag": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"json_keys": {
@@ -197,54 +186,47 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"key": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Computed:    true,
 										Description: "The key of the KeyValueInfo.",
 									},
 									"value_type": {
 										Type:        schema.TypeString,
-										Required:    true,
+										Computed:    true,
 										Description: "The type of value. Valid values: `long`, `double`, `text`, `json`.",
 									},
 									"case_sensitive": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether the value is case sensitive.",
 									},
 									"delimiter": {
 										Type:        schema.TypeString,
-										Optional:    true,
-										Default:     "",
+										Computed:    true,
 										Description: "The delimiter of the value.",
 									},
 									"include_chinese": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether the value include chinese.",
 									},
 									"sql_flag": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether the filed is enabled for analysis.",
 									},
 									"index_all": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"index_sql_all": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"auto_index_flag": {
 										Type:        schema.TypeBool,
-										Optional:    true,
-										Default:     false,
+										Computed:    true,
 										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"json_keys": {

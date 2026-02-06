@@ -1,5 +1,5 @@
 resource "volcengine_tls_index" "foo" {
-  topic_id = "e101b8c8-77e7-4ae3-91c1-2532ee480e7d"
+  topic_id = "c36ed436-84f1-467a-b00e-ba504db753ca"
 
   max_text_len = 2048
   enable_auto_index = true

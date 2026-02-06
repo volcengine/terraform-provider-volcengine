@@ -30,56 +30,49 @@ func (s *VolcengineTlsIndexService) ReadResources(condition map[string]interface
 	var (
 		resp  *map[string]interface{}
 		index interface{}
-		ok    bool
 	)
 
-	topicIds, exist := condition["TopicIds"]
+	topicId, exist := condition["TopicId"]
 	if !exist {
 		return data, err
 	}
-	if _, ok = topicIds.([]interface{}); !ok {
-		return data, fmt.Errorf(" topic ids is not slice ")
-	}
-	for _, topicId := range topicIds.([]interface{}) {
-		action := "DescribeIndex"
-		req := map[string]interface{}{
-			"TopicId": topicId,
-		}
-		logger.DebugInfo(logger.ReqFormat, action, req)
-		resp, err = s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
-			ContentType: ve.Default,
-			HttpMethod:  ve.GET,
-			Path:        []string{action},
-			Client:      s.Client.BypassSvcClient.NewTlsClient(),
-		}, &req)
-		logger.Debug(logger.RespFormat, action, req, *resp)
-		if err != nil {
-			return data, err
-		}
-		index, err = ve.ObtainSdkValue("RESPONSE", *resp)
-		if err != nil {
-			return data, err
-		}
 
-		indexMap, ok := index.(map[string]interface{})
-		if !ok {
-			return data, fmt.Errorf(" Index is not map ")
-		}
-		keyValue, exist := indexMap["KeyValue"]
-		if !exist || keyValue == nil {
-			continue
-		}
-		indexMap["KeyValue"], err = transKeyValueToResponse(keyValue)
-		userInnerKeyValue, ok := indexMap["UserInnerKeyValue"]
-		if !ok || userInnerKeyValue == nil {
-			continue
-		}
-		indexMap["UserInnerKeyValue"], err = transKeyValueToResponse(userInnerKeyValue)
-		if err != nil {
-			return data, err
-		}
-		data = append(data, index)
+	action := "DescribeIndex"
+	req := map[string]interface{}{
+		"TopicId": topicId,
 	}
+	logger.DebugInfo(logger.ReqFormat, action, req)
+	resp, err = s.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+		ContentType: ve.Default,
+		HttpMethod:  ve.GET,
+		Path:        []string{action},
+		Client:      s.Client.BypassSvcClient.NewTlsClient(),
+	}, &req)
+	logger.Debug(logger.RespFormat, action, req, *resp)
+	if err != nil {
+		return data, err
+	}
+	index, err = ve.ObtainSdkValue("RESPONSE", *resp)
+	if err != nil {
+		return data, err
+	}
+
+	indexMap, ok := index.(map[string]interface{})
+	if !ok {
+		return data, fmt.Errorf(" Index is not map ")
+	}
+	keyValue, exist := indexMap["KeyValue"]
+	if exist && keyValue != nil {
+		indexMap["KeyValue"], err = transKeyValueToResponse(keyValue)
+	}
+	userInnerKeyValue, ok := indexMap["UserInnerKeyValue"]
+	if ok && userInnerKeyValue != nil {
+		indexMap["UserInnerKeyValue"], err = transKeyValueToResponse(userInnerKeyValue)
+	}
+	if err != nil {
+		return data, err
+	}
+	data = append(data, index)
 
 	return data, err
 }
@@ -97,7 +90,7 @@ func (s *VolcengineTlsIndexService) ReadResource(resourceData *schema.ResourceDa
 		topicID = items[1]
 	}
 	req := map[string]interface{}{
-		"TopicIds": []interface{}{topicID},
+		"TopicId": topicID,
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -315,9 +308,8 @@ func (s *VolcengineTlsIndexService) RemoveResource(resourceData *schema.Resource
 func (s *VolcengineTlsIndexService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"ids": {
-				TargetField: "TopicIds",
-				ConvertType: ve.ConvertJsonArray,
+			"topic_id": {
+				TargetField: "TopicId",
 			},
 		},
 		IdField:      "IndexId",
