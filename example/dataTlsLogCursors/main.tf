@@ -4,6 +4,3 @@ data "volcengine_tls_log_cursors" "default" {
   from     = "begin"
 }
 
-output "cursor" {
-  value = data.volcengine_tls_log_cursors.default.log_cursors[0].cursor
-}

@@ -3,6 +3,3 @@ data "volcengine_tls_download_tasks" "foo" {
   task_name  = "tf-test-download"
 }
 
-output "download_tasks" {
-  value = data.volcengine_tls_download_tasks.foo.download_tasks
-}
