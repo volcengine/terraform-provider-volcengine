@@ -10,20 +10,14 @@ description: |-
 Use this data source to query detailed information of iam user groups
 ## Example Usage
 ```hcl
-resource "volcengine_iam_user_group" "foo" {
-  user_group_name = "acc-test-group"
-  description     = "acc-test"
-  display_name    = "acc-test"
-}
-
-data "volcengine_iam_user_groups" "foo" {
-  query = "acc-test"
+data "volcengine_iam_user_groups" "default" {
+  query = "xRqElT"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
-* `query` - (Optional) Fuzzy search, supports searching for user group names, display names, and remarks.
+* `query` - (Optional) Fuzzy query. Can query by user group name, display name or description.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -34,6 +28,7 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of the user group.
     * `display_name` - The display name of the user group.
     * `update_date` - The update date of the user group.
+    * `user_group_id` - The id of the user group.
     * `user_group_name` - The name of the user group.
 
 

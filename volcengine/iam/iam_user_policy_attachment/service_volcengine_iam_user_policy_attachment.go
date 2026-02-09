@@ -164,7 +164,29 @@ func (s *VolcengineIamUserPolicyAttachmentService) RemoveResource(data *schema.R
 }
 
 func (s *VolcengineIamUserPolicyAttachmentService) DatasourceResources(data *schema.ResourceData, resource *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{}
+	return ve.DataSourceInfo{
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"PolicyName": {
+				TargetField: "policy_name",
+			},
+			"PolicyType": {
+				TargetField: "policy_type",
+			},
+			"PolicyTrn": {
+				TargetField: "policy_trn",
+			},
+			"Description": {
+				TargetField: "description",
+			},
+			"AttachDate": {
+				TargetField: "attach_date",
+			},
+			"PolicyScope": {
+				TargetField: "policy_scope",
+			},
+		},
+		CollectField: "policies",
+	}
 }
 
 func (s *VolcengineIamUserPolicyAttachmentService) ReadResourceId(id string) string {

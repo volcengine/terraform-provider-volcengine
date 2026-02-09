@@ -68,6 +68,7 @@ func (s *VolcengineIamServiceLinkedRoleService) ReadResource(resourceData *schem
 	}
 	data["Status"] = role["Status"]
 	data["RoleId"] = role["RoleId"]
+	data["Tags"] = role["Tags"]
 
 	if len(data) == 0 {
 		return data, fmt.Errorf("iam_service_linked_role %s not exist ", id)
@@ -124,7 +125,12 @@ func (s *VolcengineIamServiceLinkedRoleService) CreateResource(resourceData *sch
 		Call: ve.SdkCall{
 			Action:      "CreateServiceLinkedRole",
 			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				roleName, err := s.queryRoleName(resourceData, d.Get("service_name").(string))
 				if err != nil {

@@ -50,6 +50,22 @@ func bypassBuild(r *request.Request) {
 				volcenginebody.BodyJson(&body, r)
 			}
 		}
+	} else if strings.ToUpper(r.HTTPRequest.Method) == "GET" && strings.Contains(strings.ToLower(contentType), "application/json") &&
+		len(body) > 0 && params != nil {
+		r.HTTPRequest.Header.Set("Content-Type", contentType)
+		if strings.Contains(strings.ToLower(contentType), "application/json") {
+			if r.HTTPRequest.Header.Get("Content-Length") == "" {
+				method := r.HTTPRequest.Method
+				// Temporary switch to POST to force BodyJson to marshal into Body instead of Query
+				if strings.ToUpper(method) == "GET" {
+					r.HTTPRequest.Method = "POST"
+				}
+				volcenginebody.BodyJson(&body, r)
+				if strings.ToUpper(method) == "GET" {
+					r.HTTPRequest.Method = "GET"
+				}
+			}
+		}
 	} else {
 		if len(contentType) > 0 && !strings.Contains(strings.ToLower(contentType), "x-www-form-urlencoded") {
 			r.HTTPRequest.Header.Del("Content-Type")

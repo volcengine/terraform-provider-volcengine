@@ -20,6 +20,7 @@ $ terraform import volcengine_iam_role.default TerraformTestRole
 */
 
 func ResourceVolcengineIamRole() *schema.Resource {
+	tagsSchema := ve.TagsSchema()
 	return &schema.Resource{
 		Create: resourceVolcengineIamRoleCreate,
 		Read:   resourceVolcengineIamRoleRead,
@@ -36,7 +37,7 @@ func ResourceVolcengineIamRole() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"trust_policy_document": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The trust policy document of the Role.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if d.Id() != "" {
@@ -61,7 +62,7 @@ func ResourceVolcengineIamRole() *schema.Resource {
 			},
 			"display_name": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "The display name of the Role.",
 			},
 			"description": {
@@ -79,6 +80,17 @@ func ResourceVolcengineIamRole() *schema.Resource {
 				Computed:    true,
 				Description: "The resource name of the Role.",
 			},
+			"role_id": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "The id of the Role.",
+			},
+			"is_service_linked_role": {
+				Type:        schema.TypeInt,
+				Computed:    true,
+				Description: "Whether the Role is a service linked role.",
+			},
+			"tags": tagsSchema,
 		},
 	}
 }

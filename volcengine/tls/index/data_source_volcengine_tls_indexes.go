@@ -9,14 +9,10 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineTlsTopicsRead,
 		Schema: map[string]*schema.Schema{
-			"ids": {
-				Type:     schema.TypeSet,
-				Required: true,
-				Set:      schema.HashString,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Description: "The list of topic id of tls index.",
+			"topic_id": {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "The topic id of tls index.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -98,12 +94,12 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 									"key": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The key of the KeyValue index.",
+										Description: "The key of the KeyValueInfo.",
 									},
 									"value_type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The type of value.",
+										Description: "The type of value. Valid values: `long`, `double`, `text`, `json`.",
 									},
 									"case_sensitive": {
 										Type:        schema.TypeBool,
@@ -128,7 +124,17 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 									"index_all": {
 										Type:        schema.TypeBool,
 										Computed:    true,
-										Description: "Whether to create indexes for all fields in JSON fields with text values.",
+										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+									},
+									"index_sql_all": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+									},
+									"auto_index_flag": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"json_keys": {
 										Type:        schema.TypeList,
@@ -181,12 +187,12 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 									"key": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The key of the KeyValue index.",
+										Description: "The key of the KeyValueInfo.",
 									},
 									"value_type": {
 										Type:        schema.TypeString,
 										Computed:    true,
-										Description: "The type of value.",
+										Description: "The type of value. Valid values: `long`, `double`, `text`, `json`.",
 									},
 									"case_sensitive": {
 										Type:        schema.TypeBool,
@@ -207,6 +213,21 @@ func DataSourceVolcengineTlsIndexes() *schema.Resource {
 										Type:        schema.TypeBool,
 										Computed:    true,
 										Description: "Whether the filed is enabled for analysis.",
+									},
+									"index_all": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+									},
+									"index_sql_all": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
+									},
+									"auto_index_flag": {
+										Type:        schema.TypeBool,
+										Computed:    true,
+										Description: "Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.",
 									},
 									"json_keys": {
 										Type:        schema.TypeList,

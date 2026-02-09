@@ -26,7 +26,8 @@ resource "volcengine_iam_role" "foo2" {
 }
 
 data "volcengine_iam_roles" "foo"{
-    role_name = "${volcengine_iam_role.foo1.role_name},${volcengine_iam_role.foo2.role_name}"
+    query = "acc-test-role"
+    depends_on = [volcengine_iam_role.foo1, volcengine_iam_role.foo2]
 }
 `
 
@@ -48,6 +49,7 @@ func TestAccVolcengineIamRolesDatasource_Basic(t *testing.T) {
 				Config: testAccVolcengineIamRolesDatasourceConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(acc.ResourceId, "roles.#", "2"),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "roles.0.update_date"),
 				),
 			},
 		},

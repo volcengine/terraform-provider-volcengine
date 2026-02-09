@@ -2,7 +2,6 @@ package iam_access_key
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -13,15 +12,8 @@ func DataSourceVolcengineIamAccessKeys() *schema.Resource {
 			"user_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The user names.",
+				Description: "The user name.",
 			},
-			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
-				Description:  "A Name Regex of IAM.",
-			},
-
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,

@@ -7,7 +7,7 @@ resource "volcengine_tls_shipper" "foo" {
     }
   }
   shipper_end_time = 1751255700021
-  shipper_name = "tf-test-modify"
+  shipper_name = "tf-test"
   shipper_start_time = 1750737324521
   shipper_type = "tos"
   topic_id = "8ba48bd7-2493-4300-b1d0-cb760b89e51b"

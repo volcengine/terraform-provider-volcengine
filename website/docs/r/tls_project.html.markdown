@@ -12,7 +12,7 @@ Provides a resource to manage tls project
 ```hcl
 resource "volcengine_tls_project" "foo" {
   project_name     = "tf-project-m"
-  description      = "tf-desc"
+  description      = "tf-desc-modify"
   region           = "cn-guilin-boe"
   iam_project_name = "default"
   tags {
@@ -23,6 +23,7 @@ resource "volcengine_tls_project" "foo" {
     key   = "k2"
     value = "v3"
   }
+
 }
 ```
 ## Argument Reference

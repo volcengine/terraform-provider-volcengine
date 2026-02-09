@@ -41,6 +41,7 @@ func TestAccVolcengineIamUserGroupsDatasource_Basic(t *testing.T) {
 				Config: testAccVolcengineIamUserGroupsDatasourceConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttrSet(acc.ResourceId, "user_groups"),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "user_groups.0.update_date"),
 				),
 			},
 		},

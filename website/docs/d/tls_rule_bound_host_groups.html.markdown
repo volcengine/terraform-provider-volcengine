@@ -11,7 +11,7 @@ Use this data source to query detailed information of tls rule bound host groups
 ## Example Usage
 ```hcl
 data "volcengine_tls_rule_bound_host_groups" "default" {
-  rule_id = "048dc010-6bb1-4189-858a-281d654d6686"
+  rule_id = "83ac687a-0e2b-4788-b626-3dce18498740"
 }
 ```
 ## Argument Reference

@@ -1,3 +1,3 @@
-data "volcengine_iam_oidc_providers" "foo" {
+data "volcengine_iam_oidc_providers" "default" {
 
 }

@@ -1,2 +1,2 @@
-data "volcengine_iam_saml_providers" "foo"{
+data "volcengine_iam_saml_providers" "default" {
 }

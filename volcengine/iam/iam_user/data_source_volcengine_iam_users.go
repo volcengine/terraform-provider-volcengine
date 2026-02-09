@@ -2,7 +2,6 @@ package iam_user
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -10,20 +9,10 @@ func DataSourceVolcengineIamUsers() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineIamUsersRead,
 		Schema: map[string]*schema.Schema{
-			"user_names": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "A list of user names.",
-			},
-			"name_regex": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringIsValidRegExp,
-				Description:  "A Name Regex of IAM.",
+			"query": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Fuzzy query. Can query by user name, display name or description.",
 			},
 
 			"output_file": {
@@ -102,6 +91,7 @@ func DataSourceVolcengineIamUsers() *schema.Resource {
 							Computed:    true,
 							Description: "The description of the user.",
 						},
+						"tags": ve.TagsSchema(),
 					},
 				},
 			},

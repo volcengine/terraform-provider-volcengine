@@ -10,7 +10,7 @@ description: |-
 Use this data source to query detailed information of iam oidc providers
 ## Example Usage
 ```hcl
-data "volcengine_iam_oidc_providers" "foo" {
+data "volcengine_iam_oidc_providers" "default" {
 
 }
 ```

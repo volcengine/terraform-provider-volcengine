@@ -2,6 +2,7 @@ package download_task
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -11,9 +12,9 @@ import (
 /*
 
 Import
-tls download task can be imported using the id, e.g.
+tls download task can be imported using the topic_id and task_id, e.g.
 ```
-$ terraform import volcengine_tls_download_task.default task-1234567890
+$ terraform import volcengine_tls_download_task.default topic-123456:task-1234567890
 ```
 
 */
@@ -24,7 +25,15 @@ func ResourceVolcengineTlsDownloadTask() *schema.Resource {
 		Create: resourceVolcengineTlsDownloadTaskCreate,
 		Delete: resourceVolcengineTlsDownloadTaskDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: func(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+				parts := strings.Split(d.Id(), ":")
+				if len(parts) != 2 {
+					return nil, fmt.Errorf("invalid import id %q, expected topic_id:task_id", d.Id())
+				}
+				d.Set("topic_id", parts[0])
+				d.SetId(parts[1])
+				return []*schema.ResourceData{d}, nil
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),

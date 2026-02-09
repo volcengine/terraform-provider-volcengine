@@ -225,19 +225,18 @@ func DataSourceVolcengineTlsHostGroupRules() *schema.Resource {
 
 func dataSourceVolcengineTlsHostGroupRulesRead(d *schema.ResourceData, meta interface{}) error {
 	service := host_group.NewService(meta.(*ve.SdkClient))
-	m := map[string]interface{}{
-		"host_group_id": d.Get("host_group_id"),
-	}
-	data, err := service.ReadRules(m)
-	if err != nil {
-		return err
-	}
-	d.SetId(d.Get("host_group_id").(string))
-	if len(data) > 0 {
-		if err := d.Set("rule_infos", data); err != nil {
-			return err
-		}
-	}
-	d.Set("total_count", len(data))
-	return nil
+	wrapper := &hostGroupRuleServiceWrapper{Service: service}
+	return ve.DefaultDispatcher().Data(wrapper, d, DataSourceVolcengineTlsHostGroupRules())
+}
+
+type hostGroupRuleServiceWrapper struct {
+	*host_group.Service
+}
+
+func (w *hostGroupRuleServiceWrapper) ReadResources(m map[string]interface{}) ([]interface{}, error) {
+	return w.ReadRules(m)
+}
+
+func (w *hostGroupRuleServiceWrapper) DatasourceResources(d *schema.ResourceData, r *schema.Resource) ve.DataSourceInfo {
+	return w.DatasourceRules(d, r)
 }

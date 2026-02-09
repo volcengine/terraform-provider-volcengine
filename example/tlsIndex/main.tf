@@ -1,5 +1,5 @@
 resource "volcengine_tls_index" "foo" {
-  topic_id = "b600dc34-503f-42fc-8e32-953af55463d1"
+  topic_id = "c36ed436-84f1-467a-b00e-ba504db753ca"
 
   max_text_len = 2048
   enable_auto_index = true
@@ -11,19 +11,21 @@ resource "volcengine_tls_index" "foo" {
  }
 
   key_value {
-    key = "k1"
+    key = "k21"
     value_type = "json"
     case_sensitive = true
     delimiter = "!"
     include_chinese = false
     sql_flag = true
     index_all = true
+    index_sql_all   = true
+    auto_index_flag = false
     json_keys {
-      key = "name"
+      key = "name-2"
       value_type = "text"
     }
     json_keys {
-      key = "key"
+      key = "key-2"
       value_type = "long"
     }
   }
@@ -33,9 +35,11 @@ resource "volcengine_tls_index" "foo" {
     key = "__content__"
     value_type = "json"
     delimiter = ",:-/ "
-    case_sensitive = false
     include_chinese = false
-    sql_flag = false
+    sql_flag = true
+    index_all = true
+    index_sql_all   = true
+    auto_index_flag = false
     json_keys {
       key = "app"
       value_type = "long"

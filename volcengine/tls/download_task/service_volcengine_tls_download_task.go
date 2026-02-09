@@ -2,6 +2,7 @@ package download_task
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -56,6 +57,7 @@ func (v *VolcengineTlsDownloadTaskService) ReadResources(m map[string]interface{
 
 		// Handle LogContextInfos transformation from Object to List
 		// Also convert StartTime and EndTime from string to int64 for consistency with schema
+		cst := time.FixedZone("CST", 8*3600)
 		for _, task := range taskList {
 			t, ok := task.(map[string]interface{})
 			if !ok {
@@ -65,15 +67,15 @@ func (v *VolcengineTlsDownloadTaskService) ReadResources(m map[string]interface{
 				t["LogContextInfos"] = []interface{}{info}
 			}
 
-			// Convert timestamps
+			// Convert timestamps to seconds
 			if startTimeStr, ok := t["StartTime"].(string); ok && startTimeStr != "" {
-				if parsed, err := time.Parse("2006-01-02 15:04:05", startTimeStr); err == nil {
-					t["StartTime"] = parsed.Unix() * 1000
+				if parsed, err := time.ParseInLocation("2006-01-02 15:04:05", startTimeStr, cst); err == nil {
+					t["StartTime"] = parsed.Unix()
 				}
 			}
 			if endTimeStr, ok := t["EndTime"].(string); ok && endTimeStr != "" {
-				if parsed, err := time.Parse("2006-01-02 15:04:05", endTimeStr); err == nil {
-					t["EndTime"] = parsed.Unix() * 1000
+				if parsed, err := time.ParseInLocation("2006-01-02 15:04:05", endTimeStr, cst); err == nil {
+					t["EndTime"] = parsed.Unix()
 				}
 			}
 
@@ -144,9 +146,16 @@ func (v *VolcengineTlsDownloadTaskService) ReadResource(resourceData *schema.Res
 		id = resourceData.Id()
 	}
 
+	topicId := resourceData.Get("topic_id").(string)
+	if topicId == "" && strings.Contains(id, ":") {
+		parts := strings.Split(id, ":")
+		topicId = parts[0]
+		id = parts[1]
+	}
+
 	req := map[string]interface{}{
 		"TaskId":  id,
-		"TopicId": resourceData.Get("topic_id"),
+		"TopicId": topicId,
 	}
 
 	// Use DescribeDownloadTasks to find the task since there's no single Get API
@@ -173,26 +182,6 @@ func (v *VolcengineTlsDownloadTaskService) ReadResource(resourceData *schema.Res
 		}
 
 		if taskMap["TaskId"].(string) == id {
-			// Convert StartTime and EndTime from string to int64
-			if startTimeStr, ok := taskMap["StartTime"].(string); ok && startTimeStr != "" {
-				// Try to parse using RFC3339 format first (e.g. 2021-09-01 10:40:00)
-				if t, err := time.Parse("2006-01-02 15:04:05", startTimeStr); err == nil {
-					// Convert back to int64 timestamp
-					taskMap["StartTime"] = t.Unix() * 1000
-				}
-			} else if startTimeInt, ok := taskMap["StartTime"].(float64); ok {
-				taskMap["StartTime"] = int64(startTimeInt)
-			}
-
-			if endTimeStr, ok := taskMap["EndTime"].(string); ok && endTimeStr != "" {
-				if t, err := time.Parse("2006-01-02 15:04:05", endTimeStr); err == nil {
-					// Convert back to int64 timestamp
-					taskMap["EndTime"] = t.Unix() * 1000
-				}
-			} else if endTimeInt, ok := taskMap["EndTime"].(float64); ok {
-				taskMap["EndTime"] = int64(endTimeInt)
-			}
-
 			return taskMap, nil
 		}
 	}
@@ -217,6 +206,56 @@ func (v *VolcengineTlsDownloadTaskService) CreateResource(data *schema.ResourceD
 			Call: ve.SdkCall{
 				Action:      "CreateDownloadTask",
 				ConvertMode: ve.RequestConvertAll,
+				Convert: map[string]ve.RequestConvert{
+					"topic_id": {
+						TargetField: "TopicId",
+					},
+					"task_name": {
+						TargetField: "TaskName",
+					},
+					"query": {
+						TargetField: "Query",
+					},
+					"start_time": {
+						TargetField: "StartTime",
+					},
+					"end_time": {
+						TargetField: "EndTime",
+					},
+					"compression": {
+						TargetField: "Compression",
+					},
+					"data_format": {
+						TargetField: "DataFormat",
+					},
+					"limit": {
+						TargetField: "Limit",
+					},
+					"sort": {
+						TargetField: "Sort",
+					},
+					"allow_incomplete": {
+						TargetField: "AllowIncomplete",
+					},
+					"task_type": {
+						TargetField: "TaskType",
+					},
+					"log_context_infos": {
+						TargetField: "LogContextInfos",
+						ConvertType: ve.ConvertJsonObject,
+						NextLevelConvert: map[string]ve.RequestConvert{
+							"source": {
+								TargetField: "Source",
+							},
+							"context_flow": {
+								TargetField: "ContextFlow",
+							},
+							"package_offset": {
+								TargetField: "PackageOffset",
+							},
+						},
+					},
+				},
 				ContentType: ve.ContentTypeJson,
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					// Handle LogContextInfos transformation from List to Object
@@ -260,14 +299,23 @@ func (v *VolcengineTlsDownloadTaskService) RemoveResource(data *schema.ResourceD
 					"TaskId": data.Id(),
 				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-
 					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-					return v.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
+					resp, err := v.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 						ContentType: ve.ApplicationJSON,
 						HttpMethod:  ve.POST,
 						Path:        []string{call.Action},
 						Client:      v.Client.BypassSvcClient.NewTlsClient(),
 					}, call.SdkParam)
+
+					if err != nil {
+						// If the task is already finished, canceling it will return an error.
+						// We should ignore this error during deletion/replacement.
+						if strings.Contains(err.Error(), "DownloadTaskFinished") {
+							return resp, nil
+						}
+						return resp, err
+					}
+					return resp, nil
 				},
 			},
 		},

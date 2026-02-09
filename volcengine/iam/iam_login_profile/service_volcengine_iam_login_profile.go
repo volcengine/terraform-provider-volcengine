@@ -26,7 +26,28 @@ func (s *VolcengineIamLoginProfileService) GetClient() *ve.SdkClient {
 }
 
 func (s *VolcengineIamLoginProfileService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
-	return nil, nil
+	var (
+		result interface{}
+	)
+	action := "GetLoginProfile"
+	logger.Debug(logger.ReqFormat, action, m)
+	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &m)
+	if err != nil {
+		return data, err
+	}
+	logger.Debug(logger.RespFormat, action, resp)
+	result, err = ve.ObtainSdkValue("Result.LoginProfile", *resp)
+	if err != nil {
+		return data, err
+	}
+	if dataMap, ok := result.(map[string]interface{}); ok {
+		delete(dataMap, "Password")
+		data = append(data, dataMap)
+	} else {
+		return data, errors.New("Value is not map ")
+	}
+
+	return data, nil
 }
 
 func (s *VolcengineIamLoginProfileService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
@@ -76,7 +97,36 @@ func (s *VolcengineIamLoginProfileService) CreateResource(resourceData *schema.R
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "CreateLoginProfile",
-			ConvertMode: ve.RequestConvertAll,
+			ConvertMode: ve.RequestConvertInConvert,
+			Convert: map[string]ve.RequestConvert{
+				"user_name": {
+					ForceGet: true,
+				},
+				"password": {
+					ForceGet: true,
+				},
+				"login_allowed": {
+					TargetField: "LoginAllowed",
+				},
+				"password_reset_required": {
+					TargetField: "PasswordResetRequired",
+				},
+				"safe_auth_flag": {
+					TargetField: "SafeAuthFlag",
+				},
+				"safe_auth_type": {
+					TargetField: "SafeAuthType",
+				},
+				"safe_auth_exempt_required": {
+					TargetField: "SafeAuthExemptRequired",
+				},
+				"safe_auth_exempt_unit": {
+					TargetField: "SafeAuthExemptUnit",
+				},
+				"safe_auth_exempt_duration": {
+					TargetField: "SafeAuthExemptDuration",
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -96,8 +146,42 @@ func (s *VolcengineIamLoginProfileService) CreateResource(resourceData *schema.R
 func (s *VolcengineIamLoginProfileService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:         "UpdateLoginProfile",
-			ConvertMode:    ve.RequestConvertAll,
+			Action:      "UpdateLoginProfile",
+			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"password": {
+					ForceGet:    true,
+					TargetField: "Password",
+				},
+				"login_allowed": {
+					ForceGet:    true,
+					TargetField: "LoginAllowed",
+				},
+				"password_reset_required": {
+					ForceGet:    true,
+					TargetField: "PasswordResetRequired",
+				},
+				"safe_auth_flag": {
+					ForceGet:    true,
+					TargetField: "SafeAuthFlag",
+				},
+				"safe_auth_type": {
+					ForceGet:    true,
+					TargetField: "SafeAuthType",
+				},
+				"safe_auth_exempt_required": {
+					ForceGet:    true,
+					TargetField: "SafeAuthExemptRequired",
+				},
+				"safe_auth_exempt_unit": {
+					ForceGet:    true,
+					TargetField: "SafeAuthExemptUnit",
+				},
+				"safe_auth_exempt_duration": {
+					ForceGet:    true,
+					TargetField: "SafeAuthExemptDuration",
+				},
+			},
 			RequestIdField: "UserName",
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -127,7 +211,33 @@ func (s *VolcengineIamLoginProfileService) RemoveResource(resourceData *schema.R
 }
 
 func (s *VolcengineIamLoginProfileService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
-	return ve.DataSourceInfo{}
+	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"user_name": {
+				TargetField: "UserName",
+			},
+		},
+		NameField:    "UserName",
+		IdField:      "UserName",
+		CollectField: "login_profiles",
+		ResponseConverts: map[string]ve.ResponseConvert{
+			"SafeAuthFlag": {
+				TargetField: "safe_auth_flag",
+			},
+			"SafeAuthType": {
+				TargetField: "safe_auth_type",
+			},
+			"SafeAuthExemptRequired": {
+				TargetField: "safe_auth_exempt_required",
+			},
+			"SafeAuthExemptUnit": {
+				TargetField: "safe_auth_exempt_unit",
+			},
+			"SafeAuthExemptDuration": {
+				TargetField: "safe_auth_exempt_duration",
+			},
+		},
+	}
 }
 
 func (s *VolcengineIamLoginProfileService) ReadResourceId(id string) string {

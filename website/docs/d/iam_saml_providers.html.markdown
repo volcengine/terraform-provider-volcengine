@@ -10,7 +10,7 @@ description: |-
 Use this data source to query detailed information of iam saml providers
 ## Example Usage
 ```hcl
-data "volcengine_iam_saml_providers" "foo" {
+data "volcengine_iam_saml_providers" "default" {
 }
 ```
 ## Argument Reference

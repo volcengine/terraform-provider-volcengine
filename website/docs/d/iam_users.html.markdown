@@ -10,20 +10,14 @@ description: |-
 Use this data source to query detailed information of iam users
 ## Example Usage
 ```hcl
-resource "volcengine_iam_user" "foo" {
-  user_name    = "acc-test-user"
-  description  = "acc test"
-  display_name = "name"
-}
-data "volcengine_iam_users" "foo" {
-  user_names = [volcengine_iam_user.foo.user_name]
+data "volcengine_iam_users" "default" {
+  query = "jonny"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `name_regex` - (Optional) A Name Regex of IAM.
 * `output_file` - (Optional) File name where to save data source results.
-* `user_names` - (Optional) A list of user names.
+* `query` - (Optional) Fuzzy query. Can query by user name, display name or description.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

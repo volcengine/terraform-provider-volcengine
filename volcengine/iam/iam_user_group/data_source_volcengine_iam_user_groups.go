@@ -12,7 +12,7 @@ func DataSourceVolcengineIamUserGroups() *schema.Resource {
 			"query": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Fuzzy search, supports searching for user group names, display names, and remarks.",
+				Description: "Fuzzy query. Can query by user group name, display name or description.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -30,6 +30,11 @@ func DataSourceVolcengineIamUserGroups() *schema.Resource {
 				Computed:    true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"user_group_id": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The id of the user group.",
+						},
 						"account_id": {
 							Type:        schema.TypeInt,
 							Computed:    true,

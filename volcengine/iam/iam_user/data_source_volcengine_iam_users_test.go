@@ -1,10 +1,11 @@
 package iam_user_test
 
 import (
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_user"
-	"testing"
 )
 
 const testAccVolcengineIamUsersDatasourceConfig = `
@@ -14,7 +15,7 @@ resource "volcengine_iam_user" "foo" {
   display_name = "name"
 }
 data "volcengine_iam_users" "foo"{
-    user_names = [volcengine_iam_user.foo.user_name]
+    query = volcengine_iam_user.foo.user_name
 }
 `
 
@@ -36,6 +37,7 @@ func TestAccVolcengineIamUsersDatasource_Basic(t *testing.T) {
 				Config: testAccVolcengineIamUsersDatasourceConfig,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(acc.ResourceId, "users.#", "1"),
+					resource.TestCheckResourceAttrSet(acc.ResourceId, "users.0.update_date"),
 				),
 			},
 		},
