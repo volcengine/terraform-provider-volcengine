@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/volcengine/terraform-provider-volcengine/logger"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/request"
 	"github.com/volcengine/volcengine-go-sdk/volcengine/volcenginebody"
 )
@@ -53,8 +52,6 @@ func bypassBuild(r *request.Request) {
 		}
 	} else if strings.ToUpper(r.HTTPRequest.Method) == "GET" && strings.Contains(strings.ToLower(contentType), "application/json") &&
 		len(body) > 0 && params != nil {
-		logger.Debug(logger.ReqFormat, "request.url", body)
-		logger.Debug(logger.ReqFormat, "request.body", params)
 		r.HTTPRequest.Header.Set("Content-Type", contentType)
 		if strings.Contains(strings.ToLower(contentType), "application/json") {
 			if r.HTTPRequest.Header.Get("Content-Length") == "" {
