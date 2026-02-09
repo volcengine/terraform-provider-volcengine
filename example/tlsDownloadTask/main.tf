@@ -6,7 +6,7 @@ resource "volcengine_tls_download_task" "foo" {
   end_time         = 1768450896
   compression      = "gzip"
   data_format      = "json"
-  limit            = 10000000
+  limit            = 1000000
   sort             = "asc"
   allow_incomplete = false
   task_type        = 1
