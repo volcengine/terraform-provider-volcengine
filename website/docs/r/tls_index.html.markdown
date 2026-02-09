@@ -11,40 +11,47 @@ Provides a resource to manage tls index
 ## Example Usage
 ```hcl
 resource "volcengine_tls_index" "foo" {
-  topic_id = "b600dc34-503f-42fc-8e32-953af55463d1"
-  
+  topic_id = "c36ed436-84f1-467a-b00e-ba504db753ca"
+
   max_text_len      = 2048
   enable_auto_index = true
-  
+
   full_text {
     case_sensitive  = false
     delimiter       = ", ;/\n\t"
     include_chinese = false
   }
+
   key_value {
-    key             = "k1"
+    key             = "k21"
     value_type      = "json"
     case_sensitive  = true
     delimiter       = "!"
     include_chinese = false
     sql_flag        = true
     index_all       = true
+    index_sql_all   = true
+    auto_index_flag = false
     json_keys {
-      key        = "name"
+      key        = "name-2"
       value_type = "text"
     }
     json_keys {
-      key        = "key"
+      key        = "key-2"
       value_type = "long"
     }
   }
+
+
   user_inner_key_value {
     key             = "__content__"
     value_type      = "json"
     delimiter       = ",:-/ "
-    case_sensitive  = false
     include_chinese = false
-    sql_flag        = false
+    sql_flag        = true
+    index_all       = true
+    index_sql_all   = true
+    auto_index_flag = false
     json_keys {
       key        = "app"
       value_type = "long"
@@ -68,22 +75,25 @@ The following arguments are supported:
 The `full_text` object supports the following:
 
 * `case_sensitive` - (Required) Whether the FullTextInfo is case sensitive.
-* `delimiter` - (Optional) The delimiter of the FullTextInfo.
+* `delimiter` - (Required) The delimiter of the FullTextInfo.
 * `include_chinese` - (Optional) Whether the FullTextInfo include chinese.
 
 The `json_keys` object supports the following:
 
 * `key` - (Required) The key of the subfield key value index.
 * `value_type` - (Required) The type of value. Valid values: `long`, `double`, `text`.
+* `sql_flag` - (Optional) Whether the filed is enabled for analysis.
 
 The `key_value` object supports the following:
 
 * `key` - (Required) The key of the KeyValueInfo.
 * `value_type` - (Required) The type of value. Valid values: `long`, `double`, `text`, `json`.
+* `auto_index_flag` - (Optional) Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
 * `case_sensitive` - (Optional) Whether the value is case sensitive.
 * `delimiter` - (Optional) The delimiter of the value.
 * `include_chinese` - (Optional) Whether the value include chinese.
 * `index_all` - (Optional) Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
+* `index_sql_all` - (Optional) Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
 * `json_keys` - (Optional) The JSON subfield key value index.
 * `sql_flag` - (Optional) Whether the filed is enabled for analysis.
 
@@ -91,9 +101,12 @@ The `user_inner_key_value` object supports the following:
 
 * `key` - (Required) The key of the KeyValueInfo.
 * `value_type` - (Required) The type of value. Valid values: `long`, `double`, `text`, `json`.
+* `auto_index_flag` - (Optional) Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
 * `case_sensitive` - (Optional) Whether the value is case sensitive.
 * `delimiter` - (Optional) The delimiter of the value.
 * `include_chinese` - (Optional) Whether the value include chinese.
+* `index_all` - (Optional) Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
+* `index_sql_all` - (Optional) Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
 * `json_keys` - (Optional) The JSON subfield key value index.
 * `sql_flag` - (Optional) Whether the filed is enabled for analysis.
 
@@ -107,6 +120,6 @@ In addition to all arguments above, the following attributes are exported:
 ## Import
 Tls Index can be imported using the topic id, e.g.
 ```
-$ terraform import volcengine_tls_index.default index:edf051ed-3c46-49ba-9339-bea628fe****
+$ terraform import volcengine_tls_index.default edf051ed-3c46-49ba-9339-bea628fe****
 ```
 

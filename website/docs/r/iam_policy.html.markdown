@@ -11,8 +11,8 @@ Provides a resource to manage iam policy
 ## Example Usage
 ```hcl
 resource "volcengine_iam_policy" "foo" {
-  policy_name     = "acc-test-policy"
-  description     = "acc-test"
+  policy_name     = "acc-test"
+  description     = "acc-modify"
   policy_document = "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"auto_scaling:DescribeScalingGroups\"],\"Resource\":[\"*\"]}]}"
 }
 ```
@@ -25,7 +25,10 @@ The following arguments are supported:
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `id` - ID of the resource.
+* `attachment_count` - The attachment count of the Policy.
+* `category` - The category of the Policy.
 * `create_date` - The create time of the Policy.
+* `is_service_role_policy` - Whether the Policy is a service role policy.
 * `policy_trn` - The resource name of the Policy.
 * `policy_type` - The type of the Policy.
 * `update_date` - The update time of the Policy.

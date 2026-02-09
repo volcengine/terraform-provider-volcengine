@@ -11,12 +11,12 @@ Use this data source to query detailed information of tls indexes
 ## Example Usage
 ```hcl
 data "volcengine_tls_indexes" "default" {
-  ids = ["9b756385-1dfb-4306-a094-0c88e04b34a5"]
+  topic_id = "c36ed436-84f1-467a-b00e-ba504db753ca"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `ids` - (Required) The list of topic id of tls index.
+* `topic_id` - (Required) The topic id of tls index.
 * `output_file` - (Optional) File name where to save data source results.
 
 ## Attributes Reference
@@ -30,10 +30,12 @@ In addition to all arguments above, the following attributes are exported:
         * `include_chinese` - Whether the FullText index include chinese.
     * `id` - The topic id of the tls index.
     * `key_value` - The KeyValue index of the tls topic.
+        * `auto_index_flag` - Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
         * `case_sensitive` - Whether the value is case sensitive.
         * `delimiter` - The delimiter of the value.
         * `include_chinese` - Whether the value include chinese.
-        * `index_all` - Whether to create indexes for all fields in JSON fields with text values.
+        * `index_all` - Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
+        * `index_sql_all` - Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
         * `json_keys` - The JSON subfield key value index.
             * `case_sensitive` - Whether the value is case sensitive.
             * `delimiter` - The delimiter of the value.
@@ -41,16 +43,19 @@ In addition to all arguments above, the following attributes are exported:
             * `key` - The key of the subfield key value index.
             * `sql_flag` - Whether the filed is enabled for analysis.
             * `value_type` - The type of value.
-        * `key` - The key of the KeyValue index.
+        * `key` - The key of the KeyValueInfo.
         * `sql_flag` - Whether the filed is enabled for analysis.
-        * `value_type` - The type of value.
+        * `value_type` - The type of value. Valid values: `long`, `double`, `text`, `json`.
     * `max_text_len` - The max text length of the tls index.
     * `modify_time` - The modify time of the tls index.
     * `topic_id` - The topic id of the tls index.
     * `user_inner_key_value` - The reserved field index configuration of the tls topic.
+        * `auto_index_flag` - Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
         * `case_sensitive` - Whether the value is case sensitive.
         * `delimiter` - The delimiter of the value.
         * `include_chinese` - Whether the value include chinese.
+        * `index_all` - Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
+        * `index_sql_all` - Whether to create indexes for all fields in JSON fields with text values. This field is valid when the `value_type` is `json`.
         * `json_keys` - The JSON subfield key value index.
             * `case_sensitive` - Whether the value is case sensitive.
             * `delimiter` - The delimiter of the value.
@@ -58,9 +63,9 @@ In addition to all arguments above, the following attributes are exported:
             * `key` - The key of the subfield key value index.
             * `sql_flag` - Whether the filed is enabled for analysis.
             * `value_type` - The type of value.
-        * `key` - The key of the KeyValue index.
+        * `key` - The key of the KeyValueInfo.
         * `sql_flag` - Whether the filed is enabled for analysis.
-        * `value_type` - The type of value.
+        * `value_type` - The type of value. Valid values: `long`, `double`, `text`, `json`.
 * `total_count` - The total count of tls index query.
 
 

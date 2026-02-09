@@ -11,8 +11,8 @@ Use this data source to query detailed information of tls describe traces
 ## Example Usage
 ```hcl
 data "volcengine_tls_describe_traces" "example" {
-  trace_instance_id = "b28b19bd-a539-453a-8919-fda3ef6a22fe"
-  trace_id          = "c415ff6a-7141-4fe9-9e6c-9ddce4e4c189"
+  trace_instance_id = "ac368174-2353-4e5d-859d-84c8bd255590"
+  trace_id          = "b4de47438f9d052ca71106bb9bace34e"
 }
 ```
 ## Argument Reference

@@ -11,8 +11,8 @@ Provides a resource to manage tls shard
 ## Example Usage
 ```hcl
 resource "volcengine_tls_shard" "foo" {
-  topic_id = "0b08389e-1617-4f64-b59d-81da2730e446"
-  shard_id = 4
+  topic_id = "176b62c7-c482-4a6e-b983-4697fda9294a"
+  shard_id = 1
   number   = 2
 }
 ```

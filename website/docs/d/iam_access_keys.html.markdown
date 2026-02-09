@@ -10,14 +10,13 @@ description: |-
 Use this data source to query detailed information of iam access keys
 ## Example Usage
 ```hcl
-data "volcengine_iam_access_keys" "foo" {
+data "volcengine_iam_access_keys" "default" {
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `name_regex` - (Optional) A Name Regex of IAM.
 * `output_file` - (Optional) File name where to save data source results.
-* `user_name` - (Optional) The user names.
+* `user_name` - (Optional) The user name.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

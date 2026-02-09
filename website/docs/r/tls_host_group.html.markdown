@@ -11,7 +11,7 @@ Provides a resource to manage tls host group
 ## Example Usage
 ```hcl
 resource "volcengine_tls_host_group" "foo" {
-  host_group_name   = "tfgroup-test-1"
+  host_group_name   = "tfgroup-test-x"
   host_group_type   = "Label"
   host_identifier   = "hostlable"
   auto_update       = true
@@ -22,7 +22,7 @@ resource "volcengine_tls_host_group" "foo" {
 }
 
 resource "volcengine_tls_host_group" "foo_ip" {
-  host_group_name   = "tfgroup-ip-1"
+  host_group_name   = "tfgroup-ip-x"
   host_group_type   = "IP"
   host_ip_list      = ["192.168.0.1", "192.168.0.2", "192.168.0.3"]
   auto_update       = true

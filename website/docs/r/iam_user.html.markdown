@@ -11,9 +11,15 @@ Provides a resource to manage iam user
 ## Example Usage
 ```hcl
 resource "volcengine_iam_user" "foo" {
-  user_name    = "tf-test"
+  user_name    = "jonny"
   description  = "test"
   display_name = "name"
+  mobile_phone = "+8618800000000"
+  email        = "test@example.com"
+  tags {
+    key   = "key1"
+    value = "value1"
+  }
 }
 ```
 ## Argument Reference
@@ -22,7 +28,13 @@ The following arguments are supported:
 * `description` - (Optional) The description of the user.
 * `display_name` - (Optional) The display name of the user.
 * `email` - (Optional) The email of the user.
-* `mobile_phone` - (Optional) The mobile phone of the user.
+* `mobile_phone` - (Optional) The mobile phone of the user, reference: +8618088888888.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

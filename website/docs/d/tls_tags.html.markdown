@@ -13,7 +13,7 @@ Use this data source to query detailed information of tls tags
 # Basic example - query tags for specific resources
 data "volcengine_tls_tags" "basic" {
   resource_type = "project"
-  resource_ids  = ["6e6ea17f-ee1d-494f-83f7-c3ecc5c351ea"]
+  resource_ids  = ["b01a99c0-cf7b-482f-b317-6563865111c6"]
   max_results   = 10
 }
 ```
