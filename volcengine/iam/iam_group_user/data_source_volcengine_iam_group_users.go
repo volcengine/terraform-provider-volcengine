@@ -1,13 +1,13 @@
-package iam_user_group_attachment
+package iam_group_user
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineIamUserGroupAttachments() *schema.Resource {
+func DataSourceVolcengineIamGroupUsers() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVolcengineIamUserGroupAttachmentsRead,
+		Read: dataSourceVolcengineIamGroupUsersRead,
 		Schema: map[string]*schema.Schema{
 			"user_name": {
 				Type:        schema.TypeString,
@@ -67,7 +67,7 @@ func DataSourceVolcengineIamUserGroupAttachments() *schema.Resource {
 	}
 }
 
-func dataSourceVolcengineIamUserGroupAttachmentsRead(d *schema.ResourceData, meta interface{}) error {
-	service := NewIamUserGroupAttachmentService(meta.(*ve.SdkClient))
-	return service.Dispatcher.Data(service, d, DataSourceVolcengineIamUserGroupAttachments())
+func dataSourceVolcengineIamGroupUsersRead(d *schema.ResourceData, meta interface{}) error {
+	service := NewIamGroupUserService(meta.(*ve.SdkClient))
+	return service.Dispatcher.Data(service, d, DataSourceVolcengineIamGroupUsers())
 }

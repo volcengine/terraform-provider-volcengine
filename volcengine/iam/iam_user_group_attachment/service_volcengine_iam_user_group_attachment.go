@@ -36,10 +36,7 @@ func (s *VolcengineIamUserGroupAttachmentService) ReadResources(m map[string]int
 		ok      bool
 	)
 	return ve.WithPageOffsetQuery(m, "Limit", "Offset", 100, 0, func(condition map[string]interface{}) ([]interface{}, error) {
-		action := "ListGroupsForUser"
-		if _, ok := condition["UserGroupName"]; ok {
-			action = "ListUsersForGroup"
-		}
+		action := "ListUsersForGroup"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -56,11 +53,7 @@ func (s *VolcengineIamUserGroupAttachmentService) ReadResources(m map[string]int
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-		if action == "ListUsersForGroup" {
-			results, err = ve.ObtainSdkValue("Result.Users", *resp)
-		} else {
-			results, err = ve.ObtainSdkValue("Result.UserGroups", *resp)
-		}
+		results, err = ve.ObtainSdkValue("Result.Users", *resp)
 		if err != nil {
 			return data, err
 		}
@@ -68,10 +61,7 @@ func (s *VolcengineIamUserGroupAttachmentService) ReadResources(m map[string]int
 			results = []interface{}{}
 		}
 		if data, ok = results.([]interface{}); !ok {
-			if action == "ListUsersForGroup" {
-				return data, errors.New("Result.Users is not Slice")
-			}
-			return data, errors.New("Result.UserGroups is not Slice")
+			return data, errors.New("Result.Users is not Slice")
 		}
 		return data, err
 	})
@@ -88,7 +78,7 @@ func (s *VolcengineIamUserGroupAttachmentService) ReadResource(resourceData *sch
 	}
 	ids := strings.Split(id, ":")
 	req := map[string]interface{}{
-		"UserName": ids[1],
+		"UserGroupName": ids[0],
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -98,8 +88,9 @@ func (s *VolcengineIamUserGroupAttachmentService) ReadResource(resourceData *sch
 		if tempData, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		} else {
-			if tempData["UserGroupName"].(string) == ids[0] {
+			if tempData["UserName"].(string) == ids[1] {
 				data = tempData
+				data["UserGroupName"] = ids[0]
 			}
 		}
 	}
@@ -168,53 +159,21 @@ func (s *VolcengineIamUserGroupAttachmentService) RemoveResource(resourceData *s
 }
 
 func (s *VolcengineIamUserGroupAttachmentService) DatasourceResources(d *schema.ResourceData, r *schema.Resource) ve.DataSourceInfo {
-	if _, ok := d.GetOk("user_group_name"); ok {
-		return ve.DataSourceInfo{
-			RequestConverts: map[string]ve.RequestConvert{
-				"user_group_name": {
-					TargetField: "UserGroupName",
-				},
-			},
-			NameField:    "UserName",
-			IdField:      "UserName",
-			CollectField: "users",
-			ResponseConverts: map[string]ve.ResponseConvert{
-				"Id": {
-					TargetField: "user_id",
-				},
-				"UserName": {
-					TargetField: "user_name",
-				},
-				"DisplayName": {
-					TargetField: "display_name",
-				},
-				"Description": {
-					TargetField: "description",
-				},
-				"JoinDate": {
-					TargetField: "join_date",
-				},
-			},
-		}
-	}
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"user_name": {
-				TargetField: "UserName",
-			},
-			"query": {
-				TargetField: "Query",
+			"user_group_name": {
+				TargetField: "UserGroupName",
 			},
 		},
-		NameField:    "UserGroupName",
-		IdField:      "UserGroupName",
-		CollectField: "user_groups",
+		NameField:    "UserName",
+		IdField:      "UserName",
+		CollectField: "users",
 		ResponseConverts: map[string]ve.ResponseConvert{
-			"UserGroupID": {
-				TargetField: "user_group_id",
+			"Id": {
+				TargetField: "user_id",
 			},
-			"UserGroupName": {
-				TargetField: "user_group_name",
+			"UserName": {
+				TargetField: "user_name",
 			},
 			"DisplayName": {
 				TargetField: "display_name",
