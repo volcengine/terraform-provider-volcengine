@@ -4,7 +4,7 @@ resource "volcengine_iam_oauth_provider" "foo" {
   status              = 1
   description         = "acc-test-modify"
   client_id           = "test_client_id_modify"
-  client_secret       = "test_client_secret_modify"
+  client_secret       = ""
   user_info_url       = "https://example.com/user_info_modify"
   token_url           = "https://example.com/access_token_modify"
   authorize_url       = "https://example.com/authorize_modify"

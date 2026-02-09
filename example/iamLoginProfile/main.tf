@@ -1,6 +1,6 @@
 resource "volcengine_iam_login_profile" "foo" {
   user_name                 = "jonny"
-  password                  = "Password@123"
+  password                  = ""
   login_allowed             = true
   password_reset_required   = true
   safe_auth_flag            = true

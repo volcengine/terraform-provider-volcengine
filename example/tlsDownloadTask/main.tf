@@ -11,7 +11,7 @@ resource "volcengine_tls_download_task" "foo" {
   allow_incomplete = false
   task_type        = 1
   log_context_infos {
-    source = "10.180.50.17"
+    source = "your ip"
     context_flow = "1768450893021#4258909d8fc97e7d-286d6d5f6966623c-6943"
     package_offset = "4833728523"
   }
