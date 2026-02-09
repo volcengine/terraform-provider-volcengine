@@ -295,6 +295,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_allowed_ip_address"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_caller_identity"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_entities_policy"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_group_user"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_identity_provider"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_login_profile"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/iam/iam_oauth_provider"
@@ -794,7 +795,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_entities_policies":             iam_entities_policy.DataSourceVolcengineIamEntitiesPolicies(),
 			"volcengine_iam_user_groups":                   iam_user_group.DataSourceVolcengineIamUserGroups(),
 			"volcengine_iam_user_group_attachments":        iam_user_group_attachment.DataSourceVolcengineIamUserGroupAttachments(),
-			"volcengine_iam_user_group_users":              iam_user_group_attachment.DataSourceVolcengineIamUserGroupUsers(),
+			"volcengine_iam_group_users":                   iam_group_user.DataSourceVolcengineIamGroupUsers(),
 			"volcengine_iam_user_group_policy_attachments": iam_user_group_policy_attachment.DataSourceVolcengineIamUserGroupPolicyAttachments(),
 			"volcengine_iam_user_policy_attachments":       iam_user_policy_attachment.DataSourceVolcengineIamUserPolicyAttachments(),
 			"volcengine_iam_saml_providers":                iam_saml_provider.DataSourceVolcengineIamSamlProviders(),

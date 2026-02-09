@@ -9,46 +9,41 @@ func DataSourceVolcengineIamUserGroupAttachments() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineIamUserGroupAttachmentsRead,
 		Schema: map[string]*schema.Schema{
-			"user_name": {
+			"user_group_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "The name of user.",
+				Description: "The name of user group.",
 			},
-			"query": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Fuzzy search, supports searching for user group names, display names, and remarks.",
-			},
-			"user_groups": {
+			"users": {
 				Type:        schema.TypeList,
 				Computed:    true,
-				Description: "The collection of user group.",
+				Description: "The collection of user.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"user_group_id": {
+						"user_id": {
 							Type:        schema.TypeInt,
 							Computed:    true,
-							Description: "The id of the user group.",
+							Description: "The id of the user.",
 						},
-						"user_group_name": {
+						"user_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The name of the user group.",
+							Description: "The name of the user.",
 						},
 						"display_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The display name of the user group.",
+							Description: "The display name of the user.",
 						},
 						"description": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The description of the user group.",
+							Description: "The description of the user.",
 						},
 						"join_date": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The join date of the user group.",
+							Description: "The join date of the user.",
 						},
 					},
 				},
