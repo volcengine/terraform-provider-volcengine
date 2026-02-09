@@ -794,6 +794,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_iam_users":                         iam_user.DataSourceVolcengineIamUsers(),
 			"volcengine_iam_entities_policies":             iam_entities_policy.DataSourceVolcengineIamEntitiesPolicies(),
 			"volcengine_iam_user_groups":                   iam_user_group.DataSourceVolcengineIamUserGroups(),
+			"volcengine_iam_user_group_attachments":        iam_user_group_attachment.DataSourceVolcengineIamUserGroupAttachments(),
 			"volcengine_iam_group_users":                   iam_group_user.DataSourceVolcengineIamGroupUsers(),
 			"volcengine_iam_user_group_policy_attachments": iam_user_group_policy_attachment.DataSourceVolcengineIamUserGroupPolicyAttachments(),
 			"volcengine_iam_user_policy_attachments":       iam_user_policy_attachment.DataSourceVolcengineIamUserPolicyAttachments(),
