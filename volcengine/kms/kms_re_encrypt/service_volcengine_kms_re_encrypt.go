@@ -1,4 +1,4 @@
-package kms_ciphertext
+package kms_re_encrypt
 
 import (
 	"encoding/json"
@@ -11,28 +11,28 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineKmsCiphertextService struct {
+type VolcengineKmsReEncryptService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewKmsCiphertextService(c *ve.SdkClient) *VolcengineKmsCiphertextService {
-	return &VolcengineKmsCiphertextService{
+func NewKmsReEncryptService(c *ve.SdkClient) *VolcengineKmsReEncryptService {
+	return &VolcengineKmsReEncryptService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineKmsCiphertextService) GetClient() *ve.SdkClient {
+func (s *VolcengineKmsReEncryptService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineKmsCiphertextService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineKmsReEncryptService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp *map[string]interface{}
 	)
 	return ve.WithSimpleQuery(m, func(condition map[string]interface{}) ([]interface{}, error) {
-		action := "Encrypt"
+		action := "ReEncrypt"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -60,11 +60,11 @@ func (s *VolcengineKmsCiphertextService) ReadResources(m map[string]interface{})
 	})
 }
 
-func (s *VolcengineKmsCiphertextService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineKmsReEncryptService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	return data, err
 }
 
-func (s *VolcengineKmsCiphertextService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineKmsReEncryptService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -88,7 +88,7 @@ func (s *VolcengineKmsCiphertextService) RefreshResourceState(resourceData *sche
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("kms_ciphertext status error, status: %s", status.(string))
+					return nil, "", fmt.Errorf("kms_re_encrypt status error, status: %s", status.(string))
 				}
 			}
 			return d, status.(string), err
@@ -96,46 +96,49 @@ func (s *VolcengineKmsCiphertextService) RefreshResourceState(resourceData *sche
 	}
 }
 
-func (s *VolcengineKmsCiphertextService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineKmsReEncryptService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "Encrypt",
+			Action:      "ReEncrypt",
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
-				"keyring_name": {
-					TargetField: "KeyringName",
+				"new_keyring_name": {
+					TargetField: "NewKeyringName",
 				},
-				"key_name": {
-					TargetField: "KeyName",
+				"new_key_name": {
+					TargetField: "NewKeyName",
 				},
-				"key_id": {
-					TargetField: "KeyID",
+				"new_key_id": {
+					TargetField: "NewKeyID",
 				},
-				"plaintext": {
-					TargetField: "Plaintext",
+				"source_ciphertext_blob": {
+					TargetField: "CiphertextBlob",
 				},
-				"encryption_context": {
-					TargetField: "EncryptionContext",
+				"old_encryption_context": {
+					TargetField: "OldEncryptionContext",
+				},
+				"new_encryption_context": {
+					TargetField: "NewEncryptionContext",
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				var keyId string
-				if v, ok := d.GetOk("key_id"); ok {
-					keyId = v.(string)
-				} else {
-					keyId = fmt.Sprintf("%s:%s", d.Get("key_name").(string), d.Get("keyring_name").(string))
-				}
-				d.SetId(keyId)
 				ciphertext, _ := ve.ObtainSdkValue("Result.CiphertextBlob", *resp)
 				if ciphertext != nil {
-					d.Set("ciphertext_blob", ciphertext)
+					_ = d.Set("ciphertext_blob", ciphertext)
 				}
+				var keyId string
+				if v, ok := d.GetOk("new_key_id"); ok {
+					keyId = v.(string)
+				} else {
+					keyId = fmt.Sprintf("%s:%s", d.Get("new_key_name").(string), d.Get("new_keyring_name").(string))
+				}
+				d.SetId(keyId)
 				return nil
 			},
 		},
@@ -143,26 +146,29 @@ func (s *VolcengineKmsCiphertextService) CreateResource(resourceData *schema.Res
 	return []ve.Callback{callback}
 }
 
-func (VolcengineKmsCiphertextService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineKmsReEncryptService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineKmsCiphertextService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineKmsReEncryptService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineKmsCiphertextService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineKmsReEncryptService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineKmsCiphertextService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineKmsReEncryptService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
-			"key_id": {
-				TargetField: "KeyID",
+			"new_key_id": {
+				TargetField: "NewKeyID",
+			},
+			"source_ciphertext_blob": {
+				TargetField: "CiphertextBlob",
 			},
 		},
 		CollectField:     "ciphertext_info",
@@ -170,7 +176,7 @@ func (s *VolcengineKmsCiphertextService) DatasourceResources(*schema.ResourceDat
 	}
 }
 
-func (s *VolcengineKmsCiphertextService) ReadResourceId(id string) string {
+func (s *VolcengineKmsReEncryptService) ReadResourceId(id string) string {
 	return id
 }
 

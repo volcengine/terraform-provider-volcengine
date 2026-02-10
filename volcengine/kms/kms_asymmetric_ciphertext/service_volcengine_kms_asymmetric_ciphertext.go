@@ -1,4 +1,4 @@
-package kms_ciphertext
+package kms_asymmetric_ciphertext
 
 import (
 	"encoding/json"
@@ -11,28 +11,28 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/logger"
 )
 
-type VolcengineKmsCiphertextService struct {
+type VolcengineKmsAsymmetricCiphertextService struct {
 	Client     *ve.SdkClient
 	Dispatcher *ve.Dispatcher
 }
 
-func NewKmsCiphertextService(c *ve.SdkClient) *VolcengineKmsCiphertextService {
-	return &VolcengineKmsCiphertextService{
+func NewKmsAsymmetricCiphertextService(c *ve.SdkClient) *VolcengineKmsAsymmetricCiphertextService {
+	return &VolcengineKmsAsymmetricCiphertextService{
 		Client:     c,
 		Dispatcher: &ve.Dispatcher{},
 	}
 }
 
-func (s *VolcengineKmsCiphertextService) GetClient() *ve.SdkClient {
+func (s *VolcengineKmsAsymmetricCiphertextService) GetClient() *ve.SdkClient {
 	return s.Client
 }
 
-func (s *VolcengineKmsCiphertextService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
+func (s *VolcengineKmsAsymmetricCiphertextService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {
 	var (
 		resp *map[string]interface{}
 	)
 	return ve.WithSimpleQuery(m, func(condition map[string]interface{}) ([]interface{}, error) {
-		action := "Encrypt"
+		action := "AsymmetricEncrypt"
 
 		bytes, _ := json.Marshal(condition)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
@@ -49,7 +49,6 @@ func (s *VolcengineKmsCiphertextService) ReadResources(m map[string]interface{})
 		}
 		respBytes, _ := json.Marshal(resp)
 		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
-
 		result := make(map[string]interface{})
 		ciphertext, _ := ve.ObtainSdkValue("Result.CiphertextBlob", *resp)
 		if ciphertext != nil {
@@ -60,11 +59,11 @@ func (s *VolcengineKmsCiphertextService) ReadResources(m map[string]interface{})
 	})
 }
 
-func (s *VolcengineKmsCiphertextService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
+func (s *VolcengineKmsAsymmetricCiphertextService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	return data, err
 }
 
-func (s *VolcengineKmsCiphertextService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
+func (s *VolcengineKmsAsymmetricCiphertextService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{
 		Pending:    []string{},
 		Delay:      1 * time.Second,
@@ -88,7 +87,7 @@ func (s *VolcengineKmsCiphertextService) RefreshResourceState(resourceData *sche
 			}
 			for _, v := range failStates {
 				if v == status.(string) {
-					return nil, "", fmt.Errorf("kms_ciphertext status error, status: %s", status.(string))
+					return nil, "", fmt.Errorf("kms_asymmetric_ciphertext status error, status: %s", status.(string))
 				}
 			}
 			return d, status.(string), err
@@ -96,10 +95,10 @@ func (s *VolcengineKmsCiphertextService) RefreshResourceState(resourceData *sche
 	}
 }
 
-func (s *VolcengineKmsCiphertextService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineKmsAsymmetricCiphertextService) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callback := ve.Callback{
 		Call: ve.SdkCall{
-			Action:      "Encrypt",
+			Action:      "AsymmetricEncrypt",
 			ConvertMode: ve.RequestConvertAll,
 			Convert: map[string]ve.RequestConvert{
 				"keyring_name": {
@@ -114,8 +113,8 @@ func (s *VolcengineKmsCiphertextService) CreateResource(resourceData *schema.Res
 				"plaintext": {
 					TargetField: "Plaintext",
 				},
-				"encryption_context": {
-					TargetField: "EncryptionContext",
+				"algorithm": {
+					TargetField: "Algorithm",
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -143,22 +142,22 @@ func (s *VolcengineKmsCiphertextService) CreateResource(resourceData *schema.Res
 	return []ve.Callback{callback}
 }
 
-func (VolcengineKmsCiphertextService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
+func (VolcengineKmsAsymmetricCiphertextService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
 		return d, nil, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
 
-func (s *VolcengineKmsCiphertextService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+func (s *VolcengineKmsAsymmetricCiphertextService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineKmsCiphertextService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
+func (s *VolcengineKmsAsymmetricCiphertextService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	return []ve.Callback{}
 }
 
-func (s *VolcengineKmsCiphertextService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
+func (s *VolcengineKmsAsymmetricCiphertextService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
 		RequestConverts: map[string]ve.RequestConvert{
 			"key_id": {
@@ -170,7 +169,7 @@ func (s *VolcengineKmsCiphertextService) DatasourceResources(*schema.ResourceDat
 	}
 }
 
-func (s *VolcengineKmsCiphertextService) ReadResourceId(id string) string {
+func (s *VolcengineKmsAsymmetricCiphertextService) ReadResourceId(id string) string {
 	return id
 }
 
