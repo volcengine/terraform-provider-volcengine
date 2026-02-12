@@ -118,10 +118,11 @@ func ResourceVolcengineKmsKey() *schema.Resource {
 			},
 			"tags": ve.TagsSchema(),
 			"pending_window_in_days": {
-				Type:        schema.TypeInt,
-				ForceNew:    true,
-				Optional:    true,
-				Description: "The pre-deletion cycle of the key. Valid values: [7, 30].",
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(7, 30),
+				Default:      7,
+				Description:  "The pre-deletion cycle of the key. Valid values: [7, 30]. Default value: 7.",
 			},
 			// computed
 			"creation_date": {

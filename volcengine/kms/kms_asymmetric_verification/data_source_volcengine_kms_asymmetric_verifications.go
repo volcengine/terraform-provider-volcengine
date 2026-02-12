@@ -37,7 +37,7 @@ func DataSourceVolcengineKmsAsymmetricVerifications() *schema.Resource {
 				Optional:     true,
 				ValidateFunc: validation.StringInSlice([]string{"RAW", "DIGEST"}, true),
 				Default:      "RAW",
-				Description:  "The type of message. Valid values: RAW or DIGEST. When message_type is DIGEST, KMS does not process the message digest of the original data source, it will sign directly with the private key.",
+				Description:  "The type of message. Valid values: RAW or DIGEST.",
 			},
 			"algorithm": {
 				Type:         schema.TypeString,

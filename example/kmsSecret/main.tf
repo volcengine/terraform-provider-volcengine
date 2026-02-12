@@ -16,4 +16,6 @@ resource "volcengine_kms_secret" "foo_ecs" {
   project_name = "default"
   encryption_key = "trn:kms:cn-beijing:21000******:keyrings/Tf-test/keys/Test-key1"
   automatic_rotation = false
+  force_delete = false
+  pending_window_in_days = 7
 }

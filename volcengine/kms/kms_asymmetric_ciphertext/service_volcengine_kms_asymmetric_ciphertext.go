@@ -34,8 +34,18 @@ func (s *VolcengineKmsAsymmetricCiphertextService) ReadResources(m map[string]in
 	return ve.WithSimpleQuery(m, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "AsymmetricEncrypt"
 
-		bytes, _ := json.Marshal(condition)
+		// 安全考虑，不打印请求中的明文信息，避免将明文信息写入本地日志
+		logParam := make(map[string]interface{}, len(condition))
+		for k, v := range condition {
+			if k == "Plaintext" {
+				logParam[k] = "******"
+			} else {
+				logParam[k] = v
+			}
+		}
+		bytes, _ := json.Marshal(logParam)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
+
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
 			if err != nil {
@@ -47,8 +57,9 @@ func (s *VolcengineKmsAsymmetricCiphertextService) ReadResources(m map[string]in
 				return data, err
 			}
 		}
-		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		// 安全考虑，不打印响应中的密文信息
+		// respBytes, _ := json.Marshal(resp)
+		// logger.Debug(logger.RespFormat, action, condition, string(respBytes))
 		result := make(map[string]interface{})
 		ciphertext, _ := ve.ObtainSdkValue("Result.CiphertextBlob", *resp)
 		if ciphertext != nil {
@@ -118,9 +129,25 @@ func (s *VolcengineKmsAsymmetricCiphertextService) CreateResource(resourceData *
 				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				// 安全考虑，不打印请求中的明文信息，避免将明文信息写入本地日志
+				var logParam map[string]interface{}
+				if call.SdkParam != nil {
+					logParam = make(map[string]interface{}, len(*call.SdkParam))
+					for k, v := range *call.SdkParam {
+						if k == "Plaintext" {
+							logParam[k] = "******"
+						} else {
+							logParam[k] = v
+						}
+					}
+				}
+				logger.Debug(logger.ReqFormat, call.Action, logParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				// 安全考虑，不打印响应中的密文信息，避免将密文信息写入本地日志；只打印错误信息
+				if err != nil {
+					logger.Debug(logger.ErrFormat, call.Action, logParam, err)
+					return resp, err
+				}
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {

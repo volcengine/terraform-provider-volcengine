@@ -3,7 +3,7 @@
 resource "volcengine_kms_replicate_key" "replica" {
   keyring_name   = "test"
   key_name       = "mrk-Tf-Test-1"
-  replica_region = "cn-guilin-boe"
+  replica_region = "cn-shanghai"
   description    = "replica description"
   tags {
     key = "tfk1"

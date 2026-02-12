@@ -33,7 +33,16 @@ func (s *VolcengineKmsPlaintextService) ReadResources(m map[string]interface{}) 
 	return ve.WithSimpleQuery(m, func(condition map[string]interface{}) ([]interface{}, error) {
 		action := "Decrypt"
 
-		bytes, _ := json.Marshal(condition)
+		// 安全考虑，不打印请求中的密文信息，避免将密文信息写入本地日志
+		logParam := make(map[string]interface{}, len(condition))
+		for k, v := range condition {
+			if k == "CiphertextBlob" {
+				logParam[k] = "******"
+			} else {
+				logParam[k] = v
+			}
+		}
+		bytes, _ := json.Marshal(logParam)
 		logger.Debug(logger.ReqFormat, action, string(bytes))
 		if condition == nil {
 			resp, err = s.Client.UniversalClient.DoCall(getUniversalInfo(action), nil)
@@ -46,8 +55,8 @@ func (s *VolcengineKmsPlaintextService) ReadResources(m map[string]interface{}) 
 				return data, err
 			}
 		}
-		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		// respBytes, _ := json.Marshal(resp)
+		// logger.Debug(logger.RespFormat, action, condition, string(respBytes))
 
 		result := make(map[string]interface{})
 		plaintext, _ := ve.ObtainSdkValue("Result.Plaintext", *resp)

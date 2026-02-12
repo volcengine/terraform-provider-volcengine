@@ -492,15 +492,29 @@ func (s *VolcengineKmsSecretService) RemoveResource(resourceData *schema.Resourc
 		Call: ve.SdkCall{
 			Action:      "ScheduleSecretDeletion",
 			ConvertMode: ve.RequestConvertIgnore,
-			SdkParam: &map[string]interface{}{
-				"SecretName":  resourceData.Id(),
-				"ForceDelete": true,
+			SdkParam:    &map[string]interface{}{},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				forceDelete := d.Get("force_delete").(bool)
+				if !forceDelete {
+					if pendingWindowInDays := d.Get("pending_window_in_days").(int); pendingWindowInDays > 0 {
+						(*call.SdkParam)["PendingWindowInDays"] = pendingWindowInDays
+					} else {
+						(*call.SdkParam)["PendingWindowInDays"] = 7
+					}
+				}
+				(*call.SdkParam)["SecretName"] = d.Id()
+				(*call.SdkParam)["ForceDelete"] = forceDelete
+				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				forceDelete := d.Get("force_delete").(bool)
+				if !forceDelete {
+					return nil
+				}
 				return ve.CheckResourceUtilRemoved(d, s.ReadResource, 5*time.Minute)
 			},
 			CallError: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall, baseErr error) error {

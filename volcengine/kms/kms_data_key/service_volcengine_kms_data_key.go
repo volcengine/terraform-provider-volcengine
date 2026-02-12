@@ -46,8 +46,8 @@ func (s *VolcengineKmsDataKeyService) ReadResources(m map[string]interface{}) (d
 				return data, err
 			}
 		}
-		respBytes, _ := json.Marshal(resp)
-		logger.Debug(logger.RespFormat, action, condition, string(respBytes))
+		// respBytes, _ := json.Marshal(resp)
+		// logger.Debug(logger.RespFormat, action, condition, string(respBytes))
 
 		result := make(map[string]interface{})
 		plaintext, _ := ve.ObtainSdkValue("Result.Plaintext", *resp)

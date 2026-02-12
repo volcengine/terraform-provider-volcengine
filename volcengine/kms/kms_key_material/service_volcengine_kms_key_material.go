@@ -152,32 +152,13 @@ func (s *VolcengineKmsKeyMaterialService) CreateResource(resourceData *schema.Re
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				var keyId string
+				var resourceId string
 				if v, ok := d.GetOk("key_id"); ok {
-					keyId = v.(string)
+					resourceId = v.(string)
 				} else {
-					req := map[string]interface{}{}
-					if v, ok := d.GetOk("keyring_name"); ok {
-						req["KeyringName"] = v.(string)
-					}
-					if v, ok := d.GetOk("key_name"); ok {
-						req["KeyName"] = v.(string)
-					}
-					bytes, _ := json.Marshal(req)
-					logger.Debug(logger.ReqFormat, "GetParametersForImport", string(bytes))
-					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo("GetParametersForImport"), &req)
-					if err != nil {
-						return err
-					}
-					respBytes, _ := json.Marshal(resp)
-					logger.Debug(logger.RespFormat, "GetParametersForImport", req, string(respBytes))
-
-					keyIdVal, _ := ve.ObtainSdkValue("Result.KeyID", *resp)
-					if keyIdVal != nil {
-						keyId = keyIdVal.(string)
-					}
+					resourceId = fmt.Sprintf("%s:%s", d.Get("key_name").(string), d.Get("keyring_name").(string))
 				}
-				d.SetId(keyId)
+				d.SetId(resourceId)
 				return nil
 			},
 		},

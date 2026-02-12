@@ -9,3 +9,5 @@ terraform-provider-volcengine
 output_result
 *.log
 go.sum
+.trae
+.vscode

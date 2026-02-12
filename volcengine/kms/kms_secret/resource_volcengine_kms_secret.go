@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
@@ -72,6 +73,18 @@ func ResourceVolcengineKmsSecret() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The version alias of the secret. Only Generic type secret support modifying version_name.",
+			},
+			"force_delete": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     true,
+				Description: "Whether to delete the secret immediately. If false, the secret enters pending deletion state. Only effective when destroying resources.",
+			},
+			"pending_window_in_days": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ValidateFunc: validation.IntBetween(7, 30),
+				Description:  "The waiting period before deletion when force_delete is false. Valid values: 7~30. Only effective when destroying resources.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,

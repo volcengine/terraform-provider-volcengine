@@ -464,7 +464,6 @@ func (s *VolcengineKmsKeyService) ModifyResource(resourceData *schema.ResourceDa
 	// Enable --> Enable + 轮转间隔更新: 调用 EnableKeyRotation 更新间隔
 	if resourceData.HasChanges("rotate_state", "rotate_interval") {
 		oldState, newState := resourceData.GetChange("rotate_state")
-		fmt.Println(oldState, newState)
 		// Disable --> Enable, 或者 Enable-->Enable + 间隔更新, 或者 空-->Enable: 调用 EnableKeyRotation
 		if newState.(string) == "Enable" {
 			callback := ve.Callback{
