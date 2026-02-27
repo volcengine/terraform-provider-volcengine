@@ -33,16 +33,16 @@ The following arguments are supported:
 * `creation_date_range` - (Optional) The creation date of the keyring.
 * `description` - (Optional) The description of the key.
 * `key_name` - (Optional) The name of the key.
-* `key_spec` - (Optional) The algorithm used in the key.
+* `key_spec` - (Optional) The algorithm used in the key. Valid values: SYMMETRIC_256, SYMMETRIC_128, RSA_2048, RSA_3072, RSA_4096, EC_P256K, EC_P256, EC_P384, EC_P521, EC_SM2.
 * `key_state` - (Optional) The state of the key.
-* `key_usage` - (Optional) The usage of the key.
+* `key_usage` - (Optional) The usage of the key. Valid values: ENCRYPT_DECRYPT, SIGN_VERIFY.
 * `keyring_id` - (Optional) Query the Key ring that meets the specified conditions, which is composed of key-value pairs.
 * `keyring_name` - (Optional) Query the Key ring that meets the specified conditions, which is composed of key-value pairs.
 * `name_regex` - (Optional) A Name Regex of Resource.
-* `origin` - (Optional) The origin of the key.
+* `origin` - (Optional) The origin of the key. Valid values: CloudKMS, External.
 * `output_file` - (Optional) File name where to save data source results.
-* `protection_level` - (Optional) The protection level of the key.
-* `rotate_state` - (Optional) The state of the rotate.
+* `protection_level` - (Optional) The protection level of the key. Valid values: SOFTWARE, HSM.
+* `rotate_state` - (Optional) The state of the rotate. Valid values: Enable, Disable.
 * `tags` - (Optional) A list of tags.
 * `update_date_range` - (Optional) The update date of the keyring.
 
@@ -55,6 +55,7 @@ The `tags` object supports the following:
 In addition to all arguments above, the following attributes are exported:
 * `keys` - Master key list information.
     * `creation_date` - The date when the keyring was created.
+    * `custom_key_store_id` - The ID of the custom key store.
     * `description` - The description of the key.
     * `id` - The unique ID of the key.
     * `key_material_expire_time` - The time when the key material will expire.
@@ -82,6 +83,8 @@ In addition to all arguments above, the following attributes are exported:
         * `value` - The Value of Tags.
     * `trn` - The name of the resource.
     * `update_date` - The date when the keyring was updated.
+    * `xks_key_configuration` - The configuration of the external key store.
+        * `id` - The ID of the external key store.
 * `total_count` - The total count of query.
 
 

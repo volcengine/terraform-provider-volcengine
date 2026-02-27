@@ -40,7 +40,7 @@ func ResourceVolcengineKmsSecretBackup() *schema.Resource {
 			"secret_data_key": {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Description: "The ciphertext of the data key used to encrypt the secret value, Base64 encoded",
+				Description: "The ciphertext of the data key used to encrypt the secret value, Base64 encoded.",
 			},
 			"backup_data": {
 				Type:        schema.TypeString,

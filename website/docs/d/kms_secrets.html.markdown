@@ -22,6 +22,7 @@ The following arguments are supported:
 * `managed_state` - (Optional) The state of the managed.
 * `name_regex` - (Optional) A Name Regex of Resource.
 * `output_file` - (Optional) File name where to save data source results.
+* `owning_service` - (Optional) The cloud service that owns the secret.
 * `project_name` - (Optional) The name of the project to which the secret belongs.
 * `rotation_state` - (Optional) The state of the rotation.
 * `secret_name` - (Optional) The name of the secret.
@@ -40,6 +41,7 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The unique ID of the secret. The value is in the UUID format.
     * `last_rotation_time` - The last time the secret was rotated.
     * `managed` - Indicates whether the secret is hosted.
+    * `owning_service` - The cloud service that owns the secret.
     * `project_name` - The project name of the secret.
     * `rotation_interval` - The interval at which automatic rotation is performed.
     * `rotation_state` - The rotation state of the secret.

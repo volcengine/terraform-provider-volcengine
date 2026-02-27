@@ -1,17 +1,17 @@
 ---
 subcategory: "KMS"
 layout: "volcengine"
-page_title: "Volcengine: volcengine_kms_key_enable"
-sidebar_current: "docs-volcengine-resource-kms_key_enable"
+page_title: "Volcengine: volcengine_kms_cancel_key_deletion"
+sidebar_current: "docs-volcengine-resource-kms_cancel_key_deletion"
 description: |-
-  Provides a resource to manage kms key enable
+  Provides a resource to manage kms cancel key deletion
 ---
-# volcengine_kms_key_enable
-Provides a resource to manage kms key enable
+# volcengine_kms_cancel_key_deletion
+Provides a resource to manage kms cancel key deletion
 ## Example Usage
 ```hcl
-resource "volcengine_kms_key_enable" "foo" {
-  key_id = "0e5a256d-d075-44b1-bcd2-09efafxxxxxx"
+resource "volcengine_kms_cancel_key_deletion" "foo" {
+  key_id = "50f588aa-32e1-4cd1-****-63afcbc7d523"
 }
 ```
 ## Argument Reference
@@ -27,10 +27,10 @@ In addition to all arguments above, the following attributes are exported:
 
 
 ## Import
-KmsKeyEnable can be imported using the id, e.g.
+KmsCancelKeyDeletion can be imported using the id, e.g.
 ```
-$ terraform import volcengine_kms_key_enable.default resource_id
+$ terraform import volcengine_kms_cancel_key_deletion.default resource_id
 or
-$ terraform import volcengine_kms_key_enable.default key_name:keyring_name
+$ terraform import volcengine_kms_cancel_key_deletion.default key_name:keyring_name
 ```
 
