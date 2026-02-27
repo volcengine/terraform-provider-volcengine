@@ -11,14 +11,16 @@ Provides a resource to manage kms key rotation
 ## Example Usage
 ```hcl
 resource "volcengine_kms_key_rotation" "foo" {
-  key_id = "m_cn-guilin-boe_63c08fe9-42e8-4c10-a09e-8e8e6xxxxxx"
+  key_id          = "c44870c3-f33b-421a-****-a2bba37c993e"
+  rotate_interval = 90
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `key_id` - (Optional) The id of the CMK.
-* `key_name` - (Optional) The name of the CMK.
-* `keyring_name` - (Optional) The name of the keyring.
+* `key_id` - (Optional, ForceNew) The id of the key. When key_id is not specified, both keyring_name and key_name must be specified.
+* `key_name` - (Optional, ForceNew) The name of the key.
+* `keyring_name` - (Optional, ForceNew) The name of the keyring.
+* `rotate_interval` - (Optional) Key rotation period, unit: days; value range: [90, 2560].
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

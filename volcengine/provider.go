@@ -55,12 +55,33 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_release"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/vefaas/vefaas_timer"
 
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_asymmetric_ciphertext"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_asymmetric_plaintext"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_asymmetric_signature"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_asymmetric_verification"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_cancel_key_deletion"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_cancel_secret_deletion"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_ciphertext"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_data_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_archive"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_enable"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_material"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_primary_region"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_key_rotation"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_keyring"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_mac"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_mac_verification"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_plaintext"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_public_key"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_re_encrypt"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_region"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_replicate_key"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret_backup"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret_restore"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret_rotate"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/kms/kms_secret_version"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_planned_event"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds_mysql/rds_mysql_task"
@@ -1132,9 +1153,23 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vefaas_kafka_triggers": vefaas_kafka_trigger.DataSourceVolcengineVefaasKafkaTriggers(),
 
 			// ================ KMS ================
-			"volcengine_kms_keyrings": kms_keyring.DataSourceVolcengineKmsKeyrings(),
-			"volcengine_kms_keys":     kms_key.DataSourceVolcengineKmsKeys(),
-			"volcengine_kms_secrets":  kms_secret.DataSourceVolcengineKmsSecrets(),
+			"volcengine_kms_keyrings":                 kms_keyring.DataSourceVolcengineKmsKeyrings(),
+			"volcengine_kms_key_materials":            kms_key_material.DataSourceVolcengineKmsKeyMaterials(),
+			"volcengine_kms_keys":                     kms_key.DataSourceVolcengineKmsKeys(),
+			"volcengine_kms_asymmetric_ciphertexts":   kms_asymmetric_ciphertext.DataSourceVolcengineKmsAsymmetricCiphertexts(),
+			"volcengine_kms_ciphertexts":              kms_ciphertext.DataSourceVolcengineKmsCiphertexts(),
+			"volcengine_kms_re_encrypts":              kms_re_encrypt.DataSourceVolcengineKmsReEncrypts(),
+			"volcengine_kms_data_keys":                kms_data_key.DataSourceVolcengineKmsDataKeys(),
+			"volcengine_kms_macs":                     kms_mac.DataSourceVolcengineKmsMacs(),
+			"volcengine_kms_mac_verifications":        kms_mac_verification.DataSourceVolcengineKmsMacVerifications(),
+			"volcengine_kms_asymmetric_plaintexts":    kms_asymmetric_plaintext.DataSourceVolcengineKmsAsymmetricPlaintexts(),
+			"volcengine_kms_plaintexts":               kms_plaintext.DataSourceVolcengineKmsPlaintexts(),
+			"volcengine_kms_asymmetric_signatures":    kms_asymmetric_signature.DataSourceVolcengineKmsAsymmetricSignatures(),
+			"volcengine_kms_asymmetric_verifications": kms_asymmetric_verification.DataSourceVolcengineKmsAsymmetricVerifications(),
+			"volcengine_kms_public_keys":              kms_public_key.DataSourceVolcengineKmsPublicKeys(),
+			"volcengine_kms_regions":                  kms_region.DataSourceVolcengineKmsRegions(),
+			"volcengine_kms_secrets":                  kms_secret.DataSourceVolcengineKmsSecrets(),
+			"volcengine_kms_secret_versions":          kms_secret_version.DataSourceVolcengineKmsSecretVersions(),
 
 			// ================ VMP ================
 			"volcengine_vmp_workspaces":            vmp_workspace.DataSourceVolcengineVmpWorkspaces(),
@@ -1623,12 +1658,24 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_vefaas_kafka_trigger": vefaas_kafka_trigger.ResourceVolcengineVefaasKafkaTrigger(),
 
 			// ================ KMS ================
-			"volcengine_kms_keyring":      kms_keyring.ResourceVolcengineKmsKeyring(),
-			"volcengine_kms_key":          kms_key.ResourceVolcengineKmsKey(),
-			"volcengine_kms_key_enable":   kms_key_enable.ResourceVolcengineKmsKeyEnable(),
-			"volcengine_kms_key_rotation": kms_key_rotation.ResourceVolcengineKmsKeyRotation(),
-			"volcengine_kms_key_archive":  kms_key_archive.ResourceVolcengineKmsKeyArchive(),
-			"volcengine_kms_secret":       kms_secret.ResourceVolcengineKmsSecret(),
+			"volcengine_kms_keyring":                kms_keyring.ResourceVolcengineKmsKeyring(),
+			"volcengine_kms_key_material":           kms_key_material.ResourceVolcengineKmsKeyMaterial(),
+			"volcengine_kms_key":                    kms_key.ResourceVolcengineKmsKey(),
+			"volcengine_kms_asymmetric_ciphertext":  kms_asymmetric_ciphertext.ResourceVolcengineKmsAsymmetricCiphertext(),
+			"volcengine_kms_asymmetric_signature":   kms_asymmetric_signature.ResourceVolcengineKmsAsymmetricSignature(),
+			"volcengine_kms_ciphertext":             kms_ciphertext.ResourceVolcengineKmsCiphertext(),
+			"volcengine_kms_re_encrypt":             kms_re_encrypt.ResourceVolcengineKmsReEncrypt(),
+			"volcengine_kms_key_enable":             kms_key_enable.ResourceVolcengineKmsKeyEnable(),
+			"volcengine_kms_key_rotation":           kms_key_rotation.ResourceVolcengineKmsKeyRotation(),
+			"volcengine_kms_key_archive":            kms_key_archive.ResourceVolcengineKmsKeyArchive(),
+			"volcengine_kms_cancel_key_deletion":    kms_cancel_key_deletion.ResourceVolcengineKmsCancelKeyDeletion(),
+			"volcengine_kms_cancel_secret_deletion": kms_cancel_secret_deletion.ResourceVolcengineKmsCancelSecretDeletion(),
+			"volcengine_kms_replicate_key":          kms_replicate_key.ResourceVolcengineKmsReplicateKey(),
+			"volcengine_kms_key_primary_region":     kms_key_primary_region.ResourceVolcengineKmsKeyPrimaryRegion(),
+			"volcengine_kms_secret":                 kms_secret.ResourceVolcengineKmsSecret(),
+			"volcengine_kms_secret_backup":          kms_secret_backup.ResourceVolcengineKmsSecretBackup(),
+			"volcengine_kms_secret_restore":         kms_secret_restore.ResourceVolcengineKmsSecretRestore(),
+			"volcengine_kms_secret_rotate":          kms_secret_rotate.ResourceVolcengineKmsSecretRotate(),
 
 			// ================ VMP ================
 			"volcengine_vmp_workspace":                     vmp_workspace.ResourceVolcengineVmpWorkspace(),

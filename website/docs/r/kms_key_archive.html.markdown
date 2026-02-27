@@ -32,9 +32,9 @@ resource "volcengine_kms_key_archive" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `key_id` - (Optional) The id of the CMK.
-* `key_name` - (Optional) The name of the CMK.
-* `keyring_name` - (Optional) The name of the keyring.
+* `key_id` - (Optional, ForceNew) The id of the key. When key_id is not specified, both keyring_name and key_name must be specified.
+* `key_name` - (Optional, ForceNew) The name of the key.
+* `keyring_name` - (Optional, ForceNew) The name of the keyring.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

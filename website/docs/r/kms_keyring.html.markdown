@@ -18,7 +18,7 @@ resource "volcengine_kms_keyring" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `keyring_name` - (Required, ForceNew) The name of the keyring.
+* `keyring_name` - (Required, ForceNew) The name of the keyring. Note: the keyring can only be deleted after all keys in it have been removed.
 * `description` - (Optional) The description of the keyring.
 * `keyring_type` - (Optional, ForceNew) The type of the keyring.
 * `project_name` - (Optional) The name of the project.

@@ -135,7 +135,45 @@ func (VolcengineKmsKeyRotationService) WithResourceResponseHandlers(d map[string
 }
 
 func (s *VolcengineKmsKeyRotationService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callback := ve.Callback{
+		Call: ve.SdkCall{
+			// 支持修改轮转间隔
+			Action:      "EnableKeyRotation",
+			ConvertMode: ve.RequestConvertAll,
+			Convert:     map[string]ve.RequestConvert{},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				var (
+					keyId       string
+					keyName     string
+					keyringName string
+				)
+				parts := strings.Split(d.Id(), ":")
+				switch len(parts) {
+				case 1:
+					keyId = parts[0]
+				case 2:
+					keyName = parts[0]
+					keyringName = parts[1]
+				default:
+					return false, fmt.Errorf("format of kms key rotation id is invalid,%s", d.Id())
+				}
+				if keyId != "" {
+					(*call.SdkParam)["KeyID"] = keyId
+				} else {
+					(*call.SdkParam)["KeyringName"] = keyringName
+					(*call.SdkParam)["KeyName"] = keyName
+				}
+				return true, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				logger.Debug(logger.RespFormat, call.Action, resp, err)
+				return resp, err
+			},
+		},
+	}
+	return []ve.Callback{callback}
 }
 
 func (s *VolcengineKmsKeyRotationService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {

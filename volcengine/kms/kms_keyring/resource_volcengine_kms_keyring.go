@@ -37,7 +37,7 @@ func ResourceVolcengineKmsKeyring() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "The name of the keyring.",
+				Description: "The name of the keyring. Note: the keyring can only be deleted after all keys in it have been removed.",
 			},
 			"keyring_type": {
 				Type:        schema.TypeString,

@@ -66,6 +66,14 @@ func DataSourceVolcengineKmsSecrets() *schema.Resource {
 				},
 				Description: "The state of the managed.",
 			},
+			"owning_service": {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "The cloud service that owns the secret.",
+			},
 			"rotation_state": {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -164,6 +172,11 @@ func DataSourceVolcengineKmsSecrets() *schema.Resource {
 							Type:        schema.TypeBool,
 							Computed:    true,
 							Description: "Indicates whether the secret is hosted.",
+						},
+						"owning_service": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The cloud service that owns the secret.",
 						},
 						"extended_config": {
 							Type:        schema.TypeString,
