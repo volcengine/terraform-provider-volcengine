@@ -30,15 +30,19 @@ func (s *VolcengineIamOidcProviderClientService) CreateResource(data *schema.Res
 			Call: ve.SdkCall{
 				Action:      "AddClientIDToOIDCProvider",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam: &map[string]interface{}{
-					"OIDCProviderName": data.Get("oidc_provider_name").(string),
-					"ClientID":         data.Get("client_id").(string),
-				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					param, err := ve.ResourceDateToRequest(d, resource, false, s.createRequestConvert(), ve.RequestConvertInConvert, ve.ContentTypeDefault)
+					if err != nil {
+						return nil, err
+					}
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), &param)
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-					d.SetId(fmt.Sprintf("%s:%s", d.Get("oidc_provider_name").(string), d.Get("client_id").(string)))
+					pName, _ := d.Get("oidc_provider_name").(string)
+					cId, _ := d.Get("client_id").(string)
+					if pName != "" && cId != "" {
+						d.SetId(fmt.Sprintf("%s:%s", pName, cId))
+					}
 					return nil
 				},
 			},
@@ -52,21 +56,26 @@ func (s *VolcengineIamOidcProviderClientService) RemoveResource(data *schema.Res
 			Call: ve.SdkCall{
 				Action:      "RemoveClientIDFromOIDCProvider",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam:    &map[string]interface{}{},
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					parts := strings.Split(d.Id(), ":")
 					if len(parts) != 2 {
-						return false, fmt.Errorf("invalid id format")
+						return nil, fmt.Errorf("invalid id format")
 					}
-					(*call.SdkParam)["OIDCProviderName"] = parts[0]
-					(*call.SdkParam)["ClientID"] = parts[1]
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					param := map[string]interface{}{
+						"OIDCProviderName": parts[0],
+						"ClientID":         parts[1],
+					}
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), &param)
 				},
 			},
 		},
+	}
+}
+
+func (s *VolcengineIamOidcProviderClientService) createRequestConvert() map[string]ve.RequestConvert {
+	return map[string]ve.RequestConvert{
+		"oidc_provider_name": {TargetField: "OIDCProviderName"},
+		"client_id":          {TargetField: "ClientID"},
 	}
 }
 
@@ -106,7 +115,7 @@ func (s *VolcengineIamOidcProviderClientService) ReadResource(d *schema.Resource
 	}
 
 	for _, v := range list {
-		if v.(string) == clientId {
+		if vStr, ok := v.(string); ok && vStr == clientId {
 			return map[string]interface{}{
 				"oidc_provider_name": providerName,
 				"client_id":          clientId,

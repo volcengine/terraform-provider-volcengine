@@ -81,15 +81,20 @@ func (v *VolcengineTlsAlarmService) ReadResource(resourceData *schema.ResourceDa
 	groups := data["AlarmNotifyGroup"]
 	if groups != nil {
 		groupIds := make([]string, 0)
-		if _, ok = groups.([]interface{}); !ok {
+		groupsList, ok := groups.([]interface{})
+		if !ok {
 			return data, fmt.Errorf("groups value is not slice")
 		}
-		for _, group := range groups.([]interface{}) {
+		for _, group := range groupsList {
 			groupMap, ok := group.(map[string]interface{})
 			if !ok {
 				return data, fmt.Errorf("group value is not map")
 			}
-			groupIds = append(groupIds, groupMap["AlarmNotifyGroupId"].(string))
+			if id, ok := groupMap["AlarmNotifyGroupId"].(string); ok {
+				groupIds = append(groupIds, id)
+			} else {
+				return data, fmt.Errorf("AlarmNotifyGroupId value is not string")
+			}
 		}
 		data["AlarmNotifyGroup"] = groupIds
 	}
@@ -125,6 +130,11 @@ func (v *VolcengineTlsAlarmService) CreateResource(data *schema.ResourceData, re
 				"status": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "Status",
+					ForceGet:    true,
+				},
+				"send_resolved": {
+					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
 				},
 				"query_request": {
 					ConvertType: ve.ConvertJsonObjectArray,
@@ -146,6 +156,7 @@ func (v *VolcengineTlsAlarmService) CreateResource(data *schema.ResourceData, re
 						},
 						"no_data": {
 							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
 						},
 					},
 				},
@@ -178,7 +189,11 @@ func (v *VolcengineTlsAlarmService) CreateResource(data *schema.ResourceData, re
 				if id == nil {
 					return fmt.Errorf("AlarmId is nil in response")
 				}
-				d.SetId(fmt.Sprintf("%s:%v", d.Get("project_id").(string), id))
+				projectId, ok := d.Get("project_id").(string)
+				if !ok {
+					return fmt.Errorf("project_id is not string")
+				}
+				d.SetId(fmt.Sprintf("%s:%v", projectId, id))
 				return nil
 			},
 		},
@@ -202,9 +217,11 @@ func (v *VolcengineTlsAlarmService) ModifyResource(data *schema.ResourceData, re
 				"status": {
 					ConvertType: ve.ConvertDefault,
 					TargetField: "Status",
+					ForceGet:    true,
 				},
 				"send_resolved": {
 					ConvertType: ve.ConvertDefault,
+					ForceGet:    true,
 				},
 				"condition": {
 					ConvertType: ve.ConvertDefault,
@@ -232,6 +249,7 @@ func (v *VolcengineTlsAlarmService) ModifyResource(data *schema.ResourceData, re
 						},
 						"no_data": {
 							ConvertType: ve.ConvertDefault,
+							ForceGet:    true,
 						},
 					},
 				},

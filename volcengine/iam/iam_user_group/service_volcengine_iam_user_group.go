@@ -87,7 +87,7 @@ func (s *VolcengineIamUserGroupService) ReadResource(resourceData *schema.Resour
 			return data, errors.New("Value is not map ")
 		} else
 		// 接口为模糊查询，确保查询结果正确
-		if tempData["UserGroupName"].(string) == id {
+		if vName, ok := tempData["UserGroupName"].(string); ok && vName == id {
 			data = tempData
 		}
 	}
@@ -113,8 +113,15 @@ func (s *VolcengineIamUserGroupService) CreateResource(resourceData *schema.Reso
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("Result.UserGroup.UserGroupName", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("Result.UserGroup.UserGroupName", *resp)
+				if err != nil {
+					return err
+				}
+				if idStr, ok := id.(string); ok && idStr != "" {
+					d.SetId(idStr)
+				} else {
+					return errors.New("Result.UserGroup.UserGroupName is not string")
+				}
 				return nil
 			},
 		},

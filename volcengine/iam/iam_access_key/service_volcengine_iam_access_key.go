@@ -40,7 +40,9 @@ func (s *VolcengineIamAccessKeyService) ReadResources(m map[string]interface{}) 
 			if !ok {
 				break
 			}
-			idSet[tmpId.(string)] = true
+			if s, ok := tmpId.(string); ok {
+				idSet[s] = true
+			}
 			i++
 			delete(m, filed)
 		}
@@ -79,7 +81,15 @@ func (s *VolcengineIamAccessKeyService) ReadResources(m map[string]interface{}) 
 
 	res := make([]interface{}, 0)
 	for _, cen := range cens {
-		if !idSet[cen.(map[string]interface{})["AccessKeyId"].(string)] {
+		m, ok := cen.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("result item is not map")
+		}
+		akId, ok := m["AccessKeyId"].(string)
+		if !ok {
+			return nil, errors.New("result item AccessKeyId is not string")
+		}
+		if !idSet[akId] {
 			continue
 		}
 		res = append(res, cen)
@@ -98,8 +108,10 @@ func (s *VolcengineIamAccessKeyService) ReadResource(resourceData *schema.Resour
 	req := map[string]interface{}{
 		"AccessKeyIds.1": id,
 	}
-	if resourceData.Get("user_name") != nil && len(resourceData.Get("user_name").(string)) > 0 {
-		req["UserName"] = resourceData.Get("user_name").(string)
+	if v := resourceData.Get("user_name"); v != nil {
+		if userName, ok := v.(string); ok && len(userName) > 0 {
+			req["UserName"] = userName
+		}
 	}
 	results, err = s.ReadResources(req)
 	if err != nil {
@@ -139,12 +151,16 @@ func (s *VolcengineIamAccessKeyService) RefreshResourceState(resourceData *schem
 				return nil, "", err
 			}
 			for _, v := range failStates {
-				if v == status.(string) {
-					return nil, "", fmt.Errorf("access key status error, status:%s", status.(string))
+				if s, ok := status.(string); ok && v == s {
+					return nil, "", fmt.Errorf("access key status error, status:%s", s)
 				}
 			}
 			//注意 返回的第一个参数不能为空 否则会一直等下去
-			return demo, status.(string), err
+			s, ok := status.(string)
+			if !ok {
+				s = ""
+			}
+			return demo, s, err
 		},
 	}
 
@@ -178,19 +194,49 @@ func (s *VolcengineIamAccessKeyService) CreateResource(resourceData *schema.Reso
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, *resp)
 				//注意 获取内容 这个地方不能是指针 需要转一次
-				id, _ := ve.ObtainSdkValue("Result.AccessKey.AccessKeyId", *resp)
-				d.SetId(id.(string))
-				d.Set("access_key_id", id.(string))
-				sk, _ := ve.ObtainSdkValue("Result.AccessKey.SecretAccessKey", *resp)
-				d.Set("secret_access_key", sk.(string))
-				createDate, _ := ve.ObtainSdkValue("Result.AccessKey.CreateDate", *resp)
-				d.Set("create_date", createDate.(string))
-				updateDate, _ := ve.ObtainSdkValue("Result.AccessKey.UpdateDate", *resp)
-				d.Set("update_date", updateDate.(string))
-				userName, _ := ve.ObtainSdkValue("Result.AccessKey.UserName", *resp)
-				d.Set("user_name", userName.(string))
-				status, _ := ve.ObtainSdkValue("Result.AccessKey.Status", *resp)
-				d.Set("status", status.(string))
+				id, err := ve.ObtainSdkValue("Result.AccessKey.AccessKeyId", *resp)
+				if err != nil {
+					return err
+				}
+				if idStr, ok := id.(string); ok {
+					d.SetId(idStr)
+					d.Set("access_key_id", idStr)
+				}
+				sk, err := ve.ObtainSdkValue("Result.AccessKey.SecretAccessKey", *resp)
+				if err != nil {
+					return err
+				}
+				if skStr, ok := sk.(string); ok {
+					d.Set("secret_access_key", skStr)
+				}
+				createDate, err := ve.ObtainSdkValue("Result.AccessKey.CreateDate", *resp)
+				if err != nil {
+					return err
+				}
+				if cdStr, ok := createDate.(string); ok {
+					d.Set("create_date", cdStr)
+				}
+				updateDate, err := ve.ObtainSdkValue("Result.AccessKey.UpdateDate", *resp)
+				if err != nil {
+					return err
+				}
+				if udStr, ok := updateDate.(string); ok {
+					d.Set("update_date", udStr)
+				}
+				userName, err := ve.ObtainSdkValue("Result.AccessKey.UserName", *resp)
+				if err != nil {
+					return err
+				}
+				if unStr, ok := userName.(string); ok {
+					d.Set("user_name", unStr)
+				}
+				status, err := ve.ObtainSdkValue("Result.AccessKey.Status", *resp)
+				if err != nil {
+					return err
+				}
+				if sStr, ok := status.(string); ok {
+					d.Set("status", sStr)
+				}
 				return nil
 			},
 		},
@@ -198,8 +244,10 @@ func (s *VolcengineIamAccessKeyService) CreateResource(resourceData *schema.Reso
 	callbacks = append(callbacks, callback)
 
 	// 更新ak状态
-	if resourceData.Get("status") != nil {
-		callbacks = append(callbacks, s.updateAccessKeyStatus(resourceData.Get("status").(string), resourceData))
+	if v := resourceData.Get("status"); v != nil {
+		if status, ok := v.(string); ok && len(status) > 0 {
+			callbacks = append(callbacks, s.updateAccessKeyStatus(status, resourceData))
+		}
 	}
 
 	return callbacks
@@ -208,7 +256,11 @@ func (s *VolcengineIamAccessKeyService) CreateResource(resourceData *schema.Reso
 func (s *VolcengineIamAccessKeyService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
 	callbacks := make([]ve.Callback, 0)
 	if resourceData.HasChange("status") {
-		callbacks = append(callbacks, s.updateAccessKeyStatus(resourceData.Get("status").(string), resourceData))
+		status, ok := resourceData.Get("status").(string)
+		if !ok {
+			return []ve.Callback{{Err: errors.New("status is not string")}}
+		}
+		callbacks = append(callbacks, s.updateAccessKeyStatus(status, resourceData))
 	}
 	return callbacks
 }

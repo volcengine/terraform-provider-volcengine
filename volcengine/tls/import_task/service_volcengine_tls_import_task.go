@@ -85,23 +85,25 @@ func (s *VolcengineImportTaskService) ReadResource(resourceData *schema.Resource
 		return data, fmt.Errorf("import_task %s not exist ", id)
 	}
 	if targetInfo, targetInfoExist := data["TargetInfo"]; targetInfoExist {
-		if extractRule, extractRuleExist := targetInfo.(map[string]interface{})["ExtractRule"]; extractRuleExist {
-			targetInfo.(map[string]interface{})["ExtractRule"] = []interface{}{
-				extractRule,
+		if targetInfoMap, ok := targetInfo.(map[string]interface{}); ok {
+			if extractRule, extractRuleExist := targetInfoMap["ExtractRule"]; extractRuleExist {
+				targetInfoMap["ExtractRule"] = []interface{}{
+					extractRule,
+				}
 			}
 		}
 	}
 	if importSourceInfo, importSourceInfoExist := data["ImportSourceInfo"]; importSourceInfoExist {
-		if tosSourceInfo, tosSourceInfoExist := importSourceInfo.(map[string]interface{})["TosSourceInfo"]; tosSourceInfoExist {
-			importSourceInfo.(map[string]interface{})["TosSourceInfo"] = []interface{}{
-				tosSourceInfo,
+		if importSourceInfoMap, ok := importSourceInfo.(map[string]interface{}); ok {
+			if tosSourceInfo, tosSourceInfoExist := importSourceInfoMap["TosSourceInfo"]; tosSourceInfoExist {
+				importSourceInfoMap["TosSourceInfo"] = []interface{}{
+					tosSourceInfo,
+				}
 			}
-		}
-	}
-	if importSourceInfo, importSourceInfoExist := data["ImportSourceInfo"]; importSourceInfoExist {
-		if kafkaSourceInfo, kafkaSourceInfoExist := importSourceInfo.(map[string]interface{})["KafkaSourceInfo"]; kafkaSourceInfoExist {
-			importSourceInfo.(map[string]interface{})["KafkaSourceInfo"] = []interface{}{
-				kafkaSourceInfo,
+			if kafkaSourceInfo, kafkaSourceInfoExist := importSourceInfoMap["KafkaSourceInfo"]; kafkaSourceInfoExist {
+				importSourceInfoMap["KafkaSourceInfo"] = []interface{}{
+					kafkaSourceInfo,
+				}
 			}
 		}
 	}
@@ -218,8 +220,15 @@ func (s *VolcengineImportTaskService) CreateResource(resourceData *schema.Resour
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.TaskId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.TaskId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return fmt.Errorf("TaskId is not string")
+				}
 				return nil
 			},
 		},

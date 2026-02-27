@@ -15,8 +15,8 @@ resource "volcengine_tls_topic" "foo" {
     time_key        = "request_time"
     time_format     = "%Y-%m-%dT%H:%M:%S,%f"
     tags {
-      key   = "k2"
-      value = "v3"
+      key   = "km"
+      value = "vm"
     }
     log_public_ip  = true
     enable_hot_ttl = true
@@ -101,24 +101,24 @@ resource "volcengine_tls_rule" "foo" {
      stream = "all"
      container_name_regex = ".*test.*"
      include_container_label_regex = {
-       Key1 = "Value122",
-       Key2 = "Value223"
+       Key1 = "Value1221",
+       Key2 = "Value223q"
      }
      exclude_container_label_regex = {
-       Key1 = "Value312",
-       Key2 = "Valu5e22"
+       Key1 = "Value312q",
+       Key2 = "Valu5e22q"
      }
      include_container_env_regex = {
-       Key1 = "Val2ue1",
-       Key2 = "Val2ue2"
+       Key1 = "Val2ue1q",
+       Key2 = "Val2ue2q"
      }
      exclude_container_env_regex = {
-       Key1 = "Value1",
-       Key2 = "Value2"
+       Key1 = "Value1q",
+       Key2 = "Value2q"
      }
      env_tag = {
-       Key1 = "Value1",
-       Key2 = "Value2"
+       Key1 = "Value1q",
+       Key2 = "Value2q"
      }
      kubernetes_rule {
        namespace_name_regex = ".*test.*"
@@ -134,12 +134,12 @@ resource "volcengine_tls_rule" "foo" {
        }
        pod_name_regex = ".*test.*"
        label_tag = {
-         Key1 = "Value1",
-         Key2 = "Value2"
+         Key1 = "Value1q",
+         Key2 = "Value2q"
        }
        annotation_tag = {
-         Key1 = "Value1",
-         Key2 = "Value2"
+         Key1 = "Value1q",
+         Key2 = "Value2q"
        }
      }
    }

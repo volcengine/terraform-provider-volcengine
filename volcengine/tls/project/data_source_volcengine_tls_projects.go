@@ -28,7 +28,11 @@ func DataSourceVolcengineTlsProjects() *schema.Resource {
 				Default:     false,
 				Description: "Whether to match accurately when filtering based on ProjectName.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("project_name").(string) == ""
+					v, ok := d.Get("project_name").(string)
+					if !ok {
+						return false
+					}
+					return v == ""
 				},
 			},
 			"iam_project_name": {

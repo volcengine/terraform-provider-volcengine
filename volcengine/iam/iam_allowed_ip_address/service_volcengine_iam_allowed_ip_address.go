@@ -54,7 +54,10 @@ func (s *VolcengineIamAllowedIpAddressService) ReadResource(resourceData *schema
 		return data, err
 	}
 	if len(results) > 0 {
-		return results[0].(map[string]interface{}), nil
+		if resMap, ok := results[0].(map[string]interface{}); ok {
+			return resMap, nil
+		}
+		return data, errors.New("results[0] is not map")
 	}
 	return data, errors.New("Allowed IP Address not found")
 }

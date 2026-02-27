@@ -1,11 +1,11 @@
 resource "volcengine_iam_allowed_ip_address" "foo" {
   enable_ip_list = true
   ip_list {
-    ip          = "your ip"
+    ip          = "your_ip"
     description = "test1"
   }
   ip_list {
-    ip          = "your ip"
+    ip          = "your_ip"
     description = "test2"
   }
 }

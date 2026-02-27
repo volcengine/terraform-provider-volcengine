@@ -30,15 +30,19 @@ func (s *VolcengineIamOidcProviderThumbprintService) CreateResource(data *schema
 			Call: ve.SdkCall{
 				Action:      "AddThumbprintToOIDCProvider",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam: &map[string]interface{}{
-					"OIDCProviderName": data.Get("oidc_provider_name").(string),
-					"Thumbprint":       data.Get("thumbprint").(string),
-				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					param, err := ve.ResourceDateToRequest(d, resource, false, s.createRequestConvert(), ve.RequestConvertInConvert, ve.ContentTypeDefault)
+					if err != nil {
+						return nil, err
+					}
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), &param)
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-					d.SetId(fmt.Sprintf("%s:%s", d.Get("oidc_provider_name").(string), d.Get("thumbprint").(string)))
+					pName, _ := d.Get("oidc_provider_name").(string)
+					thumbprint, _ := d.Get("thumbprint").(string)
+					if pName != "" && thumbprint != "" {
+						d.SetId(fmt.Sprintf("%s:%s", pName, thumbprint))
+					}
 					return nil
 				},
 			},
@@ -52,21 +56,26 @@ func (s *VolcengineIamOidcProviderThumbprintService) RemoveResource(data *schema
 			Call: ve.SdkCall{
 				Action:      "RemoveThumbprintFromOIDCProvider",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam:    &map[string]interface{}{},
-				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 					parts := strings.Split(d.Id(), ":")
 					if len(parts) != 2 {
-						return false, fmt.Errorf("invalid id format")
+						return nil, fmt.Errorf("invalid id format")
 					}
-					(*call.SdkParam)["OIDCProviderName"] = parts[0]
-					(*call.SdkParam)["Thumbprint"] = parts[1]
-					return true, nil
-				},
-				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					param := map[string]interface{}{
+						"OIDCProviderName": parts[0],
+						"Thumbprint":       parts[1],
+					}
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), &param)
 				},
 			},
 		},
+	}
+}
+
+func (s *VolcengineIamOidcProviderThumbprintService) createRequestConvert() map[string]ve.RequestConvert {
+	return map[string]ve.RequestConvert{
+		"oidc_provider_name": {TargetField: "OIDCProviderName"},
+		"thumbprint":         {TargetField: "Thumbprint"},
 	}
 }
 
@@ -106,7 +115,7 @@ func (s *VolcengineIamOidcProviderThumbprintService) ReadResource(d *schema.Reso
 	}
 
 	for _, v := range list {
-		if v.(string) == thumbprint {
+		if vStr, ok := v.(string); ok && vStr == thumbprint {
 			return map[string]interface{}{
 				"oidc_provider_name": providerName,
 				"thumbprint":         thumbprint,

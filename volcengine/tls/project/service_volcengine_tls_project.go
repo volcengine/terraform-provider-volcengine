@@ -91,7 +91,7 @@ func (s *VolcengineTlsProjectService) ReadResource(resourceData *schema.Resource
 		if projectMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		}
-		if projectMap["ProjectId"].(string) == projectId {
+		if pId, ok := projectMap["ProjectId"].(string); ok && pId == projectId {
 			data = projectMap
 			break
 		}
@@ -158,8 +158,15 @@ func (s *VolcengineTlsProjectService) CreateResource(resourceData *schema.Resour
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.ProjectId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.ProjectId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return fmt.Errorf("ProjectId is not string")
+				}
 				return nil
 			},
 		},
@@ -300,7 +307,13 @@ func (s *VolcengineTlsProjectService) setResourceTags(resourceData *schema.Resou
 					(*call.SdkParam)["ResourcesList"] = []string{resourceData.Id()}
 					(*call.SdkParam)["TagKeyList"] = make([]string, 0)
 					for _, tag := range removedTags.List() {
-						(*call.SdkParam)["TagKeyList"] = append((*call.SdkParam)["TagKeyList"].([]string), tag.(map[string]interface{})["key"].(string))
+						if tm, ok := tag.(map[string]interface{}); ok {
+							if k, ok := tm["key"].(string); ok {
+								if tagKeyList, ok := (*call.SdkParam)["TagKeyList"].([]string); ok {
+									(*call.SdkParam)["TagKeyList"] = append(tagKeyList, k)
+								}
+							}
+						}
 					}
 					return true, nil
 				}
@@ -329,10 +342,14 @@ func (s *VolcengineTlsProjectService) setResourceTags(resourceData *schema.Resou
 					(*call.SdkParam)["ResourcesList"] = []string{resourceData.Id()}
 					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
 					for _, tag := range addedTags.List() {
-						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), map[string]interface{}{
-							"Key":   tag.(map[string]interface{})["key"],
-							"Value": tag.(map[string]interface{})["value"],
-						})
+						if tm, ok := tag.(map[string]interface{}); ok {
+							if tagList, ok := (*call.SdkParam)["Tags"].([]map[string]interface{}); ok {
+								(*call.SdkParam)["Tags"] = append(tagList, map[string]interface{}{
+									"Key":   tm["key"],
+									"Value": tm["value"],
+								})
+							}
+						}
 					}
 					return true, nil
 				}

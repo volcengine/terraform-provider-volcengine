@@ -85,16 +85,16 @@ func (s *VolcengineShipperService) ReadResource(resourceData *schema.ResourceDat
 		return data, fmt.Errorf("shipper %s not exist ", id)
 	}
 	if contentInfos, contentInfoExist := data["ContentInfo"]; contentInfoExist {
-		if csvInfo, csvInfoExist := contentInfos.(map[string]interface{})["CsvInfo"]; csvInfoExist {
-			contentInfos.(map[string]interface{})["CsvInfo"] = []interface{}{
-				csvInfo,
+		if contentInfosMap, ok := contentInfos.(map[string]interface{}); ok {
+			if csvInfo, csvInfoExist := contentInfosMap["CsvInfo"]; csvInfoExist {
+				contentInfosMap["CsvInfo"] = []interface{}{
+					csvInfo,
+				}
 			}
-		}
-	}
-	if contentInfos, contentInfoExist := data["ContentInfo"]; contentInfoExist {
-		if jsonInfo, jsonInfoExist := contentInfos.(map[string]interface{})["JsonInfo"]; jsonInfoExist {
-			contentInfos.(map[string]interface{})["JsonInfo"] = []interface{}{
-				jsonInfo,
+			if jsonInfo, jsonInfoExist := contentInfosMap["JsonInfo"]; jsonInfoExist {
+				contentInfosMap["JsonInfo"] = []interface{}{
+					jsonInfo,
+				}
 			}
 		}
 	}
@@ -152,8 +152,15 @@ func (s *VolcengineShipperService) CreateResource(resourceData *schema.ResourceD
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.ShipperId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.ShipperId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return fmt.Errorf("ShipperId is not string")
+				}
 				return nil
 			},
 		},

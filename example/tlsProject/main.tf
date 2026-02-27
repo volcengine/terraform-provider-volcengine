@@ -1,14 +1,14 @@
 resource "volcengine_tls_project" "foo" {
   project_name     = "tf-project-m"
-  description      = "tf-desc-modify"
+  description      = "tf-desc"
   region           = "cn-guilin-boe"
   iam_project_name = "default"
   tags {
-    key   = "k1"
+    key   = "k2m"
     value = "v1"
   }
   tags {
-      key   = "k2"
+      key   = "kt3"
       value = "v3"
     }
 

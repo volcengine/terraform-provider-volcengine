@@ -39,6 +39,9 @@ func (v *VolcengineTlsRuleBoundHostGroupService) ReadResources(m map[string]inte
 			Path:        []string{action},
 			Client:      v.Client.BypassSvcClient.NewTlsClient(),
 		}, &m)
+		if err != nil {
+			return data, err
+		}
 		logger.Debug(logger.RespFormat, action, resp)
 		results, err = ve.ObtainSdkValue("RESPONSE.HostGroupInfos", *resp)
 		if err != nil {
@@ -60,10 +63,12 @@ func (v *VolcengineTlsRuleBoundHostGroupService) ReadResource(resourceData *sche
 	// 但由于 Terraform 的 id 通常是 rule_id:host_group_id，这里需要适配
 
 	// 这里我们通过 rule_id 查询所有的 host_groups，然后检查 id 指定的 host_group 是否在列表中
-	ruleId := resourceData.Get("rule_id").(string)
-	hostGroupId := resourceData.Get("host_group_id").(string)
+	vRuleId := resourceData.Get("rule_id")
+	ruleId, ok1 := vRuleId.(string)
+	vHostGroupId := resourceData.Get("host_group_id")
+	hostGroupId, ok2 := vHostGroupId.(string)
 
-	if ruleId == "" || hostGroupId == "" {
+	if !ok1 || !ok2 || ruleId == "" || hostGroupId == "" {
 		// 如果从 resourceData 获取不到，尝试从 id 解析
 		// 假设 id 格式为 ruleId:hostGroupId
 		// 但更标准的做法是依赖 resourceData 中的 required 字段
@@ -128,11 +133,15 @@ func (v *VolcengineTlsRuleBoundHostGroupService) CreateResource(resourceData *sc
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				if v, ok := d.GetOk("rule_id"); ok {
-					(*call.SdkParam)["RuleId"] = v.(string)
+					if s, ok := v.(string); ok {
+						(*call.SdkParam)["RuleId"] = s
+					}
 				}
 				// 单个 ID 转数组
 				if hgId, ok := d.GetOk("host_group_id"); ok {
-					(*call.SdkParam)["HostGroupIds"] = []string{hgId.(string)}
+					if s, ok := hgId.(string); ok {
+						(*call.SdkParam)["HostGroupIds"] = []string{s}
+					}
 				}
 				return v.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					ContentType: ve.ApplicationJSON,
@@ -142,8 +151,11 @@ func (v *VolcengineTlsRuleBoundHostGroupService) CreateResource(resourceData *sc
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				ruleId := d.Get("rule_id").(string)
-				hostGroupId := d.Get("host_group_id").(string)
+				ruleId, ok1 := d.Get("rule_id").(string)
+				hostGroupId, ok2 := d.Get("host_group_id").(string)
+				if !ok1 || !ok2 {
+					return fmt.Errorf("rule_id or host_group_id is not string")
+				}
 				d.SetId(fmt.Sprintf("%s:%s", ruleId, hostGroupId))
 				return nil
 			},
@@ -174,10 +186,18 @@ func (v *VolcengineTlsRuleBoundHostGroupService) RemoveResource(resourceData *sc
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				if v, ok := d.GetOk("rule_id"); ok {
-					(*call.SdkParam)["RuleId"] = v.(string)
+					if ruleId, ok := v.(string); ok {
+						(*call.SdkParam)["RuleId"] = ruleId
+					} else {
+						return nil, fmt.Errorf("rule_id is not string")
+					}
 				}
 				if hgId, ok := d.GetOk("host_group_id"); ok {
-					(*call.SdkParam)["HostGroupIds"] = []string{hgId.(string)}
+					if hgIdStr, ok := hgId.(string); ok {
+						(*call.SdkParam)["HostGroupIds"] = []string{hgIdStr}
+					} else {
+						return nil, fmt.Errorf("host_group_id is not string")
+					}
 				}
 				return v.Client.BypassSvcClient.DoBypassSvcCall(ve.BypassSvcInfo{
 					ContentType: ve.ApplicationJSON,

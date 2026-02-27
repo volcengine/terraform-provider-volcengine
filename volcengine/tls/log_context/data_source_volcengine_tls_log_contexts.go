@@ -118,7 +118,11 @@ func dataSourceVolcengineTlsLogContextRead(d *schema.ResourceData, meta interfac
 	// Handle output_file
 	if outputFile, ok := d.GetOk("output_file"); ok && outputFile != "" {
 		s, _ := json.MarshalIndent(results, "", "\t")
-		if err := ioutil.WriteFile(outputFile.(string), s, 0644); err != nil {
+		path, ok := outputFile.(string)
+		if !ok {
+			return fmt.Errorf("output_file is not a string")
+		}
+		if err := ioutil.WriteFile(path, s, 0644); err != nil {
 			return fmt.Errorf("Error saving output file: %s", err)
 		}
 	}

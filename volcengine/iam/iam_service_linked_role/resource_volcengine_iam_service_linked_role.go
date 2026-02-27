@@ -21,10 +21,10 @@ $ terraform import volcengine_iam_service_linked_role.default service_name:role_
 
 func ResourceVolcengineIamServiceLinkedRole() *schema.Resource {
 	tagsSchema := ve.TagsSchema()
-	tagsSchema.ForceNew = true
 	resource := &schema.Resource{
 		Create: resourceVolcengineIamServiceLinkedRoleCreate,
 		Read:   resourceVolcengineIamServiceLinkedRoleRead,
+		Update: resourceVolcengineIamServiceLinkedRoleUpdate,
 		Delete: resourceVolcengineIamServiceLinkedRoleDelete,
 		Importer: &schema.ResourceImporter{
 			State: iamServiceLinkedRoleImporter,

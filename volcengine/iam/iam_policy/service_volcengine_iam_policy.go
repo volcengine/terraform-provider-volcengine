@@ -82,7 +82,7 @@ func (s *VolcengineIamPolicyService) ReadResource(resourceData *schema.ResourceD
 		if temp, ok := v.(map[string]interface{}); !ok {
 			return data, errors.New("value is not map")
 		} else {
-			if temp["PolicyName"].(string) == policyId {
+			if pName, ok := temp["PolicyName"].(string); ok && pName == policyId {
 				data = temp
 				break
 			}
@@ -120,7 +120,9 @@ func (s *VolcengineIamPolicyService) CreateResource(data *schema.ResourceData, r
 				if err != nil {
 					return err
 				}
-				d.SetId(policyName.(string))
+				if nameStr, ok := policyName.(string); ok && nameStr != "" {
+					d.SetId(nameStr)
+				}
 				return nil
 			},
 		},
@@ -158,7 +160,9 @@ func (s *VolcengineIamPolicyService) ModifyResource(data *schema.ResourceData, r
 					if err != nil {
 						return err
 					}
-					d.SetId(policyName.(string))
+					if nameStr, ok := policyName.(string); ok && nameStr != "" {
+						d.SetId(nameStr)
+					}
 				}
 				return nil
 			},

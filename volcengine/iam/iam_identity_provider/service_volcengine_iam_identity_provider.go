@@ -1,6 +1,7 @@
 package iam_identity_provider
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -40,7 +41,10 @@ func (s *VolcengineIamIdentityProviderService) ReadResources(m map[string]interf
 		if results == nil {
 			return []interface{}{}, nil
 		}
-		return results.([]interface{}), nil
+		if data, ok := results.([]interface{}); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf("Result.IdentityProviders is not Slice")
 	})
 }
 

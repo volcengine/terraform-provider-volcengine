@@ -47,7 +47,10 @@ func (s *VolcengineIamEntitiesPolicyService) ReadResources(m map[string]interfac
 	resultMap := make(map[string]interface{})
 
 	// Extract and map entities to snake_case for manual mapping in Read function
-	users, _ := ve.ObtainSdkValue("Result.PolicyUsers", *resp)
+	users, err := ve.ObtainSdkValue("Result.PolicyUsers", *resp)
+	if err != nil {
+		return data, err
+	}
 	resultMap["users"] = convertEntities(users, map[string]string{
 		"UserName":    "user_name",
 		"DisplayName": "display_name",
@@ -56,7 +59,10 @@ func (s *VolcengineIamEntitiesPolicyService) ReadResources(m map[string]interfac
 		"ID":          "id",
 	})
 
-	roles, _ := ve.ObtainSdkValue("Result.PolicyRoles", *resp)
+	roles, err := ve.ObtainSdkValue("Result.PolicyRoles", *resp)
+	if err != nil {
+		return data, err
+	}
 	resultMap["roles"] = convertEntities(roles, map[string]string{
 		"RoleName":    "role_name",
 		"DisplayName": "display_name",
@@ -65,7 +71,10 @@ func (s *VolcengineIamEntitiesPolicyService) ReadResources(m map[string]interfac
 		"ID":          "id",
 	})
 
-	userGroups, _ := ve.ObtainSdkValue("Result.PolicyUserGroups", *resp)
+	userGroups, err := ve.ObtainSdkValue("Result.PolicyUserGroups", *resp)
+	if err != nil {
+		return data, err
+	}
 	resultMap["user_groups"] = convertEntities(userGroups, map[string]string{
 		"UserGroupName": "user_group_name",
 		"DisplayName":   "display_name",
@@ -74,7 +83,10 @@ func (s *VolcengineIamEntitiesPolicyService) ReadResources(m map[string]interfac
 		"ID":            "id",
 	})
 
-	total, _ := ve.ObtainSdkValue("Result.Total", *resp)
+	total, err := ve.ObtainSdkValue("Result.Total", *resp)
+	if err != nil {
+		return data, err
+	}
 	if total == nil {
 		resultMap["total_count"] = 0
 	} else {

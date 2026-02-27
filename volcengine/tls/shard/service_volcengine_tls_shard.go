@@ -40,6 +40,9 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 			Path:        []string{action},
 			Client:      s.Client.BypassSvcClient.NewTlsClient(),
 		}, &condition)
+		if err != nil {
+			return data, err
+		}
 		logger.Debug(logger.RespFormat, action, resp)
 		results, err = ve.ObtainSdkValue("RESPONSE.Shards", *resp)
 		if err != nil {
@@ -57,10 +60,12 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 }
 
 func (s *Service) ReadResource(resourceData *schema.ResourceData, vpcId string) (data map[string]interface{}, err error) {
-	topicId := resourceData.Get("topic_id").(string)
-	shardId := resourceData.Get("shard_id").(int)
-	if topicId == "" {
-		return nil, errors.New("topic_id is empty")
+	vTopicId := resourceData.Get("topic_id")
+	topicId, ok1 := vTopicId.(string)
+	vShardId := resourceData.Get("shard_id")
+	shardId, ok2 := vShardId.(int)
+	if !ok1 || !ok2 || topicId == "" {
+		return nil, errors.New("topic_id or shard_id is invalid")
 	}
 
 	action := "DescribeShards"
@@ -93,8 +98,11 @@ func (s *Service) ReadResource(resourceData *schema.ResourceData, vpcId string) 
 	}
 
 	for _, v := range shards {
-		shardMap := v.(map[string]interface{})
-		if int(shardMap["ShardId"].(float64)) == shardId {
+		shardMap, ok := v.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if sId, ok := shardMap["ShardId"].(float64); ok && int(sId) == shardId {
 			data = make(map[string]interface{})
 			data["topic_id"] = topicId
 			data["shard_id"] = shardId
@@ -148,7 +156,12 @@ func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *sc
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(fmt.Sprintf("%s:%d", d.Get("topic_id").(string), d.Get("shard_id").(int)))
+				topicId, ok1 := d.Get("topic_id").(string)
+				shardId, ok2 := d.Get("shard_id").(int)
+				if !ok1 || !ok2 {
+					return errors.New("topic_id or shard_id is invalid")
+				}
+				d.SetId(fmt.Sprintf("%s:%d", topicId, shardId))
 
 				results, err := ve.ObtainSdkValue("RESPONSE.Shards", *resp)
 				if err != nil {
@@ -164,16 +177,17 @@ func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *sc
 
 				var shardList []interface{}
 				for _, v := range shards {
-					shardMap := v.(map[string]interface{})
-					shardList = append(shardList, map[string]interface{}{
-						"topic_id":            shardMap["TopicId"],
-						"shard_id":            shardMap["ShardId"],
-						"inclusive_begin_key": shardMap["InclusiveBeginKey"],
-						"exclusive_end_key":   shardMap["ExclusiveEndKey"],
-						"status":              shardMap["Status"],
-						"modify_time":         shardMap["ModifyTime"],
-						"stop_write_time":     shardMap["StopWriteTime"],
-					})
+					if shardMap, ok := v.(map[string]interface{}); ok {
+						shardList = append(shardList, map[string]interface{}{
+							"topic_id":            shardMap["TopicId"],
+							"shard_id":            shardMap["ShardId"],
+							"inclusive_begin_key": shardMap["InclusiveBeginKey"],
+							"exclusive_end_key":   shardMap["ExclusiveEndKey"],
+							"status":              shardMap["Status"],
+							"modify_time":         shardMap["ModifyTime"],
+							"stop_write_time":     shardMap["StopWriteTime"],
+						})
+					}
 				}
 				return d.Set("shards", shardList)
 			},
@@ -195,9 +209,10 @@ func (s *Service) DatasourceResources(*schema.ResourceData, *schema.Resource) ve
 		IdField:      "TlsShardId",
 		CollectField: "shards",
 		ExtraData: func(i []interface{}) ([]interface{}, error) {
-			for index, ele := range i {
-				element := ele.(map[string]interface{})
-				i[index].(map[string]interface{})["TlsShardId"] = fmt.Sprintf("%s-%d", element["TopicId"], element["ShardId"])
+			for index := range i {
+				if m, ok := i[index].(map[string]interface{}); ok {
+					m["TlsShardId"] = fmt.Sprintf("%v-%v", m["TopicId"], m["ShardId"])
+				}
 			}
 			return i, nil
 		},

@@ -88,7 +88,10 @@ func (s *Service) DescribeCheckPoint(m map[string]interface{}) (data []interface
 	if err != nil {
 		return data, err
 	}
-	shardID, _ := ve.ObtainSdkValue("RESPONSE.ShardID", *resp)
+	shardID, err := ve.ObtainSdkValue("RESPONSE.ShardID", *resp)
+	if err != nil {
+		return data, err
+	}
 	var finalShardID interface{}
 	if shardID != nil {
 		if f, ok := shardID.(float64); ok {

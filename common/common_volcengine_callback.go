@@ -396,3 +396,25 @@ func CheckResourceUtilRemoved(d *schema.ResourceData, readResourceFunc ReadResou
 		}
 	})
 }
+
+func ResourceStateRefreshFunc(d *schema.ResourceData, readResource ReadResourceFunc, id string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		data, err := readResource(d, id)
+		if err != nil {
+			return nil, "", err
+		}
+		if data == nil {
+			return nil, "", nil
+		}
+		status := data["Status"]
+		if status == nil {
+			return data, "", nil
+		}
+		// 安全的类型断言：避免 panic
+		statusStr, ok := status.(string)
+		if !ok {
+			return data, "", nil
+		}
+		return data, statusStr, nil
+	}
+}

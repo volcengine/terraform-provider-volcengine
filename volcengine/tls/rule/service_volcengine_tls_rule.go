@@ -245,15 +245,17 @@ func (v *VolcengineTlsRuleService) CreateResource(data *schema.ResourceData, res
 				processors, ok := d.GetOk("user_define_rule.0.plugin.0.processors")
 				if ok {
 					arr := make([]interface{}, 0)
-					if _, ok = processors.(*schema.Set); ok {
-						for _, p := range processors.(*schema.Set).List() {
-							logger.DebugInfo("processors ori: ", p.(string))
-							var pJson map[string]interface{}
-							err := json.Unmarshal([]byte(p.(string)), &pJson)
-							if err != nil {
-								return false, errors.New("failed to unmarshal processors")
+					if ps, ok := processors.(*schema.Set); ok {
+						for _, p := range ps.List() {
+							if pStr, ok := p.(string); ok {
+								logger.DebugInfo("processors ori: ", pStr)
+								var pJson map[string]interface{}
+								err := json.Unmarshal([]byte(pStr), &pJson)
+								if err != nil {
+									return false, errors.New("failed to unmarshal processors")
+								}
+								arr = append(arr, pJson)
 							}
-							arr = append(arr, pJson)
 						}
 					}
 					// 接口中 processors 为小写
@@ -264,12 +266,12 @@ func (v *VolcengineTlsRuleService) CreateResource(data *schema.ResourceData, res
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				// 接口中 processors 为小写，需删除自动转换的大写key
-				if _, ok := (*call.SdkParam)["UserDefineRule"]; ok {
-					if userDefineMap, ok := (*call.SdkParam)["UserDefineRule"].(map[string]interface{}); ok {
+				if userDefineRule, ok := (*call.SdkParam)["UserDefineRule"]; ok {
+					if userDefineMap, ok := userDefineRule.(map[string]interface{}); ok {
 						if plugin, ok := userDefineMap["Plugin"]; ok {
 							if pluginMap, ok := plugin.(map[string]interface{}); ok {
 								if _, ok = pluginMap["Processors"]; ok {
-									delete((*call.SdkParam)["UserDefineRule"].(map[string]interface{})["Plugin"].(map[string]interface{}), "Processors")
+									delete(pluginMap, "Processors")
 								}
 							}
 						}
@@ -284,8 +286,15 @@ func (v *VolcengineTlsRuleService) CreateResource(data *schema.ResourceData, res
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.RuleId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.RuleId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return fmt.Errorf("RuleId is not string")
+				}
 				return nil
 			},
 		},
@@ -523,15 +532,17 @@ func (v *VolcengineTlsRuleService) ModifyResource(data *schema.ResourceData, res
 				processors, ok := d.GetOk("user_define_rule.0.plugin.0.processors")
 				if ok {
 					arr := make([]interface{}, 0)
-					if _, ok = processors.(*schema.Set); ok {
-						for _, p := range processors.(*schema.Set).List() {
-							logger.DebugInfo("processors ori: ", p.(string))
-							var pJson map[string]interface{}
-							err := json.Unmarshal([]byte(p.(string)), &pJson)
-							if err != nil {
-								return false, errors.New("failed to unmarshal processors")
+					if ps, ok := processors.(*schema.Set); ok {
+						for _, p := range ps.List() {
+							if pStr, ok := p.(string); ok {
+								logger.DebugInfo("processors ori: ", pStr)
+								var pJson map[string]interface{}
+								err := json.Unmarshal([]byte(pStr), &pJson)
+								if err != nil {
+									return false, errors.New("failed to unmarshal processors")
+								}
+								arr = append(arr, pJson)
 							}
-							arr = append(arr, pJson)
 						}
 					}
 					// 接口中 processors 为小写

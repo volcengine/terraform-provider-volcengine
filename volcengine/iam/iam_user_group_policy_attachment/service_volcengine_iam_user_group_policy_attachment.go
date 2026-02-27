@@ -82,7 +82,12 @@ func (s *VolcengineIamUserGroupPolicyAttachmentService) ReadResource(resourceDat
 	for _, v := range results {
 		if tempData, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
-		} else if tempData["PolicyName"].(string) == ids[1] {
+		}
+		pName, ok := tempData["PolicyName"].(string)
+		if !ok {
+			return data, errors.New("PolicyName is not string")
+		}
+		if pName == ids[1] {
 			data = tempData
 		}
 	}
@@ -109,11 +114,23 @@ func (s *VolcengineIamUserGroupPolicyAttachmentService) CreateResource(resourceD
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(fmt.Sprintf("%s:%s", d.Get("user_group_name").(string), d.Get("policy_name").(string)))
+				userGroupName, ok := d.Get("user_group_name").(string)
+				if !ok {
+					return errors.New("user_group_name is not string")
+				}
+				policyName, ok := d.Get("policy_name").(string)
+				if !ok {
+					return errors.New("policy_name is not string")
+				}
+				d.SetId(fmt.Sprintf("%s:%s", userGroupName, policyName))
 				return nil
 			},
 			LockId: func(d *schema.ResourceData) string {
-				return d.Get("user_group_name").(string)
+				userGroupName, ok := d.Get("user_group_name").(string)
+				if !ok {
+					return ""
+				}
+				return userGroupName
 			},
 		},
 	}
@@ -133,6 +150,10 @@ func (s *VolcengineIamUserGroupPolicyAttachmentService) ModifyResource(resourceD
 
 func (s *VolcengineIamUserGroupPolicyAttachmentService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
 	ids := strings.Split(resourceData.Id(), ":")
+	policyType, ok := resourceData.Get("policy_type").(string)
+	if !ok {
+		return []ve.Callback{{Err: errors.New("policy_type is not string")}}
+	}
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "DetachUserGroupPolicy",
@@ -141,7 +162,7 @@ func (s *VolcengineIamUserGroupPolicyAttachmentService) RemoveResource(resourceD
 			SdkParam: &map[string]interface{}{
 				"UserGroupName": ids[0],
 				"PolicyName":    ids[1],
-				"PolicyType":    resourceData.Get("policy_type").(string),
+				"PolicyType":    policyType,
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
