@@ -51,6 +51,12 @@ func ResourceVolcengineIpv6Gateway() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the Ipv6Gateway.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the Ipv6Gateway.",
+			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	dataSource := DataSourceVolcengineIpv6Gateways().Schema["ipv6_gateways"].Elem.(*schema.Resource).Schema

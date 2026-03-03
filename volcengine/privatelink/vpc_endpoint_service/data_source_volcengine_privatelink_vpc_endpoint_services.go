@@ -24,6 +24,12 @@ func DataSourceVolcenginePrivatelinkVpcEndpointServices() *schema.Resource {
 				Optional:    true,
 				Description: "The name of vpc endpoint service.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of vpc endpoint service.",
+			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -101,6 +107,12 @@ func DataSourceVolcenginePrivatelinkVpcEndpointServices() *schema.Resource {
 							Computed:    true,
 							Description: "Whether auto accept node connect.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of service.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"zone_ids": {
 							Type:     schema.TypeList,
 							Computed: true,

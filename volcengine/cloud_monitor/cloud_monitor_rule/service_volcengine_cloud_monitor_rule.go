@@ -214,6 +214,10 @@ func (s *VolcengineCloudMonitorRuleService) CreateResource(resourceData *schema.
 					TargetField: "WebhookIds",
 					ConvertType: ve.ConvertJsonArray,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["RuleType"] = "static"
@@ -256,6 +260,7 @@ func (s *VolcengineCloudMonitorRuleService) CreateResource(resourceData *schema.
 }
 
 func (s *VolcengineCloudMonitorRuleService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateRule",
@@ -367,6 +372,11 @@ func (s *VolcengineCloudMonitorRuleService) ModifyResource(resourceData *schema.
 					TargetField: "WebhookIds",
 					ConvertType: ve.ConvertJsonArray,
 				},
+				// UpdateRule API 根据文档是支持直接修改 Tags 参数的，但是实际使用时会报错，所以这里忽略Tags参数
+				// 相当于会移除所有的 Tag，因此最后需要再添加上去
+				"tags": {
+					Ignore: true,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				// 将 original_dimensions 转为 map 形式
@@ -406,9 +416,16 @@ func (s *VolcengineCloudMonitorRuleService) ModifyResource(resourceData *schema.
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
 			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Id()
+			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	// 更新tags，UpdateRule 接口忽略了Tags参数，相当于所有标签被移除，需要再添加回来
+	setResourceTagsCallbacks := s.setResourceAllTags(resourceData, "rule")
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+	return callbacks
 }
 
 func (s *VolcengineCloudMonitorRuleService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -473,6 +490,19 @@ func (s *VolcengineCloudMonitorRuleService) DatasourceResources(*schema.Resource
 				TargetField: "EnableState",
 				ConvertType: ve.ConvertJsonArray,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"values": {
+						TargetField: "Values",
+						ConvertType: ve.ConvertJsonArray,
+					},
+				},
+			},
 		},
 		NameField:    "RuleName",
 		IdField:      "Id",
@@ -483,6 +513,44 @@ func (s *VolcengineCloudMonitorRuleService) DatasourceResources(*schema.Resource
 
 func (s *VolcengineCloudMonitorRuleService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineCloudMonitorRuleService) setResourceAllTags(resourceData *schema.ResourceData, resourceType string) []ve.Callback {
+	var callbacks []ve.Callback
+	allTags := resourceData.Get("tags").(*schema.Set).List()
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			// ContentType: ve.ContentTypeJson,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if allTags != nil && len(allTags) > 0 {
+					var tags []map[string]interface{}
+					for _, tag := range allTags {
+						tags = append(tags, map[string]interface{}{
+							"Key":   tag.(map[string]interface{})["key"].(string),
+							"Value": tag.(map[string]interface{})["value"].(string),
+						})
+					}
+					(*call.SdkParam)["ResourceIds"] = []string{d.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["Tags"] = tags
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			LockId: func(d *schema.ResourceData) string {
+				return d.Id()
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

@@ -373,6 +373,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_permission"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_gateway_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account_privilege"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_database"
@@ -1203,6 +1204,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ APIG ================
 			"volcengine_apig_gateways":          apig_gateway.DataSourceVolcengineApigGateways(),
 			"volcengine_apig_gateway_services":  apig_gateway_service.DataSourceVolcengineApigGatewayServices(),
+			"volcengine_vpc_gateway_endpoints":  vpc_gateway_endpoint.DataSourceVolcengineVpcGatewayEndpoints(),
 			"volcengine_apig_custom_domains":    apig_custom_domain.DataSourceVolcengineApigCustomDomains(),
 			"volcengine_apig_upstreams":         apig_upstream.DataSourceVolcengineApigUpstreams(),
 			"volcengine_apig_upstream_sources":  apig_upstream_source.DataSourceVolcengineApigUpstreamSources(),
@@ -1708,6 +1710,7 @@ func Provider() terraform.ResourceProvider {
 			// ================ APIG ================
 			"volcengine_apig_gateway":          apig_gateway.ResourceVolcengineApigGateway(),
 			"volcengine_apig_gateway_service":  apig_gateway_service.ResourceVolcengineApigGatewayService(),
+			"volcengine_vpc_gateway_endpoint":  vpc_gateway_endpoint.ResourceVolcengineVpcGatewayEndpoint(),
 			"volcengine_apig_custom_domain":    apig_custom_domain.ResourceVolcengineApigCustomDomain(),
 			"volcengine_apig_upstream":         apig_upstream.ResourceVolcengineApigUpstream(),
 			"volcengine_apig_upstream_source":  apig_upstream_source.ResourceVolcengineApigUpstreamSource(),

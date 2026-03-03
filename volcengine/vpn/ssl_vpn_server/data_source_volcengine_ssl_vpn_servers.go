@@ -28,6 +28,12 @@ func DataSourceVolcengineSslVpnServers() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the ssl vpn server.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the ssl server.",
+			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -127,6 +133,7 @@ func DataSourceVolcengineSslVpnServers() *schema.Resource {
 							Computed:    true,
 							Description: "The project name of the ssl server.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

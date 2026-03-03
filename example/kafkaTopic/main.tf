@@ -56,6 +56,7 @@ resource "volcengine_kafka_topic" "foo" {
   partition_number = 15
   replica_number   = 3
 
+  cleanup_policy   = ["delete","compact"]
   parameters {
     min_insync_replica_number = 2
     message_max_byte          = 10
@@ -66,5 +67,10 @@ resource "volcengine_kafka_topic" "foo" {
   access_policies {
     user_name     = volcengine_kafka_sasl_user.foo.user_name
     access_policy = "Pub"
+  }
+
+  tags {
+    key = "k1"
+    value = "v1"
   }
 }

@@ -157,6 +157,18 @@ func (s *VolcengineIpv6AddressBandwidthService) CreateResource(resourceData *sch
 					TargetField: "BillingType",
 					Convert:     billingTypeRequestConvert,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"Key": {
+							TargetField: "Key",
+						},
+						"Value": {
+							TargetField: "Value",
+						},
+					},
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
@@ -205,6 +217,9 @@ func (s *VolcengineIpv6AddressBandwidthService) ModifyResource(resourceData *sch
 	}
 	callbacks = append(callbacks, callback)
 
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "ipv6addressbandwidth", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
 	return callbacks
 }
 
@@ -260,6 +275,18 @@ func (s *VolcengineIpv6AddressBandwidthService) DatasourceResources(*schema.Reso
 			"ipv6_addresses": {
 				TargetField: "Ipv6Addresses",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		IdField:      "AllocationId",

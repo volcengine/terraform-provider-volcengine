@@ -39,6 +39,7 @@ func DataSourceVolcengineScalingGroups() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of the scaling group.",
 			},
+			"tags": ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,

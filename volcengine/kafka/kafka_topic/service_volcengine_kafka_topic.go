@@ -215,6 +215,14 @@ func (s *VolcengineKafkaTopicService) CreateResource(resourceData *schema.Resour
 					TargetField: "AllAuthority",
 					ForceGet:    true,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+				"cleanup_policy": {
+					TargetField: "CleanupPolicy",
+					ConvertType: ve.ConvertJsonArray,
+				},
 				"parameters": {
 					TargetField: "Parameters",
 					ConvertType: ve.ConvertJsonObject,
@@ -336,7 +344,7 @@ func (s *VolcengineKafkaTopicService) ModifyResource(resourceData *schema.Resour
 		callbacks = append(callbacks, topicCallback)
 	}
 
-	if resourceData.HasChanges("partition_number", "parameters", "replica_number") {
+	if resourceData.HasChanges("partition_number", "parameters", "replica_number", "cleanup_policy") {
 		paramCallback := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "ModifyTopicParameters",
@@ -364,6 +372,10 @@ func (s *VolcengineKafkaTopicService) ModifyResource(resourceData *schema.Resour
 								TargetField: "LogRetentionHours",
 							},
 						},
+					},
+					"cleanup_policy": {
+						TargetField: "CleanupPolicy",
+						ConvertType: ve.ConvertJsonArray,
 					},
 				},
 				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -482,6 +494,10 @@ func (s *VolcengineKafkaTopicService) ModifyResource(resourceData *schema.Resour
 			},
 		})
 	}
+
+	// 更新 tags
+	tagCallbacks := s.setResourceTags(resourceData)
+	callbacks = append(callbacks, tagCallbacks...)
 	return callbacks
 }
 
@@ -538,6 +554,12 @@ func (s *VolcengineKafkaTopicService) RemoveResource(resourceData *schema.Resour
 
 func (s *VolcengineKafkaTopicService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+			},
+		},
 		IdField:      "TopicId",
 		NameField:    "TopicName",
 		CollectField: "topics",
@@ -553,6 +575,68 @@ func (s *VolcengineKafkaTopicService) DatasourceResources(*schema.ResourceData, 
 
 func (s *VolcengineKafkaTopicService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineKafkaTopicService) setResourceTags(resourceData *schema.ResourceData) []ve.Callback {
+	var callbacks []ve.Callback
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "RemoveTagsFromCustomResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					// 查询控制台，获取参数该API的具体参数，API文档未显示 RemoveTagsFromCustomResource
+					(*call.SdkParam)["ResourceIds"] = []string{d.Get("topic_name").(string)}
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id").(string)
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					(*call.SdkParam)["ResourceType"] = "topic"
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddTagsToCustomResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{d.Get("topic_name").(string)}
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id").(string)
+					(*call.SdkParam)["ResourceType"] = "topic"
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						t := tag.(map[string]interface{})
+						temp := make(map[string]interface{})
+						temp["Key"] = t["key"].(string)
+						temp["Value"] = t["value"].(string)
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), temp)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

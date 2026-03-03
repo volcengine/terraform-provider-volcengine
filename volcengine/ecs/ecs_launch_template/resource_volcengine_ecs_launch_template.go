@@ -1,9 +1,11 @@
 package ecs_launch_template
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -41,6 +43,33 @@ func ResourceVolcengineEcsLaunchTemplate() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 				Description: "The name of the launch template.",
+			},
+			"launch_template_project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "default",
+				Description: "The project name of the launch template.",
+			},
+			// resourceType:  launchtemplate
+			"launch_template_tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The tags of the launch template.",
+				Set:         LaunchTemplateTagsHash,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Value of Tags.",
+						},
+					},
+				},
 			},
 			"version_description": {
 				Type:        schema.TypeString,
@@ -176,6 +205,32 @@ func ResourceVolcengineEcsLaunchTemplate() *schema.Resource {
 				Optional:    true,
 				Description: "Instance custom data. The set custom data must be Base64 encoded, and the size of the custom data before Base64 encoding cannot exceed 16KB.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Description: "The project name of the instance.",
+			},
+			"tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Set:         LaunchTemplateTagsHash,
+				Description: "The tags of the instance.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Value of Tags.",
+						},
+					},
+				},
+			},
 			"hpc_cluster_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -194,6 +249,16 @@ func ResourceVolcengineEcsLaunchTemplate() *schema.Resource {
 		},
 	}
 	return resource
+}
+
+var LaunchTemplateTagsHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var buf bytes.Buffer
+	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
+	return hashcode.String(buf.String())
 }
 
 func resourceVolcengineEcsLaunchTemplateCreate(d *schema.ResourceData, meta interface{}) (err error) {

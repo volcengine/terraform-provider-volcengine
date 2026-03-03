@@ -52,6 +52,7 @@ func DataSourceVolcengineIpv6AddressBandwidths() *schema.Resource {
 				Optional:    true,
 				Description: "The ID of Vpc the ipv6 address in.",
 			},
+			"tags":ve.TagsSchema(),
 			"output_file": {
 				Type:        schema.TypeString,
 				Optional:    true,

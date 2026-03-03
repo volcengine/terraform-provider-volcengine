@@ -69,6 +69,7 @@ func ResourceVolcengineKafkaGroup() *schema.Resource {
 				Computed:    true,
 				Description: "The state of kafka group.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	return resource

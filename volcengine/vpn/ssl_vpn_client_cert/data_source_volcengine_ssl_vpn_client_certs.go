@@ -29,6 +29,7 @@ func DataSourceVolcengineSslVpnClientCerts() *schema.Resource {
 				Optional:    true,
 				Description: "The name of the ssl vpn client cert.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -121,6 +122,7 @@ func DataSourceVolcengineSslVpnClientCerts() *schema.Resource {
 							Computed:    true,
 							Description: "The config of the open vpn client.",
 						},
+						"tags": ve.TagsSchema(),
 					},
 				},
 			},

@@ -69,6 +69,12 @@ func ResourceVolcengineEcsKeyPair() *schema.Resource {
 					"You only have one chance to download the private key, the volcengine will not save your private key, please keep it safe. " +
 					"In the TF import scenario, this field will not write the private key locally.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the key pair.",
+			},
+			"tags": ve.TagsSchema(),
 			"finger_print": {
 				Type:        schema.TypeString,
 				Computed:    true,

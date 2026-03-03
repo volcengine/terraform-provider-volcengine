@@ -1,4 +1,4 @@
-package ipv6_gateway
+package vpc_gateway_endpoint
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -6,9 +6,9 @@ import (
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
 
-func DataSourceVolcengineIpv6Gateways() *schema.Resource {
+func DataSourceVolcengineVpcGatewayEndpoints() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceVolcengineIpv6GatewaysRead,
+		Read: dataSourceVolcengineVpcGatewayEndpointsRead,
 		Schema: map[string]*schema.Schema{
 			"ids": {
 				Type:     schema.TypeSet,
@@ -17,33 +17,28 @@ func DataSourceVolcengineIpv6Gateways() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Set:         schema.HashString,
-				Description: "The ID list of the Ipv6Gateways.",
+				Description: "A list of gateway endpoint IDs.",
 			},
-			"name": {
+			"vpc_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The name of the Ipv6Gateway.",
+				Description: "The id of the vpc.",
 			},
-			"vpc_ids": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
-				Set:         schema.HashString,
-				Description: "The ID list of the VPC which the Ipv6Gateway belongs to.",
+			"endpoint_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the gateway endpoint.",
 			},
 			"project_name": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "The project name of the Ipv6Gateway.",
+				Description: "The project name of the gateway endpoint.",
 			},
-			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringIsValidRegExp,
-				Description:  "A Name Regex of the Ipv6Gateway.",
+				Description:  "A Name Regex of gateway endpoint.",
 			},
 			"output_file": {
 				Type:        schema.TypeString,
@@ -53,10 +48,11 @@ func DataSourceVolcengineIpv6Gateways() *schema.Resource {
 			"total_count": {
 				Type:        schema.TypeInt,
 				Computed:    true,
-				Description: "The total count of Ipv6Gateway query.",
+				Description: "The total count of query.",
 			},
-			"ipv6_gateways": {
-				Description: "The collection of Ipv6Gateway query.",
+			"tags": ve.TagsSchema(),
+			"vpc_gateway_endpoints": {
+				Description: "The collection of query.",
 				Type:        schema.TypeList,
 				Computed:    true,
 				Elem: &schema.Resource{
@@ -64,47 +60,62 @@ func DataSourceVolcengineIpv6Gateways() *schema.Resource {
 						"id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The ID of the Ipv6Gateway.",
+							Description: "The id of the gateway endpoint.",
 						},
-						"ipv6_gateway_id": {
+						"endpoint_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The ID of the Ipv6Gateway.",
+							Description: "The id of the gateway endpoint.",
 						},
-						"name": {
+						"endpoint_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The Name of the Ipv6Gateway.",
+							Description: "The name of the gateway endpoint.",
 						},
 						"description": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The description of the Ipv6Gateway.",
+							Description: "The description of the gateway endpoint.",
+						},
+						"service_id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The id of the gateway endpoint service.",
+						},
+						"service_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The name of the gateway endpoint service.",
 						},
 						"vpc_id": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The id of the VPC which the Ipv6Gateway belongs to.",
+							Description: "The id of the vpc.",
 						},
 						"status": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The Status of the Ipv6Gateway.",
+							Description: "The status of the gateway endpoint.",
 						},
 						"creation_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Creation time of the Ipv6Gateway.",
+							Description: "The create time of the gateway endpoint.",
 						},
 						"update_time": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "Update time of the Ipv6Gateway.",
+							Description: "The update time of the gateway endpoint.",
 						},
 						"project_name": {
 							Type:        schema.TypeString,
 							Computed:    true,
-							Description: "The project name of the Ipv6Gateway.",
+							Description: "The project name of the gateway endpoint.",
+						},
+						"vpc_policy": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The vpc policy of the gateway endpoint.",
 						},
 						"tags": ve.TagsSchemaComputed(),
 					},
@@ -114,7 +125,7 @@ func DataSourceVolcengineIpv6Gateways() *schema.Resource {
 	}
 }
 
-func dataSourceVolcengineIpv6GatewaysRead(d *schema.ResourceData, meta interface{}) error {
-	ipv6GatewayService := NewIpv6GatewayService(meta.(*ve.SdkClient))
-	return ipv6GatewayService.Dispatcher.Data(ipv6GatewayService, d, DataSourceVolcengineIpv6Gateways())
+func dataSourceVolcengineVpcGatewayEndpointsRead(d *schema.ResourceData, meta interface{}) error {
+	service := NewVpcGatewayEndpointService(meta.(*ve.SdkClient))
+	return ve.DefaultDispatcher().Data(service, d, DataSourceVolcengineVpcGatewayEndpoints())
 }

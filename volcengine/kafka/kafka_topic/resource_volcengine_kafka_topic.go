@@ -101,6 +101,13 @@ func ResourceVolcengineKafkaTopic() *schema.Resource {
 				Default:     true,
 				Description: "Whether the kafka topic is configured to be accessible by all users. Default: true.",
 			},
+			"cleanup_policy": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+				Description: "The cleanup policy of the kafka topic. Valid values: \"delete\", \"compact\" or \"delete\",\"compact\".",
+			},
+			"tags": ve.TagsSchema(),
 			"access_policies": {
 				Type:        schema.TypeSet,
 				Optional:    true,

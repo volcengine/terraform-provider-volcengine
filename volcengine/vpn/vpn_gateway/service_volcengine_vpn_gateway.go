@@ -71,6 +71,7 @@ func (s *VolcengineVpnGatewayService) ReadResources(m map[string]interface{}) (d
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.VpnGateways is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 	if err != nil || len(nameSet) == 0 {
@@ -385,6 +386,9 @@ func (s *VolcengineVpnGatewayService) ModifyResource(resourceData *schema.Resour
 		callbacks = append(callbacks, renewVpnGateway)
 	}
 
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "vpngateway", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
 	return callbacks
 }
 
@@ -495,4 +499,25 @@ func (s *VolcengineVpnGatewayService) UnsubscribeInfo(resourceData *schema.Resou
 		info.Products = []string{"VPN"}
 	}
 	return &info, nil
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }

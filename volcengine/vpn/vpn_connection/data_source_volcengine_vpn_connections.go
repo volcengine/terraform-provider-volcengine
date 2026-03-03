@@ -68,6 +68,7 @@ func DataSourceVolcengineVpnConnections() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of VPN connection.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -127,6 +128,7 @@ func DataSourceVolcengineVpnConnections() *schema.Resource {
 							Computed:    true,
 							Description: "The description of the VPN connection.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 						"status": {
 							Type:        schema.TypeString,
 							Computed:    true,

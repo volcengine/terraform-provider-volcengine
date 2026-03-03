@@ -72,30 +72,24 @@ func (s *VolcengineEcsHpcClusterService) ReadResources(m map[string]interface{})
 
 func (s *VolcengineEcsHpcClusterService) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	var (
-		result interface{}
-		ok     bool
+		results []interface{}
+		ok      bool
 	)
 	if id == "" {
 		id = s.ReadResourceId(resourceData.Id())
 	}
 
-	action := "DescribeHpcCluster"
 	req := map[string]interface{}{
-		"HpcClusterId": id,
+		"HpcClusterIds.1": id,
 	}
-	logger.Debug(logger.ReqFormat, action, req)
-	resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(action), &req)
+	results, err = s.ReadResources(req)
 	if err != nil {
 		return data, err
 	}
-	logger.Debug(logger.RespFormat, action, req, *resp)
-
-	result, err = ve.ObtainSdkValue("Result", *resp)
-	if err != nil {
-		return data, err
-	}
-	if data, ok = result.(map[string]interface{}); !ok {
-		return data, errors.New("Value is not map ")
+	for _, v := range results {
+		if data, ok = v.(map[string]interface{}); !ok {
+			return data, errors.New("Value is not map ")
+		}
 	}
 	if len(data) == 0 {
 		return data, fmt.Errorf("ecs_hpc_cluster %s not exist ", id)
@@ -109,7 +103,12 @@ func (s *VolcengineEcsHpcClusterService) RefreshResourceState(resourceData *sche
 
 func (VolcengineEcsHpcClusterService) WithResourceResponseHandlers(d map[string]interface{}) []ve.ResourceResponseHandler {
 	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
-		return d, nil, nil
+		return d, map[string]ve.ResponseConvert{
+			"HpcClusterId": {
+				TargetField: "id",
+				KeepDefault: true,
+			},
+		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
 }
@@ -119,7 +118,12 @@ func (s *VolcengineEcsHpcClusterService) CreateResource(resourceData *schema.Res
 		Call: ve.SdkCall{
 			Action:      "CreateHpcCluster",
 			ConvertMode: ve.RequestConvertAll,
-			Convert:     map[string]ve.RequestConvert{},
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -137,6 +141,7 @@ func (s *VolcengineEcsHpcClusterService) CreateResource(resourceData *schema.Res
 }
 
 func (s *VolcengineEcsHpcClusterService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "ModifyHpcClusterAttribute",
@@ -164,7 +169,11 @@ func (s *VolcengineEcsHpcClusterService) ModifyResource(resourceData *schema.Res
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	// 更新tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "CreateTags", "DeleteTags", "hpccluster", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+	return callbacks
 }
 
 func (s *VolcengineEcsHpcClusterService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -207,6 +216,21 @@ func (s *VolcengineEcsHpcClusterService) RemoveResource(resourceData *schema.Res
 
 func (s *VolcengineEcsHpcClusterService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"ids": {
+				TargetField: "HpcClusterIds",
+				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
+		},
 		NameField:    "Name",
 		IdField:      "HpcClusterId",
 		CollectField: "hpc_clusters",
@@ -221,6 +245,15 @@ func (s *VolcengineEcsHpcClusterService) DatasourceResources(*schema.ResourceDat
 
 func (s *VolcengineEcsHpcClusterService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineEcsHpcClusterService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "hpccluster",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

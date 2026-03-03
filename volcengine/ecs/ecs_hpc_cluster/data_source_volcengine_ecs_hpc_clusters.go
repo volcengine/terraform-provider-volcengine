@@ -10,10 +10,30 @@ func DataSourceVolcengineEcsHpcClusters() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceVolcengineEcsHpcClustersRead,
 		Schema: map[string]*schema.Schema{
+			"ids": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Set:         schema.HashString,
+				Description: "A list of hpc cluster ids.",
+			},
 			"zone_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "The zone id of the hpc cluster.",
+			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the hpc cluster.",
+			},
+			"tags": ve.TagsSchema(),
+			"name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The name of the hpc cluster.",
 			},
 			"name_regex": {
 				Type:         schema.TypeString,
@@ -78,6 +98,12 @@ func DataSourceVolcengineEcsHpcClusters() *schema.Resource {
 							Computed:    true,
 							Description: "The updated time of the hpc cluster.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the hpc cluster.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

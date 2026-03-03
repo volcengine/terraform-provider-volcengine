@@ -11,4 +11,9 @@ resource "volcengine_ecs_launch_template" "foo" {
   instance_type_id = "ecs.g1.large"
   key_pair_name = "tf-key-pair"
   launch_template_name = "tf-acc-template"
+  launch_template_project_name  = "default"
+  launch_template_tags {
+    key   = "tfk1"
+    value = "tfv1"
+  }
 }

@@ -41,4 +41,8 @@ resource "volcengine_cloud_monitor_rule" "foo" {
   recovery_notify {
     enable = true
   }
+  tags{
+    key = "tfk1"
+    value = "tfv1"
+  }
 }

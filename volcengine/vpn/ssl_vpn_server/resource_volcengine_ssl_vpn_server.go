@@ -105,6 +105,7 @@ func ResourceVolcengineSslVpnServer() *schema.Resource {
 				Computed:    true,
 				Description: "The project name of the ssl server.",
 			},
+			"tags": ve.TagsSchema(),
 			"ssl_vpn_server_id": {
 				Type:        schema.TypeString,
 				Computed:    true,

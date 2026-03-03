@@ -170,6 +170,10 @@ func (s *VolcengineVpcEndpointService) CreateResource(resourceData *schema.Resou
 				"private_dns_enabled": {
 					TargetField: "PrivateDNSEnabled",
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				// 通过安全组查询 vpc
@@ -275,6 +279,10 @@ func (s *VolcengineVpcEndpointService) ModifyResource(resourceData *schema.Resou
 		}
 	}
 
+	// 更新 Tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "endpoint", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -350,6 +358,15 @@ func (VolcengineVpcEndpointService) DatasourceResources(data *schema.ResourceDat
 				TargetField: "EndpointIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "EndpointName",
 		IdField:      "EndpointId",
@@ -371,6 +388,15 @@ func (VolcengineVpcEndpointService) DatasourceResources(data *schema.ResourceDat
 
 func (s *VolcengineVpcEndpointService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineVpcEndpointService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "privatelink",
+		ResourceType:         "endpoint",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

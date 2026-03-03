@@ -49,6 +49,12 @@ func ResourceVolcengineEcsHpcCluster() *schema.Resource {
 				Optional:    true,
 				Description: "The description of the hpc cluster.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the hpc cluster.",
+			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	return resource

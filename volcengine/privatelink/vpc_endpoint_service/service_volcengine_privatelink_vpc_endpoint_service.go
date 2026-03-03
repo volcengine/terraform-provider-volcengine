@@ -178,6 +178,10 @@ func (s *VolcengineService) CreateResource(resourceData *schema.ResourceData, re
 					TargetField: "Resources",
 					ConvertType: ve.ConvertListN,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
@@ -244,6 +248,11 @@ func (s *VolcengineService) ModifyResource(resourceData *schema.ResourceData, re
 			callbacks = append(callbacks, s.resourceActionCallback(resourceData, "DetachResourceFromVpcEndpointService", element))
 		}
 	}
+
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "endpointservice", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
 	return callbacks
 }
 
@@ -298,6 +307,15 @@ func (VolcengineService) DatasourceResources(data *schema.ResourceData, resource
 				TargetField: "ServiceIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "ServiceName",
 		IdField:      "ServiceId",
@@ -315,6 +333,14 @@ func (s *VolcengineService) ReadResourceId(id string) string {
 	return id
 }
 
+func (s *VolcengineService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "privatelink",
+		ResourceType:         "endpointservice",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
+}
 func getUniversalInfo(actionName string) ve.UniversalInfo {
 	return ve.UniversalInfo{
 		ServiceName: "privatelink",

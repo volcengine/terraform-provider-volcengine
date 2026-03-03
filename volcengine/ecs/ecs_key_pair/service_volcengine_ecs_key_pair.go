@@ -117,6 +117,12 @@ func (s *VolcengineEcsKeyPairService) CreateResource(resourceData *schema.Resour
 		Call: ve.SdkCall{
 			Action:      action,
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -142,24 +148,32 @@ func (s *VolcengineEcsKeyPairService) CreateResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineEcsKeyPairService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "ModifyKeyPairAttribute",
-			ConvertMode: ve.RequestConvertAll,
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["KeyPairId"] = d.Id()
-				return true, nil
+	var callbacks []ve.Callback
+	if resourceData.HasChange("description") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyKeyPairAttribute",
+				ConvertMode: ve.RequestConvertAll,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["KeyPairId"] = d.Id()
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+					return nil
+				},
 			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				return nil
-			},
-		},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	return []ve.Callback{callback}
+
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "CreateTags", "DeleteTags", "keypair", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+	return callbacks
 }
 
 func (s *VolcengineEcsKeyPairService) RemoveResource(d *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -207,6 +221,15 @@ func (s *VolcengineEcsKeyPairService) DatasourceResources(data *schema.ResourceD
 				TargetField: "KeyPairNames",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"KeyPairId": {
@@ -222,6 +245,15 @@ func (s *VolcengineEcsKeyPairService) DatasourceResources(data *schema.ResourceD
 
 func (VolcengineEcsKeyPairService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineEcsKeyPairService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "keypair",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

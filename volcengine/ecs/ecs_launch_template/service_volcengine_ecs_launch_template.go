@@ -168,6 +168,12 @@ func (s *VolcengineEcsLaunchTemplateService) CreateResource(data *schema.Resourc
 						},
 					},
 				},
+				"launch_template_tags": {
+					ConvertType: ve.ConvertListN,
+				},
+				"tags": {
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -184,142 +190,169 @@ func (s *VolcengineEcsLaunchTemplateService) CreateResource(data *schema.Resourc
 }
 
 func (s *VolcengineEcsLaunchTemplateService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	// 查询默认版本，避免错删默认版本
-	launchTemplate, err := s.ReadResource(data, data.Id())
-	if err != nil {
-		return nil
-	}
-	defaultVersion := launchTemplate["DefaultVersionNumber"].(float64)
-	req := map[string]interface{}{
-		"launch_template_id": data.Id(),
-	}
-	versions, err := s.getLaunchTemplateVersions(req)
-	if err != nil {
-		return nil
-	}
-	if len(versions) > 29 {
-		var oldestVersion float64
-		for _, version := range versions {
-			// 删除非默认版本的最老版本
-			if versionMap, ok := version.(map[string]interface{}); !ok {
-				return nil
-			} else if versionMap["VersionNumber"].(float64) != defaultVersion &&
-				(oldestVersion == 0 || versionMap["VersionNumber"].(float64) < oldestVersion) {
-				oldestVersion = versionMap["VersionNumber"].(float64)
-			}
-		}
-		_, err = s.Client.UniversalClient.DoCall(getUniversalInfo("DeleteLaunchTemplateVersion"),
-			&map[string]interface{}{
-				"LaunchTemplateId": data.Id(),
-				"DeleteVersions.1": oldestVersion},
-		)
+	var callbacks []ve.Callback
+	// 检测是否需要创建新版本的模板数据字段
+	needCreateVersion := data.HasChanges("instance_type_id", "version_description", "image_id", "instance_name", "description",
+		"host_name", "hpc_cluster_id", "instance_charge_type", "eip_bandwidth", "eip_isp", "eip_billing_type", "user_data", "vpc_id",
+		"key_pair_name", "security_enhancement_strategy", "unique_suffix", "suffix_index", "zone_id", "project_name", "tags", "volumes", "network_interfaces")
+
+	if needCreateVersion {
+		// 查询默认版本，避免错删默认版本
+		launchTemplate, err := s.ReadResource(data, data.Id())
 		if err != nil {
+			logger.Debug(logger.ErrFormat, "ModifyResource", err)
 			return nil
 		}
-	}
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "CreateLaunchTemplateVersion",
-			ConvertMode: ve.RequestConvertInConvert,
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if value, ok := d.GetOk("launch_template_name"); ok {
-					(*call.SdkParam)["LaunchTemplateName"] = value
+		defaultVersion := launchTemplate["DefaultVersionNumber"].(float64)
+		req := map[string]interface{}{
+			"launch_template_id": data.Id(),
+		}
+		versions, err := s.getLaunchTemplateVersions(req)
+		if err != nil {
+			logger.Debug(logger.ErrFormat, "ModifyResource", err)
+			return nil
+		}
+		if len(versions) > 29 {
+			var oldestVersion float64
+			for _, version := range versions {
+				// 删除非默认版本的最老版本
+				if versionMap, ok := version.(map[string]interface{}); !ok {
+					return nil
+				} else if versionMap["VersionNumber"].(float64) != defaultVersion &&
+					(oldestVersion == 0 || versionMap["VersionNumber"].(float64) < oldestVersion) {
+					oldestVersion = versionMap["VersionNumber"].(float64)
 				}
-				if value, ok := d.GetOk("instance_type_id"); ok {
-					(*call.SdkParam)["InstanceTypeId"] = value
-				}
-				if value, ok := d.GetOk("version_description"); ok {
-					(*call.SdkParam)["VersionDescription"] = value
-				}
-				if value, ok := d.GetOk("image_id"); ok {
-					(*call.SdkParam)["ImageId"] = value
-				}
-				if value, ok := d.GetOk("instance_name"); ok {
-					(*call.SdkParam)["InstanceName"] = value
-				}
-				if value, ok := d.GetOk("description"); ok {
-					(*call.SdkParam)["Description"] = value
-				}
-				if value, ok := d.GetOk("host_name"); ok {
-					(*call.SdkParam)["HostName"] = value
-				}
-				if value, ok := d.GetOk("hpc_cluster_id"); ok {
-					(*call.SdkParam)["HpcClusterId"] = value
-				}
-				if value, ok := d.GetOk("instance_charge_type"); ok {
-					(*call.SdkParam)["InstanceChargeType"] = value
-				}
-				if value, ok := d.GetOk("eip_bandwidth"); ok {
-					(*call.SdkParam)["Eip.Bandwidth"] = value
-				}
-				if value, ok := d.GetOk("eip_isp"); ok {
-					(*call.SdkParam)["Eip.ISP"] = value
-				}
-				if value, ok := d.GetOk("eip_billing_type"); ok {
-					(*call.SdkParam)["Eip.BillingType"] = billingTypeRequestConvert(data, value)
-				}
-				if value, ok := d.GetOk("user_data"); ok {
-					(*call.SdkParam)["UserData"] = value
-				}
-				if value, ok := d.GetOk("vpc_id"); ok {
-					(*call.SdkParam)["VpcId"] = value
-				}
-				if value, ok := d.GetOk("key_pair_name"); ok {
-					(*call.SdkParam)["KeyPairName"] = value
-				}
-				if value, ok := d.GetOk("security_enhancement_strategy"); ok {
-					(*call.SdkParam)["SecurityEnhancementStrategy"] = value
-				}
-				if value, ok := d.GetOk("unique_suffix"); ok {
-					(*call.SdkParam)["UniqueSuffix"] = value
-				}
-				if value, ok := d.GetOk("suffix_index"); ok {
-					(*call.SdkParam)["SuffixIndex"] = value
-				}
-				if value, ok := d.GetOk("zone_id"); ok {
-					(*call.SdkParam)["ZoneId"] = value
-				}
-				if value, ok := d.GetOk("volumes"); ok {
-					for index, v := range value.([]interface{}) {
-						if vMap, ok := v.(map[string]interface{}); ok {
-							for k, v := range vMap {
-								(*call.SdkParam)["Volumes."+strconv.Itoa(index+1)+"."+ve.DownLineToHump(k)] = v
+			}
+			_, err = s.Client.UniversalClient.DoCall(getUniversalInfo("DeleteLaunchTemplateVersion"),
+				&map[string]interface{}{
+					"LaunchTemplateId": data.Id(),
+					"DeleteVersions.1": oldestVersion},
+			)
+			if err != nil {
+				return nil
+			}
+		}
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "CreateLaunchTemplateVersion",
+				ConvertMode: ve.RequestConvertInConvert,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if value, ok := d.GetOk("launch_template_name"); ok {
+						(*call.SdkParam)["LaunchTemplateName"] = value
+					}
+					if value, ok := d.GetOk("instance_type_id"); ok {
+						(*call.SdkParam)["InstanceTypeId"] = value
+					}
+					if value, ok := d.GetOk("version_description"); ok {
+						(*call.SdkParam)["VersionDescription"] = value
+					}
+					if value, ok := d.GetOk("image_id"); ok {
+						(*call.SdkParam)["ImageId"] = value
+					}
+					if value, ok := d.GetOk("instance_name"); ok {
+						(*call.SdkParam)["InstanceName"] = value
+					}
+					if value, ok := d.GetOk("description"); ok {
+						(*call.SdkParam)["Description"] = value
+					}
+					if value, ok := d.GetOk("host_name"); ok {
+						(*call.SdkParam)["HostName"] = value
+					}
+					if value, ok := d.GetOk("hpc_cluster_id"); ok {
+						(*call.SdkParam)["HpcClusterId"] = value
+					}
+					if value, ok := d.GetOk("instance_charge_type"); ok {
+						(*call.SdkParam)["InstanceChargeType"] = value
+					}
+					if value, ok := d.GetOk("eip_bandwidth"); ok {
+						(*call.SdkParam)["Eip.Bandwidth"] = value
+					}
+					if value, ok := d.GetOk("eip_isp"); ok {
+						(*call.SdkParam)["Eip.ISP"] = value
+					}
+					if value, ok := d.GetOk("eip_billing_type"); ok {
+						(*call.SdkParam)["Eip.BillingType"] = billingTypeRequestConvert(data, value)
+					}
+					if value, ok := d.GetOk("user_data"); ok {
+						(*call.SdkParam)["UserData"] = value
+					}
+					if value, ok := d.GetOk("vpc_id"); ok {
+						(*call.SdkParam)["VpcId"] = value
+					}
+					if value, ok := d.GetOk("key_pair_name"); ok {
+						(*call.SdkParam)["KeyPairName"] = value
+					}
+					if value, ok := d.GetOk("security_enhancement_strategy"); ok {
+						(*call.SdkParam)["SecurityEnhancementStrategy"] = value
+					}
+					if value, ok := d.GetOk("unique_suffix"); ok {
+						(*call.SdkParam)["UniqueSuffix"] = value
+					}
+					if value, ok := d.GetOk("suffix_index"); ok {
+						(*call.SdkParam)["SuffixIndex"] = value
+					}
+					if value, ok := d.GetOk("zone_id"); ok {
+						(*call.SdkParam)["ZoneId"] = value
+					}
+					if value, ok := d.GetOk("project_name"); ok {
+						(*call.SdkParam)["ProjectName"] = value
+					}
+					if tags, ok := d.GetOk("tags"); ok {
+						for index, tag := range tags.(*schema.Set).List() {
+							if tagMap, ok := tag.(map[string]interface{}); ok {
+								(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tagMap["key"].(string)
+								(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tagMap["value"].(string)
 							}
 						}
 					}
-				}
-				if value, ok := d.GetOk("network_interfaces"); ok {
-					if len(value.([]interface{})) != 0 {
+					if value, ok := d.GetOk("volumes"); ok {
 						for index, v := range value.([]interface{}) {
 							if vMap, ok := v.(map[string]interface{}); ok {
 								for k, v := range vMap {
-									if k == "security_group_ids" {
-										if len(v.([]interface{})) == 0 {
-											continue
+									(*call.SdkParam)["Volumes."+strconv.Itoa(index+1)+"."+ve.DownLineToHump(k)] = v
+								}
+							}
+						}
+					}
+					if value, ok := d.GetOk("network_interfaces"); ok {
+						if len(value.([]interface{})) != 0 {
+							for index, v := range value.([]interface{}) {
+								if vMap, ok := v.(map[string]interface{}); ok {
+									for k, v := range vMap {
+										if k == "security_group_ids" {
+											if len(v.([]interface{})) == 0 {
+												continue
+											}
+											for sgIndex, sgValue := range v.([]interface{}) {
+												(*call.SdkParam)["NetworkInterfaces."+strconv.Itoa(index+1)+"."+"SecurityGroupIds."+strconv.Itoa(sgIndex+1)] = sgValue
+											}
+										} else {
+											(*call.SdkParam)["NetworkInterfaces."+strconv.Itoa(index+1)+"."+ve.DownLineToHump(k)] = v
 										}
-										for sgIndex, sgValue := range v.([]interface{}) {
-											(*call.SdkParam)["NetworkInterfaces."+strconv.Itoa(index+1)+"."+"SecurityGroupIds."+strconv.Itoa(sgIndex+1)] = sgValue
-										}
-									} else {
-										(*call.SdkParam)["NetworkInterfaces."+strconv.Itoa(index+1)+"."+ve.DownLineToHump(k)] = v
 									}
 								}
 							}
 						}
 					}
-				}
-				return true, nil
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					delete(*call.SdkParam, "NetworkInterfaces")
+					delete(*call.SdkParam, "Volumes")
+					delete(*call.SdkParam, "Tags")
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
 			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				delete(*call.SdkParam, "NetworkInterfaces")
-				delete(*call.SdkParam, "Volumes")
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-		},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	return []ve.Callback{callback}
+	// 更新 launch_template_tags，需要使用 ecs 的新版标签处理API：TagResources, UntagResources
+	// 旧版标签处理 API 会报错：The specified ResourceType does not exist.
+	setLaunchTemplateTagsCallbacks := setLaunchTemplateTags(s.Client, "TagResources", "UntagResources", "launchtemplate", data, getUniversalInfo)
+	callbacks = append(callbacks, setLaunchTemplateTagsCallbacks...)
+	return callbacks
 }
 
 func (s *VolcengineEcsLaunchTemplateService) RemoveResource(data *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -368,6 +401,18 @@ func (s *VolcengineEcsLaunchTemplateService) DatasourceResources(data *schema.Re
 				TargetField: "LaunchTemplateNames",
 				ConvertType: ve.ConvertWithN,
 			},
+			"launch_template_tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "LaunchTemplateName",
 		IdField:      "LaunchTemplateId",
@@ -399,6 +444,15 @@ func NewEcsLaunchTemplateService(client *ve.SdkClient) *VolcengineEcsLaunchTempl
 	return &VolcengineEcsLaunchTemplateService{
 		Client:     client,
 		Dispatcher: &ve.Dispatcher{},
+	}
+}
+
+func (s *VolcengineEcsLaunchTemplateService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "ecs",
+		ResourceType:         "launchtemplate",
+		ProjectResponseField: "LaunchTemplateProjectName",
+		ProjectSchemaField:   "launch_template_project_name",
 	}
 }
 
@@ -474,4 +528,59 @@ func (s *VolcengineEcsLaunchTemplateService) getLaunchTemplateVersions(m map[str
 		}
 		return data, err
 	})
+}
+
+func setLaunchTemplateTags(serviceClient *ve.SdkClient, addAction, removeAction, resourceType string,
+	resourceData *schema.ResourceData, getUniversalInfo ve.GetUniversalInfo) []ve.Callback {
+	var callbacks []ve.Callback
+	addedTags, removedTags, _, _ := ve.GetSetDifference("launch_template_tags", resourceData, LaunchTemplateTagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      removeAction,
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds.1"] = resourceData.Id()
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = tag.(map[string]interface{})["key"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return serviceClient.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      addAction,
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds.1"] = resourceData.Id()
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range addedTags.List() {
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tag.(map[string]interface{})["key"].(string)
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tag.(map[string]interface{})["value"].(string)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return serviceClient.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }

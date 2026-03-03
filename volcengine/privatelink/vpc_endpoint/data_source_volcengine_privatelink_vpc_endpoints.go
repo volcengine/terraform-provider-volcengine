@@ -56,6 +56,12 @@ func DataSourceVolcenginePrivatelinkVpcEndpoints() *schema.Resource {
 				Computed:    true,
 				Description: "Returns the total amount of the data list.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of vpc endpoint.",
+			},
+			"tags": ve.TagsSchema(),
 			"vpc_endpoints": {
 				Description: "The collection of query.",
 				Type:        schema.TypeList,
@@ -146,6 +152,12 @@ func DataSourceVolcenginePrivatelinkVpcEndpoints() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The private dns name of vpc endpoint.",
+						},
+						"tags": ve.TagsSchemaComputed(),
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of vpc endpoint.",
 						},
 					},
 				},

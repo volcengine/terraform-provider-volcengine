@@ -119,6 +119,11 @@ func (s *VolcengineKafkaGroupService) CreateResource(resourceData *schema.Resour
 			Action:      "CreateGroup",
 			ContentType: ve.ContentTypeJson,
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
+			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
@@ -145,43 +150,50 @@ func (s *VolcengineKafkaGroupService) CreateResource(resourceData *schema.Resour
 }
 
 func (s *VolcengineKafkaGroupService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "ModifyGroup",
-			ContentType: ve.ContentTypeJson,
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"description": {
-					TargetField: "Description",
+	var callbacks []ve.Callback
+	if resourceData.HasChange("description") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyGroup",
+				ContentType: ve.ContentTypeJson,
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"description": {
+						TargetField: "Description",
+					},
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
+						(*call.SdkParam)["GroupId"] = d.Get("group_id")
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					logger.Debug(logger.RespFormat, call.Action, resp, err)
+					return resp, err
+				},
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("instance_id").(string)
+				},
+				ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
+					kafka_instance.NewKafkaInstanceService(s.Client): {
+						Target:     []string{"Running"},
+						Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
+						ResourceId: resourceData.Get("instance_id").(string),
+					},
 				},
 			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) > 0 {
-					(*call.SdkParam)["InstanceId"] = d.Get("instance_id")
-					(*call.SdkParam)["GroupId"] = d.Get("group_id")
-					return true, nil
-				}
-				return false, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-				logger.Debug(logger.RespFormat, call.Action, resp, err)
-				return resp, err
-			},
-			LockId: func(d *schema.ResourceData) string {
-				return d.Get("instance_id").(string)
-			},
-			ExtraRefresh: map[ve.ResourceService]*ve.StateRefresh{
-				kafka_instance.NewKafkaInstanceService(s.Client): {
-					Target:     []string{"Running"},
-					Timeout:    resourceData.Timeout(schema.TimeoutUpdate),
-					ResourceId: resourceData.Get("instance_id").(string),
-				},
-			},
-		},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	return []ve.Callback{callback}
+	// 更新 tags
+	setResourceTagsCallbacks := s.setResourceTags(resourceData)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+	return callbacks
 }
 
 func (s *VolcengineKafkaGroupService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -237,6 +249,12 @@ func (s *VolcengineKafkaGroupService) RemoveResource(resourceData *schema.Resour
 
 func (s *VolcengineKafkaGroupService) DatasourceResources(*schema.ResourceData, *schema.Resource) ve.DataSourceInfo {
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+			},
+		},
 		NameField:    "GroupId",
 		CollectField: "groups",
 		ContentType:  ve.ContentTypeJson,
@@ -245,6 +263,68 @@ func (s *VolcengineKafkaGroupService) DatasourceResources(*schema.ResourceData, 
 
 func (s *VolcengineKafkaGroupService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineKafkaGroupService) setResourceTags(resourceData *schema.ResourceData) []ve.Callback {
+	var callbacks []ve.Callback
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "RemoveTagsFromCustomResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					// 查询控制台，获取参数该API的具体参数，API文档未显示 RemoveTagsFromCustomResource
+					(*call.SdkParam)["ResourceIds"] = []string{d.Get("group_id").(string)}
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id").(string)
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					(*call.SdkParam)["ResourceType"] = "group"
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "AddTagsToCustomResource",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{d.Get("group_id").(string)}
+					(*call.SdkParam)["InstanceId"] = d.Get("instance_id").(string)
+					(*call.SdkParam)["ResourceType"] = "group"
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, tag := range addedTags.List() {
+						t := tag.(map[string]interface{})
+						temp := make(map[string]interface{})
+						temp["Key"] = t["key"].(string)
+						temp["Value"] = t["value"].(string)
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), temp)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

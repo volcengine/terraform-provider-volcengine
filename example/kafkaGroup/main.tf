@@ -44,4 +44,8 @@ resource "volcengine_kafka_group" "foo" {
   instance_id = volcengine_kafka_instance.foo.id
   group_id    = "acc-test-group"
   description = "tf-test"
+  tags {
+    key = "k1"
+    value = "v1"
+  }
 }

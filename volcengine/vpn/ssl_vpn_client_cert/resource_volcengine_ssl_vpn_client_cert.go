@@ -51,6 +51,7 @@ func ResourceVolcengineSslClientCertServer() *schema.Resource {
 				Computed:    true,
 				Description: "The description of the ssl vpn client cert.",
 			},
+			"tags": ve.TagsSchema(),
 
 			"status": {
 				Type:        schema.TypeString,

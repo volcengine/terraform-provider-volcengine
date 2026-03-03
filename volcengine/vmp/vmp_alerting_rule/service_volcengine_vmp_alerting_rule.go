@@ -165,6 +165,10 @@ func (s *VolcengineVmpAlertingRuleService) CreateResource(resourceData *schema.R
 					TargetField: "Labels",
 					ConvertType: ve.ConvertJsonObjectArray,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertJsonObjectArray,
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["Type"] = "vmp/PromQL"
@@ -191,6 +195,7 @@ func (s *VolcengineVmpAlertingRuleService) CreateResource(resourceData *schema.R
 }
 
 func (s *VolcengineVmpAlertingRuleService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
+	var callbacks []ve.Callback
 	callback := ve.Callback{
 		Call: ve.SdkCall{
 			Action:      "UpdateAlertingRule",
@@ -291,7 +296,11 @@ func (s *VolcengineVmpAlertingRuleService) ModifyResource(resourceData *schema.R
 			},
 		},
 	}
-	return []ve.Callback{callback}
+	callbacks = append(callbacks, callback)
+	// 更新 tags AlertingRule
+	setResourceCallback := s.setResourceTags(resourceData, "AlertingRule")
+	callbacks = append(callbacks, setResourceCallback...)
+	return callbacks
 }
 
 func (s *VolcengineVmpAlertingRuleService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -360,6 +369,10 @@ func (s *VolcengineVmpAlertingRuleService) DatasourceResources(*schema.ResourceD
 			"status": {
 				TargetField: "Filter.Status",
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertJsonObjectArray,
+			},
 		},
 		NameField:    "Name",
 		IdField:      "Id",
@@ -375,6 +388,69 @@ func (s *VolcengineVmpAlertingRuleService) DatasourceResources(*schema.ResourceD
 
 func (s *VolcengineVmpAlertingRuleService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineVmpAlertingRuleService) setResourceTags(resourceData *schema.ResourceData, resourceType string) []ve.Callback {
+	var callbacks []ve.Callback
+
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["TagKeys"] = make([]string, 0)
+					for _, tag := range removedTags.List() {
+						(*call.SdkParam)["TagKeys"] = append((*call.SdkParam)["TagKeys"].([]string), tag.(map[string]interface{})["key"].(string))
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceIds"] = []string{resourceData.Id()}
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
+					for _, v := range addedTags.List() {
+						tagMap, ok := v.(map[string]interface{})
+						if !ok {
+							return false, fmt.Errorf("Tags is not map ")
+						}
+						tag := make(map[string]interface{})
+						tag["Key"] = tagMap["key"]
+						tag["Value"] = tagMap["value"]
+						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), tag)
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

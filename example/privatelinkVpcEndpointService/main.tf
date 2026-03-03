@@ -38,4 +38,9 @@ resource "volcengine_privatelink_vpc_endpoint_service" "foo" {
   }
   description         = "acc-test"
   auto_accept_enabled = true
+  project_name        = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }

@@ -47,6 +47,12 @@ func ResourceVolcenginePrivatelinkVpcEndpointService() *schema.Resource {
 				Optional:    true,
 				Description: "The description of service.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of service.",
+			},
+			"tags": ve.TagsSchema(),
 			// 创建 service 时候，必须传入一个 resource；在修改 resource 的时候，必须保留一个，不能全部删除
 			"resources": {
 				Type:     schema.TypeSet,

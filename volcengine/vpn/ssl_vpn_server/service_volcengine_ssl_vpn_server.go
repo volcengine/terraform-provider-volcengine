@@ -47,6 +47,7 @@ func (v *VolcengineSslVpnServerService) ReadResources(m map[string]interface{}) 
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.SslVpnServers is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 }
@@ -130,6 +131,10 @@ func (v *VolcengineSslVpnServerService) CreateResource(data *schema.ResourceData
 				"local_subnets": {
 					ConvertType: ve.ConvertWithN,
 				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -150,55 +155,65 @@ func (v *VolcengineSslVpnServerService) CreateResource(data *schema.ResourceData
 }
 
 func (v *VolcengineSslVpnServerService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "ModifySslVpnServer",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"ssl_vpn_server_name": {
-					ConvertType: ve.ConvertDefault,
+	var callbacks []ve.Callback
+	modifySslVpnServerFlag := data.HasChanges("ssl_vpn_server_name", "description", "client_ip_pool", "protocol", "cipher", "auth", "compress", "port", "local_subnets")
+	if modifySslVpnServerFlag {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifySslVpnServer",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"ssl_vpn_server_name": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"description": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"client_ip_pool": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"protocol": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"cipher": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"auth": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"compress": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"port": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"local_subnets": {
+						ConvertType: ve.ConvertWithN,
+						ForceGet:    true,
+					},
 				},
-				"description": {
-					ConvertType: ve.ConvertDefault,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					(*call.SdkParam)["SslVpnServerId"] = d.Id()
+					return true, nil
 				},
-				"client_ip_pool": {
-					ConvertType: ve.ConvertDefault,
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return v.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
-				"protocol": {
-					ConvertType: ve.ConvertDefault,
-				},
-				"cipher": {
-					ConvertType: ve.ConvertDefault,
-				},
-				"auth": {
-					ConvertType: ve.ConvertDefault,
-				},
-				"compress": {
-					ConvertType: ve.ConvertDefault,
-				},
-				"port": {
-					ConvertType: ve.ConvertDefault,
-				},
-				"local_subnets": {
-					ConvertType: ve.ConvertWithN,
-					ForceGet:    true,
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Available"},
+					Timeout: data.Timeout(schema.TimeoutUpdate),
 				},
 			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				(*call.SdkParam)["SslVpnServerId"] = d.Id()
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return v.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Available"},
-				Timeout: data.Timeout(schema.TimeoutUpdate),
-			},
-		},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	return []ve.Callback{callback}
+
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(v.Client, "TagResources", "UntagResources", "sslvpnserver", data, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+
+	return callbacks
 }
 
 func (v *VolcengineSslVpnServerService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -246,6 +261,15 @@ func (v *VolcengineSslVpnServerService) DatasourceResources(data *schema.Resourc
 				TargetField: "SslVpnServerIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "SslVpnServerName",
 		IdField:      "SslVpnServerId",
@@ -286,4 +310,25 @@ func getUniversalInfo(actionName string) ve.UniversalInfo {
 		HttpMethod:  ve.GET,
 		ContentType: ve.Default,
 	}
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
