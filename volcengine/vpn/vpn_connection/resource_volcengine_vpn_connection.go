@@ -58,6 +58,7 @@ func ResourceVolcengineVpnConnection() *schema.Resource {
 				ForceNew:    true,
 				Description: "The ID of the customer gateway.",
 			},
+			"tags": ve.TagsSchema(),
 			"local_subnet": {
 				Type:     schema.TypeSet,
 				Required: true,

@@ -1,7 +1,9 @@
 package iam_service_linked_role
 
 import (
+	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -132,7 +134,11 @@ func (s *VolcengineIamServiceLinkedRoleService) CreateResource(resourceData *sch
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				roleName, err := s.queryRoleName(resourceData, d.Get("service_name").(string))
+				serviceName, ok := d.Get("service_name").(string)
+				if !ok {
+					return false, errors.New("service_name is not string")
+				}
+				roleName, err := s.queryRoleName(resourceData, serviceName)
 				if err != nil {
 					return false, err
 				}
@@ -146,8 +152,14 @@ func (s *VolcengineIamServiceLinkedRoleService) CreateResource(resourceData *sch
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				serviceName := d.Get("service_name").(string)
-				roleName := d.Get("role_name").(string)
+				serviceName, ok := d.Get("service_name").(string)
+				if !ok {
+					return errors.New("service_name is not string")
+				}
+				roleName, ok := d.Get("role_name").(string)
+				if !ok {
+					return errors.New("role_name is not string")
+				}
 				d.SetId(serviceName + ":" + roleName)
 				return nil
 			},
@@ -157,7 +169,87 @@ func (s *VolcengineIamServiceLinkedRoleService) CreateResource(resourceData *sch
 }
 
 func (s *VolcengineIamServiceLinkedRoleService) ModifyResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	return []ve.Callback{}
+	callbacks := []ve.Callback{}
+	setResourceTagsCallbacks := s.setResourceTags(resourceData, "Role", callbacks)
+	return setResourceTagsCallbacks
+}
+
+func (s *VolcengineIamServiceLinkedRoleService) setResourceTags(resourceData *schema.ResourceData, resourceType string, callbacks []ve.Callback) []ve.Callback {
+	addedTags, removedTags, _, _ := ve.GetSetDifference("tags", resourceData, ve.TagsHash, false)
+
+	roleName, ok := resourceData.Get("role_name").(string)
+	if !ok {
+		return callbacks
+	}
+
+	removeCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "UntagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if removedTags != nil && len(removedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceNames.1"] = roleName
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range removedTags.List() {
+						tm, ok := tag.(map[string]interface{})
+						if !ok {
+							return false, errors.New("tag item is not map")
+						}
+						key, ok := tm["key"].(string)
+						if !ok {
+							return false, errors.New("tag key is not string")
+						}
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = key
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, removeCallback)
+
+	addCallback := ve.Callback{
+		Call: ve.SdkCall{
+			Action:      "TagResources",
+			ConvertMode: ve.RequestConvertIgnore,
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				if addedTags != nil && len(addedTags.List()) > 0 {
+					(*call.SdkParam)["ResourceNames.1"] = roleName
+					(*call.SdkParam)["ResourceType"] = resourceType
+					for index, tag := range addedTags.List() {
+						tm, ok := tag.(map[string]interface{})
+						if !ok {
+							return false, errors.New("tag item is not map")
+						}
+						key, ok := tm["key"].(string)
+						if !ok {
+							return false, errors.New("tag key is not string")
+						}
+						value, ok := tm["value"].(string)
+						if !ok {
+							return false, errors.New("tag value is not string")
+						}
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = key
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = value
+					}
+					return true, nil
+				}
+				return false, nil
+			},
+			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+		},
+	}
+	callbacks = append(callbacks, addCallback)
+
+	return callbacks
 }
 
 func (s *VolcengineIamServiceLinkedRoleService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {

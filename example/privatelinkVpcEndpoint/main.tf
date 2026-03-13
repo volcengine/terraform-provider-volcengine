@@ -43,6 +43,11 @@ resource "volcengine_privatelink_vpc_endpoint_service" "foo" {
   }
   description         = "acc-test"
   auto_accept_enabled = true
+  project_name        = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 
 resource "volcengine_privatelink_vpc_endpoint" "foo" {
@@ -50,4 +55,9 @@ resource "volcengine_privatelink_vpc_endpoint" "foo" {
   service_id         = volcengine_privatelink_vpc_endpoint_service.foo.id
   endpoint_name      = "acc-test-ep"
   description        = "acc-test"
+  project_name       = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }

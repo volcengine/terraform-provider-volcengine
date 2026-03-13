@@ -88,7 +88,7 @@ func (s *VolcengineIamUserGroupAttachmentService) ReadResource(resourceData *sch
 		if tempData, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		} else {
-			if tempData["UserName"].(string) == ids[1] {
+			if uName, ok := tempData["UserName"].(string); ok && uName == ids[1] {
 				data = tempData
 				data["UserGroupName"] = ids[0]
 			}
@@ -116,7 +116,15 @@ func (s *VolcengineIamUserGroupAttachmentService) CreateResource(resourceData *s
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(fmt.Sprint((*call.SdkParam)["UserGroupName"], ":", (*call.SdkParam)["UserName"]))
+				groupName, ok := (*call.SdkParam)["UserGroupName"].(string)
+				if !ok {
+					return errors.New("UserGroupName is not string")
+				}
+				userName, ok := (*call.SdkParam)["UserName"].(string)
+				if !ok {
+					return errors.New("UserName is not string")
+				}
+				d.SetId(fmt.Sprintf("%s:%s", groupName, userName))
 				return nil
 			},
 		},

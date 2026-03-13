@@ -127,7 +127,9 @@ func (s *VolcengineIamRoleService) CreateResource(data *schema.ResourceData, res
 				if err != nil {
 					return err
 				}
-				d.SetId(roleName.(string))
+				if nameStr, ok := roleName.(string); ok && nameStr != "" {
+					d.SetId(nameStr)
+				}
 				return nil
 			},
 		},
@@ -284,7 +286,15 @@ func (s *VolcengineIamRoleService) setResourceTags(resourceData *schema.Resource
 					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
 					(*call.SdkParam)["ResourceType"] = resourceType
 					for index, tag := range removedTags.List() {
-						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = tag.(map[string]interface{})["key"].(string)
+						tm, ok := tag.(map[string]interface{})
+						if !ok {
+							return false, errors.New("tag item is not map")
+						}
+						key, ok := tm["key"].(string)
+						if !ok {
+							return false, errors.New("tag key is not string")
+						}
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = key
 					}
 					return true, nil
 				}
@@ -307,8 +317,20 @@ func (s *VolcengineIamRoleService) setResourceTags(resourceData *schema.Resource
 					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
 					(*call.SdkParam)["ResourceType"] = resourceType
 					for index, tag := range addedTags.List() {
-						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tag.(map[string]interface{})["key"].(string)
-						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tag.(map[string]interface{})["value"].(string)
+						tm, ok := tag.(map[string]interface{})
+						if !ok {
+							return false, errors.New("tag item is not map")
+						}
+						key, ok := tm["key"].(string)
+						if !ok {
+							return false, errors.New("tag key is not string")
+						}
+						value, ok := tm["value"].(string)
+						if !ok {
+							return false, errors.New("tag value is not string")
+						}
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = key
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = value
 					}
 					return true, nil
 				}

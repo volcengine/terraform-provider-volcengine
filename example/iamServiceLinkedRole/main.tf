@@ -1,7 +1,7 @@
 resource "volcengine_iam_service_linked_role" "foo" {
-  service_name = "ecs"
+  service_name = "vpc"
   tags {
       key   = "key-2"
-      value = "value-3"
+      value = "value-2"
   }
 }

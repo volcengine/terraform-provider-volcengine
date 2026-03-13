@@ -302,6 +302,15 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/instance"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/region"
 	esZone "github.com/volcengine/terraform-provider-volcengine/volcengine/escloud/zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_backend_server"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_listener"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_listener_health"
+	network_load_balancer "github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_network_load_balancer"
+	network_load_balancer_attribute "github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_network_load_balancer_attribute"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_server_group"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_server_group_attribute"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_tag"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/nlb/nlb_zone"
 
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/financial_relation/financial_relation"
 
@@ -373,6 +382,7 @@ import (
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_permission"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_service_resource"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_endpoint_zone"
+	"github.com/volcengine/terraform-provider-volcengine/volcengine/privatelink/vpc_gateway_endpoint"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_account_privilege"
 	"github.com/volcengine/terraform-provider-volcengine/volcengine/rds/rds_database"
@@ -991,20 +1001,28 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_direct_connect_gateway_routes":     direct_connect_gateway_route.DataSourceVolcengineDirectConnectGatewayRoutes(),
 
 			// ================ ALB ================
-			"volcengine_alb_zones":                      alb_zone.DataSourceVolcengineAlbZones(),
-			"volcengine_alb_acls":                       alb_acl.DataSourceVolcengineAlbAcls(),
-			"volcengine_alb_listeners":                  alb_listener.DataSourceVolcengineListeners(),
-			"volcengine_alb_listener_healths":           alb_listener_health.DataSourceVolcengineAlbListenerHealths(),
-			"volcengine_alb_customized_cfgs":            alb_customized_cfg.DataSourceVolcengineAlbCustomizedCfgs(),
-			"volcengine_alb_health_check_templates":     alb_health_check_template.DataSourceVolcengineAlbHealthCheckTemplates(),
-			"volcengine_alb_listener_domain_extensions": alb_listener_domain_extension.DataSourceVolcengineListenerDomainExtensions(),
-			"volcengine_alb_server_group_servers":       alb_server_group_server.DataSourceVolcengineAlbServerGroupServers(),
-			"volcengine_alb_certificates":               alb_certificate.DataSourceVolcengineAlbCertificates(),
-			"volcengine_alb_all_certificates":           alb_all_certificate.DataSourceVolcengineAlbAllCertificates(),
-			"volcengine_alb_rules":                      alb_rule.DataSourceVolcengineAlbRules(),
-			"volcengine_alb_ca_certificates":            alb_ca_certificate.DataSourceVolcengineAlbCaCertificates(),
-			"volcengine_albs":                           alb.DataSourceVolcengineAlbs(),
-			"volcengine_alb_server_groups":              alb_server_group.DataSourceVolcengineAlbServerGroups(),
+			"volcengine_alb_zones":                            alb_zone.DataSourceVolcengineAlbZones(),
+			"volcengine_alb_acls":                             alb_acl.DataSourceVolcengineAlbAcls(),
+			"volcengine_alb_listeners":                        alb_listener.DataSourceVolcengineListeners(),
+			"volcengine_alb_listener_healths":                 alb_listener_health.DataSourceVolcengineAlbListenerHealths(),
+			"volcengine_alb_customized_cfgs":                  alb_customized_cfg.DataSourceVolcengineAlbCustomizedCfgs(),
+			"volcengine_alb_health_check_templates":           alb_health_check_template.DataSourceVolcengineAlbHealthCheckTemplates(),
+			"volcengine_alb_listener_domain_extensions":       alb_listener_domain_extension.DataSourceVolcengineListenerDomainExtensions(),
+			"volcengine_alb_server_group_servers":             alb_server_group_server.DataSourceVolcengineAlbServerGroupServers(),
+			"volcengine_alb_certificates":                     alb_certificate.DataSourceVolcengineAlbCertificates(),
+			"volcengine_alb_all_certificates":                 alb_all_certificate.DataSourceVolcengineAlbAllCertificates(),
+			"volcengine_alb_rules":                            alb_rule.DataSourceVolcengineAlbRules(),
+			"volcengine_alb_ca_certificates":                  alb_ca_certificate.DataSourceVolcengineAlbCaCertificates(),
+			"volcengine_albs":                                 alb.DataSourceVolcengineAlbs(),
+			"volcengine_nlb_network_load_balancers":           network_load_balancer.DataSourceVolcengineNlbNetworkLoadBalancers(),
+			"volcengine_nlb_network_load_balancer_attributes": network_load_balancer_attribute.DataSourceVolcengineNlbNetworkLoadBalancerAttributes(),
+			"volcengine_nlb_listeners":                        nlb_listener.DataSourceVolcengineNlbListeners(),
+			"volcengine_nlb_listener_healths":                 nlb_listener_health.DataSourceVolcengineNlbListenerHealths(),
+			"volcengine_nlb_tags":                             nlb_tag.DataSourceVolcengineNlbTags(),
+			"volcengine_nlb_zones":                            nlb_zone.DataSourceVolcengineNlbZones(),
+			"volcengine_nlb_server_groups":                    nlb_server_group.DataSourceVolcengineNlbServerGroups(),
+			"volcengine_nlb_server_group_attributes":          nlb_server_group_attribute.DataSourceVolcengineNlbServerGroupAttributes(),
+			"volcengine_alb_server_groups":                    alb_server_group.DataSourceVolcengineAlbServerGroups(),
 
 			// ============= Bandwidth Package =============
 			"volcengine_bandwidth_packages": bandwidth_package.DataSourceVolcengineBandwidthPackages(),
@@ -1201,13 +1219,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_waf_service_certificates":      waf_service_certificate.DataSourceVolcengineWafServiceCertificates(),
 
 			// ================ APIG ================
-			"volcengine_apig_gateways":          apig_gateway.DataSourceVolcengineApigGateways(),
-			"volcengine_apig_gateway_services":  apig_gateway_service.DataSourceVolcengineApigGatewayServices(),
-			"volcengine_apig_custom_domains":    apig_custom_domain.DataSourceVolcengineApigCustomDomains(),
-			"volcengine_apig_upstreams":         apig_upstream.DataSourceVolcengineApigUpstreams(),
-			"volcengine_apig_upstream_sources":  apig_upstream_source.DataSourceVolcengineApigUpstreamSources(),
-			"volcengine_apig_upstream_versions": apig_upstream_version.DataSourceVolcengineApigUpstreamVersions(),
-			"volcengine_apig_routes":            apig_route.DataSourceVolcengineApigRoutes(),
+			"volcengine_apig_gateways":                     apig_gateway.DataSourceVolcengineApigGateways(),
+			"volcengine_apig_gateway_services":             apig_gateway_service.DataSourceVolcengineApigGatewayServices(),
+			"volcengine_privatelink_vpc_gateway_endpoints": vpc_gateway_endpoint.DataSourceVolcengineVpcGatewayEndpoints(),
+			"volcengine_apig_custom_domains":               apig_custom_domain.DataSourceVolcengineApigCustomDomains(),
+			"volcengine_apig_upstreams":                    apig_upstream.DataSourceVolcengineApigUpstreams(),
+			"volcengine_apig_upstream_sources":             apig_upstream_source.DataSourceVolcengineApigUpstreamSources(),
+			"volcengine_apig_upstream_versions":            apig_upstream_version.DataSourceVolcengineApigUpstreamVersions(),
+			"volcengine_apig_routes":                       apig_route.DataSourceVolcengineApigRoutes(),
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"volcengine_vpc":                           vpc.ResourceVolcengineVpc(),
@@ -1515,6 +1534,11 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_alb_ca_certificate":            alb_ca_certificate.ResourceVolcengineAlbCaCertificate(),
 			"volcengine_alb_replace_certificate":       alb_replace_certificate.ResourceVolcengineAlbReplaceCertificate(),
 			"volcengine_alb":                           alb.ResourceVolcengineAlb(),
+			"volcengine_nlb_network_load_balancer":     network_load_balancer.ResourceVolcengineNlbNetworkLoadBalancer(),
+			"volcengine_nlb_listener":                  nlb_listener.ResourceVolcengineNlbListener(),
+			"volcengine_nlb_server_group":              nlb_server_group.ResourceVolcengineNlbServerGroup(),
+			"volcengine_nlb_backend_servers":           nlb_backend_server.ResourceVolcengineNlbBackendServers(),
+			"volcengine_nlb_tag":                       nlb_tag.ResourceVolcengineNlbTag(),
 			"volcengine_alb_server_group":              alb_server_group.ResourceVolcengineAlbServerGroup(),
 
 			// ============= Bandwidth Package =============
@@ -1706,13 +1730,14 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_waf_vulnerability":            waf_vulnerability.ResourceVolcengineWafVulnerability(),
 
 			// ================ APIG ================
-			"volcengine_apig_gateway":          apig_gateway.ResourceVolcengineApigGateway(),
-			"volcengine_apig_gateway_service":  apig_gateway_service.ResourceVolcengineApigGatewayService(),
-			"volcengine_apig_custom_domain":    apig_custom_domain.ResourceVolcengineApigCustomDomain(),
-			"volcengine_apig_upstream":         apig_upstream.ResourceVolcengineApigUpstream(),
-			"volcengine_apig_upstream_source":  apig_upstream_source.ResourceVolcengineApigUpstreamSource(),
-			"volcengine_apig_upstream_version": apig_upstream_version.ResourceVolcengineApigUpstreamVersion(),
-			"volcengine_apig_route":            apig_route.ResourceVolcengineApigRoute(),
+			"volcengine_apig_gateway":                     apig_gateway.ResourceVolcengineApigGateway(),
+			"volcengine_apig_gateway_service":             apig_gateway_service.ResourceVolcengineApigGatewayService(),
+			"volcengine_privatelink_vpc_gateway_endpoint": vpc_gateway_endpoint.ResourceVolcengineVpcGatewayEndpoint(),
+			"volcengine_apig_custom_domain":               apig_custom_domain.ResourceVolcengineApigCustomDomain(),
+			"volcengine_apig_upstream":                    apig_upstream.ResourceVolcengineApigUpstream(),
+			"volcengine_apig_upstream_source":             apig_upstream_source.ResourceVolcengineApigUpstreamSource(),
+			"volcengine_apig_upstream_version":            apig_upstream_version.ResourceVolcengineApigUpstreamVersion(),
+			"volcengine_apig_route":                       apig_route.ResourceVolcengineApigRoute(),
 		},
 		ConfigureFunc: ProviderConfigure,
 	}

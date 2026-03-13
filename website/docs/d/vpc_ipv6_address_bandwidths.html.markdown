@@ -23,7 +23,13 @@ The following arguments are supported:
 * `isp` - (Optional) ISP of the ipv6 address.
 * `network_type` - (Optional) The network type of the ipv6 address.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The ID of Vpc the ipv6 address in.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

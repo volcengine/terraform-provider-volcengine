@@ -53,6 +53,10 @@ resource "volcengine_cloud_monitor_rule" "foo" {
   recovery_notify {
     enable = true
   }
+  tags {
+    key   = "tfk1"
+    value = "tfv1"
+  }
 }
 ```
 ## Argument Reference
@@ -75,6 +79,7 @@ The following arguments are supported:
 * `description` - (Optional) The description of the cloud monitor rule.
 * `multiple_conditions` - (Optional) Whether to enable the multiple conditions function of the cloud monitor rule.
 * `recovery_notify` - (Optional) The recovery notify of the cloud monitor rule.
+* `tags` - (Optional) Tags.
 * `web_hook` - (Optional) The web hook of the cloud monitor rule. When the alert method is `Webhook`, one of `web_hook` and `webhook_ids` must be specified.
 * `webhook_ids` - (Optional) The web hook id list of the cloud monitor rule. When the alert method is `Webhook`, one of `web_hook` and `webhook_ids` must be specified.
 
@@ -94,6 +99,11 @@ The `original_dimensions` object supports the following:
 The `recovery_notify` object supports the following:
 
 * `enable` - (Optional) Whether to enable the recovery notify function.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

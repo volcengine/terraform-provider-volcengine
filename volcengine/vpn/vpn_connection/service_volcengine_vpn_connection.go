@@ -72,6 +72,7 @@ func (s *VolcengineVpnConnectionService) ReadResources(m map[string]interface{})
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.VpnConnections is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 	if err != nil || len(nameSet) == 0 {
@@ -170,6 +171,14 @@ func (VolcengineVpnConnectionService) WithResourceResponseHandlers(v map[string]
 			},
 			"IkeConfig.Mode": {
 				TargetField: "ike_config_mode",
+				// 当 ike_config_version 为 ikev2 时，API 不返回 mode 字段，返回空字符串。而 Schema 定义了默认值 "main"，导致每次 plan 都会检测到差异。
+				// 因此当 API 返回空值时，使用默认值 "main" 以保持状态一致。
+				Convert: func(v interface{}) interface{} {
+					if v == nil || v == "" {
+						return "main"
+					}
+					return v
+				},
 			},
 			"IkeConfig.EncAlg": {
 				TargetField: "ike_config_enc_alg",
@@ -275,6 +284,10 @@ func (s *VolcengineVpnConnectionService) CreateResource(resourceData *schema.Res
 				"ipsec_config_lifetime": {
 					TargetField: "IpsecConfig.Lifetime",
 					ConvertType: ve.ConvertDefault,
+				},
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
 				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
@@ -409,6 +422,9 @@ func (s *VolcengineVpnConnectionService) ModifyResource(resourceData *schema.Res
 	}
 	callbacks = append(callbacks, modifyCallback)
 
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "vpnconnection", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
 	return callbacks
 }
 
@@ -465,6 +481,15 @@ func (s *VolcengineVpnConnectionService) DatasourceResources(*schema.ResourceDat
 				TargetField: "VpnConnectionNames",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "VpnConnectionName",
 		IdField:      "VpnConnectionId",
@@ -482,6 +507,14 @@ func (s *VolcengineVpnConnectionService) DatasourceResources(*schema.ResourceDat
 			},
 			"IkeConfig.Mode": {
 				TargetField: "ike_config_mode",
+				// 当 ike_config_version 为 ikev2 时，API 不返回 mode 字段，返回空字符串。而 Schema 定义了默认值 "main"，导致每次 plan 都会检测到差异。
+				// 因此当 API 返回空值时，使用默认值 "main" 以保持状态一致。
+				Convert: func(v interface{}) interface{} {
+					if v == nil || v == "" {
+						return "main"
+					}
+					return v
+				},
 			},
 			"IkeConfig.EncAlg": {
 				TargetField: "ike_config_enc_alg",
@@ -538,4 +571,25 @@ func (s *VolcengineVpnConnectionService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }

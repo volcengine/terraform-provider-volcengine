@@ -24,6 +24,30 @@ func DataSourceVolcengineEcsLaunchTemplates() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "A list of launch template names.",
 			},
+			"launch_template_project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the launch template.",
+			},
+			"launch_template_tags": {
+				Type:        schema.TypeSet,
+				Optional:    true,
+				Description: "The tags of the launch template.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"value": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Value of Tags.",
+						},
+					},
+				},
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -82,6 +106,12 @@ func DataSourceVolcengineEcsLaunchTemplates() *schema.Resource {
 							Computed:    true,
 							Description: "The updated time of the launch template.",
 						},
+						"launch_template_project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the launch template.",
+						},
+						"launch_template_tags": ve.TagsSchemaComputed(),
 						"version_description": {
 							Type:        schema.TypeString,
 							Computed:    true,
@@ -122,6 +152,12 @@ func DataSourceVolcengineEcsLaunchTemplates() *schema.Resource {
 							Computed:    true,
 							Description: "The zone ID of the instance.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the instance.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 						"volumes": {
 							Type:        schema.TypeList,
 							Computed:    true,

@@ -155,7 +155,7 @@ func ResourceVolcengineVmpAlertingRule() *schema.Resource {
 					},
 				},
 			},
-
+			"tags": ve.TagsSchema(),
 			"create_time": {
 				Type:        schema.TypeString,
 				Computed:    true,

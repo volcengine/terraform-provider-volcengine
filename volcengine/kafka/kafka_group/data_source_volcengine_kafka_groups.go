@@ -1,10 +1,26 @@
 package kafka_group
 
 import (
+	"bytes"
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
+
+var TagsHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
+	return hashcode.String(buf.String())
+}
 
 func DataSourceVolcengineKafkaGroups() *schema.Resource {
 	return &schema.Resource{
@@ -20,6 +36,7 @@ func DataSourceVolcengineKafkaGroups() *schema.Resource {
 				Optional:    true,
 				Description: "The id of kafka group, support fuzzy matching.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -52,6 +69,17 @@ func DataSourceVolcengineKafkaGroups() *schema.Resource {
 							Computed:    true,
 							Description: "The state of kafka group.",
 						},
+						"description": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The description of kafka group.",
+						},
+						"protocol_type": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The protocol type of kafka group.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

@@ -39,6 +39,18 @@ func DataSourceVolcengineCustomerGateways() *schema.Resource {
 				Optional:    true,
 				Description: "The project name of the VPN customer gateway.",
 			},
+			"status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The status of the customer gateway. Valid value: Creating, Deleting, Pending, Available.",
+			},
+			"tags": ve.TagsSchema(),
+			"ip_version": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
+				Description:  "The IP version of the customer gateway. Valid value: ipv4, ipv6.",
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -112,6 +124,17 @@ func DataSourceVolcengineCustomerGateways() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the customer gateway.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the VPN customer gateway.",
+						},
+						"ip_version": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The IP version of the customer gateway.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

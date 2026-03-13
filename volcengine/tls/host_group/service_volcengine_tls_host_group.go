@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sort"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -36,23 +38,37 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 		req := map[string]interface{}{}
 		if v, ok := condition["host_group_id"]; ok {
 			req["HostGroupId"] = v
+		} else if v, ok := condition["HostGroupId"]; ok {
+			req["HostGroupId"] = v
 		}
 		if v, ok := condition["host_group_name"]; ok {
+			req["HostGroupName"] = v
+		} else if v, ok := condition["HostGroupName"]; ok {
 			req["HostGroupName"] = v
 		}
 		if v, ok := condition["host_identifier"]; ok {
 			req["HostIdentifier"] = v
+		} else if v, ok := condition["HostIdentifier"]; ok {
+			req["HostIdentifier"] = v
 		}
 		if v, ok := condition["iam_project_name"]; ok {
+			req["IamProjectName"] = v
+		} else if v, ok := condition["IamProjectName"]; ok {
 			req["IamProjectName"] = v
 		}
 		if v, ok := condition["auto_update"]; ok {
 			req["AutoUpdate"] = v
+		} else if v, ok := condition["AutoUpdate"]; ok {
+			req["AutoUpdate"] = v
 		}
 		if v, ok := condition["service_logging"]; ok {
 			req["ServiceLogging"] = v
+		} else if v, ok := condition["ServiceLogging"]; ok {
+			req["ServiceLogging"] = v
 		}
 		if v, ok := condition["hidden"]; ok {
+			req["Hidden"] = v
+		} else if v, ok := condition["Hidden"]; ok {
 			req["Hidden"] = v
 		}
 		if v, ok := condition["PageSize"]; ok {
@@ -87,7 +103,18 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 		}
 		var res []interface{}
 		for _, ele := range data {
-			hostGroupInfo := ele.(map[string]interface{})["HostGroupInfo"].(map[string]interface{})
+			eleMap, ok := ele.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			hostGroupInfoRaw, ok := eleMap["HostGroupInfo"]
+			if !ok {
+				continue
+			}
+			hostGroupInfo, ok := hostGroupInfoRaw.(map[string]interface{})
+			if !ok {
+				continue
+			}
 			newItem := map[string]interface{}{}
 
 			newItem["host_group_info"] = []interface{}{
@@ -105,12 +132,77 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 					"update_end_time":   hostGroupInfo["UpdateEndTime"],
 					"auto_update":       hostGroupInfo["AutoUpdate"],
 					"service_logging":   hostGroupInfo["ServiceLogging"],
+					"host_ip_list":      collectIps(eleMap),
 				},
 			}
 			res = append(res, newItem)
 		}
 		return res, nil
 	})
+}
+
+func collectIps(m map[string]interface{}) []interface{} {
+	if m == nil {
+		return nil
+	}
+	ipMap := make(map[string]bool)
+
+	// 1. Try HostIpList from m or HostGroupInfo
+	extractFromMap := func(target map[string]interface{}) {
+		for k, v := range target {
+			if strings.EqualFold(k, "HostIpList") && v != nil {
+				if list, ok := v.([]interface{}); ok {
+					for _, item := range list {
+						if s, ok := item.(string); ok && s != "" {
+							ipMap[strings.TrimSpace(s)] = true
+						}
+					}
+				}
+			}
+		}
+	}
+
+	extractFromMap(m)
+	if hgiRaw, ok := m["HostGroupInfo"]; ok {
+		if hgi, ok := hgiRaw.(map[string]interface{}); ok {
+			extractFromMap(hgi)
+		}
+	}
+
+	// 2. Try HostInfos
+	for k, vRaw := range m {
+		if strings.EqualFold(k, "HostInfos") && vRaw != nil {
+			if list, ok := vRaw.([]interface{}); ok {
+				for _, item := range list {
+					if h, ok := item.(map[string]interface{}); ok {
+						for k2, v2 := range h {
+							if strings.EqualFold(k2, "Ip") {
+								if ip, ok := v2.(string); ok && ip != "" {
+									ipMap[strings.TrimSpace(ip)] = true
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if len(ipMap) == 0 {
+		return nil
+	}
+
+	ips := make([]string, 0, len(ipMap))
+	for ip := range ipMap {
+		ips = append(ips, ip)
+	}
+	sort.Strings(ips)
+
+	res := make([]interface{}, 0, len(ips))
+	for _, s := range ips {
+		res = append(res, s)
+	}
+	return res
 }
 
 func (s *Service) DatasourceRules(d *schema.ResourceData, r *schema.Resource) ve.DataSourceInfo {
@@ -397,24 +489,24 @@ func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (da
 	}
 	logger.Debug(logger.RespFormat, action, req, *resp)
 
-	result, err := ve.ObtainSdkValue("RESPONSE.HostGroupHostsRulesInfo.HostGroupInfo", *resp)
-	if err != nil {
-		// Fallback to try without HostGroupHostsRulesInfo wrapper if needed,
-		// but assuming standard structure similar to list item based on ReadResources.
-		// If DescribeHostGroupV2 returns directly HostGroupInfo under RESPONSE or Result, adjust path.
-		// Trying "RESPONSE.HostGroupInfo" as a likely alternative if the above fails or returns nil.
-		result, err = ve.ObtainSdkValue("RESPONSE.HostGroupInfo", *resp)
-		if err != nil {
-			return data, err
-		}
-	}
-	if result == nil {
-		return data, fmt.Errorf("Host Group %s not exist ", id)
+	infoRaw, err := ve.ObtainSdkValue("RESPONSE.HostGroupHostsRulesInfo", *resp)
+	if err != nil || infoRaw == nil {
+		infoRaw, _ = ve.ObtainSdkValue("RESPONSE", *resp)
 	}
 
-	hostGroupInfo, ok := result.(map[string]interface{})
+	info, ok := infoRaw.(map[string]interface{})
 	if !ok {
-		return data, errors.New("RESPONSE.HostGroupInfo is not map")
+		return data, errors.New("RESPONSE.HostGroupHostsRulesInfo is not map")
+	}
+
+	hostGroupInfoRaw := info["HostGroupInfo"]
+	if hostGroupInfoRaw == nil {
+		hostGroupInfoRaw = info
+	}
+
+	hostGroupInfo, ok := hostGroupInfoRaw.(map[string]interface{})
+	if !ok {
+		return data, errors.New("HostGroupInfo is not map")
 	}
 
 	// Manual mapping from API PascalCase to Terraform snake_case
@@ -432,6 +524,7 @@ func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (da
 		"update_end_time":   hostGroupInfo["UpdateEndTime"],
 		"auto_update":       hostGroupInfo["AutoUpdate"],
 		"service_logging":   hostGroupInfo["ServiceLogging"],
+		"host_ip_list":      collectIps(info),
 	}
 
 	return data, nil
@@ -441,9 +534,11 @@ func (s *Service) RefreshResourceState(resourceData *schema.ResourceData, target
 	return nil
 }
 
-func (Service) WithResourceResponseHandlers(data map[string]interface{}) []ve.ResourceResponseHandler {
-	return []ve.ResourceResponseHandler{}
-
+func (s *Service) WithResourceResponseHandlers(m map[string]interface{}) []ve.ResourceResponseHandler {
+	handler := func() (map[string]interface{}, map[string]ve.ResponseConvert, error) {
+		return m, nil, nil
+	}
+	return []ve.ResourceResponseHandler{handler}
 }
 
 func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *schema.Resource) []ve.Callback {
@@ -497,8 +592,15 @@ func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *sc
 				return resp, nil
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.HostGroupId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.HostGroupId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return fmt.Errorf("HostGroupId is not string")
+				}
 				return nil
 			},
 		},
@@ -534,9 +636,12 @@ func (s *Service) ModifyResource(resourceData *schema.ResourceData, resource *sc
 				(*call.SdkParam)["HostGroupId"] = d.Id()
 
 				if d.HasChanges("host_ip_list", "host_identifier", "host_group_type") {
-					(*call.SdkParam)["HostGroupType"] = d.Get("host_group_type")
-					if d.Get("host_group_type").(string) == "IP" {
-						(*call.SdkParam)["HostIpList"] = d.Get("host_ip_list").(*schema.Set).List()
+					hgt := d.Get("host_group_type")
+					(*call.SdkParam)["HostGroupType"] = hgt
+					if hgtStr, ok := hgt.(string); ok && hgtStr == "IP" {
+						if v, ok := d.Get("host_ip_list").(*schema.Set); ok {
+							(*call.SdkParam)["HostIpList"] = v.List()
+						}
 					} else {
 						(*call.SdkParam)["HostIdentifier"] = d.Get("host_identifier")
 					}
@@ -597,6 +702,29 @@ func (s *Service) DatasourceResources(d *schema.ResourceData, r *schema.Resource
 		}
 	}
 	return ve.DataSourceInfo{
+		RequestConverts: map[string]ve.RequestConvert{
+			"host_group_id": {
+				TargetField: "host_group_id",
+			},
+			"host_group_name": {
+				TargetField: "host_group_name",
+			},
+			"host_identifier": {
+				TargetField: "host_identifier",
+			},
+			"iam_project_name": {
+				TargetField: "iam_project_name",
+			},
+			"auto_update": {
+				TargetField: "auto_update",
+			},
+			"service_logging": {
+				TargetField: "service_logging",
+			},
+			"hidden": {
+				TargetField: "hidden",
+			},
+		},
 		NameField:    "HostGroupName",
 		IdField:      "HostGroupId",
 		CollectField: "infos",

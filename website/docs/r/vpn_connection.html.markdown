@@ -89,8 +89,14 @@ The following arguments are supported:
 * `nat_traversal` - (Optional) The nat traversal of the VPN connection.
 * `negotiate_instantly` - (Optional) Whether to initiate negotiation mode immediately.
 * `project_name` - (Optional) The project name of the VPN connection.
+* `tags` - (Optional) Tags.
 * `vpn_connection_name` - (Optional) The name of the VPN connection.
 * `vpn_gateway_id` - (Optional, ForceNew) The ID of the vpn gateway. If the `AttachType` is not passed or the passed value is `VpnGateway`, this parameter must be filled. If the value of `AttachType` is `TransitRouter`, this parameter does not need to be filled.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

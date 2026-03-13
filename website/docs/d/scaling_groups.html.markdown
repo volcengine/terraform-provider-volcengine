@@ -58,6 +58,12 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The project name of the scaling group.
 * `scaling_group_names` - (Optional) A list of scaling group names.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

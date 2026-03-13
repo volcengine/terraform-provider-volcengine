@@ -57,8 +57,15 @@ data "volcengine_ssl_vpn_servers" "foo" {
 The following arguments are supported:
 * `ids` - (Optional) The ids list.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the ssl server.
 * `ssl_vpn_server_name` - (Optional) The name of the ssl vpn server.
+* `tags` - (Optional) Tags.
 * `vpn_gateway_id` - (Optional) The id of the vpn gateway.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -86,6 +93,9 @@ Values:
     * `ssl_vpn_server_id` - The id of the ssl vpn server.
     * `ssl_vpn_server_name` - The name of the SSL server.
     * `status` - The status of the ssl vpn server.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time.
     * `vpn_gateway_id` - The vpn gateway id.
 * `total_count` - The total count of SSL VPN server query.

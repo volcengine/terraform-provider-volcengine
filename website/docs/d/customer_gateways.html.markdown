@@ -25,9 +25,17 @@ The following arguments are supported:
 * `customer_gateway_names` - (Optional) A list of customer gateway names.
 * `ids` - (Optional) A list of customer gateway ids.
 * `ip_address` - (Optional) A IP address of the customer gateway.
+* `ip_version` - (Optional) The IP version of the customer gateway. Valid value: ipv4, ipv6.
 * `name_regex` - (Optional) A Name Regex of customer gateway.
 * `output_file` - (Optional) File name where to save data source results.
 * `project_name` - (Optional) The project name of the VPN customer gateway.
+* `status` - (Optional) The status of the customer gateway. Valid value: Creating, Deleting, Pending, Available.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -40,7 +48,12 @@ In addition to all arguments above, the following attributes are exported:
     * `description` - The description of the customer gateway.
     * `id` - The ID of the customer gateway.
     * `ip_address` - The IP address of the customer gateway.
+    * `ip_version` - The IP version of the customer gateway.
+    * `project_name` - The project name of the VPN customer gateway.
     * `status` - The status of the customer gateway.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of customer gateway.
 * `total_count` - The total count of customer gateway query.
 

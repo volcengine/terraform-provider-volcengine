@@ -11,7 +11,7 @@ Use this data source to query detailed information of iam access key last useds
 ## Example Usage
 ```hcl
 data "volcengine_iam_access_key_last_useds" "default" {
-  access_key_id = "AKLxxxxxxxxxxxxxxxxxxxxxxxxx"
+  access_key_id = "your access_key_id"
 }
 ```
 ## Argument Reference

@@ -76,7 +76,12 @@ func ResourceVolcenginePrivatelinkVpcEndpoint() *schema.Resource {
 				Computed:    true,
 				Description: "Whether to enable private dns name. Default is false.",
 			},
-
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of vpc endpoint.",
+			},
+			"tags": ve.TagsSchema(),
 			// computed fields
 			"vpc_id": {
 				Type:        schema.TypeString,

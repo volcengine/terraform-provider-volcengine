@@ -103,7 +103,9 @@ func (s *VolcengineIamSecurityConfigService) CreateResource(resourceData *schema
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(d.Get("user_name").(string))
+				if v, ok := d.Get("user_name").(string); ok && v != "" {
+					d.SetId(v)
+				}
 				return nil
 			},
 		},

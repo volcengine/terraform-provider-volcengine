@@ -79,9 +79,15 @@ The following arguments are supported:
 * `project_name` - (Optional) The project name of VPN connection.
 * `spec` - (Optional) The spec of IPSec connection. Valid values: `default`, `large`.
 * `status` - (Optional) The status of IPSec connection. Valid values: `Creating`, `Deleting`, `Pending`, `Available`.
+* `tags` - (Optional) Tags.
 * `transit_router_id` - (Optional) An ID of transit router.
 * `vpn_connection_names` - (Optional) A list of VPN connection names.
 * `vpn_gateway_id` - (Optional) An ID of VPN gateway.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -119,6 +125,9 @@ In addition to all arguments above, the following attributes are exported:
     * `overdue_time` - The overdue time of resource, valid when the attach type is 'TransitRouter'.
     * `remote_subnet` - The remote subnet of the VPN connection.
     * `status` - The status of the VPN connection.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `transit_router_id` - The id of transit router, valid when the attach type is 'TransitRouter'.
     * `update_time` - The update time of VPN connection.
     * `vpn_connection_id` - The ID of the VPN connection.

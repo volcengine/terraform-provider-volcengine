@@ -59,6 +59,15 @@ func ResourceVolcengineCustomerGateway() *schema.Resource {
 				Computed:    true,
 				Description: "The project name of the VPN customer gateway.",
 			},
+			"tags": ve.TagsSchema(),
+			"ip_version": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Default:      "ipv4",
+				ForceNew:     true,
+				ValidateFunc: validation.StringInSlice([]string{"ipv4", "ipv6"}, false),
+				Description:  "The IP version of the customer gateway. Default value is ipv4. Valid value: ipv4, ipv6.",
+			},
 		},
 	}
 	dataSource := DataSourceVolcengineCustomerGateways().Schema["customer_gateways"].Elem.(*schema.Resource).Schema

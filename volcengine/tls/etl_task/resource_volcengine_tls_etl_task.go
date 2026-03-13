@@ -89,6 +89,11 @@ func ResourceVolcengineEtlTask() *schema.Resource {
 							Required:    true,
 							Description: "Log topics used for storing processed logs.",
 						},
+						"region": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The region where the log topic is located.",
+						},
 						"role_trn": {
 							Type:        schema.TypeString,
 							Optional:    true,

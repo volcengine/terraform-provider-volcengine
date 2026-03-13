@@ -75,9 +75,16 @@ The following arguments are supported:
 * `ids` - (Optional) The IDs of vpc endpoint.
 * `name_regex` - (Optional) A Name Regex of vpc endpoint.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of vpc endpoint.
 * `service_name` - (Optional) The name of vpc endpoint service.
 * `status` - (Optional) The status of vpc endpoint. Valid values: `Creating`, `Pending`, `Available`, `Deleting`, `Inactive`.
+* `tags` - (Optional) Tags.
 * `vpc_id` - (Optional) The vpc id of vpc endpoint.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -95,9 +102,13 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The Id of vpc endpoint.
     * `private_dns_enabled` - Whether to enable private dns name.
     * `private_dns_name` - The private dns name of vpc endpoint.
+    * `project_name` - The project name of vpc endpoint.
     * `service_id` - The Id of vpc endpoint service.
     * `service_name` - The name of vpc endpoint service.
     * `status` - The status of vpc endpoint.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of vpc endpoint.
     * `vpc_id` - The vpc id of vpc endpoint.
 

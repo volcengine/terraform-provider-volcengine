@@ -2,11 +2,11 @@ resource "volcengine_iam_tag" "foo" {
   resource_type  = "User"
   resource_names = ["jonny"]
   tags {
-    key   = "key4"
-    value = "value4"
+    key   = "key1"
+    value = "value1"
   }
   tags {
-      key   = "key3"
-      value = "value3"
+      key   = "key2"
+      value = "value2"
     }
 }

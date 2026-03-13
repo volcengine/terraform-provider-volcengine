@@ -72,6 +72,7 @@ func (s *VolcengineCustomerGatewayService) ReadResources(m map[string]interface{
 		if data, ok = results.([]interface{}); !ok {
 			return data, errors.New("Result.CustomerGateways is not Slice")
 		}
+		data, err = removeSystemTags(data)
 		return data, err
 	})
 	if err != nil || len(nameSet) == 0 {
@@ -164,6 +165,12 @@ func (s *VolcengineCustomerGatewayService) CreateResource(resourceData *schema.R
 		Call: ve.SdkCall{
 			Action:      "CreateCustomerGateway",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
@@ -194,33 +201,38 @@ func (s *VolcengineCustomerGatewayService) ModifyResource(resourceData *schema.R
 	callbacks := make([]ve.Callback, 0)
 
 	// 修改CustomerGateway
-	modifyCallback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "ModifyCustomerGatewayAttributes",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"customer_gateway_name": {
-					ConvertType: ve.ConvertDefault,
+	if resourceData.HasChanges("customer_gateway_name", "description") {
+		modifyCallback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifyCustomerGatewayAttributes",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"customer_gateway_name": {
+						ConvertType: ve.ConvertDefault,
+					},
+					"description": {
+						ConvertType: ve.ConvertDefault,
+					},
 				},
-				"description": {
-					ConvertType: ve.ConvertDefault,
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) < 1 {
+						return false, nil
+					}
+					(*call.SdkParam)["CustomerGatewayId"] = d.Id()
+					return true, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				},
 			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) < 1 {
-					return false, nil
-				}
-				(*call.SdkParam)["CustomerGatewayId"] = d.Id()
-				return true, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.RespFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-		},
+		}
+		callbacks = append(callbacks, modifyCallback)
 	}
-	callbacks = append(callbacks, modifyCallback)
 
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "customergateway", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
 	return callbacks
 }
 
@@ -274,6 +286,15 @@ func (s *VolcengineCustomerGatewayService) DatasourceResources(*schema.ResourceD
 				TargetField: "CustomerGatewayNames",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "CustomerGatewayName",
 		IdField:      "CustomerGatewayId",
@@ -308,4 +329,25 @@ func (s *VolcengineCustomerGatewayService) ProjectTrn() *ve.ProjectTrn {
 		ProjectResponseField: "ProjectName",
 		ProjectSchemaField:   "project_name",
 	}
+}
+
+func removeSystemTags(data []interface{}) ([]interface{}, error) {
+	var (
+		ok      bool
+		result  map[string]interface{}
+		results []interface{}
+		tags    []interface{}
+	)
+	for _, d := range data {
+		if result, ok = d.(map[string]interface{}); !ok {
+			return results, errors.New("The elements in data are not map ")
+		}
+		tags, ok = result["Tags"].([]interface{})
+		if ok {
+			tags = ve.FilterSystemTags(tags)
+			result["Tags"] = tags
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }

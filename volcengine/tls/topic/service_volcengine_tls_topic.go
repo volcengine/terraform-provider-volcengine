@@ -54,6 +54,9 @@ func (s *VolcengineTlsTopicService) ReadResources(condition map[string]interface
 			Path:        []string{action},
 			Client:      s.Client.BypassSvcClient.NewTlsClient(),
 		}, &condition)
+		if err != nil {
+			return data, err
+		}
 		logger.Debug(logger.RespFormat, action, condition, *resp)
 		results, err = ve.ObtainSdkValue("RESPONSE.Topics", *resp)
 		if err != nil {
@@ -119,7 +122,7 @@ func (s *VolcengineTlsTopicService) ReadResource(resourceData *schema.ResourceDa
 		if topicMap, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
 		}
-		if topicMap["TopicId"].(string) == topicId {
+		if tId, ok := topicMap["TopicId"].(string); ok && tId == topicId {
 			data = topicMap
 			break
 		}
@@ -255,31 +258,33 @@ func (s *VolcengineTlsTopicService) CreateResource(resourceData *schema.Resource
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				if v, ok := d.GetOk("encrypt_conf"); ok {
 					if list, ok := v.([]interface{}); ok && len(list) > 0 {
-						conf := list[0].(map[string]interface{})
-						apiConf := make(map[string]interface{})
-						if val, ok := conf["enable"]; ok {
-							apiConf["enable"] = val
-						}
-						if val, ok := conf["encrypt_type"]; ok {
-							apiConf["encrypt_type"] = val
-						}
-						if u, ok := conf["user_cmk_info"]; ok {
-							if uList, ok := u.([]interface{}); ok && len(uList) > 0 {
-								uKey := uList[0].(map[string]interface{})
-								apiUKey := make(map[string]interface{})
-								if val, ok := uKey["user_cmk_id"]; ok {
-									apiUKey["user_cmk_id"] = val
-								}
-								if val, ok := uKey["region_id"]; ok {
-									apiUKey["region_id"] = val
-								}
-								if val, ok := uKey["trn"]; ok {
-									apiUKey["trn"] = val
-								}
-								apiConf["user_cmk_info"] = apiUKey
+						if conf, ok := list[0].(map[string]interface{}); ok {
+							apiConf := make(map[string]interface{})
+							if val, ok := conf["enable"]; ok {
+								apiConf["enable"] = val
 							}
+							if val, ok := conf["encrypt_type"]; ok {
+								apiConf["encrypt_type"] = val
+							}
+							if u, ok := conf["user_cmk_info"]; ok {
+								if uList, ok := u.([]interface{}); ok && len(uList) > 0 {
+									if uKey, ok := uList[0].(map[string]interface{}); ok {
+										apiUKey := make(map[string]interface{})
+										if val, ok := uKey["user_cmk_id"]; ok {
+											apiUKey["user_cmk_id"] = val
+										}
+										if val, ok := uKey["region_id"]; ok {
+											apiUKey["region_id"] = val
+										}
+										if val, ok := uKey["trn"]; ok {
+											apiUKey["trn"] = val
+										}
+										apiConf["user_cmk_info"] = apiUKey
+									}
+								}
+							}
+							(*call.SdkParam)["EncryptConf"] = apiConf
 						}
-						(*call.SdkParam)["EncryptConf"] = apiConf
 					}
 				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -291,8 +296,15 @@ func (s *VolcengineTlsTopicService) CreateResource(resourceData *schema.Resource
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.TopicId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.TopicId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return errors.New("TopicId is not string")
+				}
 				return nil
 			},
 		},
@@ -365,31 +377,33 @@ func (s *VolcengineTlsTopicService) ModifyResource(resourceData *schema.Resource
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				if v, ok := d.GetOk("encrypt_conf"); ok {
 					if list, ok := v.([]interface{}); ok && len(list) > 0 {
-						conf := list[0].(map[string]interface{})
-						apiConf := make(map[string]interface{})
-						if val, ok := conf["enable"]; ok {
-							apiConf["enable"] = val
-						}
-						if val, ok := conf["encrypt_type"]; ok {
-							apiConf["encrypt_type"] = val
-						}
-						if u, ok := conf["user_cmk_info"]; ok {
-							if uList, ok := u.([]interface{}); ok && len(uList) > 0 {
-								uKey := uList[0].(map[string]interface{})
-								apiUKey := make(map[string]interface{})
-								if val, ok := uKey["user_cmk_id"]; ok {
-									apiUKey["user_cmk_id"] = val
-								}
-								if val, ok := uKey["region_id"]; ok {
-									apiUKey["region_id"] = val
-								}
-								if val, ok := uKey["trn"]; ok {
-									apiUKey["trn"] = val
-								}
-								apiConf["user_cmk_info"] = apiUKey
+						if conf, ok := list[0].(map[string]interface{}); ok {
+							apiConf := make(map[string]interface{})
+							if val, ok := conf["enable"]; ok {
+								apiConf["enable"] = val
 							}
+							if val, ok := conf["encrypt_type"]; ok {
+								apiConf["encrypt_type"] = val
+							}
+							if u, ok := conf["user_cmk_info"]; ok {
+								if uList, ok := u.([]interface{}); ok && len(uList) > 0 {
+									if uKey, ok := uList[0].(map[string]interface{}); ok {
+										apiUKey := make(map[string]interface{})
+										if val, ok := uKey["user_cmk_id"]; ok {
+											apiUKey["user_cmk_id"] = val
+										}
+										if val, ok := uKey["region_id"]; ok {
+											apiUKey["region_id"] = val
+										}
+										if val, ok := uKey["trn"]; ok {
+											apiUKey["trn"] = val
+										}
+										apiConf["user_cmk_info"] = apiUKey
+									}
+								}
+							}
+							(*call.SdkParam)["EncryptConf"] = apiConf
 						}
-						(*call.SdkParam)["EncryptConf"] = apiConf
 					}
 				}
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
@@ -553,7 +567,13 @@ func (s *VolcengineTlsTopicService) setResourceTags(resourceData *schema.Resourc
 					(*call.SdkParam)["ResourcesList"] = []string{resourceData.Id()}
 					(*call.SdkParam)["TagKeyList"] = make([]string, 0)
 					for _, tag := range removedTags.List() {
-						(*call.SdkParam)["TagKeyList"] = append((*call.SdkParam)["TagKeyList"].([]string), tag.(map[string]interface{})["key"].(string))
+						if tm, ok := tag.(map[string]interface{}); ok {
+							if k, ok := tm["key"].(string); ok {
+								if tagKeyList, ok := (*call.SdkParam)["TagKeyList"].([]string); ok {
+									(*call.SdkParam)["TagKeyList"] = append(tagKeyList, k)
+								}
+							}
+						}
 					}
 					return true, nil
 				}
@@ -582,10 +602,14 @@ func (s *VolcengineTlsTopicService) setResourceTags(resourceData *schema.Resourc
 					(*call.SdkParam)["ResourcesList"] = []string{resourceData.Id()}
 					(*call.SdkParam)["Tags"] = make([]map[string]interface{}, 0)
 					for _, tag := range addedTags.List() {
-						(*call.SdkParam)["Tags"] = append((*call.SdkParam)["Tags"].([]map[string]interface{}), map[string]interface{}{
-							"Key":   tag.(map[string]interface{})["key"],
-							"Value": tag.(map[string]interface{})["value"],
-						})
+						if tm, ok := tag.(map[string]interface{}); ok {
+							if tagList, ok := (*call.SdkParam)["Tags"].([]map[string]interface{}); ok {
+								(*call.SdkParam)["Tags"] = append(tagList, map[string]interface{}{
+									"Key":   tm["key"],
+									"Value": tm["value"],
+								})
+							}
+						}
 					}
 					return true, nil
 				}

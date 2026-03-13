@@ -33,6 +33,12 @@ func DataSourceVolcengineIpv6Gateways() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The ID list of the VPC which the Ipv6Gateway belongs to.",
 			},
+			"project_name": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The project name of the Ipv6Gateway.",
+			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -95,6 +101,12 @@ func DataSourceVolcengineIpv6Gateways() *schema.Resource {
 							Computed:    true,
 							Description: "Update time of the Ipv6Gateway.",
 						},
+						"project_name": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "The project name of the Ipv6Gateway.",
+						},
+						"tags": ve.TagsSchemaComputed(),
 					},
 				},
 			},

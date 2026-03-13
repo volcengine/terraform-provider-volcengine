@@ -40,8 +40,15 @@ func dataSourceVolcengineTlsDownloadUrlsRead(d *schema.ResourceData, meta interf
 		return fmt.Errorf("download url not found for task %s", d.Get("task_id"))
 	}
 
-	result := results[0].(map[string]interface{})
-	d.SetId(result["task_id"].(string))
+	result, ok := results[0].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("download url result is not map[string]interface{}")
+	}
+	if taskId, ok := result["task_id"].(string); ok {
+		d.SetId(taskId)
+	} else {
+		return fmt.Errorf("task_id in result is not string")
+	}
 	d.Set("download_url", result["download_url"])
 
 	return nil

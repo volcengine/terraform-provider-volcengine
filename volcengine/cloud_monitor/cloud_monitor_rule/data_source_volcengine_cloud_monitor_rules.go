@@ -66,6 +66,28 @@ func DataSourceVolcengineCloudMonitorRules() *schema.Resource {
 				ConflictsWith: []string{"ids"},
 				Description:   "The enable state of the cloud monitor rule. Valid values: `enable`, `disable`.",
 			},
+			"tags": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "The tags of the cloud monitor rule.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "The Key of Tags.",
+						},
+						"values": {
+							Type:     schema.TypeList,
+							Required: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The Value of Tags.",
+						},
+					},
+				},
+			},
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -205,6 +227,7 @@ func DataSourceVolcengineCloudMonitorRules() *schema.Resource {
 							},
 							Description: "The alert methods of the cloud monitor rule.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 						"conditions": {
 							Type:        schema.TypeList,
 							Computed:    true,

@@ -2,8 +2,9 @@ package cloud_monitor_rule
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -117,6 +118,7 @@ func ResourceVolcengineCloudMonitorRule() *schema.Resource {
 				Set:         schema.HashString,
 				Description: "The alert methods of the cloud monitor rule. Valid values: `Email`, `Phone`, `SMS`, `Webhook`.",
 			},
+			"tags": ve.TagsSchema(),
 			"web_hook": {
 				Type:          schema.TypeString,
 				Optional:      true,

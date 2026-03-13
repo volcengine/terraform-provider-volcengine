@@ -1,6 +1,7 @@
 package iam_policy_project
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -25,10 +26,18 @@ func (s *VolcengineIamPolicyProjectService) GetClient() *ve.SdkClient {
 }
 
 func (s *VolcengineIamPolicyProjectService) CreateResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	projects := data.Get("project_names").(*schema.Set).List()
+	v := data.Get("project_names")
+	tagsSet, ok := v.(*schema.Set)
+	if !ok {
+		return []ve.Callback{{Err: errors.New("project_names is not *schema.Set")}}
+	}
+	projects := tagsSet.List()
 	var callbacks []ve.Callback
 	for i, p := range projects {
-		pName := p.(string)
+		pName, ok := p.(string)
+		if !ok {
+			return []ve.Callback{{Err: errors.New("project_name item is not string")}}
+		}
 		callback := ve.Callback{
 			Call: ve.SdkCall{
 				Action:      "AttachPolicyInProject",
@@ -38,10 +47,26 @@ func (s *VolcengineIamPolicyProjectService) CreateResource(data *schema.Resource
 						param := make(map[string]interface{})
 						call.SdkParam = &param
 					}
-					(*call.SdkParam)["PrincipalType"] = d.Get("principal_type").(string)
-					(*call.SdkParam)["PrincipalName"] = d.Get("principal_name").(string)
-					(*call.SdkParam)["PolicyType"] = d.Get("policy_type").(string)
-					(*call.SdkParam)["PolicyName"] = d.Get("policy_name").(string)
+					principalType, ok := d.Get("principal_type").(string)
+					if !ok {
+						return false, errors.New("principal_type is not string")
+					}
+					principalName, ok := d.Get("principal_name").(string)
+					if !ok {
+						return false, errors.New("principal_name is not string")
+					}
+					policyType, ok := d.Get("policy_type").(string)
+					if !ok {
+						return false, errors.New("policy_type is not string")
+					}
+					policyName, ok := d.Get("policy_name").(string)
+					if !ok {
+						return false, errors.New("policy_name is not string")
+					}
+					(*call.SdkParam)["PrincipalType"] = principalType
+					(*call.SdkParam)["PrincipalName"] = principalName
+					(*call.SdkParam)["PolicyType"] = policyType
+					(*call.SdkParam)["PolicyName"] = policyName
 					(*call.SdkParam)["ProjectName.1"] = pName
 					return true, nil
 				},
@@ -54,13 +79,31 @@ func (s *VolcengineIamPolicyProjectService) CreateResource(data *schema.Resource
 			callback.Call.AfterCall = func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				var projectNames []string
 				for _, p := range projects {
-					projectNames = append(projectNames, p.(string))
+					if pStr, ok := p.(string); ok {
+						projectNames = append(projectNames, pStr)
+					}
+				}
+				principalType, ok := d.Get("principal_type").(string)
+				if !ok {
+					return errors.New("principal_type is not string")
+				}
+				principalName, ok := d.Get("principal_name").(string)
+				if !ok {
+					return errors.New("principal_name is not string")
+				}
+				policyType, ok := d.Get("policy_type").(string)
+				if !ok {
+					return errors.New("policy_type is not string")
+				}
+				policyName, ok := d.Get("policy_name").(string)
+				if !ok {
+					return errors.New("policy_name is not string")
 				}
 				d.SetId(fmt.Sprintf("%s:%s:%s:%s:%s",
-					d.Get("principal_type").(string),
-					d.Get("principal_name").(string),
-					d.Get("policy_type").(string),
-					d.Get("policy_name").(string),
+					principalType,
+					principalName,
+					policyType,
+					policyName,
 					strings.Join(projectNames, ",")))
 				return nil
 			}
@@ -170,18 +213,37 @@ func (s *VolcengineIamPolicyProjectService) ReadResource(d *schema.ResourceData,
 	foundProjects := make(map[string]bool)
 	hasSystemScope := false
 	for _, item := range list {
-		m := item.(map[string]interface{})
-		if strings.EqualFold(m["PolicyName"].(string), policyName) && strings.EqualFold(m["PolicyType"].(string), policyType) {
-			scopes, _ := m["PolicyScope"].([]interface{})
-			for _, scope := range scopes {
-				sm := scope.(map[string]interface{})
-				scopeType, _ := sm["PolicyScopeType"].(string)
-				if strings.EqualFold(scopeType, "System") {
-					hasSystemScope = true
-				}
-				pName, ok := sm["ProjectName"].(string)
-				if ok && pName != "" {
-					foundProjects[pName] = true
+		m, ok := item.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("result item is not map")
+		}
+		pName, ok := m["PolicyName"].(string)
+		if !ok {
+			return nil, errors.New("result item PolicyName is not string")
+		}
+		pType, ok := m["PolicyType"].(string)
+		if !ok {
+			return nil, errors.New("result item PolicyType is not string")
+		}
+		if strings.EqualFold(pName, policyName) && strings.EqualFold(pType, policyType) {
+			scopes, ok := m["PolicyScope"].([]interface{})
+			if ok {
+				for _, scope := range scopes {
+					sm, ok := scope.(map[string]interface{})
+					if !ok {
+						return nil, errors.New("policy scope item is not map")
+					}
+					scopeType, ok := sm["PolicyScopeType"].(string)
+					if !ok {
+						return nil, errors.New("policy scope type is not string")
+					}
+					if strings.EqualFold(scopeType, "System") {
+						hasSystemScope = true
+					}
+					pName, ok := sm["ProjectName"].(string)
+					if ok && pName != "" {
+						foundProjects[pName] = true
+					}
 				}
 			}
 		}

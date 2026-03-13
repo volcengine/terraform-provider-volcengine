@@ -13,11 +13,11 @@ Provides a resource to manage tls alarm
 resource "volcengine_tls_alarm" "foo" {
   alarm_name     = "test-terraform-tf"
   project_id     = "88d31abb-62c7-40f5-998e-889747c2a116"
-  status         = false
+  status         = true
   trigger_period = 2
   #alarm_period = 60
   alarm_notify_group = ["bf3ecf26-2081-4e27-ae18-f44dbe5c6138"]
-  user_define_msg    = "test for terraform"
+  user_define_msg    = "test for terraform-modify"
 
   query_request {
     number                 = 1
@@ -55,8 +55,7 @@ resource "volcengine_tls_alarm" "foo" {
     no_data         = false
   }
 
-
-  send_resolved = true
+  send_resolved = false
 }
 ```
 ## Argument Reference

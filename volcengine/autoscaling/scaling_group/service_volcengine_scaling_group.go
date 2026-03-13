@@ -625,6 +625,15 @@ func (s *VolcengineScalingGroupService) DatasourceResources(*schema.ResourceData
 				TargetField: "ScalingGroupNames",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "ScalingGroupName",
 		IdField:      "ScalingGroupId",

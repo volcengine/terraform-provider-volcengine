@@ -116,8 +116,15 @@ func (s *VolcengineEtlTaskService) CreateResource(resourceData *schema.ResourceD
 				}, call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.TaskId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.TaskId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return fmt.Errorf("TaskId in response is not string")
+				}
 				return nil
 			},
 		},
@@ -174,6 +181,10 @@ func (s *VolcengineEtlTaskService) ModifyResource(resourceData *schema.ResourceD
 							TargetField: "TopicId",
 							ForceGet:    true,
 						},
+						"region": {
+							TargetField: "Region",
+							ForceGet:    true,
+						},
 					},
 				},
 			},
@@ -205,7 +216,11 @@ func (s *VolcengineEtlTaskService) ModifyResource(resourceData *schema.ResourceD
 				if d.HasChange("enable") {
 					(*call.SdkParam)["TaskId"] = d.Id()
 					_, newValue := d.GetChange("enable")
-					(*call.SdkParam)["Status"] = newValue.(bool)
+					if status, ok := newValue.(bool); ok {
+						(*call.SdkParam)["Status"] = status
+					} else {
+						return false, fmt.Errorf("enable field is not a bool")
+					}
 					return true, nil
 				}
 				// Skip if enable field hasn't changed

@@ -1,10 +1,26 @@
 package kafka_topic
 
 import (
+	"bytes"
+	"fmt"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/hashcode"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
+
+var TagsHash = func(v interface{}) int {
+	if v == nil {
+		return hashcode.String("")
+	}
+	m := v.(map[string]interface{})
+	var (
+		buf bytes.Buffer
+	)
+	buf.WriteString(fmt.Sprintf("%v#%v", m["key"], m["value"]))
+	return hashcode.String(buf.String())
+}
 
 func DataSourceVolcengineKafkaTopics() *schema.Resource {
 	return &schema.Resource{
@@ -35,6 +51,7 @@ func DataSourceVolcengineKafkaTopics() *schema.Resource {
 				Optional:    true,
 				Description: "When a user name is specified, only the access policy of the specified user for this Topic will be returned.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -86,6 +103,28 @@ func DataSourceVolcengineKafkaTopics() *schema.Resource {
 							Type:        schema.TypeString,
 							Computed:    true,
 							Description: "The status of the kafka topic.",
+						},
+						"log_retention_hours": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The retention hours of log.",
+						},
+						"used_storage_percentage_in_instance": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The used storage percentage in instance.",
+						},
+						"used_storage_space_in_bytes": {
+							Type:        schema.TypeInt,
+							Computed:    true,
+							Description: "The total storage space size already used by the current Topic.",
+						},
+						"tags": ve.TagsSchemaComputed(),
+						"cleanup_policy": {
+							Type:        schema.TypeList,
+							Elem:        &schema.Schema{Type: schema.TypeString},
+							Computed:    true,
+							Description: "The cleanup policy of the kafka topic.",
 						},
 						"parameters": {
 							Type:        schema.TypeList,

@@ -2,8 +2,9 @@ package ipv6_address_bandwidth
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
@@ -56,6 +57,7 @@ func ResourceVolcengineIpv6AddressBandwidth() *schema.Resource {
 				Computed:    true,
 				Description: "Peek bandwidth of the Ipv6 address. Valid values: 1 to 200. Unit: Mbit/s.",
 			},
+			"tags": ve.TagsSchema(),
 		},
 	}
 	dataSource := DataSourceVolcengineIpv6AddressBandwidths().Schema["ipv6_address_bandwidths"].Elem.(*schema.Resource).Schema

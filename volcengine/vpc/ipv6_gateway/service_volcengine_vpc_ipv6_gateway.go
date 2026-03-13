@@ -134,6 +134,20 @@ func (s *VolcengineIpv6GatewayService) CreateResource(resourceData *schema.Resou
 		Call: ve.SdkCall{
 			Action:      "CreateIpv6Gateway",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+					NextLevelConvert: map[string]ve.RequestConvert{
+						"key": {
+							TargetField: "Key",
+						},
+						"value": {
+							TargetField: "Value",
+						},
+					},
+				},
+			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ClientToken"] = uuid.New().String()
 				return true, nil
@@ -194,6 +208,9 @@ func (s *VolcengineIpv6GatewayService) ModifyResource(resourceData *schema.Resou
 	}
 	callbacks = append(callbacks, callback)
 
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "ipv6gateway", resourceData, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
 	return callbacks
 }
 
@@ -257,6 +274,18 @@ func (s *VolcengineIpv6GatewayService) DatasourceResources(*schema.ResourceData,
 				TargetField: "VpcIds",
 				ConvertType: ve.ConvertWithN,
 			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
+			},
 		},
 		NameField:    "Name",
 		IdField:      "Ipv6GatewayId",
@@ -272,6 +301,15 @@ func (s *VolcengineIpv6GatewayService) DatasourceResources(*schema.ResourceData,
 
 func (s *VolcengineIpv6GatewayService) ReadResourceId(id string) string {
 	return id
+}
+
+func (s *VolcengineIpv6GatewayService) ProjectTrn() *ve.ProjectTrn {
+	return &ve.ProjectTrn{
+		ServiceName:          "vpc",
+		ResourceType:         "ipv6gateway",
+		ProjectResponseField: "ProjectName",
+		ProjectSchemaField:   "project_name",
+	}
 }
 
 func getUniversalInfo(actionName string) ve.UniversalInfo {

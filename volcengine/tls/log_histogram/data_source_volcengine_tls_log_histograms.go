@@ -101,7 +101,10 @@ func dataSourceVolcengineTlsHistogramsRead(d *schema.ResourceData, meta interfac
 		return fmt.Errorf("tls histogram not found")
 	}
 
-	result := results[0].(map[string]interface{})
+	result, ok := results[0].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("tls histogram response is not map[string]interface{}")
+	}
 	d.SetId(fmt.Sprintf("%s-%d-%d", result["topic_id"], result["start_time"], result["end_time"]))
 	d.Set("result_status", result["result_status"])
 	d.Set("total_count", result["total_count"])

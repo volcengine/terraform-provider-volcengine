@@ -31,11 +31,15 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 		resp    *map[string]interface{}
 		results interface{}
 	)
-	ids, exist := m["Ids"]
+	idsRaw, exist := m["Ids"]
 	if !exist {
 		return nil, nil
 	}
-	for _, id := range ids.([]interface{}) {
+	ids, ok := idsRaw.([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("Ids is not []interface{}")
+	}
+	for _, id := range ids {
 		condition := map[string]interface{}{
 			"TopicId": id,
 		}
@@ -55,7 +59,10 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 		if err != nil {
 			return data, err
 		}
-		res := results.(map[string]interface{})
+		res, ok := results.(map[string]interface{})
+		if !ok {
+			return data, fmt.Errorf("RESPONSE is not map[string]interface{}")
+		}
 		res["TopicId"] = id
 		data = append(data, res)
 	}
@@ -88,7 +95,7 @@ func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (da
 	if len(data) == 0 {
 		return data, fmt.Errorf("Topic %s not exist ", id)
 	}
-	if !data["AllowConsume"].(bool) { // for import check
+	if allowConsume, ok := data["AllowConsume"].(bool); ok && !allowConsume { // for import check
 		return data, fmt.Errorf("Topic %s do not allow consume ", id)
 	}
 	return data, err
@@ -175,9 +182,10 @@ func (s *Service) DatasourceResources(*schema.ResourceData, *schema.Resource) ve
 		IdField:      "KafkaConsumerId",
 		CollectField: "data",
 		ExtraData: func(i []interface{}) ([]interface{}, error) {
-			for index, ele := range i {
-				element := ele.(map[string]interface{})
-				i[index].(map[string]interface{})["KafkaConsumerId"] = fmt.Sprintf("%s-%d", "kafka", element["TopicId"])
+			for index := range i {
+				if m, ok := i[index].(map[string]interface{}); ok {
+					m["KafkaConsumerId"] = fmt.Sprintf("%s-%v", "kafka", m["TopicId"])
+				}
 			}
 			return i, nil
 		},

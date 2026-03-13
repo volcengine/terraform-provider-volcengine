@@ -70,7 +70,6 @@ func (v *VolcengineTlsAlarmContentTemplateService) ReadResource(resourceData *sc
 	if err != nil {
 		return data, err
 	}
-	logger.Debug(logger.RespFormat, "=====DescribeAlarmContentTemplates", req, results)
 	for _, r := range results {
 		if data, ok = r.(map[string]interface{}); !ok {
 			return data, errors.New("value is not map")
@@ -92,6 +91,34 @@ func (v *VolcengineTlsAlarmContentTemplateService) WithResourceResponseHandlers(
 			"AlarmContentTemplateId": {
 				TargetField: "alarm_content_template_id",
 			},
+			"Sms": {
+				TargetField: "sms",
+				Convert:     convertTemplateResponse,
+			},
+			"Vms": {
+				TargetField: "vms",
+				Convert:     convertTemplateResponse,
+			},
+			"Lark": {
+				TargetField: "lark",
+				Convert:     convertTemplateResponse,
+			},
+			"Email": {
+				TargetField: "email",
+				Convert:     convertTemplateResponse,
+			},
+			"WeChat": {
+				TargetField: "wechat",
+				Convert:     convertTemplateResponse,
+			},
+			"Webhook": {
+				TargetField: "webhook",
+				Convert:     convertTemplateResponse,
+			},
+			"DingTalk": {
+				TargetField: "ding_talk",
+				Convert:     convertTemplateResponse,
+			},
 		}, nil
 	}
 	return []ve.ResourceResponseHandler{handler}
@@ -110,6 +137,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				"sms": {
 					TargetField: "Sms",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -122,6 +150,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				"vms": {
 					TargetField: "Vms",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -134,6 +163,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				"lark": {
 					TargetField: "Lark",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -149,6 +179,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				"email": {
 					TargetField: "Email",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -164,6 +195,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				"wechat": {
 					TargetField: "WeChat",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -176,6 +208,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				"webhook": {
 					TargetField: "Webhook",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -185,6 +218,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				"ding_talk": {
 					TargetField: "DingTalk",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -216,9 +250,16 @@ func (v *VolcengineTlsAlarmContentTemplateService) CreateResource(resourceData *
 				return resp, nil
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.AlarmContentTemplateId", *resp)
-				d.SetId(id.(string))
-				d.Set("alarm_content_template_id", id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.AlarmContentTemplateId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+					d.Set("alarm_content_template_id", s)
+				} else {
+					return fmt.Errorf("AlarmContentTemplateId is not string")
+				}
 				return nil
 			},
 		},
@@ -239,6 +280,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) ModifyResource(resourceData *
 				"sms": {
 					TargetField: "Sms",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -251,6 +293,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) ModifyResource(resourceData *
 				"vms": {
 					TargetField: "Vms",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -263,6 +306,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) ModifyResource(resourceData *
 				"lark": {
 					TargetField: "Lark",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -278,6 +322,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) ModifyResource(resourceData *
 				"email": {
 					TargetField: "Email",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -293,6 +338,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) ModifyResource(resourceData *
 				"wechat": {
 					TargetField: "WeChat",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -305,6 +351,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) ModifyResource(resourceData *
 				"webhook": {
 					TargetField: "Webhook",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -314,6 +361,7 @@ func (v *VolcengineTlsAlarmContentTemplateService) ModifyResource(resourceData *
 				"ding_talk": {
 					TargetField: "DingTalk",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 					NextLevelConvert: map[string]ve.RequestConvert{
 						"content": {
 							TargetField: "Content",
@@ -409,24 +457,31 @@ func (v *VolcengineTlsAlarmContentTemplateService) DatasourceResources(data *sch
 		ResponseConverts: map[string]ve.ResponseConvert{
 			"Sms": {
 				TargetField: "sms",
+				Convert:     convertTemplateResponse,
 			},
 			"Vms": {
 				TargetField: "vms",
+				Convert:     convertTemplateResponse,
 			},
 			"Lark": {
 				TargetField: "lark",
+				Convert:     convertTemplateResponse,
 			},
 			"Email": {
 				TargetField: "email",
+				Convert:     convertTemplateResponse,
 			},
 			"WeChat": {
 				TargetField: "wechat",
+				Convert:     convertTemplateResponse,
 			},
 			"Webhook": {
 				TargetField: "webhook",
+				Convert:     convertTemplateResponse,
 			},
 			"DingTalk": {
 				TargetField: "ding_talk",
+				Convert:     convertTemplateResponse,
 			},
 		},
 	}
@@ -443,4 +498,31 @@ func (v *VolcengineTlsAlarmContentTemplateService) ProjectTrn() *ve.ProjectTrn {
 		ProjectSchemaField:   "iam_project_name",
 		ProjectResponseField: "IamProjectName",
 	}
+}
+
+func convertTemplateResponse(v interface{}) interface{} {
+	if v == nil {
+		return []interface{}{}
+	}
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return []interface{}{}
+	}
+	result := make(map[string]interface{})
+	for k, val := range m {
+		switch k {
+		case "Content":
+			result["content"] = val
+		case "Locale":
+			result["locale"] = val
+		case "Title":
+			result["title"] = val
+		case "Subject":
+			result["subject"] = val
+		}
+	}
+	if content, ok := result["content"].(string); !ok || content == "" {
+		return []interface{}{}
+	}
+	return []interface{}{result}
 }

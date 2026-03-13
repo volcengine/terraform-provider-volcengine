@@ -92,7 +92,11 @@ func ResourceVolcengineTlsTopic() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return !d.Get("auto_split").(bool)
+					v, ok := d.Get("auto_split").(bool)
+					if !ok {
+						return false
+					}
+					return !v
 				},
 				Description: "The maximum number of partitions, which is the maximum number of partitions after partition splitting. " +
 					"The value range is 1 to 10, with a default of 10.",

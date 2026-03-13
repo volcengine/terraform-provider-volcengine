@@ -60,6 +60,7 @@ func DataSourceVolcengineVmpAlertingRules() *schema.Resource {
 				}, false),
 				Description: "The status of vmp alerting rule. Valid values: `Running`, `Disabled`.",
 			},
+			"tags": ve.TagsSchema(),
 			"name_regex": {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -127,6 +128,7 @@ func DataSourceVolcengineVmpAlertingRules() *schema.Resource {
 							Computed:    true,
 							Description: "The status of the vmp alerting rule.",
 						},
+						"tags": ve.TagsSchemaComputed(),
 						"annotations": {
 							Type:        schema.TypeSet,
 							Computed:    true,

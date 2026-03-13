@@ -131,6 +131,14 @@ func DataSourceVolcengineTlsHostGroups() *schema.Resource {
 										Computed:    true,
 										Description: "Whether enable service logging.",
 									},
+									"host_ip_list": {
+										Type:     schema.TypeSet,
+										Computed: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: "The ip list of host group.",
+									},
 								},
 							},
 						},

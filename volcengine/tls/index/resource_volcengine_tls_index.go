@@ -142,9 +142,9 @@ func ResourceVolcengineTlsIndex() *schema.Resource {
 										Description: "The type of value. Valid values: `long`, `double`, `text`.",
 									},
 									"sql_flag": {
-										Type:     schema.TypeBool,
-										Optional: true,
-										Default:  false,
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
 										Description: "Whether the filed is enabled for analysis.",
 									},
 								},

@@ -173,6 +173,12 @@ func (s *VolcengineSslVpnClientCertService) CreateResource(data *schema.Resource
 		Call: ve.SdkCall{
 			Action:      "CreateSslVpnClientCert",
 			ConvertMode: ve.RequestConvertAll,
+			Convert: map[string]ve.RequestConvert{
+				"tags": {
+					TargetField: "Tags",
+					ConvertType: ve.ConvertListN,
+				},
+			},
 			LockId: func(d *schema.ResourceData) string {
 				return d.Get("ssl_vpn_server_id").(string)
 			},
@@ -196,41 +202,49 @@ func (s *VolcengineSslVpnClientCertService) CreateResource(data *schema.Resource
 }
 
 func (s *VolcengineSslVpnClientCertService) ModifyResource(data *schema.ResourceData, resource *schema.Resource) []ve.Callback {
-	callback := ve.Callback{
-		Call: ve.SdkCall{
-			Action:      "ModifySslVpnClientCert",
-			ConvertMode: ve.RequestConvertInConvert,
-			Convert: map[string]ve.RequestConvert{
-				"ssl_vpn_client_cert_name": {
-					TargetField: "SslVpnClientCertName",
-					ConvertType: ve.ConvertDefault,
+	var callbacks []ve.Callback
+	if data.HasChanges("ssl_vpn_client_cert_name", "description") {
+		callback := ve.Callback{
+			Call: ve.SdkCall{
+				Action:      "ModifySslVpnClientCert",
+				ConvertMode: ve.RequestConvertInConvert,
+				Convert: map[string]ve.RequestConvert{
+					"ssl_vpn_client_cert_name": {
+						TargetField: "SslVpnClientCertName",
+						ConvertType: ve.ConvertDefault,
+					},
+					"description": {
+						TargetField: "Description",
+						ConvertType: ve.ConvertDefault,
+					},
 				},
-				"description": {
-					TargetField: "Description",
-					ConvertType: ve.ConvertDefault,
+				LockId: func(d *schema.ResourceData) string {
+					return d.Get("ssl_vpn_server_id").(string)
+				},
+				BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+					if len(*call.SdkParam) > 0 {
+						(*call.SdkParam)["SslVpnClientCertId"] = d.Id()
+						return true, nil
+					}
+					return false, nil
+				},
+				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
+					logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+				},
+				Refresh: &ve.StateRefresh{
+					Target:  []string{"Available"},
+					Timeout: data.Timeout(schema.TimeoutUpdate),
 				},
 			},
-			LockId: func(d *schema.ResourceData) string {
-				return d.Get("ssl_vpn_server_id").(string)
-			},
-			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				if len(*call.SdkParam) > 0 {
-					(*call.SdkParam)["SslVpnClientCertId"] = d.Id()
-					return true, nil
-				}
-				return false, nil
-			},
-			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
-				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
-			},
-			Refresh: &ve.StateRefresh{
-				Target:  []string{"Available"},
-				Timeout: data.Timeout(schema.TimeoutUpdate),
-			},
-		},
+		}
+		callbacks = append(callbacks, callback)
 	}
-	return []ve.Callback{callback}
+
+	// 更新 tags
+	setResourceTagsCallbacks := ve.SetResourceTags(s.Client, "TagResources", "UntagResources", "sslvpnclientcert", data, getUniversalInfo)
+	callbacks = append(callbacks, setResourceTagsCallbacks...)
+	return callbacks
 }
 
 func (s *VolcengineSslVpnClientCertService) RemoveResource(resourceData *schema.ResourceData, r *schema.Resource) []ve.Callback {
@@ -280,6 +294,18 @@ func (s *VolcengineSslVpnClientCertService) DatasourceResources(data *schema.Res
 			"ids": {
 				TargetField: "SslVpnClientCertIds",
 				ConvertType: ve.ConvertWithN,
+			},
+			"tags": {
+				TargetField: "TagFilters",
+				ConvertType: ve.ConvertListN,
+				NextLevelConvert: map[string]ve.RequestConvert{
+					"key": {
+						TargetField: "Key",
+					},
+					"value": {
+						TargetField: "Values.1",
+					},
+				},
 			},
 		},
 		NameField:    "SslVpnClientCertName",

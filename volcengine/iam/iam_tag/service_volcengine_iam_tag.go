@@ -68,7 +68,9 @@ func (s *VolcengineIamTagService) ReadResources(m map[string]interface{}) (data 
 		var nextTokenStr string
 		nextToken, _ := ve.ObtainSdkValue("Result.NextToken", *resp)
 		if nextToken != nil {
-			nextTokenStr = nextToken.(string)
+			if s, ok := nextToken.(string); ok {
+				nextTokenStr = s
+			}
 		}
 
 		return rawTags, nextTokenStr, nil
@@ -95,13 +97,29 @@ func (s *VolcengineIamTagService) CreateResource(resourceData *schema.ResourceDa
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ResourceType"] = d.Get("resource_type")
-				resourceNames := d.Get("resource_names").([]interface{})
-				for i, name := range resourceNames {
-					(*call.SdkParam)[fmt.Sprintf("ResourceNames.%d", i+1)] = name.(string)
+				vNames := d.Get("resource_names")
+				resourceNames, ok := vNames.([]interface{})
+				if !ok {
+					return false, errors.New("resource_names is not []interface{}")
 				}
-				tags := d.Get("tags").(*schema.Set).List()
+				for i, name := range resourceNames {
+					nameStr, ok := name.(string)
+					if !ok {
+						return false, errors.New("resource_name is not string")
+					}
+					(*call.SdkParam)[fmt.Sprintf("ResourceNames.%d", i+1)] = nameStr
+				}
+				vTags := d.Get("tags")
+				tagsSet, ok := vTags.(*schema.Set)
+				if !ok {
+					return false, errors.New("tags is not *schema.Set")
+				}
+				tags := tagsSet.List()
 				for i, tag := range tags {
-					tm := tag.(map[string]interface{})
+					tm, ok := tag.(map[string]interface{})
+					if !ok {
+						return false, errors.New("tag item is not map")
+					}
 					(*call.SdkParam)[fmt.Sprintf("Tags.%d.Key", i+1)] = tm["key"]
 					(*call.SdkParam)[fmt.Sprintf("Tags.%d.Value", i+1)] = tm["value"]
 				}
@@ -133,13 +151,29 @@ func (s *VolcengineIamTagService) RemoveResource(resourceData *schema.ResourceDa
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["ResourceType"] = d.Get("resource_type")
-				resourceNames := d.Get("resource_names").([]interface{})
-				for i, name := range resourceNames {
-					(*call.SdkParam)[fmt.Sprintf("ResourceNames.%d", i+1)] = name.(string)
+				vNames := d.Get("resource_names")
+				resourceNames, ok := vNames.([]interface{})
+				if !ok {
+					return false, errors.New("resource_names is not []interface{}")
 				}
-				tags := d.Get("tags").(*schema.Set).List()
+				for i, name := range resourceNames {
+					nameStr, ok := name.(string)
+					if !ok {
+						return false, errors.New("resource_name is not string")
+					}
+					(*call.SdkParam)[fmt.Sprintf("ResourceNames.%d", i+1)] = nameStr
+				}
+				vTags := d.Get("tags")
+				tagsSet, ok := vTags.(*schema.Set)
+				if !ok {
+					return false, errors.New("tags is not *schema.Set")
+				}
+				tags := tagsSet.List()
 				for i, tag := range tags {
-					tm := tag.(map[string]interface{})
+					tm, ok := tag.(map[string]interface{})
+					if !ok {
+						return false, errors.New("tag item is not map")
+					}
 					(*call.SdkParam)[fmt.Sprintf("TagKeys.%d", i+1)] = tm["key"]
 				}
 				return true, nil

@@ -80,8 +80,8 @@ func (v *VolcengineTlsDownloadTaskService) ReadResources(m map[string]interface{
 
 			// Get download URL if task is successful
 			// Only try to get download URL if status is success or created_cut
-			taskStatus, _ := t["TaskStatus"].(string)
-			if taskStatus == "success" || taskStatus == "created_cut" {
+			taskStatus, ok := t["TaskStatus"].(string)
+			if ok && (taskStatus == "success" || taskStatus == "created_cut") {
 				req := map[string]interface{}{
 					"TaskId": t["TaskId"],
 				}
@@ -173,7 +173,7 @@ func (v *VolcengineTlsDownloadTaskService) ReadResource(resourceData *schema.Res
 			continue
 		}
 
-		if taskMap["TaskId"].(string) == id {
+		if taskId, ok := taskMap["TaskId"].(string); ok && taskId == id {
 			return taskMap, nil
 		}
 	}
@@ -217,8 +217,15 @@ func (v *VolcengineTlsDownloadTaskService) CreateResource(data *schema.ResourceD
 					return resp, err
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-					id, _ := ve.ObtainSdkValue("RESPONSE.TaskId", *resp)
-					d.SetId(id.(string))
+					id, err := ve.ObtainSdkValue("RESPONSE.TaskId", *resp)
+					if err != nil {
+						return err
+					}
+					if s, ok := id.(string); ok {
+						d.SetId(s)
+					} else {
+						return fmt.Errorf("TaskId is not string")
+					}
 					return nil
 				},
 			},

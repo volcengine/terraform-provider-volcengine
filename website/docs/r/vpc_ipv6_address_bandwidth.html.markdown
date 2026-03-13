@@ -33,6 +33,12 @@ The following arguments are supported:
 * `billing_type` - (Required, ForceNew) BillingType of the Ipv6 bandwidth. Valid values: `PostPaidByBandwidth`; `PostPaidByTraffic`.
 * `ipv6_address` - (Required, ForceNew) Ipv6 address.
 * `bandwidth` - (Optional) Peek bandwidth of the Ipv6 address. Valid values: 1 to 200. Unit: Mbit/s.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
