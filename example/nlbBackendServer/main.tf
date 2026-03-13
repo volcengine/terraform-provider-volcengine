@@ -1,4 +1,4 @@
-resource "volcengine_nlb_backend_servers" "foo" {
+resource "volcengine_nlb_backend_server" "foo" {
   server_group_id = "rsp-3rezryqxrtatc5zsk2ieoy3t6"
   backend_servers {
     type        = "ecs"
