@@ -208,6 +208,5 @@ func (u *Universal) doCall(info UniversalInfo, input *map[string]interface{}) (o
 	default:
 	}
 	err = req.Send()
-	logger.DebugInfo("DEBUG SIGN： %s %s\n", req.HTTPRequest.Method, req.HTTPRequest.URL.String())
 	return output, err
 }
