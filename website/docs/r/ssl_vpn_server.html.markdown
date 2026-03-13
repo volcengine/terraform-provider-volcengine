@@ -71,6 +71,12 @@ Values:
 * `project_name` - (Optional) The project name of the ssl server.
 * `protocol` - (Optional) The protocol used by the SSL server. Valid values are `TCP`, `UDP`. Default Value: `UDP`.
 * `ssl_vpn_server_name` - (Optional) The name of the SSL server.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

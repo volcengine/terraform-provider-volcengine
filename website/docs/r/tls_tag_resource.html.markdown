@@ -23,22 +23,6 @@ resource "volcengine_tls_tag_resource" "foo" {
     value = "value2"
   }
 }
-
-output "tls_tag_id" {
-  value = volcengine_tls_tag_resource.foo.id
-}
-
-output "tls_tag_resource_id" {
-  value = volcengine_tls_tag_resource.foo.resource_id
-}
-
-output "tls_tag_resource_type" {
-  value = volcengine_tls_tag_resource.foo.resource_type
-}
-
-output "tls_tag_tags" {
-  value = volcengine_tls_tag_resource.foo.tags
-}
 ```
 ## Argument Reference
 The following arguments are supported:

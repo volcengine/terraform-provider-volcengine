@@ -68,12 +68,23 @@ The following arguments are supported:
 * `group_id` - (Optional) The id of kafka group, support fuzzy matching.
 * `name_regex` - (Optional) A Name Regex of kafka group.
 * `output_file` - (Optional) File name where to save data source results.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
 * `groups` - The collection of query.
+    * `description` - The description of kafka group.
     * `group_id` - The id of kafka group.
+    * `protocol_type` - The protocol type of kafka group.
     * `state` - The state of kafka group.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
 * `total_count` - The total count of query.
 
 

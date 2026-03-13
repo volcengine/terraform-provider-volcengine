@@ -20,7 +20,14 @@ The following arguments are supported:
 * `name_regex` - (Optional) A Name Regex of the Ipv6Gateway.
 * `name` - (Optional) The name of the Ipv6Gateway.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of the Ipv6Gateway.
+* `tags` - (Optional) Tags.
 * `vpc_ids` - (Optional) The ID list of the VPC which the Ipv6Gateway belongs to.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -30,7 +37,11 @@ In addition to all arguments above, the following attributes are exported:
     * `id` - The ID of the Ipv6Gateway.
     * `ipv6_gateway_id` - The ID of the Ipv6Gateway.
     * `name` - The Name of the Ipv6Gateway.
+    * `project_name` - The project name of the Ipv6Gateway.
     * `status` - The Status of the Ipv6Gateway.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - Update time of the Ipv6Gateway.
     * `vpc_id` - The id of the VPC which the Ipv6Gateway belongs to.
 * `total_count` - The total count of Ipv6Gateway query.

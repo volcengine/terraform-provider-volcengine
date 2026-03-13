@@ -62,7 +62,14 @@ The following arguments are supported:
 * `ids` - (Optional) The IDs of vpc endpoint service.
 * `name_regex` - (Optional) A Name Regex of vpc endpoint service.
 * `output_file` - (Optional) File name where to save data source results.
+* `project_name` - (Optional) The project name of vpc endpoint service.
 * `service_name` - (Optional) The name of vpc endpoint service.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -71,6 +78,7 @@ In addition to all arguments above, the following attributes are exported:
     * `creation_time` - The create time of service.
     * `description` - The description of service.
     * `id` - The Id of service.
+    * `project_name` - The project name of service.
     * `resources` - The resources info.
         * `resource_id` - The id of resource.
         * `resource_type` - The type of resource.
@@ -81,6 +89,9 @@ In addition to all arguments above, the following attributes are exported:
     * `service_resource_type` - The resource type of service.
     * `service_type` - The type of service.
     * `status` - The status of service.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `update_time` - The update time of service.
     * `zone_ids` - The IDs of zones.
 * `total_count` - Returns the total amount of the data list.

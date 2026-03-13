@@ -161,6 +161,7 @@ The following arguments are supported:
 * `description` - (Optional) The description of the vmp alerting rule.
 * `labels` - (Optional) The labels of the vmp alerting rule.
 * `notify_policy_id` - (Optional) The id of the notify policy.
+* `tags` - (Optional) Tags.
 
 The `annotations` object supports the following:
 
@@ -183,6 +184,11 @@ The `query` object supports the following:
 
 * `prom_ql` - (Required) The prom ql of query.
 * `workspace_id` - (Required) The id of the workspace.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

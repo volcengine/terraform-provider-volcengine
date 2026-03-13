@@ -33,8 +33,15 @@ data "volcengine_ecs_launch_templates" "foo" {
 The following arguments are supported:
 * `ids` - (Optional) A list of launch template ids.
 * `launch_template_names` - (Optional) A list of launch template names.
+* `launch_template_project_name` - (Optional) The project name of the launch template.
+* `launch_template_tags` - (Optional) The tags of the launch template.
 * `name_regex` - (Optional) A Name Regex of scaling policy.
 * `output_file` - (Optional) File name where to save data source results.
+
+The `launch_template_tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -55,11 +62,19 @@ In addition to all arguments above, the following attributes are exported:
     * `latest_version_number` - The latest version of the launch template.
     * `launch_template_id` - The id of the launch template.
     * `launch_template_name` - The name of the launch template.
+    * `launch_template_project_name` - The project name of the launch template.
+    * `launch_template_tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `network_interfaces` - The list of network interfaces.
         * `security_group_ids` - The security group ID associated with the NIC.
         * `subnet_id` - The private network subnet ID of the instance, when creating the instance, supports binding the secondary NIC at the same time.
+    * `project_name` - The project name of the instance.
     * `security_enhancement_strategy` - Whether to open the security reinforcement.
     * `suffix_index` - The index of the ordered suffix.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `unique_suffix` - Indicates whether the ordered suffix is automatically added to Hostname and InstanceName when multiple instances are created.
     * `updated_at` - The updated time of the launch template.
     * `version_description` - The latest version description of the launch template.

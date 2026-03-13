@@ -15,18 +15,23 @@ use 'terraform state rm ${resourceId}' to remove.
 ## Example Usage
 ```hcl
 resource "volcengine_ecs_launch_template" "foo" {
-  description          = "acc-test-desc"
-  eip_bandwidth        = 1
-  eip_billing_type     = "PostPaidByBandwidth"
-  eip_isp              = "ChinaMobile"
-  host_name            = "tf-host-name"
-  hpc_cluster_id       = "hpcCluster-l8u24ovdmoab6opf"
-  image_id             = "image-ycjwwciuzy5pkh54xx8f"
-  instance_charge_type = "PostPaid"
-  instance_name        = "tf-acc-name"
-  instance_type_id     = "ecs.g1.large"
-  key_pair_name        = "tf-key-pair"
-  launch_template_name = "tf-acc-template"
+  description                  = "acc-test-desc"
+  eip_bandwidth                = 1
+  eip_billing_type             = "PostPaidByBandwidth"
+  eip_isp                      = "ChinaMobile"
+  host_name                    = "tf-host-name"
+  hpc_cluster_id               = "hpcCluster-l8u24ovdmoab6opf"
+  image_id                     = "image-ycjwwciuzy5pkh54xx8f"
+  instance_charge_type         = "PostPaid"
+  instance_name                = "tf-acc-name"
+  instance_type_id             = "ecs.g1.large"
+  key_pair_name                = "tf-key-pair"
+  launch_template_name         = "tf-acc-template"
+  launch_template_project_name = "default"
+  launch_template_tags {
+    key   = "tfk1"
+    value = "tfv1"
+  }
 }
 ```
 ## Argument Reference
@@ -43,9 +48,13 @@ The following arguments are supported:
 * `instance_name` - (Optional) The name of the instance.
 * `instance_type_id` - (Optional) The compute type of the instance.
 * `key_pair_name` - (Optional) When you log in to the instance using the SSH key pair, enter the name of the key pair.
+* `launch_template_project_name` - (Optional) The project name of the launch template.
+* `launch_template_tags` - (Optional) The tags of the launch template.
 * `network_interfaces` - (Optional) The list of network interfaces. When creating an instance, it is supported to bind auxiliary network cards at the same time. The first one is the primary network card, and the others are secondary network cards.
+* `project_name` - (Optional, ForceNew) The project name of the instance.
 * `security_enhancement_strategy` - (Optional) Whether to open the security reinforcement.
 * `suffix_index` - (Optional) The index of the ordered suffix.
+* `tags` - (Optional) The tags of the instance.
 * `unique_suffix` - (Optional) Indicates whether the ordered suffix is automatically added to Hostname and InstanceName when multiple instances are created.
 * `user_data` - (Optional) Instance custom data. The set custom data must be Base64 encoded, and the size of the custom data before Base64 encoding cannot exceed 16KB.
 * `version_description` - (Optional) The latest version description of the launch template.
@@ -53,10 +62,20 @@ The following arguments are supported:
 * `vpc_id` - (Optional) The vpc id.
 * `zone_id` - (Optional) The zone id.
 
+The `launch_template_tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
+
 The `network_interfaces` object supports the following:
 
 * `security_group_ids` - (Optional) The security group ID associated with the NIC.
 * `subnet_id` - (Optional) The private network subnet ID of the instance, when creating the instance, supports binding the secondary NIC at the same time.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 The `volumes` object supports the following:
 

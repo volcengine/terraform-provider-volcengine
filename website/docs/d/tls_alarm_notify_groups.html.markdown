@@ -11,7 +11,7 @@ Use this data source to query detailed information of tls alarm notify groups
 ## Example Usage
 ```hcl
 data "volcengine_tls_alarm_notify_groups" "default" {
-
+  alarm_notify_group_id = "807cc2d8-e92d-447d-b9d7-da70cb8e41bd"
 }
 ```
 ## Argument Reference

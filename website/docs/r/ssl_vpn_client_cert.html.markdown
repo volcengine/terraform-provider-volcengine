@@ -60,6 +60,12 @@ The following arguments are supported:
 * `ssl_vpn_server_id` - (Required, ForceNew) The id of the ssl vpn server.
 * `description` - (Optional) The description of the ssl vpn client cert.
 * `ssl_vpn_client_cert_name` - (Optional) The name of the ssl vpn client cert.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

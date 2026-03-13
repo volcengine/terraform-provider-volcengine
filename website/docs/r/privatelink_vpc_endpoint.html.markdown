@@ -55,6 +55,11 @@ resource "volcengine_privatelink_vpc_endpoint_service" "foo" {
   }
   description         = "acc-test"
   auto_accept_enabled = true
+  project_name        = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 
 resource "volcengine_privatelink_vpc_endpoint" "foo" {
@@ -62,6 +67,11 @@ resource "volcengine_privatelink_vpc_endpoint" "foo" {
   service_id         = volcengine_privatelink_vpc_endpoint_service.foo.id
   endpoint_name      = "acc-test-ep"
   description        = "acc-test"
+  project_name       = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -72,7 +82,14 @@ For operations that jointly use this resource and `volcengine_privatelink_securi
 * `description` - (Optional) The description of vpc endpoint.
 * `endpoint_name` - (Optional) The name of vpc endpoint.
 * `private_dns_enabled` - (Optional) Whether to enable private dns name. Default is false.
+* `project_name` - (Optional) The project name of vpc endpoint.
 * `service_name` - (Optional, ForceNew) The name of vpc endpoint service.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

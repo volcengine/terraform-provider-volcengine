@@ -156,8 +156,14 @@ The following arguments are supported:
 * `notify_policy_ids` - (Optional) A list of notify policy IDs.
 * `output_file` - (Optional) File name where to save data source results.
 * `status` - (Optional) The status of vmp alerting rule. Valid values: `Running`, `Disabled`.
+* `tags` - (Optional) Tags.
 * `type` - (Optional) The type of vmp alerting rule. Valid values: `vmp/PromQL`.
 * `workspace_id` - (Optional) The workspace id of vmp alerting rule.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -183,6 +189,9 @@ In addition to all arguments above, the following attributes are exported:
         * `prom_ql` - The prom ql of query.
         * `workspace_id` - The id of the workspace.
     * `status` - The status of the vmp alerting rule.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `type` - The type of the vmp alerting rule.
     * `update_time` - The update time of the vmp alerting rule.
 * `total_count` - The total count of query.

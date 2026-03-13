@@ -22,7 +22,14 @@ The following arguments are supported:
 * `ip_address` - (Required, ForceNew) The IP address of the customer gateway.
 * `customer_gateway_name` - (Optional) The name of the customer gateway.
 * `description` - (Optional) The description of the customer gateway.
+* `ip_version` - (Optional, ForceNew) The IP version of the customer gateway. Default value is ipv4. Valid value: ipv4, ipv6.
 * `project_name` - (Optional) The project name of the VPN customer gateway.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

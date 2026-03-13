@@ -11,7 +11,7 @@ Use this data source to query detailed information of tls host groups
 ## Example Usage
 ```hcl
 data "volcengine_tls_host_groups" "default" {
-
+  host_group_id = "97cadc9f-4415-450d-9727-ea877d8bf993"
 }
 ```
 ## Argument Reference
@@ -36,6 +36,7 @@ In addition to all arguments above, the following attributes are exported:
         * `host_group_name` - The name of host group.
         * `host_group_type` - The type of host group.
         * `host_identifier` - The identifier of host.
+        * `host_ip_list` - The ip list of host group.
         * `iam_project_name` - The project name of iam.
         * `modify_time` - The modify time of host group.
         * `rule_count` - The rule count of host.

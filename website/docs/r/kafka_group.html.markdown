@@ -56,6 +56,10 @@ resource "volcengine_kafka_group" "foo" {
   instance_id = volcengine_kafka_instance.foo.id
   group_id    = "acc-test-group"
   description = "tf-test"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -63,6 +67,12 @@ The following arguments are supported:
 * `group_id` - (Required, ForceNew) The id of kafka group.
 * `instance_id` - (Required, ForceNew) The instance id of kafka group.
 * `description` - (Optional) The description of kafka group.
+* `tags` - (Optional) Tags.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

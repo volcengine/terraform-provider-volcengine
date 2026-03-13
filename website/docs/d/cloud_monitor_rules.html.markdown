@@ -24,6 +24,12 @@ The following arguments are supported:
 * `namespace` - (Optional) The namespace of the cloud monitor rule.
 * `output_file` - (Optional) File name where to save data source results.
 * `rule_name` - (Optional) The name of the cloud monitor rule. This field support fuzzy query.
+* `tags` - (Optional) The tags of the cloud monitor rule.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `values` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -56,6 +62,9 @@ In addition to all arguments above, the following attributes are exported:
     * `rule_name` - The name of the cloud monitor rule.
     * `silence_time` - The silence time of the cloud monitor rule. Unit in minutes.
     * `sub_namespace` - The sub namespace of the cloud monitor rule.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `updated_at` - The updated time of the cloud monitor rule.
     * `web_hook` - The web hook of the cloud monitor rule.
     * `webhook_ids` - The webhook id list of the cloud monitor rule.

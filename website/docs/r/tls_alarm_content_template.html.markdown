@@ -11,8 +11,8 @@ Provides a resource to manage tls alarm content template
 ## Example Usage
 ```hcl
 resource "volcengine_tls_alarm_content_template" "foo" {
-  alarm_content_template_name = "test-alarm-content-template"
-  need_valid_content          = true
+  alarm_content_template_name = "test-alarm-content"
+  need_valid_content          = false
   sms {
     content = "修改-告警策略{{Alarm}}， 告警日志项目：{{ProjectName}}， 告警日志主题：{{AlarmTopicName}}， 告警级别：{{Severity}}， 通知类型：{%if NotifyType==1%}触发告警{%else%}告警恢复{%endif%}，触发时间：{{StartTime}}， 触发条件：{{Condition}}， 当前查询结果：[{%-for x in TriggerParams-%}{{-x-}} {%-endfor-%}]， 通知内容：{{NotifyMsg}}"
     locale  = "zh-CN"

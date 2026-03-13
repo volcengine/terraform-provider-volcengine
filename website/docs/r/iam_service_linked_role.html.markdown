@@ -11,17 +11,17 @@ Provides a resource to manage iam service linked role
 ## Example Usage
 ```hcl
 resource "volcengine_iam_service_linked_role" "foo" {
-  service_name = "ecs"
+  service_name = "vpc"
   tags {
     key   = "key-2"
-    value = "value-3"
+    value = "value-2"
   }
 }
 ```
 ## Argument Reference
 The following arguments are supported:
 * `service_name` - (Required, ForceNew) The name of the service.
-* `tags` - (Optional, ForceNew) Tags.
+* `tags` - (Optional) Tags.
 
 The `tags` object supports the following:
 

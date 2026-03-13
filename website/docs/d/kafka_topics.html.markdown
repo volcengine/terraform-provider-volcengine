@@ -92,8 +92,14 @@ The following arguments are supported:
 * `output_file` - (Optional) File name where to save data source results.
 * `partition_number` - (Optional) The number of partition in kafka topic.
 * `replica_number` - (Optional) The number of replica in kafka topic.
+* `tags` - (Optional) Tags.
 * `topic_name` - (Optional) The name of kafka topic. This field supports fuzzy query.
 * `user_name` - (Optional) When a user name is specified, only the access policy of the specified user for this Topic will be returned.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
@@ -102,8 +108,10 @@ In addition to all arguments above, the following attributes are exported:
         * `access_policy` - The access policy of SASL user.
         * `user_name` - The name of SASL user.
     * `all_authority` - Whether the kafka topic is configured to be accessible by all users.
+    * `cleanup_policy` - The cleanup policy of the kafka topic.
     * `create_time` - The create time of the kafka topic.
     * `description` - The description of the kafka topic.
+    * `log_retention_hours` - The retention hours of log.
     * `parameters` - The parameters of the kafka topic.
         * `log_retention_hours` - The retention hours of log.
         * `message_max_byte` - The max byte of message.
@@ -111,7 +119,12 @@ In addition to all arguments above, the following attributes are exported:
     * `partition_number` - The number of partition in the kafka topic.
     * `replica_number` - The number of replica in the kafka topic.
     * `status` - The status of the kafka topic.
+    * `tags` - Tags.
+        * `key` - The Key of Tags.
+        * `value` - The Value of Tags.
     * `topic_name` - The name of the kafka topic.
+    * `used_storage_percentage_in_instance` - The used storage percentage in instance.
+    * `used_storage_space_in_bytes` - The total storage space size already used by the current Topic.
 * `total_count` - The total count of query.
 
 

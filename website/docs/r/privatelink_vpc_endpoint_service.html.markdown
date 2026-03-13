@@ -50,6 +50,11 @@ resource "volcengine_privatelink_vpc_endpoint_service" "foo" {
   }
   description         = "acc-test"
   auto_accept_enabled = true
+  project_name        = "default"
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -57,11 +62,18 @@ The following arguments are supported:
 * `resources` - (Required) The resources info. When create vpc endpoint service, the resource must exist. It is recommended to bind resources using the resources' field in this resource instead of using vpc_endpoint_service_resource. For operations that jointly use this resource and vpc_endpoint_service_resource, use lifecycle ignore_changes to suppress changes to the resources field.
 * `auto_accept_enabled` - (Optional) Whether auto accept node connect.
 * `description` - (Optional) The description of service.
+* `project_name` - (Optional) The project name of service.
+* `tags` - (Optional) Tags.
 
 The `resources` object supports the following:
 
 * `resource_id` - (Required) The id of resource.
 * `resource_type` - (Required) The type of resource.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:

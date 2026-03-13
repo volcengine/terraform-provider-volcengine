@@ -68,6 +68,7 @@ resource "volcengine_kafka_topic" "foo" {
   partition_number = 15
   replica_number   = 3
 
+  cleanup_policy = ["delete", "compact"]
   parameters {
     min_insync_replica_number = 2
     message_max_byte          = 10
@@ -79,6 +80,11 @@ resource "volcengine_kafka_topic" "foo" {
     user_name     = volcengine_kafka_sasl_user.foo.user_name
     access_policy = "Pub"
   }
+
+  tags {
+    key   = "k1"
+    value = "v1"
+  }
 }
 ```
 ## Argument Reference
@@ -88,9 +94,11 @@ The following arguments are supported:
 * `topic_name` - (Required, ForceNew) The name of the kafka topic.
 * `access_policies` - (Optional) The access policies info of the kafka topic. This field only valid when the value of the AllAuthority is false.
 * `all_authority` - (Optional) Whether the kafka topic is configured to be accessible by all users. Default: true.
+* `cleanup_policy` - (Optional) The cleanup policy of the kafka topic. Valid values: "delete", "compact" or "delete","compact".
 * `description` - (Optional) The description of the kafka topic.
 * `parameters` - (Optional) The parameters of the kafka topic.
 * `replica_number` - (Optional) The number of replica in kafka topic. The value can be 2 or 3. Default is 3.
+* `tags` - (Optional) Tags.
 
 The `access_policies` object supports the following:
 
@@ -102,6 +110,11 @@ The `parameters` object supports the following:
 * `log_retention_hours` - (Optional) The retention hours of log. Unit: hour. Valid values: 0-2160. Default is 72.
 * `message_max_byte` - (Optional) The max byte of message. Unit: MB. Valid values: 1-12. Default is 10.
 * `min_insync_replica_number` - (Optional) The min number of sync replica. The default value is the replica number minus 1.
+
+The `tags` object supports the following:
+
+* `key` - (Required) The Key of Tags.
+* `value` - (Required) The Value of Tags.
 
 ## Attributes Reference
 In addition to all arguments above, the following attributes are exported:
