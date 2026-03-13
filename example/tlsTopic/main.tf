@@ -1,7 +1,7 @@
 resource "volcengine_tls_topic" "foo" {
   project_id      = "bdb87e4d-7dad-4b96-ac43-e1b09e9dc8ac"
-  topic_name      = "tf-topic-5"
-  description     = "test"
+  topic_name      = "tf-topic-with-encrypt"
+  description     = "test-modify"
   ttl             = 60
   shard_count     = 2
   auto_split      = true
@@ -21,5 +21,10 @@ resource "volcengine_tls_topic" "foo" {
   encrypt_conf {
     enable       = true
     encrypt_type = "default"
+     user_cmk_info {
+       user_cmk_id = "m_cn-guilin-boe_441a350d-b21c-4760-bd8e-01ec2bc5e58a"
+       region_id   = "cn-guilin-boe"
+       trn         = "trn:iam::2100xxxxx:role/ServiceRoleForTLS"
+     }
   }
 }

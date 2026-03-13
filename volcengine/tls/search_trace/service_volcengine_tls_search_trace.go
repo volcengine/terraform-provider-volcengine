@@ -140,7 +140,9 @@ func (v *VolcengineTlsTraceService) DatasourceResources(data *schema.ResourceDat
 								attrMap := make(map[string]interface{})
 								for _, item := range list {
 									if m, ok := item.(map[string]interface{}); ok {
-										attrMap[m["key"].(string)] = m["value"]
+										if k, ok := m["key"].(string); ok {
+											attrMap[k] = m["value"]
+										}
 									}
 								}
 								return attrMap

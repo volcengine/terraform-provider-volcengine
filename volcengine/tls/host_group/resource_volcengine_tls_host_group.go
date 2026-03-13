@@ -53,7 +53,11 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("host_group_type").(string) != "IP"
+					v, ok := d.Get("host_group_type").(string)
+					if !ok {
+						return false
+					}
+					return v != "IP"
 				},
 			},
 			"host_identifier": {
@@ -61,7 +65,11 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 				Optional:    true,
 				Description: "The identifier of host.",
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return d.Get("host_group_type").(string) != "Label"
+					v, ok := d.Get("host_group_type").(string)
+					if !ok {
+						return false
+					}
+					return v != "Label"
 				},
 			},
 			"auto_update": {
@@ -75,7 +83,11 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return !d.Get("auto_update").(bool)
+					v, ok := d.Get("auto_update").(bool)
+					if !ok {
+						return false
+					}
+					return !v
 				},
 				Description: "The update start time of log collector.",
 			},
@@ -84,7 +96,11 @@ func ResourceVolcengineTlsHostGroup() *schema.Resource {
 				Optional: true,
 				Computed: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return !d.Get("auto_update").(bool)
+					v, ok := d.Get("auto_update").(bool)
+					if !ok {
+						return false
+					}
+					return !v
 				},
 				Description: "The update end time of log collector.",
 			},

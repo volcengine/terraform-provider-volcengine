@@ -183,8 +183,9 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 // ReadResource 读取单个资源 - 实现DescribeLogContext获取日志上下文
 func (s *Service) ReadResource(resourceData *schema.ResourceData, id string) (data map[string]interface{}, err error) {
 	// Check if it's a DescribeLogContext request
-	logID := resourceData.Get("log_id").(string)
-	if logID != "" {
+	vLogId := resourceData.Get("log_id")
+	logID, ok := vLogId.(string)
+	if ok && logID != "" {
 		action := "DescribeLogContext"
 		req := map[string]interface{}{
 			"TopicId":  resourceData.Get("topic_id"),
@@ -267,9 +268,10 @@ func (s *Service) DatasourceResources(d *schema.ResourceData, resource *schema.R
 			IdField:      "HistogramId",
 			CollectField: "histograms",
 			ExtraData: func(i []interface{}) ([]interface{}, error) {
-				for index, ele := range i {
-					element := ele.(map[string]interface{})
-					i[index].(map[string]interface{})["HistogramId"] = fmt.Sprintf("%s-%d-%d", element["topic_id"], element["start_time"], element["end_time"])
+				for index := range i {
+					if m, ok := i[index].(map[string]interface{}); ok {
+						m["HistogramId"] = fmt.Sprintf("%s-%v-%v", m["topic_id"], m["start_time"], m["end_time"])
+					}
 				}
 				return i, nil
 			},
@@ -310,8 +312,14 @@ func (s *Service) DescribeHistogramV1(m map[string]interface{}) (data []interfac
 	if err != nil {
 		return data, err
 	}
-	resultStatus, _ := ve.ObtainSdkValue("RESPONSE.ResultStatus", *resp)
-	totalCount, _ := ve.ObtainSdkValue("RESPONSE.TotalCount", *resp)
+	resultStatus, err := ve.ObtainSdkValue("RESPONSE.ResultStatus", *resp)
+	if err != nil {
+		return data, err
+	}
+	totalCount, err := ve.ObtainSdkValue("RESPONSE.TotalCount", *resp)
+	if err != nil {
+		return data, err
+	}
 
 	// Return as a list of one item
 	data = []interface{}{
@@ -358,8 +366,14 @@ func (s *Service) DescribeLogContext(m map[string]interface{}) (data []interface
 	if err != nil {
 		return data, err
 	}
-	prevOver, _ := ve.ObtainSdkValue("RESPONSE.PrevOver", *resp)
-	nextOver, _ := ve.ObtainSdkValue("RESPONSE.NextOver", *resp)
+	prevOver, err := ve.ObtainSdkValue("RESPONSE.PrevOver", *resp)
+	if err != nil {
+		return data, err
+	}
+	nextOver, err := ve.ObtainSdkValue("RESPONSE.NextOver", *resp)
+	if err != nil {
+		return data, err
+	}
 
 	var infos []interface{}
 	if infosRaw != nil {

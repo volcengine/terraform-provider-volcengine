@@ -81,7 +81,7 @@ func (s *VolcengineIamUserService) ReadResource(resourceData *schema.ResourceDat
 	for _, v := range results {
 		m, ok := v.(map[string]interface{})
 		if !ok {
-			continue
+			return data, errors.New("result item is not map")
 		}
 		if name, ok := m["UserName"].(string); ok && name == id {
 			data = m
@@ -105,13 +105,19 @@ func (VolcengineIamUserService) WithResourceResponseHandlers(v map[string]interf
 			"AccountId": {
 				TargetField: "account_id",
 				Convert: func(i interface{}) interface{} {
-					return strconv.FormatFloat(i.(float64), 'f', 0, 64)
+					if v, ok := i.(float64); ok {
+						return strconv.FormatFloat(v, 'f', 0, 64)
+					}
+					return ""
 				},
 			},
 			"Id": {
 				TargetField: "user_id",
 				Convert: func(i interface{}) interface{} {
-					return strconv.FormatFloat(i.(float64), 'f', 0, 64)
+					if v, ok := i.(float64); ok {
+						return strconv.FormatFloat(v, 'f', 0, 64)
+					}
+					return ""
 				},
 			},
 		}, nil
@@ -137,7 +143,11 @@ func (s *VolcengineIamUserService) CreateResource(resourceData *schema.ResourceD
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
-				d.SetId(d.Get("user_name").(string))
+				v, ok := d.Get("user_name").(string)
+				if !ok || v == "" {
+					return errors.New("user_name is not string or empty")
+				}
+				d.SetId(v)
 				return nil
 			},
 		},
@@ -182,7 +192,11 @@ func (s *VolcengineIamUserService) ModifyResource(resourceData *schema.ResourceD
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				if d.HasChange("user_name") {
-					d.SetId(d.Get("user_name").(string))
+					v, ok := d.Get("user_name").(string)
+					if !ok || v == "" {
+						return errors.New("user_name is not string or empty")
+					}
+					d.SetId(v)
 				}
 				return nil
 			},
@@ -223,13 +237,19 @@ func (s *VolcengineIamUserService) DatasourceResources(*schema.ResourceData, *sc
 			"Id": {
 				TargetField: "user_id",
 				Convert: func(i interface{}) interface{} {
-					return strconv.FormatFloat(i.(float64), 'f', 0, 64)
+					if v, ok := i.(float64); ok {
+						return strconv.FormatFloat(v, 'f', 0, 64)
+					}
+					return ""
 				},
 			},
 			"AccountId": {
 				TargetField: "account_id",
 				Convert: func(i interface{}) interface{} {
-					return strconv.FormatFloat(i.(float64), 'f', 0, 64)
+					if v, ok := i.(float64); ok {
+						return strconv.FormatFloat(v, 'f', 0, 64)
+					}
+					return ""
 				},
 			},
 			"Tags": {
@@ -287,7 +307,15 @@ func (s *VolcengineIamUserService) setResourceTags(resourceData *schema.Resource
 					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
 					(*call.SdkParam)["ResourceType"] = resourceType
 					for index, tag := range removedTags.List() {
-						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = tag.(map[string]interface{})["key"].(string)
+						tm, ok := tag.(map[string]interface{})
+						if !ok {
+							return false, errors.New("tag item is not map")
+						}
+						key, ok := tm["key"].(string)
+						if !ok {
+							return false, errors.New("tag key is not string")
+						}
+						(*call.SdkParam)["TagKeys."+strconv.Itoa(index+1)] = key
 					}
 					return true, nil
 				}
@@ -310,8 +338,20 @@ func (s *VolcengineIamUserService) setResourceTags(resourceData *schema.Resource
 					(*call.SdkParam)["ResourceNames.1"] = resourceData.Id()
 					(*call.SdkParam)["ResourceType"] = resourceType
 					for index, tag := range addedTags.List() {
-						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = tag.(map[string]interface{})["key"].(string)
-						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = tag.(map[string]interface{})["value"].(string)
+						tm, ok := tag.(map[string]interface{})
+						if !ok {
+							return false, errors.New("tag item is not map")
+						}
+						key, ok := tm["key"].(string)
+						if !ok {
+							return false, errors.New("tag key is not string")
+						}
+						value, ok := tm["value"].(string)
+						if !ok {
+							return false, errors.New("tag value is not string")
+						}
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Key"] = key
+						(*call.SdkParam)["Tags."+strconv.Itoa(index+1)+".Value"] = value
 					}
 					return true, nil
 				}

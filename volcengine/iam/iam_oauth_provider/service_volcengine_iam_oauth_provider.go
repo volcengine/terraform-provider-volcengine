@@ -1,11 +1,13 @@
 package iam_oauth_provider
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 	"github.com/volcengine/terraform-provider-volcengine/logger"
-	"time"
 )
 
 type VolcengineIamOAuthProviderService struct {
@@ -28,26 +30,17 @@ func (s *VolcengineIamOAuthProviderService) CreateResource(data *schema.Resource
 			Call: ve.SdkCall{
 				Action:      "CreateOAuthProvider",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam: &map[string]interface{}{
-					"OAuthProviderName": data.Get("oauth_provider_name").(string),
-					"SSOType":           data.Get("sso_type").(int),
-					"Status":            data.Get("status").(int),
-					"Description":       data.Get("description").(string),
-					"ClientId":          data.Get("client_id").(string),
-					"ClientSecret":      data.Get("client_secret").(string),
-					"UserInfoURL":       data.Get("user_info_url").(string),
-					"TokenURL":          data.Get("token_url").(string),
-					"AuthorizeURL":      data.Get("authorize_url").(string),
-					"AuthorizeTemplate": data.Get("authorize_template").(string),
-					"Scope":             data.Get("scope").(string),
-					"IdentityMapType":   data.Get("identity_map_type").(int),
-					"IdpIdentityKey":    data.Get("idp_identity_key").(string),
-				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					param, err := ve.ResourceDateToRequest(d, resource, false, s.createRequestConvert(), ve.RequestConvertInConvert, ve.ContentTypeDefault)
+					if err != nil {
+						return nil, err
+					}
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), &param)
 				},
 				AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-					d.SetId(d.Get("oauth_provider_name").(string))
+					if v, ok := d.Get("oauth_provider_name").(string); ok && v != "" {
+						d.SetId(v)
+					}
 					return nil
 				},
 			},
@@ -61,25 +54,34 @@ func (s *VolcengineIamOAuthProviderService) ModifyResource(data *schema.Resource
 			Call: ve.SdkCall{
 				Action:      "UpdateOAuthProvider",
 				ConvertMode: ve.RequestConvertIgnore,
-				SdkParam: &map[string]interface{}{
-					"OAuthProviderName": data.Id(),
-					"Status":            data.Get("status").(int),
-					"Description":       data.Get("description").(string),
-					"ClientId":          data.Get("client_id").(string),
-					"ClientSecret":      data.Get("client_secret").(string),
-					"UserInfoURL":       data.Get("user_info_url").(string),
-					"TokenURL":          data.Get("token_url").(string),
-					"AuthorizeURL":      data.Get("authorize_url").(string),
-					"AuthorizeTemplate": data.Get("authorize_template").(string),
-					"Scope":             data.Get("scope").(string),
-					"IdentityMapType":   data.Get("identity_map_type").(int),
-					"IdpIdentityKey":    data.Get("idp_identity_key").(string),
-				},
 				ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+					param, err := ve.ResourceDateToRequest(d, resource, true, s.createRequestConvert(), ve.RequestConvertInConvert, ve.ContentTypeDefault)
+					if err != nil {
+						return nil, err
+					}
+					param["OAuthProviderName"] = d.Id()
+					return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), &param)
 				},
 			},
 		},
+	}
+}
+
+func (s *VolcengineIamOAuthProviderService) createRequestConvert() map[string]ve.RequestConvert {
+	return map[string]ve.RequestConvert{
+		"oauth_provider_name": {TargetField: "OAuthProviderName"},
+		"sso_type":            {TargetField: "SSOType"},
+		"status":              {TargetField: "Status"},
+		"description":         {TargetField: "Description"},
+		"client_id":           {TargetField: "ClientId"},
+		"client_secret":       {TargetField: "ClientSecret"},
+		"user_info_url":       {TargetField: "UserInfoURL"},
+		"token_url":           {TargetField: "TokenURL"},
+		"authorize_url":       {TargetField: "AuthorizeURL"},
+		"authorize_template":  {TargetField: "AuthorizeTemplate"},
+		"scope":               {TargetField: "Scope"},
+		"identity_map_type":   {TargetField: "IdentityMapType"},
+		"idp_identity_key":    {TargetField: "IdpIdentityKey"},
 	}
 }
 
@@ -118,7 +120,10 @@ func (s *VolcengineIamOAuthProviderService) ReadResource(d *schema.ResourceData,
 	if result == nil {
 		return nil, nil
 	}
-	return result.(map[string]interface{}), nil
+	if resMap, ok := result.(map[string]interface{}); ok {
+		return resMap, nil
+	}
+	return nil, fmt.Errorf("result is not map[string]interface{}")
 }
 
 func (s *VolcengineIamOAuthProviderService) ReadResources(m map[string]interface{}) (data []interface{}, err error) {

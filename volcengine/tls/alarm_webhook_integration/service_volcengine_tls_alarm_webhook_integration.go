@@ -202,8 +202,15 @@ func (v *VolcengineTlsAlarmWebhookIntegrationService) CreateResource(resourceDat
 				return resp, nil
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("RESPONSE.AlarmWebhookIntegrationId", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("RESPONSE.AlarmWebhookIntegrationId", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok {
+					d.SetId(s)
+				} else {
+					return fmt.Errorf("AlarmWebhookIntegrationId is not string")
+				}
 				return nil
 			},
 		},

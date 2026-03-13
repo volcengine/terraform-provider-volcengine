@@ -1,6 +1,8 @@
 package iam_entities_policy
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
 )
@@ -162,13 +164,18 @@ func dataSourceVolcengineIamEntitiesPoliciesRead(d *schema.ResourceData, meta in
 	}
 
 	if len(data) > 0 {
-		res := data[0].(map[string]interface{})
+		res, ok := data[0].(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("data[0] is not map[string]interface{}")
+		}
 		// Set ID from the result
 		if id, ok := res["id"].(string); ok {
 			d.SetId(id)
 		} else {
 			// Fallback ID
-			d.SetId(d.Get("policy_name").(string))
+			if v, ok := d.Get("policy_name").(string); ok && v != "" {
+				d.SetId(v)
+			}
 		}
 
 		// Set top-level fields
@@ -179,7 +186,9 @@ func dataSourceVolcengineIamEntitiesPoliciesRead(d *schema.ResourceData, meta in
 	} else {
 		// If no data, we should still set an ID to avoid "not found" errors in some cases
 		// But for data sources, empty results are often okay.
-		d.SetId(d.Get("policy_name").(string))
+		if v, ok := d.Get("policy_name").(string); ok && v != "" {
+			d.SetId(v)
+		}
 	}
 
 	return nil

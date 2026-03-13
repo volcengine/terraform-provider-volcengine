@@ -134,7 +134,9 @@ func (s *VolcengineIamLoginProfileService) CreateResource(resourceData *schema.R
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				logger.Debug(logger.RespFormat, call.Action, call.SdkParam, resp)
 				time.Sleep(5 * time.Second)
-				d.SetId(d.Get("user_name").(string))
+				if v, ok := d.Get("user_name").(string); ok && v != "" {
+					d.SetId(v)
+				}
 				return nil
 			},
 		},

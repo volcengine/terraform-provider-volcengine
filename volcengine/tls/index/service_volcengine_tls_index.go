@@ -139,6 +139,7 @@ func (s *VolcengineTlsIndexService) CreateResource(resourceData *schema.Resource
 				"full_text": {
 					TargetField: "FullText",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 				},
 				"key_value": {
 					// 框架层对于set套set的类型转换有bug，手动处理
@@ -210,6 +211,7 @@ func (s *VolcengineTlsIndexService) ModifyResource(resourceData *schema.Resource
 				"full_text": {
 					TargetField: "FullText",
 					ConvertType: ve.ConvertJsonObject,
+					ForceGet:    true,
 				},
 				"key_value": {
 					// 框架层对于set套set的类型转换有bug，手动处理
@@ -328,9 +330,10 @@ func (s *VolcengineTlsIndexService) DatasourceResources(*schema.ResourceData, *s
 			},
 		},
 		ExtraData: func(i []interface{}) ([]interface{}, error) {
-			for index, ele := range i {
-				element := ele.(map[string]interface{})
-				i[index].(map[string]interface{})["IndexId"] = fmt.Sprintf("%s-%d", "index", element["TopicId"])
+			for index := range i {
+				if m, ok := i[index].(map[string]interface{}); ok {
+					m["IndexId"] = fmt.Sprintf("%s-%v", "index", m["TopicId"])
+				}
 			}
 			return i, nil
 		},
@@ -343,7 +346,14 @@ func (s *VolcengineTlsIndexService) ReadResourceId(id string) string {
 
 func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 	keyValues := make([]interface{}, 0)
-	for _, k := range keyValueSet.(*schema.Set).List() {
+	if keyValueSet == nil {
+		return keyValues, nil
+	}
+	kvSet, ok := keyValueSet.(*schema.Set)
+	if !ok {
+		return nil, fmt.Errorf("keyValueSet is not *schema.Set")
+	}
+	for _, k := range kvSet.List() {
 		keyValue := make(map[string]interface{})
 		valueMap := make(map[string]interface{})
 		kMap, ok := k.(map[string]interface{})
@@ -385,9 +395,9 @@ func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 		}
 
 		parentSqlFlag := false
-		if v, ok := kMap["sql_flag"]; ok {
+		if v, ok := kMap["sql_flag"].(bool); ok {
 			valueMap["SqlFlag"] = v
-			parentSqlFlag = v.(bool)
+			parentSqlFlag = v
 		}
 
 		if v, ok := kMap["json_keys"]; ok {
@@ -412,8 +422,15 @@ func transKeyValueToRequest(keyValueSet interface{}) ([]interface{}, error) {
 					return nil, fmt.Errorf("json key value_type is required")
 				}
 
-				// Force sub-key SqlFlag to match parent SqlFlag per API requirement
-				singleJsonValue["SqlFlag"] = parentSqlFlag
+				// Always respect the local configuration if it's set.
+				// Since we can't distinguish between 'false' and 'unset' for bool in Go map[string]interface{},
+				// we trust the value from the HCL config.
+				if v, ok := jsonKeyMap["sql_flag"].(bool); ok {
+					singleJsonValue["SqlFlag"] = v
+				} else {
+					// Fallback to parent's SqlFlag if sub-key doesn't specify one
+					singleJsonValue["SqlFlag"] = parentSqlFlag
+				}
 
 				singleJsonKey["Value"] = singleJsonValue
 				jsonKeys = append(jsonKeys, singleJsonKey)

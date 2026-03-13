@@ -3,6 +3,7 @@ package tag
 import (
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -86,16 +87,18 @@ func (v *VolcengineTlsTagService) ReadResources(m map[string]interface{}) (data 
 			}
 		} else if k == "TagFilters" {
 			// Convert tag_filters from {key, values} to {Key, Values} as required by API
-			rawFilters := v.([]interface{})
-			apiFilters := make([]interface{}, len(rawFilters))
-			for i, rawFilter := range rawFilters {
-				filterMap := rawFilter.(map[string]interface{})
-				apiFilters[i] = map[string]interface{}{
-					"Key":    filterMap["key"],
-					"Values": filterMap["values"],
+			if rawFilters, ok := v.([]interface{}); ok {
+				apiFilters := make([]interface{}, 0, len(rawFilters))
+				for _, rawFilter := range rawFilters {
+					if filterMap, ok := rawFilter.(map[string]interface{}); ok {
+						apiFilters = append(apiFilters, map[string]interface{}{
+							"Key":    filterMap["key"],
+							"Values": filterMap["values"],
+						})
+					}
 				}
+				apiRequest[k] = apiFilters
 			}
-			apiRequest[k] = apiFilters
 		} else {
 			// Copy all other parameters
 			apiRequest[k] = v
@@ -163,37 +166,54 @@ func (v *VolcengineTlsTagService) ReadResource(resourceData *schema.ResourceData
 	var TagKeyList []string
 	var ResourceType string
 	var tags []interface{}
+	// Get tag keys defined in the HCL configuration to filter out tags added via other means
+	hclTagKeys := make(map[string]bool)
+	if v, ok := resourceData.Get("tags").([]interface{}); ok {
+		for _, item := range v {
+			if m, ok := item.(map[string]interface{}); ok {
+				if key, ok := m["key"].(string); ok {
+					hclTagKeys[key] = true
+				}
+			}
+		}
+	}
 
 	for _, v := range results {
 		if tagData, ok := v.(map[string]interface{}); ok {
+			tagKey, _ := tagData["TagKey"].(string)
+
+			// Only include tags that are defined in the HCL configuration
+			// If no tags are defined in HCL (e.g. during import), include all tags
+			if len(hclTagKeys) > 0 {
+				if _, ok := hclTagKeys[tagKey]; !ok {
+					continue
+				}
+			}
+
 			if resourceId, ok := tagData["ResourceId"].(interface{}); ok {
 				if id, ok := resourceId.(string); ok {
 					ResourcesList = append(ResourcesList, id)
 				}
 			}
-			if tagKey, ok := tagData["TagKey"].(interface{}); ok {
-				if key, ok := tagKey.(string); ok {
-					TagKeyList = append(TagKeyList, key)
-				}
-			}
+			TagKeyList = append(TagKeyList, tagKey)
 			if rt, ok := tagData["ResourceType"].(string); ok {
 				ResourceType = rt
 			}
 
-			t := map[string]interface{}{}
-			if k, ok := tagData["TagKey"].(string); ok {
-				t["key"] = k
-			}
-			if val, ok := tagData["TagValue"].(string); ok {
-				t["value"] = val
+			t := map[string]interface{}{
+				"key":   tagKey,
+				"value": tagData["TagValue"],
 			}
 			tags = append(tags, t)
 		}
 	}
 
-	// ReadResource expects a map, so we wrap the list in a map under "ResourceTags"
-	// and also provide top-level fields from the first tag to satisfy schema
+	// ReadResource expects a map
 	data = make(map[string]interface{})
+
+	// Always preserve the resource ID and type
+	data["resource_id"] = id
+	data["resource_type"] = resourceType
 
 	data["ResourceType"] = ResourceType
 	data["ResourcesList"] = ResourcesList
@@ -241,15 +261,25 @@ func (v *VolcengineTlsTagService) CreateResource(resourceData *schema.ResourceDa
 			ContentType: ve.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				// Convert single resource_id to ResourcesIds array as required by API
-				resourceId := d.Get("resource_id").(string)
+				resourceId, ok := d.Get("resource_id").(string)
+				if !ok {
+					return false, fmt.Errorf("resource_id is not string")
+				}
 				(*call.SdkParam)["ResourceType"] = d.Get("resource_type")
 				(*call.SdkParam)["ResourcesIds"] = []string{resourceId}
 
 				// Convert tags from {key, value} to {Key, Value} as required by API
-				rawTags := d.Get("tags").([]interface{})
+				vTags := d.Get("tags")
+				rawTags, ok := vTags.([]interface{})
+				if !ok {
+					return false, fmt.Errorf("tags is not []interface{}")
+				}
 				apiTags := make([]interface{}, len(rawTags))
 				for i, rawTag := range rawTags {
-					tagMap := rawTag.(map[string]interface{})
+					tagMap, ok := rawTag.(map[string]interface{})
+					if !ok {
+						return false, fmt.Errorf("tag item is not map[string]interface{}")
+					}
 					apiTags[i] = map[string]interface{}{
 						"Key":   tagMap["key"],
 						"Value": tagMap["value"],
@@ -270,7 +300,10 @@ func (v *VolcengineTlsTagService) CreateResource(resourceData *schema.ResourceDa
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
 				// TagResources doesn't return an ID, use resource ID as tag resource ID
-				resourceId := d.Get("resource_id").(string)
+				resourceId, ok := d.Get("resource_id").(string)
+				if !ok {
+					return fmt.Errorf("resource_id is not string")
+				}
 				d.SetId(resourceId)
 				return nil
 			},
@@ -289,68 +322,42 @@ func (v *VolcengineTlsTagService) RemoveResource(resourceData *schema.ResourceDa
 			ConvertMode: ve.RequestConvertIgnore,
 			ContentType: ve.ContentTypeJson,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
-				// Get all existing tags and prepare to remove them
-				existingTags, err := v.ReadResource(d, "")
-				if err != nil {
-					return false, err
+				// Only remove tags defined in the resource configuration
+				vTags := d.Get("tags")
+				rawTags, ok := vTags.([]interface{})
+				if !ok {
+					return false, fmt.Errorf("tags is not []interface{}")
 				}
 
-				// 初始化默认值，避免空值问题
-				resourceType := ""
-				resourcesList := []string{}
-				tagKeyList := []string{}
-
-				// 1. 提取 ResourceType（string 类型）
-				if rt, ok := existingTags["ResourceType"].(string); ok {
-					resourceType = rt
+				if len(rawTags) == 0 {
+					return false, nil // No tags to remove
 				}
 
-				if rl, ok := existingTags["ResourcesList"].([]string); ok {
-					logger.Debug(logger.ReqFormat, "ResourcesList断言为[]interface{}成功，长度：%d", len(rl))
-					rlUnique := make(map[string]struct{})
-					for _, item := range rl {
-						// 空值不加入（可选，根据业务需求调整）
-						if item != "" {
-							rlUnique[item] = struct{}{}
-						}
+				tagKeyList := make([]string, 0, len(rawTags))
+				for _, rawTag := range rawTags {
+					tagMap, ok := rawTag.(map[string]interface{})
+					if !ok {
+						return false, fmt.Errorf("tag item is not map[string]interface{}")
 					}
-					// 将去重后的key转回切片
-					for id := range rlUnique {
-						resourcesList = append(resourcesList, id)
-					}
-				}
-				logger.Debug(logger.ReqFormat, "resourcesList", resourcesList)
-				// 3. 提取 TagKeyList（[]interface{} 转 []string）
-				if tkl, ok := existingTags["TagKeyList"].([]string); ok {
-					tklUnique := make(map[string]struct{})
-					for _, item := range tkl {
-						if item != "" {
-							tklUnique[item] = struct{}{}
-						}
-					}
-					// 将去重后的key转回切片
-					for key := range tklUnique {
+					if key, ok := tagMap["key"].(string); ok && key != "" {
 						tagKeyList = append(tagKeyList, key)
 					}
 				}
-				logger.Debug(logger.ReqFormat, "tagKeyList", tagKeyList)
-				// 4. 只有当 TagKeyList 非空时，才设置 SdkParam 并返回 true
+
 				if len(tagKeyList) > 0 {
-					// 设置 RemoveTagsFromResource API 的参数
-					(*call.SdkParam)["ResourceType"] = resourceType
-					// 优先使用 existingTags 中的 ResourcesList，若为空则使用 d.Get 的值
-					if len(resourcesList) == 0 {
-						if id, ok := d.Get("resource_id").(string); ok {
-							resourcesList = []string{id}
-						}
+					resourceId, ok := d.Get("resource_id").(string)
+					if !ok {
+						return false, fmt.Errorf("resource_id is not string")
 					}
-					(*call.SdkParam)["ResourcesIds"] = resourcesList
+					resourceType := d.Get("resource_type")
+
+					(*call.SdkParam)["ResourceType"] = resourceType
+					(*call.SdkParam)["ResourcesIds"] = []string{resourceId}
 					(*call.SdkParam)["TagKeys"] = tagKeyList
 
 					logger.Debug(logger.ReqFormat, call.Action, "Set SdkParam success", (*call.SdkParam))
 					return true, nil
 				}
-				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return false, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
@@ -368,20 +375,27 @@ func (v *VolcengineTlsTagService) RemoveResource(resourceData *schema.ResourceDa
 					tagsMap, err := v.ReadResource(d, "")
 					if err != nil {
 						// If resource not found (all tags removed and ReadResource returns error), it's success
-						if fmt.Sprintf("%v", err) == fmt.Sprintf("tls tag %s not exist ", d.Get("resource_id").(string)) {
+						vResId := d.Get("resource_id")
+						resId, ok := vResId.(string)
+						if ok && strings.Contains(fmt.Sprintf("%v", err), fmt.Sprintf("tls tag %s not exist", resId)) {
 							return nil
 						}
 						return resource.NonRetryableError(err)
 					}
 
 					// Check if any of the removed tags still exist
-					if tags, ok := tagsMap["ResourceTags"].([]map[string]interface{}); ok {
-						removedTagKeys := (*call.SdkParam)["TagKeys"].([]string)
-						for _, tag := range tags {
-							if key, ok := tag["Key"].(string); ok {
-								for _, removedKey := range removedTagKeys {
-									if key == removedKey {
-										return resource.RetryableError(fmt.Errorf("tag key %s still exists", key))
+					if tags, ok := tagsMap["tags"].([]interface{}); ok {
+						if removedTagKeysRaw, ok := (*call.SdkParam)["TagKeys"]; ok {
+							if removedTagKeys, ok := removedTagKeysRaw.([]string); ok {
+								for _, tag := range tags {
+									if tagMap, ok := tag.(map[string]interface{}); ok {
+										if key, ok := tagMap["key"].(string); ok {
+											for _, removedKey := range removedTagKeys {
+												if key == removedKey {
+													return resource.RetryableError(fmt.Errorf("tag key %s still exists", key))
+												}
+											}
+										}
 									}
 								}
 							}

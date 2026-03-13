@@ -83,7 +83,16 @@ func (s *VolcengineIamRolePolicyAttachmentService) ReadResource(resourceData *sc
 	for _, v := range results {
 		if data, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("value is not map")
-		} else if ids[1] == data["PolicyName"].(string) && ids[2] == data["PolicyType"].(string) {
+		}
+		pName, ok := data["PolicyName"].(string)
+		if !ok {
+			continue
+		}
+		pType, ok := data["PolicyType"].(string)
+		if !ok {
+			continue
+		}
+		if ids[1] == pName && ids[2] == pType {
 			return data, err
 		}
 	}
@@ -111,8 +120,19 @@ func (s *VolcengineIamRolePolicyAttachmentService) CreateResource(data *schema.R
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				d.SetId(fmt.Sprintf("%s:%s:%s", d.Get("role_name").(string),
-					d.Get("policy_name").(string), d.Get("policy_type").(string)))
+				roleName, ok := d.Get("role_name").(string)
+				if !ok {
+					return errors.New("role_name is not string")
+				}
+				policyName, ok := d.Get("policy_name").(string)
+				if !ok {
+					return errors.New("policy_name is not string")
+				}
+				policyType, ok := d.Get("policy_type").(string)
+				if !ok {
+					return errors.New("policy_type is not string")
+				}
+				d.SetId(fmt.Sprintf("%s:%s:%s", roleName, policyName, policyType))
 				return nil
 			},
 		},

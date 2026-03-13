@@ -63,7 +63,10 @@ func (s *VolcengineIamSamlProviderService) ReadResources(m map[string]interface{
 			return data, errors.New("Result.SAMLProviders is not Slice")
 		}
 		for index, ele := range data {
-			provider := ele.(map[string]interface{})
+			provider, ok := ele.(map[string]interface{})
+			if !ok {
+				continue
+			}
 			query := map[string]interface{}{
 				// 跟API文档不对应，文档写的返回字段为SAMLProviderName，实际为ProviderName
 				"SAMLProviderName": provider["ProviderName"],
@@ -79,7 +82,9 @@ func (s *VolcengineIamSamlProviderService) ReadResources(m map[string]interface{
 			if err != nil {
 				return data, err
 			}
-			data[index].(map[string]interface{})["EncodedSAMLMetadataDocument"] = document
+			if m, ok := data[index].(map[string]interface{}); ok {
+				m["EncodedSAMLMetadataDocument"] = document
+			}
 		}
 		return data, err
 	})
@@ -102,7 +107,8 @@ func (s *VolcengineIamSamlProviderService) ReadResource(resourceData *schema.Res
 	for _, v := range results {
 		if temp, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
-		} else if temp["ProviderName"].(string) == id {
+		}
+		if name, ok := temp["ProviderName"].(string); ok && name == id {
 			data = temp
 		}
 	}
@@ -140,8 +146,11 @@ func (s *VolcengineIamSamlProviderService) CreateResource(resourceData *schema.R
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id := d.Get("saml_provider_name")
-				d.SetId(id.(string))
+				id, ok := d.Get("saml_provider_name").(string)
+				if !ok || id == "" {
+					return errors.New("saml_provider_name is not string or empty")
+				}
+				d.SetId(id)
 				return nil
 			},
 		},

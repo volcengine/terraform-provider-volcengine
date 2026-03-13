@@ -55,8 +55,10 @@ func (s *Service) ReadResources(m map[string]interface{}) (data []interface{}, e
 
 		var res []interface{}
 		for _, ele := range data {
-			ele.(map[string]interface{})["HostGroupId"] = condition["HostGroupId"] // required field
-			res = append(res, ele)
+			if m, ok := ele.(map[string]interface{}); ok {
+				m["HostGroupId"] = condition["HostGroupId"] // required field
+				res = append(res, m)
+			}
 		}
 		return res, nil
 	})
@@ -131,7 +133,11 @@ func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *sc
 				"Ip":          resourceData.Get("ip"),
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
-				ip := d.Get("ip").(string)
+				vIp := d.Get("ip")
+				ip, ok := vIp.(string)
+				if !ok {
+					return nil, fmt.Errorf("ip is not string")
+				}
 				if ip == "" {
 					call.Action = "DeleteAbnormalHosts"
 					delete(*call.SdkParam, "Ip")
@@ -153,10 +159,15 @@ func (s *Service) CreateResource(resourceData *schema.ResourceData, resource *sc
 				return resp, nil
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				if d.Get("ip").(string) == "" {
-					d.SetId(fmt.Sprintf("%s", d.Get("host_group_id").(string)))
+				ip, ok1 := d.Get("ip").(string)
+				hostGroupId, ok2 := d.Get("host_group_id").(string)
+				if !ok1 || !ok2 {
+					return fmt.Errorf("ip or host_group_id is not string")
+				}
+				if ip == "" {
+					d.SetId(hostGroupId)
 				} else {
-					d.SetId(fmt.Sprintf("%s:%s", d.Get("host_group_id").(string), d.Get("ip").(string)))
+					d.SetId(fmt.Sprintf("%s:%s", hostGroupId, ip))
 				}
 				return nil
 			},
@@ -195,9 +206,10 @@ func (s *Service) DatasourceResources(d *schema.ResourceData, r *schema.Resource
 			"heartbeat_status": converter,
 		},
 		ExtraData: func(i []interface{}) ([]interface{}, error) {
-			for index, ele := range i {
-				element := ele.(map[string]interface{})
-				i[index].(map[string]interface{})["HostId"] = fmt.Sprintf("%s-%d", element["HostGroupId"], element["Ip"])
+			for index := range i {
+				if m, ok := i[index].(map[string]interface{}); ok {
+					m["HostId"] = fmt.Sprintf("%s-%v", m["HostGroupId"], m["Ip"])
+				}
 			}
 			return i, nil
 		},

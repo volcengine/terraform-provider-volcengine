@@ -123,7 +123,8 @@ func (s *VolcengineIamOidcProviderService) ReadResource(resourceData *schema.Res
 	for _, v := range results {
 		if temp, ok = v.(map[string]interface{}); !ok {
 			return data, errors.New("Value is not map ")
-		} else if temp["ProviderName"].(string) == id {
+		}
+		if name, ok := temp["ProviderName"].(string); ok && name == id {
 			data = temp
 		}
 	}
@@ -182,8 +183,15 @@ func (s *VolcengineIamOidcProviderService) CreateResource(resourceData *schema.R
 				return resp, err
 			},
 			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
-				id, _ := ve.ObtainSdkValue("Result.OIDCProviderName", *resp)
-				d.SetId(id.(string))
+				id, err := ve.ObtainSdkValue("Result.OIDCProviderName", *resp)
+				if err != nil {
+					return err
+				}
+				if s, ok := id.(string); ok && s != "" {
+					d.SetId(s)
+				} else {
+					return errors.New("Result.OIDCProviderName is not string")
+				}
 				return nil
 			},
 		},
@@ -252,7 +260,11 @@ func (s *VolcengineIamOidcProviderService) updateOidcProviderCallback(resourceDa
 			ConvertMode: ve.RequestConvertIgnore,
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["OIDCProviderName"] = d.Id()
-				(*call.SdkParam)[field] = element.(string)
+				s, ok := element.(string)
+				if !ok {
+					return false, errors.New("element is not string")
+				}
+				(*call.SdkParam)[field] = s
 				return true, nil
 			},
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {

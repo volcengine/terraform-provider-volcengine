@@ -51,9 +51,14 @@ func ResourceVolcengineIamTag() *schema.Resource {
 				var tagValue string
 				found := false
 				for _, cr := range cloudResources {
-					crm := cr.(map[string]interface{})
+					crm, ok := cr.(map[string]interface{})
+					if !ok {
+						continue
+					}
 					if crm["TagKey"] == tagKey {
-						tagValue = crm["TagValue"].(string)
+						if v, ok := crm["TagValue"].(string); ok {
+							tagValue = v
+						}
 						found = true
 						break
 					}
@@ -114,15 +119,30 @@ func resourceVolcengineIamTagCreate(d *schema.ResourceData, meta interface{}) er
 
 func resourceVolcengineIamTagRead(d *schema.ResourceData, meta interface{}) error {
 	service := NewIamTagService(meta.(*ve.SdkClient))
-	resourceType := d.Get("resource_type").(string)
-	resourceNames := d.Get("resource_names").([]interface{})
-	tagsSet := d.Get("tags").(*schema.Set)
+	resourceType, ok := d.Get("resource_type").(string)
+	if !ok {
+		return fmt.Errorf("resource_type is not string")
+	}
+	vNames := d.Get("resource_names")
+	resourceNames, ok := vNames.([]interface{})
+	if !ok {
+		return fmt.Errorf("resource_names is not []interface{}")
+	}
+	vTags := d.Get("tags")
+	tagsSet, ok := vTags.(*schema.Set)
+	if !ok {
+		return fmt.Errorf("tags is not *schema.Set")
+	}
 
 	m := map[string]interface{}{
 		"ResourceType": resourceType,
 	}
 	for i, name := range resourceNames {
-		m[fmt.Sprintf("ResourceNames.%d", i+1)] = name.(string)
+		nameStr, ok := name.(string)
+		if !ok {
+			continue
+		}
+		m[fmt.Sprintf("ResourceNames.%d", i+1)] = nameStr
 	}
 
 	cloudResources, err := service.ReadResources(m)
@@ -133,10 +153,22 @@ func resourceVolcengineIamTagRead(d *schema.ResourceData, meta interface{}) erro
 	// Build a map for quick lookup: map[ResourceName]map[TagKey]TagValue
 	cloudTagMap := make(map[string]map[string]string)
 	for _, cr := range cloudResources {
-		crm := cr.(map[string]interface{})
-		rName, _ := crm["ResourceName"].(string)
-		tKey, _ := crm["TagKey"].(string)
-		tValue, _ := crm["TagValue"].(string)
+		crm, ok := cr.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("cloud tag item is not map")
+		}
+		rName, ok := crm["ResourceName"].(string)
+		if !ok {
+			return fmt.Errorf("cloud tag ResourceName is not string")
+		}
+		tKey, ok := crm["TagKey"].(string)
+		if !ok {
+			return fmt.Errorf("cloud tag TagKey is not string")
+		}
+		tValue, ok := crm["TagValue"].(string)
+		if !ok {
+			return fmt.Errorf("cloud tag TagValue is not string")
+		}
 		if rName == "" || tKey == "" {
 			continue
 		}
@@ -149,12 +181,24 @@ func resourceVolcengineIamTagRead(d *schema.ResourceData, meta interface{}) erro
 	// For each tag in our set, check if it exists on all resources in our list
 	tagsToFind := tagsSet.List()
 	for _, tag := range tagsToFind {
-		tm := tag.(map[string]interface{})
-		tagKey := tm["key"].(string)
-		tagValue := tm["value"].(string)
+		tm, ok := tag.(map[string]interface{})
+		if !ok {
+			return fmt.Errorf("tag item is not map")
+		}
+		tagKey, ok := tm["key"].(string)
+		if !ok {
+			return fmt.Errorf("tag key is not string")
+		}
+		tagValue, ok := tm["value"].(string)
+		if !ok {
+			return fmt.Errorf("tag value is not string")
+		}
 
 		for _, name := range resourceNames {
-			nameStr := name.(string)
+			nameStr, ok := name.(string)
+			if !ok {
+				return fmt.Errorf("resource name item is not string")
+			}
 			found := false
 			if resTags, ok := cloudTagMap[nameStr]; ok {
 				if val, ok2 := resTags[tagKey]; ok2 && val == tagValue {
@@ -163,7 +207,6 @@ func resourceVolcengineIamTagRead(d *schema.ResourceData, meta interface{}) erro
 			}
 
 			if !found {
-				// If any tag is missing from any resource, we consider the whole resource drifted/gone
 				d.SetId("")
 				return nil
 			}
