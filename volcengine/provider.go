@@ -1537,7 +1537,7 @@ func Provider() terraform.ResourceProvider {
 			"volcengine_nlb_network_load_balancer":     network_load_balancer.ResourceVolcengineNlbNetworkLoadBalancer(),
 			"volcengine_nlb_listener":                  nlb_listener.ResourceVolcengineNlbListener(),
 			"volcengine_nlb_server_group":              nlb_server_group.ResourceVolcengineNlbServerGroup(),
-			"volcengine_nlb_backend_servers":           nlb_backend_server.ResourceVolcengineNlbBackendServers(),
+			"volcengine_nlb_backend_server":            nlb_backend_server.ResourceVolcengineNlbBackendServers(),
 			"volcengine_nlb_tag":                       nlb_tag.ResourceVolcengineNlbTag(),
 			"volcengine_alb_server_group":              alb_server_group.ResourceVolcengineAlbServerGroup(),
 
