@@ -148,11 +148,15 @@ func (s *VolcengineIamRoleService) ModifyResource(data *schema.ResourceData, res
 					ConvertType: ve.ConvertDefault,
 				},
 				"display_name": {
-					TargetField: "NewDisplayName",
+					TargetField: "DisplayName",
 					ConvertType: ve.ConvertDefault,
 				},
 				"description": {
-					TargetField: "NewDescription",
+					TargetField: "Description",
+					ConvertType: ve.ConvertDefault,
+				},
+				"trust_policy_document": {
+					TargetField: "TrustPolicyDocument",
 					ConvertType: ve.ConvertDefault,
 				},
 				"max_session_duration": {
@@ -167,6 +171,19 @@ func (s *VolcengineIamRoleService) ModifyResource(data *schema.ResourceData, res
 			ExecuteCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (*map[string]interface{}, error) {
 				logger.Debug(logger.ReqFormat, call.Action, call.SdkParam)
 				return s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
+			},
+			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
+				(*call.SdkParam)["RoleName"] = d.Id()
+				return true, nil
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				if d.HasChange("role_name") {
+					v, ok := d.Get("role_name").(string)
+					if ok && v != "" {
+						d.SetId(v)
+					}
+				}
+				return nil
 			},
 		},
 	}

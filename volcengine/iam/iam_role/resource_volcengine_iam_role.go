@@ -57,7 +57,6 @@ func ResourceVolcengineIamRole() *schema.Resource {
 			"role_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: "The name of the Role.",
 			},
 			"display_name": {
