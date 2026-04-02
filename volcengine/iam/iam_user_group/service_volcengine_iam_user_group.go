@@ -148,6 +148,9 @@ func (s *VolcengineIamUserGroupService) ModifyResource(resourceData *schema.Reso
 				"display_name": {
 					TargetField: "NewDisplayName",
 				},
+				"user_group_name": {
+					TargetField: "NewUserGroupName",
+				},
 			},
 			BeforeCall: func(d *schema.ResourceData, client *ve.SdkClient, call ve.SdkCall) (bool, error) {
 				(*call.SdkParam)["UserGroupName"] = d.Id()
@@ -158,6 +161,15 @@ func (s *VolcengineIamUserGroupService) ModifyResource(resourceData *schema.Reso
 				resp, err := s.Client.UniversalClient.DoCall(getUniversalInfo(call.Action), call.SdkParam)
 				logger.Debug(logger.RespFormat, call.Action, resp, err)
 				return resp, err
+			},
+			AfterCall: func(d *schema.ResourceData, client *ve.SdkClient, resp *map[string]interface{}, call ve.SdkCall) error {
+				if d.HasChange("user_group_name") {
+					v, ok := d.Get("user_group_name").(string)
+					if ok && v != "" {
+						d.SetId(v)
+					}
+				}
+				return nil
 			},
 		},
 	}

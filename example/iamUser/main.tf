@@ -1,8 +1,8 @@
 resource "volcengine_iam_user" "foo" {
-  user_name    = "jonny-g"
+  user_name    = "jonny-k-modify"
   description  = "test"
   display_name = "name"
-  mobile_phone = "17700000000"
+  mobile_phone = "+8617700000000"
   email        = "modify@example.com"
   tags {
     key   = "key1"
