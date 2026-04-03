@@ -11,14 +11,14 @@ Provides a resource to manage iam user group
 ## Example Usage
 ```hcl
 resource "volcengine_iam_user_group" "foo" {
-  user_group_name = "acc-test1"
-  description     = "acc-modify"
-  display_name    = "modify"
+  user_group_name = "acc-test-modify-ggg"
+  description     = "acc-modify-gg"
+  display_name    = "modify-gg"
 }
 ```
 ## Argument Reference
 The following arguments are supported:
-* `user_group_name` - (Required, ForceNew) The name of the user group.
+* `user_group_name` - (Required) The name of the user group.
 * `description` - (Optional) The description of the user group.
 * `display_name` - (Optional) The display name of the user group.
 
