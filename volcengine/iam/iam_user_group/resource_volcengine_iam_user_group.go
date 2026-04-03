@@ -36,7 +36,6 @@ func ResourceVolcengineIamUserGroup() *schema.Resource {
 			"user_group_name": {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: "The name of the user group.",
 			},
 			"description": {

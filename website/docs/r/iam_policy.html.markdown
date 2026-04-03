@@ -11,9 +11,9 @@ Provides a resource to manage iam policy
 ## Example Usage
 ```hcl
 resource "volcengine_iam_policy" "foo" {
-  policy_name     = "acc-test"
-  description     = "acc-modify"
-  policy_document = "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"auto_scaling:DescribeScalingGroups\"],\"Resource\":[\"*\"]}]}"
+  policy_name     = "acc-test-k"
+  description     = "acc-modify-k"
+  policy_document = "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"iam:*\"],\"Resource\":[\"*\"]}]}"
 }
 ```
 ## Argument Reference

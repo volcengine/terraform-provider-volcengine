@@ -11,10 +11,10 @@ Provides a resource to manage iam role
 ## Example Usage
 ```hcl
 resource "volcengine_iam_role" "foo" {
-  role_name             = "tf-test"
-  display_name          = "tf-test-modify"
-  description           = "tf-test"
-  trust_policy_document = "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"sts:AssumeRole\"],\"Principal\":{\"Service\":[\"auto_scaling\"]}}]}"
+  role_name             = "tf-test-lh"
+  display_name          = "tf-test-lh"
+  description           = "tf-test-lh"
+  trust_policy_document = "{\"Statement\":[{\"Effect\":\"Allow\",\"Action\":[\"sts:AssumeRole\"],\"Principal\":{\"IAM\":[\"trn:iam::2000000001:root\"]}}]}"
   max_session_duration  = 4800
   tags {
     key   = "key-1"
@@ -24,7 +24,7 @@ resource "volcengine_iam_role" "foo" {
 ```
 ## Argument Reference
 The following arguments are supported:
-* `role_name` - (Required, ForceNew) The name of the Role.
+* `role_name` - (Required) The name of the Role.
 * `description` - (Optional) The description of the Role.
 * `display_name` - (Optional) The display name of the Role.
 * `max_session_duration` - (Optional) The max session duration of the Role.
