@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-kms_secret_restore"
 description: |-
   Provides a resource to manage kms secret restore
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kms_secret_restore
 Provides a resource to manage kms secret restore
 ## Example Usage

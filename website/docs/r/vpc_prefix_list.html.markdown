@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vpc_prefix_list"
 description: |-
   Provides a resource to manage vpc prefix list
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vpc_prefix_list
 Provides a resource to manage vpc prefix list
 ## Example Usage

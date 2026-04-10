@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-tls_log_searches"
 description: |-
   Use this data source to query detailed information of tls log searches
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_log_searches
 Use this data source to query detailed information of tls log searches
 ## Example Usage

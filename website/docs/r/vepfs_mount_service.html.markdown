@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vepfs_mount_service"
 description: |-
   Provides a resource to manage vepfs mount service
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vepfs_mount_service
 Provides a resource to manage vepfs mount service
 ## Example Usage

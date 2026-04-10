@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_postgresql_allowlist_associate"
 description: |-
   Provides a resource to manage rds postgresql allowlist associate
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_postgresql_allowlist_associate
 Provides a resource to manage rds postgresql allowlist associate
 ## Example Usage

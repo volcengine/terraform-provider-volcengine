@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-financial_relations"
 description: |-
   Use this data source to query detailed information of financial relations
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_financial_relations
 Use this data source to query detailed information of financial relations
 ## Example Usage

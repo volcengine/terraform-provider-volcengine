@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_mysql_backup_policy"
 description: |-
   Provides a resource to manage rds mysql backup policy
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_mysql_backup_policy
 Provides a resource to manage rds mysql backup policy
 ## Example Usage

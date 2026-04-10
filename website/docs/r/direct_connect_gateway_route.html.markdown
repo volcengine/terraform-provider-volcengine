@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-direct_connect_gateway_route"
 description: |-
   Provides a resource to manage direct connect gateway route
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_direct_connect_gateway_route
 Provides a resource to manage direct connect gateway route
 ## Example Usage

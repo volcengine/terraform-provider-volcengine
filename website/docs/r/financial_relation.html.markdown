@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-financial_relation"
 description: |-
   Provides a resource to manage financial relation
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_financial_relation
 Provides a resource to manage financial relation
 ## Example Usage

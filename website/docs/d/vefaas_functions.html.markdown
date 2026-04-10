@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vefaas_functions"
 description: |-
   Use this data source to query detailed information of vefaas functions
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vefaas_functions
 Use this data source to query detailed information of vefaas functions
 ## Example Usage

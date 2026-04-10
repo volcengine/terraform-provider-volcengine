@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-dns_record_sets"
 description: |-
   Use this data source to query detailed information of dns record sets
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_dns_record_sets
 Use this data source to query detailed information of dns record sets
 ## Example Usage

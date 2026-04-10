@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-traffic_mirror_targets"
 description: |-
   Use this data source to query detailed information of traffic mirror targets
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_traffic_mirror_targets
 Use this data source to query detailed information of traffic mirror targets
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-tls_rule_bound_host_groups"
 description: |-
   Use this data source to query detailed information of tls rule bound host groups
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_rule_bound_host_groups
 Use this data source to query detailed information of tls rule bound host groups
 ## Example Usage

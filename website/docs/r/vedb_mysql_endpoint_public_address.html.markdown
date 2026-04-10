@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vedb_mysql_endpoint_public_address"
 description: |-
   Provides a resource to manage vedb mysql endpoint public address
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vedb_mysql_endpoint_public_address
 Provides a resource to manage vedb mysql endpoint public address
 ## Example Usage

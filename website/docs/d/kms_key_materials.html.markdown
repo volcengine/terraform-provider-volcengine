@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-kms_key_materials"
 description: |-
   Use this data source to query detailed information of kms key materials
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kms_key_materials
 Use this data source to query detailed information of kms key materials
 ## Example Usage

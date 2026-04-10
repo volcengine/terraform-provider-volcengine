@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-rds_mysql_allowlists"
 description: |-
   Use this data source to query detailed information of rds mysql allowlists
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_mysql_allowlists
 Use this data source to query detailed information of rds mysql allowlists
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-tls_account"
 description: |-
   Provides a resource to manage tls account
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_account
 Provides a resource to manage tls account
 ## Example Usage

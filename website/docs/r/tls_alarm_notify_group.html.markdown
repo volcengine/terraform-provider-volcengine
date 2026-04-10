@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-tls_alarm_notify_group"
 description: |-
   Provides a resource to manage tls alarm notify group
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_alarm_notify_group
 Provides a resource to manage tls alarm notify group
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-image_import"
 description: |-
   Provides a resource to manage image import
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_image_import
 Provides a resource to manage image import
 ## Example Usage

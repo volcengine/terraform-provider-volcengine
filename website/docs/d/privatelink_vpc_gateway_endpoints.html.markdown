@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-privatelink_vpc_gateway_endpoints"
 description: |-
   Use this data source to query detailed information of privatelink vpc gateway endpoints
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_privatelink_vpc_gateway_endpoints
 Use this data source to query detailed information of privatelink vpc gateway endpoints
 ## Example Usage

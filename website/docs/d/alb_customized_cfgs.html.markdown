@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-alb_customized_cfgs"
 description: |-
   Use this data source to query detailed information of alb customized cfgs
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_customized_cfgs
 Use this data source to query detailed information of alb customized cfgs
 ## Example Usage

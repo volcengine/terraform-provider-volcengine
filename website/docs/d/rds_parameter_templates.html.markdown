@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-rds_parameter_templates"
 description: |-
   Use this data source to query detailed information of rds parameter templates
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_parameter_templates
 (Deprecated! Recommend use volcengine_rds_mysql_*** replace) Use this data source to query detailed information of rds parameter templates
 ## Example Usage

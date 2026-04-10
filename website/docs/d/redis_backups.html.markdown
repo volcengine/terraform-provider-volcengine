@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-redis_backups"
 description: |-
   Use this data source to query detailed information of redis backups
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_backups
 Use this data source to query detailed information of redis backups
 ## Example Usage

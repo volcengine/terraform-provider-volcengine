@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-redis_big_keys"
 description: |-
   Use this data source to query detailed information of redis big keys
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_big_keys
 Use this data source to query detailed information of redis big keys
 ## Example Usage

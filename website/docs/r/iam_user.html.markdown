@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-iam_user"
 description: |-
   Provides a resource to manage iam user
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_iam_user
 Provides a resource to manage iam user
 ## Example Usage

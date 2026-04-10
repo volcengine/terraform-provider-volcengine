@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-nat_gateways"
 description: |-
   Use this data source to query detailed information of nat gateways
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_nat_gateways
 Use this data source to query detailed information of nat gateways
 ## Example Usage

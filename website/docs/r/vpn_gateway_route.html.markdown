@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vpn_gateway_route"
 description: |-
   Provides a resource to manage vpn gateway route
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vpn_gateway_route
 Provides a resource to manage vpn gateway route
 ## Example Usage

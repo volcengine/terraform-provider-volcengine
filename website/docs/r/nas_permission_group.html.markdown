@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-nas_permission_group"
 description: |-
   Provides a resource to manage nas permission group
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_nas_permission_group
 Provides a resource to manage nas permission group
 ## Example Usage

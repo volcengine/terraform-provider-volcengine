@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-cloudfs_ns_quotas"
 description: |-
   Use this data source to query detailed information of cloudfs ns quotas
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloudfs_ns_quotas
 Use this data source to query detailed information of cloudfs ns quotas
 ## Example Usage

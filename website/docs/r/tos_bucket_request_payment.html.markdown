@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-tos_bucket_request_payment"
 description: |-
   Provides a resource to manage tos bucket request payment
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tos_bucket_request_payment
 Provides a resource to manage tos bucket request payment
 ## Example Usage

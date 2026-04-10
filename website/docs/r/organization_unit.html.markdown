@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-organization_unit"
 description: |-
   Provides a resource to manage organization unit
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_organization_unit
 Provides a resource to manage organization unit
 ## Example Usage

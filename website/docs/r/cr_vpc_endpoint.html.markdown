@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cr_vpc_endpoint"
 description: |-
   Provides a resource to manage cr vpc endpoint
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cr_vpc_endpoint
 Provides a resource to manage cr vpc endpoint
 ## Example Usage

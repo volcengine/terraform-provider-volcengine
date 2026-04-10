@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vedb_mysql_database"
 description: |-
   Provides a resource to manage vedb mysql database
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vedb_mysql_database
 Provides a resource to manage vedb mysql database
 ## Example Usage

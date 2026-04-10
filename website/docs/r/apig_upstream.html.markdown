@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-apig_upstream"
 description: |-
   Provides a resource to manage apig upstream
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_apig_upstream
 Provides a resource to manage apig upstream
 ## Example Usage

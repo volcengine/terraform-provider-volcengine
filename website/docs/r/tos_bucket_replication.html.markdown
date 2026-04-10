@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-tos_bucket_replication"
 description: |-
   Provides a resource to manage tos bucket replication
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tos_bucket_replication
 Provides a resource to manage tos bucket replication
 ## Example Usage

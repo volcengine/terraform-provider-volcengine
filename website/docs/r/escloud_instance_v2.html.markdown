@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-escloud_instance_v2"
 description: |-
   Provides a resource to manage escloud instance v2
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_escloud_instance_v2
 Provides a resource to manage escloud instance v2
 ## Notice

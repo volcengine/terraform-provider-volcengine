@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-acl"
 description: |-
   Provides a resource to manage acl
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_acl
 Provides a resource to manage acl
 ## Example Usage

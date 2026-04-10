@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-nas_mount_point"
 description: |-
   Provides a resource to manage nas mount point
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_nas_mount_point
 Provides a resource to manage nas mount point
 ## Example Usage

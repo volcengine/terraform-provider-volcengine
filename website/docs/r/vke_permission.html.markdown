@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vke_permission"
 description: |-
   Provides a resource to manage vke permission
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vke_permission
 Provides a resource to manage vke permission
 ## Example Usage

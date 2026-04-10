@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-veecp_node_pool"
 description: |-
   Provides a resource to manage veecp node pool
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_veecp_node_pool
 Provides a resource to manage veecp node pool
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-transit_router_grant_rules"
 description: |-
   Use this data source to query detailed information of transit router grant rules
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_transit_router_grant_rules
 Use this data source to query detailed information of transit router grant rules
 ## Example Usage

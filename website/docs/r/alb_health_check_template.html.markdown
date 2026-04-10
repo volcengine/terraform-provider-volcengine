@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-alb_health_check_template"
 description: |-
   Provides a resource to manage alb health check template
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_health_check_template
 Provides a resource to manage alb health check template
 ## Example Usage

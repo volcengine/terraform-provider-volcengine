@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vefaas_releases"
 description: |-
   Use this data source to query detailed information of vefaas releases
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vefaas_releases
 Use this data source to query detailed information of vefaas releases
 ## Example Usage

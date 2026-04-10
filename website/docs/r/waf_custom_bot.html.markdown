@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-waf_custom_bot"
 description: |-
   Provides a resource to manage waf custom bot
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_waf_custom_bot
 Provides a resource to manage waf custom bot
 ## Example Usage

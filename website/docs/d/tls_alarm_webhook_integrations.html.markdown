@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-tls_alarm_webhook_integrations"
 description: |-
   Use this data source to query detailed information of tls alarm webhook integrations
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_alarm_webhook_integrations
 Use this data source to query detailed information of tls alarm webhook integrations
 ## Example Usage

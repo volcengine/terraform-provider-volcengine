@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-cloud_monitor_contacts"
 description: |-
   Use this data source to query detailed information of cloud monitor contacts
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloud_monitor_contacts
 Use this data source to query detailed information of cloud monitor contacts
 ## Example Usage

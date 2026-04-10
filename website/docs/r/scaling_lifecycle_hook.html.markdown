@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-scaling_lifecycle_hook"
 description: |-
   Provides a resource to manage scaling lifecycle hook
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_scaling_lifecycle_hook
 Provides a resource to manage scaling lifecycle hook
 ## Example Usage

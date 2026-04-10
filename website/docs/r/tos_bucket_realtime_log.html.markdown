@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-tos_bucket_realtime_log"
 description: |-
   Provides a resource to manage tos bucket realtime log
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tos_bucket_realtime_log
 Provides a resource to manage tos bucket realtime log
 ## Example Usage

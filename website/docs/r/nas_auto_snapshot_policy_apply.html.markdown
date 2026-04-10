@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-nas_auto_snapshot_policy_apply"
 description: |-
   Provides a resource to manage nas auto snapshot policy apply
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_nas_auto_snapshot_policy_apply
 Provides a resource to manage nas auto snapshot policy apply
 ## Example Usage

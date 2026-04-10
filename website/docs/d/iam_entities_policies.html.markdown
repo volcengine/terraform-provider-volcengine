@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-iam_entities_policies"
 description: |-
   Use this data source to query detailed information of iam entities policies
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_iam_entities_policies
 Use this data source to query detailed information of iam entities policies
 ## Example Usage

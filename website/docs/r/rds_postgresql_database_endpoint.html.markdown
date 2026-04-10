@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_postgresql_database_endpoint"
 description: |-
   Provides a resource to manage rds postgresql database endpoint
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_postgresql_database_endpoint
 Provides a resource to manage rds postgresql database endpoint
 ## Example Usage

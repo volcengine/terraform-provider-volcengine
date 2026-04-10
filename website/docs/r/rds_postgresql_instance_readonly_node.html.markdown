@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_postgresql_instance_readonly_node
 description: |-
   Provides a resource to manage rds postgresql instance readonly node
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_postgresql_instance_readonly_node
 Provides a resource to manage rds postgresql instance readonly node
 ## Example Usage

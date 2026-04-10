@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-privatelink_vpc_endpoint_service_pe
 description: |-
   Use this data source to query detailed information of privatelink vpc endpoint service permissions
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_privatelink_vpc_endpoint_service_permissions
 Use this data source to query detailed information of privatelink vpc endpoint service permissions
 ## Example Usage

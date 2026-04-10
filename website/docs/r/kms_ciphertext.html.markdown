@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-kms_ciphertext"
 description: |-
   Provides a resource to manage kms ciphertext
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kms_ciphertext
 Provides a resource to manage kms ciphertext
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-escloud_regions"
 description: |-
   Use this data source to query detailed information of escloud regions
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_escloud_regions
 (Deprecated! Recommend use volcengine_escloud_instance_v2 replace) Use this data source to query detailed information of escloud regions
 ## Example Usage

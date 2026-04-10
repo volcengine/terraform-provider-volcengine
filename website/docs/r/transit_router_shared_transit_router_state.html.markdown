@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-transit_router_shared_transit_router_
 description: |-
   Provides a resource to manage transit router shared transit router state
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_transit_router_shared_transit_router_state
 Provides a resource to manage transit router shared transit router state
 ## Example Usage

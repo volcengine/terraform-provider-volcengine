@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vmp_alerting_rule"
 description: |-
   Provides a resource to manage vmp alerting rule
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vmp_alerting_rule
 Provides a resource to manage vmp alerting rule
 ## Example Usage

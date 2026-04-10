@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vke_default_node_pool_batch_attach"
 description: |-
   Provides a resource to manage vke default node pool batch attach
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vke_default_node_pool_batch_attach
 Provides a resource to manage vke default node pool batch attach
 ## Example Usage

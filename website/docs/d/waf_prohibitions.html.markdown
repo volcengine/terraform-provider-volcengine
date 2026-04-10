@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-waf_prohibitions"
 description: |-
   Use this data source to query detailed information of waf prohibitions
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_waf_prohibitions
 Use this data source to query detailed information of waf prohibitions
 ## Example Usage

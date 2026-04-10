@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-kms_key_rotation"
 description: |-
   Provides a resource to manage kms key rotation
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kms_key_rotation
 Provides a resource to manage kms key rotation
 ## Example Usage

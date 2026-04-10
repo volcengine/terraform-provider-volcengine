@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vmp_rule_file"
 description: |-
   Provides a resource to manage vmp rule file
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vmp_rule_file
 Provides a resource to manage vmp rule file
 ## Example Usage

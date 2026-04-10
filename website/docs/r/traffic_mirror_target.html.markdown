@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-traffic_mirror_target"
 description: |-
   Provides a resource to manage traffic mirror target
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_traffic_mirror_target
 Provides a resource to manage traffic mirror target
 ## Example Usage

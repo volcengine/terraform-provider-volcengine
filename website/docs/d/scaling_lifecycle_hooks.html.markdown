@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-scaling_lifecycle_hooks"
 description: |-
   Use this data source to query detailed information of scaling lifecycle hooks
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_scaling_lifecycle_hooks
 Use this data source to query detailed information of scaling lifecycle hooks
 ## Example Usage

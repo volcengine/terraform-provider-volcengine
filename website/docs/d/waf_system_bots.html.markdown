@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-waf_system_bots"
 description: |-
   Use this data source to query detailed information of waf system bots
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_waf_system_bots
 Use this data source to query detailed information of waf system bots
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-apig_routes"
 description: |-
   Use this data source to query detailed information of apig routes
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_apig_routes
 Use this data source to query detailed information of apig routes
 ## Example Usage

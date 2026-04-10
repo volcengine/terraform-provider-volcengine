@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-tos_buckets"
 description: |-
   Use this data source to query detailed information of tos buckets
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tos_buckets
 Use this data source to query detailed information of tos buckets
 ## Example Usage

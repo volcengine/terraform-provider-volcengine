@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_mysql_database"
 description: |-
   Provides a resource to manage rds mysql database
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_mysql_database
 Provides a resource to manage rds mysql database
 ## Example Usage

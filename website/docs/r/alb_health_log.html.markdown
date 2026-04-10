@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-alb_health_log"
 description: |-
   Provides a resource to manage alb health log
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_health_log
 Provides a resource to manage alb health log
 ## Example Usage

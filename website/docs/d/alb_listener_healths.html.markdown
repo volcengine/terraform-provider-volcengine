@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-alb_listener_healths"
 description: |-
   Use this data source to query detailed information of alb listener healths
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_listener_healths
 Use this data source to query detailed information of alb listener healths
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-rocketmq_access_keys"
 description: |-
   Use this data source to query detailed information of rocketmq access keys
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rocketmq_access_keys
 Use this data source to query detailed information of rocketmq access keys
 ## Example Usage

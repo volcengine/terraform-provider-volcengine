@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-tls_alarms"
 description: |-
   Use this data source to query detailed information of tls alarms
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_alarms
 Use this data source to query detailed information of tls alarms
 ## Example Usage

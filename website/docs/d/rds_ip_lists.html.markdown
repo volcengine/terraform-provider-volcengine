@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-rds_ip_lists"
 description: |-
   Use this data source to query detailed information of rds ip lists
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_ip_lists
 (Deprecated! Recommend use volcengine_rds_mysql_*** replace) Use this data source to query detailed information of rds ip lists
 ## Example Usage

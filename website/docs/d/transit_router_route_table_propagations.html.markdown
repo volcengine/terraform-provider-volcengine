@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-transit_router_route_table_propagat
 description: |-
   Use this data source to query detailed information of transit router route table propagations
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_transit_router_route_table_propagations
 Use this data source to query detailed information of transit router route table propagations
 ## Example Usage

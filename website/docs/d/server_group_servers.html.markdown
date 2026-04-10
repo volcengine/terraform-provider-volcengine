@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-server_group_servers"
 description: |-
   Use this data source to query detailed information of server group servers
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_server_group_servers
 Use this data source to query detailed information of server group servers
 ## Example Usage

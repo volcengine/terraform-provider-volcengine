@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_mysql_endpoint"
 description: |-
   Provides a resource to manage rds mysql endpoint
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_mysql_endpoint
 Provides a resource to manage rds mysql endpoint
 ## Example Usage

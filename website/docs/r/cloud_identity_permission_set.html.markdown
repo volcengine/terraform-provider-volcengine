@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cloud_identity_permission_set"
 description: |-
   Provides a resource to manage cloud identity permission set
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloud_identity_permission_set
 Provides a resource to manage cloud identity permission set
 ## Example Usage

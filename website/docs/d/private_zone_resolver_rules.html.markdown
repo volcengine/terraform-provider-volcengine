@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-private_zone_resolver_rules"
 description: |-
   Use this data source to query detailed information of private zone resolver rules
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_private_zone_resolver_rules
 Use this data source to query detailed information of private zone resolver rules
 ## Example Usage

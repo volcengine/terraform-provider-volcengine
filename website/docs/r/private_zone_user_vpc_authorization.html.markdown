@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-private_zone_user_vpc_authorization"
 description: |-
   Provides a resource to manage private zone user vpc authorization
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_private_zone_user_vpc_authorization
 Provides a resource to manage private zone user vpc authorization
 ## Example Usage

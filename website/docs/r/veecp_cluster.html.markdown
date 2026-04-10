@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-veecp_cluster"
 description: |-
   Provides a resource to manage veecp cluster
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_veecp_cluster
 Provides a resource to manage veecp cluster
 ## Example Usage

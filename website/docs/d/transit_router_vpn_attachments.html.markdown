@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-transit_router_vpn_attachments"
 description: |-
   Use this data source to query detailed information of transit router vpn attachments
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_transit_router_vpn_attachments
 Use this data source to query detailed information of transit router vpn attachments
 ## Example Usage
