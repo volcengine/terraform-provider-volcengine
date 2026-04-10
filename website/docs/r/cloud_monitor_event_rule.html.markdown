@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cloud_monitor_event_rule"
 description: |-
   Provides a resource to manage cloud monitor event rule
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloud_monitor_event_rule
 Provides a resource to manage cloud monitor event rule
 ## Example Usage

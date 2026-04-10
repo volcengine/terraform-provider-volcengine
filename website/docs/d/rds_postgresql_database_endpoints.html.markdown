@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-rds_postgresql_database_endpoints"
 description: |-
   Use this data source to query detailed information of rds postgresql database endpoints
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_postgresql_database_endpoints
 Use this data source to query detailed information of rds postgresql database endpoints
 ## Example Usage

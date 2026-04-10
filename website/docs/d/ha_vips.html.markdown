@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-ha_vips"
 description: |-
   Use this data source to query detailed information of ha vips
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_ha_vips
 Use this data source to query detailed information of ha vips
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-eip_addresses"
 description: |-
   Use this data source to query detailed information of eip addresses
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_eip_addresses
 Use this data source to query detailed information of eip addresses
 ## Example Usage

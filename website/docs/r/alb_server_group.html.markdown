@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-alb_server_group"
 description: |-
   Provides a resource to manage alb server group
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_server_group
 Provides a resource to manage alb server group
 ## Example Usage

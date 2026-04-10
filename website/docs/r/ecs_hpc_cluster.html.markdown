@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-ecs_hpc_cluster"
 description: |-
   Provides a resource to manage ecs hpc cluster
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_ecs_hpc_cluster
 Provides a resource to manage ecs hpc cluster
 ## Example Usage

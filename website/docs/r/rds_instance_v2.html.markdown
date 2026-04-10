@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_instance_v2"
 description: |-
   Provides a resource to manage rds instance v2
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_instance_v2
 (Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds instance v2
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-redis_parameter_groups"
 description: |-
   Use this data source to query detailed information of redis parameter groups
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_parameter_groups
 Use this data source to query detailed information of redis parameter groups
 ## Example Usage

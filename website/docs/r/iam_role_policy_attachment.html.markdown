@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-iam_role_policy_attachment"
 description: |-
   Provides a resource to manage iam role policy attachment
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_iam_role_policy_attachment
 Provides a resource to manage iam role policy attachment
 ## Example Usage

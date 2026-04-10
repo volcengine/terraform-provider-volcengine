@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-redis_allow_list_associate"
 description: |-
   Provides a resource to manage redis allow list associate
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_allow_list_associate
 Provides a resource to manage redis allow list associate
 ## Example Usage

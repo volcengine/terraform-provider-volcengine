@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-image_share_permissions"
 description: |-
   Use this data source to query detailed information of image share permissions
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_image_share_permissions
 Use this data source to query detailed information of image share permissions
 ## Example Usage

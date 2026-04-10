@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-organization_service_control_policy_a
 description: |-
   Provides a resource to manage organization service control policy attachment
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_organization_service_control_policy_attachment
 Provides a resource to manage organization service control policy attachment
 ## Example Usage

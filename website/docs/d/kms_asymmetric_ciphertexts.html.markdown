@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-kms_asymmetric_ciphertexts"
 description: |-
   Use this data source to query detailed information of kms asymmetric ciphertexts
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kms_asymmetric_ciphertexts
 Use this data source to query detailed information of kms asymmetric ciphertexts
 ## Example Usage

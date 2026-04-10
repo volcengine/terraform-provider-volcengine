@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-iam_role_policy_attachments"
 description: |-
   Use this data source to query detailed information of iam role policy attachments
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_iam_role_policy_attachments
 Use this data source to query detailed information of iam role policy attachments
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-iam_security_config"
 description: |-
   Provides a resource to manage iam security config
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_iam_security_config
 Provides a resource to manage iam security config
 ## Example Usage

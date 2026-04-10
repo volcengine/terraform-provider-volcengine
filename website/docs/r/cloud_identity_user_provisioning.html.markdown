@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cloud_identity_user_provisioning"
 description: |-
   Provides a resource to manage cloud identity user provisioning
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloud_identity_user_provisioning
 Provides a resource to manage cloud identity user provisioning
 ## Example Usage

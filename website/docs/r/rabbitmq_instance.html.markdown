@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rabbitmq_instance"
 description: |-
   Provides a resource to manage rabbitmq instance
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rabbitmq_instance
 Provides a resource to manage rabbitmq instance
 ## Example Usage

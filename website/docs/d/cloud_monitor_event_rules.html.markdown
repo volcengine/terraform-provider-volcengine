@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-cloud_monitor_event_rules"
 description: |-
   Use this data source to query detailed information of cloud monitor event rules
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloud_monitor_event_rules
 Use this data source to query detailed information of cloud monitor event rules
 ## Example Usage

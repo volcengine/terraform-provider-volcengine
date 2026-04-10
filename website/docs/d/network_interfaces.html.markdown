@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-network_interfaces"
 description: |-
   Use this data source to query detailed information of network interfaces
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_network_interfaces
 Use this data source to query detailed information of network interfaces
 ## Example Usage

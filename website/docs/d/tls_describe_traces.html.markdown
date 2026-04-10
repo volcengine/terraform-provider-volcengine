@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-tls_describe_traces"
 description: |-
   Use this data source to query detailed information of tls describe traces
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_describe_traces
 Use this data source to query detailed information of tls describe traces
 ## Example Usage

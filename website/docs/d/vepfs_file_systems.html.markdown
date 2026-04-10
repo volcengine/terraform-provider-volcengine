@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vepfs_file_systems"
 description: |-
   Use this data source to query detailed information of vepfs file systems
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vepfs_file_systems
 Use this data source to query detailed information of vepfs file systems
 ## Example Usage

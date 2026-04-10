@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vke_node_pool"
 description: |-
   Provides a resource to manage vke node pool
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vke_node_pool
 Provides a resource to manage vke node pool
 ## Example Usage

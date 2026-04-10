@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-veecp_batch_edge_machine"
 description: |-
   Provides a resource to manage veecp batch edge machine
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_veecp_batch_edge_machine
 Provides a resource to manage veecp batch edge machine
 ## Example Usage

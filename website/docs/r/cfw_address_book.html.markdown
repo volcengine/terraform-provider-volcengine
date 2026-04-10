@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cfw_address_book"
 description: |-
   Provides a resource to manage cfw address book
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cfw_address_book
 Provides a resource to manage cfw address book
 ## Example Usage

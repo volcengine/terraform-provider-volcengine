@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-tls_shards"
 description: |-
   Use this data source to query detailed information of tls shards
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_shards
 Use this data source to query detailed information of tls shards
 ## Example Usage

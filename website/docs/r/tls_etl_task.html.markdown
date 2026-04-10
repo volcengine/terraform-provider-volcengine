@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-tls_etl_task"
 description: |-
   Provides a resource to manage tls etl task
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_etl_task
 Provides a resource to manage tls etl task
 ## Example Usage

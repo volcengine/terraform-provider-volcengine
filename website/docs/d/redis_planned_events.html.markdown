@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-redis_planned_events"
 description: |-
   Use this data source to query detailed information of redis planned events
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_planned_events
 Use this data source to query detailed information of redis planned events
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-ebs_snapshot_group"
 description: |-
   Provides a resource to manage ebs snapshot group
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_ebs_snapshot_group
 Provides a resource to manage ebs snapshot group
 ## Example Usage

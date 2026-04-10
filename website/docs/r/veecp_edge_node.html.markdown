@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-veecp_edge_node"
 description: |-
   Provides a resource to manage veecp edge node
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_veecp_edge_node
 Provides a resource to manage veecp edge node
 ## Example Usage

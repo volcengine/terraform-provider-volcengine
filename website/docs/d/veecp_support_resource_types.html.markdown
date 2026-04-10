@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-veecp_support_resource_types"
 description: |-
   Use this data source to query detailed information of veecp support resource types
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_veecp_support_resource_types
 Use this data source to query detailed information of veecp support resource types
 ## Example Usage

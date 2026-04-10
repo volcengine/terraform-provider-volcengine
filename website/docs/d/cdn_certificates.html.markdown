@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-cdn_certificates"
 description: |-
   Use this data source to query detailed information of cdn certificates
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cdn_certificates
 Use this data source to query detailed information of cdn certificates
 ## Example Usage

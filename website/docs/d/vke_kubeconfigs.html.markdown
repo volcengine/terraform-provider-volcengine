@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vke_kubeconfigs"
 description: |-
   Use this data source to query detailed information of vke kubeconfigs
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vke_kubeconfigs
 Use this data source to query detailed information of vke kubeconfigs
 ## Example Usage

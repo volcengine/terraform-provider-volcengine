@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-scaling_configuration"
 description: |-
   Provides a resource to manage scaling configuration
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_scaling_configuration
 Provides a resource to manage scaling configuration
 ## Notice

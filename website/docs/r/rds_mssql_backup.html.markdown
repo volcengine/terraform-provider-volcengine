@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_mssql_backup"
 description: |-
   Provides a resource to manage rds mssql backup
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_mssql_backup
 Provides a resource to manage rds mssql backup
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-cdn_configs"
 description: |-
   Use this data source to query detailed information of cdn configs
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cdn_configs
 Use this data source to query detailed information of cdn configs
 ## Example Usage

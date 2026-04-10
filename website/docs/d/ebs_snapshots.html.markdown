@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-ebs_snapshots"
 description: |-
   Use this data source to query detailed information of ebs snapshots
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_ebs_snapshots
 Use this data source to query detailed information of ebs snapshots
 ## Example Usage

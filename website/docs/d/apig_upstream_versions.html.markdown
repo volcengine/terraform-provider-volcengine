@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-apig_upstream_versions"
 description: |-
   Use this data source to query detailed information of apig upstream versions
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_apig_upstream_versions
 Use this data source to query detailed information of apig upstream versions
 ## Example Usage

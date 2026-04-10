@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-waf_cc_rule"
 description: |-
   Provides a resource to manage waf cc rule
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_waf_cc_rule
 Provides a resource to manage waf cc rule
 ## Example Usage

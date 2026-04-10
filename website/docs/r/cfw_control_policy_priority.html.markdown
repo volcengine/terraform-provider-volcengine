@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cfw_control_policy_priority"
 description: |-
   Provides a resource to manage cfw control policy priority
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cfw_control_policy_priority
 Provides a resource to manage cfw control policy priority
 ## Example Usage

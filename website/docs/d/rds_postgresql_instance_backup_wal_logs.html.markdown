@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-rds_postgresql_instance_backup_wal_
 description: |-
   Use this data source to query detailed information of rds postgresql instance backup wal logs
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_postgresql_instance_backup_wal_logs
 Use this data source to query detailed information of rds postgresql instance backup wal logs
 ## Example Usage

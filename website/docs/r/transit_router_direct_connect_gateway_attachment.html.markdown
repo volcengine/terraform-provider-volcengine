@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-transit_router_direct_connect_gateway
 description: |-
   Provides a resource to manage transit router direct connect gateway attachment
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_transit_router_direct_connect_gateway_attachment
 Provides a resource to manage transit router direct connect gateway attachment
 ## Example Usage

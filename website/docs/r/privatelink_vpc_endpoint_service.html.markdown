@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-privatelink_vpc_endpoint_service"
 description: |-
   Provides a resource to manage privatelink vpc endpoint service
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_privatelink_vpc_endpoint_service
 Provides a resource to manage privatelink vpc endpoint service
 ## Example Usage

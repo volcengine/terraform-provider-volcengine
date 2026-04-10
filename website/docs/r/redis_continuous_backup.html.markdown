@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-redis_continuous_backup"
 description: |-
   Provides a resource to manage redis continuous backup
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_continuous_backup
 Provides a resource to manage redis continuous backup
 ## Example Usage

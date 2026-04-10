@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-scaling_policies"
 description: |-
   Use this data source to query detailed information of scaling policies
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_scaling_policies
 Use this data source to query detailed information of scaling policies
 ## Example Usage

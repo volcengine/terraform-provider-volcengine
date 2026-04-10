@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-certificate"
 description: |-
   Provides a resource to manage certificate
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_certificate
 Provides a resource to manage certificate
 ## Example Usage

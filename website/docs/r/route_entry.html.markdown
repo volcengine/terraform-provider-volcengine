@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-route_entry"
 description: |-
   Provides a resource to manage route entry
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_route_entry
 Provides a resource to manage route entry
 ## Example Usage

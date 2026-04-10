@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-veenedge_cloud_server"
 description: |-
   Provides a resource to manage veenedge cloud server
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_veenedge_cloud_server
 Provides a resource to manage veenedge cloud server
 ## Example Usage

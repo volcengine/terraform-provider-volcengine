@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-transit_router_grant_rule"
 description: |-
   Provides a resource to manage transit router grant rule
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_transit_router_grant_rule
 Provides a resource to manage transit router grant rule
 ## Example Usage

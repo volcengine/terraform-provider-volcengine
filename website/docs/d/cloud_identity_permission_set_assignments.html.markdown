@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-cloud_identity_permission_set_assig
 description: |-
   Use this data source to query detailed information of cloud identity permission set assignments
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloud_identity_permission_set_assignments
 Use this data source to query detailed information of cloud identity permission set assignments
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-private_zones"
 description: |-
   Use this data source to query detailed information of private zones
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_private_zones
 Use this data source to query detailed information of private zones
 ## Example Usage

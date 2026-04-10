@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cr_registry"
 description: |-
   Provides a resource to manage cr registry
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cr_registry
 Provides a resource to manage cr registry
 ## Example Usage

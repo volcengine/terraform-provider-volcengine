@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-health_check_log_topics"
 description: |-
   Use this data source to query detailed information of health check log topics
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_health_check_log_topics
 Use this data source to query detailed information of health check log topics
 ## Example Usage

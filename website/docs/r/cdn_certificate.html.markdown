@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cdn_certificate"
 description: |-
   Provides a resource to manage cdn certificate
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cdn_certificate
 Provides a resource to manage cdn certificate
 ## Example Usage

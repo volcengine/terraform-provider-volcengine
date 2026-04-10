@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vmp_contact_groups"
 description: |-
   Use this data source to query detailed information of vmp contact groups
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vmp_contact_groups
 Use this data source to query detailed information of vmp contact groups
 ## Example Usage

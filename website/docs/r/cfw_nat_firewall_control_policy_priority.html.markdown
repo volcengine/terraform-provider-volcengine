@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cfw_nat_firewall_control_policy_prior
 description: |-
   Provides a resource to manage cfw nat firewall control policy priority
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cfw_nat_firewall_control_policy_priority
 Provides a resource to manage cfw nat firewall control policy priority
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vmp_silence_policy_enable_disable"
 description: |-
   Provides a resource to manage vmp silence policy enable disable
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vmp_silence_policy_enable_disable
 Provides a resource to manage vmp silence policy enable disable
 ## Example Usage

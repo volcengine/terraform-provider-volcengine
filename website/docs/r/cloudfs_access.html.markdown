@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cloudfs_access"
 description: |-
   Provides a resource to manage cloudfs access
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cloudfs_access
 Provides a resource to manage cloudfs access
 ## Example Usage

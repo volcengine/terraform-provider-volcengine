@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vpn_connections"
 description: |-
   Use this data source to query detailed information of vpn connections
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vpn_connections
 Use this data source to query detailed information of vpn connections
 ## Example Usage

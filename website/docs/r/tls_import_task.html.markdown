@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-tls_import_task"
 description: |-
   Provides a resource to manage tls import task
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_tls_import_task
 Provides a resource to manage tls import task
 ## Example Usage

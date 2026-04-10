@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-redis_backup_restore"
 description: |-
   Provides a resource to manage redis backup restore
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_backup_restore
 Provides a resource to manage redis backup restore
 ## Example Usage

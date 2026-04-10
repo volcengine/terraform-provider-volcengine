@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-kms_keys"
 description: |-
   Use this data source to query detailed information of kms keys
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kms_keys
 Use this data source to query detailed information of kms keys
 ## Example Usage

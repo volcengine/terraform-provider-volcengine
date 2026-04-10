@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-kafka_allow_lists"
 description: |-
   Use this data source to query detailed information of kafka allow lists
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kafka_allow_lists
 Use this data source to query detailed information of kafka allow lists
 ## Example Usage

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-flow_log_active"
 description: |-
   Provides a resource to manage flow log active
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_flow_log_active
 Provides a resource to manage flow log active
 ## Example Usage

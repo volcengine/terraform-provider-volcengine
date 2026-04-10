@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-ecs_deployment_sets"
 description: |-
   Use this data source to query detailed information of ecs deployment sets
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_ecs_deployment_sets
 Use this data source to query detailed information of ecs deployment sets
 ## Example Usage

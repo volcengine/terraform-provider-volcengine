@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vpc_prefix_lists"
 description: |-
   Use this data source to query detailed information of vpc prefix lists
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vpc_prefix_lists
 Use this data source to query detailed information of vpc prefix lists
 ## Example Usage

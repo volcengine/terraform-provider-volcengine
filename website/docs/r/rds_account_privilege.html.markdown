@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_account_privilege"
 description: |-
   Provides a resource to manage rds account privilege
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_account_privilege
 (Deprecated! Recommend use volcengine_rds_mysql_*** replace) Provides a resource to manage rds account privilege
 ## Example Usage

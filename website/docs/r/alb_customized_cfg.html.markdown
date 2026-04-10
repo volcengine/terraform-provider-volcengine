@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-alb_customized_cfg"
 description: |-
   Provides a resource to manage alb customized cfg
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_customized_cfg
 Provides a resource to manage alb customized cfg
 ## Example Usage

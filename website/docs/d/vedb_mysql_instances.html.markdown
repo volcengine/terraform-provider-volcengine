@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-vedb_mysql_instances"
 description: |-
   Use this data source to query detailed information of vedb mysql instances
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vedb_mysql_instances
 Use this data source to query detailed information of vedb mysql instances
 ## Example Usage

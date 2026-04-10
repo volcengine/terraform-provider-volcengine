@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-alb"
 description: |-
   Provides a resource to manage alb
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb
 Provides a resource to manage alb
 ## Example Usage

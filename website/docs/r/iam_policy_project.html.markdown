@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-iam_policy_project"
 description: |-
   Provides a resource to manage iam policy project
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_iam_policy_project
 Provides a resource to manage iam policy project
 ## Example Usage

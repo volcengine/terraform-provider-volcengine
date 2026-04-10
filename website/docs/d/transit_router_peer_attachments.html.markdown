@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-transit_router_peer_attachments"
 description: |-
   Use this data source to query detailed information of transit router peer attachments
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_transit_router_peer_attachments
 Use this data source to query detailed information of transit router peer attachments
 ## Example Usage

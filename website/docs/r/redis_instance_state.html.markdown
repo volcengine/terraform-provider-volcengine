@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-redis_instance_state"
 description: |-
   Provides a resource to manage redis instance state
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_redis_instance_state
 Provides a resource to manage redis instance state
 ## Example Usage

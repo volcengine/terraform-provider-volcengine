@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-vpc_cidr_block_associate"
 description: |-
   Provides a resource to manage vpc cidr block associate
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_vpc_cidr_block_associate
 Provides a resource to manage vpc cidr block associate
 ## Example Usage

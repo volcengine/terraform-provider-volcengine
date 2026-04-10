@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-waf_instance_ctl"
 description: |-
   Provides a resource to manage waf instance ctl
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_waf_instance_ctl
 Provides a resource to manage waf instance ctl
 ## Example Usage

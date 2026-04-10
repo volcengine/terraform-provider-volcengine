@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-security_group_rules"
 description: |-
   Use this data source to query detailed information of security group rules
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_security_group_rules
 Use this data source to query detailed information of security group rules
 ## Example Usage

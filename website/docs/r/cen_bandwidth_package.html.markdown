@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-cen_bandwidth_package"
 description: |-
   Provides a resource to manage cen bandwidth package
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_cen_bandwidth_package
 Provides a resource to manage cen bandwidth package
 ## Notice

@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-alb_tls_access_log"
 description: |-
   Provides a resource to manage alb tls access log
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_tls_access_log
 Provides a resource to manage alb tls access log
 ## Example Usage

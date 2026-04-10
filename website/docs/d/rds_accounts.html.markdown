@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-rds_accounts"
 description: |-
   Use this data source to query detailed information of rds accounts
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_accounts
 (Deprecated! Recommend use volcengine_rds_mysql_*** replace) Use this data source to query detailed information of rds accounts
 ## Example Usage

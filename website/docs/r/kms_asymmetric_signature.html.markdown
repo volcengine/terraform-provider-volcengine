@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-kms_asymmetric_signature"
 description: |-
   Provides a resource to manage kms asymmetric signature
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_kms_asymmetric_signature
 Provides a resource to manage kms asymmetric signature
 ## Example Usage

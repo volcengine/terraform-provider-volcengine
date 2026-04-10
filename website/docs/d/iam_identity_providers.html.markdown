@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-iam_identity_providers"
 description: |-
   Use this data source to query detailed information of iam identity providers
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_iam_identity_providers
 Use this data source to query detailed information of iam identity providers
 ## Example Usage

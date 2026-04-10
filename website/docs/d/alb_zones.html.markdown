@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-datasource-alb_zones"
 description: |-
   Use this data source to query detailed information of alb zones
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_alb_zones
 Use this data source to query detailed information of alb zones
 ## Example Usage

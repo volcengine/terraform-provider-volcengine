@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-rds_postgresql_account"
 description: |-
   Provides a resource to manage rds postgresql account
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_rds_postgresql_account
 Provides a resource to manage rds postgresql account
 ## Example Usage

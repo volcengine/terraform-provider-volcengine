@@ -6,6 +6,8 @@ sidebar_current: "docs-volcengine-resource-ecs_command"
 description: |-
   Provides a resource to manage ecs command
 ---
+**❗Notice:**
+The current provider is no longer being maintained. We recommend that you use the [volcenginecc](https://registry.terraform.io/providers/volcengine/volcenginecc/latest/docs) instead.
 # volcengine_ecs_command
 Provides a resource to manage ecs command
 ## Example Usage
