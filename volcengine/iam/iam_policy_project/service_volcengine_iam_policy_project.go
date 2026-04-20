@@ -189,6 +189,7 @@ func (s *VolcengineIamPolicyProjectService) ReadResource(d *schema.ResourceData,
 		Action:      action,
 		Version:     "2018-01-01",
 		HttpMethod:  ve.GET,
+		RegionType:  ve.Global,
 	}, &param)
 	if err != nil {
 		if strings.Contains(err.Error(), "NotExist") {
