@@ -115,6 +115,10 @@ options:
 -a, --arch      [optional] specify the architecture, if no value is specified, the default value is amd64
 ```
 
+## Security and privacy
+This project takes security seriously. 
+For vulnerability reporting and supported versions, see [SECURITY.md](SECURITY.md)
+
 
 
 
