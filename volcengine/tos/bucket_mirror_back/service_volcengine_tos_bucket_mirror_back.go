@@ -72,6 +72,7 @@ func (s *VolcengineTosBucketMirrorBackService) ReadResource(resourceData *schema
 					}
 					if v1, exist1 := rule1["Redirect"]; exist1 {
 						if redirect, ok1 := v1.(map[string]interface{}); ok1 {
+							normalizePrivateSourceResponse(redirect)
 							if v2, exist2 := redirect["PublicSource"]; exist2 {
 								if publicSource, ok2 := v2.(map[string]interface{}); ok2 {
 									if v3, exist3 := publicSource["SourceEndpoint"]; exist3 {
@@ -113,6 +114,77 @@ func (s *VolcengineTosBucketMirrorBackService) ReadResource(resourceData *schema
 	return data, err
 }
 
+func normalizePrivateSourceResponse(redirect map[string]interface{}) {
+	pruneEmptyMirrorBackResponse(redirect)
+	privateSource, ok := redirect["PrivateSource"].(map[string]interface{})
+	if !ok {
+		return
+	}
+	sourceEndpoint, ok := privateSource["SourceEndpoint"].(map[string]interface{})
+	if ok {
+		for _, endpointType := range []string{"Primary", "Follower"} {
+			endpoints, ok := sourceEndpoint[endpointType].([]interface{})
+			if !ok {
+				continue
+			}
+			for _, endpoint := range endpoints {
+				endpointMap, ok := endpoint.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if credential, ok := endpointMap["CredentialProvider"].(map[string]interface{}); ok {
+					endpointMap["CredentialProvider"] = []interface{}{credential}
+				}
+			}
+		}
+		privateSource["SourceEndpoint"] = []interface{}{sourceEndpoint}
+	}
+	redirect["PrivateSource"] = []interface{}{privateSource}
+}
+
+func pruneEmptyMirrorBackResponse(redirect map[string]interface{}) {
+	if publicSource, ok := redirect["PublicSource"].(map[string]interface{}); ok && emptyPublicSource(publicSource) {
+		delete(redirect, "PublicSource")
+	}
+	if transform, ok := redirect["Transform"].(map[string]interface{}); ok && emptyTransform(transform) {
+		delete(redirect, "Transform")
+	}
+	if mirrorHeader, ok := redirect["MirrorHeader"].(map[string]interface{}); ok {
+		for _, key := range []string{"Pass", "Remove", "Set"} {
+			if values, ok := mirrorHeader[key].([]interface{}); ok && len(values) == 0 {
+				delete(mirrorHeader, key)
+			}
+		}
+	}
+}
+
+func emptyPublicSource(publicSource map[string]interface{}) bool {
+	if fixed, _ := publicSource["FixedEndpoint"].(bool); fixed {
+		return false
+	}
+	sourceEndpoint, _ := publicSource["SourceEndpoint"].(map[string]interface{})
+	for _, key := range []string{"Primary", "Follower"} {
+		if endpoints, ok := sourceEndpoint[key].([]interface{}); ok && len(endpoints) > 0 {
+			return false
+		}
+	}
+	return true
+}
+
+func emptyTransform(transform map[string]interface{}) bool {
+	for _, key := range []string{"WithKeyPrefix", "WithKeySuffix"} {
+		if value, _ := transform[key].(string); value != "" {
+			return false
+		}
+	}
+	replace, _ := transform["ReplaceKeyPrefix"].(map[string]interface{})
+	for _, key := range []string{"KeyPrefix", "ReplaceWith"} {
+		if value, _ := replace[key].(string); value != "" {
+			return false
+		}
+	}
+	return true
+}
 func (s *VolcengineTosBucketMirrorBackService) RefreshResourceState(resourceData *schema.ResourceData, target []string, timeout time.Duration, id string) *resource.StateChangeConf {
 	return &resource.StateChangeConf{}
 }
