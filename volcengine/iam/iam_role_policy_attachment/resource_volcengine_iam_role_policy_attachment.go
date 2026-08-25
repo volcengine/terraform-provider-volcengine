@@ -1,12 +1,14 @@
 package iam_role_policy_attachment
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/validation"
 	ve "github.com/volcengine/terraform-provider-volcengine/common"
+	"github.com/volcengine/volcengine-go-sdk/volcengine/volcengineerr"
 )
 
 /*
@@ -59,17 +61,35 @@ func ResourceVolcengineIamRolePolicyAttachment() *schema.Resource {
 func resourceVolcengineIamRolePolicyAttachmentCreate(d *schema.ResourceData, meta interface{}) error {
 	iamRolePolicyAttachmentService := NewIamRolePolicyAttachmentService(meta.(*ve.SdkClient))
 	if err := ve.DefaultDispatcher().Create(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
+		if rolePolicyAttachmentAlreadyExists(err) {
+			d.SetId(fmt.Sprintf("%s:%s:%s", d.Get("role_name"), d.Get("policy_name"), d.Get("policy_type")))
+			return resourceVolcengineIamRolePolicyAttachmentRead(d, meta)
+		}
 		return fmt.Errorf("error on creating iam role policy attachment %q, %w", d.Id(), err)
 	}
 	return resourceVolcengineIamRolePolicyAttachmentRead(d, meta)
 }
 
+func rolePolicyAttachmentAlreadyExists(err error) bool {
+	var failure volcengineerr.RequestFailure
+	return errors.As(err, &failure) && failure.Code() == "PolicyAttachConflict"
+}
+
 func resourceVolcengineIamRolePolicyAttachmentRead(d *schema.ResourceData, meta interface{}) error {
 	iamRolePolicyAttachmentService := NewIamRolePolicyAttachmentService(meta.(*ve.SdkClient))
 	if err := ve.DefaultDispatcher().Read(iamRolePolicyAttachmentService, d, ResourceVolcengineIamRolePolicyAttachment()); err != nil {
+		if rolePolicyAttachmentParentMissing(err) {
+			d.SetId("")
+			return nil
+		}
 		return fmt.Errorf("error on reading iam role policy attachment %q, %w", d.Id(), err)
 	}
 	return nil
+}
+
+func rolePolicyAttachmentParentMissing(err error) bool {
+	var failure volcengineerr.RequestFailure
+	return errors.As(err, &failure) && failure.Code() == "RoleNotExist"
 }
 
 func resourceVolcengineIamRolePolicyAttachmentDelete(d *schema.ResourceData, meta interface{}) error {
